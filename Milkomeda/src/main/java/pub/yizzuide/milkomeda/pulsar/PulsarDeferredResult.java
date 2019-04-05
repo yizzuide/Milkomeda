@@ -1,4 +1,4 @@
-package yiz.milkomeda.pulsar;
+package pub.yizzuide.milkomeda.pulsar;
 
 import lombok.Data;
 

@@ -1,4 +1,4 @@
-package yiz.milkomeda.test;
+package pub.yizzuide.milkomeda.test;
 
 import lombok.val;
 import org.junit.Before;
@@ -13,7 +13,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-import yiz.milkomeda.demo.MilkomedaDemoApplication;
+import pub.yizzuide.milkomeda.demo.MilkomedaDemoApplication;
 
 /**
  * UserControllerTest

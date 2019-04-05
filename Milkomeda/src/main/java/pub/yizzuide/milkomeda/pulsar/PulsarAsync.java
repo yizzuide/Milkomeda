@@ -1,4 +1,4 @@
-package yiz.milkomeda.pulsar;
+package pub.yizzuide.milkomeda.pulsar;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

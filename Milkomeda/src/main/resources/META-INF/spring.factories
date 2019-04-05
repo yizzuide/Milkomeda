@@ -1,1 +1,1 @@
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=yiz.milkomeda.pulsar.PulsarAutoConfiguration
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=pub.yizzuide.milkomeda.pulsar.PulsarAutoConfiguration

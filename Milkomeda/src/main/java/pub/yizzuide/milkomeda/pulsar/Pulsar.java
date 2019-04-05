@@ -1,4 +1,4 @@
-package yiz.milkomeda.pulsar;
+package pub.yizzuide.milkomeda.pulsar;
 
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
@@ -61,7 +61,7 @@ public class Pulsar {
      * @param joinPoint 切面连接点
      * @return 响应数据对象
      */
-    @Around("@annotation(yiz.milkomeda.pulsar.PulsarAsync)")
+    @Around("@annotation(pub.yizzuide.milkomeda.pulsar.PulsarAsync)")
     public Object handlePulse(ProceedingJoinPoint joinPoint) throws Throwable {
         PulsarAsync pulsarAsync = resolveAnnotation(joinPoint);
         // 如果没有设置DeferredResult，则使用WebAsyncTask
