@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import yiz.milkomeda.pulsar.Pulsar;
+import pub.yizzuide.milkomeda.pulsar.Pulsar;
 
 /**
  * WebMvcConfig

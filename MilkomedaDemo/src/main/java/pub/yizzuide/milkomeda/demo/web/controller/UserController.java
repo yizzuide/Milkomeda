@@ -8,9 +8,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.async.DeferredResult;
 import pub.yizzuide.milkomeda.demo.pojo.User;
-import yiz.milkomeda.pulsar.Pulsar;
-import yiz.milkomeda.pulsar.PulsarAsync;
-import yiz.milkomeda.pulsar.PulsarDeferredResult;
+import pub.yizzuide.milkomeda.pulsar.Pulsar;
+import pub.yizzuide.milkomeda.pulsar.PulsarAsync;
+import pub.yizzuide.milkomeda.pulsar.PulsarDeferredResult;
 
 import java.util.UUID;
 
@@ -80,7 +80,7 @@ public class UserController {
         new Thread(() -> {
             log.info("execute business");
             try {
-                Thread.sleep(1000);
+                Thread.sleep(200);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

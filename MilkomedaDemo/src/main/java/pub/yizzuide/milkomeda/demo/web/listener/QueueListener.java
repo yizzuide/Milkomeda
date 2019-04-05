@@ -6,7 +6,7 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.async.DeferredResult;
 import pub.yizzuide.milkomeda.demo.pojo.User;
-import yiz.milkomeda.pulsar.Pulsar;
+import pub.yizzuide.milkomeda.pulsar.Pulsar;
 
 /**
  * QueueListener
