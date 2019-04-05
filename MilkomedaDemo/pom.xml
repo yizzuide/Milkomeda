@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>yiz.milkomeda</groupId>
+    <groupId>pub.yizzuide</groupId>
     <artifactId>milkomeda-demo</artifactId>
     <version>0.0.1</version>
 
@@ -19,7 +19,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>1.8</java.version>
-        <yiz.latest.version>0.1.0</yiz.latest.version>
+        <milkomeda.version>0.1.0</milkomeda.version>
     </properties>
 
     <dependencies>
@@ -32,9 +32,9 @@
             <artifactId>spring-boot-starter-test</artifactId>
         </dependency>
         <dependency>
-            <groupId>yiz.milkomeda</groupId>
+            <groupId>pub.yizzuide</groupId>
             <artifactId>milkomeda-spring-boot-starter</artifactId>
-            <version>${yiz.latest.version}</version>
+            <version>${milkomeda.version}</version>
         </dependency>
     </dependencies>
 

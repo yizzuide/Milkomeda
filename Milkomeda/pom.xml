@@ -4,9 +4,64 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>yiz.milkomeda</groupId>
+    <groupId>pub.yizzuide</groupId>
     <artifactId>milkomeda-spring-boot-starter</artifactId>
-    <version>0.1.0</version>
+    <version>${project.release.version}</version>
+
+    <properties>
+        <java.version>1.8</java.version>
+        <project.release.version>0.1.0-SNAPSHOT</project.release.version>
+    </properties>
+
+    <parent>
+        <groupId>org.sonatype.oss</groupId>
+        <artifactId>oss-parent</artifactId>
+        <version>7</version>
+    </parent>
+
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>https://opensource.org/licenses/mit-license.php</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <scm>
+        <connection>scm:git:git@github.com:yizzuide/Milkomeda.git</connection>
+        <developerConnection>scm:git:git@github.com:yizzuide/Milkomeda.git</developerConnection>
+        <url>git@github.com:yizzuide/Milkomeda.git</url>
+    </scm>
+
+    <developers>
+        <developer>
+            <name>yizzuide</name>
+            <email>fu837014586@163.com</email>
+            <organization>https://github.com/yizzuide</organization>
+            <timezone>+8</timezone>
+        </developer>
+    </developers>
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>sonatype-nexus-snapshots</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+        </snapshotRepository>
+        <repository>
+            <id>sonatype-nexus-staging</id>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
+    </distributionManagement>
+
+    <profiles>
+        <profile>
+            <id>product</id>
+            <properties>
+                <project.release.version>0.1.0</project.release.version>
+            </properties>
+        </profile>
+    </profiles>
+
 
     <dependencies>
         <dependency>
