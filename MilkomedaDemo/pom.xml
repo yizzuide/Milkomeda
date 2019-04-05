@@ -19,7 +19,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>1.8</java.version>
-        <yiz.latest.version>0.0.1</yiz.latest.version>
+        <yiz.latest.version>0.1.0</yiz.latest.version>
     </properties>
 
     <dependencies>
