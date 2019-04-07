@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>pub.yizzuide</groupId>
+    <groupId>com.github.yizzuide</groupId>
     <artifactId>milkomeda-demo</artifactId>
     <version>0.0.1</version>
 
@@ -32,7 +32,7 @@
             <artifactId>spring-boot-starter-test</artifactId>
         </dependency>
         <dependency>
-            <groupId>pub.yizzuide</groupId>
+            <groupId>com.github.yizzuide</groupId>
             <artifactId>milkomeda-spring-boot-starter</artifactId>
             <version>${milkomeda.version}</version>
         </dependency>
