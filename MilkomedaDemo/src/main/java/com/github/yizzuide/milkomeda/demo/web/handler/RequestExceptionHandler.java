@@ -28,6 +28,7 @@ public class RequestExceptionHandler extends ResponseEntityExceptionHandler {
     @ResponseBody
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR) // 设置响应状态码为500
     public Map<String, Object> handleException(YizException e) {
+        log.error("invoke error", e);
         Map<String, Object> result = new HashMap<>();
         result.put("id", e.getId());
         result.put("type", e.getType());

@@ -94,6 +94,11 @@ public class Pulsar {
         PulsarDeferredResult pulsarDeferredResult = new PulsarDeferredResult();
         // 调用方法实现
         joinPoint.proceed(injectDeferredResult(joinPoint, pulsarDeferredResult));
+        // 检测deferredResultID
+        if (null == pulsarDeferredResult.getDeferredResultID() ||
+                "".equals(pulsarDeferredResult.getDeferredResultID())) {
+            throw new IllegalArgumentException("you must set deferredResultID use setDeferredResultID() of PulsarDeferredResult");
+        }
         // 添加到容器
         deferredResultMap.put(pulsarDeferredResult.getDeferredResultID(), deferredResult);
         return deferredResult;
