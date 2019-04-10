@@ -60,6 +60,7 @@ public class Pulsar {
      * 对使用了 @PulsarAsync 注解实现环绕切面
      * @param joinPoint 切面连接点
      * @return 响应数据对象
+     * @throws Throwable 可抛出异常
      */
     @Around("@annotation(com.github.yizzuide.milkomeda.pulsar.PulsarAsync)")
     public Object handlePulse(ProceedingJoinPoint joinPoint) throws Throwable {
@@ -164,7 +165,7 @@ public class Pulsar {
 
     /**
      * 用于处理 Error 类型（Exception类型还是使用 @ExceptionHandler 捕获）
-     * @param errorCallback Function<Throwable, Object>
+     * @param errorCallback 失败回调
      */
     public void setErrorCallback(Function<Throwable, Object> errorCallback) {
         this.errorCallback = errorCallback;
