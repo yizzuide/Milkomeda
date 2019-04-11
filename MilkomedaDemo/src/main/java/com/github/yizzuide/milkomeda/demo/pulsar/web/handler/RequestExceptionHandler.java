@@ -1,4 +1,4 @@
-package com.github.yizzuide.milkomeda.demo.web.handler;
+package com.github.yizzuide.milkomeda.demo.pulsar.web.handler;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
-import com.github.yizzuide.milkomeda.demo.exception.YizException;
+import com.github.yizzuide.milkomeda.demo.pulsar.exception.YizException;
 
 import java.util.HashMap;
 import java.util.Map;

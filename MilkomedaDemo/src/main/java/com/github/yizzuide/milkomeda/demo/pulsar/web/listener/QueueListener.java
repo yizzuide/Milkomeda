@@ -1,11 +1,11 @@
-package com.github.yizzuide.milkomeda.demo.web.listener;
+package com.github.yizzuide.milkomeda.demo.pulsar.web.listener;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.async.DeferredResult;
-import com.github.yizzuide.milkomeda.demo.pojo.User;
+import com.github.yizzuide.milkomeda.demo.pulsar.pojo.User;
 import com.github.yizzuide.milkomeda.pulsar.Pulsar;
 
 /**

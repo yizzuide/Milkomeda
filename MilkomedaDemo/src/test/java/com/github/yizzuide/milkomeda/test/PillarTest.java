@@ -1,5 +1,6 @@
 package com.github.yizzuide.milkomeda.test;
 
+import com.github.yizzuide.milkomeda.demo.MilkomedaDemoApplication;
 import lombok.val;
 import org.junit.Before;
 import org.junit.Test;
@@ -13,17 +14,16 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-import com.github.yizzuide.milkomeda.demo.MilkomedaDemoApplication;
 
 /**
- * UserControllerTest
+ * PillarTest
  *
  * @author yizzuide
- * Create at 2019/03/30 19:29
+ * Create at 2019/04/11 18:40
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = MilkomedaDemoApplication.class)
-public class UserControllerTest {
+public class PillarTest {
     @Autowired
     private WebApplicationContext wac;
 
@@ -35,32 +35,13 @@ public class UserControllerTest {
     }
 
     @Test
-    public void login() throws Exception {
-        val ret = mockMvc.perform(MockMvcRequestBuilders.get("/user/login")
-                .param("username", "yiz")
+    public void bankcardPrepay() throws Exception {
+        val ret = mockMvc.perform(MockMvcRequestBuilders.get("/pay/bankcardPrepay")
+                .param("type", "1")
+                .param("orderId", "1243224343")
                 .contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andExpect(MockMvcResultMatchers.status().isOk())
-                .andReturn().getAsyncResult();
-        System.out.println(ret);
-    }
-
-    @Test
-    public void userInfo() throws Exception {
-        val ret = mockMvc.perform(MockMvcRequestBuilders.get("/user/1")
-                .param("id", "1")
-                .contentType(MediaType.APPLICATION_JSON_UTF8))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andReturn().getAsyncResult();
-        System.out.println(ret);
-    }
-
-    @Test
-    public void sendNotice() throws Exception {
-        val ret = mockMvc.perform(MockMvcRequestBuilders.get("/user/notice/1")
-                .param("id", "1")
-                .contentType(MediaType.APPLICATION_JSON_UTF8))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andReturn().getAsyncResult();
+                .andReturn().getResponse().getContentAsString();
         System.out.println(ret);
     }
 }

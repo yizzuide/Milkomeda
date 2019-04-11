@@ -1,4 +1,4 @@
-package com.github.yizzuide.milkomeda.demo.config;
+package com.github.yizzuide.milkomeda.demo.pulsar.config;
 
 import com.github.yizzuide.milkomeda.pulsar.Pulsar;
 import lombok.extern.slf4j.Slf4j;

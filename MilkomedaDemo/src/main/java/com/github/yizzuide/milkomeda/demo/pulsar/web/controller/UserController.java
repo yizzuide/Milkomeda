@@ -1,4 +1,4 @@
-package com.github.yizzuide.milkomeda.demo.web.controller;
+package com.github.yizzuide.milkomeda.demo.pulsar.web.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.async.DeferredResult;
-import com.github.yizzuide.milkomeda.demo.pojo.User;
+import com.github.yizzuide.milkomeda.demo.pulsar.pojo.User;
 import com.github.yizzuide.milkomeda.pulsar.Pulsar;
 import com.github.yizzuide.milkomeda.pulsar.PulsarAsync;
 import com.github.yizzuide.milkomeda.pulsar.PulsarDeferredResult;

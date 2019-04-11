@@ -1,4 +1,4 @@
-package com.github.yizzuide.milkomeda.demo.exception;
+package com.github.yizzuide.milkomeda.demo.pulsar.exception;
 
 import lombok.Getter;
 import lombok.Setter;

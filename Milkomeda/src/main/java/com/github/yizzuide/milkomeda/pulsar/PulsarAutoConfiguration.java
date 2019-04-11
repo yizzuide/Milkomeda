@@ -13,6 +13,7 @@ import java.util.Map;
  * 自动配置类
  *
  * @author yizzuide
+ * @since  0.1.0
  * Create at 2019/03/30 12:36
  */
 @Configuration

@@ -1,4 +1,4 @@
-package com.github.yizzuide.milkomeda.demo.pojo;
+package com.github.yizzuide.milkomeda.demo.pulsar.pojo;
 
 import lombok.Data;
 

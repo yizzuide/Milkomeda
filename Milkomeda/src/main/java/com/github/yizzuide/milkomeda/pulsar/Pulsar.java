@@ -1,18 +1,17 @@
 package com.github.yizzuide.milkomeda.pulsar;
 
+import com.github.yizzuide.milkomeda.util.ReflectUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.context.request.async.WebAsyncTask;
 import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer;
 
-import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
@@ -23,6 +22,7 @@ import java.util.function.Function;
  * Pulsar
  *
  * @author yizzuide
+ * @since  0.1.0
  * Create at 2019/03/29 10:36
  */
 @Slf4j
@@ -64,7 +64,7 @@ public class Pulsar {
      */
     @Around("@annotation(com.github.yizzuide.milkomeda.pulsar.PulsarAsync)")
     public Object handlePulse(ProceedingJoinPoint joinPoint) throws Throwable {
-        PulsarAsync pulsarAsync = resolveAnnotation(joinPoint);
+        PulsarAsync pulsarAsync = ReflectUtil.getAnnotation(joinPoint, PulsarAsync.class);
         // 如果没有设置DeferredResult，则使用WebAsyncTask
         if (!pulsarAsync.useDeferredResult()) {
             // 返回异步任务
@@ -195,29 +195,5 @@ public class Pulsar {
             }
         }
         return args;
-    }
-
-    /**
-     * 解析方法注解
-     * @param joinPoint 切面连接点
-     * @return PulsarAsync
-     * @throws Exception 获取方法异常
-     */
-    @SuppressWarnings("unchecked")
-    private PulsarAsync resolveAnnotation(JoinPoint joinPoint) throws Exception {
-        // 目标类名
-        String targetName = joinPoint.getTarget().getClass().getName();
-        // 方法签名
-        MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
-        // 方法名
-        String methodName = methodSignature.getName();
-        // 参数类型
-        Class[] parameterTypes = methodSignature.getParameterTypes();
-        // 目标字节类
-        Class targetClass = Class.forName(targetName);
-        // 反射方法
-        Method method = targetClass.getDeclaredMethod(methodName, parameterTypes);
-        // 获取方法上的注解
-        return method.getAnnotation(PulsarAsync.class);
     }
 }

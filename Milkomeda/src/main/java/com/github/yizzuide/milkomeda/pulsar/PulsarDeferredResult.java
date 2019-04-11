@@ -7,6 +7,7 @@ import lombok.Data;
  * DeferredResult标识装配类
  *
  * @author yizzuide
+ * @since  0.1.0
  * Create at 2019/03/30 00:03
  */
 @Data
