@@ -5,6 +5,8 @@ package com.github.yizzuide.milkomeda.comet;
  * 采集记录器
  *
  * @author yizzuide
+ * @since 0.2.0
+ * @version 0.2.1
  * Create at 2019/04/11 19:45
  */
 public interface CometRecorder {

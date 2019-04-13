@@ -1,5 +1,7 @@
-package com.github.yizzuide.milkomeda.pulsar;
+package com.github.yizzuide.milkomeda.universe.config;
 
+import com.github.yizzuide.milkomeda.pulsar.Pulsar;
+import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -9,17 +11,21 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * PulsarAutoConfiguration
- * 自动配置类
+ * MilkomedaAutoConfiguration
  *
  * @author yizzuide
- * @since  0.1.0
- * Create at 2019/03/30 12:36
+ * @since 0.2.1
+ * Create at 2019/04/12 11:29
  */
 @Configuration
-@ConditionalOnClass(Pulsar.class)
-public class PulsarAutoConfiguration {
+public class MilkomedaAutoConfiguration {
     @Bean
+    public ApplicationContextHolder applicationContextHolder() {
+        return new ApplicationContextHolder();
+    }
+
+    @Bean
+    @ConditionalOnClass(Pulsar.class)
     Pulsar pulsar() {
         Pulsar pulsar = new Pulsar();
         pulsar.setTimeoutCallback(() -> {

@@ -10,8 +10,7 @@
 
     <properties>
         <java.version>1.8</java.version>
-        <fastjson.verson>1.2.56</fastjson.verson>
-        <project.release.version>0.2.0-SNAPSHOT</project.release.version>
+        <project.release.version>0.2.1-SNAPSHOT</project.release.version>
     </properties>
 
     <parent>
@@ -59,7 +58,7 @@
         <profile>
             <id>sonatype-oss-release</id>
             <properties>
-                <project.release.version>0.2.0</project.release.version>
+                <project.release.version>0.2.1</project.release.version>
             </properties>
             <build>
                 <plugins>

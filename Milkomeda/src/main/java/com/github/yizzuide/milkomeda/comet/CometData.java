@@ -8,6 +8,8 @@ import java.util.Date;
  * CometData
  *
  * @author yizzuide
+ * @since 0.2.0
+ * @version 0.2.1
  * Create at 2019/04/11 19:32
  */
 @Data
@@ -25,6 +27,22 @@ public class CometData {
      */
     private String requestType;
     /**
+     * 请求 URL
+     */
+    private String requestURL;
+    /**
+     * 请求路径
+     */
+    private String requestPath;
+    /**
+     * 请求方式
+     */
+    private String requestMethod;
+    /**
+     * 执行的方法
+     */
+    private String execMethod;
+    /**
      * 请求时间
      */
     private Date requestTime;
@@ -36,10 +54,6 @@ public class CometData {
      * 服务器耗时
      */
     private String duration;
-    /**
-     * 请求路径
-     */
-    private String requestPath;
     /**
      * 服务器地址
      */

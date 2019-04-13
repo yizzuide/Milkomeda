@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
+import org.aspectj.lang.Signature;
 import org.aspectj.lang.annotation.*;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -21,6 +22,7 @@ import java.util.Date;
  *
  * @author yizzuide
  * @since 0.2.0
+ * @version 0.2.1
  * Create at 2019/04/11 19:48
  */
 @Slf4j
@@ -49,7 +51,12 @@ public class CometAspect {
         cometData.setDescription(comet.description());
         cometData.setRequestType(comet.requestType());
         cometData.setRequestData(HttpServletUtil.getRequestData(request));
+        cometData.setRequestURL(request.getRequestURL().toString());
         cometData.setRequestPath(request.getServletPath());
+        cometData.setRequestMethod(request.getMethod());
+        Signature signature = joinPoint.getSignature();
+        cometData.setExecMethod(signature.getDeclaringTypeName() + "#" +
+                signature.getName());
         cometData.setHost(NetworkUtil.getHost());
         cometData.setRequestIP(request.getRemoteAddr());
         cometData.setDeviceInfo(request.getHeader("user-agent"));

@@ -7,6 +7,7 @@ import java.net.UnknownHostException;
  * NetworkUtil
  *
  * @author yizzuide
+ * @since 0.2.0
  * Create at 2019/04/11 20:13
  */
 public class NetworkUtil {
