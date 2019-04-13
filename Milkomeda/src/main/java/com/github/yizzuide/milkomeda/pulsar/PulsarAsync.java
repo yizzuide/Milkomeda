@@ -38,7 +38,7 @@ public @interface PulsarAsync {
      *              ...
      *              // 设置唯一标识符
      *              deferredResult.setDeferredResultID("235495954");
-     *              // 返回任意数据，但内部不会使用，请使用另一线程回调通过<code>pulsar.takeDeferredResult("235495954").setResult(obj)</code>返回
+     *              // 返回任意数据，但内部不会获取这个值，请在另一线程回调里通过<code>pulsar.takeDeferredResult("235495954").setResult(obj)</code>返回
      *              return null;
      *          }
      *      ```

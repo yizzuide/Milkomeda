@@ -34,6 +34,9 @@ public class CometAspect {
      */
     @Getter @Setter
     private CometRecorder recorder;
+    {
+       recorder = new CometRecorder() {};
+    }
 
     // 切入点
     @Pointcut("@annotation(com.github.yizzuide.milkomeda.comet.Comet)")
@@ -41,7 +44,7 @@ public class CometAspect {
 
     @Before("comet()")
     public void doBefore(JoinPoint joinPoint) throws Exception {
-        CometData cometData = new CometData();
+        CometData cometData = recorder.prototype();
         cometData.setRequestTime(new Date());
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         Comet comet = ReflectUtil.getAnnotation(joinPoint, Comet.class);
@@ -60,6 +63,7 @@ public class CometAspect {
         cometData.setHost(NetworkUtil.getHost());
         cometData.setRequestIP(request.getRemoteAddr());
         cometData.setDeviceInfo(request.getHeader("user-agent"));
+        recorder.onRequest(cometData);
         threadLocal.set(cometData);
     }
 
@@ -72,9 +76,7 @@ public class CometAspect {
         cometData.setResponseTime(new Date());
         cometData.setResponseData(HttpServletUtil.getResponseData(object));
         log.info(JSONUtil.serialize(cometData));
-        if (recorder != null) {
-            recorder.onReturn(cometData);
-        }
+        recorder.onReturn(cometData);
         threadLocal.remove();
     }
 
@@ -91,9 +93,7 @@ public class CometAspect {
         cometData.setResponseTime(new Date());
         cometData.setErrorInfo(e.fillInStackTrace().toString());
         log.error(JSONUtil.serialize(cometData));
-        if (recorder != null) {
-            recorder.onThrowing(cometData);
-        }
+        recorder.onThrowing(cometData);
         threadLocal.remove();
     }
 }

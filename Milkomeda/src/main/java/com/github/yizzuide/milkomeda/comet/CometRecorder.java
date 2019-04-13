@@ -11,6 +11,18 @@ package com.github.yizzuide.milkomeda.comet;
  */
 public interface CometRecorder {
     /**
+     * 日志实体原型，子类型根据业务可以对这个类型进行扩展
+     * @return 默认为CometData
+     */
+    default CometData prototype() { return new CometData();}
+
+    /**
+     * 请求触发时
+     * @param cometData 日志实体
+     */
+    default void onRequest(CometData cometData) {}
+
+    /**
      * 方法返回结果后
      * @param cometData 日志实体
      */

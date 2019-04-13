@@ -21,6 +21,12 @@ public class CometConfig {
         CometAspect cometAspect = new CometAspect();
         cometAspect.setRecorder(new CometRecorder() {
             @Override
+            public void onRequest(CometData cometData) {
+                log.info("onRequest {}", cometData);
+                // 根据是否覆盖 prototype 方法替换采集日志实体，这里可以根据业务添加相应设置
+            }
+
+            @Override
             public void onReturn(CometData cometData) {
                 log.info("onReturn {}", cometData);
             }
