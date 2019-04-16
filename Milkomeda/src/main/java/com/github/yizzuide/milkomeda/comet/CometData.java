@@ -9,7 +9,7 @@ import java.util.Date;
  *
  * @author yizzuide
  * @since 0.2.0
- * @version 0.2.1
+ * @version 0.2.4
  * Create at 2019/04/11 19:32
  */
 @Data
@@ -26,6 +26,10 @@ public class CometData {
      * 请求类型 1: 前台请求（默认） 2：第三方服务器推送
      */
     private String requestType;
+    /**
+     * 记录数据 prototype（原型）的相应tag，用于请求分类，用于收集不同的类型数据
+     */
+    private String tag;
     /**
      * 请求 URL
      */

@@ -8,21 +8,25 @@ import javax.servlet.http.HttpServletRequest;
  *
  * @author yizzuide
  * @since 0.2.0
- * @version 0.2.1
+ * @version 0.2.4
  * Create at 2019/04/11 19:45
  */
 public interface CometRecorder {
     /**
      * 日志实体原型，子类型根据业务可以对这个类型进行扩展
-     * @return 默认为CometData
+     * @return 在0.2.4中返回 null，之后版本可能会删除
+     * @deprecated 0.2.4 使用注解<code>Comet(prototype=CometData.class)</code>代替
      */
-    default CometData prototype() { return new CometData();}
+    @Deprecated
+    default CometData prototype() { return null;}
 
     /**
      * 请求触发时
-     * @param cometData 日志实体
+     * @param prototype 采集数据原型
+     * @param tag       请求分类 tag，可根据 tag 来区分不同的 prototype；如果没有指定 tag 名又指定了指定的 prototype，
+     * @param request   请求对象
      */
-    default void onRequest(CometData cometData, HttpServletRequest request) {}
+    default void onRequest(CometData prototype, String tag, HttpServletRequest request) {}
 
     /**
      * 方法返回结果后

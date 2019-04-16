@@ -1,6 +1,7 @@
 package com.github.yizzuide.milkomeda.demo.comet.web.controller;
 
 import com.github.yizzuide.milkomeda.comet.Comet;
+import com.github.yizzuide.milkomeda.demo.comet.pojo.ProfileCometData;
 import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,7 +25,7 @@ public class CollectController {
     private ApplicationContextHolder applicationContextHolder;
 
     @RequestMapping("feature")
-    @Comet(apiCode = "1.1", description = "上传用户特征")
+    @Comet(apiCode = "1.1", description = "上传用户特征", tag = "profile", prototype = ProfileCometData.class)
     public Map<String, String> feature(@RequestParam Map<String, String> params) {
         System.out.println(params);
         System.out.println(applicationContextHolder.getApplicationContext());

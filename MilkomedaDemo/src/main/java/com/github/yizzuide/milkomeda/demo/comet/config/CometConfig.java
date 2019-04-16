@@ -3,6 +3,7 @@ package com.github.yizzuide.milkomeda.demo.comet.config;
 import com.github.yizzuide.milkomeda.comet.CometAspect;
 import com.github.yizzuide.milkomeda.comet.CometData;
 import com.github.yizzuide.milkomeda.comet.CometRecorder;
+import com.github.yizzuide.milkomeda.demo.comet.pojo.ProfileCometData;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
@@ -23,9 +24,14 @@ public class CometConfig {
     public void config(CometAspect cometAspect) {
         cometAspect.setRecorder(new CometRecorder() {
             @Override
-            public void onRequest(CometData cometData, HttpServletRequest request) {
-                log.info("onRequest {} - {}", cometData, request);
-                // 根据是否覆盖 prototype 方法替换采集日志实体，这里可以根据业务添加相应设置
+            public void onRequest(CometData prototype, String tag, HttpServletRequest request) {
+                // 根据 prototype 实际采集日志实体，这里可以根据业务添加相应业务
+                if (tag.equals("profile")) {
+                    ProfileCometData profileCometData = (ProfileCometData) prototype;
+                    String uid = String.valueOf(request.getParameter("uid"));
+                    profileCometData.setUid(uid);
+                }
+                log.info("onRequest {} - {} - {}", prototype, tag, request);
             }
 
             @Override

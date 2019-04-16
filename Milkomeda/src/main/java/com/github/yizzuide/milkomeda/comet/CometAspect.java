@@ -22,7 +22,7 @@ import java.util.Date;
  *
  * @author yizzuide
  * @since 0.2.0
- * @version 0.2.1
+ * @version 0.2.4
  * Create at 2019/04/11 19:48
  */
 @Slf4j
@@ -44,15 +44,22 @@ public class CometAspect {
 
     @Before("comet()")
     public void doBefore(JoinPoint joinPoint) throws Exception {
-        CometData cometData = recorder.prototype();
-        cometData.setRequestTime(new Date());
+        Date now = new Date();
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         Comet comet = ReflectUtil.getAnnotation(joinPoint, Comet.class);
+        // 从记录器的模板方法上获取
+        CometData cometData = recorder.prototype();
+        // 如果没有就从注解上获取
+        if (null == cometData) {
+            cometData = comet.prototype().newInstance();
+        }
+        cometData.setRequestTime(now);
         assert attributes != null;
         HttpServletRequest request = attributes.getRequest();
         cometData.setApiCode(comet.apiCode());
         cometData.setDescription(comet.description());
         cometData.setRequestType(comet.requestType());
+        cometData.setTag(comet.tag());
         cometData.setRequestData(HttpServletUtil.getRequestData(request));
         cometData.setRequestURL(request.getRequestURL().toString());
         cometData.setRequestPath(request.getServletPath());
@@ -63,7 +70,7 @@ public class CometAspect {
         cometData.setHost(NetworkUtil.getHost());
         cometData.setRequestIP(request.getRemoteAddr());
         cometData.setDeviceInfo(request.getHeader("user-agent"));
-        recorder.onRequest(cometData, request);
+        recorder.onRequest(cometData, cometData.getTag(), request);
         threadLocal.set(cometData);
     }
 

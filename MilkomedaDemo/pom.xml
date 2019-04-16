@@ -19,7 +19,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>1.8</java.version>
-        <milkomeda.version>0.2.3-SNAPSHOT</milkomeda.version>
+        <milkomeda.version>0.2.4-SNAPSHOT</milkomeda.version>
     </properties>
 
     <dependencies>

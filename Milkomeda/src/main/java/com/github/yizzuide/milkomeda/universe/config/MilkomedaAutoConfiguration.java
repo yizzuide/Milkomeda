@@ -18,6 +18,7 @@ import java.util.Map;
  *
  * @author yizzuide
  * @since 0.2.1
+ * @version 0.2.3
  * Create at 2019/04/12 11:29
  */
 @Configuration

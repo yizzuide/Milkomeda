@@ -37,7 +37,7 @@ public class CometTest {
     @Test
     public void feature() throws Exception {
         val ret = mockMvc.perform(MockMvcRequestBuilders.get("/collect/feature")
-                .param("uuid", "1123458897655")
+                .param("uid", "1123458897655")
                 .contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andReturn().getResponse().getContentAsString();
