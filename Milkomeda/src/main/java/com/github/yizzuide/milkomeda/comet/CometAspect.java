@@ -63,7 +63,7 @@ public class CometAspect {
         cometData.setHost(NetworkUtil.getHost());
         cometData.setRequestIP(request.getRemoteAddr());
         cometData.setDeviceInfo(request.getHeader("user-agent"));
-        recorder.onRequest(cometData);
+        recorder.onRequest(cometData, request);
         threadLocal.set(cometData);
     }
 

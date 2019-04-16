@@ -4,8 +4,10 @@ import com.github.yizzuide.milkomeda.comet.CometAspect;
 import com.github.yizzuide.milkomeda.comet.CometData;
 import com.github.yizzuide.milkomeda.comet.CometRecorder;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Bean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * CometConfig
@@ -16,13 +18,13 @@ import org.springframework.context.annotation.Configuration;
 @Slf4j
 @Configuration
 public class CometConfig {
-    @Bean
-    public CometAspect cometAspect() {
-        CometAspect cometAspect = new CometAspect();
+
+    @Autowired
+    public void config(CometAspect cometAspect) {
         cometAspect.setRecorder(new CometRecorder() {
             @Override
-            public void onRequest(CometData cometData) {
-                log.info("onRequest {}", cometData);
+            public void onRequest(CometData cometData, HttpServletRequest request) {
+                log.info("onRequest {} - {}", cometData, request);
                 // 根据是否覆盖 prototype 方法替换采集日志实体，这里可以根据业务添加相应设置
             }
 
@@ -36,6 +38,5 @@ public class CometConfig {
                 log.error("onThrowing {}", cometData);
             }
         });
-        return cometAspect;
     }
 }

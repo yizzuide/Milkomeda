@@ -1,5 +1,7 @@
 package com.github.yizzuide.milkomeda.comet;
 
+import javax.servlet.http.HttpServletRequest;
+
 /**
  * CometRecorder
  * 采集记录器
@@ -20,7 +22,7 @@ public interface CometRecorder {
      * 请求触发时
      * @param cometData 日志实体
      */
-    default void onRequest(CometData cometData) {}
+    default void onRequest(CometData cometData, HttpServletRequest request) {}
 
     /**
      * 方法返回结果后

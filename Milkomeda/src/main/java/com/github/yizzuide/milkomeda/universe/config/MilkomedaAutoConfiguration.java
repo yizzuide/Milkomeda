@@ -1,8 +1,11 @@
 package com.github.yizzuide.milkomeda.universe.config;
 
+import com.github.yizzuide.milkomeda.comet.Comet;
+import com.github.yizzuide.milkomeda.comet.CometAspect;
 import com.github.yizzuide.milkomeda.pulsar.Pulsar;
 import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.ResponseEntity;
@@ -20,13 +23,15 @@ import java.util.Map;
 @Configuration
 public class MilkomedaAutoConfiguration {
     @Bean
+    @ConditionalOnMissingBean
     public ApplicationContextHolder applicationContextHolder() {
         return new ApplicationContextHolder();
     }
 
     @Bean
     @ConditionalOnClass(Pulsar.class)
-    Pulsar pulsar() {
+    @ConditionalOnMissingBean
+    public Pulsar pulsar() {
         Pulsar pulsar = new Pulsar();
         pulsar.setTimeoutCallback(() -> {
             Map<String, Object> ret = new HashMap<>();
@@ -34,5 +39,12 @@ public class MilkomedaAutoConfiguration {
             return ResponseEntity.status(500).body(ret);
         });
         return pulsar;
+    }
+
+    @Bean
+    @ConditionalOnClass(Comet.class)
+    @ConditionalOnMissingBean
+    public CometAspect cometAspect() {
+        return new CometAspect();
     }
 }
