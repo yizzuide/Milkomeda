@@ -1,5 +1,9 @@
 package com.github.yizzuide.milkomeda.demo.pulsar.web.controller;
 
+import com.github.yizzuide.milkomeda.demo.pulsar.pojo.User;
+import com.github.yizzuide.milkomeda.pulsar.Pulsar;
+import com.github.yizzuide.milkomeda.pulsar.PulsarAsync;
+import com.github.yizzuide.milkomeda.pulsar.PulsarDeferredResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -7,10 +11,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.async.DeferredResult;
-import com.github.yizzuide.milkomeda.demo.pulsar.pojo.User;
-import com.github.yizzuide.milkomeda.pulsar.Pulsar;
-import com.github.yizzuide.milkomeda.pulsar.PulsarAsync;
-import com.github.yizzuide.milkomeda.pulsar.PulsarDeferredResult;
 
 import java.util.UUID;
 
@@ -77,7 +77,7 @@ public class UserController {
         pulsarDeferredResult.setDeferredResultID(deferredResultID);
 
         // 模拟当前方法中调用耗时数业务处理
-        new Thread(() -> {
+        pulsar.asyncRun(() -> {
             log.info("execute business");
             try {
                 Thread.sleep(200);
@@ -86,7 +86,7 @@ public class UserController {
             }
             DeferredResult<Object> deferredResult = pulsar.takeDeferredResult(deferredResultID);
             deferredResult.setResult("send OK");
-        }).start();
+        });
         return null;
     }
 }

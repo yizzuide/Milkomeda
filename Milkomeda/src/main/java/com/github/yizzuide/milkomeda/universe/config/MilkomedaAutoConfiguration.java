@@ -9,6 +9,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -18,7 +19,7 @@ import java.util.Map;
  *
  * @author yizzuide
  * @since 0.2.1
- * @version 0.2.3
+ * @version 0.2.6
  * Create at 2019/04/12 11:29
  */
 @Configuration
@@ -47,5 +48,10 @@ public class MilkomedaAutoConfiguration {
     @ConditionalOnMissingBean
     public CometAspect cometAspect() {
         return new CometAspect();
+    }
+
+    @Bean("pulsarTaskExecutor")
+    public ThreadPoolTaskExecutor taskExecutor() {
+        return new ThreadPoolTaskExecutor();
     }
 }

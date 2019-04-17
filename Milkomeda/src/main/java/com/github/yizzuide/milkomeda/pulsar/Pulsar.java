@@ -6,6 +6,8 @@ import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.context.request.async.DeferredResult;
@@ -23,7 +25,7 @@ import java.util.function.Function;
  *
  * @author yizzuide
  * @since  0.1.0
- * @version 0.2.5
+ * @version 0.2.6
  * Create at 2019/03/29 10:36
  */
 @Slf4j
@@ -33,6 +35,12 @@ public class Pulsar {
      * DeferredResult容器
      */
     private Map<String, DeferredResult<Object>> deferredResultMap;
+
+    /**
+     * 线程池执行器
+     */
+    @Autowired @Qualifier("pulsarTaskExecutor")
+    private ThreadPoolTaskExecutor taskExecutor;
 
     /**
      *  Error 错误回调<可抛出接口，自定义响应数据>
@@ -140,12 +148,20 @@ public class Pulsar {
     }
 
     /**
+     * 异步运行
+     * @param runnable Runnable
+     */
+    public void asyncRun(Runnable runnable) {
+        taskExecutor.execute(runnable);
+    }
+
+    /**
      * 配置默认的异步支持
      * @param configurer 配置对象
      * @param timeout 超时时间，ms
      */
-    public static void configureAsyncSupport(AsyncSupportConfigurer configurer, long timeout) {
-         configureAsyncSupport(configurer, 5, 10, 50, 200, timeout);
+    public void configure(AsyncSupportConfigurer configurer, long timeout) {
+        configure(configurer, 5, 10, 50, 200, timeout);
     }
 
     /**
@@ -157,24 +173,22 @@ public class Pulsar {
      * @param keepAliveSeconds  线程保存存活时间
      * @param timeout           超时时间，ms
      */
-    public static void configureAsyncSupport(AsyncSupportConfigurer configurer, int corePoolSize, int maxPoolSize, int queueCapacity, int keepAliveSeconds, long timeout) {
+    public void configure(AsyncSupportConfigurer configurer, int corePoolSize, int maxPoolSize, int queueCapacity, int keepAliveSeconds, long timeout) {
         // 默认超时时间
         configurer.setDefaultTimeout(timeout);
-        // 自定义线程池
-        ThreadPoolTaskExecutor poolTaskExecutor = new ThreadPoolTaskExecutor();
         // 线程池维护线程的最少数量
-        poolTaskExecutor.setCorePoolSize(corePoolSize);
+        taskExecutor.setCorePoolSize(corePoolSize);
         // 线程池维护线程的最大数量
-        poolTaskExecutor.setMaxPoolSize(maxPoolSize);
+        taskExecutor.setMaxPoolSize(maxPoolSize);
         // 线程池所使用的缓冲队列
-        poolTaskExecutor.setQueueCapacity(queueCapacity);
+        taskExecutor.setQueueCapacity(queueCapacity);
         // 线程池维护线程所允许的空闲时间
-        poolTaskExecutor.setKeepAliveSeconds(keepAliveSeconds);
-        poolTaskExecutor.setThreadNamePrefix("pulsar-");
+        taskExecutor.setKeepAliveSeconds(keepAliveSeconds);
+        taskExecutor.setThreadNamePrefix("pulsar-");
         // 线程池对拒绝任务（无线程可用）的处理策略，目前只支持AbortPolicy、CallerRunsPolicy，默认为后者
-        poolTaskExecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
-        poolTaskExecutor.initialize();
-        configurer.setTaskExecutor(poolTaskExecutor);
+        taskExecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
+        taskExecutor.initialize();
+        configurer.setTaskExecutor(taskExecutor);
     }
 
     /**
