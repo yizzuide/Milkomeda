@@ -1,5 +1,6 @@
 package com.github.yizzuide.milkomeda.demo.pulsar.web.controller;
 
+import com.github.yizzuide.milkomeda.comet.Comet;
 import com.github.yizzuide.milkomeda.demo.pulsar.pojo.User;
 import com.github.yizzuide.milkomeda.pulsar.Pulsar;
 import com.github.yizzuide.milkomeda.pulsar.PulsarAsync;
@@ -67,25 +68,32 @@ public class UserController {
     @Autowired
     private Pulsar pulsar;
 
+    @Comet
     // 使用DeferredResult异步处理在同一方法使用的例子
     @PulsarAsync(useDeferredResult = true)
     @GetMapping("notice/{id:\\d+}")
     public Object /* TODO 这里的返回值必需为Object */ sendNotice(@PathVariable("id") Long id,
                                                         PulsarDeferredResult pulsarDeferredResult) {
         log.info("sendNotice：" + id);
-        String deferredResultID = UUID.randomUUID().toString();
+        final String deferredResultID = UUID.randomUUID().toString();
         pulsarDeferredResult.setDeferredResultID(deferredResultID);
+        // 如果异步处理耗时<50ms，需要下面这行自行添加
+//        pulsar.putDeferredResult(pulsarDeferredResult);
 
         // 模拟当前方法中调用耗时数业务处理
         pulsar.asyncRun(() -> {
             log.info("execute business");
             try {
-                Thread.sleep(200);
+                Thread.sleep(100);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
             DeferredResult<Object> deferredResult = pulsar.takeDeferredResult(deferredResultID);
-            deferredResult.setResult("send OK");
+            if (null != deferredResult) {
+                deferredResult.setResult("send OK");
+            } else {
+                log.error("根据 id 为 {} 获取DeferredResult失败", deferredResultID);
+            }
         });
         return null;
     }

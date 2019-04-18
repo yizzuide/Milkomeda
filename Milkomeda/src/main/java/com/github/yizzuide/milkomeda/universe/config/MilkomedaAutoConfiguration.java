@@ -19,7 +19,7 @@ import java.util.Map;
  *
  * @author yizzuide
  * @since 0.2.1
- * @version 0.2.6
+ * @version 0.2.7
  * Create at 2019/04/12 11:29
  */
 @Configuration
@@ -37,7 +37,7 @@ public class MilkomedaAutoConfiguration {
         Pulsar pulsar = new Pulsar();
         pulsar.setTimeoutCallback(() -> {
             Map<String, Object> ret = new HashMap<>();
-            ret.put("errorMsg", "PulsarAsync handle timeout");
+            ret.put("error_message", "PulsarAsync handle timeout");
             return ResponseEntity.status(500).body(ret);
         });
         return pulsar;
