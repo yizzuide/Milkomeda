@@ -2,18 +2,13 @@ package com.github.yizzuide.milkomeda.demo.pulsar.web.controller;
 
 import com.github.yizzuide.milkomeda.comet.Comet;
 import com.github.yizzuide.milkomeda.demo.pulsar.pojo.User;
-import com.github.yizzuide.milkomeda.pulsar.Pulsar;
 import com.github.yizzuide.milkomeda.pulsar.PulsarAsync;
 import com.github.yizzuide.milkomeda.pulsar.PulsarDeferredResult;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.context.request.async.DeferredResult;
-
-import java.util.UUID;
 
 /**
  * UserController
@@ -64,10 +59,6 @@ public class UserController {
     }
 
 
-    // 注入Pulsar
-    @Autowired
-    private Pulsar pulsar;
-
     @Comet
     // 使用DeferredResult异步处理在同一方法使用的例子
     @PulsarAsync(useDeferredResult = true)
@@ -75,25 +66,15 @@ public class UserController {
     public Object /* TODO 这里的返回值必需为Object */ sendNotice(@PathVariable("id") Long id,
                                                         PulsarDeferredResult pulsarDeferredResult) {
         log.info("sendNotice：" + id);
-        final String deferredResultID = UUID.randomUUID().toString();
-        pulsarDeferredResult.setDeferredResultID(deferredResultID);
-        // 如果异步处理耗时<50ms，需要下面这行自行添加
-//        pulsar.putDeferredResult(pulsarDeferredResult);
-
         // 模拟当前方法中调用耗时数业务处理
-        pulsar.asyncRun(() -> {
+        pulsarDeferredResult.getPulsar().asyncRun(() -> {
             log.info("execute business");
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            DeferredResult<Object> deferredResult = pulsar.takeDeferredResult(deferredResultID);
-            if (null != deferredResult) {
-                deferredResult.setResult("send OK");
-            } else {
-                log.error("根据 id 为 {} 获取DeferredResult失败", deferredResultID);
-            }
+            pulsarDeferredResult.take().setResult("send OK");
         });
         return null;
     }

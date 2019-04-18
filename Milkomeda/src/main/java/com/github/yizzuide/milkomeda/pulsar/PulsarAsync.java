@@ -19,7 +19,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface PulsarAsync {
     /**
-     * 用于WebAsyncTask方式实际类型标注，只是让代码看起来更容易理解
+     * 可选标注实际返回类型，只是让代码看起来更直观
      * @return 实际返回的Class
      */
      Class<?> returnClass() default Object.class;

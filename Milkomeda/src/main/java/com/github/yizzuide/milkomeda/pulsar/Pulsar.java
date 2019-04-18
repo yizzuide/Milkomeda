@@ -25,7 +25,7 @@ import java.util.function.Function;
  *
  * @author yizzuide
  * @since  0.1.0
- * @version 0.2.7
+ * @version 0.2.8
  * Create at 2019/03/29 10:36
  */
 @Slf4j
@@ -52,15 +52,20 @@ public class Pulsar {
      */
     private Callable<Object> timeoutCallback;
 
+    /**
+     * 初始化容器容量大小
+     */
+    private static final int DEFAULT_CAPACITY = 64;
+
     public Pulsar() {
-        deferredResultMap = new ConcurrentHashMap<>();
+        deferredResultMap = new ConcurrentHashMap<>(DEFAULT_CAPACITY);
     }
 
     /**
      * 记存一个DeferredResult
      * @param pulsarDeferredResult PulsarDeferredResult
      */
-    public void putDeferredResult(PulsarDeferredResult pulsarDeferredResult) {
+    void putDeferredResult(PulsarDeferredResult pulsarDeferredResult) {
         deferredResultMap.put(pulsarDeferredResult.getDeferredResultID(), pulsarDeferredResult);
     }
     /**
@@ -83,7 +88,7 @@ public class Pulsar {
      * @throws Throwable 可抛出异常
      */
     @Around("@annotation(com.github.yizzuide.milkomeda.pulsar.PulsarAsync)")
-    public Object handlePulse(ProceedingJoinPoint joinPoint) throws Throwable {
+    Object handlePulse(ProceedingJoinPoint joinPoint) throws Throwable {
         PulsarAsync pulsarAsync = ReflectUtil.getAnnotation(joinPoint, PulsarAsync.class);
         // 如果没有设置DeferredResult，则使用WebAsyncTask
         if (!pulsarAsync.useDeferredResult()) {
@@ -113,19 +118,12 @@ public class Pulsar {
             // 适配错误处理
             deferredResult.onError((throwable) -> deferredResult.setErrorResult(errorCallback.apply(throwable)));
         }
-        PulsarDeferredResult pulsarDeferredResult = new PulsarDeferredResult();
-        pulsarDeferredResult.setDeferredResult(deferredResult);
+        // 创建增强DeferredResult
+        PulsarDeferredResult pulsarDeferredResult = new PulsarDeferredResult(this);
+        pulsarDeferredResult.pack(deferredResult);
         // 调用方法实现
-        joinPoint.proceed(injectDeferredResult(joinPoint, pulsarDeferredResult));
-        // 检测deferredResultID
-        if (null == pulsarDeferredResult.getDeferredResultID() ||
-                "".equals(pulsarDeferredResult.getDeferredResultID())) {
-            throw new IllegalArgumentException("you must add PulsarDeferredResult param on method " +
-                    invokeMethodName + " and set deferredResultID before use DeferredResult.");
-        }
-        // 添加DeferredResult到容器
-        // 注意：如果异步执行耗时<50ms，需要开发者手动调用 pulsar.pushDeferredResult() 方法，否则会
-        deferredResultMap.putIfAbsent(pulsarDeferredResult.getDeferredResultID(), pulsarDeferredResult);
+        joinPoint.proceed(injectDeferredResult(joinPoint, pulsarDeferredResult,
+                pulsarAsync.useDeferredResult()));
         return deferredResult;
     }
 
@@ -226,16 +224,23 @@ public class Pulsar {
      * 注入DeferredResult
      * @param joinPoint 切面连接点
      * @param deferredResult DeferredResult标识装配类
+     * @param check 是否检查添加了<code>PulsarDeferredResult</code>类型参数
      * @return 注入完成的参数
      */
-    private Object[] injectDeferredResult(JoinPoint joinPoint, PulsarDeferredResult deferredResult) {
+    private Object[] injectDeferredResult(JoinPoint joinPoint, PulsarDeferredResult deferredResult, boolean check) {
         Object[] args = joinPoint.getArgs();
         int len = args.length;
+        boolean flag = false;
         for (int i = 0; i < len; i++) {
             if (args[i] instanceof PulsarDeferredResult) {
                 args[i] = deferredResult;
+                flag = true;
                 return args;
             }
+        }
+        if (check && !flag) {
+            throw new IllegalArgumentException("you must add PulsarDeferredResult param on method " +
+                    joinPoint.getSignature().getName() + " and optionally set deferredResultID before use DeferredResult.");
         }
         return args;
     }
