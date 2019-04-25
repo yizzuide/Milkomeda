@@ -12,7 +12,7 @@ import java.util.UUID;
  *
  * @author yizzuide
  * @since  0.1.0
- * @version 0.2.8
+ * @version 0.2.9
  * Create at 2019/03/30 00:03
  */
 @NoArgsConstructor
@@ -74,6 +74,10 @@ public class PulsarDeferredResult {
      * @return DeferredResult
      */
     public DeferredResult<Object> take() {
-        return pulsar.takeDeferredResult(this.getDeferredResultID());
+        DeferredResult<Object> deferredResult = pulsar.takeDeferredResult(this.getDeferredResultID());
+        if (deferredResult == null) {
+            return getDeferredResult();
+        }
+        return deferredResult;
     }
 }

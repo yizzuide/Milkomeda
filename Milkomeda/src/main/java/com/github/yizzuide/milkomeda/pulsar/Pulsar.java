@@ -25,7 +25,7 @@ import java.util.function.Function;
  *
  * @author yizzuide
  * @since  0.1.0
- * @version 0.2.8
+ * @version 0.2.9
  * Create at 2019/03/29 10:36
  */
 @Slf4j
@@ -43,7 +43,10 @@ public class Pulsar {
     private ThreadPoolTaskExecutor taskExecutor;
 
     /**
-     *  Error 错误回调<可抛出接口，自定义响应数据>
+     *  Error 错误回调
+     *
+     *  Throwable：错误异常
+     *  Object：响应数据
      */
     private Function<Throwable, Object> errorCallback;
 
@@ -122,8 +125,13 @@ public class Pulsar {
         PulsarDeferredResult pulsarDeferredResult = new PulsarDeferredResult(this);
         pulsarDeferredResult.pack(deferredResult);
         // 调用方法实现
-        joinPoint.proceed(injectDeferredResult(joinPoint, pulsarDeferredResult,
+        Object returnObj = joinPoint.proceed(injectDeferredResult(joinPoint, pulsarDeferredResult,
                 pulsarAsync.useDeferredResult()));
+        // 方法有返回值，则应用调用方的返回值
+        // 如果是DeferredResult实例类型对象，则为异步请求，否则为同步请求
+        if (null != returnObj) {
+            return returnObj;
+        }
         return deferredResult;
     }
 
