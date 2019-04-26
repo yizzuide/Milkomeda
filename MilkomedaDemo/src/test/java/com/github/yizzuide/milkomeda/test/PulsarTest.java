@@ -60,7 +60,14 @@ public class PulsarTest {
                 .param("id", "1")
                 .contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andExpect(MockMvcResultMatchers.status().isOk())
-                .andReturn().getAsyncResult();
+                .andReturn()
+
+                // 同步请求
+//                .getResponse()
+//                .getContentAsString();
+
+                // 异步请求
+                .getAsyncResult();
         System.out.println(ret);
     }
 }

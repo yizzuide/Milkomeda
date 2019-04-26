@@ -16,17 +16,18 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 0.2.0
+ * @version 0.2.10
  * Create at 2019/04/11 14:14
  */
 public class PillarExecutor<P, R> {
     /**
-     * 逻辑处理单元柱集合
+     * 分流柱集合
      */
     private Set<Pillar<P, R>> pillars = new HashSet<>();
 
     /**
-     * 执行逻辑处理单元柱
-     * @param type 逻辑类型
+     * 执行分流柱
+     * @param type 分流类型
      * @param params 参数
      * @param result 结果
      */
@@ -36,7 +37,12 @@ public class PillarExecutor<P, R> {
         }
     }
 
-    private List<Pillar<P, R>> getPillars(String type) {
+    /**
+     * 根据类型获取分流柱
+     * @param type 分流类型
+     * @return 分流柱集合
+     */
+    public List<? extends Pillar<P, R>> getPillars(String type) {
         return pillars.stream()
                 .filter(processor -> type.equals(processor.supportType()))
                 .collect(Collectors.toList());
@@ -44,7 +50,7 @@ public class PillarExecutor<P, R> {
 
 
     /**
-     * 添加一个逻辑处理单元柱
+     * 添加一个分流柱
      * @param pillar 逻辑处理
      */
     public void addPillar(Pillar<P, R> pillar) {
@@ -52,8 +58,8 @@ public class PillarExecutor<P, R> {
     }
 
     /**
-     * 添加多个逻辑处理单元柱
-     * @param pillarList 逻辑处理单元柱集合
+     * 添加多个分流柱
+     * @param pillarList 分流柱集合
      */
     public void addPillarList(List<Pillar<P, R>> pillarList) {
         pillars.addAll(pillarList);

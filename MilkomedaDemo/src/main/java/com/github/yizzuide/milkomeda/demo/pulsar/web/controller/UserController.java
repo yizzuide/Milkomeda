@@ -76,6 +76,9 @@ public class UserController {
             }
             pulsarDeferredResult.take().setResult("send OK");
         });
+        // 同步测试
+//        return ResponseEntity.ok("OK");
+        // 异步测试
         return null;
     }
 }

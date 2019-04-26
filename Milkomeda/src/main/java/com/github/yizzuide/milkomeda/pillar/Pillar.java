@@ -2,7 +2,7 @@ package com.github.yizzuide.milkomeda.pillar;
 
 /**
  * Pillar
- * 逻辑处理单元柱接口
+ * 分流柱接口
  *
  * @param <P> 参数
  * @param <R> 结果

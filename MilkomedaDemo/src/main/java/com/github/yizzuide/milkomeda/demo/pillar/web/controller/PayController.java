@@ -50,6 +50,8 @@ public class PayController {
             returnData.setMsg("type 参数错误");
             return ResponseEntity.ok(returnData);
         }
+        // 获取分流柱
+        pillarExecutor.getPillars(pillarType).forEach(System.out::println);
         // 将 if/else 分支分流
         pillarExecutor.execute(pillarType, params, returnData);
         return ResponseEntity.ok(returnData);
