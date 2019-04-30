@@ -25,7 +25,7 @@ import java.util.function.Function;
  *
  * @author yizzuide
  * @since  0.1.0
- * @version 0.2.9
+ * @version 1.0.0
  * Create at 2019/03/29 10:36
  */
 @Slf4j
@@ -62,6 +62,7 @@ public class Pulsar {
 
     public Pulsar() {
         deferredResultMap = new ConcurrentHashMap<>(DEFAULT_CAPACITY);
+        PulsarHolder.setPulsar(this);
     }
 
     /**
@@ -110,10 +111,12 @@ public class Pulsar {
             // 适配超时处理
             deferredResult.onTimeout(() -> {
                 try {
-                    log.warn("deferredResult handle timeout on method {}", invokeMethodName);
+                    log.warn("pulsar:- DeferredResult handle timeout on method {}", invokeMethodName);
                     deferredResult.setErrorResult(timeoutCallback.call());
                 } catch (Exception e) {
-                    log.error("error callback error", e);
+                    log.error("pulsar:- DeferredResult happen timeout callback error with message: {} ", e.getMessage(), e);
+                    if (null == this.errorCallback) return;
+                    this.errorCallback.apply(e);
                 }
             });
         }
@@ -150,19 +153,19 @@ public class Pulsar {
 
         @Override
         public Object call() throws Exception {
-            log.debug("pulsar invoke: {}", joinPoint.getSignature());
+            log.debug("pulsar:- WebAsyncTask invoke method: {}", joinPoint.getSignature());
             try {
                 return joinPoint.proceed();
-            } catch (Throwable throwable) {
-                log.error("pulsar invoke error", throwable);
+            } catch (Throwable t) {
+                log.error("pulsar:-  WebAsyncTask invoke error with message: {}", t.getMessage(), t);
                 // 如果有Exception异常向外抛，交由开发者处理
-                if (throwable instanceof Exception) {
-                    throw (Exception) throwable;
+                if (t instanceof Exception) {
+                    throw (Exception) t;
                 } else { // Error类型
                     if (null != errorCallback) {
-                        return errorCallback.apply(throwable);
+                        return errorCallback.apply(t);
                     }
-                    return ResponseEntity.status(500).body(throwable.getMessage());
+                    return ResponseEntity.status(500).body(t.getMessage());
                 }
             }
         }
@@ -177,12 +180,20 @@ public class Pulsar {
     }
 
     /**
+     * 支持异常自动捕获的异步运行
+     * @param runnable PulsarRunnable
+     */
+    public void asyncRun(PulsarRunnable runnable) {
+        taskExecutor.execute(runnable);
+    }
+
+    /**
      * 配置默认的异步支持
      * @param configurer 配置对象
      * @param timeout 超时时间，ms
      */
     public void configure(AsyncSupportConfigurer configurer, long timeout) {
-        configure(configurer, 5, 10, 50, 200, timeout);
+        configure(configurer, 5, 10, 150, 200, timeout);
     }
 
     /**
@@ -218,6 +229,7 @@ public class Pulsar {
      */
     public void setErrorCallback(Function<Throwable, Object> errorCallback) {
         this.errorCallback = errorCallback;
+        PulsarHolder.setErrorCallback(this.errorCallback);
     }
 
     /**

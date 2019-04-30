@@ -4,6 +4,7 @@ import com.github.yizzuide.milkomeda.comet.Comet;
 import com.github.yizzuide.milkomeda.comet.CometAspect;
 import com.github.yizzuide.milkomeda.pulsar.Pulsar;
 import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
@@ -19,9 +20,10 @@ import java.util.Map;
  *
  * @author yizzuide
  * @since 0.2.1
- * @version 0.2.7
+ * @version 1.0.0
  * Create at 2019/04/12 11:29
  */
+@Slf4j
 @Configuration
 public class MilkomedaAutoConfiguration {
     @Bean
@@ -38,6 +40,12 @@ public class MilkomedaAutoConfiguration {
         pulsar.setTimeoutCallback(() -> {
             Map<String, Object> ret = new HashMap<>();
             ret.put("error_message", "PulsarAsync handle timeout");
+            return ResponseEntity.status(500).body(ret);
+        });
+        pulsar.setErrorCallback((Throwable t) -> {
+            log.error("pulsar:- ErrorCallback catch a error with message: {}", t.getMessage(), t);
+            Map<String, Object> ret = new HashMap<>();
+            ret.put("error_message", t.getMessage());
             return ResponseEntity.status(500).body(ret);
         });
         return pulsar;

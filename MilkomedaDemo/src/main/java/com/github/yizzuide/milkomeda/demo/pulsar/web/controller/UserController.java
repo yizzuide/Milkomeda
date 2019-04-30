@@ -4,6 +4,8 @@ import com.github.yizzuide.milkomeda.comet.Comet;
 import com.github.yizzuide.milkomeda.demo.pulsar.pojo.User;
 import com.github.yizzuide.milkomeda.pulsar.PulsarAsync;
 import com.github.yizzuide.milkomeda.pulsar.PulsarDeferredResult;
+import com.github.yizzuide.milkomeda.pulsar.PulsarHolder;
+import com.github.yizzuide.milkomeda.pulsar.PulsarRunnable;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -66,8 +68,9 @@ public class UserController {
     public Object /* TODO 这里的返回值必需为Object */ sendNotice(@PathVariable("id") Long id,
                                                         PulsarDeferredResult pulsarDeferredResult) {
         log.info("sendNotice：" + id);
-        // 模拟当前方法中调用耗时数业务处理
-        pulsarDeferredResult.getPulsar().asyncRun(() -> {
+
+        // 模拟当前方法中调用耗时数业务处理（这种方式不支持内部异常捕获）
+        /*pulsarDeferredResult.getPulsar().asyncRun(() -> {
             log.info("execute business");
             try {
                 Thread.sleep(100);
@@ -75,7 +78,20 @@ public class UserController {
                 e.printStackTrace();
             }
             pulsarDeferredResult.take().setResult("send OK");
+        });*/
+
+        log.info("pulsarHolder: {}", PulsarHolder.getPulsar());
+        log.info("errorCallback: {}", PulsarHolder.getErrorCallback());
+
+        // 使用可自动异常方式
+        pulsarDeferredResult.getPulsar().asyncRun(new PulsarRunnable(pulsarDeferredResult) {
+            @Override
+            protected void runFlow(PulsarDeferredResult pulsarDeferredResult) throws Throwable {
+                throw new RuntimeException("测试抛出异常");
+//                pulsarDeferredResult.take().setResult("send OK");
+            }
         });
+
         // 同步测试
 //        return ResponseEntity.ok("OK");
         // 异步测试
