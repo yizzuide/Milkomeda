@@ -25,7 +25,7 @@ import java.util.function.Function;
  *
  * @author yizzuide
  * @since  0.1.0
- * @version 1.1.0
+ * @version 1.2.0
  * Create at 2019/03/29 10:36
  */
 @Slf4j
@@ -88,11 +88,8 @@ public class Pulsar {
      * @return DeferredResult
      */
     public DeferredResult<Object> takeDeferredResult(String id) {
-        PulsarDeferredResult pulsarDeferredResult = deferredResultMap.remove(id);
-        if (pulsarDeferredResult == null) {
-            return null;
-        }
-        return pulsarDeferredResult.getDeferredResult();
+        PulsarDeferredResult pulsarDeferredResult = takePulsarDeferredResult(id);
+        return pulsarDeferredResult == null ? null : pulsarDeferredResult.getDeferredResult();
     }
 
     /**

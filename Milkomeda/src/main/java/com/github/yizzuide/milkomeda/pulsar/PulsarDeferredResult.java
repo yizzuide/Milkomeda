@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.web.context.request.async.DeferredResult;
 
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -12,7 +13,7 @@ import java.util.UUID;
  *
  * @author yizzuide
  * @since  0.1.0
- * @version 0.2.9
+ * @version 1.2.0
  * Create at 2019/03/30 00:03
  */
 @NoArgsConstructor
@@ -46,10 +47,12 @@ public class PulsarDeferredResult {
      */
     public void setDeferredResultID(String deferredResultID) {
         // 如果在Pulsar中存放过，先拿出
-        if (null != this.deferredResultID) {
+        if (null != this.getDeferredResultID()) {
             take();
         }
+        // 设置标识符
         this.deferredResultID = deferredResultID;
+        // 放入容器
         pulsar.putDeferredResult(this);
     }
 
@@ -75,9 +78,6 @@ public class PulsarDeferredResult {
      */
     public DeferredResult<Object> take() {
         DeferredResult<Object> deferredResult = pulsar.takeDeferredResult(this.getDeferredResultID());
-        if (deferredResult == null) {
-            return getDeferredResult();
-        }
-        return deferredResult;
+        return Optional.of(deferredResult).orElse(getDeferredResult());
     }
 }
