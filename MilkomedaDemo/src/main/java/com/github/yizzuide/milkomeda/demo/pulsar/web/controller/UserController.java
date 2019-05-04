@@ -5,12 +5,15 @@ import com.github.yizzuide.milkomeda.demo.pulsar.pojo.User;
 import com.github.yizzuide.milkomeda.pulsar.PulsarAsync;
 import com.github.yizzuide.milkomeda.pulsar.PulsarDeferredResult;
 import com.github.yizzuide.milkomeda.pulsar.PulsarHolder;
-import com.github.yizzuide.milkomeda.pulsar.PulsarRunnable;
+import com.github.yizzuide.milkomeda.pulsar.PulsarRunner;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import static com.github.yizzuide.milkomeda.pulsar.PulsarHolder.async;
 
 /**
  * UserController
@@ -69,8 +72,8 @@ public class UserController {
                                                         PulsarDeferredResult pulsarDeferredResult) {
         log.info("sendNotice：" + id);
 
-        // 模拟当前方法中调用耗时数业务处理（这种方式不支持内部异常捕获）
-        /*pulsarDeferredResult.getPulsar().asyncRun(() -> {
+        // 模拟当前方法中调用耗时数业务处理（这种方式不支持内部异常捕获，不推荐使用）
+        /*PulsarHolder.getPulsar().asyncRun(() -> {
             log.info("execute business");
             try {
                 Thread.sleep(100);
@@ -83,14 +86,13 @@ public class UserController {
         log.info("pulsarHolder: {}", PulsarHolder.getPulsar());
         log.info("errorCallback: {}", PulsarHolder.getErrorCallback());
 
-        // 使用可自动异常方式
-        pulsarDeferredResult.getPulsar().asyncRun(new PulsarRunnable(pulsarDeferredResult) {
-            @Override
-            protected void runFlow(PulsarDeferredResult pulsarDeferredResult) throws Throwable {
-                throw new RuntimeException("测试抛出异常");
-//                pulsarDeferredResult.take().setResult("send OK");
-            }
-        });
+        // async为PulsarHolder的静态方法（内部可自动捕获异常，推荐使用）
+        async(new PulsarRunner(() -> {
+//            throw new RuntimeException("测试抛出异常");
+
+            // 这里的返回，内部会使用DeferredResult返回
+            return ResponseEntity.ok( "{\"code\": \"0000\"}");
+        }, pulsarDeferredResult));
 
         // 同步测试
 //        return ResponseEntity.ok("OK");

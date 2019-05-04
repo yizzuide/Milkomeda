@@ -25,7 +25,7 @@ import java.util.function.Function;
  *
  * @author yizzuide
  * @since  0.1.0
- * @version 1.0.0
+ * @version 1.1.0
  * Create at 2019/03/29 10:36
  */
 @Slf4j
@@ -72,8 +72,18 @@ public class Pulsar {
     void putDeferredResult(PulsarDeferredResult pulsarDeferredResult) {
         deferredResultMap.put(pulsarDeferredResult.getDeferredResultID(), pulsarDeferredResult);
     }
+
     /**
-     * 通过标识符拿走对应的DeferredResult
+     * 通过标识符取出PulsarDeferredResult
+     * @param id 标识符
+     * @return PulsarDeferredResult
+     */
+    public PulsarDeferredResult takePulsarDeferredResult(String id) {
+        return deferredResultMap.remove(id);
+    }
+
+    /**
+     * 通过标识符取出DeferredResult
      * @param id 标识符
      * @return DeferredResult
      */
@@ -176,14 +186,6 @@ public class Pulsar {
      * @param runnable Runnable
      */
     public void asyncRun(Runnable runnable) {
-        taskExecutor.execute(runnable);
-    }
-
-    /**
-     * 支持异常自动捕获的异步运行
-     * @param runnable PulsarRunnable
-     */
-    public void asyncRun(PulsarRunnable runnable) {
         taskExecutor.execute(runnable);
     }
 

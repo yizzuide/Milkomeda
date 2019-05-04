@@ -20,7 +20,7 @@ import java.util.Map;
  *
  * @author yizzuide
  * @since 0.2.1
- * @version 1.0.0
+ * @version 1.1.0
  * Create at 2019/04/12 11:29
  */
 @Slf4j
@@ -43,7 +43,6 @@ public class MilkomedaAutoConfiguration {
             return ResponseEntity.status(500).body(ret);
         });
         pulsar.setErrorCallback((Throwable t) -> {
-            log.error("pulsar:- ErrorCallback catch a error with message: {}", t.getMessage(), t);
             Map<String, Object> ret = new HashMap<>();
             ret.put("error_message", t.getMessage());
             return ResponseEntity.status(500).body(ret);
