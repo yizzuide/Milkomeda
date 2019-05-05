@@ -31,10 +31,21 @@ public class PulsarRunner implements Runnable {
      */
     private DeferredResult<Object> deferredResult;
 
+    /**
+     * 通过 Callable 和 PulsarDeferredResult 构造异步运行器
+     *
+     * @param callable  异步运行方法，业务代码里可以直接返回数据，由框架异步来接管返回。如：return ResponseEntity.ok(data);
+     * @param pulsarDeferredResult  基于Pulsar包装的DeferredResult
+     */
     public PulsarRunner(Callable<Object> callable, PulsarDeferredResult pulsarDeferredResult) {
         this(callable, pulsarDeferredResult == null ? null : pulsarDeferredResult.take());
     }
 
+    /**
+     * 通过 Callable 和 DeferredResultID 构造异步运行器
+     * @param callable  异步运行方法，业务代码里可以直接返回数据，由框架异步来接管返回。如：return ResponseEntity.ok(data);
+     * @param deferredResultID  基于Pulsar包装的DeferredResult
+     */
     public PulsarRunner(Callable<Object> callable, String deferredResultID) {
         this(callable, PulsarHolder.getPulsar().takePulsarDeferredResult(deferredResultID));
         if (null == this.deferredResult) {

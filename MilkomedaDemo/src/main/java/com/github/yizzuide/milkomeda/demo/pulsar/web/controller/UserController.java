@@ -5,7 +5,6 @@ import com.github.yizzuide.milkomeda.demo.pulsar.pojo.User;
 import com.github.yizzuide.milkomeda.pulsar.PulsarAsync;
 import com.github.yizzuide.milkomeda.pulsar.PulsarDeferredResult;
 import com.github.yizzuide.milkomeda.pulsar.PulsarHolder;
-import com.github.yizzuide.milkomeda.pulsar.PulsarRunner;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -72,6 +71,12 @@ public class UserController {
                                                         PulsarDeferredResult pulsarDeferredResult) {
         log.info("sendNotice：" + id);
 
+        log.info("pulsarHolder: {}", PulsarHolder.getPulsar());
+        log.info("errorCallback: {}", PulsarHolder.getErrorCallback());
+
+        // 同步测试（如果返回值不为 null，则采用同步执行）
+//        return ResponseEntity.ok("OK");
+
         // 模拟当前方法中调用耗时数业务处理（这种方式不支持内部异常捕获，不推荐使用）
         /*PulsarHolder.getPulsar().asyncRun(() -> {
             log.info("execute business");
@@ -83,20 +88,12 @@ public class UserController {
             pulsarDeferredResult.take().setResult("send OK");
         });*/
 
-        log.info("pulsarHolder: {}", PulsarHolder.getPulsar());
-        log.info("errorCallback: {}", PulsarHolder.getErrorCallback());
-
         // async为PulsarHolder的静态方法（内部可自动捕获异常，推荐使用）
-        async(new PulsarRunner(() -> {
+        return async(() -> {
 //            throw new RuntimeException("测试抛出异常");
 
             // 这里的返回，内部会使用DeferredResult返回
             return ResponseEntity.ok( "{\"code\": \"0000\"}");
-        }, pulsarDeferredResult));
-
-        // 同步测试
-//        return ResponseEntity.ok("OK");
-        // 异步测试
-        return null;
+        }, pulsarDeferredResult);
     }
 }
