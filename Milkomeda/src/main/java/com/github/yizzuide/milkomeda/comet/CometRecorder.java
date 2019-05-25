@@ -8,7 +8,7 @@ import javax.servlet.http.HttpServletRequest;
  *
  * @author yizzuide
  * @since 0.2.0
- * @version 0.2.7
+ * @version 1.3.1
  * Create at 2019/04/11 19:45
  */
 public interface CometRecorder {
@@ -22,13 +22,18 @@ public interface CometRecorder {
 
     /**
      * 方法返回结果后
-     * @param cometData 日志实体
+     * @param cometData     日志实体
+     * @param returnData    返回数据
+     * @return  返回对象
      */
-    default void onReturn(CometData cometData) {}
+    default Object onReturn(CometData cometData, Object returnData) {
+        return returnData;
+    }
 
     /**
      * 方法抛出异常
      * @param cometData 日志实体
+     * @param e         异常
      */
-    default void onThrowing(CometData cometData) {}
+    default void onThrowing(CometData cometData, Exception e) {}
 }

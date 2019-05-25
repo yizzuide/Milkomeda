@@ -7,9 +7,10 @@ import com.github.yizzuide.milkomeda.util.ReflectUtil;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.aspectj.lang.JoinPoint;
+import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.Signature;
 import org.aspectj.lang.annotation.*;
+import org.springframework.core.annotation.Order;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
@@ -22,11 +23,12 @@ import java.util.Date;
  *
  * @author yizzuide
  * @since 0.2.0
- * @version 0.2.7
+ * @version 1.3.1
  * Create at 2019/04/11 19:48
  */
 @Slf4j
 @Aspect
+@Order(9)
 public class CometAspect {
     private ThreadLocal<CometData> threadLocal = new ThreadLocal<>();
     /**
@@ -42,8 +44,8 @@ public class CometAspect {
     @Pointcut("@annotation(com.github.yizzuide.milkomeda.comet.Comet)")
     public void comet() {}
 
-    @Before("comet()")
-    public void doBefore(JoinPoint joinPoint) throws Exception {
+    @Around("comet()")
+    public Object doAround(ProceedingJoinPoint joinPoint) throws Throwable {
         Date now = new Date();
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         Comet comet = ReflectUtil.getAnnotation(joinPoint, Comet.class);
@@ -66,28 +68,27 @@ public class CometAspect {
         cometData.setHost(NetworkUtil.getHost());
         cometData.setRequestIP(request.getRemoteAddr());
         cometData.setDeviceInfo(request.getHeader("user-agent"));
+        log.info("Comet:- before: {}", JSONUtil.serialize(cometData));
         recorder.onRequest(cometData, cometData.getTag(), request);
         threadLocal.set(cometData);
-    }
 
-    @AfterReturning(pointcut = "comet()", returning = "object")
-    public void doAfterReturn(Object object) {
-        CometData cometData = threadLocal.get();
+        // 执行方法体
+        Object returnData = joinPoint.proceed();
+
         long duration = new Date().getTime() - cometData.getRequestTime().getTime();
         cometData.setDuration(String.valueOf(duration));
         cometData.setStatus("1");
         cometData.setResponseTime(new Date());
-        cometData.setResponseData(HttpServletUtil.getResponseData(object));
-        log.info(JSONUtil.serialize(cometData));
-        recorder.onReturn(cometData);
-        threadLocal.remove();
+        cometData.setResponseData(HttpServletUtil.getResponseData(returnData));
+        log.info("Comet:- afterReturn: {}", JSONUtil.serialize(cometData));
+        return recorder.onReturn(cometData, returnData);
     }
 
     /**
      * 异常抛出后
      */
     @AfterThrowing(pointcut = "comet()", throwing = "e")
-    public void afterThrowing(RuntimeException e) {
+    public void afterThrowing(Exception e) {
         CometData cometData = threadLocal.get();
         long duration = new Date().getTime() - cometData.getRequestTime().getTime();
         cometData.setDuration(String.valueOf(duration));
@@ -95,8 +96,8 @@ public class CometAspect {
         cometData.setResponseData(null);
         cometData.setResponseTime(new Date());
         cometData.setErrorInfo(e.fillInStackTrace().toString());
-        log.error(JSONUtil.serialize(cometData));
-        recorder.onThrowing(cometData);
+        log.error("Comet:- afterThrowing: {}", JSONUtil.serialize(cometData));
+        recorder.onThrowing(cometData, e);
         threadLocal.remove();
     }
 }
