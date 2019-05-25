@@ -39,7 +39,7 @@ public class MilkomedaAutoConfiguration {
         Pulsar pulsar = new Pulsar();
         pulsar.setTimeoutCallback(() -> {
             Map<String, Object> ret = new HashMap<>();
-            ret.put("error_message", "PulsarAsync handle timeout");
+            ret.put("error_message", "PulsarFlow handle timeout");
             return ResponseEntity.status(500).body(ret);
         });
         pulsar.setErrorCallback((Throwable t) -> {

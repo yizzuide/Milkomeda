@@ -14,7 +14,7 @@ import java.util.concurrent.Callable;
  * 基于Runnable的装饰运行器，可自动捕获 Throwable，并给出相应的错误反馈
  *
  * @since 1.1.0
- * @version 1.2.0
+ * @version 1.4.0
  * @author yizzuide
  * Create at 2019/05/03 23:53
  */
@@ -38,7 +38,7 @@ public class PulsarRunner implements Runnable {
      * @param pulsarDeferredResult  基于Pulsar包装的DeferredResult
      */
     public PulsarRunner(Callable<Object> callable, PulsarDeferredResult pulsarDeferredResult) {
-        this(callable, pulsarDeferredResult == null ? null : pulsarDeferredResult.take());
+        this(callable, pulsarDeferredResult == null ? null : pulsarDeferredResult.value());
     }
 
     /**
@@ -47,7 +47,7 @@ public class PulsarRunner implements Runnable {
      * @param deferredResultID  基于Pulsar包装的DeferredResult
      */
     public PulsarRunner(Callable<Object> callable, String deferredResultID) {
-        this(callable, PulsarHolder.getPulsar().takePulsarDeferredResult(deferredResultID));
+        this(callable, PulsarHolder.getPulsar().getPulsarDeferredResult(deferredResultID));
         if (null == this.deferredResult) {
             log.error("Pulsar:- Can't find deferredResultID \"{}\" in container, that maybe cause NullPointerException.", deferredResultID);
         }

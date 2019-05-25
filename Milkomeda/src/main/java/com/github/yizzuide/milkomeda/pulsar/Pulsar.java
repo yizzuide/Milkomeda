@@ -6,6 +6,7 @@ import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
@@ -23,9 +24,12 @@ import java.util.function.Function;
 /**
  * Pulsar
  *
+ * 用于存放和管理DeferredResult的容器，配合应用注解 <code>@PulsarFlow</code> 切面，
+ * 并提供参数注入DeferredResult的包装类 <code>PulsarDeferredResult</code> 到请求参数列表。
+ *
  * @author yizzuide
  * @since  0.1.0
- * @version 1.2.0
+ * @version 1.4.0
  * Create at 2019/03/29 10:36
  */
 @Slf4j
@@ -69,7 +73,7 @@ public class Pulsar {
      * 记存一个DeferredResult
      * @param pulsarDeferredResult PulsarDeferredResult
      */
-    void putDeferredResult(PulsarDeferredResult pulsarDeferredResult) {
+    private void putDeferredResult(PulsarDeferredResult pulsarDeferredResult) {
         deferredResultMap.put(pulsarDeferredResult.getDeferredResultID(), pulsarDeferredResult);
     }
 
@@ -78,31 +82,49 @@ public class Pulsar {
      * @param id 标识符
      * @return PulsarDeferredResult
      */
-    public PulsarDeferredResult takePulsarDeferredResult(String id) {
-        return deferredResultMap.remove(id);
+    PulsarDeferredResult getPulsarDeferredResult(String id) {
+        return deferredResultMap.get(id);
     }
 
     /**
-     * 通过标识符取出DeferredResult
+     * 通过标识符得到DeferredResult
      * @param id 标识符
      * @return DeferredResult
      */
-    public DeferredResult<Object> takeDeferredResult(String id) {
-        PulsarDeferredResult pulsarDeferredResult = takePulsarDeferredResult(id);
+    public DeferredResult<Object> getDeferredResult(String id) {
+        PulsarDeferredResult pulsarDeferredResult = getPulsarDeferredResult(id);
         return pulsarDeferredResult == null ? null : pulsarDeferredResult.getDeferredResult();
     }
 
     /**
-     * 对使用了 @PulsarAsync 注解实现环绕切面
+     * 移除DeferredResult
+     * @param id 标识符
+     */
+    private void removeDeferredResult(String id) {
+        deferredResultMap.remove(id);
+    }
+
+    /**
+     * 对使用了 @PulsarFlow 注解实现环绕切面
      * @param joinPoint 切面连接点
      * @return 响应数据对象
      * @throws Throwable 可抛出异常
      */
-    @Around("@annotation(com.github.yizzuide.milkomeda.pulsar.PulsarAsync)")
+    @Around("@annotation(com.github.yizzuide.milkomeda.pulsar.PulsarFlow)")
     Object handlePulse(ProceedingJoinPoint joinPoint) throws Throwable {
-        PulsarAsync pulsarAsync = ReflectUtil.getAnnotation(joinPoint, PulsarAsync.class);
+        // 检测方法返回值
+        MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
+        String invokeMethodName = joinPoint.getSignature().getName();
+        if (methodSignature.getReturnType() != Object.class) {
+            throw new ClassCastException("you must set [Object] return type on method " +
+                    invokeMethodName);
+        }
+
+        // 获取注解信息
+        PulsarFlow pulsarFlow = ReflectUtil.getAnnotation(joinPoint, PulsarFlow.class);
+
         // 如果没有设置DeferredResult，则使用WebAsyncTask
-        if (!pulsarAsync.useDeferredResult()) {
+        if (!pulsarFlow.useDeferredResult()) {
             // 返回异步任务
             WebAsyncTask<Object> webAsyncTask = new WebAsyncTask<>(new WebAsyncTaskCallable(joinPoint));
             if (null != timeoutCallback) {
@@ -111,7 +133,6 @@ public class Pulsar {
             return webAsyncTask;
         }
 
-        String invokeMethodName = joinPoint.getSignature().getName();
         // 使用DeferredResult方式
         DeferredResult<Object> deferredResult = new DeferredResult<>();
         if (null != timeoutCallback) {
@@ -127,21 +148,37 @@ public class Pulsar {
                 }
             });
         }
+
         if (null != errorCallback) {
             // 适配错误处理
             deferredResult.onError((throwable) -> deferredResult.setErrorResult(errorCallback.apply(throwable)));
         }
+
         // 创建增强DeferredResult
-        PulsarDeferredResult pulsarDeferredResult = new PulsarDeferredResult(this);
-        pulsarDeferredResult.pack(deferredResult);
+        PulsarDeferredResult pulsarDeferredResult = new PulsarDeferredResult();
+        pulsarDeferredResult.setDeferredResult(deferredResult);
+
         // 调用方法实现
         Object returnObj = joinPoint.proceed(injectDeferredResult(joinPoint, pulsarDeferredResult,
-                pulsarAsync.useDeferredResult()));
-        // 方法有返回值，则应用调用方的返回值
-        // 如果是DeferredResult实例类型对象，则为异步请求，否则为同步请求
-        if (null != returnObj) {
+                pulsarFlow.useDeferredResult()));
+
+        // 方法有返回值且不是DeferredResult，则不作DeferredResult处理
+        if (null != returnObj && !(returnObj instanceof DeferredResult)) {
             return returnObj;
         }
+
+        // 检查是否设置标识
+        if (null == pulsarDeferredResult.getDeferredResultID()) {
+            throw new IllegalArgumentException("you must invoke setDeferredResultID method of PulsarDeferredResult parameter on method " +
+                    invokeMethodName);
+        }
+
+        // 无论超时还是成功响应，删除这个DeferredResult
+        deferredResult.onCompletion(() -> removeDeferredResult(pulsarDeferredResult.getDeferredResultID()));
+
+        // 放入容器
+        putDeferredResult(pulsarDeferredResult);
+        // 返回
         return deferredResult;
     }
 
@@ -192,7 +229,7 @@ public class Pulsar {
      * @param timeout 超时时间，ms
      */
     public void configure(AsyncSupportConfigurer configurer, long timeout) {
-        configure(configurer, 5, 10, 150, 200, timeout);
+        configure(configurer, 5, 10, 50, 200, timeout);
     }
 
     /**
@@ -258,8 +295,8 @@ public class Pulsar {
             }
         }
         if (check && !flag) {
-            throw new IllegalArgumentException("you must add PulsarDeferredResult param on method " +
-                    joinPoint.getSignature().getName() + " and optionally set deferredResultID before use DeferredResult.");
+            throw new IllegalArgumentException("you must add PulsarDeferredResult parameter on method " +
+                    joinPoint.getSignature().getName() + " and set deferredResultID before use DeferredResult.");
         }
         return args;
     }

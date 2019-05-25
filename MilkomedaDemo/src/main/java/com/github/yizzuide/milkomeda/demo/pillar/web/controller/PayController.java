@@ -1,18 +1,16 @@
 package com.github.yizzuide.milkomeda.demo.pillar.web.controller;
 
-import com.github.yizzuide.milkomeda.demo.pillar.pillars.PayPillar;
-import com.github.yizzuide.milkomeda.demo.pillar.pillars.RechargePillar;
 import com.github.yizzuide.milkomeda.demo.pillar.common.ReturnData;
 import com.github.yizzuide.milkomeda.demo.pillar.common.TradeType;
 import com.github.yizzuide.milkomeda.pillar.PillarExecutor;
 import com.github.yizzuide.milkomeda.pillar.PillarRecognizer;
 import lombok.val;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Arrays;
 import java.util.Map;
 
 /**
@@ -25,11 +23,8 @@ import java.util.Map;
 @RequestMapping("pay")
 public class PayController {
 
+    @Autowired
     private PillarExecutor<Map<String, String>, ReturnData> pillarExecutor;
-    {
-        pillarExecutor = new PillarExecutor<>();
-        pillarExecutor.addPillarList(Arrays.asList(new PayPillar(), new RechargePillar()));
-    }
 
     /**
      * 第三方平台银行卡预支付

@@ -4,6 +4,7 @@ import com.github.yizzuide.milkomeda.demo.pillar.common.ReturnData;
 import com.github.yizzuide.milkomeda.demo.pillar.common.TradeType;
 import com.github.yizzuide.milkomeda.pillar.Pillar;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
@@ -15,6 +16,7 @@ import java.util.Map;
  * Create at 2019/04/11 16:53
  */
 @Slf4j
+@Component
 public class PayPillar implements Pillar<Map<String, String>, ReturnData> {
     @Override
     public String supportType() {

@@ -9,10 +9,15 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.Signature;
-import org.aspectj.lang.annotation.*;
+import org.aspectj.lang.annotation.AfterThrowing;
+import org.aspectj.lang.annotation.Around;
+import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.core.annotation.Order;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.web.context.request.async.DeferredResult;
+import org.springframework.web.context.request.async.WebAsyncTask;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
@@ -23,7 +28,7 @@ import java.util.Date;
  *
  * @author yizzuide
  * @since 0.2.0
- * @version 1.3.1
+ * @version 1.4.1
  * Create at 2019/04/11 19:48
  */
 @Slf4j
@@ -79,7 +84,13 @@ public class CometAspect {
         cometData.setDuration(String.valueOf(duration));
         cometData.setStatus("1");
         cometData.setResponseTime(new Date());
-        cometData.setResponseData(HttpServletUtil.getResponseData(returnData));
+        if (returnData.getClass() == DeferredResult.class) {
+            cometData.setResponseData("[DeferredResult]");
+        } else if (returnData.getClass() == WebAsyncTask.class) {
+            cometData.setResponseData("[WebAsyncTask]");
+        } else {
+            cometData.setResponseData(HttpServletUtil.getResponseData(returnData));
+        }
         log.info("Comet:- afterReturn: {}", JSONUtil.serialize(cometData));
         return recorder.onReturn(cometData, returnData);
     }

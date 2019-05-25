@@ -53,21 +53,4 @@ public class PulsarTest {
                 .andReturn().getAsyncResult();
         System.out.println(ret);
     }
-
-    @Test
-    public void sendNotice() throws Exception {
-        val ret = mockMvc.perform(MockMvcRequestBuilders.get("/user/notice/1")
-                .param("id", "1")
-                .contentType(MediaType.APPLICATION_JSON_UTF8))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andReturn()
-
-                // 同步请求
-//                .getResponse()
-//                .getContentAsString();
-
-                // 异步请求
-                .getAsyncResult();
-        System.out.println(ret);
-    }
 }
