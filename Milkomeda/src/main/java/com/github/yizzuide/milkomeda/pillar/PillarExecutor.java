@@ -9,14 +9,14 @@ import java.util.stream.Collectors;
  * PillarExecutor
  * 逻辑分流中心执行器
  * 把很多的逻辑不同阶段的数据处理，拆分到不同的类里边去编写，这对于代码逻辑的解耦能起到非常好的作用，
- * 如：状态机转换、多if/else分支判断
+ * 使用场景如：状态机转换、多if/else分支判断
  *
  * @param <P> 参数
  * @param <R> 结果
  *
  * @author yizzuide
  * @since 0.2.0
- * @version 0.2.10
+ * @version 1.4.2
  * Create at 2019/04/11 14:14
  */
 public class PillarExecutor<P, R> {
@@ -61,7 +61,7 @@ public class PillarExecutor<P, R> {
      * 添加多个分流柱
      * @param pillarList 分流柱集合
      */
-    public void addPillarList(List<Pillar<P, R>> pillarList) {
+    public void addPillarList(List<? extends Pillar<P, R>> pillarList) {
         pillars.addAll(pillarList);
     }
 }

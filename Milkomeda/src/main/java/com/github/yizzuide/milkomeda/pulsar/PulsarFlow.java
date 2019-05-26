@@ -7,7 +7,8 @@ import java.lang.annotation.Target;
 
 /**
  * PulsarFlow
- * 该注解能通过DeferredResult等技术延迟返回结果，让数据的返回更灵活，可应用于@RequestMapping注解的方法上
+ * 该注解应用于@RequestMapping注解的方法上，能通过DeferredResult技术延迟返回结果，让数据的返回更灵活，
+ * 使用场景如：长轮询、耗时请求fast-timeout等
  *
  * 注意：使用该注解的方法返回必需为 Object。（由于 SpringMVC 内部会对类型进行校验的机制，使用 Object 并不会影响实际处理结果）
  *
