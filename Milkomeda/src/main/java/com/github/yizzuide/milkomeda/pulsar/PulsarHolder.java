@@ -9,7 +9,7 @@ import java.util.function.Function;
  *
  * @author yizzuide
  * @since 1.0.0
- * @version 1.4.0
+ * @version 1.5.0
  * Create at 2019/04/30 15:47
  */
 public class PulsarHolder {
@@ -40,14 +40,14 @@ public class PulsarHolder {
     }
 
     /**
-     * 通过 Callable 和 PulsarDeferredResult 异步运行耗时请求处理
+     * 通过 Callable 和 PulsarDeferredResult 推迟运行耗时请求处理再返回
      *
-     * @param callable 异步运行方法，业务代码里可以直接返回数据，由框架异步来接管返回。如：return ResponseEntity.ok(data);
+     * @param callable 运行方法，业务代码里可以直接返回数据。如：return ResponseEntity.ok(data);
      * @param pulsarDeferredResult  基于Pulsar包装的DeferredResult
-     * @return 配合和 @PulsarFlow 的使用（异步可以直接返回 null），其它地方忽略这个返回值
+     * @return 配合和 @PulsarFlow 的使用，其它地方使用可以忽略这个返回值
      */
-    public static Object async(Callable<Object> callable, PulsarDeferredResult pulsarDeferredResult) {
-         pulsar.asyncRun(new PulsarRunner(callable, pulsarDeferredResult));
+    public static Object defer(Callable<Object> callable, PulsarDeferredResult pulsarDeferredResult) {
+         pulsar.post(new PulsarRunner(callable, pulsarDeferredResult));
          return null;
     }
 }

@@ -14,7 +14,7 @@ import java.lang.annotation.Target;
  *
  * @author yizzuide
  * @since  0.1.0
- * @version 1.4.0
+ * @version 1.5.0
  * Create at 2019/03/29 10:22
  */
 @Target(ElementType.METHOD)
@@ -33,7 +33,7 @@ public @interface PulsarFlow {
     Class<?> value() default Object.class;
 
     /**
-     * 支持使用DeferredResult方式
+     * 支持使用DeferredResult方式，推迟响应返回
      * 使用方法：
      * ``` @PulsarFlow(useDeferredResult=true)
      *     public Object method(..., PulsarDeferredResult deferredResult) {
@@ -44,9 +44,16 @@ public @interface PulsarFlow {
      *          return null;
      *     }
      * ```
-     * 注意：WebAsyncTask方式会自动另起一个线程运行，而DeferredResult方式仍然运行在当前的Tomcat请求线程上！！
      *
      * @return 如果指定为 true，则使用DeferredResult，默认使用WebAsyncTask
      */
     boolean useDeferredResult() default false;
+
+    /**
+     * 设置DeferredResult的ID标识，用于在返回时查找
+     * 1. 支持Spring EL表达式，如：#id
+     * 2. 支持HTTP Header获取表达式（内建支持），如：[token]
+     * @return 如果有设置，则需要不在方法上添加PulsarDeferredResult参数来设置ID
+     */
+    String id() default "";
 }

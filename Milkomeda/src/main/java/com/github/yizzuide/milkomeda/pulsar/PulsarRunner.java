@@ -34,7 +34,7 @@ public class PulsarRunner implements Runnable {
     /**
      * 通过 Callable 和 PulsarDeferredResult 构造异步运行器
      *
-     * @param callable  异步运行方法，业务代码里可以直接返回数据，由框架异步来接管返回。如：return ResponseEntity.ok(data);
+     * @param callable  运行方法，业务代码里可以直接返回数据，由框架异步来接管返回。如：return ResponseEntity.ok(data);
      * @param pulsarDeferredResult  基于Pulsar包装的DeferredResult
      */
     public PulsarRunner(Callable<Object> callable, PulsarDeferredResult pulsarDeferredResult) {
@@ -43,7 +43,7 @@ public class PulsarRunner implements Runnable {
 
     /**
      * 通过 Callable 和 DeferredResultID 构造异步运行器
-     * @param callable  异步运行方法，业务代码里可以直接返回数据，由框架异步来接管返回。如：return ResponseEntity.ok(data);
+     * @param callable  运行方法，业务代码里可以直接返回数据，由框架异步来接管返回。如：return ResponseEntity.ok(data);
      * @param deferredResultID  基于Pulsar包装的DeferredResult
      */
     public PulsarRunner(Callable<Object> callable, String deferredResultID) {
@@ -54,7 +54,7 @@ public class PulsarRunner implements Runnable {
     }
 
     /**
-     * 覆盖线程调度运行的 run()方法，使用装饰模式增强来支持统一捕获Throwable异常
+     * 覆盖线程调度运行的 post()方法，使用装饰模式增强来支持统一捕获Throwable异常
      */
     @Override
     public void run() {

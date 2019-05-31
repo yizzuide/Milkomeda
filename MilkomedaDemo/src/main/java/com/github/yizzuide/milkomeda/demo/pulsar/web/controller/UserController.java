@@ -3,7 +3,9 @@ package com.github.yizzuide.milkomeda.demo.pulsar.web.controller;
 import com.github.yizzuide.milkomeda.demo.pulsar.pojo.User;
 import com.github.yizzuide.milkomeda.pulsar.PulsarDeferredResult;
 import com.github.yizzuide.milkomeda.pulsar.PulsarFlow;
+import com.github.yizzuide.milkomeda.pulsar.PulsarHolder;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -58,5 +60,22 @@ public class UserController {
 
         // 实际结果由DeferredResult返回，这里返回null即可
         return null;
+    }
+
+    // 支持EL表达式设置DeferredResultID
+    @PulsarFlow(useDeferredResult = true, id = "#id")
+    @GetMapping("notice/{id:\\d+}")
+    public Object /* 这里的返回值必需为Object */ sendNotice(@PathVariable("id") Long id,
+                                                        PulsarDeferredResult pulsarDeferredResult) {
+        log.info("sendNotice：" + id);
+
+        log.info("pulsarHolder: {}", PulsarHolder.getPulsar());
+        log.info("errorCallback: {}", PulsarHolder.getErrorCallback());
+
+        // 直接返回响应
+//        return ResponseEntity.ok("OK");
+
+        // 延迟返回响应方式
+        return PulsarHolder.defer(() -> ResponseEntity.ok("OK"), pulsarDeferredResult);
     }
 }

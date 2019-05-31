@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.context.request.async.WebAsyncTask;
 import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer;
@@ -29,7 +30,7 @@ import java.util.function.Function;
  *
  * @author yizzuide
  * @since  0.1.0
- * @version 1.4.0
+ * @version 1.5.0
  * Create at 2019/03/29 10:36
  */
 @Slf4j
@@ -116,7 +117,7 @@ public class Pulsar {
         MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
         String invokeMethodName = joinPoint.getSignature().getName();
         if (methodSignature.getReturnType() != Object.class) {
-            throw new ClassCastException("you must set [Object] return type on method " +
+            throw new ClassCastException("You must set [Object] return type on method " +
                     invokeMethodName);
         }
 
@@ -158,9 +159,18 @@ public class Pulsar {
         PulsarDeferredResult pulsarDeferredResult = new PulsarDeferredResult();
         pulsarDeferredResult.setDeferredResult(deferredResult);
 
+        // 准备设置DeferredResultID
+        String id = pulsarFlow.id();
+        String idValue = null;
+        if (!StringUtils.isEmpty(id)) {
+            // 解析表达式
+            idValue = ReflectUtil.extractValue(joinPoint, id);
+            pulsarDeferredResult.setDeferredResultID(idValue);
+        }
+
         // 调用方法实现
         Object returnObj = joinPoint.proceed(injectDeferredResult(joinPoint, pulsarDeferredResult,
-                pulsarFlow.useDeferredResult()));
+                StringUtils.isEmpty(idValue)));
 
         // 方法有返回值且不是DeferredResult，则不作DeferredResult处理
         if (null != returnObj && !(returnObj instanceof DeferredResult)) {
@@ -169,7 +179,7 @@ public class Pulsar {
 
         // 检查是否设置标识
         if (null == pulsarDeferredResult.getDeferredResultID()) {
-            throw new IllegalArgumentException("you must invoke setDeferredResultID method of PulsarDeferredResult parameter on method " +
+            throw new IllegalArgumentException("You must invoke setDeferredResultID method of PulsarDeferredResult parameter on method " +
                     invokeMethodName);
         }
 
@@ -216,15 +226,15 @@ public class Pulsar {
     }
 
     /**
-     * 异步运行
+     * 提交一个基于Spring的ThreadPoolTaskExecutor任务运行
      * @param runnable Runnable
      */
-    public void asyncRun(Runnable runnable) {
+    public void post(Runnable runnable) {
         taskExecutor.execute(runnable);
     }
 
     /**
-     * 配置默认的异步支持
+     * 配置默认的Spring MVC异步支持
      * @param configurer 配置对象
      * @param timeout 超时时间，ms
      */
@@ -295,7 +305,7 @@ public class Pulsar {
             }
         }
         if (check && !flag) {
-            throw new IllegalArgumentException("you must add PulsarDeferredResult parameter on method " +
+            throw new IllegalArgumentException("You must add PulsarDeferredResult parameter on method " +
                     joinPoint.getSignature().getName() + " and set deferredResultID before use DeferredResult.");
         }
         return args;

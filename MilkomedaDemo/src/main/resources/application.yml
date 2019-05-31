@@ -1,2 +1,6 @@
 server:
   port: 8091
+
+spring:
+  redis:
+    host: 127.0.0.1
