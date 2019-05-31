@@ -6,7 +6,7 @@
 目前添加的模块有：
 - [x] Particle: 基于Springboot Data Redis，可用于幂等/去重、次数限制，及可扩展限制器责任链。
 - [x] Comet:  基于Spring MVC，可用于统一的请求切面日志记录。
-- [x] Pulsar: 基于Spring MVC的`DeferredResult`，可用于长轮询、耗时请求fast-timeout等
+- [x] Pulsar: 基于Spring MVC的`DeferredResult`，可用于长轮询、耗时请求fast-timeout等。
 - [x] Pillar: 使用策略模式，可用于if/else业务块拆分。
 
 ## Requirements
