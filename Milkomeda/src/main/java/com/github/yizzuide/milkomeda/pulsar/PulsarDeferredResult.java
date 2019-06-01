@@ -5,7 +5,7 @@ import org.springframework.web.context.request.async.DeferredResult;
 
 /**
  * PulsarDeferredResult
- * DeferredResult标识装配类
+ * DeferredResult的简单代理
  *
  * @author yizzuide
  * @since  0.1.0

@@ -37,6 +37,32 @@ public class ReflectUtil {
     }
 
     /**
+     * 注入参数
+     * @param joinPoint 连接点
+     * @param obj       Particle
+     * @param type      注解
+     * @param check     检查参数列表
+     * @return  注入后的参数列表
+     */
+    public static Object[] injectParam(JoinPoint joinPoint, Object obj, Annotation type, boolean check) {
+        Object[] args = joinPoint.getArgs();
+        int len = args.length;
+        boolean flag = false;
+        for (int i = 0; i < len; i++) {
+            if (obj.getClass().isInstance(args[i])) {
+                args[i] = obj;
+                flag = true;
+                return args;
+            }
+        }
+        if (check && !flag) {
+            throw new IllegalArgumentException("You must add " + obj.getClass().getSimpleName() + " parameter on method " +
+                    joinPoint.getSignature().getName() + " before use @" + type.annotationType().getSimpleName() + ".");
+        }
+        return args;
+    }
+
+    /**
      * 根据EL表达式或内置头表达式抽取值
      * @param joinPoint 切面连接点
      * @param express   表达式

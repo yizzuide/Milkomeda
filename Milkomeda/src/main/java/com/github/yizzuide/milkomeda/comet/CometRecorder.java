@@ -4,7 +4,7 @@ import javax.servlet.http.HttpServletRequest;
 
 /**
  * CometRecorder
- * 采集记录器
+ * 采集记录器策略接口
  *
  * @author yizzuide
  * @since 0.2.0

@@ -4,9 +4,9 @@ import java.util.List;
 
 /**
  * BarrierLimiter
- * 拦截链限制器
+ * 组合限制器
  *
- * 用于组装限制处理器，也能实现链串
+ * 用于组装多个限制处理器，也能实现复合链串：限制器 + 组合限制器 + ...
  *
  * @author yizzuide
  * @since 1.5.0
@@ -16,7 +16,7 @@ public class BarrierLimiter extends LimitHandler {
     /**
      * 拦截链头
      */
-    private LimitHandler header;
+    private LimitHandler limitHandler;
 
     /**
      * 添加限制处理器
@@ -24,9 +24,9 @@ public class BarrierLimiter extends LimitHandler {
      */
     public void addLimitHandlerList(List<LimitHandler> limitHandlerList) {
         for (LimitHandler handler : limitHandlerList) {
-            if (header == null) {
-                header = handler;
-                next = header;
+            if (limitHandler == null) {
+                limitHandler = handler;
+                next = limitHandler;
                 continue;
             }
             next.setNext(handler);
@@ -36,6 +36,6 @@ public class BarrierLimiter extends LimitHandler {
 
     @Override
     public <R> R limit(String key, long expire, Process<R> process) throws Throwable {
-        return header.limit(key, expire, process);
+        return limitHandler.limit(key, expire, process);
     }
 }

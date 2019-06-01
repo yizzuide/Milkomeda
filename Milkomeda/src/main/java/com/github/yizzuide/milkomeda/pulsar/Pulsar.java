@@ -1,8 +1,6 @@
 package com.github.yizzuide.milkomeda.pulsar;
 
-import com.github.yizzuide.milkomeda.util.ReflectUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -21,6 +19,8 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.function.Function;
+
+import static com.github.yizzuide.milkomeda.util.ReflectUtil.*;
 
 /**
  * Pulsar
@@ -122,7 +122,7 @@ public class Pulsar {
         }
 
         // 获取注解信息
-        PulsarFlow pulsarFlow = ReflectUtil.getAnnotation(joinPoint, PulsarFlow.class);
+        PulsarFlow pulsarFlow = getAnnotation(joinPoint, PulsarFlow.class);
 
         // 如果没有设置DeferredResult，则使用WebAsyncTask
         if (!pulsarFlow.useDeferredResult()) {
@@ -164,12 +164,12 @@ public class Pulsar {
         String idValue = null;
         if (!StringUtils.isEmpty(id)) {
             // 解析表达式
-            idValue = ReflectUtil.extractValue(joinPoint, id);
+            idValue = extractValue(joinPoint, id);
             pulsarDeferredResult.setDeferredResultID(idValue);
         }
 
         // 调用方法实现
-        Object returnObj = joinPoint.proceed(injectDeferredResult(joinPoint, pulsarDeferredResult,
+        Object returnObj = joinPoint.proceed(injectParam(joinPoint, pulsarDeferredResult, pulsarFlow,
                 StringUtils.isEmpty(idValue)));
 
         // 方法有返回值且不是DeferredResult，则不作DeferredResult处理
@@ -284,30 +284,5 @@ public class Pulsar {
      */
     public void setTimeoutCallback(Callable<Object> timeoutCallback) {
         this.timeoutCallback = timeoutCallback;
-    }
-
-    /**
-     * 注入DeferredResult
-     * @param joinPoint 切面连接点
-     * @param deferredResult DeferredResult标识装配类
-     * @param check 是否检查添加了<code>PulsarDeferredResult</code>类型参数
-     * @return 注入完成的参数
-     */
-    private Object[] injectDeferredResult(JoinPoint joinPoint, PulsarDeferredResult deferredResult, boolean check) {
-        Object[] args = joinPoint.getArgs();
-        int len = args.length;
-        boolean flag = false;
-        for (int i = 0; i < len; i++) {
-            if (args[i] instanceof PulsarDeferredResult) {
-                args[i] = deferredResult;
-                flag = true;
-                return args;
-            }
-        }
-        if (check && !flag) {
-            throw new IllegalArgumentException("You must add PulsarDeferredResult parameter on method " +
-                    joinPoint.getSignature().getName() + " and set deferredResultID before use DeferredResult.");
-        }
-        return args;
     }
 }

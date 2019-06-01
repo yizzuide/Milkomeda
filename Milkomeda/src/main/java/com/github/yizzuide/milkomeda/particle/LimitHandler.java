@@ -4,7 +4,7 @@ import lombok.Data;
 
 /**
  * LimitHandler
- * 限制处理器
+ * 限制处理器链
  *
  * @author yizzuide
  * @since 1.5.0

@@ -8,7 +8,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 
 /**
  * IdempotentLimiter
- * 幂等限制器
+ * 幂等、去重限制器
  * 同一个标识的key不能重复调用业务处理方法，相同的调用可作幂等返回处理
  *
  * @author yizzuide

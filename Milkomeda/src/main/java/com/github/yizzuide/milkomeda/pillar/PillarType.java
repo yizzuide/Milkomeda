@@ -2,7 +2,7 @@ package com.github.yizzuide.milkomeda.pillar;
 
 /**
  * PillarType
- * 分流柱类型接口，需要枚举继承
+ * 分流柱类型适配器接口，需要枚举实现
  *
  * @author yizzuide
  * @since 0.2.0

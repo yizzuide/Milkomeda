@@ -2,7 +2,7 @@ package com.github.yizzuide.milkomeda.particle;
 
 /**
  * Limiter
- * 限制器
+ * 限制器策略接口
  *
  * @author yizzuide
  * @since 1.5.0
