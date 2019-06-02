@@ -32,14 +32,14 @@ public class ParticleController {
             if (particle.isLimited()) {
                 return ResponseEntity.status(406).body("请求勿重复请求");
             }
-            // 测试业务处理耗时
+            // 模拟业务处理耗时
             Thread.sleep(5000);
             return ResponseEntity.ok("ok");
         });
     }
 
     @RequestMapping("check2")
-    // 注解的方式限制一次请求的重复调用
+    // 注解的方式限制一次请求的重复调用（注：'#'为Spring EL表达式）
     @Limit(name = "user:check", key = "#token", expire = 60L)
     public ResponseEntity check2(String token, Particle particle/*这个状态值自动注入*/) throws Throwable {
         log.info("check2: token={}", token);
@@ -53,7 +53,7 @@ public class ParticleController {
     }
 
     @RequestMapping("check3")
-    // 注解的方式限制一次请求的重复调用
+    // 注解的方式限制一次请求的重复调用（注：'[]'用于取HTTP请求header里的值）
     @Limit(name = "user:check", key = "[X-Token]", expire = 60L)
     public ResponseEntity check3(Particle particle/*这个状态值自动注入*/) throws Throwable {
         // 判断是否被限制
@@ -119,9 +119,10 @@ public class ParticleController {
         log.info("verify2: phone={}", phone);
         // 判断是否被限制
         if (particle.isLimited()) {
+            // 如果是去重限制类型
             if (particle.getType() == IdempotentLimiter.class) {
                 return ResponseEntity.status(406).body("请求勿重复请求");
-            } else if (particle.getType() == TimesLimiter.class) {
+            } else if (particle.getType() == TimesLimiter.class) {// 次数限制类型
                 return ResponseEntity.status(406).body("超过使用次数：" + particle.getValue() + "次");
             }
         }
