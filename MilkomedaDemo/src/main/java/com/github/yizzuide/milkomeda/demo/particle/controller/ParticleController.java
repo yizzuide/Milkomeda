@@ -4,8 +4,12 @@ import com.github.yizzuide.milkomeda.particle.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.servlet.http.HttpServletResponse;
+import java.util.Map;
 
 /**
  * ParticleController
@@ -53,7 +57,7 @@ public class ParticleController {
     }
 
     @RequestMapping("check3")
-    // 注解的方式限制一次请求的重复调用（注：'[]'用于取HTTP请求header里的值）
+    // 注解的方式限制一次请求的重复调用（注：[]用于取HTTP请求header里的值）
     @Limit(name = "user:check", key = "[X-Token]", expire = 60L)
     public ResponseEntity check3(Particle particle/*这个状态值自动注入*/) throws Throwable {
         // 判断是否被限制
@@ -131,5 +135,23 @@ public class ParticleController {
         Thread.sleep(5000);
 
         return ResponseEntity.ok("发送成功，当前次数：" + particle.getValue());
+    }
+
+    // 第三方一次请求多次调用限制（唯一约束：订单号+状态值）
+    @RequestMapping("notify")
+    @Limit(name = "notify:order", key = "#params['orderId']+'-'+#params['state']", expire = 60L)
+    public void notify(@RequestBody Map<String, Object> params, Particle particle, HttpServletResponse resp) throws Exception {
+        log.info("params: {}", params);
+        if (particle.isLimited()) {
+            resp.sendError(406, "请求勿重复调用");
+            return;
+        }
+
+        // 模拟业务处理耗时
+        Thread.sleep(5000);
+
+        resp.setStatus(200);
+        resp.getWriter().println("OK");
+        resp.getWriter().flush();
     }
 }

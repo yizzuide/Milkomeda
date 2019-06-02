@@ -11,7 +11,7 @@ package com.github.yizzuide.milkomeda.particle;
 public interface Limiter {
 
     /**
-     * 检测限制情况，结果通过ParticleProcess参数 Particle.isLimited() 判断
+     * 检测限制情况，结果通过Process参数 particle.isLimited() 判断
      * @param key       键
      * @param expire    过期时间
      * @param process   处理方法
