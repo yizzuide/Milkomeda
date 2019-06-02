@@ -19,7 +19,8 @@
 
 ## Requirements
 * Java 8
-* Springboot 2.x
+* Lombok 1.18.x
+* SpringBoot 2.x
 
 ## Installation
 ```xml
