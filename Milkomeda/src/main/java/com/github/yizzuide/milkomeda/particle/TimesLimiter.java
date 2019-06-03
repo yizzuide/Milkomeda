@@ -1,9 +1,9 @@
 package com.github.yizzuide.milkomeda.particle;
 
-import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.time.DateUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
 import java.util.Date;
@@ -13,7 +13,7 @@ import java.util.Date;
  * 调用次数限制器
  *
  * @author yizzuide
- * @since 1.5.0
+ * @since 1.5.1
  * Create at 2019/05/30 17:32
  */
 public class TimesLimiter extends LimitHandler {
@@ -29,13 +29,10 @@ public class TimesLimiter extends LimitHandler {
     @Getter @Setter
     private Long limitTimes;
 
+    @Autowired
     private StringRedisTemplate redisTemplate;
 
     private static final String POSTFIX = ":times";
-
-    public TimesLimiter() {
-        redisTemplate = ApplicationContextHolder.get().getBean(StringRedisTemplate.class);
-    }
 
     /**
      * 构造限制配置
@@ -43,7 +40,6 @@ public class TimesLimiter extends LimitHandler {
      * @param limitTimes    限制次数
      */
     public TimesLimiter(TimesType timesType, Long limitTimes) {
-        this();
         this.timesType = timesType;
         this.limitTimes = limitTimes;
     }
