@@ -31,6 +31,26 @@
 </dependency>
 ```
 
+## Dependency
+```xml
+<dependency>
+   <groupId>org.springframework.boot</groupId>
+   <artifactId>spring-boot-starter-aop</artifactId>
+</dependency>
+<dependency>
+   <groupId>org.springframework.boot</groupId>
+   <artifactId>spring-boot-starter-data-redis</artifactId>
+</dependency>
+<dependency>
+   <groupId>org.apache.commons</groupId>
+   <artifactId>commons-lang3</artifactId>
+</dependency>
+<dependency>
+   <groupId>org.projectlombok</groupId>
+   <artifactId>lombok</artifactId>
+</dependency>
+```
+
 ## Documentation
 1. [Particle快速入门](https://github.com/yizzuide/Milkomeda/wiki/1.-Particle%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8)
 
