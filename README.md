@@ -52,7 +52,8 @@
 ```
 
 ## Documentation
-[Particle快速入门](https://github.com/yizzuide/Milkomeda/wiki/1.-Particle%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8)
+[Particle使用之API方式](https://github.com/yizzuide/Milkomeda/wiki/Particle%E6%A8%A1%E5%9D%97%E4%BD%BF%E7%94%A8%E4%B9%8BAPI%E6%96%B9%E5%BC%8F)
+[Particle使用之注解方式](https://github.com/yizzuide/Milkomeda/wiki/Particle%E6%A8%A1%E5%9D%97%E4%BD%BF%E7%94%A8%E4%B9%8B%E6%B3%A8%E8%A7%A3%E6%96%B9%E5%BC%8F)
 
 其它模块文档陆续添加中……
 
