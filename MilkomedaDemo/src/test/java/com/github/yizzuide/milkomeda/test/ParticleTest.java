@@ -105,6 +105,16 @@ public class ParticleTest {
     }
 
     @Test
+    public void verify3() throws Exception {
+        val ret = mockMvc.perform(MockMvcRequestBuilders.get("/particle/verify3")
+                .param("phone", "151")
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        System.out.println(ret);
+    }
+
+    @Test
     public void testNotify() throws Exception {
         val ret = mockMvc.perform(MockMvcRequestBuilders.get("/particle/notify")
                 .content("{\"orderId\":\"12345676543456\",\"state\": 12}")
