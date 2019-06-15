@@ -54,7 +54,7 @@
 ## Documentation
 [Particle快速入门](https://github.com/yizzuide/Milkomeda/wiki/1.-Particle%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8)
 
-其它模块文档陆续添加中
+其它模块文档陆续添加中……
 
 ## Author
 yizzuide, fu837014586@163.com
