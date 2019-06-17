@@ -28,7 +28,7 @@ import java.util.Date;
  *
  * @author yizzuide
  * @since 0.2.0
- * @version 1.5.2
+ * @version 1.5.3
  * Create at 2019/04/11 19:48
  */
 @Slf4j
@@ -84,12 +84,15 @@ public class CometAspect {
         cometData.setDuration(String.valueOf(duration));
         cometData.setStatus("1");
         cometData.setResponseTime(new Date());
-        if (returnData.getClass() == DeferredResult.class) {
-            cometData.setResponseData("[DeferredResult]");
-        } else if (returnData.getClass() == WebAsyncTask.class) {
-            cometData.setResponseData("[WebAsyncTask]");
-        } else {
-            cometData.setResponseData(HttpServletUtil.getResponseData(returnData));
+        // 有的请求方法为空，如第三方回调
+        if (returnData != null) {
+            if (returnData.getClass() == DeferredResult.class) {
+                cometData.setResponseData("[DeferredResult]");
+            } else if (returnData.getClass() == WebAsyncTask.class) {
+                cometData.setResponseData("[WebAsyncTask]");
+            } else {
+                cometData.setResponseData(HttpServletUtil.getResponseData(returnData));
+            }
         }
         log.info("Comet:- afterReturn: {}", JSONUtil.serialize(cometData));
         return recorder.onReturn(cometData, returnData);
