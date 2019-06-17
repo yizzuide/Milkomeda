@@ -18,7 +18,7 @@ import java.lang.reflect.Method;
  *
  * @author yizzuide
  * @since 0.2.0
- * @version 1.5.0
+ * @version 1.5.2
  * Create at 2019/04/11 19:55
  */
 public class ReflectUtil {
@@ -73,10 +73,10 @@ public class ReflectUtil {
         // 解析EL表达式
         if (express.startsWith("#")) {
             value = ReflectUtil.getValue(joinPoint, express);
-        } else if (express.startsWith("[") && express.endsWith("]") && express.length() > 2) { // 解析Http请求头
+        } else if (express.startsWith("@")) { // 解析Http请求头
             ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
             assert attributes != null;
-            String headerName = express.substring(1, express.length() - 1);
+            String headerName = express.substring(1);
             value = attributes.getRequest().getHeader(headerName);
             if (StringUtils.isEmpty(headerName)) {
                 throw new IllegalArgumentException("Can't find " + headerName + " from HTTP header.");

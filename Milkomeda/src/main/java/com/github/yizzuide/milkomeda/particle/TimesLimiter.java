@@ -13,7 +13,7 @@ import java.util.Date;
  * 调用次数限制器
  *
  * @author yizzuide
- * @since 1.5.1
+ * @since 1.5.2
  * Create at 2019/05/30 17:32
  */
 public class TimesLimiter extends LimitHandler {
@@ -32,6 +32,7 @@ public class TimesLimiter extends LimitHandler {
     @Autowired
     private StringRedisTemplate redisTemplate;
 
+    // 装饰后缀
     private static final String POSTFIX = ":times";
 
     /**
@@ -58,11 +59,11 @@ public class TimesLimiter extends LimitHandler {
 
     @Override
     public <R> R limit(String key, long expire, Process<R> process) throws Throwable {
-        key = key + POSTFIX;
-        Boolean exists = redisTemplate.hasKey(key);
+        String decoratedKey = key + POSTFIX;
+        Boolean exists = redisTemplate.hasKey(decoratedKey);
         assert exists != null;
         Particle particle;
-        Long times = redisTemplate.opsForValue().increment(key, 1);
+        Long times = redisTemplate.opsForValue().increment(decoratedKey, 1);
         if (!exists) {
             Date date;
             switch (timesType) {
@@ -81,7 +82,7 @@ public class TimesLimiter extends LimitHandler {
                 default:
                     throw new IllegalStateException("Unexpected value: " + timesType);
             }
-            redisTemplate.expireAt(key, date);
+            redisTemplate.expireAt(decoratedKey, date);
         }
         assert times != null;
         // 判断是否超过次数

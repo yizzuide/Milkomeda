@@ -21,6 +21,7 @@ public class IdempotentLimiter extends LimitHandler {
     @Autowired
     private StringRedisTemplate redisTemplate;
 
+    // 装饰后缀
     private static final String POSTFIX = ":repeat";
 
     @Override
