@@ -27,7 +27,7 @@
 <dependency>
     <groupId>com.github.yizzuide</groupId>
     <artifactId>milkomeda-spring-boot-starter</artifactId>
-    <version>1.5.1</version>
+    <version>1.5.2</version>
 </dependency>
 ```
 
