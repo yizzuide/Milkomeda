@@ -8,36 +8,33 @@ import java.lang.reflect.Method;
  *
  * @author yizzuide
  * @since 0.2.0
+ * @version 1.6.0
  * Create at 2019/04/11 18:02
  */
 public class PillarRecognizer {
     /**
-     * 从枚举类识别Pillar分流柱类型
+     * 通过反射从枚举类识别Pillar分流柱类型（效率低）
      * @param enumClazz 枚举类型
      * @param identifier 标识符
      * @return Pillar分流柱类型
      * @throws Exception 反射调用异常
      */
-    public static String typeOf(Class<?> enumClazz, Object identifier) throws Exception {
-        PillarType pillarType = (PillarType) typeOfEnum(enumClazz, identifier);
-        return pillarType != null ? pillarType.pillarType() : null;
+    public static String typeOf(Class<? extends PillarType> enumClazz, Object identifier) throws Exception {
+        Method method = enumClazz.getMethod("values");
+        PillarType[] pillarTypes = (PillarType[]) method.invoke(null);
+        return typeOf(pillarTypes, identifier);
     }
 
     /**
-     * 根据标识符识别枚举类
-     * @param enumClazz 枚举类型
-     * @param identifier 标识符
-     * @param <T> 返回枚举类型
-     * @return Pillar分流柱类型
-     * @throws Exception 反射调用异常
+     * 通过Pillar类型ID匹配类型名（效率高）
+     * @param typeValues    PillarType所有枚举值
+     * @param identifier    标识符
+     * @return  Pillar分流柱类型
      */
-    @SuppressWarnings("unchecked")
-    public static <T> T typeOfEnum(Class<T> enumClazz, Object identifier) throws Exception {
-        Method method = enumClazz.getMethod("values");
-        PillarType[] pillarTypes = (PillarType[]) method.invoke(null);
-        for (PillarType pillarType : pillarTypes) {
-            if (identifier.equals(pillarType.identifier())) {
-                return (T) pillarType;
+    public static String typeOf(PillarType[] typeValues, Object identifier) {
+        for (PillarType pillarType : typeValues) {
+            if (String.valueOf(identifier).equals(String.valueOf(pillarType.identifier()))) {
+                return pillarType.pillarType();
             }
         }
         return null;

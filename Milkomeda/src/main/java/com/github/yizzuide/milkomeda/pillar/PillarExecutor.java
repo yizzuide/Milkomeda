@@ -1,8 +1,6 @@
 package com.github.yizzuide.milkomeda.pillar;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -38,7 +36,7 @@ public class PillarExecutor<P, R> {
     }
 
     /**
-     * 根据类型获取分流柱
+     * 根据类型名获取分流柱
      * @param type 分流类型
      * @return 分流柱集合
      */

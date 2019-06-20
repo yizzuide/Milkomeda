@@ -28,7 +28,7 @@ import java.util.Date;
  *
  * @author yizzuide
  * @since 0.2.0
- * @version 1.5.3
+ * @version 1.6.0
  * Create at 2019/04/11 19:48
  */
 @Slf4j
@@ -109,7 +109,6 @@ public class CometAspect {
         cometData.setStatus("2");
         cometData.setResponseData(null);
         cometData.setResponseTime(new Date());
-        log.error("Comet:- afterThrowing: {}", e.getMessage(), e);
         recorder.onThrowing(cometData, e);
         threadLocal.remove();
     }

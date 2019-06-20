@@ -10,7 +10,7 @@ package com.github.yizzuide.milkomeda.pillar;
  */
 public interface PillarType {
     /**
-     * 识别标识符
+     * 识别标识符，如：记录ID、序列号
      */
     Object identifier();
 

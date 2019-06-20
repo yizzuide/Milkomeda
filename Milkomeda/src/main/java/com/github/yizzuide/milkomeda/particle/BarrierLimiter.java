@@ -10,13 +10,14 @@ import java.util.List;
  *
  * @author yizzuide
  * @since 1.5.0
+ * @version 1.6.0
  * Create at 2019/05/31 11:25
  */
 public class BarrierLimiter extends LimitHandler {
     /**
      * 拦截链头
      */
-    private LimitHandler limitHandler;
+    private LimitHandler head;
 
     /**
      * 添加限制处理器
@@ -24,9 +25,9 @@ public class BarrierLimiter extends LimitHandler {
      */
     public void addLimitHandlerList(List<LimitHandler> limitHandlerList) {
         for (LimitHandler handler : limitHandlerList) {
-            if (limitHandler == null) {
-                limitHandler = handler;
-                next = limitHandler;
+            if (head == null) {
+                head = handler;
+                next = head;
                 continue;
             }
             next.setNext(handler);
@@ -36,6 +37,6 @@ public class BarrierLimiter extends LimitHandler {
 
     @Override
     public <R> R limit(String key, long expire, Process<R> process) throws Throwable {
-        return limitHandler.limit(key, expire, process);
+        return head.limit(key, expire, process);
     }
 }

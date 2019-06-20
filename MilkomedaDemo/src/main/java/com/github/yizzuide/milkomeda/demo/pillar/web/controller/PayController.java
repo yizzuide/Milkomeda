@@ -4,7 +4,6 @@ import com.github.yizzuide.milkomeda.demo.pillar.common.ReturnData;
 import com.github.yizzuide.milkomeda.demo.pillar.common.TradeType;
 import com.github.yizzuide.milkomeda.pillar.PillarExecutor;
 import com.github.yizzuide.milkomeda.pillar.PillarRecognizer;
-import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,12 +31,9 @@ public class PayController {
      * @return ReturnData
      */
     @RequestMapping("bankcardPrepay")
-    public ResponseEntity<ReturnData> bankcardPrepay(@RequestParam Map<String, String> params) throws Exception {
-        Integer type = Integer.valueOf(params.get("type"));
-        // 通过此方法可以直接拿到枚举
-//        TradeType tradeType = PillarRecognizer.typeOfEnum(TradeType.class, type);
+    public ResponseEntity<ReturnData> bankcardPrepay(@RequestParam Map<String, String> params) {
         // 直接获得 Pillar 处理单元柱类型名
-        val pillarType = PillarRecognizer.typeOf(TradeType.class, type);
+        String pillarType = PillarRecognizer.typeOf(TradeType.values(), params.get("type"));
         ReturnData returnData = new ReturnData();
         if (pillarType == null) {
             returnData.setCode("400");
@@ -46,7 +42,7 @@ public class PayController {
             return ResponseEntity.ok(returnData);
         }
         // 获取分流柱
-        pillarExecutor.getPillars(pillarType).forEach(System.out::println);
+//        pillarExecutor.getPillars(pillarType).forEach(System.out::println);
         // 将 if/else 分支分流
         pillarExecutor.execute(pillarType, params, returnData);
         return ResponseEntity.ok(returnData);
