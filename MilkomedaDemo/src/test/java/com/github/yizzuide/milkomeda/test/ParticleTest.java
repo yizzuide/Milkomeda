@@ -57,7 +57,7 @@ public class ParticleTest {
     @Test
     public void check3() throws Exception {
         val ret = mockMvc.perform(MockMvcRequestBuilders.get("/particle/check3")
-                .header("X-Token", "123321")
+                .header("Token", "123321")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andReturn().getResponse().getContentAsString();

@@ -28,12 +28,12 @@ import java.util.Date;
  *
  * @author yizzuide
  * @since 0.2.0
- * @version 1.6.0
+ * @version 1.7.0
  * Create at 2019/04/11 19:48
  */
 @Slf4j
 @Aspect
-@Order(9)
+@Order(-99)
 public class CometAspect {
     private ThreadLocal<CometData> threadLocal = new ThreadLocal<>();
     /**
@@ -95,7 +95,9 @@ public class CometAspect {
             }
         }
         log.info("Comet:- afterReturn: {}", JSONUtil.serialize(cometData));
-        return recorder.onReturn(cometData, returnData);
+        Object returnObj = recorder.onReturn(cometData, returnData);
+        threadLocal.remove();
+        return returnObj;
     }
 
     /**

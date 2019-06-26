@@ -21,7 +21,7 @@ import static com.github.yizzuide.milkomeda.util.ReflectUtil.*;
  */
 @Slf4j
 @Aspect
-@Order(8)
+@Order(88)
 public class ParticleAspect {
 
     // 切入点

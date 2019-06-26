@@ -7,6 +7,7 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.util.StringUtils;
@@ -35,6 +36,7 @@ import static com.github.yizzuide.milkomeda.util.ReflectUtil.*;
  */
 @Slf4j
 @Aspect
+@Order(66)
 public class Pulsar {
     /**
      * DeferredResult容器

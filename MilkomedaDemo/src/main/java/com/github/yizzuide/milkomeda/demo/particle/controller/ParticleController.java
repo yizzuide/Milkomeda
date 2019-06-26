@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Map;
 
@@ -22,7 +23,8 @@ import java.util.Map;
 @RequestMapping("particle")
 public class ParticleController {
 
-    @Autowired
+    // 注意：由于配置了限制器链，就有了两个去重限制器，这里使用@Resource按Bean名注入
+    @Resource
     private IdempotentLimiter idempotentLimiter;
 
     @Autowired
@@ -47,7 +49,8 @@ public class ParticleController {
 
     @RequestMapping("check2")
     // 注解的方式限制一次请求的重复调用（注：'#'为Spring EL表达式）
-    @Limit(name = "user:check", key = "#token", expire = 60L)
+    // 注意：由于配置了限制器链，就有了两个去重限制器，由于框架内部根据类型查找，这里需要通过limiterBeanName指定
+    @Limit(name = "user:check", key = "#token", expire = 60L, limiterBeanName = "idempotentLimiter")
     public ResponseEntity check2(String token, Particle particle/*这个状态值自动注入*/) throws Throwable {
         log.info("check2: token={}", token);
         // 判断是否被限制
@@ -61,15 +64,18 @@ public class ParticleController {
 
     @RequestMapping("check3")
     // 注解的方式限制一次请求的重复调用（注：@用于取HTTP请求header里的值）
-    @Limit(name = "user:check", key = "@Token", expire = 60L)
+    // 注意：由于配置了限制器链，就有了两个去重限制器，由于框架内部根据类型查找，这里需要通过limiterBeanName指定
+    @Limit(name = "user:check", key = "@Token", expire = 60L, limiterBeanName = "idempotentLimiter")
     public ResponseEntity check3(Particle particle/*这个状态值自动注入*/) throws Throwable {
         // 判断是否被限制
+        log.info("limited: {}", particle.isLimited());
         if (particle.isLimited()) {
             return ResponseEntity.status(406).body("请求勿重复请求");
         }
-
+        
         // 模拟业务处理耗时
         Thread.sleep(5000);
+        
         return ResponseEntity.ok("ok");
     }
 
@@ -163,7 +169,7 @@ public class ParticleController {
 
     // 第三方一次请求多次调用限制（唯一约束：订单号+状态值）
     @RequestMapping("notify")
-    @Limit(name = "notify:order", key = "#params['orderId']+'-'+#params['state']", expire = 60L)
+    @Limit(name = "notify:order", key = "#params['orderId']+'-'+#params['state']", expire = 60L, limiterBeanName = "idempotentLimiter")
     public void notify(@RequestBody Map<String, Object> params, Particle particle, HttpServletResponse resp) throws Exception {
         log.info("params: {}", params);
         if (particle.isLimited()) {

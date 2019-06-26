@@ -23,6 +23,6 @@ public class WebMvcConfig implements WebMvcConfigurer {
     // 配置异步支持：超时、线程池等
     @Override
     public void configureAsyncSupport(AsyncSupportConfigurer configurer) {
-        pulsar.configure(configurer, 1000);
+        pulsar.configure(configurer, 5500);
     }
 }
