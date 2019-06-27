@@ -1,13 +1,13 @@
 package com.github.yizzuide.milkomeda.pillar;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * PillarCache
  * 分流柱缓存
  *
- * @since 1.7.0
+ * @since 1.7.1
  * @author yizzuide
  * Create at 2019/06/26 10:50
  */
@@ -15,7 +15,7 @@ public class PillarCache<T> {
     /**
      * 缓存容器
      */
-    private Map<Object, PillarAttachment<T, ?>> cacheMap = new HashMap<>();
+    private Map<Object, PillarAttachment<T, ?>> cacheMap = new ConcurrentHashMap<>();
 
     /**
      * 缓存附件
