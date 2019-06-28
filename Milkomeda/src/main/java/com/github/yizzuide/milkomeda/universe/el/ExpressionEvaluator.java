@@ -56,7 +56,7 @@ public class ExpressionEvaluator<T> extends CachedExpressionEvaluator {
      * @param elementKey            元素key
      * @param evalContext           上下文
      * @param clazz                 值类型
-     * @return
+     * @return  解析出来的值
      */
     public T condition(String conditionExpression, AnnotatedElementKey elementKey,
                        EvaluationContext evalContext, Class<T> clazz) {

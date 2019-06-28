@@ -3,6 +3,7 @@ package com.github.yizzuide.milkomeda.universe.config;
 import com.github.yizzuide.milkomeda.comet.Comet;
 import com.github.yizzuide.milkomeda.comet.CometAspect;
 import com.github.yizzuide.milkomeda.particle.IdempotentLimiter;
+import com.github.yizzuide.milkomeda.particle.Limit;
 import com.github.yizzuide.milkomeda.particle.ParticleAspect;
 import com.github.yizzuide.milkomeda.pulsar.Pulsar;
 import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
@@ -61,6 +62,7 @@ public class MilkomedaAutoConfiguration {
     }
 
     @Bean
+    @ConditionalOnClass(Limit.class)
     public ParticleAspect particleAspect() {
         return new ParticleAspect();
     }

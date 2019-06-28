@@ -4,8 +4,9 @@ import com.github.yizzuide.milkomeda.demo.pillar.common.ReturnData;
 import com.github.yizzuide.milkomeda.demo.pillar.common.TradeType;
 import com.github.yizzuide.milkomeda.demo.pillar.pojo.PayEntity;
 import com.github.yizzuide.milkomeda.demo.pillar.service.PayService;
+import com.github.yizzuide.milkomeda.light.LightCache;
+import com.github.yizzuide.milkomeda.light.Spot;
 import com.github.yizzuide.milkomeda.pillar.Pillar;
-import com.github.yizzuide.milkomeda.pillar.PillarAttachment;
 import com.github.yizzuide.milkomeda.pillar.PillarExecutor;
 import com.github.yizzuide.milkomeda.pillar.PillarRecognizer;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +35,9 @@ public class PayController {
     @Resource
     private PayService payService;
 
+    @Resource
+    private LightCache<Pillar<Map<String, String>, ReturnData>, PayEntity> lightCache;
+
     /**
      * 第三方平台银行卡预支付
      * @param params type 支付类型
@@ -45,20 +49,15 @@ public class PayController {
         // 匹配标识符
         String pillarType = PillarRecognizer.typeOf(TradeType.values(), type);
 
-        // ###############  测试缓存的使用 ###############
-        // 从缓存获取匹配的业务实体
-        PillarAttachment attachment = pillarExecutor.getPillarCache().get(type);
-        System.out.println(attachment);
-
-        // 获取分流柱
-        if (attachment == null) {
+        Spot<Pillar<Map<String, String>, ReturnData>, PayEntity> spot = lightCache.get(type);
+        if (spot == null) {
             Pillar<Map<String, String>, ReturnData> pillar = pillarExecutor.getPillars(pillarType).get(0);
+            // 模拟从数据库查找
             PayEntity payEntity = payService.get(type);
-            // 缓存匹配的分流柱和业务查询实体
-            pillarExecutor.getPillarCache().set(type, new PillarAttachment<>(pillar, payEntity));
+            spot = new Spot<>(pillar, payEntity);
+            lightCache.set(type, spot);
         }
-        // #############################################
-
+        System.out.println(spot);
 
         // 直接获得 Pillar 处理单元柱类型名
         ReturnData returnData = new ReturnData();

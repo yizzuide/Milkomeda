@@ -18,6 +18,8 @@ public enum TradeType implements PillarType {
     PAY(1, "PAY"),
     // 充值
     RECHARGE(2, "RECHARGE"),
+    // 提现
+    WITHDRAW(3, "WITHDRAW"),
     ;
 
     private Integer type;

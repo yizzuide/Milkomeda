@@ -1,8 +1,8 @@
 package com.github.yizzuide.milkomeda.pillar;
 
-import lombok.Getter;
-
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 0.2.0
- * @version 1.7.0
+ * @version 1.8.0
  * Create at 2019/04/11 14:14
  */
 public class PillarExecutor<P, R> {
@@ -24,12 +24,6 @@ public class PillarExecutor<P, R> {
      * 分流柱集合
      */
     private Set<Pillar<P, R>> pillars = new HashSet<>();
-
-    /**
-     * 分流柱缓存
-     */
-    @Getter
-    private PillarCache<Pillar<P, R>> pillarCache = new PillarCache<>();
 
     /**
      * 执行分流柱
