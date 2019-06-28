@@ -35,8 +35,9 @@ public abstract class SortDiscard<V, E> implements Discard<V, E> {
     @Override
     @SuppressWarnings("unchecked")
     public void discard(Map<String, Spot<V, E>> cacheMap, float l1DiscardPercent) {
-        List<? extends SortSpot<V, E>> list = ((Collection<? extends SortSpot<V, E>>) cacheMap.values())
+        List<? extends SortSpot<V, E>> list = cacheMap.values()
                 .stream()
+                .map(spot -> (SortSpot<V, E>)spot)
                 .sorted((Comparator<? super SortSpot<V, E>>) comparator())
                 .collect(Collectors.toList());
         int discardCount = Math.round(list.size() * l1DiscardPercent);
