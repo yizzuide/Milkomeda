@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 public class Spot<V, E> {
 
     /**
-     * 视图
+     * 视图数据或标识符
      */
     private V view;
 

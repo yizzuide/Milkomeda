@@ -11,6 +11,8 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 
 /**
  * ReflectUtil
@@ -22,6 +24,27 @@ import java.lang.reflect.Method;
  * Create at 2019/04/11 19:55
  */
 public class ReflectUtil {
+
+    /**
+     * 获取父类或接口上泛型对应的Class
+     * @param type  泛型原型
+     * @return Class[]
+     */
+    public static Class[] getClassOfParameterizedType(Type type) {
+        // 是否带泛型
+        if (type instanceof ParameterizedType) {
+            ParameterizedType pt = (ParameterizedType)type;
+            Type[] subTypes = pt.getActualTypeArguments();
+            Class[] classes = new Class[subTypes.length];
+            for (int i = 0; i < subTypes.length; i++) {
+                // 获取泛型类型
+                Class clazz = (Class)((ParameterizedType) subTypes[i]).getRawType();
+                classes[i] = clazz;
+            }
+            return classes;
+        }
+        return null;
+    }
     /**
      * 获得方法上的注解
      * @param joinPoint 切点连接点
