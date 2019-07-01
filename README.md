@@ -16,7 +16,7 @@
 - [x] Particle（粒子）: 用于幂等/去重、次数限制，及可扩展限制器责任链。*1.5.0+*
     * 依赖技术：Spring MVC、SpringBoot Data Redis
     * 设计模式：策略模式、责任链模式、组合模式
-- [x] Light (光）: 用于快速缓存，支持一级缓存（内存）、二级缓存（Redis)。 *1.8.0+*
+- [x] Light (光）: 用于快速缓存，支持超级缓存（ThreadLocal）、一级缓存（内存）、二级缓存（Redis)。 *1.8.0+*
     * 依赖技术：SpringBoot Data Redis
     * 设计模式：策略模式、模板方法模式
 
