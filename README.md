@@ -55,6 +55,8 @@
 ```
 
 ## Documentation
+[Pulsar使用文档](https://github.com/yizzuide/Milkomeda/wiki/Pulsar%E6%A8%A1%E5%9D%97%E4%BD%BF%E7%94%A8)
+
 [Comet使用文档](https://github.com/yizzuide/Milkomeda/wiki/Comet%E6%A8%A1%E5%9D%97%E4%BD%BF%E7%94%A8)
 
 [Pillar使用文档](https://github.com/yizzuide/Milkomeda/wiki/Pillar%E6%A8%A1%E5%9D%97%E4%BD%BF%E7%94%A8)
