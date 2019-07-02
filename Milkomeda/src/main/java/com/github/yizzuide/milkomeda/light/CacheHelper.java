@@ -12,11 +12,24 @@ import java.util.function.Function;
  * 缓存帮助类
  *
  * @since 1.10.0
+ * @version 1.10.2
  * @author yizzuide
  * Create at 2019/07/02 11:36
  */
 @Slf4j
 public class CacheHelper {
+
+    /**
+     * 设置标识数据，用于超级缓存
+     * @param cache     缓存类
+     * @param id        标识值
+     * @param <V>       标识类型
+     * @param <E>       数据类型
+     */
+    public <V, E> void set(Cache<V, E> cache, V id) {
+        cache.set(id);
+    }
+
     /**
      * 从缓存获取数据，支持一级缓存、二级缓存（如果使用默认配置的话）
      * @param cache             缓存类
