@@ -1,20 +1,29 @@
 package com.github.yizzuide.milkomeda.demo.light.config;
 
+import com.github.yizzuide.milkomeda.demo.light.handler.RequestInterceptor;
 import com.github.yizzuide.milkomeda.demo.light.pojo.Order;
 import com.github.yizzuide.milkomeda.light.Cache;
 import com.github.yizzuide.milkomeda.light.LightCache;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+import javax.annotation.Resource;
 
 /**
- * LightConfig
+ * WebMvcConfig
  *
  * @author yizzuide
- * Create at 2019/07/01 17:06
+ * Create at 2019/07/02 11:00
  */
 @Configuration
-public class LightConfig {
+public class CacheWebMvcConfig implements WebMvcConfigurer {
 
+    @Resource
+    private RequestInterceptor requestInterceptor;
+
+    // 如果有通过拦截器使用超级缓存来缓存参数，配置必需放在这个类！！
     @Bean("lightCache")
     public Cache<String, Order> lightCache() {
         LightCache<String, Order> lightCache = new LightCache<>();
@@ -29,4 +38,8 @@ public class LightConfig {
         return lightCache;
     }
 
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(requestInterceptor).order(-1).addPathPatterns("/order/**");
+    }
 }

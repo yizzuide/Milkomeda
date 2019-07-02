@@ -48,7 +48,7 @@ public interface Cache<V, E> {
      *
      * @param key   键
      * @return      Spot
-     * @deprecated  1.9.0版本开始标为过时，请使用：<code>get(String, Class<V>, Class<E>)</code>、get(String, TypeReference<V>, TypeReference<E>);
+     * @deprecated  1.9.0版本开始标为过时
      */
     @Deprecated
     Spot<V, E> get(String key);

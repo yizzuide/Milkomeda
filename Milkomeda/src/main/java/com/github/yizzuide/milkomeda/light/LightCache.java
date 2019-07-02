@@ -214,6 +214,12 @@ public class LightCache<V, E> implements Cache<V, E> {
         return get(key, javaType);
     }
 
+    /**
+     * 从缓存获取数据
+     * @param key       缓存key
+     * @param javaType  缓存数据类型，如果为null，则不支持复杂数据类型的反序列化
+     * @return  Spot
+     */
     @SuppressWarnings("unchecked")
     private Spot<V, E> get(String key, JavaType javaType) {
         // 从一级缓存查找
