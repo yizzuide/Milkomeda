@@ -30,7 +30,7 @@
 <dependency>
     <groupId>com.github.yizzuide</groupId>
     <artifactId>milkomeda-spring-boot-starter</artifactId>
-    <version>1.9.0</version>
+    <version>1.10.2</version>
 </dependency>
 ```
 
