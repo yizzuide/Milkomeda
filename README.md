@@ -55,6 +55,8 @@
 ```
 
 ## Documentation
+[Comet使用文档](https://github.com/yizzuide/Milkomeda/wiki/Comet%E6%A8%A1%E5%9D%97%E4%BD%BF%E7%94%A8)
+
 [Pillar使用文档](https://github.com/yizzuide/Milkomeda/wiki/Pillar%E6%A8%A1%E5%9D%97%E4%BD%BF%E7%94%A8)
 
 [Particle使用之API方式](https://github.com/yizzuide/Milkomeda/wiki/Particle%E6%A8%A1%E5%9D%97%E4%BD%BF%E7%94%A8%E4%B9%8BAPI%E6%96%B9%E5%BC%8F)
