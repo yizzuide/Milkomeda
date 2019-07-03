@@ -67,8 +67,6 @@
 
 [Light使用文档](https://github.com/yizzuide/Milkomeda/wiki/Light%E6%A8%A1%E5%9D%97%E4%BD%BF%E7%94%A8)
 
-其它模块文档陆续添加中……
-
 ## Author
 yizzuide, fu837014586@163.com
 
