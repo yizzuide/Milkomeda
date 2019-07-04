@@ -16,7 +16,7 @@
 - [x] Particle（粒子）: 用于幂等/去重、次数限制，及可扩展限制器责任链。*1.5.0+*
     * 依赖技术：Spring MVC、SpringBoot Data Redis
     * 设计模式：策略模式、责任链模式、组合模式
-- [x] Light (光）: 用于快速缓存，支持超级缓存（ThreadLocal）、一级缓存（内存）、二级缓存（Redis)。 *1.8.0+*
+- [x] Light (光）: 用于快速缓存，支持超级缓存（ThreadLocal）、一级缓存（内存缓存池）、二级缓存（Redis)。 *1.8.0+*
     * 依赖技术：SpringBoot Data Redis
     * 设计模式：策略模式、模板方法模式、门面模式
 
@@ -66,8 +66,6 @@
 [Particle使用之注解方式](https://github.com/yizzuide/Milkomeda/wiki/Particle%E6%A8%A1%E5%9D%97%E4%BD%BF%E7%94%A8%E4%B9%8B%E6%B3%A8%E8%A7%A3%E6%96%B9%E5%BC%8F)
 
 [Light使用文档](https://github.com/yizzuide/Milkomeda/wiki/Light%E6%A8%A1%E5%9D%97%E4%BD%BF%E7%94%A8)
-
-其它模块文档陆续添加中……
 
 ## Author
 yizzuide, fu837014586@163.com
