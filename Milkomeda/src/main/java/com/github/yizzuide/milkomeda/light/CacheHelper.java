@@ -12,7 +12,7 @@ import java.util.function.Function;
  * 缓存帮助类
  *
  * @since 1.10.0
- * @version 1.10.2
+ * @version 1.11.0
  * @author yizzuide
  * Create at 2019/07/02 11:36
  */
@@ -20,19 +20,54 @@ import java.util.function.Function;
 public class CacheHelper {
 
     /**
-     * 设置标识数据，用于超级缓存
-     * @param cache     缓存类
+     * 设置超级缓存的缓存标识数据 {@link LightContext}
+     * @param cache     缓存实例
      * @param id        标识值
      * @param <V>       标识类型
      * @param <E>       数据类型
      */
-    public <V, E> void set(Cache<V, E> cache, V id) {
+    public static <V, E> void set(Cache<V, E> cache, V id) {
         cache.set(id);
     }
 
     /**
+     * 设置超级缓存的缓存数据 {@link LightContext}
+     * @param cache     缓存实例
+     * @param spot      缓存数据
+     * @param <V>       标识类型
+     * @param <E>       数据类型
+     */
+    public static <V, E> void set(Cache<V, E> cache, Spot<V, E> spot) {
+        if (cache instanceof LightCache) {
+            LightCache<V, E> lightCache = (LightCache<V, E>) cache;
+            lightCache.getSuperCache().set(spot);
+        }
+    }
+
+    /**
+     * 从超级缓存获取数据 {@link LightContext}
+     * @param cache     缓存实例
+     * @param <V>       标识类型
+     * @param <E>       数据类型
+     * @return          Spot
+     */
+    public static <V, E> Spot<V, E> get(Cache<V, E> cache) {
+        return cache.get();
+    }
+    
+    /**
+     * 移除超级缓存的数据 {@link LightContext}
+     * @param cache     缓存实例
+     * @param <V>       标识类型
+     * @param <E>       数据类型
+     */
+    public static <V, E> void remove(Cache<V, E> cache) {
+        cache.remove();
+    }
+
+    /**
      * 从缓存获取数据，支持一级缓存、二级缓存（如果使用默认配置的话）
-     * @param cache             缓存类
+     * @param cache             缓存实例
      * @param vClazz            标识Class
      * @param eClazz            数据Class
      * @param id                标识值
@@ -52,7 +87,7 @@ public class CacheHelper {
      *
      * 注意：超级缓存需要提前设置标识数据
      *
-     * @param cache             缓存类
+     * @param cache             缓存实例
      * @param vClazz            标识Class
      * @param eClazz            数据Class
      * @param keyGenerator      缓存key产生器
@@ -68,7 +103,7 @@ public class CacheHelper {
 
     /**
      * 从缓存获取数据，支持一级缓存、二级缓存（如果使用默认配置的话）
-     * @param cache             缓存类
+     * @param cache             缓存实例
      * @param vTypeRef          标识TypeReference
      * @param eTypeRef          数据TypeReference
      * @param id                标识值
@@ -97,7 +132,7 @@ public class CacheHelper {
      *
      * 注意：超级缓存需要提前设置标识数据
      *
-     * @param cache             缓存类
+     * @param cache             缓存实例
      * @param vTypeRef          标识TypeReference
      * @param eTypeRef          数据TypeReference
      * @param keyGenerator      缓存key产生器

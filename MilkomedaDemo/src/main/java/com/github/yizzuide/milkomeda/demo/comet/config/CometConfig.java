@@ -23,6 +23,7 @@ public class CometConfig {
 
     @Autowired
     public void config(CometAspect cometAspect) {
+        // 设置日记采集器
         cometAspect.setRecorder(new CometRecorder() {
             @Override
             public void onRequest(CometData prototype, String tag, HttpServletRequest request) {
@@ -33,12 +34,16 @@ public class CometConfig {
                     String uid = String.valueOf(request.getParameter("uid"));
                     profileCometData.setUid(uid);
                 }
+                // 异步将日志存储到MySQL数据库或ES
             }
 
             @Override
             public Object onReturn(CometData cometData, Object returnData) {
                 log.info("onReturn {}", cometData);
-                // 修改返回值!!!
+
+                // 异步将日志存储到MySQL数据库或ES
+
+                // 这里可以修改返回值!!!（这里只作为例子使用，一般不要修改）
                 if (returnData instanceof ResponseEntity) {
                     return ResponseEntity.ok("ok");
                 }

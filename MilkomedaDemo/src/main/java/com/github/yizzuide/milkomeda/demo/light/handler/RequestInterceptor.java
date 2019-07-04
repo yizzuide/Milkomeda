@@ -25,7 +25,7 @@ public class RequestInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         String orderId = request.getParameter("orderId");
-        // 根据API接口需要匹配贷款方产品id，并放置上下文数据
+        // 如果有订单id参数，放置上下文数据
         if (StringUtils.hasLength(orderId)) {
             lightCache.set(orderId);
         }
@@ -34,7 +34,7 @@ public class RequestInterceptor implements HandlerInterceptor {
 
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
-        // 此处可以不写，因为对于一级缓存的缓存池来说不需要回收，这里调用remove方法只是移除了引用而已，但为了保持开发中良好防对象泄露，可以调用一下
+        // 移除超级缓存数据，防止泄露
         lightCache.remove();
     }
 }

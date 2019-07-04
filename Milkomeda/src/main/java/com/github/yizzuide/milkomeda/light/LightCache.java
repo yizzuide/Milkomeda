@@ -13,6 +13,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.concurrent.TimeUnit;
 
 /**
  * LightCache
@@ -39,6 +40,11 @@ public class LightCache<V, E> implements Cache<V, E> {
     private static final Float DEFAULT_L1_DISCARD_PERCENT = 0.1F;
 
     /**
+     * 默认二缓存过期时间
+     */
+    private static final Long DEFAULT_L2_EXPIRE = -1L;
+
+    /**
      * 一级缓存最大个数
      */
     @Setter
@@ -52,18 +58,25 @@ public class LightCache<V, E> implements Cache<V, E> {
     private Float l1DiscardPercent = DEFAULT_L1_DISCARD_PERCENT;
 
     /**
-     * 只写入一级缓存, 默认为false
+     * 只写入一级缓存, 默认为 {@code false}
      */
     @Setter
     @Getter
     private Boolean onlyCacheL1 = false;
 
     /**
-     * 丢弃策略，默认根据热点
+     * 一级缓存丢弃策略，默认根据热点
      */
     @Setter
     @Getter
     private Discard<V, E> discardStrategy = new HotDiscard<>();
+
+    /**
+     * 二级缓存过期时间，默认为永不过期，单位：秒
+     */
+    @Setter
+    @Getter
+    private Long l2Expire =  DEFAULT_L2_EXPIRE;
 
     /**
      * 超级缓存
@@ -168,7 +181,7 @@ public class LightCache<V, E> implements Cache<V, E> {
         // 异步添加到Redis（由于序列化稍微耗时）
         PulsarHolder.getPulsar().post(() -> {
             String json = JSONUtil.serialize(spot);
-            stringRedisTemplate.opsForValue().set(key, json);
+            stringRedisTemplate.opsForValue().set(key, json, l2Expire, TimeUnit.SECONDS);
         });
     }
 
