@@ -2,7 +2,7 @@ package com.github.yizzuide.milkomeda.particle;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.apache.commons.lang3.time.DateUtils;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
@@ -14,6 +14,7 @@ import java.util.Date;
  *
  * @author yizzuide
  * @since 1.5.2
+ * @version 1.11.0
  * Create at 2019/05/30 17:32
  */
 public class TimesLimiter extends LimitHandler {
@@ -68,16 +69,16 @@ public class TimesLimiter extends LimitHandler {
             Date date;
             switch (timesType) {
                 case SEC:
-                    date = DateUtils.addSeconds(new Date(), 1);
+                    date = DateTime.now().plusSeconds(1).toDate();
                     break;
                 case MIN:
-                    date = DateUtils.addMinutes(new Date(), 1);
+                    date = DateTime.now().plusMinutes(1).toDate();
                     break;
                 case HOUR:
-                    date = DateUtils.addHours(new Date(), 1);
+                    date = DateTime.now().plusHours(1).toDate();
                     break;
                 case DAY:
-                    date = DateUtils.addDays(new Date(), 1);
+                    date = DateTime.now().plusDays(1).toDate();
                     break;
                 default:
                     throw new IllegalStateException("Unexpected value: " + timesType);

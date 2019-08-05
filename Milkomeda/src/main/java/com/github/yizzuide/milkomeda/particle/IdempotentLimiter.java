@@ -1,5 +1,6 @@
 package com.github.yizzuide.milkomeda.particle;
 
+import com.github.yizzuide.milkomeda.util.Polyfill;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
  *
  * @author yizzuide
  * @since 1.5.0
+ * @version 1.11.0
  * Create at 2019/05/30 13:49
  */
 @Slf4j
@@ -48,7 +50,9 @@ public class IdempotentLimiter extends LimitHandler {
             return process.apply(particle);
         } finally {
             // 只有第一次设置key的线程有权删除这个key
-            if (isAbsent) redisTemplate.delete(decoratedKey);
+            if (isAbsent) {
+                Polyfill.redisDelete(redisTemplate, decoratedKey);
+            }
         }
     }
 }
