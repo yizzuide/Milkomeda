@@ -31,7 +31,7 @@ import static com.github.yizzuide.milkomeda.util.ReflectUtil.*;
  *
  * @author yizzuide
  * @since  0.1.0
- * @version 1.5.0
+ * @version 1.11.0
  * Create at 2019/03/29 10:36
  */
 @Slf4j
@@ -152,10 +152,10 @@ public class Pulsar {
             });
         }
 
-        if (null != errorCallback) {
-            // 适配错误处理
+        // TODO 适配错误处理 SpringBoot 1.5不支持设置Error类型错误
+        /*if (null != errorCallback) {
             deferredResult.onError((throwable) -> deferredResult.setErrorResult(errorCallback.apply(throwable)));
-        }
+        }*/
 
         // 创建增强DeferredResult
         PulsarDeferredResult pulsarDeferredResult = new PulsarDeferredResult();

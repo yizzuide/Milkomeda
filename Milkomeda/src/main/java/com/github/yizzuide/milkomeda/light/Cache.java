@@ -11,6 +11,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
  * E：缓存业务数据
  *
  * @since 1.9.0
+ * @version 1.11.0
  * @author yizzuide
  * Create at 2019/07/01 15:39
  */
@@ -72,4 +73,10 @@ public interface Cache<V, E> {
      * @return          Spot
      */
     Spot<V, E> get(String key, TypeReference<V> vTypeRef, TypeReference<E> eTypeRef);
+
+    /**
+     * 根据key擦除指定缓存
+     * @param key   缓存key
+     */
+    void erase(String key);
 }

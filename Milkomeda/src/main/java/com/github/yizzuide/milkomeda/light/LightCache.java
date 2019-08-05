@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.github.yizzuide.milkomeda.pulsar.PulsarHolder;
 import com.github.yizzuide.milkomeda.util.JSONUtil;
+import com.github.yizzuide.milkomeda.util.Polyfill;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +25,7 @@ import java.util.concurrent.TimeUnit;
  * E：缓存业务数据
  *
  * @since 1.8.0
- * @version 1.9.0
+ * @version 1.11.0
  * @author yizzuide
  * Create at 2019/06/28 13:33
  */
@@ -181,7 +182,11 @@ public class LightCache<V, E> implements Cache<V, E> {
         // 异步添加到Redis（由于序列化稍微耗时）
         PulsarHolder.getPulsar().post(() -> {
             String json = JSONUtil.serialize(spot);
-            stringRedisTemplate.opsForValue().set(key, json, l2Expire, TimeUnit.SECONDS);
+            if (l2Expire > 0) {
+                stringRedisTemplate.opsForValue().set(key, json, l2Expire, TimeUnit.SECONDS);
+            } else {
+                stringRedisTemplate.opsForValue().set(key, json);
+            }
         });
     }
 
@@ -259,7 +264,15 @@ public class LightCache<V, E> implements Cache<V, E> {
         return spot;
     }
 
-   /**
+    @Override
+    public void erase(String key) {
+        // 从二级缓存移除
+        Polyfill.redisDelete(stringRedisTemplate, key);
+        // 从一级缓存移除
+        cacheMap.remove(key);
+    }
+
+    /**
     * 设置一级缓存一次性移除百分比
     * @param l1DiscardPercent   范围：[0.1-1.0]
     */

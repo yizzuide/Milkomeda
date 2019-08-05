@@ -44,7 +44,7 @@ public class PulsarHolder {
      *
      * @param callable 运行方法，业务代码里可以直接返回数据。如：return ResponseEntity.ok(data);
      * @param pulsarDeferredResult  基于Pulsar包装的DeferredResult
-     * @return 配合和 @PulsarFlow 的使用，其它地方使用可以忽略这个返回值
+     * @return 返回null用于配合 @PulsarFlow 的使用，其它地方使用可以忽略这个返回值（因为这个不是真实要返回的数据）
      */
     public static Object defer(Callable<Object> callable, PulsarDeferredResult pulsarDeferredResult) {
          pulsar.post(new PulsarRunner(callable, pulsarDeferredResult));

@@ -52,7 +52,7 @@ public @interface PulsarFlow {
     /**
      * 设置DeferredResult的ID标识，用于在返回时查找
      * 1. 支持Spring EL表达式，如：#id
-     * 2. 支持HTTP Header获取表达式（内建支持），如：[token]
+     * 2. 支持HTTP Header获取表达式（内建支持），如：@token
      * @return 如果有设置，则需要不在方法上添加PulsarDeferredResult参数来设置ID
      */
     String id() default "";

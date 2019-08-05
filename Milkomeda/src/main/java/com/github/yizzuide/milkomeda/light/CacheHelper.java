@@ -12,7 +12,7 @@ import java.util.function.Function;
  * 缓存帮助类
  *
  * @since 1.10.0
- * @version 1.11.0
+ * @version 1.11.1
  * @author yizzuide
  * Create at 2019/07/02 11:36
  */
@@ -116,14 +116,16 @@ public class CacheHelper {
     public static  <V, E> E get(Cache<V, E> cache, TypeReference<V> vTypeRef, TypeReference<E> eTypeRef,
                                 V id, Function<V, String> keyGenerator, Function<V, E> dataGenerator) {
         String key = keyGenerator.apply(id);
+        // 一级缓存池获取（耗时为O(logN)），或二级缓存Redis获取（耗时：网络+序列化）
         Spot<V, E> spot = cache.get(key, vTypeRef, eTypeRef);
         if (spot == null) {
             E data = dataGenerator.apply(id);
             spot = new Spot<>(id, data);
-            // 一级缓存池获取（耗时为O(logN)），或二级缓存Redis获取（耗时：网络+序列化）
+            // 放入缓存中
             cache.set(key, spot);
             return data;
         }
+        // 返回缓存中数据
         return spot.getData();
     }
 
@@ -146,7 +148,7 @@ public class CacheHelper {
         // 方案一：从超级缓存中获取，内存指针引用即可返回（耗时为O(1)，速度快到没朋友）
         Spot<V, E> fastSpot = cache.get();
         if (fastSpot == null) {
-            log.error("CacheHelper:- 超级缓存设置错误，没有获取标识数据");
+            log.error("CacheHelper:- 超级缓存设置错误，没有获取到标识数据");
             return null;
         }
 
@@ -175,6 +177,18 @@ public class CacheHelper {
         // 一级缓存（内存，默认缓存64个，超出时使用热点旧数据丢弃策略） -> 二级缓存（Redis）
         cache.set(key, fastSpot);
         return data;
+    }
+
+    /**
+     * 擦除指定缓存数据（不管有没有用上超级缓存，只需要删除一级缓存和二级缓存）
+     * @param cache         缓存实例
+     * @param id            标识值
+     * @param keyGenerator  缓存key生成器
+     * @param <V>           标识类型
+     * @param <E>           数据类型
+     */
+    public static  <V, E> void erase(Cache<V, E> cache, V id, Function<V, String> keyGenerator) {
+        cache.erase(keyGenerator.apply(id));
     }
 
 }
