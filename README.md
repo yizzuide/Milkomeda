@@ -30,7 +30,7 @@
 <dependency>
     <groupId>com.github.yizzuide</groupId>
     <artifactId>milkomeda-spring-boot-starter</artifactId>
-    <version>Dalston-1.11.1</version>
+    <version>${milkomeda-last-version}</version>
 </dependency>
 ```
 
