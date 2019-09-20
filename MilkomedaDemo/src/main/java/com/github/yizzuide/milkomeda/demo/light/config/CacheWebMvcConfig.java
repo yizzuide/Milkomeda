@@ -2,8 +2,10 @@ package com.github.yizzuide.milkomeda.demo.light.config;
 
 import com.github.yizzuide.milkomeda.demo.light.handler.RequestInterceptor;
 import com.github.yizzuide.milkomeda.demo.light.pojo.Order;
+import com.github.yizzuide.milkomeda.fusion.FusionAspect;
 import com.github.yizzuide.milkomeda.light.Cache;
 import com.github.yizzuide.milkomeda.light.LightCache;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -36,6 +38,11 @@ public class CacheWebMvcConfig implements WebMvcConfigurer {
         // 设置只存储到一级缓存，默认为false
 //        lightCache.setOnlyCacheL1(false);
         return lightCache;
+    }
+
+    @Autowired
+    public void configFusion(FusionAspect fusionAspect) {
+        fusionAspect.setConverter((tag, retObj) -> retObj);
     }
 
     @Override
