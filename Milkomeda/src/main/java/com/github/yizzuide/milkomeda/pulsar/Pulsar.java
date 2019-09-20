@@ -152,10 +152,10 @@ public class Pulsar {
             });
         }
 
-        // TODO 适配错误处理 SpringBoot 1.5不支持设置Error类型错误
-        /*if (null != errorCallback) {
+        // 设置DeferredResult的错误处理
+        if (null != errorCallback) {
             deferredResult.onError((throwable) -> deferredResult.setErrorResult(errorCallback.apply(throwable)));
-        }*/
+        }
 
         // 创建增强DeferredResult
         PulsarDeferredResult pulsarDeferredResult = new PulsarDeferredResult();
