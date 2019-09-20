@@ -2,6 +2,8 @@ package com.github.yizzuide.milkomeda.universe.config;
 
 import com.github.yizzuide.milkomeda.comet.Comet;
 import com.github.yizzuide.milkomeda.comet.CometAspect;
+import com.github.yizzuide.milkomeda.fusion.Fusion;
+import com.github.yizzuide.milkomeda.fusion.FusionAspect;
 import com.github.yizzuide.milkomeda.particle.IdempotentLimiter;
 import com.github.yizzuide.milkomeda.particle.Limit;
 import com.github.yizzuide.milkomeda.particle.ParticleAspect;
@@ -72,4 +74,9 @@ public class MilkomedaAutoConfiguration {
         return new IdempotentLimiter();
     }
 
+    @Bean
+    @ConditionalOnClass(Fusion.class)
+    public FusionAspect fusionAspect() {
+        return new FusionAspect();
+    }
 }

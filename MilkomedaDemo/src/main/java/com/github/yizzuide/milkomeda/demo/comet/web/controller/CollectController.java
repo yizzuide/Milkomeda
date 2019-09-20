@@ -34,7 +34,7 @@ public class CollectController {
         map.put("code", "200");
         map.put("data", null);
 //        throw new RuntimeException("出错了");
-        // TODO 注意：这里的返回值会被 CometConfig 里的切面修改掉！
+        // 注意：这里的返回值会被 CometConfig 里的切面修改掉！
         return ResponseEntity.ok(map);
     }
 }
