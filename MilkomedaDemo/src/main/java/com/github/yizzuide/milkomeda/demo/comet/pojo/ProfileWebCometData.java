@@ -1,6 +1,6 @@
 package com.github.yizzuide.milkomeda.demo.comet.pojo;
 
-import com.github.yizzuide.milkomeda.comet.CometData;
+import com.github.yizzuide.milkomeda.comet.WebCometData;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -12,6 +12,6 @@ import lombok.EqualsAndHashCode;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class ProfileCometData extends CometData {
+public class ProfileWebCometData extends WebCometData {
     private String uid;
 }

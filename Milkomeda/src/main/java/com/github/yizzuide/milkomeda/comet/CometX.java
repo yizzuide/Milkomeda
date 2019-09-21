@@ -6,41 +6,20 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Comet
- * 采集注解
+ * CometX
  *
  * @author yizzuide
- * @since 0.2.0
- * @version 1.12.0
- * Create at 2019/04/11 19:25
+ * @since 1.12.0
+ * Create at 2019/09/21 01:15
  */
 @Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Comet {
+public @interface CometX {
     /**
      * 日志记录名
      * @return String
      */
     String name() default "";
-
-    /**
-     * 日志描述
-     * @deprecated deprecated at 1.12.0，use <code>name</code>.
-     * @return String
-     */
-    String description() default "";
-
-    /**
-     * 请求编码
-     * @return String
-     */
-    String apiCode() default "";
-
-    /**
-     * 请求类型  1: 前台请求（默认） 2：第三方服务器推送
-     * @return String
-     */
-    String requestType() default "1";
 
     /**
      * 设置记录数据 prototype（原型）的相应tag，用于分类，用于收集不同的类型数据，
@@ -55,7 +34,8 @@ public @interface Comet {
      * 1. CometData类型应该是一个 pojo，需要提供无参构造器
      * 2. 原则上一个记录数据原型对应指定一个 tag
      *
-     * @return WebCometData子类型
+     * @return XCometData子类型
      */
-    Class<? extends WebCometData> prototype() default WebCometData.class;
+    Class<? extends XCometData> prototype() default XCometData.class;
+
 }

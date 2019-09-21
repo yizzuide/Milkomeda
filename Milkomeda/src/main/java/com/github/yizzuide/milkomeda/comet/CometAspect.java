@@ -14,13 +14,17 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.context.request.async.WebAsyncTask;
 
 import javax.servlet.http.HttpServletRequest;
+import java.net.UnknownHostException;
 import java.util.Date;
+import java.util.function.Function;
 
 /**
  * CometAspect
@@ -28,7 +32,7 @@ import java.util.Date;
  *
  * @author yizzuide
  * @since 0.2.0
- * @version 1.7.0
+ * @version 1.12.0
  * Create at 2019/04/11 19:48
  */
 @Slf4j
@@ -36,6 +40,7 @@ import java.util.Date;
 @Order(-99)
 public class CometAspect {
     private ThreadLocal<CometData> threadLocal = new ThreadLocal<>();
+    private ThreadLocal<CometData> threadLocalX = new ThreadLocal<>();
     /**
      * 记录器
      */
@@ -45,35 +50,105 @@ public class CometAspect {
        recorder = new CometRecorder() {};
     }
 
-    // 切入点
+    // 定义切入点
     @Pointcut("@annotation(com.github.yizzuide.milkomeda.comet.Comet)")
     public void comet() {}
 
+    @Pointcut("@annotation(com.github.yizzuide.milkomeda.comet.CometX)")
+    public void cometX() {}
+
     @Around("comet()")
-    public Object doAround(ProceedingJoinPoint joinPoint) throws Throwable {
-        Date now = new Date();
+    public Object around(ProceedingJoinPoint joinPoint) throws Throwable {
+        Date requestTime = new Date();
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         Comet comet = ReflectUtil.getAnnotation(joinPoint, Comet.class);
         // 获取记录原型对象
-        CometData cometData = comet.prototype().newInstance();
-        cometData.setRequestTime(now);
+        WebCometData cometData = comet.prototype().newInstance();
         assert attributes != null;
         HttpServletRequest request = attributes.getRequest();
         cometData.setApiCode(comet.apiCode());
-        cometData.setDescription(comet.description());
+        cometData.setDescription(StringUtils.isEmpty(comet.name()) ? comet.description() : comet.name());
         cometData.setRequestType(comet.requestType());
-        cometData.setTag(comet.tag());
-        cometData.setRequestData(HttpServletUtil.getRequestData(request));
         cometData.setRequestURL(request.getRequestURL().toString());
         cometData.setRequestPath(request.getServletPath());
         cometData.setRequestMethod(request.getMethod());
-        Signature signature = joinPoint.getSignature();
-        cometData.setExecMethod(signature.getDeclaringTypeName() + "#" +
-                signature.getName());
-        cometData.setHost(NetworkUtil.getHost());
+        cometData.setRequestParams(HttpServletUtil.getRequestData(request));
         cometData.setRequestIP(request.getRemoteAddr());
         cometData.setDeviceInfo(request.getHeader("user-agent"));
+        return applyAround(cometData, threadLocal, joinPoint, request, requestTime, comet.name(), comet.tag(), (returnData) -> {
+            if (returnData.getClass() == DeferredResult.class) {
+                return "[DeferredResult]";
+            }
+            if (returnData.getClass() == WebAsyncTask.class) {
+                return "[WebAsyncTask]";
+            }
+            return returnData;
+        });
+    }
+
+    /**
+     * 异常抛出后
+     */
+    @AfterThrowing(pointcut = "comet()", throwing = "e")
+    public void afterThrowing(Exception e) {
+        applyAfterThrowing(e, threadLocal);
+    }
+
+    @Around("cometX()")
+    public Object aroundX(ProceedingJoinPoint joinPoint)  throws Throwable {
+        Date requestTime = new Date();
+        CometX comet = ReflectUtil.getAnnotation(joinPoint, CometX.class);
+        // 获取记录原型对象
+        XCometData cometData = comet.prototype().newInstance();
+        return applyAround(cometData, threadLocalX, joinPoint, null, requestTime, comet.name(), comet.tag(), null);
+    }
+
+    @AfterThrowing(pointcut = "cometX()", throwing = "e")
+    public void afterThrowingX(Exception e) {
+        applyAfterThrowing(e, threadLocalX);
+    }
+
+    private void applyAfterThrowing(Exception e, ThreadLocal<CometData> threadLocal) {
+        CometData cometData = threadLocal.get();
+        Date now = new Date();
+        long duration = now.getTime() - cometData.getRequestTime().getTime();
+        cometData.setStatus("2");
+        cometData.setResponseTime(now);
+        cometData.setResponseData(null);
+        cometData.setDuration(String.valueOf(duration));
+        cometData.setErrorInfo(e.getMessage());
+        StackTraceElement[] stackTrace = e.getStackTrace();
+        if (stackTrace.length > 0) {
+            String errorStack = String.format("exception happened: %s \n invoke root: %s", stackTrace[0], stackTrace[stackTrace.length - 1]);
+            cometData.setTraceStack(errorStack);
+        }
+        recorder.onThrowing(cometData, e);
+        threadLocal.remove();
+    }
+
+    private Object applyAround(CometData cometData, ThreadLocal<CometData> threadLocal, ProceedingJoinPoint joinPoint,
+                               HttpServletRequest request, Date requestTime, String name, String tag,
+                               Function<Object, Object> mapReturnData) throws Throwable {
+        cometData.setRequestTime(requestTime);
+        cometData.setName(name);
+        cometData.setTag(tag);
+        Signature signature = joinPoint.getSignature();
+        cometData.setClazzName(signature.getDeclaringTypeName());
+        cometData.setExecMethod(signature.getName());
+        StringBuilder params = new StringBuilder();
+        if (joinPoint.getArgs() !=  null && joinPoint.getArgs().length > 0) {
+            for (int i = 0; i < joinPoint.getArgs().length; i++) {
+                params.append(JSONUtil.serialize(joinPoint.getArgs()[i])).append(";");
+            }
+            cometData.setRequestData(params.toString());
+        }
+        try {
+            String host = NetworkUtil.getHost();
+            cometData.setHost(host);
+        } catch (UnknownHostException ignored) {
+        }
         log.info("Comet:- before: {}", JSONUtil.serialize(cometData));
+        // 外部可以扩展记录自定义数据
         recorder.onRequest(cometData, cometData.getTag(), request);
         threadLocal.set(cometData);
 
@@ -84,34 +159,27 @@ public class CometAspect {
         cometData.setDuration(String.valueOf(duration));
         cometData.setStatus("1");
         cometData.setResponseTime(new Date());
-        // 有的请求方法为空，如第三方回调
+        // returnData应用map转换类型
         if (returnData != null) {
-            if (returnData.getClass() == DeferredResult.class) {
-                cometData.setResponseData("[DeferredResult]");
-            } else if (returnData.getClass() == WebAsyncTask.class) {
-                cometData.setResponseData("[WebAsyncTask]");
+            if (mapReturnData != null) {
+                returnData = mapReturnData.apply(returnData);
+            }
+        }
+        // 开始回调
+        Object returnObj = recorder.onReturn(cometData, returnData);
+        // 修正返回值
+        returnObj = returnObj == null ? returnData : returnObj;
+        // 记录返回数据
+        if (returnObj != null) {
+            if (returnObj instanceof ResponseEntity) {
+                Object body = ((ResponseEntity) returnObj).getBody();
+                cometData.setResponseData(body instanceof String ? (String) body : JSONUtil.serialize(body));
             } else {
-                cometData.setResponseData(HttpServletUtil.getResponseData(returnData));
+                cometData.setResponseData(returnObj instanceof String ? (String) returnObj : JSONUtil.serialize(returnObj));
             }
         }
         log.info("Comet:- afterReturn: {}", JSONUtil.serialize(cometData));
-        Object returnObj = recorder.onReturn(cometData, returnData);
         threadLocal.remove();
         return returnObj;
-    }
-
-    /**
-     * 异常抛出后
-     */
-    @AfterThrowing(pointcut = "comet()", throwing = "e")
-    public void afterThrowing(Exception e) {
-        CometData cometData = threadLocal.get();
-        long duration = new Date().getTime() - cometData.getRequestTime().getTime();
-        cometData.setDuration(String.valueOf(duration));
-        cometData.setStatus("2");
-        cometData.setResponseData(null);
-        cometData.setResponseTime(new Date());
-        recorder.onThrowing(cometData, e);
-        threadLocal.remove();
     }
 }

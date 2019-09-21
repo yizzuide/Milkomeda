@@ -9,39 +9,36 @@ import java.util.Date;
  *
  * @author yizzuide
  * @since 0.2.0
- * @version 0.2.4
- * Create at 2019/04/11 19:32
+ * @version 1.12.0
+ * Create at 2019/09/21 00:48
  */
 @Data
 public class CometData {
     /**
-     * 请求编码
+     * 日志记录名
      */
-    private String apiCode;
+    private String name;
     /**
-     * 请求描述
+     * 日志描述
+     * @deprecated deprecated at 1.12.0，use <code>name</code>.
      */
     private String description;
-    /**
-     * 请求类型 1: 前台请求（默认） 2：第三方服务器推送
-     */
-    private String requestType;
     /**
      * 记录数据 prototype（原型）的相应tag，用于请求分类，用于收集不同的类型数据
      */
     private String tag;
     /**
-     * 请求 URL
+     * 服务器地址
      */
-    private String requestURL;
+    private String host;
     /**
-     * 请求路径
+     * 微服务名
      */
-    private String requestPath;
+    private String microName;
     /**
-     * 请求方式
+     * 类名
      */
-    private String requestMethod;
+    private String clazzName;
     /**
      * 执行的方法
      */
@@ -51,29 +48,17 @@ public class CometData {
      */
     private Date requestTime;
     /**
+     * 方法参数
+     */
+    private String requestData;
+    /**
      * 响应时间
      */
     private Date responseTime;
     /**
-     * 服务器耗时
+     * 处理耗时
      */
     private String duration;
-    /**
-     * 服务器地址
-     */
-    private String host;
-    /**
-     * 请求 IP
-     */
-    private String requestIP;
-    /**
-     * 请求设备信息
-     */
-    private String deviceInfo;
-    /**
-     * 请求参数
-     */
-    private String requestData;
     /**
      * 响应数据
      */
@@ -86,4 +71,8 @@ public class CometData {
      * 错误信息
      */
     private String errorInfo;
+    /**
+     * 栈信息
+     */
+    private String traceStack;
 }
