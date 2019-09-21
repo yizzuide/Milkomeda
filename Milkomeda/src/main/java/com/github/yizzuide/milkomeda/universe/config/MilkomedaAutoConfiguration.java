@@ -24,11 +24,13 @@ import java.util.Map;
  *
  * @author yizzuide
  * @since 0.2.1
- * @version 1.5.0
+ * @version 1.12.0
  * Create at 2019/04/12 11:29
  */
 @Slf4j
 @Configuration
+// 导入Echo模块配置实现自激活，现改为通过@EnableEcho注解激活方式
+//@Import({EchoConfig.class})
 public class MilkomedaAutoConfiguration {
     @Bean
     public ApplicationContextHolder applicationContextHolder() {

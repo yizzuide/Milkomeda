@@ -2,7 +2,7 @@ package com.github.yizzuide.milkomeda.demo.comet.web.controller;
 
 import com.github.yizzuide.milkomeda.comet.Comet;
 import com.github.yizzuide.milkomeda.demo.comet.pojo.ProfileWebCometData;
-import com.github.yizzuide.milkomeda.demo.service.CollectService;
+import com.github.yizzuide.milkomeda.demo.comet.service.CollectService;
 import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

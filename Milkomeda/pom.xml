@@ -11,7 +11,7 @@
 
     <properties>
         <java.version>1.8</java.version>
-        <project.release.version>1.12.0-SNAPSHOT</project.release.version>
+        <project.release.version>1.13.0-SNAPSHOT</project.release.version>
     </properties>
 
     <parent>
@@ -59,7 +59,7 @@
         <profile>
             <id>sonatype-oss-release</id>
             <properties>
-                <project.release.version>1.12.0</project.release.version>
+                <project.release.version>1.13.0</project.release.version>
             </properties>
             <build>
                 <plugins>
@@ -111,6 +111,19 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-beanutils</groupId>
+            <artifactId>commons-beanutils</artifactId>
+            <version>1.9.4</version>
         </dependency>
         <dependency>
             <groupId>joda-time</groupId>

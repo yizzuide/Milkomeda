@@ -1,4 +1,4 @@
-package com.github.yizzuide.milkomeda.demo.service;
+package com.github.yizzuide.milkomeda.demo.comet.service;
 
 import com.github.yizzuide.milkomeda.comet.CometX;
 import org.springframework.stereotype.Service;

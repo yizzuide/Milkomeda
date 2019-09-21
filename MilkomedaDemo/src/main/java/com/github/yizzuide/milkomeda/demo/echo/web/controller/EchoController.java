@@ -1,0 +1,77 @@
+package com.github.yizzuide.milkomeda.demo.echo.web.controller;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.github.yizzuide.milkomeda.echo.EchoException;
+import com.github.yizzuide.milkomeda.echo.EchoRequest;
+import com.github.yizzuide.milkomeda.echo.EchoResponseData;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import javax.annotation.Resource;
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * EchoController
+ *
+ * @author yizzuide
+ * Create at 2019/09/21 20:18
+ */
+@Slf4j
+@RestController
+public class EchoController {
+
+    @Resource
+    private EchoRequest simpleEchoRequest;
+
+    // 模拟一个第三方平台开户接口
+    @RequestMapping("/echo/account/open")
+    public ResponseEntity<Map<String, Object>> openAccount(@RequestBody Map<String, Object> params) {
+        log.info("接收调用方参数：{}", params);
+        Map<String, Object> data = new HashMap<>();
+        // 第三方平台根据我们提供的公钥验签（如第三方平台回调我们的接口验签需要使用第三方提供的公钥，验签方式相同）
+        Map<String, Object> map = simpleEchoRequest.verifyParam(params);
+        if (map == null) {
+            data.put("code", "403");
+            data.put("error_msg", "验签失败");
+            data.put("data", null);
+        } else {
+            data.put("code", "200");
+            data.put("error_msg", "成功");
+            data.put("data", new HashMap<String, Object>(){
+                private static final long serialVersionUID = -7494033976315538458L;
+                {
+                    put("order_id", "12343243434324324");
+                }});
+        }
+        return ResponseEntity.ok(data);
+    }
+
+    // 请求第三方平台开户接口
+    @RequestMapping("/test/echo/account/open")
+    public ResponseEntity<Map<String, Object>> requestOpenAccount() {
+        Map<String, Object> reqParams = new HashMap<>();
+        reqParams.put("uid", "1101");
+        reqParams.put("name", "yiz");
+        reqParams.put("id_no", "14324357894594483");
+
+        try {
+            // 发送请求，内部会进行签名
+            // TypeReference比用xxx.class在泛型的支持上要强得多，IDE也会智能检测匹配成功
+            // 如果第三方的data是一个json数组，可以传new TypeReference<List<Map<String, Object>>>() {}，返回结果用EchoResponseData<List<Map<String, Object>>>接收
+            EchoResponseData<Map<String, Object>> responseData = simpleEchoRequest.sendPostForResult("http://localhost:8091/echo/account/open", reqParams, new TypeReference<Map<String, Object>>() {}, true);
+            log.info("responseData: {}", responseData);
+        } catch (EchoException e) {
+            log.error("开户请求第三出错：{}", e.getMessage());
+            // 出错的业务处理。。。
+        }
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("code", "200");
+        data.put("error_msg", "开户成功");
+        return ResponseEntity.ok(data);
+    }
+}
