@@ -7,7 +7,7 @@
 - [x] Pulsar（脉冲星）: 用于长轮询、耗时请求fast-timeout等。*0.1.0+*
     * 依赖技术：Spring MVC
     * 设计模式：适配器模式、代理模式
-- [x] Comet（彗星）:  用于统一的请求切面日志记录（包括Controller层、Service层）。*0.2.0+*
+- [x] Comet（彗星）:  用于统一的请求切面日志记录（包括Controller层、Service层（*1.12.0+*））。*0.2.0+*
     * 依赖技术：Spring MVC
     * 设计模式：策略模式
 - [x] Pillar（创生柱）: 用于if/else业务块拆分。*0.2.0+*
