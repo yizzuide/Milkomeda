@@ -40,21 +40,34 @@
 ## Dependency
 ```xml
 <dependency>
-   <groupId>org.springframework.boot</groupId>
-   <artifactId>spring-boot-starter-aop</artifactId>
-</dependency>
-<dependency>
-   <groupId>org.springframework.boot</groupId>
-   <artifactId>spring-boot-starter-data-redis</artifactId>
-</dependency>
-<dependency>
-   <groupId>org.apache.commons</groupId>
-   <artifactId>commons-lang3</artifactId>
-</dependency>
-<dependency>
-   <groupId>org.projectlombok</groupId>
-   <artifactId>lombok</artifactId>
-</dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aop</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-beanutils</groupId>
+            <artifactId>commons-beanutils</artifactId>
+            <version>1.9.4</version>
+        </dependency>
+        <dependency>
+            <groupId>joda-time</groupId>
+            <artifactId>joda-time</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
 ```
 
 ## Documentation
