@@ -26,6 +26,7 @@ public class PulsarHolder {
 
     /**
      * 可抛出异常回调，外部可直接调用来触发设置的回调执行
+     * @return 异常回调
      */
     public static Function<Throwable, Object> getErrorCallback() {
         return errorCallback;

@@ -21,6 +21,7 @@ import java.lang.annotation.Target;
 public @interface Limit {
     /**
      * 前缀标识名
+     * @return String
      */
     String name() default "";
 
@@ -28,21 +29,25 @@ public @interface Limit {
      * 唯一标识键，用于组成redis的key
      * 1. 支持Spring EL表达式，如：#id
      * 2. 支持HTTP Header获取表达式（内建支持），如：[token]
+     * @return String
      */
     String key() default "";
 
     /**
      * 过期时间。单位：秒
+     * @return long
      */
     long expire() default -1L;
 
     /**
      * 限制器组件名，优先级比limiterBeanClass高
+     * @return String
      */
     String limiterBeanName() default "";
 
     /**
      * 限制器类型，如果设置了limiterBeanName则不生效，默认为IdempotentLimiter
+     * @return Class
      */
     Class<? extends Limiter> limiterBeanClass() default IdempotentLimiter.class;
 }

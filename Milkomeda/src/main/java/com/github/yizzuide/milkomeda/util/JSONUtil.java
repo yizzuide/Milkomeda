@@ -95,10 +95,11 @@ public class JSONUtil {
     }
 
     /**
-     * 将下划线转换为驼峰的形式，例如：user_name --> userName
+     * 将下划线转换为驼峰的形式，例如：user_name 转 userName
      *
      * @param data  Map
      * @param clazz 转换的类型
+     * @param <T> 返回类型
      * @return 结果类型
      * @throws IOException 转换异常
      */

@@ -15,6 +15,7 @@ public interface Limiter {
      * @param key       键
      * @param expire    过期时间
      * @param process   处理方法
+     * @param <R>       返回类型
      * @return R
      * @throws Throwable 可抛出异常
      */

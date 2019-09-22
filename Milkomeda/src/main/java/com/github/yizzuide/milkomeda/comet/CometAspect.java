@@ -88,6 +88,7 @@ public class CometAspect {
 
     /**
      * 异常抛出后
+     * @param e 异常
      */
     @AfterThrowing(pointcut = "comet()", throwing = "e")
     public void afterThrowing(Exception e) {

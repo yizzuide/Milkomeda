@@ -61,6 +61,7 @@ public abstract class AbstractRequest {
      * @param url 请求子路径
      * @param map 请求参数
      * @return EchoResponseData
+     * @throws EchoException 请求异常
      */
     public EchoResponseData<Map<String, Object>> sendPostForResult(String url, Map<String, Object> map) throws EchoException {
         return sendPostForResult(url, map, new TypeReference<Map<String, Object>>() {});
@@ -72,7 +73,9 @@ public abstract class AbstractRequest {
      * @param url         请求子路径
      * @param params      请求参数
      * @param specType    具体类型
+     * @param <T>         EchoResponseData的data字段类型
      * @return EchoResponseData
+     * @throws EchoException 请求异常
      */
     public <T> EchoResponseData<T> sendPostForResult(String url, Map<String, Object> params, TypeReference<T> specType) throws EchoException {
         return sendPostForResult(url, params, specType, false);
@@ -85,7 +88,9 @@ public abstract class AbstractRequest {
      * @param params      请求参数
      * @param specType    EchoResponseData的data字段类型
      * @param forceCamel  是否强制驼峰字段，支持深度转换
+     * @param <T>         EchoResponseData的data字段类型
      * @return EchoResponseData
+     * @throws EchoException 请求异常
      */
     @SuppressWarnings("unchecked")
     public <T> EchoResponseData<T> sendPostForResult(String url, Map<String, Object> params, TypeReference<T> specType, boolean forceCamel) throws EchoException {
@@ -132,7 +137,9 @@ public abstract class AbstractRequest {
      *
      * @param respData 第三方方响应的数据
      * @param specType ResponseData的data字段类型
+     * @param <T>      EchoResponseData的data字段类型
      * @return 统一响应数据类
+     * @throws EchoException 请求异常
      */
     protected abstract <T> EchoResponseData<T> createReturnData(Map respData, TypeReference<T> specType) throws EchoException;
 
@@ -170,6 +177,7 @@ public abstract class AbstractRequest {
      * 检测响应数据的正确性
      *
      * @param responseData 统一响应数据类
+     * @throws EchoException 请求异常
      */
     protected void checkResponse(EchoResponseData responseData) throws EchoException {}
 

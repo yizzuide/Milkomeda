@@ -17,11 +17,13 @@ import java.lang.annotation.Target;
 public @interface Fusion {
     /**
      * 打个标签，用于在转换器<code>converter</code>里识别
+     * @return String
      */
     String tag() default "fusion";
 
     /**
      * 同tag
+     * @return String
      */
     String value() default "";
 }

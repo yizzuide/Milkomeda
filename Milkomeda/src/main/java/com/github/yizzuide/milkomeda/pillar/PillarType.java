@@ -11,11 +11,13 @@ package com.github.yizzuide.milkomeda.pillar;
 public interface PillarType {
     /**
      * 识别标识符，如：记录ID、序列号
+     * @return Object
      */
     Object identifier();
 
     /**
      * pillar类型名
+     * @return String
      */
     String pillarType();
 }
