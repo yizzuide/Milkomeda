@@ -56,7 +56,7 @@ public abstract class AbstractRequest {
     }
 
     /**
-     * Post方式向贷款方发送请求，返回封装的ResponseData（默认data为Map类型）
+     * Post方式向第三方发送请求，返回封装的ResponseData（默认data为Map类型）
      *
      * @param url 请求子路径
      * @param map 请求参数
@@ -68,7 +68,7 @@ public abstract class AbstractRequest {
     }
 
     /**
-     * Post方式向贷款方发送请求，返回封装的ResponseData（需要指定data的具体类型）
+     * Post方式向第三方发送请求，返回封装的ResponseData（需要指定data的具体类型）
      *
      * @param url         请求子路径
      * @param params      请求参数
@@ -82,7 +82,7 @@ public abstract class AbstractRequest {
     }
 
     /**
-     * Post方式向贷款方发送请求，返回封装的ResponseData（需要指定data的具体类型）
+     * Post方式向第三方发送请求，返回封装的ResponseData（需要指定data的具体类型）
      *
      * @param url         请求子路径
      * @param params      请求参数
