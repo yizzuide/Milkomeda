@@ -32,7 +32,7 @@ public class EchoController {
     public ResponseEntity<Map<String, Object>> openAccount(@RequestBody Map<String, Object> params) {
         log.info("接收调用方参数：{}", params);
         Map<String, Object> data = new HashMap<>();
-        // 第三方平台根据我们提供的公钥验签（如第三方平台回调我们的接口验签需要使用第三方提供的公钥，验签方式相同）
+        // 第三方平台根据我们提供的公钥验签（如果是第三方平台回调我们的接口验签需要使用第三方提供的公钥，验签方式相同）
         Map<String, Object> map = simpleEchoRequest.verifyParam(params);
         if (map == null) {
             data.put("code", "403");
@@ -65,7 +65,7 @@ public class EchoController {
             EchoResponseData<Map<String, Object>> responseData = simpleEchoRequest.sendPostForResult("http://localhost:8091/echo/account/open", reqParams, new TypeReference<Map<String, Object>>() {}, true);
             log.info("responseData: {}", responseData);
         } catch (EchoException e) {
-            log.error("开户请求第三出错：{}", e.getMessage());
+            log.error("请求第三方开户接口出错：{}", e.getMessage());
             // 出错的业务处理。。。
         }
 

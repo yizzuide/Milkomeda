@@ -5,6 +5,7 @@ package com.github.yizzuide.milkomeda.echo;
  *
  * @author yizzuide
  * @since 1.13.0
+ * @version 1.13.1
  * Create at 2019/09/03 16:47
  */
 public interface ErrorCode {
@@ -52,6 +53,8 @@ public interface ErrorCode {
     int VENDOR_CALLBACK_ERROR = 7004;
     /** 第三方平台内部错误 */
     int VENDOR_SERVER_ERROR = 7005;
+    /** 第三方平台响应数据解析错误 */
+    int VENDOR_SERVER_RESPONSE_DATA_ANALYSIS_FAIL = 7006;
     /** 未知异常 */
     int UNKNOWN = 9999;
 }

@@ -67,7 +67,7 @@ public class SimpleEchoRequest extends EchoRequest {
         // 下面是签名的例子
         outParams.put("appId", "1000");
         outParams.put("version", "1.0");
-        DataTypeConvertUtil.clearEmptyValue(inParams); // 去值
+        DataTypeConvertUtil.clearEmptyValue(inParams); // 去空值
         String bizContent = JSONUtil.serialize(inParams); // 序列化业务参数
         outParams.put("biz_data", bizContent);
         // 将outParams转成：name=val&name2=val2...

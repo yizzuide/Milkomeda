@@ -23,7 +23,7 @@ import java.util.Map;
  * 抽象请求类
  *
  * @author yizzuide
- * @since 1.13.0
+ * @since 1.13.1
  * Create at 2019/09/21 16:48
  */
 @Slf4j
@@ -124,7 +124,7 @@ public abstract class AbstractRequest {
                 body = JSONUtil.toCamel(body, new TypeReference<Map>() {});
             } catch (Exception e) {
                 log.error("abstractRequest:- convert type data  error: {}", e.getMessage(), e);
-                throw new EchoException("The load platform response data resolve fail");
+                throw new EchoException(ErrorCode.VENDOR_SERVER_RESPONSE_DATA_ANALYSIS_FAIL, e.getMessage());
             }
         }
         EchoResponseData<T> responseData = createReturnData(body, specType);
