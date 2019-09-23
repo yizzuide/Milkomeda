@@ -40,7 +40,7 @@ public class EchoController {
             data.put("data", null);
         } else {
             data.put("code", "200");
-            data.put("error_msg", "成功");
+            data.put("error_msg", "");
             data.put("data", new HashMap<String, Object>(){
                 private static final long serialVersionUID = -7494033976315538458L;
                 {
@@ -71,7 +71,7 @@ public class EchoController {
 
         Map<String, Object> data = new HashMap<>();
         data.put("code", "200");
-        data.put("error_msg", "开户成功");
+        data.put("error_msg", "");
         return ResponseEntity.ok(data);
     }
 }

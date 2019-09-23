@@ -17,7 +17,7 @@ import java.util.*;
  *
  * @author yizzuide
  * @since 0.2.0
- * @version 1.13.0
+ * @version 1.13.1
  * Create at 2019/04/11 22:07
  */
 @Slf4j
@@ -103,9 +103,13 @@ public class JSONUtil {
      * @return 结果类型
      * @throws IOException 转换异常
      */
+    @SuppressWarnings("unchecked")
     public static <T> T toCamel(Map data, TypeReference<T> clazz) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         Map<String, Object> targetMap = toCamel(data);
+        if (Map.class == TypeUtil.type2Class(clazz)) {
+            return (T) targetMap;
+        }
         String jsonString = mapper.writeValueAsString(targetMap);
         return mapper.readValue(jsonString, clazz);
     }
