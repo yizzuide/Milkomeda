@@ -115,7 +115,7 @@ public abstract class AbstractRequest {
         Map body = request.getBody();
         if (null == body) {
             log.error("abstractRequest:- response with url: {}, params: {}, reqParams:{}, data: null", url, params, reqParams);
-            throw new EchoException("The load platform response data is null");
+            throw new EchoException(ErrorCode.VENDOR_RESPONSE_IS_NOTHING, "response body is null");
         }
         log.info("abstractRequest:- response with url: {}, params: {}, reqParams:{}, data: {}", url, params, reqParams, body);
         // 下划线转驼峰
