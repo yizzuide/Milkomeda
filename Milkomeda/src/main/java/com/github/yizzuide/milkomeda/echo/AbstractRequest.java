@@ -1,8 +1,10 @@
 package com.github.yizzuide.milkomeda.echo;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.github.yizzuide.milkomeda.universe.config.MilkomedaProperties;
 import com.github.yizzuide.milkomeda.util.JSONUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -23,7 +25,7 @@ import java.util.Map;
  * 抽象请求类
  *
  * @author yizzuide
- * @since 1.13.1
+ * @since 1.13.2
  * Create at 2019/09/21 16:48
  */
 @Slf4j
@@ -31,6 +33,9 @@ public abstract class AbstractRequest {
 
     @Resource(name = "echoRestTemplate")
     private RestTemplate restTemplate;
+
+    @Autowired
+    private MilkomedaProperties milkomedaProperties;
 
     /**
      * 获取消息体数据
@@ -110,14 +115,19 @@ public abstract class AbstractRequest {
         signParam(params, reqParams);
         HttpEntity<Map> httpEntity = new HttpEntity<>(reqParams, headers);
 
-        log.info("abstractRequest:- send request with url: {}, params: {}, reqParams:{}", url, params, reqParams);
+        boolean showLog = milkomedaProperties.isShowLog();
+        if (showLog) {
+            log.info("abstractRequest:- send request with url: {}, params: {}, reqParams:{}", url, params, reqParams);
+        }
         ResponseEntity<Map> request = restTemplate.postForEntity(url, httpEntity, Map.class);
         Map body = request.getBody();
         if (null == body) {
             log.error("abstractRequest:- response with url: {}, params: {}, reqParams:{}, data: null", url, params, reqParams);
             throw new EchoException(ErrorCode.VENDOR_RESPONSE_IS_NOTHING, "response body is null");
         }
-        log.info("abstractRequest:- response with url: {}, params: {}, reqParams:{}, data: {}", url, params, reqParams, body);
+        if (showLog) {
+            log.info("abstractRequest:- response with url: {}, params: {}, reqParams:{}, data: {}", url, params, reqParams, body);
+        }
         // 下划线转驼峰
         if (forceCamel) {
             try {

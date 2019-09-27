@@ -4,3 +4,7 @@ server:
 spring:
   redis:
     host: 127.0.0.1
+
+# 配置是否显示跟踪日志信息（线上环境应该关闭）
+milkomeda:
+  show-log: true

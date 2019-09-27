@@ -11,6 +11,7 @@ import com.github.yizzuide.milkomeda.pulsar.Pulsar;
 import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.ResponseEntity;
@@ -24,11 +25,12 @@ import java.util.Map;
  *
  * @author yizzuide
  * @since 0.2.1
- * @version 1.12.0
+ * @version 1.13.2
  * Create at 2019/04/12 11:29
  */
 @Slf4j
 @Configuration
+@EnableConfigurationProperties(MilkomedaProperties.class)
 // 导入Echo模块配置实现自激活，现改为通过@EnableEcho注解激活方式
 //@Import({EchoConfig.class})
 public class MilkomedaAutoConfiguration {

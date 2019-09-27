@@ -1,5 +1,6 @@
 package com.github.yizzuide.milkomeda.comet;
 
+import com.github.yizzuide.milkomeda.universe.config.MilkomedaProperties;
 import com.github.yizzuide.milkomeda.util.HttpServletUtil;
 import com.github.yizzuide.milkomeda.util.JSONUtil;
 import com.github.yizzuide.milkomeda.util.NetworkUtil;
@@ -13,6 +14,7 @@ import org.aspectj.lang.annotation.AfterThrowing;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
@@ -32,15 +34,26 @@ import java.util.function.Function;
  *
  * @author yizzuide
  * @since 0.2.0
- * @version 1.12.0
+ * @version 1.13.2
  * Create at 2019/04/11 19:48
  */
 @Slf4j
 @Aspect
 @Order(-99)
 public class CometAspect {
+
+    @Autowired
+    private MilkomedaProperties milkomedaProperties;
+
+    /**
+     * 控制器层本地线程存储
+     */
     private ThreadLocal<CometData> threadLocal = new ThreadLocal<>();
+    /**
+     * 服务层本地线程存储
+     */
     private ThreadLocal<CometData> threadLocalX = new ThreadLocal<>();
+
     /**
      * 记录器
      */
@@ -148,7 +161,9 @@ public class CometAspect {
             cometData.setHost(host);
         } catch (UnknownHostException ignored) {
         }
-        log.info("Comet:- before: {}", JSONUtil.serialize(cometData));
+        if (milkomedaProperties.isShowLog()) {
+            log.info("Comet:- before: {}", JSONUtil.serialize(cometData));
+        }
         // 外部可以扩展记录自定义数据
         recorder.onRequest(cometData, cometData.getTag(), request);
         threadLocal.set(cometData);
@@ -179,7 +194,9 @@ public class CometAspect {
                 cometData.setResponseData(returnObj instanceof String ? (String) returnObj : JSONUtil.serialize(returnObj));
             }
         }
-        log.info("Comet:- afterReturn: {}", JSONUtil.serialize(cometData));
+        if (milkomedaProperties.isShowLog()) {
+            log.info("Comet:- afterReturn: {}", JSONUtil.serialize(cometData));
+        }
         threadLocal.remove();
         return returnObj;
     }

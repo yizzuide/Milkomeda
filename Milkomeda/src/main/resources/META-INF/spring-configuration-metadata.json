@@ -1,0 +1,9 @@
+{
+  "properties": [
+    {
+      "name": "milkomeda.show_log",
+      "type": "java.lang.Boolean",
+      "defaultValue": false
+    }
+  ]
+}
