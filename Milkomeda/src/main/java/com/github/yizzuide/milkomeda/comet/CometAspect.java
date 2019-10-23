@@ -34,7 +34,7 @@ import java.util.function.Function;
  *
  * @author yizzuide
  * @since 0.2.0
- * @version 1.13.2
+ * @version 1.13.3
  * Create at 2019/04/11 19:48
  */
 @Slf4j
@@ -150,9 +150,13 @@ public class CometAspect {
         cometData.setClazzName(signature.getDeclaringTypeName());
         cometData.setExecMethod(signature.getName());
         StringBuilder params = new StringBuilder();
-        if (joinPoint.getArgs() !=  null && joinPoint.getArgs().length > 0) {
-            for (int i = 0; i < joinPoint.getArgs().length; i++) {
-                params.append(JSONUtil.serialize(joinPoint.getArgs()[i])).append(";");
+        Object[] args = joinPoint.getArgs();
+        if (args !=  null && args.length > 0) {
+            for (int i = 0; i < args.length; i++) {
+                params.append(JSONUtil.serialize(args[i]));
+                if (i < args.length - 1) {
+                    params.append(";");
+                }
             }
             cometData.setRequestData(params.toString());
         }
@@ -165,7 +169,7 @@ public class CometAspect {
             log.info("Comet:- before: {}", JSONUtil.serialize(cometData));
         }
         // 外部可以扩展记录自定义数据
-        recorder.onRequest(cometData, cometData.getTag(), request);
+        recorder.onRequest(cometData, cometData.getTag(), request, args);
         threadLocal.set(cometData);
 
         // 执行方法体

@@ -16,5 +16,5 @@ public class MilkomedaProperties {
     /**
      * 是否显示日志，默认为false
      */
-    private boolean showLog;
+    private boolean showLog = false;
 }

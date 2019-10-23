@@ -122,14 +122,16 @@ public abstract class AbstractRequest {
         ResponseEntity<Map> request = restTemplate.postForEntity(url, httpEntity, Map.class);
         Map body = request.getBody();
         if (null == body) {
-            log.error("abstractRequest:- response with url: {}, params: {}, reqParams:{}, data: null", url, params, reqParams);
-            throw new EchoException(ErrorCode.VENDOR_RESPONSE_IS_NOTHING, "response body is null");
+            if (!useStandardHTTP()) {
+                log.error("abstractRequest:- response with url: {}, params: {}, reqParams:{}, data: null", url, params, reqParams);
+                throw new EchoException(ErrorCode.VENDOR_RESPONSE_IS_NOTHING, "response body is null");
+            }
         }
         if (showLog) {
             log.info("abstractRequest:- response with url: {}, params: {}, reqParams:{}, data: {}", url, params, reqParams, body);
         }
         // 下划线转驼峰
-        if (forceCamel) {
+        if (forceCamel && null != body) {
             try {
                 body = JSONUtil.toCamel(body, new TypeReference<Map>() {});
             } catch (Exception e) {
@@ -137,9 +139,20 @@ public abstract class AbstractRequest {
                 throw new EchoException(ErrorCode.VENDOR_SERVER_RESPONSE_DATA_ANALYSIS_FAIL, e.getMessage());
             }
         }
-        EchoResponseData<T> responseData = createReturnData(body, specType);
+        EchoResponseData<T> responseData = createReturnData(body, specType, useStandardHTTP());
+        if (useStandardHTTP()) {
+            responseData.setCode(String.valueOf(request.getStatusCodeValue()));
+        }
         checkResponse(responseData);
         return responseData;
+    }
+
+    /**
+     * 是否使用标准的HTTP标准码（消息体中只有业务数据，不包code、msg这些）
+     * @return 默认为false
+     */
+    protected boolean useStandardHTTP() {
+        return false;
     }
 
     /**
@@ -148,10 +161,11 @@ public abstract class AbstractRequest {
      * @param respData 第三方方响应的数据
      * @param specType ResponseData的data字段类型
      * @param <T>      EchoResponseData的data字段类型
+     * @param useStandardHTTP 是否使用标准的HTTP标准码
      * @return 统一响应数据类
      * @throws EchoException 请求异常
      */
-    protected abstract <T> EchoResponseData<T> createReturnData(Map respData, TypeReference<T> specType) throws EchoException;
+    protected abstract <T> EchoResponseData<T> createReturnData(Map respData, TypeReference<T> specType, boolean useStandardHTTP) throws EchoException;
 
     /**
      * 子类需要实现的参数签名（默认不应用签名）

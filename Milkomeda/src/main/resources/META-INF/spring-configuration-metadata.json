@@ -4,6 +4,51 @@
       "name": "milkomeda.show_log",
       "type": "java.lang.Boolean",
       "defaultValue": false
+    },
+    {
+      "name": "milkomeda.echo.pool_max_size",
+      "type": "java.lang.Integer",
+      "defaultValue": 200
+    },
+    {
+      "name": "milkomeda.echo.default_max_per_route",
+      "type": "java.lang.Integer",
+      "defaultValue": 50
+    },
+    {
+      "name": "milkomeda.echo.connect_timeout",
+      "type": "java.lang.Integer",
+      "defaultValue": 5000
+    },
+    {
+      "name": "milkomeda.echo.read_timeout",
+      "type": "java.lang.Integer",
+      "defaultValue": 5000
+    },
+    {
+      "name": "milkomeda.echo.connection_request_timeout",
+      "type": "java.lang.Integer",
+      "defaultValue": 200
+    },
+    {
+      "name": "milkomeda.echo.enable_buffer_request_body",
+      "type": "java.lang.Boolean",
+      "defaultValue": false
+    },
+    {
+      "name": "milkomeda.echo.keep_alive",
+      "type": "java.lang.Integer",
+      "defaultValue": 5000
+    },
+    {
+      "name": "milkomeda.echo.enable_request_sent_retry",
+      "type": "java.lang.Boolean",
+      "defaultValue": true
+    },
+    {
+      "name": "milkomeda.echo.retry_count",
+      "type": "java.lang.Integer",
+      "defaultValue": 3
     }
   ]
 }

@@ -28,8 +28,8 @@ public class CometConfig {
         // 设置日记采集器
         cometAspect.setRecorder(new CometRecorder() {
             @Override
-            public void onRequest(CometData prototype, String tag, HttpServletRequest request) {
-                log.info("onRequest {} - {} - {}", prototype, tag, request);
+            public void onRequest(CometData prototype, String tag, HttpServletRequest request, Object[] args) {
+                log.info("onRequest {} - {} - {} - {}", prototype, tag, request, args);
                 // 根据 prototype 实际采集日志实体，这里可以根据业务添加相应业务
                 if (tag.equals("profile")) {
                     ProfileWebCometData profileCometData = (ProfileWebCometData) prototype;

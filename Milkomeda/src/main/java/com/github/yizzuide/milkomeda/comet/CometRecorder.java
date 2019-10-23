@@ -8,18 +8,18 @@ import javax.servlet.http.HttpServletRequest;
  *
  * @author yizzuide
  * @since 0.2.0
- * @version 1.12.0
+ * @version 1.13.3
  * Create at 2019/04/11 19:45
  */
 public interface CometRecorder {
     /**
      * 方法进入时触发
-     *
-     * @param prototype 采集数据原型
-     * @param tag       分类 tag，可根据 tag 来区分不同的 prototype
-     * @param request   请求对象，应用@CometX的切面时为null
+     *  @param prototype 采集数据原型
+     * @param tag        分类 tag，可根据 tag 来区分不同的 prototype
+     * @param request    请求对象，应用@CometX的切面时为null
+     * @param args       方法参数
      */
-    default void onRequest(CometData prototype, String tag, HttpServletRequest request) {}
+    default void onRequest(CometData prototype, String tag, HttpServletRequest request, Object[] args) {}
 
     /**
      * 方法返回时触发

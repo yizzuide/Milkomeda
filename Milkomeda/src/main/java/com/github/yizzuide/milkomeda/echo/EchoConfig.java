@@ -14,6 +14,8 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.protocol.HttpContext;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -38,12 +40,18 @@ import java.util.List;
  *
  * @author yizzuide
  * @since 1.13.0
+ * @version 1.13.3
  * Create at 2019/09/21 16:24
  */
 @Slf4j
 @Configuration
 @EnableScheduling
+@EnableConfigurationProperties(EchoProperties.class)
 public class EchoConfig {
+
+    @Autowired
+    private EchoProperties echoProperties;
+
     // 用于Spring Cloud体系
    /* @Bean
     @LoadBalanced
@@ -83,8 +91,8 @@ public class EchoConfig {
     @Bean
     public HttpClientConnectionManager poolingConnectionManager() {
         PoolingHttpClientConnectionManager poolingConnectionManager = new PoolingHttpClientConnectionManager();
-        poolingConnectionManager.setMaxTotal(200); // 连接池最大连接数
-        poolingConnectionManager.setDefaultMaxPerRoute(50); // 每个路由的并发
+        poolingConnectionManager.setMaxTotal(echoProperties.getPoolMaxSize()); // 连接池最大连接数
+        poolingConnectionManager.setDefaultMaxPerRoute(echoProperties.getDefaultMaxPerRoute()); // 每个路由的并发
         return poolingConnectionManager;
     }
 
@@ -113,11 +121,11 @@ public class EchoConfig {
             public long getKeepAliveDuration(HttpResponse response, HttpContext context) {
                 long keepAlive = super.getKeepAliveDuration(response, context);
                 if (keepAlive == -1) {
-                    keepAlive = 5000;
+                    keepAlive = echoProperties.getKeepAlive();
                 }
                 return keepAlive;
             }
-        }).setRetryHandler(new DefaultHttpRequestRetryHandler(3, true)).setSSLSocketFactory(csf)
+        }).setRetryHandler(new DefaultHttpRequestRetryHandler(echoProperties.getRetryCount(), echoProperties.isEnableRequestSentRetry())).setSSLSocketFactory(csf)
                 .setDefaultHeaders(headers).build();
     }
 
@@ -126,13 +134,13 @@ public class EchoConfig {
         HttpComponentsClientHttpRequestFactory clientHttpRequestFactory = new HttpComponentsClientHttpRequestFactory();
         clientHttpRequestFactory.setHttpClient(closeableHttpClient());
         //设置客户端和服务端建立连接的超时时间
-        clientHttpRequestFactory.setConnectTimeout(5000);
+        clientHttpRequestFactory.setConnectTimeout(echoProperties.getConnectTimeout());
         //设置客户端从服务端读取数据的超时时间
-        clientHttpRequestFactory.setReadTimeout(5000);
+        clientHttpRequestFactory.setReadTimeout(echoProperties.getReadTimeout());
         //设置从连接池获取连接的超时时间，不宜过长
-        clientHttpRequestFactory.setConnectionRequestTimeout(200);
+        clientHttpRequestFactory.setConnectionRequestTimeout(echoProperties.getConnectionRequestTimeout());
         //缓冲请求数据，默认为true。通过POST或者PUT大量发送数据时，建议将此更改为false，以免耗尽内存（注意：Spring boot 1.5.x下需要注释掉这行）
-        clientHttpRequestFactory.setBufferRequestBody(false);
+        clientHttpRequestFactory.setBufferRequestBody(echoProperties.isEnableBufferRequestBody());
         return clientHttpRequestFactory;
     }
 }
