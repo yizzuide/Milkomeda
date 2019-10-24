@@ -12,6 +12,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.ResponseEntity;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * CometConfig
@@ -35,6 +37,10 @@ public class CometConfig {
                     ProfileWebCometData profileCometData = (ProfileWebCometData) prototype;
                     String uid = String.valueOf(request.getParameter("uid"));
                     profileCometData.setUid(uid);
+                    // 模拟一个日志实体
+                    Map<String, Object> log = new HashMap<>();
+                    log.put("uid", profileCometData.getUid());
+                    profileCometData.setAttachment(log);
                 }
                 // 异步将日志存储到MySQL数据库或ES
             }
@@ -55,6 +61,8 @@ public class CometConfig {
             @Override
             public void onThrowing(CometData cometData, Exception e) {
                 log.error("onThrowing {}", JSONUtil.serialize(cometData));
+                // 查看日志实体
+                log.info("attachment: {}", cometData.getAttachment());
             }
         });
     }

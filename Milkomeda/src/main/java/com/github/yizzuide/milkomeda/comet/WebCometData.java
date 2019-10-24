@@ -38,6 +38,10 @@ public class WebCometData extends CometData {
      */
     private String requestParams;
     /**
+     * 请求头
+     */
+    private String requestHeaders;
+    /**
      * 请求 IP
      */
     private String requestIP;

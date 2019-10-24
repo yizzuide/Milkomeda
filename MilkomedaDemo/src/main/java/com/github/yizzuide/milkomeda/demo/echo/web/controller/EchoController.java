@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,7 +30,8 @@ public class EchoController {
 
     // 模拟一个第三方平台开户接口
     @RequestMapping("/echo/account/open")
-    public ResponseEntity<Map<String, Object>> openAccount(@RequestBody Map<String, Object> params) {
+    public ResponseEntity<Map<String, Object>> openAccount(@RequestBody Map<String, Object> params, HttpServletRequest request) {
+        log.info("header: {}", request.getHeader("Authorization"));
         log.info("接收调用方参数：{}", params);
         Map<String, Object> data = new HashMap<>();
         // 第三方平台根据我们提供的公钥验签（如果是第三方平台回调我们的接口验签需要使用第三方提供的公钥，验签方式相同）

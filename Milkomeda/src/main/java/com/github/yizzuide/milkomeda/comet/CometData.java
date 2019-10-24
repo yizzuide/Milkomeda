@@ -9,7 +9,7 @@ import java.util.Date;
  *
  * @author yizzuide
  * @since 0.2.0
- * @version 1.12.0
+ * @version 1.13.4
  * Create at 2019/09/21 00:48
  */
 @Data
@@ -75,4 +75,8 @@ public class CometData {
      * 栈信息
      */
     private String traceStack;
+    /**
+     * 跟踪附件，用于设置日志记录实体
+     */
+    private Object attachment;
 }

@@ -33,6 +33,8 @@ public interface ErrorCode {
     int REQUEST_PARAM_FORMAT_EXCEPTION = 4001;
     /** 参数不匹配 **/
     int INVALID_REQUEST_PARAM = 4002;
+    /** 不支持的请求类型 **/
+    int NOT_SUPPORT_REQUEST_METHOD = 4003;
     /** 服务器执行时内部抛出异常，请重试 */
     int SERVER_ERROR = 5000;
     /** 重复的请求 */

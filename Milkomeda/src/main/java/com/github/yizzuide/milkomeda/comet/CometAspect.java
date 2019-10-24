@@ -26,6 +26,9 @@ import org.springframework.web.context.request.async.WebAsyncTask;
 import javax.servlet.http.HttpServletRequest;
 import java.net.UnknownHostException;
 import java.util.Date;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Function;
 
 /**
@@ -34,7 +37,7 @@ import java.util.function.Function;
  *
  * @author yizzuide
  * @since 0.2.0
- * @version 1.13.3
+ * @version 1.13.4
  * Create at 2019/04/11 19:48
  */
 @Slf4j
@@ -86,6 +89,13 @@ public class CometAspect {
         cometData.setRequestPath(request.getServletPath());
         cometData.setRequestMethod(request.getMethod());
         cometData.setRequestParams(HttpServletUtil.getRequestData(request));
+        Map<String, Object> headers = new HashMap<>();
+        Enumeration<String> enumeration = request.getHeaderNames();
+        while (enumeration.hasMoreElements()) {
+            String key = enumeration.nextElement();
+            headers.put(key, request.getHeader(key));
+        }
+        cometData.setRequestHeaders(JSONUtil.serialize(headers));
         cometData.setRequestIP(request.getRemoteAddr());
         cometData.setDeviceInfo(request.getHeader("user-agent"));
         return applyAround(cometData, threadLocal, joinPoint, request, requestTime, comet.name(), comet.tag(), (returnData) -> {

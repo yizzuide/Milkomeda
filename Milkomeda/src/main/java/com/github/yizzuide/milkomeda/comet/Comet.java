@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 /**
  * Comet
- * 采集注解
+ * 请求方法采集器
  *
  * @author yizzuide
  * @since 0.2.0
@@ -43,14 +43,13 @@ public @interface Comet {
     String requestType() default "1";
 
     /**
-     * 设置记录数据 prototype（原型）的相应tag，用于分类，用于收集不同的类型数据，
-     * 不同的 tag 对应不同的记录数据原型
+     * 设置记录数据 prototype（原型）的相应tag，用于分类
      * @return String
      */
     String tag() default "";
 
     /**
-     * 设置记录数据 prototype（原型）, 与tag 对应，用于收集不同的类型数据
+     * 设置记录数据 prototype（原型）
      * 注意：
      * 1. CometData类型应该是一个 pojo，需要提供无参构造器
      * 2. 原则上一个记录数据原型对应指定一个 tag

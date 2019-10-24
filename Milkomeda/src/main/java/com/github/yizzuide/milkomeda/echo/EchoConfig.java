@@ -19,18 +19,14 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.client.ClientHttpRequestFactory;
-import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.web.client.DefaultResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 
 import javax.net.ssl.SSLContext;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,7 +36,7 @@ import java.util.List;
  *
  * @author yizzuide
  * @since 1.13.0
- * @version 1.13.3
+ * @version 1.13.4
  * Create at 2019/09/21 16:24
  */
 @Slf4j
@@ -72,17 +68,7 @@ public class EchoConfig {
         messageConverters.removeIf(converter -> converter instanceof StringHttpMessageConverter);
         messageConverters.add(new StringHttpMessageConverter(StandardCharsets.UTF_8));
         // 自定义错误处理
-        restTemplate.setErrorHandler(new DefaultResponseErrorHandler() {
-            public void handleError(ClientHttpResponse response) throws IOException {
-                HttpStatus statusCode = response.getStatusCode();
-                int code = statusCode.value();
-                String statusText = response.getStatusText();
-                if (statusCode.is4xxClientError() || statusCode.is5xxServerError()) {
-                    log.error("RestTemplate request error code: {}, status:{}", code, statusText);
-                }
-                super.handleError(response);
-            }
-        });
+        restTemplate.setErrorHandler(new EchoResponseErrorHandler());
         return restTemplate;
     }
 

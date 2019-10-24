@@ -5,17 +5,15 @@ import com.github.yizzuide.milkomeda.universe.config.MilkomedaProperties;
 import com.github.yizzuide.milkomeda.util.JSONUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
@@ -25,7 +23,8 @@ import java.util.Map;
  * 抽象请求类
  *
  * @author yizzuide
- * @since 1.13.2
+ * @since 1.13.0
+ * @version 1.13.4
  * Create at 2019/09/21 16:48
  */
 @Slf4j
@@ -41,13 +40,13 @@ public abstract class AbstractRequest {
      * 获取消息体数据
      * 注意：消息体输入流只能读取一次，通过Filter包装一个Request才可以用这个方法
      *
-     * @param request HttpServletRequest
+     * @param inputStream InputStream
      * @return String
      */
-    public static String getPostData(HttpServletRequest request) {
+    public static String getPostData(InputStream inputStream) {
         StringBuilder data;
         try {
-            BufferedReader reader = new BufferedReader(new InputStreamReader(request.getInputStream()));
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
             String str;
             data = new StringBuilder();
             while((str = reader.readLine()) != null) {
@@ -97,32 +96,83 @@ public abstract class AbstractRequest {
      * @return EchoResponseData
      * @throws EchoException 请求异常
      */
-    @SuppressWarnings("unchecked")
     public <T> EchoResponseData<T> sendPostForResult(String url, Map<String, Object> params, TypeReference<T> specType, boolean forceCamel) throws EchoException {
+        return sendRequest(HttpMethod.POST, url, params, specType, forceCamel);
+    }
+
+    /**
+     * GET方式向第三方发送请求，返回封装的ResponseData（默认data为Map类型）
+     * @param url       请求URL
+     * @param params    请求参数
+     * @return  EchoResponseData
+     * @throws EchoException 请求异常
+     */
+    public EchoResponseData<Map<String, Object>> sendGetForResult(String url, Map<String, Object> params) throws EchoException {
+        return sendRequest(HttpMethod.GET, url, params, new TypeReference<Map<String, Object>>() {}, false);
+    }
+
+    /**
+     * 发送REST请求，返回封装的ResponseData（默认data为Map类型）
+     * @param method    请求方式
+     * @param url       请求URL
+     * @param params    请求参数
+     * @return  EchoResponseData
+     * @throws EchoException 请求异常
+     */
+    public EchoResponseData<Map<String, Object>> sendRequestForResult(HttpMethod method, String url, Map<String, Object> params) throws EchoException {
+        return sendRequest(method, url, params, new TypeReference<Map<String, Object>>() {}, false);
+    }
+
+    /**
+     * 发送REST请求
+     * @param method        请求方式
+     * @param url           请求URL
+     * @param params        请求参数，GET 和 DELETE 方式将会拼接在URL后面
+     * @param specType      EchoResponseData的data字段类型
+     * @param forceCamel    是否强制驼峰字段，支持深度转换
+     * @param <T>           EchoResponseData的data字段类型
+     * @return  EchoResponseData
+     * @throws EchoException 请求异常
+     */
+    @SuppressWarnings("unchecked")
+    public <T> EchoResponseData<T> sendRequest(HttpMethod method, String url, Map<String, Object> params, TypeReference<T> specType, boolean forceCamel) throws EchoException {
         // 请求头
         HttpHeaders headers = new HttpHeaders();
         appendHeaders(headers);
         // 请求参数
-        Map reqParams;
-        // 表单类型
-        if (MediaType.APPLICATION_FORM_URLENCODED.equals(headers.getContentType()) ||
-                MediaType.MULTIPART_FORM_DATA.equals(headers.getContentType())) {
-            reqParams = new LinkedMultiValueMap<String, Object>();
-        } else { // JSON类型
-            reqParams = new HashMap();
+        Map reqParams = new HashMap();
+        // 有消息体的请求方式
+        if (hasBody(method)) {
+            // 表单类型，转LinkedMultiValueMap，支持value数组
+            if (MediaType.APPLICATION_FORM_URLENCODED.equals(headers.getContentType()) ||
+                    MediaType.MULTIPART_FORM_DATA.equals(headers.getContentType())) {
+                reqParams = new LinkedMultiValueMap<String, Object>();
+            }
         }
-        // 追加签名参数
-        signParam(params, reqParams);
-        HttpEntity<Map> httpEntity = new HttpEntity<>(reqParams, headers);
 
+        // 追加签名等参数
+        signParam(params, reqParams);
         boolean showLog = milkomedaProperties.isShowLog();
         if (showLog) {
             log.info("abstractRequest:- send request with url: {}, params: {}, reqParams:{}", url, params, reqParams);
         }
-        ResponseEntity<Map> request = restTemplate.postForEntity(url, httpEntity, Map.class);
+        HttpEntity<Map> httpEntity = new HttpEntity<>(hasBody(method) ? reqParams : null, headers);
+        ResponseEntity<Map> request;
+        if (hasBody(method)) {
+            request = restTemplate.exchange(url, method, httpEntity, Map.class);
+        } else {
+            // 转换为URL参数
+            UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(url);
+            for (Object k : reqParams.keySet()) {
+                builder.queryParam((String) k, reqParams.get(k));
+            }
+            request = reqParams.size() > 0 ? restTemplate.exchange(builder.build().encode().toUri(), method, httpEntity, Map.class) :
+                    restTemplate.exchange(url, method, httpEntity, Map.class);
+        }
         Map body = request.getBody();
+        boolean useStandardHTTP = useStandardHTTP();
         if (null == body) {
-            if (!useStandardHTTP()) {
+            if (!useStandardHTTP) {
                 log.error("abstractRequest:- response with url: {}, params: {}, reqParams:{}, data: null", url, params, reqParams);
                 throw new EchoException(ErrorCode.VENDOR_RESPONSE_IS_NOTHING, "response body is null");
             }
@@ -139,12 +189,16 @@ public abstract class AbstractRequest {
                 throw new EchoException(ErrorCode.VENDOR_SERVER_RESPONSE_DATA_ANALYSIS_FAIL, e.getMessage());
             }
         }
-        EchoResponseData<T> responseData = createReturnData(body, specType, useStandardHTTP());
-        if (useStandardHTTP()) {
+        EchoResponseData<T> responseData = createReturnData(body, specType, useStandardHTTP);
+        if (useStandardHTTP) {
             responseData.setCode(String.valueOf(request.getStatusCodeValue()));
         }
         checkResponse(responseData);
         return responseData;
+    }
+
+    private boolean hasBody(HttpMethod method) {
+        return method == HttpMethod.POST || method == HttpMethod.PUT;
     }
 
     /**
