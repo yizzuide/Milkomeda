@@ -42,12 +42,13 @@ public class EchoController {
             data.put("data", null);
         } else {
             data.put("code", "200");
-            data.put("error_msg", "");
+            data.put("error_msg", "成功");
             data.put("data", new HashMap<String, Object>(){
                 private static final long serialVersionUID = -7494033976315538458L;
                 {
                     put("order_id", "12343243434324324");
                 }});
+
         }
         return ResponseEntity.ok(data);
     }

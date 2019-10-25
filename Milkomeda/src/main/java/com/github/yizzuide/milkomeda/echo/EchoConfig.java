@@ -21,13 +21,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.client.RestTemplate;
 
 import javax.net.ssl.SSLContext;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,7 +33,7 @@ import java.util.List;
  *
  * @author yizzuide
  * @since 1.13.0
- * @version 1.13.4
+ * @version 1.13.6
  * Create at 2019/09/21 16:24
  */
 @Slf4j
@@ -63,16 +60,10 @@ public class EchoConfig {
     private RestTemplate getRestTemplate(RestTemplateBuilder builder) {
         RestTemplate restTemplate = builder.build();
         restTemplate.setRequestFactory(clientHttpRequestFactory());
-        // 使用 utf-8 编码集的 Converter 替换默认的 Converter（默认的 string Converter 的编码集为"ISO-8859-1"）
-        List<HttpMessageConverter<?>> messageConverters = restTemplate.getMessageConverters();
-        messageConverters.removeIf(converter -> converter instanceof StringHttpMessageConverter);
-        messageConverters.add(new StringHttpMessageConverter(StandardCharsets.UTF_8));
         // 自定义错误处理
         restTemplate.setErrorHandler(new EchoResponseErrorHandler());
         return restTemplate;
     }
-
-
 
     @Bean
     public HttpClientConnectionManager poolingConnectionManager() {

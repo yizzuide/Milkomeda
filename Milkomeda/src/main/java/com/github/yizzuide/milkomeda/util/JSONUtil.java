@@ -97,20 +97,34 @@ public class JSONUtil {
     /**
      * 将下划线转换为驼峰的形式，例如：user_name 转 userName
      *
-     * @param data  Map
+     * @param data  源数据，Map或List
      * @param clazz 转换的类型
      * @param <T> 返回类型
      * @return 结果类型
      * @throws IOException 转换异常
      */
     @SuppressWarnings("unchecked")
-    public static <T> T toCamel(Map data, TypeReference<T> clazz) throws IOException {
+    public static <T> T toCamel(Object data, TypeReference<T> clazz) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
-        Map<String, Object> targetMap = toCamel(data);
-        if (Map.class == TypeUtil.type2Class(clazz)) {
-            return (T) targetMap;
+        Object result = data;
+        if (data instanceof Map) {
+            result = toCamel((Map) data);
+            if (Map.class == TypeUtil.type2Class(clazz)) {
+                return (T) result;
+            }
+        } else if (data instanceof List) {
+            List<Map> list = (List) data;
+            List<Map> targetList = new ArrayList<>();
+            for (Map m : list) {
+                targetList.add(toCamel(m));
+            }
+            result = targetList;
+            if (List.class == TypeUtil.type2Class(clazz)) {
+                return (T) result;
+            }
         }
-        String jsonString = mapper.writeValueAsString(targetMap);
+
+        String jsonString = mapper.writeValueAsString(result);
         return mapper.readValue(jsonString, clazz);
     }
 

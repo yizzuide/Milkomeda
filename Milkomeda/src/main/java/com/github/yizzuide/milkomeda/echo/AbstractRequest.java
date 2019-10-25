@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -24,7 +25,7 @@ import java.util.Map;
  *
  * @author yizzuide
  * @since 1.13.0
- * @version 1.13.5
+ * @version 1.13.6
  * Create at 2019/09/21 16:48
  */
 @Slf4j
@@ -173,19 +174,20 @@ public abstract class AbstractRequest {
             log.info("abstractRequest:- send request with url: {}, params: {}, reqParams:{}", url, params, reqParams);
         }
         HttpEntity<Map> httpEntity = new HttpEntity<>(hasBody(method) ? reqParams : null, headers);
-        ResponseEntity<Map> request;
+        ResponseEntity<String> request;
         if (hasBody(method)) {
-            request = restTemplate.exchange(url, method, httpEntity, Map.class);
+            request = restTemplate.exchange(url, method, httpEntity, String.class);
         } else {
             // 转换为URL参数
             UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(url);
             for (Object k : reqParams.keySet()) {
                 builder.queryParam((String) k, reqParams.get(k));
             }
-            request = reqParams.size() > 0 ? restTemplate.exchange(builder.build().encode().toUri(), method, httpEntity, Map.class) :
-                    restTemplate.exchange(url, method, httpEntity, Map.class);
+            request = reqParams.size() > 0 ? restTemplate.exchange(builder.build().encode().toUri(), method, httpEntity, String.class) :
+                    restTemplate.exchange(url, method, httpEntity, String.class);
         }
-        Map body = request.getBody();
+
+        String body = request.getBody();
         boolean useStandardHTTP = useStandardHTTP();
         if (null == body) {
             if (!useStandardHTTP) {
@@ -196,16 +198,33 @@ public abstract class AbstractRequest {
         if (showLog) {
             log.info("abstractRequest:- response with url: {}, params: {}, reqParams:{}, data: {}", url, params, reqParams, body);
         }
-        // 下划线转驼峰
-        if (forceCamel && null != body) {
-            try {
-                body = JSONUtil.toCamel(body, new TypeReference<Map>() {});
-            } catch (Exception e) {
-                log.error("abstractRequest:- convert type data  error: {}", e.getMessage(), e);
-                throw new EchoException(ErrorCode.VENDOR_SERVER_RESPONSE_DATA_ANALYSIS_FAIL, e.getMessage());
+
+        Object responseEntity = null;
+        if (null != body) {
+            boolean isMap = body.matches("^\\s*\\{.+");
+            boolean isList = body.matches("^\\s*\\[.+");
+            if (isMap) {
+                responseEntity = JSONUtil.parseMap(body, String.class, Object.class);
+            } else if (isList) {
+                responseEntity = JSONUtil.parseList(body, Map.class);
+            } else {
+                throw new EchoException(ErrorCode.VENDOR_SERVER_RESPONSE_DATA_ANALYSIS_FAIL, "不支持的响应数据：" + body);
+            }
+
+            // 下划线转驼峰
+            if (forceCamel && null != responseEntity) {
+                try {
+                    responseEntity = isMap ? JSONUtil.toCamel(responseEntity, new TypeReference<Map>() {}) :
+                            JSONUtil.toCamel(responseEntity, new TypeReference<List>() {});
+                } catch (Exception e) {
+                    log.error("abstractRequest:- convert type data  error: {}", e.getMessage(), e);
+                    throw new EchoException(ErrorCode.VENDOR_SERVER_RESPONSE_DATA_ANALYSIS_FAIL, e.getMessage());
+                }
             }
         }
-        EchoResponseData<T> responseData = createReturnData(body, specType, useStandardHTTP);
+
+
+        EchoResponseData<T> responseData = createReturnData(responseEntity, specType, useStandardHTTP);
         if (useStandardHTTP) {
             responseData.setCode(String.valueOf(request.getStatusCodeValue()));
         }
@@ -228,14 +247,14 @@ public abstract class AbstractRequest {
     /**
      * 返回数据类型的模板方法
      *
-     * @param respData 第三方方响应的数据
+     * @param respData 第三方方响应的数据，Map或List
      * @param specType ResponseData的data字段类型
      * @param <T>      EchoResponseData的data字段类型
      * @param useStandardHTTP 是否使用标准的HTTP标准码
      * @return 统一响应数据类
      * @throws EchoException 请求异常
      */
-    protected abstract <T> EchoResponseData<T> createReturnData(Map respData, TypeReference<T> specType, boolean useStandardHTTP) throws EchoException;
+    protected abstract <T> EchoResponseData<T> createReturnData(Object respData, TypeReference<T> specType, boolean useStandardHTTP) throws EchoException;
 
     /**
      * 子类需要实现的参数签名（默认不应用签名）
