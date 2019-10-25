@@ -24,7 +24,7 @@ import java.util.Map;
  *
  * @author yizzuide
  * @since 1.13.0
- * @version 1.13.4
+ * @version 1.13.5
  * Create at 2019/09/21 16:48
  */
 @Slf4j
@@ -102,6 +102,16 @@ public abstract class AbstractRequest {
 
     /**
      * GET方式向第三方发送请求，返回封装的ResponseData（默认data为Map类型）
+     * @param url   请求URL
+     * @return  EchoResponseData
+     * @throws EchoException 请求异常
+     */
+    public EchoResponseData<Map<String, Object>> sendGetForResult(String url) throws EchoException {
+        return sendRequest(HttpMethod.GET, url, null, new TypeReference<Map<String, Object>>() {}, false);
+    }
+
+    /**
+     * GET方式向第三方发送请求，返回封装的ResponseData（默认data为Map类型）
      * @param url       请求URL
      * @param params    请求参数
      * @return  EchoResponseData
@@ -110,6 +120,7 @@ public abstract class AbstractRequest {
     public EchoResponseData<Map<String, Object>> sendGetForResult(String url, Map<String, Object> params) throws EchoException {
         return sendRequest(HttpMethod.GET, url, params, new TypeReference<Map<String, Object>>() {}, false);
     }
+
 
     /**
      * 发送REST请求，返回封装的ResponseData（默认data为Map类型）
@@ -148,6 +159,11 @@ public abstract class AbstractRequest {
                     MediaType.MULTIPART_FORM_DATA.equals(headers.getContentType())) {
                 reqParams = new LinkedMultiValueMap<String, Object>();
             }
+        }
+
+        // 设置参数默认值
+        if (null == params) {
+            params = new HashMap<>();
         }
 
         // 追加签名等参数
