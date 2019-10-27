@@ -37,4 +37,13 @@ public class TypeUtil {
     public static Class<?> type2Class(TypeReference typeRef) {
         return TypeFactory.defaultInstance().constructType(typeRef.getType()).getRawClass();
     }
+
+    /**
+     * Type 转 Class
+     * @param type   TypeReference
+     * @return  Class
+     */
+    public static Class<?> type2Class(Type type) {
+        return TypeFactory.defaultInstance().constructType(type).getRawClass();
+    }
 }

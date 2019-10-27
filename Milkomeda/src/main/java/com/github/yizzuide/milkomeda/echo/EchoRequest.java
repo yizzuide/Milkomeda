@@ -7,6 +7,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.beanutils.BeanUtils;
 import org.springframework.http.HttpStatus;
 
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
 
@@ -33,14 +35,13 @@ public abstract class EchoRequest extends AbstractRequest {
         boolean isMapType = Map.class == specClazz;
         boolean isListType = List.class == specClazz;
 
-        // 指定类型判断
-        if ((isListType && respData instanceof Map) || (isMapType && respData instanceof List)) {
-            log.error("EchoRequest:- 响应类型匹配错误，当前响应类型为：{}，指定类型为：{}", respData.getClass(), specClazz);
-            throw new EchoException(ErrorCode.ANALYSIS_DATA_FAIL, "响应类型匹配错误");
-        }
-
         // 标准HTTP标准码处理方式
         if (useStandardHTTP) {
+            // 指定类型判断
+            if ((isListType && respData instanceof Map) || (isMapType && respData instanceof List)) {
+                log.error("EchoRequest:- 响应类型匹配错误，当前响应类型为：{}，指定类型为：{}", respData.getClass(), specClazz);
+                throw new EchoException(ErrorCode.ANALYSIS_DATA_FAIL, "响应类型匹配错误");
+            }
             // Map类型
             if (isMapType) {
                 EchoResponseData<Map> responseData = responseData();
@@ -49,10 +50,22 @@ public abstract class EchoRequest extends AbstractRequest {
             }
 
             // List类型
-            if (isListType) {
-                EchoResponseData<List> responseData = responseData();
-                responseData.setData((List) respData);
-                return (EchoResponseData<T>) responseData;
+            if (respData instanceof List && isListType) {
+                // 如果没有参数子类型
+                if (specType.getType() instanceof Class) {
+                    EchoResponseData<List> responseData = responseData();
+                    responseData.setData((List) respData);
+                    return (EchoResponseData<T>) responseData;
+                }
+
+                // 有参数类型
+                ParameterizedType parameterizedType = (ParameterizedType) specType.getType();
+                Type paramType = parameterizedType.getActualTypeArguments()[0];
+                if (TypeUtil.type2Class(paramType) == Map.class) {
+                    EchoResponseData<List> responseData = responseData();
+                    responseData.setData((List) respData);
+                    return (EchoResponseData<T>) responseData;
+                }
             }
 
             // 指定的是其它自定义类型
@@ -72,10 +85,31 @@ public abstract class EchoRequest extends AbstractRequest {
                 log.warn("EchoRequest:- 当前响应的源数据不是JSON Object，而是JSON Array：{}", respData);
                 return responseData;
             }
-            BeanUtils.populate(responseData, (Map<String, Object>) respData);
 
-            // 指定的是自定义的实体类型时，转换data到具体类型
-            if (!(isMapType || isListType)) {
+            // 有规范格式的响应数据
+            if (respData instanceof Map) {
+                BeanUtils.populate(responseData, (Map) respData);
+            }
+
+            // 指定类型为非Map的处理
+            if (!isMapType) {
+                // 如果指定是List
+                if (isListType) {
+                    if (!(responseData.getData() instanceof List)) {
+                        log.error("EchoRequest:- 响应类型匹配错误，当前响应类型为：{}，指定类型为：{}", responseData.getData().getClass(), specClazz);
+                        throw new EchoException(ErrorCode.ANALYSIS_DATA_FAIL, "响应类型匹配错误");
+                    }
+                    // 没有参数类型，不处理
+                    if (specType.getType() instanceof Class) {
+                        return responseData;
+                    }
+                    // 参数类型是Map，不处理
+                    ParameterizedType parameterizedType = (ParameterizedType) specType.getType();
+                    Type paramType = parameterizedType.getActualTypeArguments()[0];
+                    if (TypeUtil.type2Class(paramType) == Map.class) {
+                        return responseData;
+                    }
+                }
                 responseData.setData(JSONUtil.nativeRead(JSONUtil.serialize(responseData.getData()), specType));
             }
         } catch (Exception e) {
