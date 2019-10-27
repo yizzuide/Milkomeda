@@ -20,7 +20,7 @@ import java.lang.reflect.Type;
  *
  * @author yizzuide
  * @since 0.2.0
- * @version 1.5.2
+ * @version 1.13.7
  * Create at 2019/04/11 19:55
  */
 public class ReflectUtil {

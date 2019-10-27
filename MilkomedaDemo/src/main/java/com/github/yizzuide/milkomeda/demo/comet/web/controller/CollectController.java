@@ -1,6 +1,7 @@
 package com.github.yizzuide.milkomeda.demo.comet.web.controller;
 
 import com.github.yizzuide.milkomeda.comet.Comet;
+import com.github.yizzuide.milkomeda.comet.XCometData;
 import com.github.yizzuide.milkomeda.demo.comet.pojo.ProfileWebCometData;
 import com.github.yizzuide.milkomeda.demo.comet.service.CollectService;
 import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
@@ -35,7 +36,7 @@ public class CollectController {
     public ResponseEntity<Map> feature(@RequestParam Map<String, String> params) {
         System.out.println(params);
         System.out.println(applicationContextHolder.getApplicationContext());
-        collectService.save(1, params);
+        collectService.save(1, params, new XCometData());
         Map<String, String> map = new HashMap<>();
         map.put("code", "200");
         map.put("data", null);

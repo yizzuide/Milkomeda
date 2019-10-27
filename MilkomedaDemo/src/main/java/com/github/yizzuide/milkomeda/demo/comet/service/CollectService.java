@@ -1,6 +1,7 @@
 package com.github.yizzuide.milkomeda.demo.comet.service;
 
 import com.github.yizzuide.milkomeda.comet.CometX;
+import com.github.yizzuide.milkomeda.comet.XCometData;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -20,7 +21,8 @@ public class CollectService {
 
     // @CometX用于服务层的日志记录
     @CometX(name = "Collect保存")
-    public boolean save(int state, Map<String, String> params) {
+    public boolean save(int state, Map<String, String> params, XCometData xCometData) {
+        System.out.println(xCometData);
         // 用于测试异常
 //        int i = 1 / 0;
         // 代理对象调用，防切面失效

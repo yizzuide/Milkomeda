@@ -24,6 +24,7 @@ import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.context.request.async.WebAsyncTask;
 
 import javax.servlet.http.HttpServletRequest;
+import java.lang.annotation.Annotation;
 import java.net.UnknownHostException;
 import java.util.Date;
 import java.util.Enumeration;
@@ -31,13 +32,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+import static com.github.yizzuide.milkomeda.util.ReflectUtil.injectParam;
+
 /**
  * CometAspect
  * 采集切面
  *
  * @author yizzuide
  * @since 0.2.0
- * @version 1.13.4
+ * @version 1.13.7
  * Create at 2019/04/11 19:48
  */
 @Slf4j
@@ -98,7 +101,7 @@ public class CometAspect {
         cometData.setRequestHeaders(JSONUtil.serialize(headers));
         cometData.setRequestIP(request.getRemoteAddr());
         cometData.setDeviceInfo(request.getHeader("user-agent"));
-        return applyAround(cometData, threadLocal, joinPoint, request, requestTime, comet.name(), comet.tag(), (returnData) -> {
+        return applyAround(comet, cometData, threadLocal, joinPoint, request, requestTime, comet.name(), comet.tag(), (returnData) -> {
             if (returnData.getClass() == DeferredResult.class) {
                 return "[DeferredResult]";
             }
@@ -124,7 +127,7 @@ public class CometAspect {
         CometX comet = ReflectUtil.getAnnotation(joinPoint, CometX.class);
         // 获取记录原型对象
         XCometData cometData = comet.prototype().newInstance();
-        return applyAround(cometData, threadLocalX, joinPoint, null, requestTime, comet.name(), comet.tag(), null);
+        return applyAround(comet, cometData, threadLocalX, joinPoint, null, requestTime, comet.name(), comet.tag(), null);
     }
 
     @AfterThrowing(pointcut = "cometX()", throwing = "e")
@@ -150,7 +153,7 @@ public class CometAspect {
         threadLocal.remove();
     }
 
-    private Object applyAround(CometData cometData, ThreadLocal<CometData> threadLocal, ProceedingJoinPoint joinPoint,
+    private Object applyAround(Annotation comet, CometData cometData, ThreadLocal<CometData> threadLocal, ProceedingJoinPoint joinPoint,
                                HttpServletRequest request, Date requestTime, String name, String tag,
                                Function<Object, Object> mapReturnData) throws Throwable {
         cometData.setRequestTime(requestTime);
@@ -163,8 +166,15 @@ public class CometAspect {
         Object[] args = joinPoint.getArgs();
         if (args !=  null && args.length > 0) {
             for (int i = 0; i < args.length; i++) {
-                params.append(JSONUtil.serialize(args[i]));
+                Object arg = args[i];
+                if (arg instanceof CometData) {
+                    continue;
+                }
+                params.append(JSONUtil.serialize(arg));
                 if (i < args.length - 1) {
+                    if (i + 1 < args.length && args[i+1] instanceof CometData) {
+                        continue;
+                    }
                     params.append(";");
                 }
             }
@@ -183,7 +193,7 @@ public class CometAspect {
         threadLocal.set(cometData);
 
         // 执行方法体
-        Object returnData = joinPoint.proceed();
+        Object returnData = joinPoint.proceed(injectParam(joinPoint, cometData, comet, false));
 
         long duration = new Date().getTime() - cometData.getRequestTime().getTime();
         cometData.setDuration(String.valueOf(duration));
