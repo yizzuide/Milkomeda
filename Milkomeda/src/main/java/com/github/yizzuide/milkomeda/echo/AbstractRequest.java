@@ -25,7 +25,7 @@ import java.util.Map;
  *
  * @author yizzuide
  * @since 1.13.0
- * @version 1.13.6
+ * @version 1.13.8
  * Create at 2019/09/21 16:48
  */
 @Slf4j
@@ -210,6 +210,7 @@ public abstract class AbstractRequest {
             } else {
                 throw new EchoException(ErrorCode.VENDOR_SERVER_RESPONSE_DATA_ANALYSIS_FAIL, "不支持的响应数据：" + body);
             }
+            checkRawResponse(responseEntity);
 
             // 下划线转驼峰
             if (forceCamel && null != responseEntity) {
@@ -287,7 +288,15 @@ public abstract class AbstractRequest {
     }
 
     /**
-     * 检测响应数据的正确性
+     * 校验原始响应数据的正确性
+     *
+     * @param responseEntity 原始响应数据，Map或List
+     * @throws EchoException 请求异常
+     */
+    protected void checkRawResponse(Object responseEntity) throws EchoException {}
+
+    /**
+     * 校验封装后的响应数据的正确性
      *
      * @param responseData 统一响应数据类
      * @throws EchoException 请求异常
