@@ -14,6 +14,7 @@ import java.io.IOException;
  *
  * @author yizzuide
  * @since 1.13.4
+ * @since 1.13.9
  * Create at 2019/10/24 14:09
  */
 @Slf4j
@@ -28,6 +29,7 @@ public class EchoResponseErrorHandler implements ResponseErrorHandler {
         } catch (RestClientException e) {
             if (e instanceof HttpStatusCodeException) {
                 HttpStatusCodeException ce = (HttpStatusCodeException) e;
+                log.error("echo request with error code: {}, msg:{}, body:{}", ce.getStatusCode().value(), ce.getMessage(), ce.getResponseBodyAsString());
                 throw new EchoException(ce.getStatusCode().value(), ce.getMessage(), ce.getResponseBodyAsString());
             }
             throw new EchoException(ErrorCode.VENDOR_REQUEST_ERROR, e.getMessage());

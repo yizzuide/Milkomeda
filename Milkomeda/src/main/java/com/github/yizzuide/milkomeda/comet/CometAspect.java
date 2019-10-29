@@ -1,10 +1,7 @@
 package com.github.yizzuide.milkomeda.comet;
 
 import com.github.yizzuide.milkomeda.universe.config.MilkomedaProperties;
-import com.github.yizzuide.milkomeda.util.HttpServletUtil;
-import com.github.yizzuide.milkomeda.util.JSONUtil;
-import com.github.yizzuide.milkomeda.util.NetworkUtil;
-import com.github.yizzuide.milkomeda.util.ReflectUtil;
+import com.github.yizzuide.milkomeda.util.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -40,7 +37,7 @@ import static com.github.yizzuide.milkomeda.util.ReflectUtil.injectParam;
  *
  * @author yizzuide
  * @since 0.2.0
- * @version 1.13.7
+ * @version 1.13.9
  * Create at 2019/04/11 19:48
  */
 @Slf4j
@@ -54,11 +51,11 @@ public class CometAspect {
     /**
      * 控制器层本地线程存储
      */
-    private ThreadLocal<CometData> threadLocal = new ThreadLocal<>();
+    private static ThreadLocal<CometData> threadLocal = new ThreadLocal<>();
     /**
      * 服务层本地线程存储
      */
-    private ThreadLocal<CometData> threadLocalX = new ThreadLocal<>();
+    private static ThreadLocal<CometData> threadLocalX = new ThreadLocal<>();
 
     /**
      * 记录器
@@ -170,7 +167,7 @@ public class CometAspect {
                 if (arg instanceof CometData) {
                     continue;
                 }
-                params.append(JSONUtil.serialize(arg));
+                params.append(RecognizeUtil.isCompoundType(arg) ? JSONUtil.serialize(arg) : arg);
                 if (i < args.length - 1) {
                     if (i + 1 < args.length && args[i+1] instanceof CometData) {
                         continue;
@@ -223,5 +220,21 @@ public class CometAspect {
         }
         threadLocal.remove();
         return returnObj;
+    }
+
+    /**
+     * 获取控制层采集数据
+     * @return WebCometData
+     */
+    public static WebCometData getCurrentWebCometData() {
+        return (WebCometData) threadLocal.get();
+    }
+
+    /**
+     * 获取服务层采集数据
+     * @return XCometData
+     */
+    public static XCometData getCurrentXCometData() {
+        return (XCometData) threadLocalX.get();
     }
 }
