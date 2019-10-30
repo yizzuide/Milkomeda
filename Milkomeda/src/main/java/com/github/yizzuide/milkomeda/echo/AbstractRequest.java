@@ -25,7 +25,7 @@ import java.util.Map;
  *
  * @author yizzuide
  * @since 1.13.0
- * @version 1.13.8
+ * @version 1.13.10
  * Create at 2019/09/21 16:48
  */
 @Slf4j
@@ -98,7 +98,7 @@ public abstract class AbstractRequest {
      * @throws EchoException 请求异常
      */
     public <T> EchoResponseData<T> sendPostForResult(String url, Map<String, Object> params, TypeReference<T> specType, boolean forceCamel) throws EchoException {
-        return sendRequest(HttpMethod.POST, url, params, specType, forceCamel);
+        return sendRequest(HttpMethod.POST, url, null, params, specType, forceCamel);
     }
 
     /**
@@ -108,7 +108,7 @@ public abstract class AbstractRequest {
      * @throws EchoException 请求异常
      */
     public EchoResponseData<Map<String, Object>> sendGetForResult(String url) throws EchoException {
-        return sendRequest(HttpMethod.GET, url, null, new TypeReference<Map<String, Object>>() {}, false);
+        return sendRequest(HttpMethod.GET, url, null, null, new TypeReference<Map<String, Object>>() {}, false);
     }
 
     /**
@@ -119,7 +119,7 @@ public abstract class AbstractRequest {
      * @throws EchoException 请求异常
      */
     public EchoResponseData<Map<String, Object>> sendGetForResult(String url, Map<String, Object> params) throws EchoException {
-        return sendRequest(HttpMethod.GET, url, params, new TypeReference<Map<String, Object>>() {}, false);
+        return sendRequest(HttpMethod.GET, url, null, params, new TypeReference<Map<String, Object>>() {}, false);
     }
 
 
@@ -132,13 +132,14 @@ public abstract class AbstractRequest {
      * @throws EchoException 请求异常
      */
     public EchoResponseData<Map<String, Object>> sendRequestForResult(HttpMethod method, String url, Map<String, Object> params) throws EchoException {
-        return sendRequest(method, url, params, new TypeReference<Map<String, Object>>() {}, false);
+        return sendRequest(method, url, null, params, new TypeReference<Map<String, Object>>() {}, false);
     }
 
     /**
      * 发送REST请求
      * @param method        请求方式
      * @param url           请求URL
+     * @param headerMap       当前需要添加的请求头
      * @param params        请求参数，GET 和 DELETE 方式将会拼接在URL后面
      * @param specType      EchoResponseData的data字段类型
      * @param forceCamel    是否强制驼峰字段，支持深度转换
@@ -147,14 +148,22 @@ public abstract class AbstractRequest {
      * @throws EchoException 请求异常
      */
     @SuppressWarnings("unchecked")
-    public <T> EchoResponseData<T> sendRequest(HttpMethod method, String url, Map<String, Object> params, TypeReference<T> specType, boolean forceCamel) throws EchoException {
+    public <T> EchoResponseData<T> sendRequest(HttpMethod method, String url,  Map<String, String> headerMap, Map<String, Object> params, TypeReference<T> specType, boolean forceCamel) throws EchoException {
         // 请求头
         HttpHeaders headers = new HttpHeaders();
         appendHeaders(headers);
+
+        if (null != headerMap) {
+            for (String key : headerMap.keySet()) {
+                headers.add(key, headerMap.get(key));
+            }
+        }
+
         // 请求参数
         Map reqParams = new HashMap();
         // 有消息体的请求方式
-        if (hasBody(method)) {
+        boolean hasBody = hasBody(method);
+        if (hasBody) {
             // 表单类型，转LinkedMultiValueMap，支持value数组
             if (MediaType.APPLICATION_FORM_URLENCODED.equals(headers.getContentType()) ||
                     MediaType.MULTIPART_FORM_DATA.equals(headers.getContentType())) {
@@ -175,7 +184,7 @@ public abstract class AbstractRequest {
         }
         HttpEntity<Map> httpEntity = new HttpEntity<>(hasBody(method) ? reqParams : null, headers);
         ResponseEntity<String> request;
-        if (hasBody(method)) {
+        if (hasBody) {
             request = restTemplate.exchange(url, method, httpEntity, String.class);
         } else {
             // 转换为URL参数
@@ -234,7 +243,7 @@ public abstract class AbstractRequest {
     }
 
     private boolean hasBody(HttpMethod method) {
-        return method == HttpMethod.POST || method == HttpMethod.PUT;
+        return method == HttpMethod.POST || method == HttpMethod.PUT || method == HttpMethod.PATCH;
     }
 
     /**

@@ -1,10 +1,10 @@
 package com.github.yizzuide.milkomeda.demo.echo.web.controller;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.github.yizzuide.milkomeda.echo.EchoException;
 import com.github.yizzuide.milkomeda.echo.EchoRequest;
 import com.github.yizzuide.milkomeda.echo.EchoResponseData;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -65,7 +65,8 @@ public class EchoController {
             // 发送请求，内部会进行签名
             // TypeReference比用xxx.class在泛型的支持上要强得多，IDE也会智能检测匹配成功
             // 如果第三方的data是一个json数组，可以传new TypeReference<List<Map<String, Object>>>() {}，返回结果用EchoResponseData<List<Map<String, Object>>>接收
-            EchoResponseData<Map<String, Object>> responseData = simpleEchoRequest.sendPostForResult("http://localhost:8091/echo/account/open", reqParams, new TypeReference<Map<String, Object>>() {}, true);
+//            EchoResponseData<Map<String, Object>> responseData = simpleEchoRequest.sendPostForResult("http://localhost:8091/echo/account/open", reqParams, new TypeReference<Map<String, Object>>() {}, true);
+            EchoResponseData<Map<String, Object>> responseData = simpleEchoRequest.fetch(HttpMethod.POST, "http://localhost:8091/echo/account/open", reqParams);
             log.info("responseData: {}", responseData);
         } catch (EchoException e) {
             log.error("请求第三方开户接口出错：{}", e.getMessage());

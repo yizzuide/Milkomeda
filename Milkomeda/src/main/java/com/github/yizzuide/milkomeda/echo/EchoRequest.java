@@ -5,6 +5,7 @@ import com.github.yizzuide.milkomeda.util.JSONUtil;
 import com.github.yizzuide.milkomeda.util.TypeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.beanutils.BeanUtils;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 
 import java.lang.reflect.ParameterizedType;
@@ -18,7 +19,7 @@ import java.util.Map;
  *
  * @author yizzuide
  * @since 1.13.0
- * @since 1.13.8
+ * @since 1.13.10
  * Create at 2019/09/21 19:00
  */
 @Slf4j
@@ -117,6 +118,98 @@ public abstract class EchoRequest extends AbstractRequest {
             throw new EchoException(e.getMessage());
         }
         return responseData;
+    }
+
+    /**
+     * 获取数据
+     * @param method    请求方式
+     * @param url       请求URL
+     * @return  EchoResponseData
+     */
+    public EchoResponseData<Map<String, Object>> fetch(HttpMethod method, String url) {
+        return fetch(method, url, null);
+    }
+
+    /**
+     * 获取数据列表
+     * @param method    请求方式
+     * @param url       请求URL
+     * @return  EchoResponseData
+     */
+    public EchoResponseData<List<Map<String, Object>>> fetchList(HttpMethod method, String url) {
+        return fetchList(method, url, null);
+    }
+
+    /**
+     * 获取数据
+     * @param method    请求方式
+     * @param url       请求URL
+     * @param params    请求参数
+     * @return  EchoResponseData
+     */
+    public EchoResponseData<Map<String, Object>> fetch(HttpMethod method, String url, Map<String, Object> params) {
+        return fetch(method, url, null, params);
+    }
+
+    /**
+     * 获取数据列表
+     * @param method    请求方式
+     * @param url       请求URL
+     * @param params    请求参数
+     * @return  EchoResponseData
+     */
+    public EchoResponseData<List<Map<String, Object>>> fetchList(HttpMethod method, String url, Map<String, Object> params) {
+        return fetchList(method, url, null, params);
+    }
+
+    /**
+     * 获取数据
+     * @param method    请求方式
+     * @param url       请求URL
+     * @param headerMap 请求头
+     * @param params    请求参数
+     * @return  EchoResponseData
+     */
+    public EchoResponseData<Map<String, Object>> fetch(HttpMethod method, String url, Map<String, String> headerMap, Map<String, Object> params) {
+        return fetch(method, url, headerMap, params, false);
+    }
+
+    /**
+     * 获取数据列表
+     * @param method    请求方式
+     * @param url       请求URL
+     * @param headerMap 请求头
+     * @param params    请求参数
+     * @return  EchoResponseData
+     */
+    public EchoResponseData<List<Map<String, Object>>> fetchList(HttpMethod method, String url, Map<String, String> headerMap, Map<String, Object> params) {
+        return fetchList(method, url, headerMap, params, false);
+    }
+
+    /**
+     * 获取数据
+     * @param method        请求方式
+     * @param url           请求URL
+     * @param headerMap     请求头
+     * @param params        请求参数
+     * @param forceCamel    响应字段转为Camel风格
+     * @return  EchoResponseData
+     */
+    public EchoResponseData<Map<String, Object>> fetch(HttpMethod method, String url, Map<String, String> headerMap, Map<String, Object> params, boolean forceCamel) {
+        return sendRequest(method, url, headerMap, params, new TypeReference<Map<String, Object>>() {}, forceCamel);
+    }
+
+    /**
+     * 获取数据列表
+     * @param method        请求方式
+     * @param url           请求URL
+     * @param headerMap     请求头
+     * @param params        请求参数
+     * @param forceCamel    响应字段转为Camel风格
+     * @return  EchoResponseData
+     */
+    public EchoResponseData<List<Map<String, Object>>> fetchList(HttpMethod method, String url, Map<String, String> headerMap, Map<String, Object> params, boolean forceCamel) {
+        return sendRequest(method, url, headerMap, params, new TypeReference<List<Map<String, Object>>>() {}, forceCamel);
     }
 
     /**
