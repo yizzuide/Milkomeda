@@ -25,7 +25,7 @@ import java.util.Map;
  *
  * @author yizzuide
  * @since 1.13.0
- * @version 1.13.10
+ * @version 1.13.12
  * Create at 2019/09/21 16:48
  */
 @Slf4j
@@ -147,55 +147,16 @@ public abstract class AbstractRequest {
      * @return  EchoResponseData
      * @throws EchoException 请求异常
      */
-    @SuppressWarnings("unchecked")
     public <T> EchoResponseData<T> sendRequest(HttpMethod method, String url,  Map<String, String> headerMap, Map<String, Object> params, TypeReference<T> specType, boolean forceCamel) throws EchoException {
-        // 请求头
-        HttpHeaders headers = new HttpHeaders();
-        appendHeaders(headers);
-
-        if (null != headerMap) {
-            for (String key : headerMap.keySet()) {
-                headers.add(key, headerMap.get(key));
-            }
-        }
-
-        // 请求参数
-        Map reqParams = new HashMap();
         // 有消息体的请求方式
         boolean hasBody = hasBody(method);
-        if (hasBody) {
-            // 表单类型，转LinkedMultiValueMap，支持value数组
-            if (MediaType.APPLICATION_FORM_URLENCODED.equals(headers.getContentType()) ||
-                    MediaType.MULTIPART_FORM_DATA.equals(headers.getContentType())) {
-                reqParams = new LinkedMultiValueMap<String, Object>();
-            }
-        }
-
-        // 设置参数默认值
-        if (null == params) {
-            params = new HashMap<>();
-        }
-
-        // 追加签名等参数
-        signParam(params, reqParams);
+        // 请求参数
+        Map reqParams = new HashMap();
+        // 请求头
+        HttpHeaders headers = new HttpHeaders();
         boolean showLog = milkomedaProperties.isShowLog();
-        if (showLog) {
-            log.info("abstractRequest:- send request with url: {}, params: {}, reqParams:{}", url, params, reqParams);
-        }
-        HttpEntity<Map> httpEntity = new HttpEntity<>(hasBody(method) ? reqParams : null, headers);
-        ResponseEntity<String> request;
-        if (hasBody) {
-            request = restTemplate.exchange(url, method, httpEntity, String.class);
-        } else {
-            // 转换为URL参数
-            UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(url);
-            for (Object k : reqParams.keySet()) {
-                builder.queryParam((String) k, reqParams.get(k));
-            }
-            request = reqParams.size() > 0 ? restTemplate.exchange(builder.build().encode().toUri(), method, httpEntity, String.class) :
-                    restTemplate.exchange(url, method, httpEntity, String.class);
-        }
-
+        // 执行请求
+        ResponseEntity<String> request = performRequest(method, url, params, headerMap, reqParams, headers, hasBody, showLog, String.class);
         String body = request.getBody();
         boolean useStandardHTTP = useStandardHTTP();
         if (null == body) {
@@ -233,13 +194,105 @@ public abstract class AbstractRequest {
             }
         }
 
-
         EchoResponseData<T> responseData = createReturnData(responseEntity, specType, useStandardHTTP);
         if (useStandardHTTP) {
             responseData.setCode(String.valueOf(request.getStatusCodeValue()));
         }
         checkResponse(responseData);
         return responseData;
+    }
+
+    /**
+     * 获取流数据
+     * @param method    请求方式
+     * @param url       请求URL
+     * @param headerMap 源请求头
+     * @param params    源请求参数
+     * @return  InputStream
+     */
+    public InputStream sendRequest(HttpMethod method, String url,  Map<String, String> headerMap, Map<String, Object> params) {
+        // 有消息体的请求方式
+        boolean hasBody = hasBody(method);
+        // 请求参数
+        Map reqParams = new HashMap();
+        // 请求头
+        HttpHeaders headers = new HttpHeaders();
+        boolean showLog = milkomedaProperties.isShowLog();
+        // 执行请求
+        ResponseEntity<org.springframework.core.io.Resource> request = performRequest(method, url, params, headerMap, reqParams, headers, hasBody, showLog, org.springframework.core.io.Resource.class);
+        if (null == request.getBody()) {
+            log.error("abstractRequest:- response with url: {}, params: {}, reqParams:{}, data: null", url, params, reqParams);
+            throw new EchoException(ErrorCode.VENDOR_RESPONSE_IS_NOTHING, "response body is null");
+        }
+        // 获取消息体
+        org.springframework.core.io.Resource body = request.getBody();
+        if (showLog) {
+            log.info("abstractRequest:- response with url: {}, params: {}, reqParams:{}, data: {}", url, params, reqParams, body);
+        }
+        try {
+            return body.getInputStream();
+        } catch (IOException e) {
+            throw new EchoException(ErrorCode.VENDOR_RESPONSE_IS_FAIL, e.getMessage());
+        }
+    }
+
+    /**
+     * 执行请求
+     * @param method    请求方式
+     * @param url       请求URL
+     * @param params    源请求参数
+     * @param headerMap 源请求头
+     * @param reqParams 实际请求参数
+     * @param hasBody   是否有消息体
+     * @param headers   实际请求头
+     * @param showLog   是否显示日志
+     * @param respType  响应类型
+     * @param <T>   响应类型
+     * @return ResponseEntity
+     */
+    @SuppressWarnings("unchecked")
+    private <T> ResponseEntity<T> performRequest(HttpMethod method, String url, Map<String, Object> params, Map<String, String> headerMap, Map reqParams, HttpHeaders headers, boolean hasBody, boolean showLog, Class<T> respType) {
+        // 添加头数据
+        appendHeaders(headers);
+        if (null != headerMap) {
+            for (String key : headerMap.keySet()) {
+                headers.add(key, headerMap.get(key));
+            }
+        }
+
+        if (hasBody) {
+            // 表单类型，转LinkedMultiValueMap，支持value数组
+            if (MediaType.APPLICATION_FORM_URLENCODED.equals(headers.getContentType()) ||
+                    MediaType.MULTIPART_FORM_DATA.equals(headers.getContentType())) {
+                reqParams = new LinkedMultiValueMap<String, Object>();
+            }
+        }
+
+        // 设置参数默认值
+        if (null == params) {
+            params = new HashMap<>();
+        }
+        // 追加签名等参数
+        signParam(params, reqParams);
+        if (showLog) {
+            log.info("abstractRequest:- send request with url: {}, params: {}, reqParams:{}", url, params, reqParams);
+        }
+        // 组装实体
+        HttpEntity<Map> httpEntity = new HttpEntity<>(hasBody ? reqParams : null, headers);
+        // 执行请求
+        ResponseEntity<T> request;
+        if (hasBody) {
+            request = restTemplate.exchange(url, method, httpEntity, respType);
+        } else {
+            // 转换为URL参数
+            UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(url);
+            for (Object k : reqParams.keySet()) {
+                builder.queryParam((String) k, reqParams.get(k));
+            }
+            request = reqParams.size() > 0 ? restTemplate.exchange(builder.build().encode().toUri(), method, httpEntity, respType) :
+                    restTemplate.exchange(url, method, httpEntity, respType);
+        }
+        return request;
     }
 
     private boolean hasBody(HttpMethod method) {
