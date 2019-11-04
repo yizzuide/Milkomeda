@@ -31,7 +31,7 @@ import static com.github.yizzuide.milkomeda.util.ReflectUtil.*;
  *
  * @author yizzuide
  * @since  0.1.0
- * @version 1.11.0
+ * @version 1.13.11
  * Create at 2019/03/29 10:36
  */
 @Slf4j
@@ -241,7 +241,7 @@ public class Pulsar {
      * @param timeout 超时时间，ms
      */
     public void configure(AsyncSupportConfigurer configurer, long timeout) {
-        configure(configurer, 5, 10, 50, 200, timeout);
+        configure(configurer, 5, 10, 200, 200, timeout);
     }
 
     /**
@@ -267,6 +267,7 @@ public class Pulsar {
         taskExecutor.setThreadNamePrefix("pulsar-");
         // 线程池对拒绝任务（无线程可用）的处理策略，目前只支持AbortPolicy、CallerRunsPolicy，默认为后者
         taskExecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
+        taskExecutor.setTaskDecorator(new RequestContextDecorator());
         taskExecutor.initialize();
         configurer.setTaskExecutor(taskExecutor);
     }

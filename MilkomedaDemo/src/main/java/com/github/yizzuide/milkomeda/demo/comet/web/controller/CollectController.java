@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,7 +33,8 @@ public class CollectController {
 
     @RequestMapping("feature")
     @Comet(apiCode = "1.1", name = "上传用户特征", tag = "profile", prototype = ProfileWebCometData.class)
-    public ResponseEntity<Map> feature(@RequestParam Map<String, String> params) {
+    public ResponseEntity<Map> feature(@RequestParam Map<String, String> params, HttpServletRequest request) {
+        System.out.println(request.getHeader("accept-language"));
         System.out.println(params);
         System.out.println(applicationContextHolder.getApplicationContext());
         collectService.save(1, params);

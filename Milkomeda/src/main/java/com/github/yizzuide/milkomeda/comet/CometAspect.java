@@ -20,13 +20,14 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.context.request.async.WebAsyncTask;
 
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.annotation.Annotation;
 import java.net.UnknownHostException;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 
 import static com.github.yizzuide.milkomeda.util.ReflectUtil.injectParam;
@@ -37,7 +38,7 @@ import static com.github.yizzuide.milkomeda.util.ReflectUtil.injectParam;
  *
  * @author yizzuide
  * @since 0.2.0
- * @version 1.13.9
+ * @version 1.13.11
  * Create at 2019/04/11 19:48
  */
 @Slf4j
@@ -56,14 +57,21 @@ public class CometAspect {
      * 服务层本地线程存储
      */
     private static ThreadLocal<CometData> threadLocalX = new ThreadLocal<>();
-
+    /**
+     * 忽略序列化的参数
+     */
+    private List<Class> ignoreParams;
     /**
      * 记录器
      */
     @Getter @Setter
     private CometRecorder recorder;
+
     {
        recorder = new CometRecorder() {};
+       ignoreParams = new ArrayList<>();
+       ignoreParams.addAll(Arrays.asList(CometData.class, InputStream.class, OutputStream.class,
+               ServletRequest.class, ServletResponse.class));
     }
 
     // 定义切入点
@@ -164,7 +172,7 @@ public class CometAspect {
         if (args !=  null && args.length > 0) {
             for (int i = 0; i < args.length; i++) {
                 Object arg = args[i];
-                if (arg instanceof CometData) {
+                if (hasFilter(arg)) {
                     continue;
                 }
                 params.append(RecognizeUtil.isCompoundType(arg) ? JSONUtil.serialize(arg) : arg);
@@ -223,6 +231,20 @@ public class CometAspect {
     }
 
     /**
+     * 参数过滤
+     * @param arg 参数
+     * @return true为过滤
+     */
+    private boolean hasFilter(Object arg) {
+        for (Class ignoreParam : ignoreParams) {
+            if (ignoreParam.isInstance(arg)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * 获取控制层采集数据
      * @return WebCometData
      */
@@ -236,5 +258,14 @@ public class CometAspect {
      */
     public static XCometData getCurrentXCometData() {
         return (XCometData) threadLocalX.get();
+    }
+
+    /**
+     * 配置忽略的参数类型
+     *
+     * @param clazzList 忽略的参数类型列表
+     */
+    public void addFilterClass(Class... clazzList) {
+        this.ignoreParams.addAll(Arrays.asList(clazzList));
     }
 }
