@@ -83,7 +83,7 @@
 
 [Light使用文档](https://github.com/yizzuide/Milkomeda/wiki/Light%E6%A8%A1%E5%9D%97%E4%BD%BF%E7%94%A8)
 
-[Echo使用文档](https://github.com/yizzuide/Milkomeda/wiki/Echo%E6%A8%A1%E5%9D%97%E4%BD%BF%E7%94%A8)
+[Echo使用文档](https://github.com/yizzuide/Milkomeda/wiki/Echo%E6%A8%A1%E5%9D%97%E7%9A%84%E4%BD%BF%E7%94%A8)
 
 ## Author
 yizzuide, fu837014586@163.com
