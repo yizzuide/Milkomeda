@@ -1,9 +1,9 @@
 package com.github.yizzuide.milkomeda.particle;
 
+import com.github.yizzuide.milkomeda.util.RedisUtil;
 import lombok.Getter;
 import lombok.Setter;
 import org.joda.time.DateTime;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
 import java.util.Date;
@@ -14,7 +14,7 @@ import java.util.Date;
  *
  * @author yizzuide
  * @since 1.5.2
- * @version 1.11.0
+ * @version 1.14.0
  * Create at 2019/05/30 17:32
  */
 public class TimesLimiter extends LimitHandler {
@@ -29,9 +29,6 @@ public class TimesLimiter extends LimitHandler {
      */
     @Getter @Setter
     private Long limitTimes;
-
-    @Autowired
-    private StringRedisTemplate redisTemplate;
 
     // 装饰后缀
     private static final String POSTFIX = ":times";
@@ -61,34 +58,28 @@ public class TimesLimiter extends LimitHandler {
     @Override
     public <R> R limit(String key, long expire, Process<R> process) throws Throwable {
         String decoratedKey = key + POSTFIX;
-        Boolean exists = redisTemplate.hasKey(decoratedKey);
-        assert exists != null;
-        Particle particle;
-        Long times = redisTemplate.opsForValue().increment(decoratedKey, 1);
-        if (!exists) {
-            Date date;
-            switch (timesType) {
-                case SEC:
-                    date = DateTime.now().plusSeconds(1).toDate();
-                    break;
-                case MIN:
-                    date = DateTime.now().plusMinutes(1).toDate();
-                    break;
-                case HOUR:
-                    date = DateTime.now().plusHours(1).toDate();
-                    break;
-                case DAY:
-                    date = DateTime.now().plusDays(1).toDate();
-                    break;
-                default:
-                    throw new IllegalStateException("Unexpected value: " + timesType);
-            }
-            redisTemplate.expireAt(decoratedKey, date);
+        StringRedisTemplate redisTemplate = getRedisTemplate();
+        Date date;
+        switch (timesType) {
+            case SEC:
+                date = DateTime.now().plusSeconds(1).toDate();
+                break;
+            case MIN:
+                date = DateTime.now().plusMinutes(1).toDate();
+                break;
+            case HOUR:
+                date = DateTime.now().plusHours(1).toDate();
+                break;
+            case DAY:
+                date = DateTime.now().plusDays(1).toDate();
+                break;
+            default:
+                throw new IllegalStateException("Unexpected value: " + timesType);
         }
-        assert times != null;
+        long times = RedisUtil.incr(decoratedKey, 1, date, redisTemplate);
         // 判断是否超过次数
         boolean isOver = times > limitTimes;
-        particle = new Particle(this.getClass(), isOver, times);
+        Particle particle = new Particle(this.getClass(), isOver, times);
         // 如果未被限制，且有下一个处理器
         if (!particle.isLimited() && null != getNext()) {
             return getNext().limit(key, expire, process);

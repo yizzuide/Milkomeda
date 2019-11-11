@@ -27,16 +27,11 @@ public class ParticleConfig {
         return new TimesLimiter(TimesType.MIN, 3L);
     }
 
-    // 注意：这里的`IdempotentLimiter`需要再创建一份用于限制器链组装，防止污染框架自动注册的对象
-    @Bean("linkIdempotentLimiter")
-    public IdempotentLimiter linkIdempotentLimiter() {
-        return new IdempotentLimiter();
-    }
-
     // 下面配置的限制器链为：linkIdempotentLimiter -> timesLimiter
     @Bean
-    public BarrierLimiter barrierLimiter(IdempotentLimiter linkIdempotentLimiter,
-                                         TimesLimiter timesLimiter) {
+    public BarrierLimiter barrierLimiter(TimesLimiter timesLimiter) {
+        // 这里的`IdempotentLimiter`需要再创建一份用于限制器链组装，防止污染框架自动注册的Limiter的next值
+        IdempotentLimiter linkIdempotentLimiter = new IdempotentLimiter();
         BarrierLimiter barrierLimiter = new BarrierLimiter();
         barrierLimiter.addLimitHandlerList(Arrays.asList(linkIdempotentLimiter, timesLimiter));
         return barrierLimiter;

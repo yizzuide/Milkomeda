@@ -1,10 +1,8 @@
 package com.github.yizzuide.milkomeda.particle;
 
 import com.github.yizzuide.milkomeda.util.Polyfill;
+import com.github.yizzuide.milkomeda.util.RedisUtil;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
 /**
@@ -14,14 +12,11 @@ import org.springframework.data.redis.core.StringRedisTemplate;
  *
  * @author yizzuide
  * @since 1.5.0
- * @version 1.11.0
+ * @version 1.14.0
  * Create at 2019/05/30 13:49
  */
 @Slf4j
 public class IdempotentLimiter extends LimitHandler {
-
-    @Autowired
-    private StringRedisTemplate redisTemplate;
 
     // 装饰后缀
     private static final String POSTFIX = ":repeat";
@@ -29,17 +24,8 @@ public class IdempotentLimiter extends LimitHandler {
     @Override
     public <R> R limit(String key, long expire, Process<R> process) throws Throwable {
         String decoratedKey = key + POSTFIX;
-        val isAbsent = redisTemplate.execute((RedisCallback<Boolean>) connection -> {
-            byte[] keyBytes = redisTemplate.getStringSerializer().serialize(decoratedKey);
-            byte[] valueBytes = redisTemplate.getStringSerializer().serialize(("1"));
-            // 将设置key
-            val success = connection.setNX(keyBytes, valueBytes);
-            assert success != null;
-            if (success) {
-                connection.expire(keyBytes, expire);
-            }
-            return success;
-        });
+        StringRedisTemplate redisTemplate = getRedisTemplate();
+        Boolean isAbsent = RedisUtil.setIfAbsent(decoratedKey, expire, redisTemplate);
         assert isAbsent != null;
         Particle particle = new Particle(this.getClass(), !isAbsent, isAbsent ? null : "1");
         try {

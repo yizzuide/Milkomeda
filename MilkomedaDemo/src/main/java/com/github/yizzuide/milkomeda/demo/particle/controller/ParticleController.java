@@ -23,7 +23,6 @@ import java.util.Map;
 @RequestMapping("particle")
 public class ParticleController {
 
-    // 注意：由于配置了限制器链，就有了两个去重限制器，这里使用@Resource按Bean名注入
     @Resource
     private IdempotentLimiter idempotentLimiter;
 

@@ -53,10 +53,6 @@ public class EchoConfig {
 
     @Bean("echoRestTemplate")
     public RestTemplate simpleRestTemplate(RestTemplateBuilder builder) {
-        return getRestTemplate(builder);
-    }
-
-    private RestTemplate getRestTemplate(RestTemplateBuilder builder) {
         RestTemplate restTemplate = builder.build();
         restTemplate.setRequestFactory(clientHttpRequestFactory());
         // 自定义错误处理
