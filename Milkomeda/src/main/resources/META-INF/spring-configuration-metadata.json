@@ -49,6 +49,41 @@
       "name": "milkomeda.echo.retry_count",
       "type": "java.lang.Integer",
       "defaultValue": 3
+    },
+    {
+      "name": "milkomeda.crust.use_rsa",
+      "type": "java.lang.Boolean",
+      "defaultValue": false
+    },
+    {
+      "name": "milkomeda.crust.secure_key",
+      "type": "java.lang.String",
+      "defaultValue": null
+    },
+    {
+      "name": "milkomeda.crust.pub_key",
+      "type": "java.lang.String",
+      "defaultValue": null
+    },
+    {
+      "name": "milkomeda.crust.pri_key",
+      "type": "java.lang.String",
+      "defaultValue": null
+    },
+    {
+      "name": "milkomeda.crust.expire",
+      "type": "java.lang.Integer",
+      "defaultValue": 30
+    },
+    {
+      "name": "milkomeda.crust.token_name",
+      "type": "java.lang.String",
+      "defaultValue": "token"
+    },
+    {
+      "name": "milkomeda.crust.use_bCrypt",
+      "type": "java.lang.Boolean",
+      "defaultValue": true
     }
   ]
 }

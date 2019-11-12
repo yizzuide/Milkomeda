@@ -5,6 +5,18 @@ spring:
   redis:
     host: 127.0.0.1
 
-# 配置是否显示跟踪日志信息（线上环境应该关闭）
 milkomeda:
-  show-log: true
+  # 配置是否显示跟踪日志信息（线上环境应该关闭）
+  show_log: true
+
+  echo:
+    # 设置请求读取超时
+    read_timeout: 10000
+
+  crust:
+    # 使用对称密钥生成token
+    secure_key: crust_secure_key
+    # 自定义token头，默认为token
+    token_name: Authorization
+    # 不使用BCrypt（如果用户表有salt字段的情况）
+#    use_bCrypt: false

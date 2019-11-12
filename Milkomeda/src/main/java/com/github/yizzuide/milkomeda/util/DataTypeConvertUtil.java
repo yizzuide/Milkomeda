@@ -16,6 +16,7 @@ import java.util.regex.Pattern;
  *
  * @author yizzuide
  * @since 1.13.0
+ * @version 1.14.0
  * Create at 2019/09/21 17:23
  */
 public class DataTypeConvertUtil {
@@ -39,23 +40,46 @@ public class DataTypeConvertUtil {
     }
 
     /**
-     * Long 转 Integer
-     * @param num Long
+     * Object 转 String
+     * @param obj   Object
+     * @return  String
+     */
+    public static String toString(Object obj) {
+        if (obj == null) {
+            return null;
+        }
+        return obj.toString();
+    }
+
+    /**
+     * Object 转 Long
+     * @param obj Object
      * @return Integer
      */
-    public static Integer intVal(Long num) {
-        int n = num.intValue();
-        // 注意：这里不能直接返回num.intValue()，由于编译器类型装箱的原因，会报错: java.lang.Long cannot be cast to java.lang.Integer
-        return n;
+    public static Long toLong(Object obj) {
+        if (obj == null) {
+            return 0L;
+        }
+        if (obj instanceof Double || obj instanceof Float) {
+            return Long.valueOf(StringUtils.substringBefore(obj.toString(), "."));
+        }
+        if (obj instanceof Number) {
+            return Long.valueOf(obj.toString());
+        }
+        if (obj instanceof String) {
+            return Long.valueOf(obj.toString());
+        } else {
+            return 0L;
+        }
     }
 
     /**
      * Object 转 int
-     * @param num Object
+     * @param obj Object
      * @return int
      */
-    public static int intVal(Object num) {
-        return Integer.parseInt(String.valueOf(num));
+    public static Integer toInt(Object obj) {
+        return toLong(obj).intValue();
     }
 
     /**
@@ -65,7 +89,7 @@ public class DataTypeConvertUtil {
      * @return 16进制字符串
      */
     public static String byte2HexStr(byte[] buf) {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         for (byte b : buf) {
             String hex = Integer.toHexString(b & 0xFF);
             if (hex.length() == 1) {
