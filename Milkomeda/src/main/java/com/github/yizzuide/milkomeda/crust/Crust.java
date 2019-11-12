@@ -34,7 +34,7 @@ public class Crust {
     /**
      * 创建时间
      */
-    private static final String CREATED = "created";
+    private static final String CREATED = Claims.ISSUED_AT;
     /**
      * 权限列表
      */
@@ -100,6 +100,16 @@ public class Crust {
     }
 
     /**
+     * 获取Token发行时间
+     */
+    long getTokenIssue() {
+        String token = getToken();
+        String unSignKey = getUnSignKey();
+        Claims claims = JwtUtil.parseToken(token, unSignKey);
+        return (long) claims.get(CREATED);
+    }
+
+    /**
      * 根据令牌进行认证
      */
     void checkAuthentication() {
@@ -114,7 +124,7 @@ public class Crust {
      *
      * @return 用户名
      */
-    private Authentication getAuthenticationFromToken() {
+    Authentication getAuthenticationFromToken() {
         Authentication authentication = null;
         // 获取请求携带的令牌
         String token = getToken();
@@ -196,7 +206,7 @@ public class Crust {
             if (principal instanceof CrustUserDetails) {
                 CrustUserDetails userDetails = (CrustUserDetails) principal;
                 userInfo = new CrustUserInfo(userDetails.getUid(), userDetails.getUsername(), getToken());
-            } else {
+            } else if (authentication instanceof CrustAuthenticationToken) {
                 CrustAuthenticationToken authenticationToken = (CrustAuthenticationToken) authentication;
                 Claims claims = JwtUtil.parseToken(authenticationToken.getToken(), getUnSignKey());
                 String uid = (String) claims.get(UID);
@@ -241,7 +251,7 @@ public class Crust {
      *
      * @return Token
      */
-    private String getToken() {
+    public String getToken() {
         String token = WebContext.getRequest().getHeader(props.getTokenName());
         if (StringUtils.isEmpty(token)) return null;
         // 一般请求头Authorization的值会添加Bearer

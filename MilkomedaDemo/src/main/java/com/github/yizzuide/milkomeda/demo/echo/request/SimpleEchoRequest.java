@@ -47,7 +47,7 @@ public class SimpleEchoRequest extends EchoRequest {
         // 可以设置为application/x-www-form-urlencoded
 //        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
         // 自定义请求头
-        headers.add("Authorization", "Basic c2tfdGVzdF9PWUNFZkw1eGdMTCtsOFp2SzdRYVNHR1ZNTjczb05FcGszeXorUnhuLzJiUy9MQ2dDUVorZ3c9PTo=");
+//        headers.add("Authorization", "Basic c2tfdGVzdF9PWUNFZkw1eGdMTCtsOFp2SzdRYVNHR1ZNTjczb05FcGszeXorUnhuLzJiUy9MQ2dDUVorZ3c9PTo=");
     }
 
     // 添加统一传递参数，如appId、签名等，如是不需要可不用覆盖这个类

@@ -52,6 +52,7 @@ public class EchoConfig {
     private EchoProperties echoProperties;
 
     @Bean("echoRestTemplate")
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     public RestTemplate simpleRestTemplate(RestTemplateBuilder builder) {
         RestTemplate restTemplate = builder.build();
         restTemplate.setRequestFactory(clientHttpRequestFactory());

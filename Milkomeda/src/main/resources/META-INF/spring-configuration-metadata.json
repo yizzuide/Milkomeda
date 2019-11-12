@@ -84,6 +84,16 @@
       "name": "milkomeda.crust.use_bCrypt",
       "type": "java.lang.Boolean",
       "defaultValue": true
+    },
+    {
+      "name": "milkomeda.crust.enable_auto_refresh_token",
+      "type": "java.lang.Boolean",
+      "defaultValue": true
+    },
+    {
+      "name": "milkomeda.crust.refresh_token_interval",
+      "type": "java.lang.Integer",
+      "defaultValue": 5
     }
   ]
 }

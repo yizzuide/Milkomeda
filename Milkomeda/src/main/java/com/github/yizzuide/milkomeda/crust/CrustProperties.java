@@ -35,9 +35,9 @@ public class CrustProperties {
     private String priKey;
 
     /**
-     * Token过期时间（单位分，默认30分钟）
+     * Token过期时间（默认30分钟，单位：分）
      */
-    private Integer expire = 30;
+    private int expire = 30;
 
     /**
      * 请求头自定义的token名（默认为token)
@@ -49,4 +49,14 @@ public class CrustProperties {
      * 什么是BCrypt？BCrypt能够将salt添加到加密的密码中，解密时可以将salt提取出来
      */
     private boolean useBCrypt = true;
+
+    /**
+     * 开启Token自动刷新（默认开启）
+     */
+    private boolean enableAutoRefreshToken = true;
+
+    /**
+     * Token刷新间隔（默认5分钟，单位：分）
+     */
+    private int refreshTokenInterval = 5;
 }
