@@ -22,6 +22,9 @@
 - [x] Echo（回响）：用于第三方请求，支持签名/验签、数据加密、可定制统一响应类型和成功校验。*1.13.0+*
     * 依赖技术：Spring MVC
     * 设计模式：模板方法模式、适配器模式、工厂方法模式
+- [x] Crust（外壳）：用于生成JWT Token，支持验证、刷新Token，可选配置对称与RSA非对称生成Token，BCrypt或自定义salt表字段加密的方式。*1.14.0+*
+    * 依赖技术：Spring Security
+    * 设计模式：模板方法模式、适配器模式
     
 ## Requirements
 * Java 8
