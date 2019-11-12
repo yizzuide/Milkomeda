@@ -3,97 +3,116 @@
     {
       "name": "milkomeda.show-log",
       "type": "java.lang.Boolean",
-      "defaultValue": false
+      "defaultValue": false,
+      "description": "显示INFO级别运行日志"
     },
     {
       "name": "milkomeda.echo.pool-max-size",
       "type": "java.lang.Integer",
-      "defaultValue": 200
+      "defaultValue": 200,
+      "description": "连接池最大连接数"
     },
     {
       "name": "milkomeda.echo.default-max-per-route",
       "type": "java.lang.Integer",
-      "defaultValue": 50
+      "defaultValue": 50,
+      "description": "每个路由的并发量"
     },
     {
       "name": "milkomeda.echo.connect-timeout",
       "type": "java.lang.Integer",
-      "defaultValue": 5000
+      "defaultValue": 5000,
+      "description": "连接超时ms"
     },
     {
       "name": "milkomeda.echo.read-timeout",
       "type": "java.lang.Integer",
-      "defaultValue": 5000
+      "defaultValue": 5000,
+      "description": "请求读取超时ms"
     },
     {
       "name": "milkomeda.echo.connection-request-timeout",
       "type": "java.lang.Integer",
-      "defaultValue": 200
+      "defaultValue": 200,
+      "description": "池中获取请求连接超时ms（不宜过长）"
     },
     {
       "name": "milkomeda.echo.enable-buffer-request-body",
       "type": "java.lang.Boolean",
-      "defaultValue": false
+      "defaultValue": false,
+      "description": "缓冲请求(POST/PUT)提交数据，建议不要修改，以免耗尽内存"
     },
     {
       "name": "milkomeda.echo.keep-alive",
       "type": "java.lang.Integer",
-      "defaultValue": 5000
+      "defaultValue": 5000,
+      "description": "连接保活时长ms"
     },
     {
       "name": "milkomeda.echo.enable-request-sent-retry",
       "type": "java.lang.Boolean",
-      "defaultValue": true
+      "defaultValue": true,
+      "description": "请求失败时是否允许重试"
     },
     {
       "name": "milkomeda.echo.retry-count",
       "type": "java.lang.Integer",
-      "defaultValue": 3
+      "defaultValue": 3,
+      "description": "请求重试次数"
     },
     {
       "name": "milkomeda.crust.use-rsa",
       "type": "java.lang.Boolean",
-      "defaultValue": false
+      "defaultValue": false,
+      "description": "使用非对称加密签名Token"
     },
     {
       "name": "milkomeda.crust.secure-key",
       "type": "java.lang.String",
-      "defaultValue": null
+      "defaultValue": null,
+      "description": "对称加密key"
     },
     {
       "name": "milkomeda.crust.pub-key",
       "type": "java.lang.String",
-      "defaultValue": null
+      "defaultValue": null,
+      "description": "非对称公钥key"
     },
     {
       "name": "milkomeda.crust.pri-key",
       "type": "java.lang.String",
-      "defaultValue": null
+      "defaultValue": null,
+      "description": "非对称私钥key"
     },
     {
       "name": "milkomeda.crust.expire",
       "type": "java.lang.Integer",
-      "defaultValue": 30
+      "defaultValue": 30,
+      "description": "Token过期时间（单位：分钟)"
     },
     {
       "name": "milkomeda.crust.token-name",
       "type": "java.lang.String",
-      "defaultValue": "token"
+      "defaultValue": "token",
+      "description": "自定义请求Header的Token字段名"
     },
     {
       "name": "milkomeda.crust.use-bCrypt",
       "type": "java.lang.Boolean",
-      "defaultValue": true
+      "defaultValue": true,
+      "description": "使用BCrypt加密密码（将salt藏在密码里）"
     },
     {
       "name": "milkomeda.crust.enable-auto-refresh-token",
       "type": "java.lang.Boolean",
-      "defaultValue": true
+      "defaultValue": true,
+      "description": "允许自动刷新Token"
     },
     {
       "name": "milkomeda.crust.refresh-token-interval",
       "type": "java.lang.Integer",
-      "defaultValue": 5
+      "defaultValue": 5,
+      "description": "自动刷新Token间隔（单位：分钟)"
     }
   ]
 }
