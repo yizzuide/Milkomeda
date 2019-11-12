@@ -1,72 +1,72 @@
 {
   "properties": [
     {
-      "name": "milkomeda.show_log",
+      "name": "milkomeda.show-log",
       "type": "java.lang.Boolean",
       "defaultValue": false
     },
     {
-      "name": "milkomeda.echo.pool_max_size",
+      "name": "milkomeda.echo.pool-max-size",
       "type": "java.lang.Integer",
       "defaultValue": 200
     },
     {
-      "name": "milkomeda.echo.default_max_per_route",
+      "name": "milkomeda.echo.default-max-per-route",
       "type": "java.lang.Integer",
       "defaultValue": 50
     },
     {
-      "name": "milkomeda.echo.connect_timeout",
+      "name": "milkomeda.echo.connect-timeout",
       "type": "java.lang.Integer",
       "defaultValue": 5000
     },
     {
-      "name": "milkomeda.echo.read_timeout",
+      "name": "milkomeda.echo.read-timeout",
       "type": "java.lang.Integer",
       "defaultValue": 5000
     },
     {
-      "name": "milkomeda.echo.connection_request_timeout",
+      "name": "milkomeda.echo.connection-request-timeout",
       "type": "java.lang.Integer",
       "defaultValue": 200
     },
     {
-      "name": "milkomeda.echo.enable_buffer_request_body",
+      "name": "milkomeda.echo.enable-buffer-request-body",
       "type": "java.lang.Boolean",
       "defaultValue": false
     },
     {
-      "name": "milkomeda.echo.keep_alive",
+      "name": "milkomeda.echo.keep-alive",
       "type": "java.lang.Integer",
       "defaultValue": 5000
     },
     {
-      "name": "milkomeda.echo.enable_request_sent_retry",
+      "name": "milkomeda.echo.enable-request-sent-retry",
       "type": "java.lang.Boolean",
       "defaultValue": true
     },
     {
-      "name": "milkomeda.echo.retry_count",
+      "name": "milkomeda.echo.retry-count",
       "type": "java.lang.Integer",
       "defaultValue": 3
     },
     {
-      "name": "milkomeda.crust.use_rsa",
+      "name": "milkomeda.crust.use-rsa",
       "type": "java.lang.Boolean",
       "defaultValue": false
     },
     {
-      "name": "milkomeda.crust.secure_key",
+      "name": "milkomeda.crust.secure-key",
       "type": "java.lang.String",
       "defaultValue": null
     },
     {
-      "name": "milkomeda.crust.pub_key",
+      "name": "milkomeda.crust.pub-key",
       "type": "java.lang.String",
       "defaultValue": null
     },
     {
-      "name": "milkomeda.crust.pri_key",
+      "name": "milkomeda.crust.pri-key",
       "type": "java.lang.String",
       "defaultValue": null
     },
@@ -76,22 +76,22 @@
       "defaultValue": 30
     },
     {
-      "name": "milkomeda.crust.token_name",
+      "name": "milkomeda.crust.token-name",
       "type": "java.lang.String",
       "defaultValue": "token"
     },
     {
-      "name": "milkomeda.crust.use_bCrypt",
+      "name": "milkomeda.crust.use-bCrypt",
       "type": "java.lang.Boolean",
       "defaultValue": true
     },
     {
-      "name": "milkomeda.crust.enable_auto_refresh_token",
+      "name": "milkomeda.crust.enable-auto-refresh-token",
       "type": "java.lang.Boolean",
       "defaultValue": true
     },
     {
-      "name": "milkomeda.crust.refresh_token_interval",
+      "name": "milkomeda.crust.refresh-token-interval",
       "type": "java.lang.Integer",
       "defaultValue": 5
     }
