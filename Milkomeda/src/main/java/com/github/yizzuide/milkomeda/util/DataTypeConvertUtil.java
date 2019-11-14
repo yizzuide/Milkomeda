@@ -16,7 +16,7 @@ import java.util.regex.Pattern;
  *
  * @author yizzuide
  * @since 1.13.0
- * @version 1.14.0
+ * @version 1.15.0
  * Create at 2019/09/21 17:23
  */
 public class DataTypeConvertUtil {
@@ -80,6 +80,17 @@ public class DataTypeConvertUtil {
      */
     public static Integer toInt(Object obj) {
         return toLong(obj).intValue();
+    }
+
+    /**
+     * Long 转 Integer
+     * @param num Long
+     * @return Integer
+     */
+    public static Integer intVal(Long num) {
+        int n = num.intValue();
+        // 注意：这里不能直接返回num.intValue()，由于编译器类型装箱的原因，会报错: java.lang.Long cannot be cast to java.lang.Integer
+        return n;
     }
 
     /**

@@ -38,7 +38,7 @@ import static com.github.yizzuide.milkomeda.util.ReflectUtil.injectParam;
  *
  * @author yizzuide
  * @since 0.2.0
- * @version 1.13.11
+ * @version 1.15.0
  * Create at 2019/04/11 19:48
  */
 @Slf4j
@@ -104,7 +104,7 @@ public class CometAspect {
             headers.put(key, request.getHeader(key));
         }
         cometData.setRequestHeaders(JSONUtil.serialize(headers));
-        cometData.setRequestIP(request.getRemoteAddr());
+        cometData.setRequestIP(NetworkUtil.getRemoteAddr(request));
         cometData.setDeviceInfo(request.getHeader("user-agent"));
         return applyAround(comet, cometData, threadLocal, joinPoint, request, requestTime, comet.name(), comet.tag(), (returnData) -> {
             if (returnData.getClass() == DeferredResult.class) {
@@ -204,25 +204,25 @@ public class CometAspect {
         cometData.setDuration(String.valueOf(duration));
         cometData.setStatus("1");
         cometData.setResponseTime(new Date());
-        // returnData应用map转换类型
         if (returnData != null) {
+            // returnData应用map转换类型
             if (mapReturnData != null) {
                 returnData = mapReturnData.apply(returnData);
             }
+
+            // 记录返回数据
+            if (returnData instanceof ResponseEntity) {
+                Object body = ((ResponseEntity) returnData).getBody();
+                cometData.setResponseData(body instanceof String ? (String) body : JSONUtil.serialize(body));
+            } else {
+                cometData.setResponseData(returnData instanceof String ? (String) returnData : JSONUtil.serialize(returnData));
+            }
         }
+
         // 开始回调
         Object returnObj = recorder.onReturn(cometData, returnData);
         // 修正返回值
         returnObj = returnObj == null ? returnData : returnObj;
-        // 记录返回数据
-        if (returnObj != null) {
-            if (returnObj instanceof ResponseEntity) {
-                Object body = ((ResponseEntity) returnObj).getBody();
-                cometData.setResponseData(body instanceof String ? (String) body : JSONUtil.serialize(body));
-            } else {
-                cometData.setResponseData(returnObj instanceof String ? (String) returnObj : JSONUtil.serialize(returnObj));
-            }
-        }
         if (milkomedaProperties.isShowLog()) {
             log.info("Comet:- afterReturn: {}", JSONUtil.serialize(cometData));
         }

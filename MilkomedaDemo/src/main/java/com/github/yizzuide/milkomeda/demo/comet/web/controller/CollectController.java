@@ -15,6 +15,8 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.github.yizzuide.milkomeda.demo.comet.collector.CollectorType.TAG_PROFILE;
+
 /**
  * CollectController
  *
@@ -32,7 +34,7 @@ public class CollectController {
     private CollectService collectService;
 
     @RequestMapping("feature")
-    @Comet(apiCode = "1.1", name = "上传用户特征", tag = "profile", prototype = ProfileWebCometData.class)
+    @Comet(apiCode = "1.1", name = "上传用户特征", tag = TAG_PROFILE, prototype = ProfileWebCometData.class)
     public ResponseEntity<Map> feature(@RequestParam Map<String, String> params, HttpServletRequest request) {
         System.out.println(request.getHeader("accept-language"));
         System.out.println(params);
