@@ -88,7 +88,7 @@
       "name": "milkomeda.crust.expire",
       "type": "java.lang.Integer",
       "defaultValue": 30,
-      "description": "Token过期时间（单位：分钟)"
+      "description": "Token过期时间（单位：分钟）"
     },
     {
       "name": "milkomeda.crust.token-name",
@@ -112,7 +112,73 @@
       "name": "milkomeda.crust.refresh-token-interval",
       "type": "java.lang.Integer",
       "defaultValue": 5,
-      "description": "自动刷新Token间隔（单位：分钟)"
+      "description": "自动刷新Token间隔（单位：分钟）"
+    },
+    {
+      "name": "milkomeda.ice.delay-bucket-count",
+      "type": "java.lang.Integer",
+      "defaultValue": 3,
+      "description": "延迟队列分桶数量"
+    },
+    {
+      "name": "milkomeda.ice.delay-bucket-poll-rate",
+      "type": "java.lang.Long",
+      "defaultValue": 1000,
+      "description": "延迟分桶任务轮询间隔（单位：ms）"
+    },
+    {
+      "name": "milkomeda.ice.ttr",
+      "type": "java.lang.Long",
+      "defaultValue": 5000,
+      "description": "任务执行超时时间（单位：ms）"
+    },
+    {
+      "name": "milkomeda.ice.retry-count",
+      "type": "java.lang.Integer",
+      "defaultValue": 3,
+      "description": "任务执行超时重试次数"
+    },
+    {
+      "name": "milkomeda.ice.enable-delay-multi-retry-count",
+      "type": "java.lang.Boolean",
+      "defaultValue": true,
+      "description": "开启任务执行超时重试时，延迟时间根据重试次数递增"
+    },
+    {
+      "name": "milkomeda.ice.retry-delay-multi-factor",
+      "type": "java.lang.Integer",
+      "defaultValue": 3,
+      "description": "任务执行超时重试的延迟时间增长因子"
+    },
+    {
+      "name": "milkomeda.ice.enable-task",
+      "type": "java.lang.Boolean",
+      "defaultValue": false,
+      "description": "使用Task处理方式接收Topic方式"
+    },
+    {
+      "name": "milkomeda.ice.task-pool-size",
+      "type": "java.lang.Integer",
+      "defaultValue": 20,
+      "description": "任务池大小"
+    },
+    {
+      "name": "milkomeda.ice.task-termination-aware-seconds",
+      "type": "java.lang.Integer",
+      "defaultValue": 60,
+      "description": "任务被停止时的有效执行时间"
+    },
+    {
+      "name": "milkomeda.ice.task-topic-pop-max-size",
+      "type": "java.lang.Integer",
+      "defaultValue": 10,
+      "description": "Topic任务消费的最大个数"
+    },
+    {
+      "name": "milkomeda.ice.task-execute-rate",
+      "type": "java.lang.Long",
+      "defaultValue": 5000,
+      "description": "任务执行间隔"
     }
   ]
 }

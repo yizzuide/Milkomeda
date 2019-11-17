@@ -25,14 +25,14 @@ import static com.github.yizzuide.milkomeda.util.ReflectUtil.*;
 
 /**
  * Pulsar
- *
+ * <p>
  * 用于存放和管理DeferredResult的容器，配合应用注解 <code>@PulsarFlow</code> 切面，
  * 并提供参数注入DeferredResult的包装类 <code>PulsarDeferredResult</code> 到请求参数列表。
  *
  * @author yizzuide
- * @since  0.1.0
  * @version 1.13.11
  * Create at 2019/03/29 10:36
+ * @since 0.1.0
  */
 @Slf4j
 @Aspect
@@ -46,14 +46,15 @@ public class Pulsar {
     /**
      * 线程池执行器
      */
-    @Autowired @Qualifier("pulsarTaskExecutor")
+    @Autowired
+    @Qualifier("pulsarTaskExecutor")
     private ThreadPoolTaskExecutor taskExecutor;
 
     /**
-     *  Error 错误回调
-     *
-     *  Throwable：错误异常
-     *  Object：响应数据
+     * Error 错误回调
+     * <p>
+     * Throwable：错误异常
+     * Object：响应数据
      */
     private Function<Throwable, Object> errorCallback;
 
@@ -74,6 +75,7 @@ public class Pulsar {
 
     /**
      * 记存一个DeferredResult
+     *
      * @param pulsarDeferredResult PulsarDeferredResult
      */
     private void putDeferredResult(PulsarDeferredResult pulsarDeferredResult) {
@@ -82,6 +84,7 @@ public class Pulsar {
 
     /**
      * 通过标识符取出PulsarDeferredResult
+     *
      * @param id 标识符
      * @return PulsarDeferredResult
      */
@@ -91,6 +94,7 @@ public class Pulsar {
 
     /**
      * 通过标识符得到DeferredResult
+     *
      * @param id 标识符
      * @return DeferredResult
      */
@@ -101,6 +105,7 @@ public class Pulsar {
 
     /**
      * 移除DeferredResult
+     *
      * @param id 标识符
      */
     private void removeDeferredResult(String id) {
@@ -109,6 +114,7 @@ public class Pulsar {
 
     /**
      * 对使用了 @PulsarFlow 注解实现环绕切面
+     *
      * @param joinPoint 切面连接点
      * @return 响应数据对象
      * @throws Throwable 可抛出异常
@@ -229,6 +235,7 @@ public class Pulsar {
 
     /**
      * 提交一个基于Spring的ThreadPoolTaskExecutor任务运行
+     *
      * @param runnable Runnable
      */
     public void post(Runnable runnable) {
@@ -237,8 +244,9 @@ public class Pulsar {
 
     /**
      * 配置默认的Spring MVC异步支持
+     *
      * @param configurer 配置对象
-     * @param timeout 超时时间，ms
+     * @param timeout    超时时间，ms
      */
     public void configure(AsyncSupportConfigurer configurer, long timeout) {
         configure(configurer, 5, 10, 200, 200, timeout);
@@ -246,12 +254,13 @@ public class Pulsar {
 
     /**
      * 自定义配置的异步支持
-     * @param configurer        配置对象
-     * @param corePoolSize      核心池大小
-     * @param maxPoolSize       最大线程池数
-     * @param queueCapacity     队列容量
-     * @param keepAliveSeconds  线程保存存活时间
-     * @param timeout           超时时间，ms
+     *
+     * @param configurer       配置对象
+     * @param corePoolSize     核心池大小
+     * @param maxPoolSize      最大线程池数
+     * @param queueCapacity    队列容量
+     * @param keepAliveSeconds 线程保存存活时间
+     * @param timeout          超时时间，ms
      */
     public void configure(AsyncSupportConfigurer configurer, int corePoolSize, int maxPoolSize, int queueCapacity, int keepAliveSeconds, long timeout) {
         // 默认超时时间
@@ -264,6 +273,10 @@ public class Pulsar {
         taskExecutor.setQueueCapacity(queueCapacity);
         // 线程池维护线程所允许的空闲时间
         taskExecutor.setKeepAliveSeconds(keepAliveSeconds);
+        // 调度器shutdown被调用时等待当前被调度的任务完成
+        taskExecutor.setWaitForTasksToCompleteOnShutdown(true);
+        // 等待时长
+        taskExecutor.setAwaitTerminationSeconds(60);
         taskExecutor.setThreadNamePrefix("pulsar-");
         // 线程池对拒绝任务（无线程可用）的处理策略，目前只支持AbortPolicy、CallerRunsPolicy，默认为后者
         taskExecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
@@ -274,6 +287,7 @@ public class Pulsar {
 
     /**
      * 用于处理 Error 类型（Exception类型还是使用 @ExceptionHandler 捕获）
+     *
      * @param errorCallback 失败回调
      */
     public void setErrorCallback(Function<Throwable, Object> errorCallback) {
@@ -283,6 +297,7 @@ public class Pulsar {
 
     /**
      * 处理超时
+     *
      * @param timeoutCallback 需要返回响应的超时数据
      */
     public void setTimeoutCallback(Callable<Object> timeoutCallback) {

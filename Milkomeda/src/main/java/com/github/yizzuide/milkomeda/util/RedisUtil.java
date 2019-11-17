@@ -1,6 +1,9 @@
 package com.github.yizzuide.milkomeda.util;
 
+import org.springframework.dao.DataAccessException;
+import org.springframework.data.redis.core.RedisOperations;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.SessionCallback;
 import org.springframework.data.redis.support.atomic.RedisAtomicLong;
 
 import java.util.Date;
@@ -58,5 +61,20 @@ public class RedisUtil {
             ral.expire(liveTime, TimeUnit.SECONDS);
         }
         return increment;
+    }
+
+    /**
+     * 批量操作
+     * @param runnable      业务体
+     * @param redisTemplate RedisTemplate
+     */
+    public static void batchOps(Runnable runnable, RedisTemplate<String, String> redisTemplate) {
+        redisTemplate.executePipelined(new SessionCallback<Object>() {
+            @Override
+            public <K, V> Object execute(RedisOperations<K, V> operations) throws DataAccessException {
+                runnable.run();
+                return null;
+            }
+        });
     }
 }

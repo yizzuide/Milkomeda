@@ -20,3 +20,7 @@ milkomeda:
     token-name: Authorization
     # 不使用BCrypt（如果用户表有salt字段的情况）
 #    use-bCrypt: false
+
+  ice:
+    # 开启Task功能，开发者就可以通过注解方式接收topic消息
+    enable-task: true

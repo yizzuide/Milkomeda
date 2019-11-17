@@ -15,10 +15,16 @@ import org.springframework.web.context.request.RequestContextHolder;
 public class RequestContextDecorator implements TaskDecorator {
     @Override
     public Runnable decorate(Runnable runnable) {
-        RequestAttributes context = RequestContextHolder.currentRequestAttributes();
+        RequestAttributes context;
+        try {
+            context = RequestContextHolder.currentRequestAttributes();
+        } catch (Exception e) {
+            return runnable;
+        }
+        RequestAttributes finalContext = context;
         return () -> {
             try {
-                RequestContextHolder.setRequestAttributes(context);
+                RequestContextHolder.setRequestAttributes(finalContext);
                 runnable.run();
             } finally {
                 RequestContextHolder.resetRequestAttributes();
