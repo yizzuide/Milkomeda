@@ -46,6 +46,7 @@ public class Job<T> implements Serializable {
     /**
      * 状态（对外不可访问）
      */
+    @JsonSerialize(using = ToStringSerializer.class)
     private JobStatus status;
 
     public Job(String id, String topic, long delay, long ttr, int retryCount, T body) {

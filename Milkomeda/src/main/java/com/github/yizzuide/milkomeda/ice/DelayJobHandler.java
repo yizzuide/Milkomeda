@@ -48,8 +48,9 @@ public class DelayJobHandler implements Runnable {
     @Override
     public void run() {
         while (true) {
+            DelayJob delayJob = null;
             try {
-                DelayJob delayJob = delayBucket.poll(index);
+                delayJob = delayBucket.poll(index);
                 // 没有任务
                 if (delayJob == null) {
                     sleep();
@@ -71,7 +72,6 @@ public class DelayJobHandler implements Runnable {
                     delayBucket.remove(index, delayJob);
                     continue;
                 }
-                log.info("任务{}, 延迟触发时间：{}, 当前时间：{}", delayJob.getJodId(), delayJob.getDelayTime(), currentTime);
                 JobStatus status = job.getStatus();
                 if (JobStatus.RESERVED.equals(status)) {
                     // 处理超时任务
@@ -81,7 +81,8 @@ public class DelayJobHandler implements Runnable {
                     processDelayJob(delayJob, job);
                 }
             } catch (Exception e) {
-                log.error("Ice Timer处理DelayBucket出错：{}", e.getMessage(), e);
+                log.error("Ice Timer处理延迟Job {} 异常：{}", delayJob != null ?
+                        delayJob.getJodId()  : "[任务数据获取失败]", e.getMessage(), e);
                 sleep();
             }
         }
@@ -91,6 +92,7 @@ public class DelayJobHandler implements Runnable {
      * 处理ttr的任务
      */
     private void processTtrJob(DelayJob delayJob, Job job) {
+        log.info("Ice处理TTR重试的Job {}，已重试次数为{}", delayJob.getJodId(), delayJob.getRetryCount());
         // 检测重试次数过载
         boolean overload = delayJob.getRetryCount() > job.getRetryCount();
         if (overload) {
@@ -123,6 +125,7 @@ public class DelayJobHandler implements Runnable {
      * 处理延时任务
      */
     private void processDelayJob(DelayJob delayJob, Job job) {
+        log.info("Ice正在处理延迟的Job {}，当前状态为：{}", delayJob.getJodId(), job.getStatus());
         RedisUtil.batchOps(() -> {
             // 修改任务池状态
             job.setStatus(JobStatus.READY);
