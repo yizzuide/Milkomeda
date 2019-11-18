@@ -91,6 +91,9 @@
 
 [Echo使用文档](https://github.com/yizzuide/Milkomeda/wiki/Echo%E6%A8%A1%E5%9D%97%E7%9A%84%E4%BD%BF%E7%94%A8)
 
+
+[Ice使用文档](https://github.com/yizzuide/Milkomeda/wiki/%E4%BD%BF%E7%94%A8Ice%E5%AE%9E%E7%8E%B0%E5%BB%B6%E8%BF%9F%E9%98%9F%E5%88%97)
+
 ## Author
 yizzuide, fu837014586@163.com
 
