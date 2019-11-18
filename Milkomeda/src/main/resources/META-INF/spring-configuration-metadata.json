@@ -147,7 +147,7 @@
     {
       "name": "milkomeda.ice.retry-delay-multi-factor",
       "type": "java.lang.Integer",
-      "defaultValue": 3,
+      "defaultValue": 1,
       "description": "任务执行超时重试的延迟时间增长因子"
     },
     {

@@ -2,6 +2,7 @@ package com.github.yizzuide.milkomeda.ice;
 
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.type.TypeFactory;
+import com.github.yizzuide.milkomeda.universe.metadata.HandlerMetaData;
 import com.github.yizzuide.milkomeda.util.JSONUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,19 +54,20 @@ public class IceScheduleConfig implements SchedulingConfigurer {
             IceContext.getTopicMap().keySet().forEach(topic -> {
                 List<Job<Map>> jobs = ice.pop(topic, props.getTaskTopicPopMaxSize());
                 if (CollectionUtils.isEmpty(jobs)) return;
-                List<IceExpress> iceExpressList = IceContext.getTopicMap().get(topic);
-                for (IceExpress iceExpress : iceExpressList) {
+
+                List<HandlerMetaData> metaDataList = IceContext.getTopicMap().get(topic);
+                for (HandlerMetaData metaData : metaDataList) {
                     try {
-                        Method method = iceExpress.getMethod();
+                        Method method = metaData.getMethod();
                         // 没有参数
                         if(method.getParameterTypes().length == 0) {
-                            method.invoke(iceExpress.getTarget());
+                            method.invoke(metaData.getTarget());
                             return;
                         }
                         Type[] genericParameterTypes = method.getGenericParameterTypes();
                         // 没有泛型参数
                         if (genericParameterTypes.length == 0) {
-                            method.invoke(iceExpress.getTarget(), jobs);
+                            method.invoke(metaData.getTarget(), jobs);
                             return;
                         }
                         ParameterizedType parameterizedType = (ParameterizedType) genericParameterTypes[0];
@@ -73,7 +75,7 @@ public class IceScheduleConfig implements SchedulingConfigurer {
                         // 子参数类型
                         Type[] subActualTypeArguments = ((ParameterizedTypeImpl) actualTypeArguments[0]).getActualTypeArguments();
                         if (subActualTypeArguments.length == 0) {
-                            method.invoke(iceExpress.getTarget(), jobs);
+                            method.invoke(metaData.getTarget(), jobs);
                             return;
                         }
                         JavaType javaType = TypeFactory.defaultInstance().constructType(subActualTypeArguments[0]);
@@ -81,7 +83,7 @@ public class IceScheduleConfig implements SchedulingConfigurer {
                         for (Job job : jobs) {
                             job.setBody(JSONUtil.nativeRead(JSONUtil.serialize(job.getBody()), javaType));
                         }
-                        method.invoke(iceExpress.getTarget(), jobs);
+                        method.invoke(metaData.getTarget(), jobs);
                     } catch (Exception e) {
                         log.error("Ice schedule error: {}", e.getMessage(), e);
                         return;

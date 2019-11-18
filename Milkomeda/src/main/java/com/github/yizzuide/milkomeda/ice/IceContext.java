@@ -1,15 +1,14 @@
 package com.github.yizzuide.milkomeda.ice;
 
-import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
+import com.github.yizzuide.milkomeda.universe.context.AopContextHolder;
+import com.github.yizzuide.milkomeda.universe.metadata.HandlerMetaData;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
-import java.lang.reflect.Method;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
 
 /**
  * IceContext
@@ -21,36 +20,17 @@ import java.util.*;
 @Slf4j
 public class IceContext implements ApplicationListener<ContextRefreshedEvent> {
 
-    private static Map<String, List<IceExpress>> topicMap = new HashMap<>();
+    private static Map<String, List<HandlerMetaData>> topicMap;
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
-        Map<String, Object> beanMap = ApplicationContextHolder.get().getBeansWithAnnotation(IceHandler.class);
-        for (String key : beanMap.keySet()) {
-            // 如果方法有aop切面，可以通过AopUtils.getTargetClass(beanMap.get(key).getClass())获取
-            Method[] methods = ReflectionUtils.getAllDeclaredMethods(beanMap.get(key).getClass());
-            for (Method method : methods) {
-                // 获取指定方法上的注解的属性
-                final IceListener iceListener = AnnotationUtils.findAnnotation(method, IceListener.class);
-                if (null != iceListener) {
-                    String topicName = StringUtils.isEmpty(iceListener.topic()) ? iceListener.value() : iceListener.topic();
-                    if (StringUtils.isEmpty(topicName)) {
-                        throw new IllegalArgumentException("Please specify the topic of @IceListener!");
-                    }
-                    if (topicMap.containsKey(topicName)) {
-                        topicMap.get(topicName).add(new IceExpress(topicName, beanMap.get(key), method));
-                    } else {
-                        List<IceExpress> mList = new ArrayList<>();
-                        mList.add(new IceExpress(topicName, beanMap.get(key), method));
-                        topicMap.put(topicName, mList);
-                    }
-                    break;
-                }
-            }
-        }
+        topicMap = AopContextHolder.getHandlerMetaData(IceHandler.class, IceListener.class, annotation -> {
+                    IceListener iceListener = (IceListener) annotation;
+                    return StringUtils.isEmpty(iceListener.topic()) ? iceListener.value() : iceListener.topic();
+                }, false, true);
     }
 
-    static Map<String, List<IceExpress>> getTopicMap() {
+    static Map<String, List<HandlerMetaData>> getTopicMap() {
         return topicMap;
     }
 }

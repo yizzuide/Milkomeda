@@ -44,7 +44,7 @@ public class Job<T> implements Serializable {
      */
     private T body;
     /**
-     * 状态（对外不可访问）
+     * 状态
      */
     @JsonSerialize(using = ToStringSerializer.class)
     private JobStatus status;
@@ -56,13 +56,5 @@ public class Job<T> implements Serializable {
         this.ttr = ttr;
         this.retryCount = retryCount;
         this.body = body;
-    }
-
-    JobStatus getStatus() {
-        return status;
-    }
-
-    void setStatus(JobStatus status) {
-        this.status = status;
     }
 }
