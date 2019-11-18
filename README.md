@@ -5,26 +5,29 @@
 
 目前添加的模块有：
 - [x] Pulsar（脉冲星）: 用于长轮询、耗时请求fast-timeout等。*0.1.0+*
-    * 依赖技术：Spring MVC
-    * 设计模式：适配器模式、代理模式
+   * 依赖技术：Spring MVC
+   * 设计模式：适配器模式、代理模式
 - [x] Comet（彗星）:  用于统一的请求切面日志记录（包括Controller层、Service层（*1.12.0+*））。*0.2.0+*
-    * 依赖技术：Spring MVC
-    * 设计模式：策略模式
+   * 依赖技术：Spring MVC
+   * 设计模式：策略模式
 - [x] Pillar（创生柱）: 用于if/else业务块拆分。*0.2.0+*
-    * 可选依赖技术：Spring IoC
-    * 设计模式：策略模式、适配器模式
+   * 可选依赖技术：Spring IoC
+   * 设计模式：策略模式、适配器模式
 - [x] Particle（粒子）: 用于幂等/去重、次数限制，及可扩展限制器责任链。*1.5.0+*
-    * 依赖技术：Spring MVC、SpringBoot Data Redis
-    * 设计模式：策略模式、责任链模式、组合模式
+   * 依赖技术：Spring MVC、SpringBoot Data Redis
+   * 设计模式：策略模式、责任链模式、组合模式
 - [x] Light (光）: 用于快速缓存，支持超级缓存（ThreadLocal）、一级缓存（内存缓存池）、二级缓存（Redis)。 *1.8.0+*
-    * 依赖技术：SpringBoot Data Redis
-    * 设计模式：策略模式、模板方法模式、门面模式
+   * 依赖技术：SpringBoot Data Redis
+   * 设计模式：策略模式、模板方法模式、门面模式
 - [x] Echo（回响）：用于第三方请求，支持签名/验签、数据加密、可定制统一响应类型和成功校验。*1.13.0+*
-    * 依赖技术：Spring MVC
-    * 设计模式：模板方法模式、适配器模式、工厂方法模式
+   * 依赖技术：Spring MVC
+   * 设计模式：模板方法模式、适配器模式、工厂方法模式
 - [x] Crust（外壳）：用于生成JWT Token，支持验证、刷新Token，可选配置对称与RSA非对称生成Token，BCrypt或自定义salt表字段加密的方式。*1.14.0+*
-    * 依赖技术：Spring Security
-    * 设计模式：模板方法模式、适配器模式
+   * 依赖技术：Spring Security
+   * 设计模式：模板方法模式、适配器模式
+- [x] Ice（冰）：用于延迟列队的需求，支持配置延迟分桶、任务执行超时时间（TTR）、超时重试、Task自动调度等。*1.15.0+*
+   * 依赖技术：Spring IoC、Spring Task、SpringBoot Data Redis
+   * 设计模式：策略模式、享元模式、门面模式、面向声明式编程
     
 ## Requirements
 * Java 8
