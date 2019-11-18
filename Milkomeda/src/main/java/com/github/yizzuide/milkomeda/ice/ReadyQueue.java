@@ -24,7 +24,7 @@ public interface ReadyQueue {
     DelayJob pop(String topic);
 
     /**
-     * 批量取出待处理延迟任务
+     * 批量取出待处理延迟任务（非原子操作，多线程可能会重复）
      * @param topic 任务分组
      * @param count 批量数
      * @return  List

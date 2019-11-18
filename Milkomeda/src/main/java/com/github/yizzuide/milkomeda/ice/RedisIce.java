@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.CollectionUtils;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -14,6 +15,7 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 1.15.0
+ * @version 1.15.1
  * Create at 2019/11/16 15:20
  */
 public class RedisIce implements Ice {
@@ -76,7 +78,8 @@ public class RedisIce implements Ice {
 
     @Override
     public <T> List<Job<T>> pop(String topic, int count) {
-        List<DelayJob> delayJobList = readyQueue.pop(topic, count);
+        List<DelayJob> delayJobList = count == 1 ?
+                Collections.singletonList(readyQueue.pop(topic)) : readyQueue.pop(topic, count);
         if (CollectionUtils.isEmpty(delayJobList)) {
             return null;
         }
