@@ -1,8 +1,8 @@
 package com.github.yizzuide.milkomeda.demo;
 
 import com.github.yizzuide.milkomeda.crust.EnableCrust;
-import com.github.yizzuide.milkomeda.ice.EnableIce;
 import com.github.yizzuide.milkomeda.echo.EnableEcho;
+import com.github.yizzuide.milkomeda.ice.EnableIce;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;

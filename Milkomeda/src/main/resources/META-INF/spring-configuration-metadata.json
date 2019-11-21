@@ -115,6 +115,12 @@
       "description": "自动刷新Token间隔（单位：分钟）"
     },
     {
+      "name": "milkomeda.ice.enable-job-timer",
+      "type": "java.lang.Boolean",
+      "defaultValue": true,
+      "description": "开启作业Timer（仅作为消费端使用时需要设置为false）"
+    },
+    {
       "name": "milkomeda.ice.delay-bucket-count",
       "type": "java.lang.Integer",
       "defaultValue": 3,

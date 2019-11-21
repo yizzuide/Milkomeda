@@ -23,6 +23,6 @@ public class ProductCheckHandler {
     // 监听topic消息
     @IceListener(topic = "topic_product_check")
     public void handle(List<Job<Product>> jobs) {
-      log.info("job list: {}", jobs);
+      log.info("job list: {}", jobs.get(0).getBody());
     }
 }

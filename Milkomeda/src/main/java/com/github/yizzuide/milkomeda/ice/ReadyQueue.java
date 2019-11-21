@@ -7,6 +7,7 @@ import java.util.List;
  *
  * @author yizzuide
  * @since 1.15.0
+ * @version 1.15.2
  * Create at 2019/11/16 17:04
  */
 public interface ReadyQueue {
@@ -30,4 +31,10 @@ public interface ReadyQueue {
      * @return  List
      */
     List<DelayJob> pop(String topic, int count);
+
+    /**
+     * 获取准备消费队列的元素个数
+     * @param topic 任务分组
+     */
+    long size(String topic);
 }

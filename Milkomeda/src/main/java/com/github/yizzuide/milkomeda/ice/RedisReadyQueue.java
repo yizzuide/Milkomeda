@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 1.15.0
+ * @version 1.15.2
  * Create at 2019/11/16 17:07
  */
 public class RedisReadyQueue implements ReadyQueue, InitializingBean {
@@ -48,6 +49,12 @@ public class RedisReadyQueue implements ReadyQueue, InitializingBean {
         return delayJobOrigList.stream()
                 .map(delayJob -> JSONUtil.parse(delayJob, DelayJob.class))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public long size(String topic) {
+        Long size = getQueue(topic).size();
+        return size == null ? 0 : size;
     }
 
     private BoundListOperations<String, String> getQueue(String topic) {

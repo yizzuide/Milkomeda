@@ -8,11 +8,17 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  *
  * @author yizzuide
  * @since 1.15.0
+ * @version 1.15.2
  * Create at 2019/11/16 19:02
  */
 @Data
 @ConfigurationProperties("milkomeda.ice")
 class IceProperties {
+    /**
+     * 开启作业Timer（默认为true，仅作为消费端使用时需要设置为false）<br>
+     * 注意：使用<code>@EnableIceServer</code>时，设置为false无效
+     */
+    private boolean enableJobTimer = true;
     /**
      * 延迟分桶数量（默认为3）
      */
@@ -40,7 +46,8 @@ class IceProperties {
 
     /**
      * 使用Task处理方式接收Topic方式（默认为false)<br>
-     * 启用后，才可以通过<code>@IceHandler</code>和<code>@IceListener</code>接收Topic
+     * 启用后，才可以通过<code>@IceHandler</code>和<code>@IceListener</code>接收Topic<br>
+     * 注意：使用<code>@EnableIceClient</code>时，设置为false无效
      */
     private boolean enableTask = false;
 
