@@ -1,5 +1,7 @@
 package com.github.yizzuide.milkomeda.pulsar;
 
+import org.springframework.web.context.request.async.DeferredResult;
+
 import java.util.concurrent.Callable;
 import java.util.function.Function;
 
@@ -43,12 +45,20 @@ public class PulsarHolder {
     /**
      * 通过 Callable 和 PulsarDeferredResult 推迟运行耗时请求处理再返回
      *
-     * @param callable 运行方法，业务代码里可以直接返回数据。如：return ResponseEntity.ok(data);
-     * @param pulsarDeferredResult  基于Pulsar包装的DeferredResult
+     * @param callable  运行方法，业务代码里可以直接返回数据。如：return ResponseEntity.ok(data);
+     * @param identifier    PulsarDeferredResult或PulsarDeferredResultID
      * @return 返回null用于配合 @PulsarFlow 的使用，其它地方使用可以忽略这个返回值（因为这个不是真实要返回的数据）
      */
-    public static Object defer(Callable<Object> callable, PulsarDeferredResult pulsarDeferredResult) {
-         pulsar.post(new PulsarRunner(callable, pulsarDeferredResult));
-         return null;
+    public static Object defer(Callable<Object> callable, Object identifier) {
+        DeferredResult<Object> deferredResult;
+        if (identifier instanceof String || identifier instanceof Integer || identifier instanceof Long) {
+            deferredResult = pulsar.getDeferredResult(String.valueOf(identifier));
+        } else if (identifier instanceof PulsarDeferredResult) {
+            deferredResult = ((PulsarDeferredResult) identifier).getDeferredResult();
+        } else {
+            throw new IllegalArgumentException("identifier " + identifier + " is invalid.");
+        }
+        pulsar.post(new PulsarRunner(callable, deferredResult));
+        return null;
     }
 }

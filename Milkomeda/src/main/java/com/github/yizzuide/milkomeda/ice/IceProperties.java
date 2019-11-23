@@ -53,11 +53,13 @@ class IceProperties {
 
     /**
      * 任务池大小（默认20）
+     * @deprecated since 1.16.0, instead of spring.scheduling.pool.size
      */
     private int taskPoolSize = 20;
 
     /**
      * 任务被停止时的有效执行时间（单位：s，默认60）
+     * @deprecated since 1.16.0, instead of spring.scheduling.shutdown.await-termination-period
      */
     private int taskTerminationAwareSeconds = 60;
 
@@ -70,4 +72,9 @@ class IceProperties {
      * 任务执行间隔（单位：ms，默认5000）
      */
     private long taskExecuteRate = 5000;
+
+    /**
+     * 多个消费的并发锁超时（单位：s，默认60s）
+     */
+    private long taskPopCountLockTimeoutSeconds = 60L;
 }

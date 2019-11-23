@@ -25,7 +25,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.client.RestTemplate;
 
 import javax.net.ssl.HostnameVerifier;
@@ -44,7 +43,6 @@ import java.util.Objects;
  */
 @Slf4j
 @Configuration
-@EnableScheduling
 @EnableConfigurationProperties(EchoProperties.class)
 public class EchoConfig {
 

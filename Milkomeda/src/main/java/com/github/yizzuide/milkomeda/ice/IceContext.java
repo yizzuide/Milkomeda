@@ -5,7 +5,6 @@ import com.github.yizzuide.milkomeda.universe.metadata.HandlerMetaData;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.util.StringUtils;
 
 import java.util.HashMap;
 import java.util.List;
@@ -16,7 +15,7 @@ import java.util.Map;
  *
  * @author yizzuide
  * @since 1.15.0
- * @version 1.15.2
+ * @version 1.16.0
  * Create at 2019/11/17 18:40
  */
 @Slf4j
@@ -28,7 +27,7 @@ public class IceContext implements ApplicationListener<ContextRefreshedEvent> {
     public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
         topicMap = AopContextHolder.getHandlerMetaData(IceHandler.class, IceListener.class, annotation -> {
                     IceListener iceListener = (IceListener) annotation;
-                    return StringUtils.isEmpty(iceListener.topic()) ? iceListener.value() : iceListener.topic();
+                    return iceListener.value();
                 }, false, true);
     }
 

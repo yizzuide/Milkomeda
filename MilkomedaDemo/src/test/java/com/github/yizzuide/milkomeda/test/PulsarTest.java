@@ -38,7 +38,7 @@ public class PulsarTest {
     public void login() throws Exception {
         val ret = mockMvc.perform(MockMvcRequestBuilders.get("/user/login")
                 .param("username", "yiz")
-                .contentType(MediaType.APPLICATION_JSON_UTF8))
+                .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andReturn().getAsyncResult();
         System.out.println(ret);
@@ -48,7 +48,7 @@ public class PulsarTest {
     public void userInfo() throws Exception {
         val ret = mockMvc.perform(MockMvcRequestBuilders.get("/user/1")
                 .param("id", "1")
-                .contentType(MediaType.APPLICATION_JSON_UTF8))
+                .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andReturn().getAsyncResult();
         System.out.println(ret);
@@ -58,7 +58,7 @@ public class PulsarTest {
     public void sendNotice() throws Exception {
         val ret = mockMvc.perform(MockMvcRequestBuilders.get("/user/notice/1")
                 .param("id", "1")
-                .contentType(MediaType.APPLICATION_JSON_UTF8))
+                .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andReturn()
 

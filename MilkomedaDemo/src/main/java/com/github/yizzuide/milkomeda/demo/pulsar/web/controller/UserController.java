@@ -65,8 +65,7 @@ public class UserController {
     // 支持EL表达式设置DeferredResultID
     @PulsarFlow(useDeferredResult = true, id = "#id")
     @GetMapping("notice/{id:\\d+}")
-    public Object /* 这里的返回值必需为Object */ sendNotice(@PathVariable("id") Long id,
-                                                        PulsarDeferredResult pulsarDeferredResult) {
+    public Object /* 这里的返回值必需为Object */ sendNotice(@PathVariable("id") Long id) {
         log.info("sendNotice：" + id);
 
         log.info("pulsarHolder: {}", PulsarHolder.getPulsar());
@@ -76,6 +75,6 @@ public class UserController {
 //        return ResponseEntity.ok("OK");
 
         // 延迟返回响应方式
-        return PulsarHolder.defer(() -> ResponseEntity.ok("OK"), pulsarDeferredResult);
+        return PulsarHolder.defer(() -> ResponseEntity.ok("OK"), id);
     }
 }
