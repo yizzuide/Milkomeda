@@ -3,7 +3,7 @@
 
 名字源于未来要融合的”银河织女系“，代表当前Spring生态的全家桶体系，这个项目以Spring生态为基础，从实际业务上整理出来的快速开发模块。
 
-目前添加的模块有：
+## Modules
 - [x] Pulsar（脉冲星）: 用于长轮询、耗时请求fast-timeout等。*0.1.0+*
    * 依赖技术：Spring MVC
    * 设计模式：适配器模式、代理模式
@@ -28,6 +28,10 @@
 - [x] Ice（冰）：用于延迟列队的需求，支持配置延迟分桶、任务执行超时时间（TTR）、超时重试、Task自动调度等。*1.15.0+*
    * 依赖技术：Spring IoC、Spring Task、SpringBoot Data Redis
    * 设计模式：策略模式、享元模式、门面模式、面向声明式编程
+   
+## Todo List
+- [ ] Light模块无配置化改造
+- [ ] Crust模块支持Shiro
     
 ## Requirements
 * Java 8
