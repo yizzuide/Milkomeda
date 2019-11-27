@@ -34,6 +34,12 @@
 * Lombok 1.18.x
 * SpringBoot 2.x
 
+## Version control guidelines
+- 1.16.x for Spring Boot 2.1.x
+- Dalston.1.11.0-Dalston.1.12.0 for Spring Boot 1.5.x
+- Others for Spring Boot 2.0.x
+
+
 ## Installation
 ```xml
 <dependency>
