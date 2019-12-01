@@ -35,14 +35,6 @@ import java.util.function.Supplier;
 /**
  * CrustConfigurerAdapter
  * Spring Security配置器适配器
- * <br>
- * <h3>继承这个类，添加上以下注解：</h3>
- * <blockquote>
- * <pre class="code">
- * <code>@EnableWebSecurity</code>
- * <code>@EnableGlobalMethodSecurity(prePostEnabled = true)</code>
- * </pre>
- * </blockquote>
  *
  * @author yizzuide
  * @since 1.14.0

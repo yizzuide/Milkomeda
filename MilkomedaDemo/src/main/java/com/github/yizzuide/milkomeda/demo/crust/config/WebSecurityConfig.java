@@ -1,9 +1,8 @@
 package com.github.yizzuide.milkomeda.demo.crust.config;
 
 import com.github.yizzuide.milkomeda.crust.CrustConfigurerAdapter;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer;
 
 /**
@@ -12,8 +11,7 @@ import org.springframework.security.config.annotation.web.configurers.Expression
  * @author yizzuide
  * Create at 2019/11/11 23:35
  */
-@EnableWebSecurity
-@EnableGlobalMethodSecurity(prePostEnabled = true)
+@Configuration
 public class WebSecurityConfig extends CrustConfigurerAdapter {
     @Override
     protected void additionalConfigure(ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry urlRegistry, HttpSecurity http) throws Exception {
