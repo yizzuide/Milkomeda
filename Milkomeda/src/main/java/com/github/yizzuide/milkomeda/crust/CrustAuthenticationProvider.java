@@ -15,6 +15,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
  *
  * @author yizzuide
  * @since 1.14.0
+ * @version 1.16.1
  * Create at 2019/11/11 18:02
  */
 public class CrustAuthenticationProvider extends DaoAuthenticationProvider {
@@ -37,16 +38,25 @@ public class CrustAuthenticationProvider extends DaoAuthenticationProvider {
             return;
         }
 
-        // 自定义加salt实现
+        // 检查登录密码
         if (authentication.getCredentials() == null) {
             logger.debug("Authentication failed: no credentials provided");
             throw new BadCredentialsException(messages.getMessage("AbstractUserDetailsAuthenticationProvider.badCredentials", "Bad credentials"));
         }
 
+        boolean isMatched;
         String presentedPassword = authentication.getCredentials().toString();
-        String salt = ((CrustUserDetails) userDetails).getSalt();
-        // 覆写密码验证逻辑
-        if (!new PasswordEncoder(salt).matches(presentedPassword, userDetails.getPassword())) {
+        // 如果用户有实现自定义加密器
+        if (getPasswordEncoder() != null) {
+            isMatched = getPasswordEncoder().matches(presentedPassword, userDetails.getPassword());
+        } else {
+            // 否则使用内置加密器
+            String salt = ((CrustUserDetails) userDetails).getSalt();
+            isMatched = new PasswordEncoder(salt).matches(presentedPassword, userDetails.getPassword());
+        }
+
+        // 如果验证失败
+        if (!isMatched) {
             logger.debug("Authentication failed: password does not match stored value");
             throw new BadCredentialsException(messages.getMessage("AbstractUserDetailsAuthenticationProvider.badCredentials", "Bad credentials"));
         }

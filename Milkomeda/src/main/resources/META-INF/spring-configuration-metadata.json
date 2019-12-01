@@ -61,6 +61,12 @@
       "description": "请求重试次数"
     },
     {
+      "name": "milkomeda.crust.stateless",
+      "type": "java.lang.Boolean",
+      "defaultValue": true,
+      "description": "使用Toke的无状态登录"
+    },
+    {
       "name": "milkomeda.crust.use-rsa",
       "type": "java.lang.Boolean",
       "defaultValue": false,
@@ -113,6 +119,18 @@
       "type": "java.lang.Integer",
       "defaultValue": 5,
       "description": "自动刷新Token间隔（单位：分钟）"
+    },
+    {
+      "name": "milkomeda.crust.login-url",
+      "type": "java.lang.String",
+      "defaultValue": "/login",
+      "description": "登录路径"
+    },
+    {
+      "name": "milkomeda.crust.logout-url",
+      "type": "java.lang.String",
+      "defaultValue": "/logout",
+      "description": "登出路径"
     },
     {
       "name": "milkomeda.ice.enable-job-timer",

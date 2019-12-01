@@ -3,13 +3,17 @@ package com.github.yizzuide.milkomeda.crust;
 import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.BeanIds;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler;
 import org.springframework.security.web.header.Header;
 import org.springframework.security.web.header.writers.StaticHeadersWriter;
@@ -26,6 +30,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.function.Supplier;
 
 /**
  * CrustConfigurerAdapter
@@ -41,6 +46,7 @@ import java.util.Collections;
  *
  * @author yizzuide
  * @since 1.14.0
+ * @version 1.16.1
  * Create at 2019/11/11 18:25
  */
 public class CrustConfigurerAdapter extends WebSecurityConfigurerAdapter {
@@ -48,17 +54,21 @@ public class CrustConfigurerAdapter extends WebSecurityConfigurerAdapter {
     @Override
     public void configure(AuthenticationManagerBuilder auth) {
         // 添加自定义身份验证组件
-        auth.authenticationProvider(new CrustAuthenticationProvider(ApplicationContextHolder.get().getBean(CrustUserDetailsService.class)));
+        CrustUserDetailsService userDetailsService = ApplicationContextHolder.get().getBean(CrustUserDetailsService.class);
+        CrustAuthenticationProvider authenticationProvider = new CrustAuthenticationProvider(userDetailsService);
+        configureProvider(authenticationProvider);
+        auth.authenticationProvider(authenticationProvider);
     }
 
     @Override
-    protected final void configure(HttpSecurity http) throws Exception {
+    protected void configure(HttpSecurity http) throws Exception {
+        CrustProperties props = ApplicationContextHolder.get().getBean(CrustProperties.class);
         http.csrf().disable()
-            .sessionManagement().disable()
+            .sessionManagement().sessionCreationPolicy(props.isStateless() ?
+                SessionCreationPolicy.STATELESS : SessionCreationPolicy.IF_REQUIRED).and()
             .formLogin().disable()
             // 支持跨域，从CorsConfigurationSource中取跨域配置
-            .cors()
-            .and()
+            .cors().and()
             // 添加header设置，支持跨域和ajax请求
             .headers().addHeaderWriter(new StaticHeadersWriter(Arrays.asList(
                 // 支持所有源的访问
@@ -67,36 +77,55 @@ public class CrustConfigurerAdapter extends WebSecurityConfigurerAdapter {
                 new Header("Access-Control-Expose-Headers", "Authorization"))))
             .and()
             // 拦截OPTIONS请求，直接返回header
-            .addFilterAfter(new OptionsRequestFilter(), CorsFilter.class)
-            // 应用认证配置器，忽略登出请求
-            .apply(new CrustAuthenticationConfigurer<>()).permissiveRequestUrls("/logout")
-            .and()
-            .logout()
+            .addFilterAfter(new OptionsRequestFilter(), CorsFilter.class);
+
+        // 如果是无状态方式
+        if (props.isStateless()) {
+            // 应用Token认证配置器，忽略登出请求
+            http.apply(new CrustAuthenticationConfigurer<>(authFailureHandler())).permissiveRequestUrls(props.getLogoutUrl());
+        }
+
+        http.logout()
+                .logoutUrl(props.getLogoutUrl())
                 .addLogoutHandler((req, res, auth) -> SecurityContextHolder.clearContext())
                 .logoutSuccessHandler(new HttpStatusReturningLogoutSuccessHandler());
-        presetConfigure(http);
+
+        presetConfigure(http, props);
+    }
+
+    /**
+     * 自定义配置数据源提供及<code>PasswordEncoder</code>
+     * @param provider  DaoAuthenticationProvider
+     */
+    protected void configureProvider(DaoAuthenticationProvider provider) { }
+
+    /**
+     * 认证失败处理器
+     */
+    protected Supplier<AuthenticationFailureHandler> authFailureHandler() {
+        return () -> (request, response, exception) -> response.setStatus(HttpStatus.UNAUTHORIZED.value());
     }
 
     /**
      * 预设置添加允许访问路径
      *
      * @param http HttpSecurity
+     * @param props 配置
      * @throws Exception 配置异常
      */
-    protected void presetConfigure(HttpSecurity http) throws Exception {
+    protected void presetConfigure(HttpSecurity http, CrustProperties props) throws Exception {
         ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry urlRegistry =
                 http.authorizeRequests()
                         // 跨域预检请求
                         .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         // 登录
-                        .antMatchers("/login").permitAll()
+                        .antMatchers(props.getLoginUrl()).permitAll()
                         // web jars、druid
                         .antMatchers("/webjars/**").permitAll()
                         .antMatchers("/druid/**").permitAll()
                         // swagger
                         .antMatchers("/swagger-ui.html").permitAll()
                         .antMatchers("/swagger-resources").permitAll()
-                        .antMatchers("/v2/api-docs").permitAll()
                         .antMatchers("/webjars/springfox-swagger-ui/**").permitAll()
                         // 服务监控
                         .antMatchers("/actuator/**").permitAll();

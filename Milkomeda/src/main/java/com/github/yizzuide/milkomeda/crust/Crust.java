@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.util.StringUtils;
@@ -20,6 +21,7 @@ import java.util.*;
  *
  * @author yizzuide
  * @since 1.14.0
+ * @version 1.16.1
  * Create at 2019/11/11 15:48
  */
 public class Crust {
@@ -58,8 +60,13 @@ public class Crust {
         Authentication authentication = authenticationManager.authenticate(authenticationToken);
         // 认证成功存储认证信息到上下文
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        // 生成令牌并返回给客户端
-        return generateToken(authentication);
+        // token方式
+        if (props.isStateless()) {
+            // 生成令牌并返回给客户端
+            return generateToken(authentication);
+        }
+        // session方式
+        return getUserInfo(authentication);
     }
 
     /**
@@ -67,6 +74,7 @@ public class Crust {
      * @return Token
      */
     public String refreshToken() {
+        if (!props.isStateless()) return null;
         String refreshedToken;
         try {
             Claims claims = JwtUtil.parseToken(getToken(), getUnSignKey());
@@ -97,6 +105,13 @@ public class Crust {
      */
     public CrustUserInfo getUserInfo() {
         return getUserInfo(getAuthentication());
+    }
+
+    /**
+     * 获取Spring Security上下文
+     */
+    public SecurityContext getContext() {
+        return SecurityContextHolder.getContext();
     }
 
     /**
@@ -203,10 +218,11 @@ public class Crust {
         CrustUserInfo userInfo = null;
         if (authentication != null) {
             Object principal = authentication.getPrincipal();
+            // authentication就是内部封装的UsernamePasswordAuthenticationToken
             if (principal instanceof CrustUserDetails) {
                 CrustUserDetails userDetails = (CrustUserDetails) principal;
                 userInfo = new CrustUserInfo(userDetails.getUid(), userDetails.getUsername(), getToken());
-            } else if (authentication instanceof CrustAuthenticationToken) {
+            } else if (authentication instanceof CrustAuthenticationToken) { // 自定义设置的UsernamePasswordAuthenticationToken
                 CrustAuthenticationToken authenticationToken = (CrustAuthenticationToken) authentication;
                 Claims claims = JwtUtil.parseToken(authenticationToken.getToken(), getUnSignKey());
                 String uid = (String) claims.get(UID);
@@ -252,6 +268,7 @@ public class Crust {
      * @return Token
      */
     public String getToken() {
+        if (!props.isStateless()) return null;
         String token = WebContext.getRequest().getHeader(props.getTokenName());
         if (StringUtils.isEmpty(token)) return null;
         // 一般请求头Authorization的值会添加Bearer

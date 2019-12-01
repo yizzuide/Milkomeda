@@ -44,7 +44,7 @@ milkomeda:
     # 自定义token头，默认为token
     token-name: Authorization
     # 不使用BCrypt（如果用户表有salt字段的情况）
-#    use-bCrypt: false
+  #    use-bCrypt: false
 
   ice:
     # 开启Job作业（默认为true，仅作为消费端使用时，设置false）

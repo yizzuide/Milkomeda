@@ -8,11 +8,17 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  *
  * @author yizzuide
  * @since 1.14.0
+ * @version 1.16.1
  * Create at 2019/11/11 15:51
  */
 @Data
 @ConfigurationProperties("milkomeda.crust")
 public class CrustProperties {
+    /**
+     * 使用Toke的无状态登录（默认为true, 设置为false使用session管理）
+     */
+    private boolean stateless = true;
+
     /**
      * 使用非对称方式（默认为false)<br>
      * 注意：如果设置true，则必须设置<code>priKey</code>和<code>pubKey</code>
@@ -59,4 +65,14 @@ public class CrustProperties {
      * Token刷新间隔（默认5分钟，单位：分）
      */
     private int refreshTokenInterval = 5;
+
+    /**
+     * 登录路径（默认/login）
+     */
+    private String loginUrl = "/login";
+
+    /**
+     * 登出路径（默认/logout）
+     */
+    private String logoutUrl = "/logout";
 }

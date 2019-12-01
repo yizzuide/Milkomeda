@@ -2,7 +2,7 @@ package com.github.yizzuide.milkomeda.demo.comet.collector;
 
 import com.github.yizzuide.milkomeda.comet.CometData;
 import com.github.yizzuide.milkomeda.demo.comet.pojo.ProfileWebCometData;
-import com.github.yizzuide.milkomeda.mix.collector.CollectorAdapter;
+import com.github.yizzuide.milkomeda.mix.collector.Collector;
 import com.github.yizzuide.milkomeda.universe.context.WebContext;
 import org.springframework.stereotype.Component;
 
@@ -16,7 +16,7 @@ import java.util.Map;
  * Create at 2019/11/14 16:02
  */
 @Component
-public class CometCollector extends CollectorAdapter {
+public class CometCollector implements Collector {
 
     @Override
     public void prepare(CometData params) {
