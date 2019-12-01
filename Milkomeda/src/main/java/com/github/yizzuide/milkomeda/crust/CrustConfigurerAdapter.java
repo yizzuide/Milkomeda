@@ -17,19 +17,10 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler;
-import org.springframework.security.web.header.Header;
-import org.springframework.security.web.header.writers.StaticHeadersWriter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.filter.CorsFilter;
-import org.springframework.web.filter.OncePerRequestFilter;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.function.Supplier;
@@ -40,7 +31,7 @@ import java.util.function.Supplier;
  *
  * @author yizzuide
  * @since 1.14.0
- * @version 1.16.4
+ * @version 1.16.5
  * Create at 2019/11/11 18:25
  */
 public class CrustConfigurerAdapter extends WebSecurityConfigurerAdapter {
@@ -66,16 +57,10 @@ public class CrustConfigurerAdapter extends WebSecurityConfigurerAdapter {
                 SessionCreationPolicy.STATELESS : SessionCreationPolicy.IF_REQUIRED).and()
             .formLogin().disable()
             // 支持跨域，从CorsConfigurationSource中取跨域配置
-            .cors().and()
-            // 添加header设置，支持跨域和ajax请求
-            .headers().addHeaderWriter(new StaticHeadersWriter(Arrays.asList(
-                // 支持所有源的访问
-                new Header("Access-control-Allow-Origin", "*"),
-                // 使ajax请求能够取到header中的jwt token信息
-                new Header("Access-Control-Expose-Headers", "Authorization"))))
-            .and()
-            // 拦截OPTIONS请求，直接返回header
-            .addFilterAfter(new OptionsRequestFilter(), CorsFilter.class);
+            .cors().and();
+
+        // 配置预设置
+        presetConfigure(http);
 
         // 如果是无状态方式
         if (props.isStateless()) {
@@ -92,14 +77,12 @@ public class CrustConfigurerAdapter extends WebSecurityConfigurerAdapter {
                     .and()
                     .sessionManagement()
                     .sessionAuthenticationErrorUrl(props.getLoginUrl())
-                    .invalidSessionUrl(props.getLoginUrl())
                     .sessionAuthenticationFailureHandler(authFailureHandler().get()).and()
             .logout()
                     .logoutUrl(props.getLogoutUrl())
                     .logoutSuccessUrl(props.getLoginUrl())
                     .invalidateHttpSession(true);
         }
-        presetConfigure(http);
     }
 
     /**
@@ -164,25 +147,11 @@ public class CrustConfigurerAdapter extends WebSecurityConfigurerAdapter {
     protected CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(Collections.singletonList("*"));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "HEAD", "OPTION"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "HEAD", "OPTION"));
         configuration.setAllowedHeaders(Collections.singletonList("*"));
         configuration.addExposedHeader("Authorization");
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
-}
-
-class OptionsRequestFilter extends OncePerRequestFilter {
-    @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-            throws ServletException, IOException {
-        if (request.getMethod().equals("OPTIONS")) {
-            response.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS,HEAD");
-            response.setHeader("Access-Control-Allow-Headers", response.getHeader("Access-Control-Request-Headers"));
-            return;
-        }
-        filterChain.doFilter(request, response);
-    }
-
 }
