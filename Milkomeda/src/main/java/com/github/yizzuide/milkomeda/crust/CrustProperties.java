@@ -8,7 +8,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  *
  * @author yizzuide
  * @since 1.14.0
- * @version 1.16.1
+ * @version 1.16.4
  * Create at 2019/11/11 15:51
  */
 @Data
@@ -51,10 +51,10 @@ public class CrustProperties {
     private String tokenName = "token";
 
     /**
-     * 是否使用BCrypt，实现直接在密码里加salt（默认为true）
-     * 什么是BCrypt？BCrypt能够将salt添加到加密的密码中，解密时可以将salt提取出来
+     * 是否使用Bcrypt，实现直接在密码里加salt（默认为true）
+     * 什么是Bcrypt？Bcrypt能够将salt添加到加密的密码中，解密时可以将salt提取出来
      */
-    private boolean useBCrypt = true;
+    private boolean useBcrypt = true;
 
     /**
      * 开启Token自动刷新（默认开启）

@@ -103,10 +103,10 @@
       "description": "自定义请求Header的Token字段名"
     },
     {
-      "name": "milkomeda.crust.use-bCrypt",
+      "name": "milkomeda.crust.use-bcrypt",
       "type": "java.lang.Boolean",
       "defaultValue": true,
-      "description": "使用BCrypt加密密码（将salt藏在密码里）"
+      "description": "使用Bcrypt加密密码（将salt藏在密码里）"
     },
     {
       "name": "milkomeda.crust.enable-auto-refresh-token",

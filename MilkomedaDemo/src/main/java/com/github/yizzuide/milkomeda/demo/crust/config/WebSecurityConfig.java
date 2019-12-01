@@ -1,7 +1,9 @@
 package com.github.yizzuide.milkomeda.demo.crust.config;
 
 import com.github.yizzuide.milkomeda.crust.CrustConfigurerAdapter;
+import com.github.yizzuide.milkomeda.demo.crust.provider.UserDetailsService;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer;
 
@@ -13,9 +15,14 @@ import org.springframework.security.config.annotation.web.configurers.Expression
  */
 @Configuration
 public class WebSecurityConfig extends CrustConfigurerAdapter {
+
+    @Override
+    protected void configureProvider(DaoAuthenticationProvider provider) {
+        provider.setUserDetailsService(new UserDetailsService());
+    }
+
     @Override
     protected void additionalConfigure(ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry urlRegistry, HttpSecurity http) throws Exception {
-        super.additionalConfigure(urlRegistry, http);
         // 允许其它测试模块访问
         urlRegistry
                 .antMatchers("/collect/**").permitAll()

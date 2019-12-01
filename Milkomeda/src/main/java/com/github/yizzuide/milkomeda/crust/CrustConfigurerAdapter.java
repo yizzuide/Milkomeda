@@ -1,6 +1,6 @@
 package com.github.yizzuide.milkomeda.crust;
 
-import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -13,7 +13,9 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler;
 import org.springframework.security.web.header.Header;
 import org.springframework.security.web.header.writers.StaticHeadersWriter;
@@ -38,23 +40,27 @@ import java.util.function.Supplier;
  *
  * @author yizzuide
  * @since 1.14.0
- * @version 1.16.1
+ * @version 1.16.4
  * Create at 2019/11/11 18:25
  */
 public class CrustConfigurerAdapter extends WebSecurityConfigurerAdapter {
 
+    @Autowired
+    private CrustProperties props;
+
+    @Autowired(required = false)
+    private BCryptPasswordEncoder passwordEncoder;
+
     @Override
     public void configure(AuthenticationManagerBuilder auth) {
-        // 添加自定义身份验证组件
-        CrustUserDetailsService userDetailsService = ApplicationContextHolder.get().getBean(CrustUserDetailsService.class);
-        CrustAuthenticationProvider authenticationProvider = new CrustAuthenticationProvider(userDetailsService);
+        CrustAuthenticationProvider authenticationProvider = new CrustAuthenticationProvider(props, passwordEncoder);
         configureProvider(authenticationProvider);
+        // 添加自定义身份验证组件
         auth.authenticationProvider(authenticationProvider);
     }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        CrustProperties props = ApplicationContextHolder.get().getBean(CrustProperties.class);
         http.csrf().disable()
             .sessionManagement().sessionCreationPolicy(props.isStateless() ?
                 SessionCreationPolicy.STATELESS : SessionCreationPolicy.IF_REQUIRED).and()
@@ -74,15 +80,26 @@ public class CrustConfigurerAdapter extends WebSecurityConfigurerAdapter {
         // 如果是无状态方式
         if (props.isStateless()) {
             // 应用Token认证配置器，忽略登出请求
-            http.apply(new CrustAuthenticationConfigurer<>(authFailureHandler())).permissiveRequestUrls(props.getLogoutUrl());
+            http.apply(new CrustAuthenticationConfigurer<>(authFailureHandler())).permissiveRequestUrls(props.getLogoutUrl())
+                    .and()
+                    .logout()
+                    .logoutUrl(props.getLogoutUrl())
+                    .addLogoutHandler((req, res, auth) -> SecurityContextHolder.clearContext())
+                    .logoutSuccessHandler(new HttpStatusReturningLogoutSuccessHandler());
+        } else {
+            // 自定义session方式登录
+            http.httpBasic().authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint(props.getLoginUrl()))
+                    .and()
+                    .sessionManagement()
+                    .sessionAuthenticationErrorUrl(props.getLoginUrl())
+                    .invalidSessionUrl(props.getLoginUrl())
+                    .sessionAuthenticationFailureHandler(authFailureHandler().get()).and()
+            .logout()
+                    .logoutUrl(props.getLogoutUrl())
+                    .logoutSuccessUrl(props.getLoginUrl())
+                    .invalidateHttpSession(true);
         }
-
-        http.logout()
-                .logoutUrl(props.getLogoutUrl())
-                .addLogoutHandler((req, res, auth) -> SecurityContextHolder.clearContext())
-                .logoutSuccessHandler(new HttpStatusReturningLogoutSuccessHandler());
-
-        presetConfigure(http, props);
+        presetConfigure(http);
     }
 
     /**
@@ -102,10 +119,9 @@ public class CrustConfigurerAdapter extends WebSecurityConfigurerAdapter {
      * 预设置添加允许访问路径
      *
      * @param http HttpSecurity
-     * @param props 配置
      * @throws Exception 配置异常
      */
-    protected void presetConfigure(HttpSecurity http, CrustProperties props) throws Exception {
+    protected void presetConfigure(HttpSecurity http) throws Exception {
         ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry urlRegistry =
                 http.authorizeRequests()
                         // 跨域预检请求

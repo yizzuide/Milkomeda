@@ -5,7 +5,6 @@ import com.github.yizzuide.milkomeda.crust.CrustUserDetailsService;
 import com.github.yizzuide.milkomeda.demo.crust.pojo.User;
 import org.assertj.core.util.Lists;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.stereotype.Component;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -16,7 +15,6 @@ import java.util.Set;
  * @author yizzuide
  * Create at 2019/11/11 23:44
  */
-@Component
 public class UserDetailsService extends CrustUserDetailsService {
 
     @Override
