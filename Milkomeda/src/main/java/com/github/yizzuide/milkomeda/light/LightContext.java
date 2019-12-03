@@ -2,6 +2,8 @@ package com.github.yizzuide.milkomeda.light;
 
 import lombok.Data;
 
+import java.io.Serializable;
+
 /**
  * LightContext
  *
@@ -11,20 +13,21 @@ import lombok.Data;
  * E：上下文数据
  *
  * @since 1.9.0
+ * @version 1.17.0
  * @author yizzuide
  * Create at 2019/06/30 18:57
  */
 @Data
-public class LightContext<I, E> {
+public class LightContext {
 
-    private static final ThreadLocal<Spot> context = new ThreadLocal<>();
+    private static final ThreadLocal<Spot<Serializable, ?>> context = new ThreadLocal<>();
 
     /**
      * 设置上下文id
      * @param id    上下文id
      */
-    public void set(I id) {
-        Spot<I, E> spot = new Spot<>();
+    public void set(Serializable id) {
+        Spot<Serializable, ?> spot = new Spot<>();
         spot.setView(id);
         set(spot);
     }
@@ -33,7 +36,7 @@ public class LightContext<I, E> {
      * 设置上下文数据
      * @param spot  Spot
      */
-    public void set(Spot<I, E> spot) {
+    public void set(Spot<Serializable, ?> spot) {
         context.set(spot);
     }
 
@@ -42,8 +45,8 @@ public class LightContext<I, E> {
      * @return  Spot
      */
     @SuppressWarnings("unchecked")
-    public Spot<I, E> get() {
-        return context.get();
+    public <E> Spot<Serializable, E> get() {
+        return (Spot<Serializable, E>) context.get();
     }
 
     /**

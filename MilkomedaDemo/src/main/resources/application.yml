@@ -34,6 +34,12 @@ milkomeda:
   # 配置是否显示跟踪日志信息（线上环境应该关闭）
   show-log: true
 
+  light:
+    # 二级缓存一天后过期
+    l2-expire: 86400
+    # 使用时间线丢弃策略
+    strategy: timeline
+
   echo:
     # 设置请求读取超时
     read-timeout: 10000

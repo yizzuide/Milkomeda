@@ -7,6 +7,42 @@
       "description": "显示INFO级别运行日志"
     },
     {
+      "name": "milkomeda.light.l-1-max-count",
+      "type": "java.lang.Integer",
+      "defaultValue": 64,
+      "description": "一级缓存个数"
+    },
+    {
+      "name": "milkomeda.light.l-1-discard-percent",
+      "type": "java.lang.Float",
+      "defaultValue": 0.1,
+      "description": "级缓存超出后丢弃的百分比"
+    },
+    {
+      "name": "milkomeda.light.strategy",
+      "type": "com.github.yizzuide.milkomeda.light.LightDiscardStrategy",
+      "defaultValue": "LightDiscardStrategy.HOT",
+      "description": "一级缓存丢弃策略"
+    },
+    {
+      "name": "milkomeda.light.strategy-class",
+      "type": "java.lang.Class<Discard>",
+      "defaultValue": null,
+      "description": "一级缓存自定义丢弃策略实现类 （设置 LightDiscardStrategy.CUSTOM 时有效）"
+    },
+    {
+      "name": "milkomeda.light.only-cache-l-1",
+      "type": "java.lang.Boolean",
+      "defaultValue": false,
+      "description": "只缓存在一级缓存上"
+    },
+    {
+      "name": "milkomeda.light.l-2-expire",
+      "type": "java.lang.Long",
+      "defaultValue": -1,
+      "description": " 二级缓存过期时间（单位s，默认不过期）"
+    },
+    {
       "name": "milkomeda.echo.pool-max-size",
       "type": "java.lang.Integer",
       "defaultValue": 200,

@@ -1,6 +1,7 @@
 package com.github.yizzuide.milkomeda.light;
 
 
+import java.io.Serializable;
 import java.util.Comparator;
 
 /**
@@ -9,10 +10,11 @@ import java.util.Comparator;
  * 低频热点丢弃方案
  *
  * @since 1.8.0
+ * @version 1.17.0
  * @author yizzuide
  * Create at 2019/06/28 14:58
  */
-public class HotDiscard<V, E> extends SortDiscard<V, E> {
+public class HotDiscard extends SortDiscard {
 
     @Override
     public Class<? extends SortSpot> spotClazz() {
@@ -20,8 +22,8 @@ public class HotDiscard<V, E> extends SortDiscard<V, E> {
     }
 
     @Override
-    public Spot<V, E> deform(String key, Spot<V, E> spot) {
-        HotSpot<V, E> hotSpot = (HotSpot<V, E>) super.deform(key, spot);
+    public Spot<Serializable, Object> deform(String key, Spot<Serializable, Object> spot) {
+        HotSpot<Serializable, Object> hotSpot = (HotSpot<Serializable, Object>) super.deform(key, spot);
         if (null == hotSpot.getStar()) {
             hotSpot.setStar(0L);
         }
@@ -29,13 +31,13 @@ public class HotDiscard<V, E> extends SortDiscard<V, E> {
     }
 
     @Override
-    public void ascend(Spot<V, E> spot) {
-        HotSpot<V, E> hotSpot = (HotSpot<V, E>) spot;
+    public void ascend(Spot<Serializable, Object> spot) {
+        HotSpot<Serializable, Object> hotSpot = (HotSpot<Serializable, Object>) spot;
         hotSpot.setStar(hotSpot.getStar() + 1);
     }
 
     @Override
-    protected Comparator<? extends SortSpot<V, E>> comparator() {
-        return Comparator.<HotSpot<V, E>, Long>comparing(HotSpot::getStar);
+    protected Comparator<? extends SortSpot<Serializable, Object>> comparator() {
+        return Comparator.<HotSpot<Serializable, Object>, Long>comparing(HotSpot::getStar);
     }
 }
