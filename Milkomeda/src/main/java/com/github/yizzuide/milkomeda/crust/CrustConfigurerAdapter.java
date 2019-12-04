@@ -12,7 +12,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
@@ -50,6 +49,8 @@ public class CrustConfigurerAdapter extends WebSecurityConfigurerAdapter {
         auth.authenticationProvider(authenticationProvider);
     }
 
+
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.csrf().disable()
@@ -69,7 +70,7 @@ public class CrustConfigurerAdapter extends WebSecurityConfigurerAdapter {
                     .and()
                     .logout()
                     .logoutUrl(props.getLogoutUrl())
-                    .addLogoutHandler((req, res, auth) -> SecurityContextHolder.clearContext())
+                    .addLogoutHandler((req, res, auth) -> CrustContext.invalidate())
                     .logoutSuccessHandler(new HttpStatusReturningLogoutSuccessHandler());
         } else {
             // 自定义session方式登录

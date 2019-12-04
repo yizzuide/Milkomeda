@@ -14,7 +14,6 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 @EnableConfigurationProperties(LightProperties.class)
-
 public class LightConfig {
 
     @Autowired
@@ -25,7 +24,7 @@ public class LightConfig {
         LightCache lightCache = new LightCache();
         lightCache.setL1MaxCount(props.getL1MaxCount());
         lightCache.setL1DiscardPercent(props.getL1DiscardPercent());
-        lightCache.setStrategy(LightDiscardStrategy.TIMELINE);
+        lightCache.setStrategy(props.getStrategy());
         lightCache.setStrategyClass(props.getStrategyClass());
         lightCache.setOnlyCacheL1(props.isOnlyCacheL1());
         lightCache.setL2Expire(props.getL2Expire());

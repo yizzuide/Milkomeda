@@ -2,6 +2,7 @@ package com.github.yizzuide.milkomeda.demo.crust.controller;
 
 import com.github.yizzuide.milkomeda.crust.CrustContext;
 import com.github.yizzuide.milkomeda.crust.CrustUserInfo;
+import com.github.yizzuide.milkomeda.demo.crust.pojo.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,11 +26,14 @@ public class CaseController {
     @GetMapping("info")
     @PreAuthorize("hasAuthority('case:find:one')")
     public Map<String, Object> info() {
-        CrustUserInfo userInfo = CrustContext.get().getUserInfo();
+        CrustUserInfo<User> userInfo = CrustContext.getUserInfo(User.class);
         log.info("userInfo: {}", userInfo);
         Map<String, Object> data = new HashMap<>();
         data.put("id", "12345667009874");
         data.put("name", "case-01");
+
+        CrustUserInfo<User> userInfo2 = CrustContext.getUserInfo(User.class);
+        log.info("比较两个对象：{}", userInfo == userInfo2);
         return data;
     }
 }

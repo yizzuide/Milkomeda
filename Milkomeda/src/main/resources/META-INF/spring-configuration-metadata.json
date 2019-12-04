@@ -103,6 +103,18 @@
       "description": "使用Toke的无状态登录"
     },
     {
+      "name": "milkomeda.crust.enable-cache",
+      "type": "java.lang.Boolean",
+      "defaultValue": true,
+      "description": "在Token方式情况下，是否开启实体查询的多级缓存"
+    },
+    {
+      "name": "milkomeda.crust.enable-cache-l-2",
+      "type": "java.lang.Boolean",
+      "defaultValue": true,
+      "description": "在enableCache=true的情况下，是否缓存到Redis"
+    },
+    {
       "name": "milkomeda.crust.use-rsa",
       "type": "java.lang.Boolean",
       "defaultValue": false,

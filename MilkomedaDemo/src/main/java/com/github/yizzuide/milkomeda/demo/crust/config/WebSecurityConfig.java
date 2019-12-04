@@ -2,6 +2,7 @@ package com.github.yizzuide.milkomeda.demo.crust.config;
 
 import com.github.yizzuide.milkomeda.crust.CrustConfigurerAdapter;
 import com.github.yizzuide.milkomeda.demo.crust.provider.UserDetailsService;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -16,9 +17,14 @@ import org.springframework.security.config.annotation.web.configurers.Expression
 @Configuration
 public class WebSecurityConfig extends CrustConfigurerAdapter {
 
+    @Bean
+    public UserDetailsService userDetailsService() {
+        return new UserDetailsService();
+    }
+
     @Override
     protected void configureProvider(DaoAuthenticationProvider provider) {
-        provider.setUserDetailsService(new UserDetailsService());
+        provider.setUserDetailsService(userDetailsService());
     }
 
     @Override

@@ -10,7 +10,7 @@ import java.util.function.Function;
 /**
  * CacheHelper
  *
- * 缓存帮助类
+ * 缓存外层API，集超级缓存、一级缓存、二级缓存于一体的方法
  *
  * @since 1.10.0
  * @version 1.17.0
@@ -151,7 +151,7 @@ public class CacheHelper {
             return data;
         }
 
-        // 从数据库获取（耗时最长，一个标识只会查一次）
+        // 方案三：从数据库获取（耗时最长，一个标识只会查一次）
         data = dataGenerator.apply(fastSpot.getView().toString());
         // 设置到超级缓存
         fastSpot.setData(data);

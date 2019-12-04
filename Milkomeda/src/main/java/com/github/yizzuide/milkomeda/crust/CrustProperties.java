@@ -15,9 +15,19 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties("milkomeda.crust")
 public class CrustProperties {
     /**
-     * 使用Toke的无状态登录（默认为true, 设置为false使用session管理）
+     * 使用Token的无状态登录（默认为true, 设置为false使用session管理）
      */
     private boolean stateless = true;
+
+    /**
+     * 在Token方式情况下，是否开启实体查询的多级缓存（默认为true）
+     */
+    private boolean enableCache = true;
+    /**
+     * 在enableCache=true的情况下，是否缓存到Redis（默认为true）<br>
+     * 注意：这个配置将覆盖<code>light.onlyCacheL1</code>配置的值（该配置为Light模块）
+     */
+    private boolean enableCacheL2 = true;
 
     /**
      * 使用非对称方式（默认为false)<br>
@@ -67,7 +77,7 @@ public class CrustProperties {
     private int refreshTokenInterval = 5;
 
     /**
-     * 登录路径（默认/login）
+     * 登录路径，只有在stateless=false时有效（默认/login）
      */
     private String loginUrl = "/login";
 

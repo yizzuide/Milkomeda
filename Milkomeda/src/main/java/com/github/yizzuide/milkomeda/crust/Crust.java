@@ -1,5 +1,9 @@
 package com.github.yizzuide.milkomeda.crust;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.github.yizzuide.milkomeda.light.Cache;
+import com.github.yizzuide.milkomeda.light.CacheHelper;
+import com.github.yizzuide.milkomeda.light.Spot;
 import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import com.github.yizzuide.milkomeda.universe.context.WebContext;
 import com.github.yizzuide.milkomeda.util.JwtUtil;
@@ -13,6 +17,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.util.StringUtils;
 
+import javax.annotation.Resource;
+import java.io.Serializable;
 import java.util.*;
 
 /**
@@ -21,10 +27,15 @@ import java.util.*;
  *
  * @author yizzuide
  * @since 1.14.0
- * @version 1.16.1
+ * @version 1.17.0
  * Create at 2019/11/11 15:48
  */
 public class Crust {
+    // 缓存标识
+    public static final String CATCH_NAME = "crustLightCache";
+    // 缓存前辍
+    public static final String CATCH_KEY_PREFIX = "crust:user:";
+
     /**
      * 用户id
      */
@@ -45,14 +56,18 @@ public class Crust {
     @Autowired
     private CrustProperties props;
 
+    @Resource
+    Cache crustLightCache;
+
     /**
      * 登录认证
      *
      * @param username 用户名
      * @param password 密码
+     * @param entityClazz 实体类型
      * @return CrustUserInfo
      */
-    public CrustUserInfo login(String username, String password) {
+    public <T> CrustUserInfo<T> login(String username, String password, Class<T> entityClazz) {
         CrustAuthenticationToken authenticationToken = new CrustAuthenticationToken(username, password);
         authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(WebContext.getRequest()));
         AuthenticationManager authenticationManager = ApplicationContextHolder.get().getBean(AuthenticationManager.class);
@@ -63,10 +78,10 @@ public class Crust {
         // token方式
         if (props.isStateless()) {
             // 生成令牌并返回给客户端
-            return generateToken(authentication);
+            return generateToken(authentication, entityClazz);
         }
         // session方式
-        return getUserInfo(authentication);
+        return getUserInfo(authentication, entityClazz);
     }
 
     /**
@@ -100,11 +115,37 @@ public class Crust {
     }
 
     /**
+     * 获取登录的用户ID
+     */
+    public String getUserId() {
+        String token = getToken();
+        String unSignKey = getUnSignKey();
+        Claims claims = JwtUtil.parseToken(token, unSignKey);
+        return String.valueOf(claims.get(UID));
+    }
+
+    /**
      * 获取当前用户信息
+     *
+     * @param entityClazz 实体类型
      * @return  CrustUserInfo
      */
-    public CrustUserInfo getUserInfo() {
-        return getUserInfo(getAuthentication());
+    public <T> CrustUserInfo<T> getUserInfo(Class<T> entityClazz) {
+        // 检测超级缓存
+        Spot<Serializable, CrustUserInfo<T>> spot = CacheHelper.get(crustLightCache);
+        if (spot != null && spot.getData() != null) {
+            return spot.getData();
+        }
+
+        CrustUserInfo<T> userInfo = getUserInfo(getAuthentication(), entityClazz);
+        // session方式下，设置用户数据到超级缓存
+        if (!props.isStateless()) {
+            Spot<Serializable, CrustUserInfo<T>> sessionSpot = new Spot<>();
+            sessionSpot.setView(userInfo.getUid());
+            sessionSpot.setData(userInfo);
+            CacheHelper.set(crustLightCache, sessionSpot);
+        }
+        return userInfo;
     }
 
     /**
@@ -112,6 +153,14 @@ public class Crust {
      */
     public SecurityContext getContext() {
         return SecurityContextHolder.getContext();
+    }
+
+    /**
+     * 使登录信息失效
+     */
+    public void invalidate() {
+        CacheHelper.erase(getCache(), getUserInfo(Serializable.class).getUid(), id -> Crust.CATCH_KEY_PREFIX + id);
+        SecurityContextHolder.clearContext();
     }
 
     /**
@@ -139,6 +188,7 @@ public class Crust {
      *
      * @return 用户名
      */
+    @SuppressWarnings("unchecked")
     Authentication getAuthenticationFromToken() {
         Authentication authentication = null;
         // 获取请求携带的令牌
@@ -161,8 +211,8 @@ public class Crust {
                 Object authors = claims.get(AUTHORITIES);
                 List<GrantedAuthority> authorities = new ArrayList<>();
                 if (authors instanceof List) {
-                    for (Object object : (List) authors) {
-                        authorities.add(new GrantedAuthorityImpl((String) ((Map) object).get("authority")));
+                    for (Object object : (List<Map<String, String>>) authors) {
+                        authorities.add(new GrantedAuthorityImpl(((Map<String, String>) object).get("authority")));
                     }
                 }
                 CrustUserDetails userDetails = new CrustUserDetails((String) claims.get(UID), username, authorities);
@@ -176,6 +226,13 @@ public class Crust {
             }
         }
         return authentication;
+    }
+
+    /**
+     * 获取缓存
+     */
+    Cache getCache() {
+        return crustLightCache;
     }
 
     /**
@@ -195,11 +252,12 @@ public class Crust {
      * 登录成功后生成令牌
      *
      * @param authentication 认证对象
+     * @param entityClazz 实体类型
      * @return CrustUserInfo
      */
-    private CrustUserInfo generateToken(Authentication authentication) {
+    private <T> CrustUserInfo<T> generateToken(Authentication authentication, Class<T> entityClazz) {
         Map<String, Object> claims = new HashMap<>(6);
-        CrustUserInfo userInfo = getUserInfo(authentication);
+        CrustUserInfo<T> userInfo = getUserInfo(authentication, entityClazz);
         claims.put(UID, userInfo.getUid());
         claims.put(USERNAME, userInfo.getUsername());
         claims.put(CREATED, new Date());
@@ -212,21 +270,36 @@ public class Crust {
     /**
      * 根据认证信息获取用户信息
      *
+     * @param authentication 认证信息
+     * @param clazz 实体类型
      * @return CrustUserInfo
      */
-    private CrustUserInfo getUserInfo(Authentication authentication) {
-        CrustUserInfo userInfo = null;
+    @SuppressWarnings("unchecked")
+    private <T> CrustUserInfo<T> getUserInfo(Authentication authentication, Class<T> clazz) {
+        CrustUserInfo<T> userInfo = null;
         if (authentication != null) {
+            // 从Token解析的自定义设置的UsernamePasswordAuthenticationToken
+            if (authentication instanceof CrustAuthenticationToken) {
+                CrustAuthenticationToken authenticationToken = (CrustAuthenticationToken) authentication;
+                String token = authenticationToken.getToken();
+                Claims claims = JwtUtil.parseToken(token, getUnSignKey());
+                String uid = (String) claims.get(UID);
+                CrustUserDetailsService detailsService = ApplicationContextHolder.get().getBean(CrustUserDetailsService.class);
+                T entity = (T) detailsService.findEntityById(uid);
+                if (props.isEnableCache()) {
+                    return CacheHelper.get(crustLightCache, new TypeReference<CrustUserInfo<T>>(){},
+                            id -> CATCH_KEY_PREFIX + id.toString(),
+                            id -> new CrustUserInfo<>(uid, authenticationToken.getName(), token, entity));
+                }
+                userInfo = new CrustUserInfo<>(uid, authenticationToken.getName(), token, entity);
+                return userInfo;
+            }
+
+            // 此时 authentication 就是内部封装的 UsernamePasswordAuthenticationToken
             Object principal = authentication.getPrincipal();
-            // authentication就是内部封装的UsernamePasswordAuthenticationToken
             if (principal instanceof CrustUserDetails) {
                 CrustUserDetails userDetails = (CrustUserDetails) principal;
-                userInfo = new CrustUserInfo(userDetails.getUid(), userDetails.getUsername(), getToken());
-            } else if (authentication instanceof CrustAuthenticationToken) { // 自定义设置的UsernamePasswordAuthenticationToken
-                CrustAuthenticationToken authenticationToken = (CrustAuthenticationToken) authentication;
-                Claims claims = JwtUtil.parseToken(authenticationToken.getToken(), getUnSignKey());
-                String uid = (String) claims.get(UID);
-                userInfo = new CrustUserInfo(uid, authenticationToken.getName(), authenticationToken.getToken());
+                userInfo = new CrustUserInfo<>(userDetails.getUid(), userDetails.getUsername(), getToken(), (T) userDetails.getEntity());
             }
         }
         return userInfo;

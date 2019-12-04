@@ -1,14 +1,17 @@
 package com.github.yizzuide.milkomeda.crust;
 
+import java.io.Serializable;
+
 /**
  * CrustEntity
  * 需要用户实体实现的适配接口
  *
  * @author yizzuide
  * @since 1.14.0
+ * @version 1.17.0
  * Create at 2019/11/11 18:47
  */
-public interface CrustEntity {
+public interface CrustEntity extends Serializable {
     /**
      * 用户id
      */

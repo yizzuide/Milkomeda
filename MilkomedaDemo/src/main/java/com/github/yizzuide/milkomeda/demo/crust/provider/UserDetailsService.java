@@ -6,6 +6,7 @@ import com.github.yizzuide.milkomeda.demo.crust.pojo.User;
 import org.assertj.core.util.Lists;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -18,6 +19,11 @@ import java.util.Set;
 public class UserDetailsService extends CrustUserDetailsService {
 
     @Override
+    protected Serializable findEntityById(String uid) {
+        return new User("1000", "yiz", new BCryptPasswordEncoder().encode("123456"), null);
+    }
+
+    @Override
     protected CrustEntity findEntityByUsername(String username) {
         // 实际情况下通过Dao查询，未找到，直接返回null
         // 模拟自定义salt方式
@@ -27,7 +33,7 @@ public class UserDetailsService extends CrustUserDetailsService {
     }
 
     @Override
-    protected Set<String> findPermissionsById(String uid) {
+    protected Set<String> findPermissionsById(String uid, String username) {
         // 实际情况下通过Dao查询
         return new HashSet<>(Lists.list("case:find:list", "case:find:one"));
     }

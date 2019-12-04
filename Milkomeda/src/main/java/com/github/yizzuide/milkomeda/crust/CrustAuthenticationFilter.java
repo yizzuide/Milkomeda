@@ -17,6 +17,7 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationFa
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestHeaderRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
+import org.springframework.util.DigestUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.FilterChain;
@@ -33,6 +34,7 @@ import java.util.List;
  *
  * @author yizzuide
  * @since 1.14.0
+ * @version 1.17.0
  * Create at 2019/11/11 17:52
  */
 @Slf4j
@@ -58,10 +60,11 @@ public class CrustAuthenticationFilter extends OncePerRequestFilter {
 
         Authentication authResult = null;
         AuthenticationException failed = null;
+        Crust crust = CrustContext.get();
+        String token = crust.getToken();
         try {
-            String token = CrustContext.get().getToken();
             if (StringUtils.isNotBlank(token)) {
-                authResult = CrustContext.get().getAuthenticationFromToken();
+                authResult = crust.getAuthenticationFromToken();
             } else {
                 failed = new InsufficientAuthenticationException("Require Token is not set");
             }
@@ -83,7 +86,11 @@ public class CrustAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
+        // 设置超级缓存
+        crust.getCache().set(DigestUtils.md5DigestAsHex(token.getBytes()));
         chain.doFilter(request, response);
+        // 响应完成后清除超级缓存
+        crust.getCache().remove();
     }
 
     protected void unsuccessfulAuthentication(HttpServletRequest request,
