@@ -8,7 +8,7 @@ import java.io.Serializable;
  *
  * @author yizzuide
  * @since 1.14.0
- * @version 1.17.0
+ * @version 1.17.1
  * Create at 2019/11/11 18:47
  */
 public interface CrustEntity extends Serializable {
@@ -16,7 +16,7 @@ public interface CrustEntity extends Serializable {
      * 用户id
      * @return user id
      */
-    String getId();
+    String getUID();
 
     /**
      * 用户名

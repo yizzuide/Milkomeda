@@ -15,11 +15,13 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
 import java.io.Serializable;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Crust
@@ -27,7 +29,7 @@ import java.util.*;
  *
  * @author yizzuide
  * @since 1.14.0
- * @version 1.17.0
+ * @version 1.17.1
  * Create at 2019/11/11 15:48
  */
 public class Crust {
@@ -52,6 +54,10 @@ public class Crust {
      * 权限列表
      */
     private static final String AUTHORITIES = "authorities";
+    /**
+     * 角色id
+     */
+    private static final String ROLE_IDS = "roles";
 
     @Autowired
     private CrustProperties props;
@@ -213,14 +219,17 @@ public class Crust {
                 if (JwtUtil.isTokenExpired(token, unSignKey)) {
                     return null;
                 }
-                Object authors = claims.get(AUTHORITIES);
-                List<GrantedAuthority> authorities = new ArrayList<>();
-                if (authors instanceof List) {
-                    for (Object object : (List<Map<String, String>>) authors) {
-                        authorities.add(new GrantedAuthorityImpl(((Map<String, String>) object).get("authority")));
-                    }
+                Object authorsObj = claims.get(AUTHORITIES);
+                List<GrantedAuthority> authorities = null;
+                if (authorsObj != null) {
+                    authorities = Arrays.stream(((String) authorsObj).split(",")).map(GrantedAuthorityImpl::new).collect(Collectors.toList());
                 }
-                CrustUserDetails userDetails = new CrustUserDetails((String) claims.get(UID), username, authorities);
+                Object RoleIdsObj = claims.get(ROLE_IDS);
+                List<Long> roleIds = null;
+                if (RoleIdsObj != null) {
+                    roleIds = Arrays.stream(((String) RoleIdsObj).split(",")).map(Long::parseLong).collect(Collectors.toList());
+                }
+                CrustUserDetails userDetails = new CrustUserDetails((String) claims.get(UID), username, authorities, roleIds);
                 authentication = new CrustAuthenticationToken(userDetails, null, authorities, token);
             } else {
                 // 当前上下文认证信息存在，验证token是否正确匹配
@@ -268,7 +277,17 @@ public class Crust {
         claims.put(UID, userInfo.getUid());
         claims.put(USERNAME, userInfo.getUsername());
         claims.put(CREATED, new Date());
-        claims.put(AUTHORITIES, authentication.getAuthorities());
+        if (!CollectionUtils.isEmpty(authentication.getAuthorities())) {
+            List<String> authors = authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList());
+            claims.put(AUTHORITIES, StringUtils.arrayToCommaDelimitedString(authors.toArray()));
+        }
+        Object principal = authentication.getPrincipal();
+        if (principal instanceof CrustUserDetails) {
+            List<Long> roleIds = ((CrustUserDetails) principal).getRoleIds();
+            if (!CollectionUtils.isEmpty(roleIds)) {
+                claims.put(ROLE_IDS, StringUtils.arrayToCommaDelimitedString(roleIds.toArray()));
+            }
+        }
         String token = JwtUtil.generateToken(claims, getSignKey(), props.getExpire(), props.isUseRsa());
         userInfo.setToken(token);
         return userInfo;
@@ -290,24 +309,28 @@ public class Crust {
             if (authentication instanceof CrustAuthenticationToken) {
                 CrustAuthenticationToken authenticationToken = (CrustAuthenticationToken) authentication;
                 String token = authenticationToken.getToken();
-                Claims claims = JwtUtil.parseToken(token, getUnSignKey());
-                String uid = (String) claims.get(UID);
-                CrustUserDetailsService detailsService = ApplicationContextHolder.get().getBean(CrustUserDetailsService.class);
-                T entity = (T) detailsService.findEntityById(uid);
-                if (props.isEnableCache()) {
-                    return CacheHelper.get(crustLightCache, new TypeReference<CrustUserInfo<T>>(){},
-                            id -> CATCH_KEY_PREFIX + id.toString(),
-                            id -> new CrustUserInfo<>(uid, authenticationToken.getName(), token, entity));
+                Object principal = authentication.getPrincipal();
+                if (principal instanceof CrustUserDetails) {
+                    CrustUserDetails userDetails = (CrustUserDetails) principal;
+                    String uid = userDetails.getUid();
+                    List<Long> roleIds = userDetails.getRoleIds();
+                    CrustUserDetailsService detailsService = ApplicationContextHolder.get().getBean(CrustUserDetailsService.class);
+                    T entity = (T) detailsService.findEntityById(uid);
+                    if (props.isEnableCache()) {
+                        return CacheHelper.get(crustLightCache, new TypeReference<CrustUserInfo<T>>(){},
+                                id -> CATCH_KEY_PREFIX + id.toString(),
+                                id -> new CrustUserInfo<>(uid, authenticationToken.getName(), token, roleIds,  entity));
+                    }
+                    userInfo = new CrustUserInfo<>(uid, authenticationToken.getName(), token, roleIds, entity);
+                    return userInfo;
                 }
-                userInfo = new CrustUserInfo<>(uid, authenticationToken.getName(), token, entity);
-                return userInfo;
             }
 
             // 此时 authentication 就是内部封装的 UsernamePasswordAuthenticationToken
             Object principal = authentication.getPrincipal();
             if (principal instanceof CrustUserDetails) {
                 CrustUserDetails userDetails = (CrustUserDetails) principal;
-                userInfo = new CrustUserInfo<>(userDetails.getUid(), userDetails.getUsername(), getToken(), (T) userDetails.getEntity());
+                userInfo = new CrustUserInfo<>(userDetails.getUid(), userDetails.getUsername(), getToken(), userDetails.getRoleIds(), (T) userDetails.getEntity());
             }
         }
         return userInfo;

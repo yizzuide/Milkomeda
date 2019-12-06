@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 1.14.0
- * @version 1.17.0
+ * @version 1.17.1
  * Create at 2019/11/11 18:01
  */
 public abstract class CrustUserDetailsService implements UserDetailsService {
@@ -28,9 +28,14 @@ public abstract class CrustUserDetailsService implements UserDetailsService {
             throw new UsernameNotFoundException("Not Found: " + username);
         }
         // 用户权限列表，根据用户拥有的权限标识与如 @PreAuthorize("hasAuthority('sys:menu:view')") 标注的接口对比，决定是否可以调用接口
-        Set<String> permissions = findPermissionsById(entity.getId(), username);
-        List<GrantedAuthority> grantedAuthorities = permissions.stream().map(GrantedAuthorityImpl::new).collect(Collectors.toList());
-        return new CrustUserDetails(entity.getId(), entity.getUsername(), entity.getPassword(), entity.getSalt(), grantedAuthorities, entity);
+        Set<CrustRole> permissions = findPermissionsById(entity.getUID(), username);
+        List<GrantedAuthority> grantedAuthorities = null;
+        List<Long> roleIds = null;
+        if (permissions != null) {
+            grantedAuthorities = permissions.stream().map(CrustRole::getRoleName).map(GrantedAuthorityImpl::new).collect(Collectors.toList());
+            roleIds = permissions.stream().map(CrustRole::getRoleId).collect(Collectors.toList());
+        }
+        return new CrustUserDetails(entity.getUID(), entity.getUsername(), entity.getPassword(), entity.getSalt(), grantedAuthorities, roleIds, entity);
     }
 
     /**
@@ -56,5 +61,5 @@ public abstract class CrustUserDetailsService implements UserDetailsService {
      * @param username 用户名
      * @return  权限列表
      */
-    protected abstract Set<String> findPermissionsById(String uid, String username);
+    protected abstract Set<CrustRole> findPermissionsById(String uid, String username);
 }

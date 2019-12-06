@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * CrustUserInfo
@@ -12,7 +13,7 @@ import java.io.Serializable;
  *
  * @author yizzuide
  * @since 1.14.0
- * @version 1.17.0
+ * @version 1.17.1
  * Create at 2019/11/11 21:51
  */
 @Data
@@ -32,6 +33,10 @@ public class CrustUserInfo<T> implements Serializable {
      * 认证token（stateless=true时有值）
      */
     private String token;
+    /**
+     * 角色id
+     */
+    private List<Long> roleIds;
     /**
      * 用户实体对象
      * <br>

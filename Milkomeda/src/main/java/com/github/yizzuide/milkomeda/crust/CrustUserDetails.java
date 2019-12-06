@@ -7,6 +7,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * CrustUserDetails
@@ -14,7 +15,7 @@ import java.util.Collection;
  *
  * @author yizzuide
  * @since 1.14.0
- * @version 1.17.0
+ * @version 1.17.1
  * Create at 2019/11/11 17:23
  */
 @Data
@@ -27,12 +28,14 @@ public class CrustUserDetails implements UserDetails {
     private String password;
     private String salt;
     private Collection<? extends GrantedAuthority> authorities;
+    private List<Long> roleIds;
     private Serializable entity;
 
-    CrustUserDetails(String uid, String username, Collection<? extends GrantedAuthority> authorities) {
+    CrustUserDetails(String uid, String username, Collection<? extends GrantedAuthority> authorities, List<Long> roleIds) {
         this.uid = uid;
         this.username = username;
         this.authorities = authorities;
+        this.roleIds = roleIds;
     }
 
     @Override

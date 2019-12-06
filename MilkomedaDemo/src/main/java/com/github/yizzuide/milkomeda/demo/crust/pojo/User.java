@@ -25,4 +25,9 @@ public class User implements CrustEntity {
     private String password;
     @JsonIgnore
     private String salt;
+
+    @Override
+    public String getUID() {
+        return id;
+    }
 }
