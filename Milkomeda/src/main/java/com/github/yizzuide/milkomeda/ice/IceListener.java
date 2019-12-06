@@ -20,12 +20,16 @@ public @interface IceListener {
 
     /**
      * 监听的Topic
+     *
+     * @return topic name
      */
     @AliasFor("topic")
     String value() default "";
 
     /**
      * 监听的Topic
+     *
+     * @return topic name
      */
     @AliasFor("value")
     String topic() default "";

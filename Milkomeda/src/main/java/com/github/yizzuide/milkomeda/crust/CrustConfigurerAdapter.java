@@ -94,6 +94,8 @@ public class CrustConfigurerAdapter extends WebSecurityConfigurerAdapter {
 
     /**
      * 认证失败处理器
+     *
+     * @return Supplier
      */
     protected Supplier<AuthenticationFailureHandler> authFailureHandler() {
         return () -> (request, response, exception) -> response.setStatus(HttpStatus.UNAUTHORIZED.value());

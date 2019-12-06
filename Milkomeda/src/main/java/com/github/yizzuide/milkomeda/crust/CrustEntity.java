@@ -14,22 +14,26 @@ import java.io.Serializable;
 public interface CrustEntity extends Serializable {
     /**
      * 用户id
+     * @return user id
      */
     String getId();
 
     /**
      * 用户名
+     * @return username
      */
     String getUsername();
 
     /**
      * 登录密码
+     * @return password
      */
     String getPassword();
 
     /**
      * 如果设置了<code>milkomeda.crust.use_bCrypt</code>为<code>true</code>(默认为true)，
      * 那个这个字段不需要实现，否则需要实现
+     * @return salt
      */
     default String getSalt() {return null;}
 }

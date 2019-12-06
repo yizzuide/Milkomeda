@@ -47,6 +47,7 @@ public interface Ice {
     /**
      * 完成任务
      * @param jobs    任务列表
+     * @param <T>   业务数据
      */
     <T> void finish(List<Job<T>> jobs);
 
@@ -59,6 +60,7 @@ public interface Ice {
     /**
      * 删除任务
      * @param jobs    任务列表
+     * @param <T>   业务数据
      */
     <T> void delete(List<Job<T>> jobs);
 

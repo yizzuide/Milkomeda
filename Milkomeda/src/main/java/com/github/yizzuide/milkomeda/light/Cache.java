@@ -28,6 +28,7 @@ public interface Cache {
     /**
      * 获取超级缓存数据
      *
+     * @param <E> 实体类型
      * @return  Spot
      */
     <E> Spot<Serializable, E> get();
@@ -50,8 +51,9 @@ public interface Cache {
      * 注意：这个简单方法只支持基本类型的包装类型以及String，其它类型请不要使用
      *
      * @param key   键
+     * @param <E> 实体类型
      * @return      Spot
-     * @deprecated  1.9.0版本开始标为过时
+     * @deprecated  1.9.0
      */
     @Deprecated
     <E> Spot<Serializable, E> get(String key);
@@ -62,6 +64,7 @@ public interface Cache {
      * @param key       键
      * @param vClazz    标识数据类型
      * @param eClazz    业务数据类型
+     * @param <E> 实体类型
      * @return          Spot
      */
     <E> Spot<Serializable, E> get(String key, Class<Serializable> vClazz, Class<E> eClazz);
@@ -72,6 +75,7 @@ public interface Cache {
      * @param key       键
      * @param vTypeRef  标识数据TypeReference
      * @param eTypeRef  业务数据TypeReference
+     * @param <E> 实体类型
      * @return          Spot
      */
     <E> Spot<Serializable, E> get(String key, TypeReference<Serializable> vTypeRef, TypeReference<E> eTypeRef);

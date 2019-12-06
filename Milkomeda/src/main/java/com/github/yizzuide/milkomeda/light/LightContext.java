@@ -42,6 +42,7 @@ public class LightContext {
 
     /***
      * 获取上下文数据
+     * @param <E> 实体类型
      * @return  Spot
      */
     @SuppressWarnings("unchecked")

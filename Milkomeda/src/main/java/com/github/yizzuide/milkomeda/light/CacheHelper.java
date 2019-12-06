@@ -44,6 +44,7 @@ public class CacheHelper {
     /**
      * 从超级缓存获取数据 {@link LightContext}
      * @param cache     缓存实例
+     * @param <E> 实体类型
      * @return          Spot
      */
     public static <E> Spot<Serializable, E> get(Cache cache) {
@@ -65,6 +66,7 @@ public class CacheHelper {
      * @param id                标识值
      * @param keyGenerator      缓存key产生器
      * @param dataGenerator     数据产生器
+     * @param <E> 实体类型
      * @return                  缓存数据
      */
     public static <E> E get(Cache cache, Class<E> eClazz, Serializable id,
@@ -81,6 +83,7 @@ public class CacheHelper {
      * @param eClazz            数据Class
      * @param keyGenerator      缓存key产生器
      * @param dataGenerator     数据产生器
+     * @param <E> 实体类型
      * @return                  缓存数据
      */
     public static  <E>  E get(Cache cache, Class<E> eClazz,
@@ -95,6 +98,7 @@ public class CacheHelper {
      * @param id                标识值
      * @param keyGenerator      缓存key产生器
      * @param dataGenerator     数据产生器
+     * @param <E> 实体类型
      * @return                  缓存数据
      */
     public static <E> E get(Cache cache, TypeReference<E> eTypeRef,
@@ -122,6 +126,7 @@ public class CacheHelper {
      * @param eTypeRef          数据TypeReference
      * @param keyGenerator      缓存key产生器
      * @param dataGenerator     数据产生器
+     * @param <E> 实体类型
      * @return                  缓存数据
      */
     public static  <E> E get(Cache cache, TypeReference<E> eTypeRef,
@@ -165,6 +170,7 @@ public class CacheHelper {
      * @param cache         缓存实例
      * @param id            标识值
      * @param keyGenerator  缓存key生成器
+     * @param <E> 实体类型
      */
     public static  <E> void erase(Cache cache, Serializable id, Function<Serializable, String> keyGenerator) {
         cache.erase(keyGenerator.apply(id));

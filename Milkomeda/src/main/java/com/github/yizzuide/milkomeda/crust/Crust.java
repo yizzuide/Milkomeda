@@ -65,6 +65,7 @@ public class Crust {
      * @param username 用户名
      * @param password 密码
      * @param entityClazz 实体类型
+     * @param <T> 实体类型
      * @return CrustUserInfo
      */
     public <T> CrustUserInfo<T> login(String username, String password, Class<T> entityClazz) {
@@ -116,6 +117,7 @@ public class Crust {
 
     /**
      * 获取登录的用户ID
+     * @return user id
      */
     public String getUserId() {
         String token = getToken();
@@ -128,6 +130,7 @@ public class Crust {
      * 获取当前用户信息
      *
      * @param entityClazz 实体类型
+     * @param <T> 实体类型
      * @return  CrustUserInfo
      */
     public <T> CrustUserInfo<T> getUserInfo(Class<T> entityClazz) {
@@ -150,6 +153,7 @@ public class Crust {
 
     /**
      * 获取Spring Security上下文
+     * @return SecurityContext
      */
     public SecurityContext getContext() {
         return SecurityContextHolder.getContext();
@@ -165,6 +169,7 @@ public class Crust {
 
     /**
      * 获取Token发行时间
+     * @return token issue time
      */
     long getTokenIssue() {
         String token = getToken();
@@ -186,7 +191,7 @@ public class Crust {
     /**
      * 根据请求令牌获取登录认证信息
      *
-     * @return 用户名
+     * @return Authentication
      */
     @SuppressWarnings("unchecked")
     Authentication getAuthenticationFromToken() {
@@ -230,6 +235,8 @@ public class Crust {
 
     /**
      * 获取缓存
+     *
+     * @return Cache
      */
     Cache getCache() {
         return crustLightCache;
@@ -272,6 +279,7 @@ public class Crust {
      *
      * @param authentication 认证信息
      * @param clazz 实体类型
+     * @param <T> 实体类型
      * @return CrustUserInfo
      */
     @SuppressWarnings("unchecked")
@@ -354,6 +362,7 @@ public class Crust {
 
     /**
      * 获取加密key
+     * @return sign key
      */
     private String getSignKey() {
         if (props.isUseRsa()) {
@@ -364,6 +373,7 @@ public class Crust {
 
     /**
      * 获取解密key
+     * @return unSign key
      */
     private String getUnSignKey() {
         if (props.isUseRsa()) {

@@ -159,7 +159,7 @@ public class LightCache implements Cache {
      * 存入一级缓存、二级缓存
      * @param key       键
      * @param spot      缓存数据，如果有设置过超级缓存，这个对象不应该通过new再次创建，
-     *                  而是先通过<codObject>get()</codObject>获得，修改之后再传入，这样才能只存储一份数据
+     *                  而是先通过<code>get()</code>获得，修改之后再传入，这样才能只存储一份数据
      */
     @SuppressWarnings("unchecked")
     @Override
