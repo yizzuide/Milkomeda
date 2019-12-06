@@ -1,6 +1,7 @@
 package com.github.yizzuide.milkomeda.ice;
 
 import org.springframework.context.annotation.Import;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 import java.lang.annotation.*;
 
@@ -54,12 +55,14 @@ import java.lang.annotation.*;
  *
  * @author yizzuide
  * @since 1.15.0
+ * @version 1.16.0
  * Create at 2019/11/16 17:24
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE})
 @Inherited
+@EnableScheduling
 @Import({IceConfig.class, IceScheduleConfig.class})
 public @interface EnableIce {
 }

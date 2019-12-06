@@ -7,6 +7,42 @@
       "description": "显示INFO级别运行日志"
     },
     {
+      "name": "milkomeda.light.l-1-max-count",
+      "type": "java.lang.Integer",
+      "defaultValue": 64,
+      "description": "一级缓存个数"
+    },
+    {
+      "name": "milkomeda.light.l-1-discard-percent",
+      "type": "java.lang.Float",
+      "defaultValue": 0.1,
+      "description": "级缓存超出后丢弃的百分比"
+    },
+    {
+      "name": "milkomeda.light.strategy",
+      "type": "com.github.yizzuide.milkomeda.light.LightDiscardStrategy",
+      "defaultValue": "LightDiscardStrategy.HOT",
+      "description": "一级缓存丢弃策略"
+    },
+    {
+      "name": "milkomeda.light.strategy-class",
+      "type": "java.lang.Class<Discard>",
+      "defaultValue": null,
+      "description": "一级缓存自定义丢弃策略实现类 （设置 LightDiscardStrategy.CUSTOM 时有效）"
+    },
+    {
+      "name": "milkomeda.light.only-cache-l-1",
+      "type": "java.lang.Boolean",
+      "defaultValue": false,
+      "description": "只缓存在一级缓存上"
+    },
+    {
+      "name": "milkomeda.light.l-2-expire",
+      "type": "java.lang.Long",
+      "defaultValue": -1,
+      "description": " 二级缓存过期时间（单位s，默认不过期）"
+    },
+    {
       "name": "milkomeda.echo.pool-max-size",
       "type": "java.lang.Integer",
       "defaultValue": 200,
@@ -61,6 +97,24 @@
       "description": "请求重试次数"
     },
     {
+      "name": "milkomeda.crust.stateless",
+      "type": "java.lang.Boolean",
+      "defaultValue": true,
+      "description": "使用Toke的无状态登录"
+    },
+    {
+      "name": "milkomeda.crust.enable-cache",
+      "type": "java.lang.Boolean",
+      "defaultValue": true,
+      "description": "在Token方式情况下，是否开启实体查询的多级缓存"
+    },
+    {
+      "name": "milkomeda.crust.enable-cache-l-2",
+      "type": "java.lang.Boolean",
+      "defaultValue": true,
+      "description": "在enableCache=true的情况下，是否缓存到Redis"
+    },
+    {
       "name": "milkomeda.crust.use-rsa",
       "type": "java.lang.Boolean",
       "defaultValue": false,
@@ -97,10 +151,10 @@
       "description": "自定义请求Header的Token字段名"
     },
     {
-      "name": "milkomeda.crust.use-bCrypt",
+      "name": "milkomeda.crust.use-bcrypt",
       "type": "java.lang.Boolean",
       "defaultValue": true,
-      "description": "使用BCrypt加密密码（将salt藏在密码里）"
+      "description": "使用Bcrypt加密密码（将salt藏在密码里）"
     },
     {
       "name": "milkomeda.crust.enable-auto-refresh-token",
@@ -113,6 +167,18 @@
       "type": "java.lang.Integer",
       "defaultValue": 5,
       "description": "自动刷新Token间隔（单位：分钟）"
+    },
+    {
+      "name": "milkomeda.crust.login-url",
+      "type": "java.lang.String",
+      "defaultValue": "/login",
+      "description": "登录路径"
+    },
+    {
+      "name": "milkomeda.crust.logout-url",
+      "type": "java.lang.String",
+      "defaultValue": "/logout",
+      "description": "登出路径"
     },
     {
       "name": "milkomeda.ice.enable-job-timer",
@@ -163,18 +229,6 @@
       "description": "使用Task处理方式接收Topic方式"
     },
     {
-      "name": "milkomeda.ice.task-pool-size",
-      "type": "java.lang.Integer",
-      "defaultValue": 20,
-      "description": "任务池大小"
-    },
-    {
-      "name": "milkomeda.ice.task-termination-aware-seconds",
-      "type": "java.lang.Integer",
-      "defaultValue": 60,
-      "description": "任务被停止时的有效执行时间"
-    },
-    {
       "name": "milkomeda.ice.task-topic-pop-max-size",
       "type": "java.lang.Integer",
       "defaultValue": 10,
@@ -184,7 +238,13 @@
       "name": "milkomeda.ice.task-execute-rate",
       "type": "java.lang.Long",
       "defaultValue": 5000,
-      "description": "任务执行间隔"
+      "description": "任务执行间隔（单位：ms）"
+    },
+    {
+      "name": "milkomeda.ice.task-pop-count-lock-timeout-seconds",
+      "type": "java.lang.Long",
+      "defaultValue": 60,
+      "description": "多个消费的并发锁超时（单位：s）"
     }
   ]
 }

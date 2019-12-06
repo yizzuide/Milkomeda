@@ -5,9 +5,40 @@ spring:
   redis:
     host: 127.0.0.1
 
+
+  mvc:
+    # Pulsar模块异步超时
+    async:
+      request-timeout: 20s
+
+  # Pulsar模块异步线程池（Async异步任务线程池，SpringBoot 2.1.0+在这里配置）
+  task:
+    execution:
+      thread-name-prefix: pulsar-
+      pool:
+        queue-capacity: 150
+        core-size: 8
+        max-size: 12
+        keep-alive: 100s
+
+    # Ice模块的调度线程池（Spring Task调度线程池，SpringBoot 2.1.0+在这里配置）
+    scheduling:
+      thread-name-prefix: ice-
+      pool:
+        size: 20
+      shutdown:
+        await-termination: true
+        await-termination-period: 60s
+
 milkomeda:
   # 配置是否显示跟踪日志信息（线上环境应该关闭）
   show-log: true
+
+  light:
+    # 二级缓存一天后过期
+    l2-expire: 86400
+    # 使用时间线丢弃策略
+    strategy: timeline
 
   echo:
     # 设置请求读取超时
@@ -19,18 +50,20 @@ milkomeda:
     # 自定义token头，默认为token
     token-name: Authorization
     # 不使用BCrypt（如果用户表有salt字段的情况）
-#    use-bCrypt: false
+  #    use-bcrypt: false
 
   ice:
     # 开启Job作业（默认为true，仅作为消费端使用时，设置false）
 #    enable-job-timer: false
+    # Job作业频率（默认1000ms）
+    delay-bucket-poll-rate: 2000
     # 延迟队列分桶数量（默认为3）
     delay-bucket-count: 2
     # 消费执行超时时间（默认5000ms）
     ttr: 10000
     # 重试时添加延迟增长因子（默认为1，计算公式：delay * (retryCount++) * factor）
     retry-delay-multi-factor: 2
-    # 开启Task功能，开发者就可以通过注解方式接收topic消息（如果是微服务布署服务端方案时，保持默认false)
+    # 开启Task功能（使用@EnableIce时消费端需要配置为true）
     enable-task: true
     # 最大消费个数（默认为10）
     task-topic-pop-max-size: 5

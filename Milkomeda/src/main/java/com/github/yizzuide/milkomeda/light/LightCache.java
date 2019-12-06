@@ -8,9 +8,11 @@ import com.github.yizzuide.milkomeda.util.JSONUtil;
 import com.github.yizzuide.milkomeda.util.Polyfill;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
+import java.io.Serializable;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentSkipListMap;
@@ -25,11 +27,12 @@ import java.util.concurrent.TimeUnit;
  * E：缓存业务数据
  *
  * @since 1.8.0
- * @version 1.11.0
+ * @version 1.17.0
  * @author yizzuide
  * Create at 2019/06/28 13:33
  */
-public class LightCache<V, E> implements Cache<V, E> {
+@Slf4j
+public class LightCache implements Cache {
     /**
      * 默认一级缓存最大个数
      */
@@ -66,11 +69,22 @@ public class LightCache<V, E> implements Cache<V, E> {
     private Boolean onlyCacheL1 = false;
 
     /**
-     * 一级缓存丢弃策略，默认根据热点
+     * 一级缓存丢弃策略，默认为HOT
+     */
+    @Getter
+    private LightDiscardStrategy strategy;
+
+    /**
+     * 自定义一级缓存丢弃策略实现
      */
     @Setter
     @Getter
-    private Discard<V, E> discardStrategy = new HotDiscard<>();
+    private Class<Discard> strategyClass;
+
+    /**
+     * 一级缓存丢弃策略
+     */
+    private Discard discardStrategy;
 
     /**
      * 二级缓存过期时间，默认为永不过期，单位：秒
@@ -83,12 +97,12 @@ public class LightCache<V, E> implements Cache<V, E> {
      * 超级缓存
      */
     @Getter
-    private LightContext<V, E> superCache = new LightContext<>();
+    private LightContext superCache = new LightContext();
 
     /**
      * 一级缓存容器
      */
-    private Map<String, Spot<V, E>> cacheMap = new ConcurrentSkipListMap<>();
+    private Map<String, Spot<Serializable, Object>> cacheMap = new ConcurrentSkipListMap<>();
 
     /**
      * 二级缓存容器
@@ -105,7 +119,7 @@ public class LightCache<V, E> implements Cache<V, E> {
      * @param id    缓存标识符
      */
     @Override
-    public void set(V id) {
+    public void set(Serializable id) {
         if (null == id) return;
         // 如果一级缓存没有数据，创建新的缓存数据对象
         if (cacheMap.size() == 0) {
@@ -114,7 +128,7 @@ public class LightCache<V, E> implements Cache<V, E> {
         }
 
         // 从一级缓存获取
-        Optional<Spot<V, E>> viableSpot = cacheMap.values()
+        Optional<Spot<Serializable, Object>> viableSpot = cacheMap.values()
                 .stream()
                 .filter(spot -> spot.getView().equals(id))
                 .findFirst();
@@ -124,7 +138,7 @@ public class LightCache<V, E> implements Cache<V, E> {
             return;
         }
 
-        Spot<V, E> spot = viableSpot.get();
+        Spot<Serializable, Object> spot = viableSpot.get();
         // 排行加分
         discardStrategy.ascend(spot);
         // 设置到超级缓存，保存相同缓存数据对象只有一份
@@ -132,7 +146,7 @@ public class LightCache<V, E> implements Cache<V, E> {
     }
 
     @Override
-    public Spot<V, E> get() {
+    public <E> Spot<Serializable, E> get() {
         return superCache.get();
     }
 
@@ -147,15 +161,16 @@ public class LightCache<V, E> implements Cache<V, E> {
      * @param spot      缓存数据，如果有设置过超级缓存，这个对象不应该通过new再次创建，
      *                  而是先通过<code>get()</code>获得，修改之后再传入，这样才能只存储一份数据
      */
+    @SuppressWarnings("unchecked")
     @Override
-    public void set(String key, Spot<V, E> spot) {
+    public void set(String key, Spot<Serializable, ?> spot) {
         // 如果是父类型，需要向下转型（会触发初始化排序状态字段）
         if (spot.getClass() == Spot.class) {
-            spot = discardStrategy.deform(key, spot);
+            spot = discardStrategy.deform(key, (Spot<Serializable, Object>) spot);
         }
 
         // 开始缓存
-        cache(key, spot);
+        cache(key, (Spot<Serializable, Object>)spot);
     }
 
     /**
@@ -163,7 +178,7 @@ public class LightCache<V, E> implements Cache<V, E> {
      * @param key   键
      * @param spot  缓存数据
      */
-    private void cache(String key, Spot<V, E> spot) {
+    private void cache(String key, Spot<Serializable, Object> spot) {
         // 一级缓存
         cacheL1(key, spot);
 
@@ -178,7 +193,7 @@ public class LightCache<V, E> implements Cache<V, E> {
      * @param key   键
      * @param spot  缓存数据
      */
-    private void cacheL2(String key, Spot<V, E> spot) {
+    private void cacheL2(String key, Spot<Serializable, Object> spot) {
         // 异步添加到Redis（由于序列化稍微耗时）
         PulsarHolder.getPulsar().post(() -> {
             String json = JSONUtil.serialize(spot);
@@ -195,7 +210,7 @@ public class LightCache<V, E> implements Cache<V, E> {
      * @param key   键
      * @param spot  缓存数据
      */
-    private void cacheL1(String key, Spot<V, E> spot) {
+    private void cacheL1(String key, Spot<Serializable, Object> spot) {
         // 一级缓存超出最大个数
         if ((cacheMap.size() + 1) > l1MaxCount) {
             // 根据选择的策略来丢弃数据
@@ -210,21 +225,21 @@ public class LightCache<V, E> implements Cache<V, E> {
     }
 
     @Override
-    public Spot<V, E> get(String key) {
+    public <E> Spot<Serializable, E> get(String key) {
         return get(key, null);
     }
 
     @Override
-    public Spot<V, E> get(String key, Class<V> vClazz, Class<E> eClazz) {
+    public  <E> Spot<Serializable, E> get(String key, Class<Serializable> vClazz, Class<E> eClazz) {
         JavaType javaType = TypeFactory.defaultInstance()
                 .constructParametricType(discardStrategy.spotClazz(), vClazz, eClazz);
         return get(key, javaType);
     }
 
     @Override
-    public Spot<V, E> get(String key, TypeReference<V> vTypeRef, TypeReference<E> eTypeRef) {
+    public <E> Spot<Serializable, E> get(String key, TypeReference<Serializable> vTypeRef, TypeReference<E> eTypeRef) {
         // TypeReference -> (Type | JavaType) -> Class
-        // TypeFactory.defaultInstance().constructType(vTypeRef.getType()).getRawClass();
+        // TypeFactory.defaultInstance().constructType(SerializableTypeRef.getType()).getRawClass();
         JavaType vType =  TypeFactory.defaultInstance().constructType(vTypeRef);
         JavaType eType = TypeFactory.defaultInstance().constructType(eTypeRef);
         JavaType javaType = TypeFactory.defaultInstance()
@@ -239,13 +254,13 @@ public class LightCache<V, E> implements Cache<V, E> {
      * @return  Spot
      */
     @SuppressWarnings("unchecked")
-    private Spot<V, E> get(String key, JavaType javaType) {
+    private <E> Spot<Serializable, E> get(String key, JavaType javaType) {
         // 从一级缓存查找
-        Spot<V, E> spot = cacheMap.get(key);
+        Spot<Serializable, Object> spot = cacheMap.get(key);
         if (null != spot) {
             // 排行加分
             discardStrategy.ascend(spot);
-            return spot;
+            return (Spot<Serializable, E>) spot;
         }
 
         // 从二级缓存中查找
@@ -261,7 +276,7 @@ public class LightCache<V, E> implements Cache<V, E> {
                 cacheL1(key, spot);
             }
         }
-        return spot;
+        return (Spot<Serializable, E>) spot;
     }
 
     @Override
@@ -278,5 +293,33 @@ public class LightCache<V, E> implements Cache<V, E> {
     */
     public void setL1DiscardPercent(Float l1DiscardPercent) {
         this.l1DiscardPercent = Math.min(Math.max(l1DiscardPercent, 0.1F), 1.0F);
+    }
+
+    public void setStrategy(LightDiscardStrategy strategy) {
+        this.strategy = strategy;
+        if (strategy == null) {
+            discardStrategy  = new HotDiscard();
+            return;
+        }
+        switch (strategy) {
+            case HOT:
+                discardStrategy  = new HotDiscard();
+                break;
+            case TIMELINE:
+                discardStrategy = new TimelineDiscard();
+                break;
+            case CUSTOM:
+            {
+                if (strategyClass == null) {
+                    discardStrategy  = new HotDiscard();
+                    return;
+                }
+                try {
+                    discardStrategy = strategyClass.newInstance();
+                } catch (Exception e) {
+                    log.error("light create strategy class error with message:{}", e.getMessage(), e);
+                }
+            }
+        }
     }
 }

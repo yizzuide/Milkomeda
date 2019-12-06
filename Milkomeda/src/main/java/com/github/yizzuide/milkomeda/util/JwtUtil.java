@@ -38,6 +38,7 @@ public class JwtUtil {
      * @param claims        载荷中的数据
      * @param secureKey     密钥
      * @param expireMinutes 过期时间，单位分钟
+     * @param usedRSA       是否使用RSA加密方式
      * @return  Token
      */
     public static String generateToken(Map<String, Object> claims, String secureKey, int expireMinutes, boolean usedRSA) {

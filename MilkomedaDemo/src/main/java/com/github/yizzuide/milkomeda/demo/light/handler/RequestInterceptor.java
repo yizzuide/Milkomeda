@@ -1,6 +1,5 @@
 package com.github.yizzuide.milkomeda.demo.light.handler;
 
-import com.github.yizzuide.milkomeda.demo.light.pojo.Order;
 import com.github.yizzuide.milkomeda.light.Cache;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -20,7 +19,7 @@ import javax.servlet.http.HttpServletResponse;
 public class RequestInterceptor implements HandlerInterceptor {
 
     @Resource
-    private Cache<String, Order> lightCache;
+    private Cache lightCache;
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {

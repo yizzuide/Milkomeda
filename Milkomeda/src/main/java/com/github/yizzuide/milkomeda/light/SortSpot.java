@@ -10,6 +10,7 @@ import lombok.ToString;
  * 支持排序的热点数据
  *
  * @since 1.8.0
+ * @version 1.17.0
  * @author yizzuide
  * Create at 2019/06/28 15:41
  */

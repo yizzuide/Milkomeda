@@ -12,6 +12,7 @@ import lombok.AllArgsConstructor;
  *
  * @author yizzuide
  * @since 1.15.0
+ * @version 1.16.0
  * Create at 2019/11/13 19:11
  */
 @AllArgsConstructor

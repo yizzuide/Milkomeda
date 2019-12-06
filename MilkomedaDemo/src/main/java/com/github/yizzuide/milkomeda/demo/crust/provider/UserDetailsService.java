@@ -5,8 +5,8 @@ import com.github.yizzuide.milkomeda.crust.CrustUserDetailsService;
 import com.github.yizzuide.milkomeda.demo.crust.pojo.User;
 import org.assertj.core.util.Lists;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.stereotype.Component;
 
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -16,8 +16,12 @@ import java.util.Set;
  * @author yizzuide
  * Create at 2019/11/11 23:44
  */
-@Component
 public class UserDetailsService extends CrustUserDetailsService {
+
+    @Override
+    protected Serializable findEntityById(String uid) {
+        return new User("1000", "yiz", new BCryptPasswordEncoder().encode("123456"), null);
+    }
 
     @Override
     protected CrustEntity findEntityByUsername(String username) {
@@ -29,7 +33,7 @@ public class UserDetailsService extends CrustUserDetailsService {
     }
 
     @Override
-    protected Set<String> findPermissionsById(String uid) {
+    protected Set<String> findPermissionsById(String uid, String username) {
         // 实际情况下通过Dao查询
         return new HashSet<>(Lists.list("case:find:list", "case:find:one"));
     }

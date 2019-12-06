@@ -11,9 +11,10 @@
 
     <properties>
         <java.version>1.8</java.version>
-        <project.release.version>1.15.2-SNAPSHOT</project.release.version>
+        <project.release.version>1.17.0-SNAPSHOT</project.release.version>
         <jwt.version>0.9.1</jwt.version>
         <shiro.version>1.4.2</shiro.version>
+        <commons-beanutils.version>1.9.4</commons-beanutils.version>
     </properties>
 
     <parent>
@@ -61,7 +62,7 @@
         <profile>
             <id>sonatype-oss-release</id>
             <properties>
-                <project.release.version>1.15.2</project.release.version>
+                <project.release.version>1.17.0</project.release.version>
             </properties>
             <build>
                 <plugins>
@@ -131,26 +132,22 @@
             <artifactId>httpclient</artifactId>
         </dependency>
         <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt</artifactId>
+            <version>${jwt.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
         </dependency>
         <dependency>
             <groupId>commons-beanutils</groupId>
             <artifactId>commons-beanutils</artifactId>
-            <version>1.9.4</version>
+            <version>${commons-beanutils.version}</version>
         </dependency>
         <dependency>
             <groupId>joda-time</groupId>
             <artifactId>joda-time</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.jsonwebtoken</groupId>
-            <artifactId>jjwt</artifactId>
-            <version>${jwt.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -158,8 +155,13 @@
             <optional>true</optional>
         </dependency>
         <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
+        <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 

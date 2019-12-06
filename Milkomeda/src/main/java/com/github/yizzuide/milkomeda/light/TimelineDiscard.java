@@ -1,6 +1,8 @@
 package com.github.yizzuide.milkomeda.light;
 
-import java.util.*;
+import java.io.Serializable;
+import java.util.Comparator;
+import java.util.Date;
 
 /**
  * TimelineDiscard
@@ -8,10 +10,11 @@ import java.util.*;
  * 时间线丢弃方案
  *
  * @since 1.8.0
+ * @version 1.17.0
  * @author yizzuide
  * Create at 2019/06/28 16:25
  */
-public class TimelineDiscard<V, E> extends SortDiscard<V, E> {
+public class TimelineDiscard extends SortDiscard {
 
     @Override
     public Class<? extends SortSpot> spotClazz() {
@@ -19,8 +22,8 @@ public class TimelineDiscard<V, E> extends SortDiscard<V, E> {
     }
 
     @Override
-    public Spot<V, E> deform(String key, Spot<V, E> spot) {
-        TimelineSpot<V, E> timelineSpot = (TimelineSpot<V, E>) super.deform(key, spot);
+    public Spot<Serializable, Object> deform(String key, Spot<Serializable, Object> spot) {
+        TimelineSpot<Serializable, Object> timelineSpot = (TimelineSpot<Serializable, Object>) super.deform(key, spot);
         if (null == timelineSpot.getTime()) {
             timelineSpot.setTime(new Date());
         }
@@ -28,13 +31,13 @@ public class TimelineDiscard<V, E> extends SortDiscard<V, E> {
     }
 
     @Override
-    public void ascend(Spot<V, E> spot) {
-        TimelineSpot<V, E> timelineSpot = (TimelineSpot<V, E>) spot;
+    public void ascend(Spot<Serializable, Object> spot) {
+        TimelineSpot<Serializable, Object> timelineSpot = (TimelineSpot<Serializable, Object>) spot;
         timelineSpot.setTime(new Date());
     }
 
     @Override
-    protected Comparator<? extends SortSpot<V, E>> comparator() {
-        return Comparator.<TimelineSpot<V, E>, Date>comparing(TimelineSpot::getTime);
+    protected Comparator<? extends SortSpot<Serializable, Object>> comparator() {
+        return Comparator.<TimelineSpot<Serializable, Object>, Date>comparing(TimelineSpot::getTime);
     }
 }

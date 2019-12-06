@@ -44,47 +44,41 @@ public class DelayJobHandler implements Runnable {
     @Autowired
     private IceProperties props;
 
-    @SuppressWarnings("InfiniteLoopStatement")
     @Override
     public void run() {
-        while (true) {
-            DelayJob delayJob = null;
-            try {
-                delayJob = delayBucket.poll(index);
-                // 没有任务
-                if (delayJob == null) {
-                    sleep();
-                    continue;
-                }
-
-                // 发现延时任务，延迟时间没到
-                long currentTime = System.currentTimeMillis();
-                if (delayJob.getDelayTime() > currentTime) {
-                    sleep();
-                    continue;
-                }
-
-                // 获取超时任务（包括延迟超时和TTR超时）
-                Job job = jobPool.get(delayJob.getJodId());
-                // 任务元数据不存在（说明任务已被消费）
-                if (job == null) {
-                    // 移除TTR超时检测任务
-                    delayBucket.remove(index, delayJob);
-                    continue;
-                }
-                JobStatus status = job.getStatus();
-                if (JobStatus.RESERVED.equals(status)) {
-                    // 处理超时任务
-                    processTtrJob(delayJob, job);
-                } else {
-                    // 延时任务
-                    processDelayJob(delayJob, job);
-                }
-            } catch (Exception e) {
-                log.error("Ice Timer处理延迟Job {} 异常：{}", delayJob != null ?
-                        delayJob.getJodId()  : "[任务数据获取失败]", e.getMessage(), e);
-                sleep();
+        DelayJob delayJob = null;
+        try {
+            delayJob = delayBucket.poll(index);
+            // 没有任务
+            if (delayJob == null) {
+                return;
             }
+
+            // 发现延时任务，延迟时间没到
+            long currentTime = System.currentTimeMillis();
+            if (delayJob.getDelayTime() > currentTime) {
+                return;
+            }
+
+            // 获取超时任务（包括延迟超时和TTR超时）
+            Job job = jobPool.get(delayJob.getJodId());
+            // 任务元数据不存在（说明任务已被消费）
+            if (job == null) {
+                // 移除TTR超时检测任务
+                delayBucket.remove(index, delayJob);
+                return;
+            }
+            JobStatus status = job.getStatus();
+            if (JobStatus.RESERVED.equals(status)) {
+                // 处理超时任务
+                processTtrJob(delayJob, job);
+            } else {
+                // 延时任务
+                processDelayJob(delayJob, job);
+            }
+        } catch (Exception e) {
+            log.error("Ice Timer处理延迟Job {} 异常：{}", delayJob != null ?
+                    delayJob.getJodId()  : "[任务数据获取失败]", e.getMessage(), e);
         }
     }
 
@@ -135,12 +129,5 @@ public class DelayJobHandler implements Runnable {
             // 移除delayBucket中的任务
             delayBucket.remove(index, delayJob);
         }, redisTemplate);
-    }
-
-    private void sleep() {
-        try {
-            Thread.sleep(props.getDelayBucketPollRate());
-        } catch (InterruptedException ignored) {
-        }
     }
 }

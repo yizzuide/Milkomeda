@@ -1,9 +1,11 @@
 package com.github.yizzuide.milkomeda.crust;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.io.Serializable;
 import java.util.Collection;
 
 /**
@@ -12,9 +14,11 @@ import java.util.Collection;
  *
  * @author yizzuide
  * @since 1.14.0
+ * @version 1.17.0
  * Create at 2019/11/11 17:23
  */
 @Data
+@AllArgsConstructor
 public class CrustUserDetails implements UserDetails {
     private static final long serialVersionUID = 2749178892063846690L;
 
@@ -23,14 +27,7 @@ public class CrustUserDetails implements UserDetails {
     private String password;
     private String salt;
     private Collection<? extends GrantedAuthority> authorities;
-
-    CrustUserDetails(String uid, String username, String password, String salt, Collection<? extends GrantedAuthority> authorities) {
-        this.uid = uid;
-        this.username = username;
-        this.password = password;
-        this.salt = salt;
-        this.authorities = authorities;
-    }
+    private Serializable entity;
 
     CrustUserDetails(String uid, String username, Collection<? extends GrantedAuthority> authorities) {
         this.uid = uid;

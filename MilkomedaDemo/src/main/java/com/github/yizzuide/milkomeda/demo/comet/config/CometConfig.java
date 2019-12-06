@@ -3,7 +3,7 @@ package com.github.yizzuide.milkomeda.demo.comet.config;
 import com.github.yizzuide.milkomeda.comet.CometAspect;
 import com.github.yizzuide.milkomeda.comet.CometData;
 import com.github.yizzuide.milkomeda.demo.comet.collector.CollectorType;
-import com.github.yizzuide.milkomeda.mix.collector.CollectorAdapter;
+import com.github.yizzuide.milkomeda.mix.collector.Collector;
 import com.github.yizzuide.milkomeda.mix.collector.CollectorFactory;
 import com.github.yizzuide.milkomeda.mix.collector.CollectorRecorder;
 import com.github.yizzuide.milkomeda.pillar.PillarExecutor;
@@ -25,7 +25,7 @@ import java.util.List;
 public class CometConfig {
 
     @Autowired
-    private List<CollectorAdapter> collectors;
+    private List<Collector> collectors;
 
     @Bean("cometPillarExecutor") // 这里取个别名（因为在PillarConfig例子中配置过了）
     public PillarExecutor<CometData, Object> pillarExecutor() {

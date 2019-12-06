@@ -21,7 +21,7 @@ import javax.annotation.Resource;
 public class OrderController {
 
     @Resource
-    private Cache<String, Order> lightCache;
+    private Cache lightCache;
 
     @Resource
     private OrderService orderService;
@@ -31,12 +31,12 @@ public class OrderController {
         // 从缓存获取数据，支持一级缓存、二级缓存（如果使用默认配置的话）
 //        return CacheHelper.get(lightCache, String.class, Order.class, orderId, (id) -> "order:" + id, (id) -> orderService.findById(id));
         // 使用TypeReference支持的泛型更加强大，只是在当前简单的例子看不出来，如：TypeReference<List<Page<User>>>
-        return CacheHelper.get(lightCache, new TypeReference<String>() {}, new TypeReference<Order>() {}, orderId, (id) -> "order:" + id, (id) -> orderService.findById(id));
+        return CacheHelper.get(lightCache, new TypeReference<Order>() {}, orderId, id -> "order:" + id, id -> orderService.findById(id));
     }
 
     @RequestMapping("detail2")
-    public Order detail2(String orderId) {
+    public Order detail2() {
         // 从缓存获取数据，支持超级缓存、一级缓存、二级缓存（如果使用默认配置的话）
-        return CacheHelper.get(lightCache, String.class, Order.class, (id) -> "order:" + id, (id) -> orderService.findById(id));
+        return CacheHelper.get(lightCache, Order.class, (id) -> "order:" + id, (id) -> orderService.findById(id));
     }
 }

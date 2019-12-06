@@ -35,6 +35,7 @@ public interface JobPool {
      * 获取任务
      * @param jobId 任务id
      * @param typeReference TypeReference
+     * @param <T> 实体类型
      * @return Job
      */
     <T> Job<T> getByType(String jobId, TypeReference<Job<T>> typeReference);
@@ -44,6 +45,7 @@ public interface JobPool {
      * @param jobIds 任务id列表
      * @param typeReference TypeReference
      * @param count 批量数
+     * @param <T> 实体类型
      * @return Job
      */
     <T> List<Job<T>> getByType(List<String> jobIds, TypeReference<Job<T>> typeReference, int count);

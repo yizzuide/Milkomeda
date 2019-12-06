@@ -35,6 +35,7 @@ public interface ReadyQueue {
     /**
      * 获取准备消费队列的元素个数
      * @param topic 任务分组
+     * @return ready queue size
      */
     long size(String topic);
 }
