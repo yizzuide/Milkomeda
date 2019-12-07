@@ -30,8 +30,7 @@
    * 设计模式：策略模式、享元模式、门面模式、面向声明式编程
    
 ## Todo List
-- [ ] Light模块无配置化改造
-- [ ] Crust模块支持Shiro
+- [ ] 添加一个支持Shiro的模块
     
 ## Requirements
 * Java 8
