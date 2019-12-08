@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.BeanIds;
@@ -30,7 +31,7 @@ import java.util.function.Supplier;
  *
  * @author yizzuide
  * @since 1.14.0
- * @version 1.16.5
+ * @version 1.17.3
  * Create at 2019/11/11 18:25
  */
 public class CrustConfigurerAdapter extends WebSecurityConfigurerAdapter {
@@ -90,13 +91,14 @@ public class CrustConfigurerAdapter extends WebSecurityConfigurerAdapter {
      * 自定义配置数据源提供及<code>PasswordEncoder</code>
      * @param provider  DaoAuthenticationProvider
      */
-    protected void configureProvider(DaoAuthenticationProvider provider) { }
+    protected void configureProvider(@NonNull DaoAuthenticationProvider provider) { }
 
     /**
      * 认证失败处理器
      *
      * @return Supplier
      */
+    @NonNull
     protected Supplier<AuthenticationFailureHandler> authFailureHandler() {
         return () -> (request, response, exception) -> response.setStatus(HttpStatus.UNAUTHORIZED.value());
     }

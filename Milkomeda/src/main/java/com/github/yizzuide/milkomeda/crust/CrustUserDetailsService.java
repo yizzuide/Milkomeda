@@ -1,5 +1,6 @@
 package com.github.yizzuide.milkomeda.crust;
 
+import org.springframework.lang.Nullable;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -17,7 +18,7 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 1.14.0
- * @version 1.17.2
+ * @version 1.17.3
  * Create at 2019/11/11 18:01
  */
 public abstract class CrustUserDetailsService implements UserDetailsService {
@@ -49,6 +50,7 @@ public abstract class CrustUserDetailsService implements UserDetailsService {
      * @param uid   用户id
      * @return  CrustEntity
      */
+    @Nullable
     protected Serializable findEntityById(String uid) {return null;}
 
     /**
@@ -57,6 +59,7 @@ public abstract class CrustUserDetailsService implements UserDetailsService {
      * @param username  用户名
      * @return  CrustEntity
      */
+    @Nullable
     protected abstract CrustEntity findEntityByUsername(String username);
 
     /**
@@ -66,5 +69,6 @@ public abstract class CrustUserDetailsService implements UserDetailsService {
      * @param username 用户名
      * @return  权限数据
      */
+    @Nullable
     protected abstract CrustPerm findPermissionsById(String uid, String username);
 }

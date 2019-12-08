@@ -3,6 +3,8 @@ package com.github.yizzuide.milkomeda.crust;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.lang.Nullable;
+import org.springframework.util.CollectionUtils;
 
 import java.io.Serializable;
 import java.util.List;
@@ -13,7 +15,7 @@ import java.util.List;
  *
  * @author yizzuide
  * @since 1.14.0
- * @version 1.17.1
+ * @version 1.17.3
  * Create at 2019/11/11 21:51
  */
 @Data
@@ -53,4 +55,26 @@ public class CrustUserInfo<T> implements Serializable {
      * @see CrustUserDetailsService#findEntityById(String)
      */
     private T entity;
+
+    /**
+     * 获取第一个角色id
+     * @return  角色id
+     */
+    @Nullable
+    public Long firstRole() {
+        if (CollectionUtils.isEmpty(roleIds)) {
+            return null;
+        }
+        return getRoleIds().get(0);
+    }
+
+    /**
+     * 获取第一个角色id
+     * @return  角色id
+     */
+    public long firstRoleVal() {
+        Long val = firstRole();
+        assert val != null;
+        return val;
+    }
 }

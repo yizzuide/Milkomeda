@@ -1,12 +1,14 @@
 package com.github.yizzuide.milkomeda.crust;
 
+import org.springframework.lang.NonNull;
+
 /**
  * CrustContext
  * Crust上下文，使用这个类直接访问内部提供的API
  *
  * @author yizzuide
  * @since 1.14.0
- * @version 1.17.0
+ * @version 1.17.3
  * Create at 2019/11/11 17:53
  */
 public class CrustContext {
@@ -17,6 +19,7 @@ public class CrustContext {
         INSTANCE = crust;
     }
 
+    @NonNull
     public static Crust get() {
         return INSTANCE;
     }
@@ -28,7 +31,8 @@ public class CrustContext {
      * @param <T>   实体类型
      * @return  CrustUserInfo
      */
-    public static <T> CrustUserInfo<T> getUserInfo(Class<T> entityClass) { return get().getUserInfo(entityClass); }
+    @NonNull
+    public static <T> CrustUserInfo<T> getUserInfo(@NonNull Class<T> entityClass) { return get().getUserInfo(entityClass); }
 
     /**
      * 使登录信息失效，清空当前用户的缓存
