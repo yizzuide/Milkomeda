@@ -69,3 +69,7 @@ milkomeda:
     task-topic-pop-max-size: 5
     # 消费轮询间隔（默认5000ms）
     task-execute-rate: 2000
+
+  neutron:
+    # 不使用持久化
+    serializable: false
