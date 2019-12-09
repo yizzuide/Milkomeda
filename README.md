@@ -28,6 +28,9 @@
 - [x] Ice（冰）：用于延迟列队的需求，支持配置延迟分桶、任务执行超时时间（TTR）、超时重试、Task自动调度等。*1.15.0+*
    * 依赖技术：Spring IoC、Spring Task、SpringBoot Data Redis
    * 设计模式：策略模式、享元模式、门面模式、面向声明式编程
+- [x] Neutron（中子星）：用于定时作业任务，支持数据库持久化，动态创建Job、删除、修改Cron执行表达式。*1.18.0+*
+   * 依赖技术：Spring IoC、Quartz
+   * 设计模式：门面模式
    
 ## Todo List
 - [ ] 添加一个支持Shiro的模块
