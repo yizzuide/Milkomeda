@@ -21,6 +21,10 @@ public class NeutronController {
     @RequestMapping("add")
     public ResponseEntity<?> add() {
         Neutron.addJob(jobName, NeutronJob.class, "1/5 * * * * ?");
+        // 动态添加实现
+        // String clazzName = 从数据库读取配置的class
+        // Class clazz = Class.forName(clazzName)
+        // Neutron.addJob(jobName, (Class<? extends Job>)clazz, "1/5 * * * * ?")
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 

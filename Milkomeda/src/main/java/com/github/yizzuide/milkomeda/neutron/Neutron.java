@@ -2,6 +2,7 @@ package com.github.yizzuide.milkomeda.neutron;
 
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.*;
+import org.springframework.boot.autoconfigure.quartz.JobStoreType;
 import org.springframework.scheduling.quartz.CronTriggerFactoryBean;
 
 import java.text.ParseException;
@@ -40,11 +41,22 @@ public class Neutron {
      * @return  jobDetail
      */
     public static JobDetail createJobDetail(String jobName, String group, Class<? extends Job> jobClass/*, String description*/) {
+        return createJobDetail(jobName, group, jobClass, "");
+    }
+
+    /**
+     * 创建JOB
+     * @param jobName   job名称
+     * @param group     job组
+     * @param jobClass  job类
+     * @return  jobDetail
+     */
+    public static JobDetail createJobDetail(String jobName, String group, Class<? extends Job> jobClass, String description) {
         return JobBuilder.newJob(jobClass)
                 .withIdentity(jobName, group)
-                // .withDescription(description)
+                 .withDescription(description)
                 // 持久化到数据库
-                 .storeDurably(NeutronHolder.getProps().isSerializable())
+                 .storeDurably(NeutronHolder.getProps().getJobStoreType() == JobStoreType.JDBC)
                 .build();
     }
 

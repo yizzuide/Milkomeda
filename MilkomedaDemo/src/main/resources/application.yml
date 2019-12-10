@@ -30,6 +30,11 @@ spring:
         await-termination: true
         await-termination-period: 60s
 
+  quartz:
+    scheduler-name: neutron
+    overwrite-existing-jobs: true
+    wait-for-jobs-to-complete-on-shutdown: true
+
 milkomeda:
   # 配置是否显示跟踪日志信息（线上环境应该关闭）
   show-log: true
@@ -69,7 +74,3 @@ milkomeda:
     task-topic-pop-max-size: 5
     # 消费轮询间隔（默认5000ms）
     task-execute-rate: 2000
-
-  neutron:
-    # 不使用持久化
-    serializable: false

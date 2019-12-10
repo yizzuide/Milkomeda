@@ -2,6 +2,7 @@ package com.github.yizzuide.milkomeda.neutron;
 
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
+import org.springframework.boot.autoconfigure.quartz.QuartzProperties;
 
 /**
  * NeutronHolder
@@ -12,7 +13,7 @@ import org.quartz.SchedulerException;
  */
 public class NeutronHolder {
     private static Scheduler scheduler;
-    private static NeutronProperties props;
+    private static QuartzProperties props;
 
     public static void setScheduler(Scheduler scheduler) {
         NeutronHolder.scheduler = scheduler;
@@ -22,11 +23,11 @@ public class NeutronHolder {
         return scheduler;
     }
 
-    public static void setProps(NeutronProperties props) {
+    public static void setProps(QuartzProperties props) {
         NeutronHolder.props = props;
     }
 
-    public static NeutronProperties getProps() {
+    public static QuartzProperties getProps() {
         return props;
     }
 }
