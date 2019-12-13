@@ -10,7 +10,7 @@ import java.util.Map;
  *
  * @author yizzuide
  * @since 0.2.0
- * @version 1.12.0
+ * @version 2.0.0
  * Create at 2019/04/11 20:10
  */
 public class HttpServletUtil {
@@ -26,12 +26,7 @@ public class HttpServletUtil {
         while (names.hasMoreElements()) {
             String name = names.nextElement();
             String value = request.getParameter(name);
-            if (value.length() > 100) {
-                String vString = value.substring(0, 50) + value.substring(value.length() - 50);
-                inputs.put(name, vString);
-            } else {
-                inputs.put(name, value);
-            }
+            inputs.put(name, value);
         }
         return JSONUtil.serialize(inputs);
     }
