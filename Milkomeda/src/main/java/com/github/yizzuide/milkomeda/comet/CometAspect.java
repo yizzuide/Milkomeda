@@ -1,6 +1,7 @@
 package com.github.yizzuide.milkomeda.comet;
 
 import com.github.yizzuide.milkomeda.universe.config.MilkomedaProperties;
+import com.github.yizzuide.milkomeda.universe.context.WebContext;
 import com.github.yizzuide.milkomeda.util.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -15,8 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.context.request.async.WebAsyncTask;
 
@@ -30,15 +29,13 @@ import java.net.UnknownHostException;
 import java.util.*;
 import java.util.function.Function;
 
-import static com.github.yizzuide.milkomeda.util.ReflectUtil.injectParam;
-
 /**
  * CometAspect
  * 采集切面
  *
  * @author yizzuide
  * @since 0.2.0
- * @version 1.15.0
+ * @version 2.0.0
  * Create at 2019/04/11 19:48
  */
 @Slf4j
@@ -49,6 +46,13 @@ public class CometAspect {
     @Autowired
     private MilkomedaProperties milkomedaProperties;
 
+    @Autowired
+    private CometProperties cometProperties;
+
+    /**
+     * 请求参数解析本地线程存储
+     */
+    static ThreadLocal<String> resolveThreadLocal = new ThreadLocal<>();
     /**
      * 控制器层本地线程存储
      */
@@ -60,7 +64,7 @@ public class CometAspect {
     /**
      * 忽略序列化的参数
      */
-    private List<Class> ignoreParams;
+    private List<Class<?>> ignoreParams;
     /**
      * 记录器
      */
@@ -84,19 +88,19 @@ public class CometAspect {
     @Around("comet()")
     public Object around(ProceedingJoinPoint joinPoint) throws Throwable {
         Date requestTime = new Date();
-        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         Comet comet = ReflectUtil.getAnnotation(joinPoint, Comet.class);
         // 获取记录原型对象
         WebCometData cometData = comet.prototype().newInstance();
-        assert attributes != null;
-        HttpServletRequest request = attributes.getRequest();
+        HttpServletRequest request = WebContext.getRequest();
         cometData.setApiCode(comet.apiCode());
         cometData.setDescription(StringUtils.isEmpty(comet.name()) ? comet.description() : comet.name());
         cometData.setRequestType(comet.requestType());
         cometData.setRequestURL(request.getRequestURL().toString());
         cometData.setRequestPath(request.getServletPath());
         cometData.setRequestMethod(request.getMethod());
-        cometData.setRequestParams(HttpServletUtil.getRequestData(request));
+        String requestParams = resolveThreadLocal.get();
+        cometData.setRequestParams(requestParams != null ? requestParams :
+                resolveRequestParams(cometProperties.isEnableReadRequestBody()));
         Map<String, Object> headers = new HashMap<>();
         Enumeration<String> enumeration = request.getHeaderNames();
         while (enumeration.hasMoreElements()) {
@@ -198,7 +202,7 @@ public class CometAspect {
         threadLocal.set(cometData);
 
         // 执行方法体
-        Object returnData = joinPoint.proceed(injectParam(joinPoint, cometData, comet, false));
+        Object returnData = joinPoint.proceed();
 
         long duration = new Date().getTime() - cometData.getRequestTime().getTime();
         cometData.setDuration(String.valueOf(duration));
@@ -230,13 +234,28 @@ public class CometAspect {
         return returnObj;
     }
 
+    public static String resolveRequestParams(boolean formBody) {
+        HttpServletRequest request = WebContext.getRequest();
+        String requestData = HttpServletUtil.getRequestData(request);
+        // 如果form方式获取为空，取消息体内容
+        if (formBody && "{}".equals(requestData)
+                && request instanceof CometRequestWrapper) {
+            // 从请求包装里获取
+            String body = ((CometRequestWrapper) request).getBodyString();
+            // 删除换行符
+            body = body.replaceAll("\\n?\\t?", "");
+           return body;
+        }
+        return requestData;
+    }
+
     /**
      * 参数过滤
      * @param arg 参数
      * @return true为过滤
      */
     private boolean hasFilter(Object arg) {
-        for (Class ignoreParam : ignoreParams) {
+        for (Class<?> ignoreParam : ignoreParams) {
             if (ignoreParam.isInstance(arg)) {
                 return true;
             }
@@ -265,7 +284,7 @@ public class CometAspect {
      *
      * @param clazzList 忽略的参数类型列表
      */
-    public void addFilterClass(Class... clazzList) {
+    public void addFilterClass(Class<?>... clazzList) {
         this.ignoreParams.addAll(Arrays.asList(clazzList));
     }
 }

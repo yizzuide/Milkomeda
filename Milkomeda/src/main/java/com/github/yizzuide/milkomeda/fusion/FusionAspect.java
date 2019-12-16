@@ -21,7 +21,7 @@ import java.util.function.BiFunction;
 @Aspect
 public class FusionAspect {
     /**
-     * 记录器
+     * 转换器
      */
     @Getter
     @Setter
