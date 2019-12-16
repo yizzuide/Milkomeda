@@ -1,5 +1,7 @@
 package com.github.yizzuide.milkomeda.ice;
 
+import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 
@@ -12,6 +14,10 @@ import org.springframework.context.annotation.Bean;
  * Create at 2019/11/21 11:16
  */
 public class IceBasicConfig {
+
+    @Autowired
+    private ApplicationContextHolder applicationContextHolder;
+
     @Bean
     @ConditionalOnMissingBean(JobPool.class)
     public JobPool jobPool() {
