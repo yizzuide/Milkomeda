@@ -29,7 +29,7 @@ public class JobController {
      * @param job 必需设置属性：id（唯一id), topic（消费Topic标识）, delay（延迟ms), ttr（消费执行超时ms）, retryCount（重试次数）, body（JSON业务数据）
      */
     @RequestMapping("push")
-    public void push(@RequestBody Job job) {
+    public void push(@RequestBody Job<?> job) {
         ice.add(job);
     }
 
@@ -40,7 +40,7 @@ public class JobController {
      * @return List
      */
     @RequestMapping("pop")
-    public List<Job<Map>> pop(String topic, Integer count) {
+    public List<Job<Map<String, String>>> pop(String topic, Integer count) {
         if (count == null) {
             return Collections.singletonList(ice.pop(topic));
         }
