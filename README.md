@@ -28,10 +28,12 @@
 - [x] Ice（冰）：用于延迟列队的需求，支持配置延迟分桶、任务执行超时时间（TTR）、超时重试、Task自动调度等。*1.15.0+*
    * 依赖技术：Spring IoC、Spring Task、SpringBoot Data Redis
    * 设计模式：策略模式、享元模式、门面模式、面向声明式编程
+- [x] Neutron（中子星）：用于定时作业任务，支持数据库持久化，动态创建Job、删除、修改Cron执行表达式。*1.18.0+*
+   * 依赖技术：Spring IoC、Quartz
+   * 设计模式：门面模式
    
 ## Todo List
-- [ ] Light模块无配置化改造
-- [ ] Crust模块支持Shiro
+- [ ] 添加一个支持Shiro的模块
     
 ## Requirements
 * Java 8
@@ -39,7 +41,7 @@
 * SpringBoot 2.x
 
 ## Version control guidelines
-- 1.16.x for Spring Boot 2.1.x - 2.2.x
+- 1.16.0+ for Spring Boot 2.1.x - 2.2.x
 - Dalston.1.11.0-Dalston.1.12.0 for Spring Boot 1.5.x
 - Others for Spring Boot 2.0.x
 

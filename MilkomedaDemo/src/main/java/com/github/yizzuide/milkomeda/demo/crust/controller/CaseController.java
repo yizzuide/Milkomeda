@@ -24,7 +24,9 @@ import java.util.Map;
 public class CaseController {
 
     @GetMapping("info")
-    @PreAuthorize("hasAuthority('case:find:one')")
+//    @PreAuthorize("hasAuthority('ROLE_USER')")
+    // 和上面等同
+    @PreAuthorize("hasRole('USER')")
     public Map<String, Object> info() {
         CrustUserInfo<User> userInfo = CrustContext.getUserInfo(User.class);
         log.info("userInfo: {}", userInfo);

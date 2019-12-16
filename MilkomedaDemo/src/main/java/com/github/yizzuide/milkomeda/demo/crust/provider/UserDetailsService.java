@@ -1,14 +1,13 @@
 package com.github.yizzuide.milkomeda.demo.crust.provider;
 
 import com.github.yizzuide.milkomeda.crust.CrustEntity;
+import com.github.yizzuide.milkomeda.crust.CrustPerm;
 import com.github.yizzuide.milkomeda.crust.CrustUserDetailsService;
 import com.github.yizzuide.milkomeda.demo.crust.pojo.User;
-import org.assertj.core.util.Lists;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Collections;
 
 /**
  * UserDetailsService
@@ -33,8 +32,10 @@ public class UserDetailsService extends CrustUserDetailsService {
     }
 
     @Override
-    protected Set<String> findPermissionsById(String uid, String username) {
+    protected CrustPerm findPermissionsById(String uid, String username) {
         // 实际情况下通过Dao查询
-        return new HashSet<>(Lists.list("case:find:list", "case:find:one"));
+        CrustPerm crustPerm = new CrustPerm();
+        crustPerm.setPermNames(Collections.singletonList("ROLE_USER"));
+        return crustPerm;
     }
 }

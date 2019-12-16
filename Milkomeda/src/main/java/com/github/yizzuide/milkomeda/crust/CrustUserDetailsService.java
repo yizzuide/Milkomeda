@@ -1,13 +1,15 @@
 package com.github.yizzuide.milkomeda.crust;
 
+import org.springframework.lang.Nullable;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.util.CollectionUtils;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -16,7 +18,7 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 1.14.0
- * @version 1.17.0
+ * @version 1.17.3
  * Create at 2019/11/11 18:01
  */
 public abstract class CrustUserDetailsService implements UserDetailsService {
@@ -27,10 +29,19 @@ public abstract class CrustUserDetailsService implements UserDetailsService {
         if (entity == null) {
             throw new UsernameNotFoundException("Not Found: " + username);
         }
-        // 用户权限列表，根据用户拥有的权限标识与如 @PreAuthorize("hasAuthority('sys:menu:view')") 标注的接口对比，决定是否可以调用接口
-        Set<String> permissions = findPermissionsById(entity.getId(), username);
-        List<GrantedAuthority> grantedAuthorities = permissions.stream().map(GrantedAuthorityImpl::new).collect(Collectors.toList());
-        return new CrustUserDetails(entity.getId(), entity.getUsername(), entity.getPassword(), entity.getSalt(), grantedAuthorities, entity);
+        CrustPerm crustPerm = findPermissionsById(entity.getUID(), username);
+        List<GrantedAuthority> grantedAuthorities = null;
+        List<Long> roleIds = null;
+        if (crustPerm != null) {
+            if (!CollectionUtils.isEmpty(crustPerm.getRoleIds())) {
+                roleIds = new ArrayList<>(crustPerm.getRoleIds());
+            }
+            if (!CollectionUtils.isEmpty(crustPerm.getPermNames())) {
+                grantedAuthorities = crustPerm.getPermNames().stream().map(GrantedAuthorityImpl::new).collect(Collectors.toList());
+            }
+        }
+        return new CrustUserDetails(entity.getUID(), entity.getUsername(), entity.getPassword(),
+                entity.getSalt(), grantedAuthorities, roleIds, entity);
     }
 
     /**
@@ -39,6 +50,7 @@ public abstract class CrustUserDetailsService implements UserDetailsService {
      * @param uid   用户id
      * @return  CrustEntity
      */
+    @Nullable
     protected Serializable findEntityById(String uid) {return null;}
 
     /**
@@ -47,6 +59,7 @@ public abstract class CrustUserDetailsService implements UserDetailsService {
      * @param username  用户名
      * @return  CrustEntity
      */
+    @Nullable
     protected abstract CrustEntity findEntityByUsername(String username);
 
     /**
@@ -54,7 +67,8 @@ public abstract class CrustUserDetailsService implements UserDetailsService {
      *
      * @param uid  用户id
      * @param username 用户名
-     * @return  权限列表
+     * @return  权限数据
      */
-    protected abstract Set<String> findPermissionsById(String uid, String username);
+    @Nullable
+    protected abstract CrustPerm findPermissionsById(String uid, String username);
 }
