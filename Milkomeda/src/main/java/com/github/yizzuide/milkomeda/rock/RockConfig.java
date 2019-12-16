@@ -8,10 +8,11 @@ import org.apache.shiro.spring.web.ShiroFilterFactoryBean;
 import org.apache.shiro.web.mgt.DefaultWebSecurityManager;
 import org.apache.shiro.web.session.mgt.DefaultWebSessionManager;
 import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.apache.shiro.mgt.SecurityManager;
+
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -39,13 +40,12 @@ public class RockConfig {
         return sessionManager;
     }
 
-
     /**
      * SecurityManager：安全管理器
      * @return
      */
-    @Bean("securityManager")
-    public DefaultWebSecurityManager securityManager(UserRealm userRealm, SessionManager sessionManager) {
+    @Bean("SecurityManager")
+    public SecurityManager securityManager(UserRealm userRealm, SessionManager sessionManager) {
         DefaultWebSecurityManager securityManager = new DefaultWebSecurityManager();
         securityManager.setSessionManager(sessionManager);
         securityManager.setRealm(userRealm);
@@ -74,6 +74,7 @@ public class RockConfig {
     public LifecycleBeanPostProcessor lifecycleBeanPostProcessor() {
         return new LifecycleBeanPostProcessor();
     }
+
     /**
      * 扫描上下文，寻找所有的Advistor(通知器）
      * 将这些Advisor应用到所有符合切入点的Bean中。
@@ -98,7 +99,4 @@ public class RockConfig {
     public UserRealm userRealm(){
         return new UserRealm();
     }
-
-
-
 }
