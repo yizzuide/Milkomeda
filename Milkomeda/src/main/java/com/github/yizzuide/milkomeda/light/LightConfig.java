@@ -19,6 +19,11 @@ public class LightConfig {
     @Autowired
     private LightProperties props;
 
+    @Bean
+    public LightCacheAspect lightCacheAspect() {
+        return new LightCacheAspect();
+    }
+
     @Bean("lightCache")
     public Cache lightCache() {
         LightCache lightCache = new LightCache();
