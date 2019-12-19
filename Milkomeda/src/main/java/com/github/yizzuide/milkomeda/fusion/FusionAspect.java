@@ -7,6 +7,7 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
+import org.springframework.core.annotation.Order;
 import org.springframework.util.StringUtils;
 
 import java.util.function.BiFunction;
@@ -18,6 +19,7 @@ import java.util.function.BiFunction;
  * @since 1.12.0
  * Create at 2019/08/09 11:09
  */
+@Order(99)
 @Aspect
 public class FusionAspect {
     /**

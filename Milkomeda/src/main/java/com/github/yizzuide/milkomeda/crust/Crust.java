@@ -18,6 +18,7 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.DigestUtils;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
@@ -31,7 +32,7 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 1.14.0
- * @version 1.17.3
+ * @version 2.0.0
  * Create at 2019/11/11 15:48
  */
 public class Crust {
@@ -313,9 +314,13 @@ public class Crust {
                     CrustUserDetailsService detailsService = ApplicationContextHolder.get().getBean(CrustUserDetailsService.class);
                     T entity = (T) detailsService.findEntityById(uid);
                     if (props.isEnableCache() && entity != null) {
-                        return CacheHelper.get(crustLightCache, new TypeReference<CrustUserInfo<T>>(){},
-                                id -> CATCH_KEY_PREFIX + id.toString(),
-                                id -> new CrustUserInfo<>(uid, authenticationToken.getName(), token, roleIds,  entity));
+                        try {
+                            return CacheHelper.get(crustLightCache, new TypeReference<CrustUserInfo<T>>(){},
+                                    DigestUtils.md5DigestAsHex(token.getBytes()),
+                                    id -> CATCH_KEY_PREFIX + id.toString(),
+                                    id -> new CrustUserInfo<>(uid, authenticationToken.getName(), token, roleIds,  entity));
+                        } catch (Throwable ignored) {
+                        }
                     }
                     userInfo = new CrustUserInfo<>(uid, authenticationToken.getName(), token, roleIds, entity);
                     return userInfo;

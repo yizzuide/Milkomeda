@@ -2,8 +2,11 @@ package com.github.yizzuide.milkomeda.light;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.util.Collections;
 
 /**
  * LightConfig
@@ -34,5 +37,14 @@ public class LightConfig {
         lightCache.setOnlyCacheL1(props.isOnlyCacheL1());
         lightCache.setL2Expire(props.getL2Expire());
         return lightCache;
+    }
+
+    @Bean
+    public FilterRegistrationBean<LightCacheClearFilter> lightCacheClearFilter() {
+        FilterRegistrationBean<LightCacheClearFilter> lightCacheClearFilter = new FilterRegistrationBean<>();
+        lightCacheClearFilter.setFilter(new LightCacheClearFilter());
+        lightCacheClearFilter.setName("lightCacheClearFilter");
+        lightCacheClearFilter.setUrlPatterns(Collections.singleton("/*"));
+        return lightCacheClearFilter;
     }
 }

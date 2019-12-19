@@ -1,6 +1,7 @@
 package com.github.yizzuide.milkomeda.light;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.github.yizzuide.milkomeda.universe.function.ThrowableFunction;
 import com.github.yizzuide.milkomeda.util.TypeUtil;
 import lombok.extern.slf4j.Slf4j;
 
@@ -13,7 +14,7 @@ import java.util.function.Function;
  * 缓存外层API，集超级缓存、一级缓存、二级缓存于一体的方法
  *
  * @since 1.10.0
- * @version 1.18.3
+ * @version 2.0.0
  * @author yizzuide
  * Create at 2019/07/02 11:36
  */
@@ -71,11 +72,12 @@ public class CacheHelper {
      * @param <E> 实体类型
      * @return                  缓存数据
      * @deprecated Deprecated sine 1.18.3
-     * @see #get(Cache, Class, Serializable, Function, Function)
+     * @see #get(Cache, Class, Serializable, Function, ThrowableFunction)
+     * @throws Throwable 获取异常
      */
     @Deprecated
     public static <E> E get(Cache cache, Class<E> eClazz,
-                            Function<Serializable, String> keyGenerator, Function<String, E> dataGenerator) {
+                            Function<Serializable, String> keyGenerator, ThrowableFunction<String, E> dataGenerator) throws Throwable {
         return get(cache, eClazz, null, keyGenerator, dataGenerator);
     }
 
@@ -88,9 +90,10 @@ public class CacheHelper {
      * @param dataGenerator 数据产生器
      * @param <E>   实体类型
      * @return  缓存数据
+     * @throws Throwable 获取异常
      */
     public static <E> E get(Cache cache, Class<E> eClazz, Serializable id,
-                                Function<Serializable, String> keyGenerator, Function<String, E> dataGenerator) {
+                                Function<Serializable, String> keyGenerator, ThrowableFunction<String, E> dataGenerator) throws Throwable {
         return get(cache, TypeUtil.class2TypeRef(eClazz), id, keyGenerator, dataGenerator);
     }
 
@@ -106,11 +109,12 @@ public class CacheHelper {
      * @param <E> 实体类型
      * @return                  缓存数据
      * @deprecated Deprecated sine 1.18.3
-     * @see #get(Cache, TypeReference, Serializable, Function, Function)
+     * @see #get(Cache, TypeReference, Serializable, Function, ThrowableFunction)
+     * @throws Throwable 获取异常
      */
     @Deprecated
     public static  <E> E get(Cache cache, TypeReference<E> eTypeRef,
-                             Function<Serializable, String> keyGenerator, Function<String, E> dataGenerator) {
+                             Function<Serializable, String> keyGenerator, ThrowableFunction<String, E> dataGenerator) throws Throwable {
         return get(cache, eTypeRef, null, keyGenerator, dataGenerator);
     }
 
@@ -124,9 +128,10 @@ public class CacheHelper {
      * @param dataGenerator     数据产生器
      * @param <E> 实体类型
      * @return                  缓存数据
+     * @throws Throwable 获取异常
      */
     public static  <E> E get(Cache cache, TypeReference<E> eTypeRef, Serializable id,
-                                Function<Serializable, String> keyGenerator, Function<String, E> dataGenerator) {
+                                Function<Serializable, String> keyGenerator, ThrowableFunction<String, E> dataGenerator) throws Throwable {
         E data;
         // 方案一：从超级缓存中获取，内存指针引用即可返回（耗时为O(1)，速度快到没朋友）
         Spot<Serializable, E> fastSpot = get(cache);
