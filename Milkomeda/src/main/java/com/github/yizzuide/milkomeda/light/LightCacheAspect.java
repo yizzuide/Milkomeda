@@ -1,12 +1,15 @@
 package com.github.yizzuide.milkomeda.light;
 
 import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
+import com.github.yizzuide.milkomeda.universe.context.WebContext;
 import lombok.val;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.springframework.beans.BeanUtils;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.annotation.Order;
 import org.springframework.util.StringUtils;
 
@@ -62,7 +65,11 @@ public class LightCacheAspect {
         boolean isUsedGKey = StringUtils.isEmpty(key);
         // 解析表达式
         key = extractValue(joinPoint, key);
-        Cache cache = ApplicationContextHolder.get().getBean(cacheBeanName, Cache.class);
+
+        Cache defaultBean =  ApplicationContextHolder.get().getBean("lightCache",LightCache.class);
+        cacheBeanName = cacheBeanName + (int) (Math.random() * 9+1) * (2<<10);
+        Cache cache = WebContext.registerBean((ConfigurableApplicationContext) ApplicationContextHolder.get(), cacheBeanName, LightCache.class);
+        BeanUtils.copyProperties(defaultBean,cache);
         Serializable view = isUsedGKey ? gKey : key;
         // 修改类型移除缓存数据
         if (annotation.annotationType() == LightCachePut.class || annotation.annotationType() == LightCacheEvict.class) {
