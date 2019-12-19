@@ -53,18 +53,18 @@ public class WebContext {
 
     /**
      *  动态注册bean
-     * @param applicationContext
-     * @param name
-     * @param clazz
-     * @param args
-     * @param <T>
-     * @return
+     * @param applicationContext    上下文
+     * @param name                  bean name
+     * @param clazz                 bean class
+     * @param args                  构造参数
+     * @param <T>                   实体类型
+     * @return  Bean
      */
     public static <T> T registerBean(ConfigurableApplicationContext applicationContext, String name, Class<T> clazz, Object... args) {
         if (applicationContext.containsBean(name)) {
-            Object bean = applicationContext.getBean(name);
+            T bean = applicationContext.getBean(name, clazz);
             if (bean.getClass().isAssignableFrom(clazz)) {
-                return (T) bean;
+                return bean;
             } else {
                 throw new RuntimeException("BeanName 重复 " + name);
             }

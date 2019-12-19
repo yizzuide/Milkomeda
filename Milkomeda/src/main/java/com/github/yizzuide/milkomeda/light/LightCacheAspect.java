@@ -30,6 +30,8 @@ import static com.github.yizzuide.milkomeda.util.ReflectUtil.getAnnotation;
 @Aspect
 public class LightCacheAspect {
 
+    public static final String DEFAULT_BEAN_NAME = "lightCache";
+
     @Pointcut("@annotation(com.github.yizzuide.milkomeda.light.LightCacheable)")
     public void cacheablePointCut() {}
 
@@ -42,6 +44,11 @@ public class LightCacheAspect {
     @Around("cacheablePointCut()")
     public Object cacheableAround(ProceedingJoinPoint joinPoint) throws Throwable {
         val cacheable = getAnnotation(joinPoint, LightCacheable.class);
+        // 检查缓存条件
+        String condition = cacheable.condition();
+        if (!StringUtils.isEmpty(condition) && !Boolean.parseBoolean(extractValue(joinPoint, condition))) {
+            return joinPoint.proceed();
+        }
         return applyAround(joinPoint, cacheable, cacheable.value(), cacheable.keyPrefix(), cacheable.key(), cacheable.gKey());
     }
 
@@ -65,12 +72,15 @@ public class LightCacheAspect {
         boolean isUsedGKey = StringUtils.isEmpty(key);
         // 解析表达式
         key = extractValue(joinPoint, key);
-
-        Cache defaultBean =  ApplicationContextHolder.get().getBean("lightCache",LightCache.class);
-        cacheBeanName = cacheBeanName + (int) (Math.random() * 9+1) * (2<<10);
-        Cache cache = WebContext.registerBean((ConfigurableApplicationContext) ApplicationContextHolder.get(), cacheBeanName, LightCache.class);
-        BeanUtils.copyProperties(defaultBean,cache);
         Serializable view = isUsedGKey ? gKey : key;
+        Cache defaultBean = ApplicationContextHolder.get().getBean(DEFAULT_BEAN_NAME, LightCache.class);
+        Cache cache = defaultBean;
+        // 如果有自定义的bean名，创建动态的Cache对象
+        if (!DEFAULT_BEAN_NAME.equals(cacheBeanName)) {
+            cacheBeanName = cacheBeanName + (int) (Math.random() * 9 + 1) * (2 << 10);
+            cache = WebContext.registerBean((ConfigurableApplicationContext) ApplicationContextHolder.get(), cacheBeanName, LightCache.class);
+            BeanUtils.copyProperties(defaultBean, cache);
+        }
         // 修改类型移除缓存数据
         if (annotation.annotationType() == LightCachePut.class || annotation.annotationType() == LightCacheEvict.class) {
             CacheHelper.erase(cache, view, isUsedGKey ? id -> gKey : id -> prefix + id);

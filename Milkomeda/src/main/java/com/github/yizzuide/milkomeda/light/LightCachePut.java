@@ -21,7 +21,7 @@ public @interface LightCachePut {
     String value() default "lightCache";
 
     /**
-     * 缓存key
+     * 缓存key，支持EL表达式获取参数的值
      * @return  String
      */
     String key() default "";
@@ -33,7 +33,7 @@ public @interface LightCachePut {
     String keyPrefix() default "";
 
     /**
-     * 自定义构建缓存key，与属性方法 key() 二选一
+     * 自定义构建缓存key，与属性方法 key() 二选一；如果同时都设置，则 gKey() 优先级要高
      * @return  String
      */
     String gKey() default "";

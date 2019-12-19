@@ -1,7 +1,6 @@
 package com.github.yizzuide.milkomeda.light;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
@@ -28,7 +27,7 @@ public class LightConfig {
         return new LightCacheAspect();
     }
 
-    @Bean("lightCache")
+    @Bean(LightCacheAspect.DEFAULT_BEAN_NAME)
     public Cache lightCache() {
         LightCache lightCache = new LightCache();
         lightCache.setL1MaxCount(props.getL1MaxCount());

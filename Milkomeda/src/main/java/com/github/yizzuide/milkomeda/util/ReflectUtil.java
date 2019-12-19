@@ -92,10 +92,8 @@ public class ReflectUtil {
      */
     public static String extractValue(JoinPoint joinPoint, String express) {
         String value = express;
-        // 解析EL表达式
-        if (express.startsWith("#")) {
-            value = ReflectUtil.getValue(joinPoint, express);
-        } else if (express.startsWith("@")) { // 解析Http请求头
+        // 解析Http请求头
+        if (express.startsWith(":")) {
             ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
             assert attributes != null;
             String headerName = express.substring(1);
@@ -103,6 +101,13 @@ public class ReflectUtil {
             if (StringUtils.isEmpty(headerName)) {
                 throw new IllegalArgumentException("Can't find " + headerName + " from HTTP header.");
             }
+        }
+
+        // 解析EL表达式
+        try {
+            value = ReflectUtil.getValue(joinPoint, express);
+        } catch (Exception ignored) {
+            // 解析出错，回显
         }
         return value;
     }
@@ -131,7 +136,7 @@ public class ReflectUtil {
      * @param condition     el条件表达式
      * @return 解析的值
      */
-    public static String getValue(Object object, Object[] args, Class clazz, Method method,
+    public static String getValue(Object object, Object[] args, Class<?> clazz, Method method,
                           String condition) {
         if (args == null) {
             return null;

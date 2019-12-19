@@ -25,7 +25,7 @@ public class OrderService {
      * @param orderId  订单id
      */
 //    @Fusion // 这个用于测试Fusion模块，当前Light模块不需要这个注解
-    @LightCacheable(keyPrefix = "order:", key = "#orderId",value = "tttttttt")
+    @LightCacheable(value = "order", keyPrefix = "order:", key = "#orderId", condition = "#orderId!=null")
     public Order findById(String orderId) {
         return new Order(orderId, "小明", "1200", new Date());
     }
