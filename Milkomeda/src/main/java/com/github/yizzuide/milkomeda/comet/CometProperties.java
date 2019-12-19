@@ -14,5 +14,5 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties("milkomeda.comet")
 public class CometProperties {
     /** 允许读取请求消息体（使用CometParam时必须开启） */
-    private boolean enableReadRequestBody = true;
+    private boolean  enableReadRequestBody = true;
 }
