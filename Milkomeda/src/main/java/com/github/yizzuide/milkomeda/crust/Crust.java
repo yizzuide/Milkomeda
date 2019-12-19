@@ -156,6 +156,8 @@ public class Crust {
             CacheHelper.set(crustLightCache, sessionSpot);
             return userInfo;
         }
+
+        // Token方式
         Crust crustProxy = AopContextHolder.self(this.getClass());
         return crustProxy.getTokenUserInfo(authentication, entityClazz);
     }
@@ -300,7 +302,9 @@ public class Crust {
     }
 
     @SuppressWarnings("unchecked")
-    @LightCacheable(value = Crust.CATCH_NAME,keyPrefix = "crust:", key= "T(org.springframework.util.DigestUtils).md5DigestAsHex(#authentication.getToken().getBytes())",condition = "#authentication!=null")
+    @LightCacheable(value = Crust.CATCH_NAME, keyPrefix = "crust:",
+            key = "T(org.springframework.util.DigestUtils).md5DigestAsHex(#authentication.getToken().getBytes())",
+            condition = "#authentication!=null")
     public <T> CrustUserInfo<T> getTokenUserInfo(Authentication authentication, @NonNull Class<T> clazz) {
         CrustUserInfo<T> userInfo = null;
         if (authentication != null) {
