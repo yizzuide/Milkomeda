@@ -1,6 +1,5 @@
 package com.github.yizzuide.milkomeda.crust;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.github.yizzuide.milkomeda.light.Cache;
 import com.github.yizzuide.milkomeda.light.CacheHelper;
 import com.github.yizzuide.milkomeda.light.LightCacheable;
@@ -21,7 +20,6 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.DigestUtils;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
@@ -302,7 +300,7 @@ public class Crust {
     }
 
     @SuppressWarnings("unchecked")
-    @LightCacheable(value = Crust.CATCH_NAME,gKey = "T(org.springframework.util.DigestUtils).md5DigestAsHex(#authentication.getToken().getBytes())",condition = "#authentication!=null")
+    @LightCacheable(value = Crust.CATCH_NAME,keyPrefix = "crust:", key= "T(org.springframework.util.DigestUtils).md5DigestAsHex(#authentication.getToken().getBytes())",condition = "#authentication!=null")
     public <T> CrustUserInfo<T> getTokenUserInfo(Authentication authentication, @NonNull Class<T> clazz) {
         CrustUserInfo<T> userInfo = null;
         if (authentication != null) {
