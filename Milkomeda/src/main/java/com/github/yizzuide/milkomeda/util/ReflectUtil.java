@@ -1,6 +1,7 @@
 package com.github.yizzuide.milkomeda.util;
 
 import com.github.yizzuide.milkomeda.universe.el.ExpressionEvaluator;
+import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.context.expression.AnnotatedElementKey;
@@ -23,6 +24,7 @@ import java.lang.reflect.Type;
  * @version 2.0.0
  * Create at 2019/04/11 19:55
  */
+@Slf4j
 public class ReflectUtil {
 
     /**
@@ -106,8 +108,9 @@ public class ReflectUtil {
         // 解析EL表达式
         try {
             value = ReflectUtil.getValue(joinPoint, express);
-        } catch (Exception ignored) {
-            // 解析出错，回显
+        } catch (Exception e) {
+            // 解析出错时，返回源值
+            log.error("Compile Spring EL error with msg: {}", e.getMessage(), e);
         }
         return value;
     }
