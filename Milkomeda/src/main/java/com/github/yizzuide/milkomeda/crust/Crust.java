@@ -3,7 +3,9 @@ package com.github.yizzuide.milkomeda.crust;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.github.yizzuide.milkomeda.light.Cache;
 import com.github.yizzuide.milkomeda.light.CacheHelper;
+import com.github.yizzuide.milkomeda.light.LightCacheable;
 import com.github.yizzuide.milkomeda.light.Spot;
+import com.github.yizzuide.milkomeda.universe.context.AopContextHolder;
 import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import com.github.yizzuide.milkomeda.universe.context.WebContext;
 import com.github.yizzuide.milkomeda.util.JwtUtil;
@@ -156,16 +158,8 @@ public class Crust {
             CacheHelper.set(crustLightCache, sessionSpot);
             return userInfo;
         }
-
-        // Token方式
-        try {
-            return CacheHelper.get(crustLightCache, new TypeReference<CrustUserInfo<T>>(){},
-                    DigestUtils.md5DigestAsHex(((CrustAuthenticationToken) authentication).getToken().getBytes()),
-                    id -> CATCH_KEY_PREFIX + id.toString(),
-                    id -> getTokenUserInfo(authentication, entityClazz));
-        } catch (Throwable throwable) {
-            return getTokenUserInfo(authentication, entityClazz);
-        }
+        Crust crustProxy = AopContextHolder.self(this.getClass());
+        return crustProxy.getTokenUserInfo(authentication, entityClazz);
     }
 
     /**
@@ -308,6 +302,7 @@ public class Crust {
     }
 
     @SuppressWarnings("unchecked")
+    @LightCacheable(value = Crust.CATCH_NAME,gKey = "T(org.springframework.util.DigestUtils).md5DigestAsHex(#authentication.getToken().getBytes())",condition = "#authentication!=null")
     public <T> CrustUserInfo<T> getTokenUserInfo(Authentication authentication, @NonNull Class<T> clazz) {
         CrustUserInfo<T> userInfo = null;
         if (authentication != null) {
@@ -323,17 +318,6 @@ public class Crust {
                     CrustUserDetailsService detailsService = ApplicationContextHolder.get().getBean(CrustUserDetailsService.class);
                     T entity = (T) detailsService.findEntityById(uid);
                     return new CrustUserInfo<>(uid, authenticationToken.getName(), token, roleIds,  entity);
-                    /*if (props.isEnableCache()) {
-                        try {
-                            return CacheHelper.get(crustLightCache, new TypeReference<CrustUserInfo<T>>(){},
-                                    DigestUtils.md5DigestAsHex(token.getBytes()),
-                                    id -> CATCH_KEY_PREFIX + id.toString(),
-                                    id -> new CrustUserInfo<>(uid, authenticationToken.getName(), token, roleIds,  entity));
-                        } catch (Throwable ignored) {
-                        }
-                    }
-                    userInfo = new CrustUserInfo<>(uid, authenticationToken.getName(), token, roleIds, entity);
-                    return userInfo;*/
                 }
             }
             // 走Token登录认证类型流程
