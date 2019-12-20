@@ -31,9 +31,6 @@
 - [x] Neutron（中子星）：用于定时作业任务，支持数据库持久化，动态创建Job、删除、修改Cron执行表达式。*1.18.0+*
    * 依赖技术：Spring IoC、Quartz
    * 设计模式：门面模式
-   
-## Todo List
-- [ ] 添加一个支持Shiro的模块
     
 ## Requirements
 * Java 8
@@ -45,7 +42,6 @@
 - Dalston.1.11.0-Dalston.1.12.0 for Spring Boot 1.5.x
 - Others for Spring Boot 2.0.x
 
-
 ## Installation
 ```xml
 <dependency>
@@ -55,56 +51,23 @@
 </dependency>
 ```
 
-## Dependency
-```xml
-<dependency>
-   <groupId>org.springframework.boot</groupId>
-   <artifactId>spring-boot-starter-aop</artifactId>
-</dependency>
-<dependency>
-   <groupId>org.springframework.boot</groupId>
-   <artifactId>spring-boot-starter-data-redis</artifactId>
-</dependency>
-<dependency>
-   <groupId>org.apache.httpcomponents</groupId>
-   <artifactId>httpclient</artifactId>
-</dependency>
-<dependency>
-   <groupId>org.apache.commons</groupId>
-   <artifactId>commons-lang3</artifactId>
-</dependency>
-<dependency>
-   <groupId>commons-beanutils</groupId>
-   <artifactId>commons-beanutils</artifactId>
-   <version>1.9.4</version>
-</dependency>
-<dependency>
-   <groupId>joda-time</groupId>
-   <artifactId>joda-time</artifactId>
-</dependency>
-<dependency>
-   <groupId>org.projectlombok</groupId>
-   <artifactId>lombok</artifactId>
-</dependency>
-```
+## 2.x Release
+Milkomeda 2.x is now available (Dec 2019).
+
+- 构建的包更小，减少即时的依赖，根据开启的模块选择依赖。
+- 模块的使用更加明了，需要使用什么模块，使用`@EnableXXX`（除了非Spring依赖模块不需要开启）。
+- 部分模块使用API改进，优先使用注解的声明式编程，并使用SpEL增强，然后是API方法调用。
+- 各模块间的功能相互增强，如：`Crust`添加`Light`模块缓存加持、`Comet`添加`Pillar`模块拆分处理等。
+- 重构各模块的Config配置依赖，合理拆分工具类、Context等。
+
+
+## Migrating to 2.x from 1.x
+1. 除了`Pillar`模块（非Spring依赖）外，其它模块都需要通过`@EnableXXX`来启用模块。
+
+
 
 ## Documentation
-[Pulsar使用文档](https://github.com/yizzuide/Milkomeda/wiki/Pulsar%E6%A8%A1%E5%9D%97%E4%BD%BF%E7%94%A8)
-
-[Comet使用文档](https://github.com/yizzuide/Milkomeda/wiki/Comet%E6%A8%A1%E5%9D%97%E4%BD%BF%E7%94%A8)
-
-[Pillar使用文档](https://github.com/yizzuide/Milkomeda/wiki/Pillar%E6%A8%A1%E5%9D%97%E4%BD%BF%E7%94%A8)
-
-[Particle使用之API方式](https://github.com/yizzuide/Milkomeda/wiki/Particle%E6%A8%A1%E5%9D%97%E4%BD%BF%E7%94%A8%E4%B9%8BAPI%E6%96%B9%E5%BC%8F)
-
-[Particle使用之注解方式](https://github.com/yizzuide/Milkomeda/wiki/Particle%E6%A8%A1%E5%9D%97%E4%BD%BF%E7%94%A8%E4%B9%8B%E6%B3%A8%E8%A7%A3%E6%96%B9%E5%BC%8F)
-
-[Light使用文档](https://github.com/yizzuide/Milkomeda/wiki/Light%E6%A8%A1%E5%9D%97%E4%BD%BF%E7%94%A8)
-
-[Echo使用文档](https://github.com/yizzuide/Milkomeda/wiki/Echo%E6%A8%A1%E5%9D%97%E7%9A%84%E4%BD%BF%E7%94%A8)
-
-
-[Ice使用文档](https://github.com/yizzuide/Milkomeda/wiki/%E4%BD%BF%E7%94%A8Ice%E5%AE%9E%E7%8E%B0%E5%BB%B6%E8%BF%9F%E9%98%9F%E5%88%97)
+[See Wiki](https://github.com/yizzuide/Milkomeda/wiki)
 
 ## Author
 yizzuide, fu837014586@163.com
