@@ -39,9 +39,9 @@ import java.util.stream.Collectors;
  */
 public class Crust {
     // 缓存标识
-    public static final String CATCH_NAME = "crustLightCache";
+    static final String CATCH_NAME = "crustLightCache";
     // 缓存前辍
-    public static final String CATCH_KEY_PREFIX = "crust:user:";
+    private static final String CATCH_KEY_PREFIX = "crust:user:";
 
     /**
      * 用户id
@@ -302,7 +302,7 @@ public class Crust {
         return userInfo;
     }
 
-    @LightCacheable(value = Crust.CATCH_NAME, keyPrefix = "crust:",
+    @LightCacheable(value = Crust.CATCH_NAME, keyPrefix = CATCH_KEY_PREFIX,
             key = "T(org.springframework.util.DigestUtils).md5DigestAsHex(#authentication.getToken().getBytes())",
             condition = "#authentication!=null&&@crust.getProps().isEnableCache()") // 或者#this.object.getProps().isEnableCache()，都是调用当前对象的方法
     @SuppressWarnings("unchecked")
