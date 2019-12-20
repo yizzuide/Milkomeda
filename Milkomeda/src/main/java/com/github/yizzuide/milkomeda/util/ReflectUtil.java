@@ -1,17 +1,14 @@
 package com.github.yizzuide.milkomeda.util;
 
-import com.github.yizzuide.milkomeda.universe.el.ExpressionEvaluator;
+import com.github.yizzuide.milkomeda.universe.el.ELContext;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
-import org.springframework.context.expression.AnnotatedElementKey;
-import org.springframework.expression.EvaluationContext;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
@@ -107,46 +104,11 @@ public class ReflectUtil {
 
         // 解析EL表达式
         try {
-            value = ReflectUtil.getValue(joinPoint, express);
+            value = ELContext.getValue(joinPoint, express);
         } catch (Exception e) {
             // 解析出错时，返回源值
             log.error("Compile Spring EL error with msg: {}", e.getMessage(), e);
         }
         return value;
-    }
-
-    /**
-     * 根据方法切面，获取EL表达式的值
-     * @param joinPoint 切面连接点
-     * @param condition el条件表达式
-     * @return 解析的值
-     */
-    public static String getValue(JoinPoint joinPoint, String condition) {
-        return getValue(joinPoint.getTarget(), joinPoint.getArgs(),
-                joinPoint.getTarget().getClass(),
-                ((MethodSignature) joinPoint.getSignature()).getMethod(), condition);
-    }
-
-    // EL表达式执行器
-    private static ExpressionEvaluator<String> evaluator = new ExpressionEvaluator<>();
-
-    /**
-     * 根据类的反射信息，获取EL表达式的值
-     * @param object        目标对象
-     * @param args          参数
-     * @param clazz         目标类型
-     * @param method        方法
-     * @param condition     el条件表达式
-     * @return 解析的值
-     */
-    public static String getValue(Object object, Object[] args, Class<?> clazz, Method method,
-                          String condition) {
-        if (args == null) {
-            return null;
-        }
-        EvaluationContext evaluationContext =
-                evaluator.createEvaluationContext(object, clazz, method, args);
-        AnnotatedElementKey methodKey = new AnnotatedElementKey(method, clazz);
-        return evaluator.condition(condition, methodKey, evaluationContext, String.class);
     }
 }

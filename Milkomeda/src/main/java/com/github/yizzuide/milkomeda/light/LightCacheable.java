@@ -43,5 +43,4 @@ public @interface LightCacheable {
      * @return String
      */
     String condition() default "";
-
 }

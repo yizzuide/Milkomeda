@@ -36,10 +36,10 @@ import java.util.Map;
 public class IceScheduleConfig {
 
     @Autowired
-    @SuppressWarnings({"unchecked", "SpringJavaInjectionPointsAutowiringInspection"})
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     public void config(Ice ice, IceProperties props, ThreadPoolTaskScheduler taskScheduler) {
         taskScheduler.scheduleAtFixedRate(() -> IceContext.getTopicMap().keySet().forEach(topic -> {
-            List<Job<Map>> jobs = ice.pop(topic, props.getTaskTopicPopMaxSize());
+            List<Job<Map<String, Object>>> jobs = ice.pop(topic, props.getTaskTopicPopMaxSize());
             if (CollectionUtils.isEmpty(jobs)) return;
 
             List<HandlerMetaData> metaDataList = IceContext.getTopicMap().get(topic);
@@ -67,7 +67,7 @@ public class IceScheduleConfig {
                     }
                     JavaType javaType = TypeFactory.defaultInstance().constructType(subActualTypeArguments[0]);
                     // 转换到业务类型
-                    for (Job job : jobs) {
+                    for (Job<?> job : jobs) {
                         job.setBody(JSONUtil.nativeRead(JSONUtil.serialize(job.getBody()), javaType));
                     }
                     method.invoke(metaData.getTarget(), jobs);

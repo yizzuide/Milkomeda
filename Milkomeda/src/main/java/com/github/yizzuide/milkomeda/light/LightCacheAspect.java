@@ -81,8 +81,9 @@ public class LightCacheAspect {
             cache = WebContext.registerBean((ConfigurableApplicationContext) ApplicationContextHolder.get(), cacheBeanName, LightCache.class);
             BeanUtils.copyProperties(defaultBean, cache);
         }
-        // 修改类型移除缓存数据
-        if (annotation.annotationType() == LightCachePut.class || annotation.annotationType() == LightCacheEvict.class) {
+        // 根据条件移除缓存数据
+        if (annotation.annotationType() == LightCachePut.class ||
+                annotation.annotationType() == LightCacheEvict.class) {
             CacheHelper.erase(cache, view, isUsedGKey ? id -> gKey : id -> prefix + id);
             // 删除类型直接返回
             if (annotation.annotationType() == LightCacheEvict.class) {

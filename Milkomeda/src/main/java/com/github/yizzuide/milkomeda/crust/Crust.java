@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
@@ -301,10 +302,10 @@ public class Crust {
         return userInfo;
     }
 
-    @SuppressWarnings("unchecked")
     @LightCacheable(value = Crust.CATCH_NAME, keyPrefix = "crust:",
             key = "T(org.springframework.util.DigestUtils).md5DigestAsHex(#authentication.getToken().getBytes())",
-            condition = "#authentication!=null")
+            condition = "#authentication!=null&&@crust.getProps().isEnableCache()") // 或者#this.object.getProps().isEnableCache()，都是调用当前对象的方法
+    @SuppressWarnings("unchecked")
     public <T> CrustUserInfo<T> getTokenUserInfo(Authentication authentication, @NonNull Class<T> clazz) {
         CrustUserInfo<T> userInfo = null;
         if (authentication != null) {
@@ -322,8 +323,6 @@ public class Crust {
                     return new CrustUserInfo<>(uid, authenticationToken.getName(), token, roleIds,  entity);
                 }
             }
-            // 走Token登录认证类型流程
-            return getLoginUserInfo(authentication, clazz);
         }
         return userInfo;
     }
@@ -341,12 +340,12 @@ public class Crust {
     @SuppressWarnings("unchecked")
     private <T> CrustUserInfo<T> getLoginUserInfo(Authentication authentication, @NonNull Class<T> clazz) {
         if (authentication == null) {
-            throw new RuntimeException("authentication is null");
+            throw new AuthenticationServiceException("Authentication is must be not null");
         }
         // 此时 authentication 就是内部封装的 UsernamePasswordAuthenticationToken
         Object principal = authentication.getPrincipal();
         if (!(principal instanceof CrustUserDetails)) {
-            throw new RuntimeException("principal must be subtype of CrustUserDetails");
+            throw new AuthenticationServiceException("Authentication principal must be subtype of CrustUserDetails");
         }
         CrustUserDetails userDetails = (CrustUserDetails) principal;
         return new CrustUserInfo<>(userDetails.getUid(), userDetails.getUsername(), getToken(), userDetails.getRoleIds(), (T) userDetails.getEntity());
