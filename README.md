@@ -51,8 +51,8 @@
 </dependency>
 ```
 
-## 2.x Release
-Milkomeda 2.x is now available (Dec 2019).
+## 2.0 Release
+Milkomeda 2.0 is now available (Dec 2019).
 
 - 构建的包更小，减少即时的依赖，根据开启的模块选择依赖。
 - 模块的使用更加明了，需要使用什么模块，使用`@EnableXXX`（除了非Spring依赖模块不需要开启）。
@@ -62,7 +62,12 @@ Milkomeda 2.x is now available (Dec 2019).
 
 
 ## Migrating to 2.x from 1.x
-1. 除了`Pillar`模块（非Spring依赖）外，其它模块都需要通过`@EnableXXX`来启用模块。
+1. 除了`Pillar`模块（非Spring依赖）外，其它模块都需要通过`@EnableXXX`来启用模块（迁移请注意！）。
+2. 在1.x版本默认依赖的`Spring Data Redis`已被删除，需要根据使用模块是否依赖来在项目中添加（迁移请注意！）。
+3. 模块`Particle`的限制器注解在取请求头的语法`@`改为`:`（由于和SpEL的`@`语法冲突问题）。
+4. 模块`Light`的API方法方式改为使用`@LightCacheable`（仿Spring Cache，部分属性方法支持SpEL），默认使用了超级缓存（不用再操心超级缓存的复杂API了）。
+5. 模块`Crust`的token方式内建支持`Light`模块的高效多级缓存。
+6. 模块`Comet`添加注解`@CometParam`注解用于同时支持解析`application/x-www-form-urlencoded`、`JSON`的Body消息数据（Spring MVC默认是不支持的）。
 
 
 
