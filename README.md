@@ -60,6 +60,8 @@ Milkomeda 2.0 is now available (Dec 2019).
 - 各模块间的功能相互增强，如：`Crust`添加`Light`模块缓存加持、`Comet`添加`Pillar`模块拆分处理等。
 - 重构各模块的Config配置依赖，合理拆分工具类、Context等。
 
+> 在2.0改造中，有了@mars的加入，非常感谢提供很多好的建议和改进
+
 
 ## Migrating to 2.x from 1.x
 1. 除了`Pillar`模块（非Spring依赖）外，其它模块都需要通过`@EnableXXX`来启用模块（迁移请注意！）。
@@ -68,8 +70,6 @@ Milkomeda 2.0 is now available (Dec 2019).
 4. 模块`Light`的API方法方式改为使用`@LightCacheable`（仿Spring Cache，部分属性方法支持SpEL），默认使用了超级缓存（不用再操心超级缓存的复杂API了）。
 5. 模块`Crust`的token方式内建支持`Light`模块的高效多级缓存。
 6. 模块`Comet`添加注解`@CometParam`注解用于同时支持解析`application/x-www-form-urlencoded`、`JSON`的Body消息数据（Spring MVC默认是不支持的）。
-
-
 
 ## Documentation
 [See Wiki](https://github.com/yizzuide/Milkomeda/wiki)
