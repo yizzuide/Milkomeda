@@ -2,11 +2,9 @@ package com.github.yizzuide.milkomeda.light;
 
 import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import com.github.yizzuide.milkomeda.universe.context.WebContext;
-import lombok.val;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.beans.BeanUtils;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -15,9 +13,9 @@ import org.springframework.util.StringUtils;
 
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
+import java.util.function.Function;
 
 import static com.github.yizzuide.milkomeda.util.ReflectUtil.extractValue;
-import static com.github.yizzuide.milkomeda.util.ReflectUtil.getAnnotation;
 
 /**
  * LightCacheAspect
@@ -29,21 +27,10 @@ import static com.github.yizzuide.milkomeda.util.ReflectUtil.getAnnotation;
 @Order(98)
 @Aspect
 public class LightCacheAspect {
-
     public static final String DEFAULT_BEAN_NAME = "lightCache";
 
-    @Pointcut("@annotation(com.github.yizzuide.milkomeda.light.LightCacheable)")
-    public void cacheablePointCut() {}
-
-    @Pointcut("@annotation(com.github.yizzuide.milkomeda.light.LightCacheEvict)")
-    public void cacheEvictPointCut() {}
-
-    @Pointcut("@annotation(com.github.yizzuide.milkomeda.light.LightCachePut)")
-    public void cachePutPointCut() {}
-
-    @Around("cacheablePointCut()")
-    public Object cacheableAround(ProceedingJoinPoint joinPoint) throws Throwable {
-        val cacheable = getAnnotation(joinPoint, LightCacheable.class);
+    @Around("execution(@LightCacheable * *.*(..)) && @annotation(cacheable)")
+    public Object cacheableAround(ProceedingJoinPoint joinPoint, LightCacheable cacheable) throws Throwable {
         // 检查缓存条件
         String condition = cacheable.condition();
         if (!StringUtils.isEmpty(condition) && !Boolean.parseBoolean(extractValue(joinPoint, condition))) {
@@ -52,15 +39,13 @@ public class LightCacheAspect {
         return applyAround(joinPoint, cacheable, cacheable.value(), cacheable.keyPrefix(), cacheable.key(), cacheable.gKey());
     }
 
-    @Around("cacheEvictPointCut()")
-    public Object cacheEvictAround(ProceedingJoinPoint joinPoint) throws Throwable {
-        val cacheEvict = getAnnotation(joinPoint, LightCacheEvict.class);
+    @Around("execution(@LightCacheEvict * *.*(..)) && @annotation(cacheEvict)")
+    public Object cacheEvictAround(ProceedingJoinPoint joinPoint, LightCacheEvict cacheEvict) throws Throwable {
         return applyAround(joinPoint, cacheEvict, cacheEvict.value(), cacheEvict.keyPrefix(), cacheEvict.key(), cacheEvict.gKey());
     }
 
-    @Around("cachePutPointCut()")
-    public Object cachePutAround(ProceedingJoinPoint joinPoint) throws Throwable {
-        val cachePut = getAnnotation(joinPoint, LightCachePut.class);
+    @Around("execution(@LightCachePut * *.*(..)) && @annotation(cachePut)")
+    public Object cachePutAround(ProceedingJoinPoint joinPoint, LightCachePut cachePut) throws Throwable {
         return applyAround(joinPoint, cachePut, cachePut.value(), cachePut.keyPrefix(), cachePut.key(), cachePut.gKey());
     }
 
@@ -81,10 +66,11 @@ public class LightCacheAspect {
             cache = WebContext.registerBean((ConfigurableApplicationContext) ApplicationContextHolder.get(), cacheBeanName, LightCache.class);
             BeanUtils.copyProperties(defaultBean, cache);
         }
+        Function<Serializable, String> keyGenerator = isUsedGKey ? id -> gKey : id -> prefix + id;
         // 根据条件移除缓存数据
         if (annotation.annotationType() == LightCachePut.class ||
                 annotation.annotationType() == LightCacheEvict.class) {
-            CacheHelper.erase(cache, view, isUsedGKey ? id -> gKey : id -> prefix + id);
+            CacheHelper.erase(cache, view, keyGenerator);
             // 删除类型直接返回
             if (annotation.annotationType() == LightCacheEvict.class) {
                 return null;
@@ -92,6 +78,6 @@ public class LightCacheAspect {
         }
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         Class eType = signature.getReturnType();
-        return CacheHelper.get(cache, eType, view, isUsedGKey ? id -> gKey : id -> prefix + id, id -> joinPoint.proceed());
+        return CacheHelper.get(cache, eType, view, keyGenerator, id -> joinPoint.proceed());
     }
 }
