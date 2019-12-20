@@ -48,7 +48,10 @@ public class ExpressionEvaluator<T> extends CachedExpressionEvaluator {
         // 创建自定义EL Root
         ExpressionRootObject root = new ExpressionRootObject(object, args);
         // 创建基于方法的执行上下文
-        return new MethodBasedEvaluationContext(root, targetMethod, args, this.paramNameDiscoverer);
+        MethodBasedEvaluationContext evaluationContext = new MethodBasedEvaluationContext(root, targetMethod, args, this.paramNameDiscoverer);
+        // 添加变量引用
+        evaluationContext.setVariable("target", root.getObject());
+        return evaluationContext;
     }
 
     /**
