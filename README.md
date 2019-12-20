@@ -64,7 +64,7 @@ Milkomeda 2.0 is now available (Dec 2019).
 
 
 ## Migrating to 2.x from 1.x
-1. 除了`Pillar`模块（非Spring依赖）外，其它模块都需要通过`@EnableXXX`来启用模块（迁移请注意！）。
+1. 除了`Pillar`模块外，其它模块都需要通过`@EnableXXX`来启用模块（迁移请注意！）。
 2. 在1.x版本默认依赖的`Spring Data Redis`已被删除，需要根据使用模块是否依赖来在项目中添加（迁移请注意！）。
 3. 模块`Particle`的限制器注解在取请求头的语法`@`改为`:`（由于和SpEL的`@`语法冲突问题）。
 4. 模块`Light`的API方法方式改为使用`@LightCacheable`（仿Spring Cache，部分属性方法支持SpEL），默认使用了超级缓存（不用再操心超级缓存的复杂API了）。
