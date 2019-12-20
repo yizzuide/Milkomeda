@@ -1,11 +1,5 @@
 package com.github.yizzuide.milkomeda.demo;
 
-import com.github.yizzuide.milkomeda.crust.EnableCrust;
-import com.github.yizzuide.milkomeda.echo.EnableEcho;
-import com.github.yizzuide.milkomeda.ice.EnableIce;
-import com.github.yizzuide.milkomeda.light.EnableLight;
-import com.github.yizzuide.milkomeda.neutron.EnableNeutron;
-import com.github.yizzuide.milkomeda.pulsar.EnablePulsar;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
@@ -17,12 +11,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  * @author yizzuide
  * Create at 2019/03/30 19:04
  */
-@EnableNeutron
-@EnableIce
-@EnableCrust
-@EnableEcho
-@EnableLight
-@EnablePulsar
+@EnableMilkomeda
 @SpringBootApplication
 @EnableTransactionManagement
 @EnableAspectJAutoProxy(proxyTargetClass = true, exposeProxy = true)

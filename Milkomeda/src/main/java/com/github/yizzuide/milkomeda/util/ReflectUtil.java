@@ -1,16 +1,14 @@
 package com.github.yizzuide.milkomeda.util;
 
-import com.github.yizzuide.milkomeda.universe.el.ExpressionEvaluator;
+import com.github.yizzuide.milkomeda.universe.el.ELContext;
+import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
-import org.springframework.context.expression.AnnotatedElementKey;
-import org.springframework.expression.EvaluationContext;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
@@ -20,9 +18,10 @@ import java.lang.reflect.Type;
  *
  * @author yizzuide
  * @since 0.2.0
- * @version 1.13.7
+ * @version 2.0.0
  * Create at 2019/04/11 19:55
  */
+@Slf4j
 public class ReflectUtil {
 
     /**
@@ -30,15 +29,15 @@ public class ReflectUtil {
      * @param type  泛型原型
      * @return Class[]
      */
-    public static Class[] getClassOfParameterizedType(Type type) {
+    public static Class<?>[] getClassOfParameterizedType(Type type) {
         // 是否带泛型
         if (type instanceof ParameterizedType) {
             ParameterizedType pt = (ParameterizedType)type;
             Type[] subTypes = pt.getActualTypeArguments();
-            Class[] classes = new Class[subTypes.length];
+            Class<?>[] classes = new Class[subTypes.length];
             for (int i = 0; i < subTypes.length; i++) {
                 // 获取泛型类型
-                Class clazz = (Class)((ParameterizedType) subTypes[i]).getRawType();
+                Class<?> clazz = (Class<?>)((ParameterizedType) subTypes[i]).getRawType();
                 classes[i] = clazz;
             }
             return classes;
@@ -63,7 +62,7 @@ public class ReflectUtil {
     /**
      * 注入参数
      * @param joinPoint 连接点
-     * @param obj       Particle
+     * @param obj       注入值
      * @param type      注解
      * @param check     检查参数列表
      * @return  注入后的参数列表
@@ -71,15 +70,13 @@ public class ReflectUtil {
     public static Object[] injectParam(JoinPoint joinPoint, Object obj, Annotation type, boolean check) {
         Object[] args = joinPoint.getArgs();
         int len = args.length;
-        boolean flag = false;
         for (int i = 0; i < len; i++) {
             if (obj.getClass().isInstance(args[i])) {
                 args[i] = obj;
-                flag = true;
                 return args;
             }
         }
-        if (check && !flag) {
+        if (check) {
             throw new IllegalArgumentException("You must add " + obj.getClass().getSimpleName() + " parameter on method " +
                     joinPoint.getSignature().getName() + " before use @" + type.annotationType().getSimpleName() + ".");
         }
@@ -94,10 +91,8 @@ public class ReflectUtil {
      */
     public static String extractValue(JoinPoint joinPoint, String express) {
         String value = express;
-        // 解析EL表达式
-        if (express.startsWith("#")) {
-            value = ReflectUtil.getValue(joinPoint, express);
-        } else if (express.startsWith("@")) { // 解析Http请求头
+        // 解析Http请求头
+        if (express.startsWith(":")) {
             ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
             assert attributes != null;
             String headerName = express.substring(1);
@@ -106,41 +101,14 @@ public class ReflectUtil {
                 throw new IllegalArgumentException("Can't find " + headerName + " from HTTP header.");
             }
         }
-        return value;
-    }
 
-    /**
-     * 根据方法切面，获取EL表达式的值
-     * @param joinPoint 切面连接点
-     * @param condition el条件表达式
-     * @return 解析的值
-     */
-    public static String getValue(JoinPoint joinPoint, String condition) {
-        return getValue(joinPoint.getTarget(), joinPoint.getArgs(),
-                joinPoint.getTarget().getClass(),
-                ((MethodSignature) joinPoint.getSignature()).getMethod(), condition);
-    }
-
-    // EL表达式执行器
-    private static ExpressionEvaluator<String> evaluator = new ExpressionEvaluator<>();
-
-    /**
-     * 根据类的反射信息，获取EL表达式的值
-     * @param object        目标对象
-     * @param args          参数
-     * @param clazz         目标类型
-     * @param method        方法
-     * @param condition     el条件表达式
-     * @return 解析的值
-     */
-    public static String getValue(Object object, Object[] args, Class clazz, Method method,
-                          String condition) {
-        if (args == null) {
-            return null;
+        // 解析EL表达式
+        try {
+            value = ELContext.getValue(joinPoint, express);
+        } catch (Exception e) {
+            // 解析出错时，返回源值
+            log.error("Compile Spring EL error with msg: {}", e.getMessage(), e);
         }
-        EvaluationContext evaluationContext =
-                evaluator.createEvaluationContext(object, clazz, method, args);
-        AnnotatedElementKey methodKey = new AnnotatedElementKey(method, clazz);
-        return evaluator.condition(condition, methodKey, evaluationContext, String.class);
+        return value;
     }
 }

@@ -9,6 +9,7 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
  * 兼容处理
  *
  * @author yizzuide
+ * @since 1.5.0
  * Create at 2019/07/25 18:23
  */
 public class Polyfill {

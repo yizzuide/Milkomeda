@@ -50,7 +50,8 @@ milkomeda:
     read-timeout: 10000
 
   crust:
-    # 使用对称密钥生成token
+#    stateless: false
+  # 使用对称密钥生成token
     secure-key: crust_secure_key
     # 自定义token头，默认为token
     token-name: Authorization

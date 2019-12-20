@@ -1,17 +1,20 @@
 package com.github.yizzuide.milkomeda.crust;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.github.yizzuide.milkomeda.light.Cache;
 import com.github.yizzuide.milkomeda.light.CacheHelper;
+import com.github.yizzuide.milkomeda.light.LightCacheable;
 import com.github.yizzuide.milkomeda.light.Spot;
+import com.github.yizzuide.milkomeda.universe.context.AopContextHolder;
 import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import com.github.yizzuide.milkomeda.universe.context.WebContext;
 import com.github.yizzuide.milkomeda.util.JwtUtil;
 import io.jsonwebtoken.Claims;
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
@@ -31,7 +34,7 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 1.14.0
- * @version 1.17.3
+ * @version 2.0.0
  * Create at 2019/11/11 15:48
  */
 public class Crust {
@@ -61,6 +64,7 @@ public class Crust {
      */
     private static final String ROLE_IDS = "roles";
 
+    @Getter
     @Autowired
     private CrustProperties props;
 
@@ -91,7 +95,7 @@ public class Crust {
             return generateToken(authentication, entityClazz);
         }
         // session方式
-        return getUserInfo(authentication, entityClazz);
+        return getLoginUserInfo(authentication, entityClazz);
     }
 
     /**
@@ -133,21 +137,30 @@ public class Crust {
      */
     @NonNull
     public <T> CrustUserInfo<T> getUserInfo(@NonNull Class<T> entityClazz) {
-        // 检测超级缓存
-        Spot<Serializable, CrustUserInfo<T>> spot = CacheHelper.get(crustLightCache);
-        if (spot != null && spot.getData() != null) {
-            return spot.getData();
+        Authentication authentication = getAuthentication();
+        if (authentication == null) {
+            throw new RuntimeException("authentication is null");
         }
 
-        CrustUserInfo<T> userInfo = getUserInfo(getAuthentication(), entityClazz);
-        // session方式下，设置用户数据到超级缓存
+        // Session方式下
         if (!props.isStateless()) {
+            // 先检测超级缓存（提高性能）
+            Spot<Serializable, CrustUserInfo<T>> spot = CacheHelper.get(crustLightCache);
+            if (spot != null && spot.getData() != null) {
+                return spot.getData();
+            }
+            CrustUserInfo<T> userInfo = getLoginUserInfo(authentication, entityClazz);
+            // 设置用户数据到超级缓存（在内存中已经有一份用户登录元数据了）
             Spot<Serializable, CrustUserInfo<T>> sessionSpot = new Spot<>();
             sessionSpot.setView(userInfo.getUid());
             sessionSpot.setData(userInfo);
             CacheHelper.set(crustLightCache, sessionSpot);
+            return userInfo;
         }
-        return userInfo;
+
+        // Token方式
+        Crust crustProxy = AopContextHolder.self(this.getClass());
+        return crustProxy.getTokenUserInfo(authentication, entityClazz);
     }
 
     /**
@@ -269,7 +282,7 @@ public class Crust {
     @NonNull
     private <T> CrustUserInfo<T> generateToken(@NonNull Authentication authentication, @NonNull Class<T> entityClazz) {
         Map<String, Object> claims = new HashMap<>(6);
-        CrustUserInfo<T> userInfo = getUserInfo(authentication, entityClazz);
+        CrustUserInfo<T> userInfo = getLoginUserInfo(authentication, entityClazz);
         claims.put(UID, userInfo.getUid());
         claims.put(USERNAME, userInfo.getUsername());
         claims.put(CREATED, new Date());
@@ -289,19 +302,14 @@ public class Crust {
         return userInfo;
     }
 
-    /**
-     * 根据认证信息获取用户信息
-     *
-     * @param authentication 认证信息
-     * @param clazz 实体类型
-     * @param <T> 实体类型
-     * @return CrustUserInfo
-     */
+    @LightCacheable(value = Crust.CATCH_NAME, keyPrefix = "crust:",
+            key = "T(org.springframework.util.DigestUtils).md5DigestAsHex(#authentication.getToken().getBytes())",
+            condition = "#authentication!=null&&@crust.getProps().isEnableCache()") // 或者#this.object.getProps().isEnableCache()，都是调用当前对象的方法
     @SuppressWarnings("unchecked")
-    private <T> CrustUserInfo<T> getUserInfo(Authentication authentication, @NonNull Class<T> clazz) {
+    public <T> CrustUserInfo<T> getTokenUserInfo(Authentication authentication, @NonNull Class<T> clazz) {
         CrustUserInfo<T> userInfo = null;
         if (authentication != null) {
-            // 从Token解析的自定义设置的UsernamePasswordAuthenticationToken
+            // 解析Token方式获取用户信息
             if (authentication instanceof CrustAuthenticationToken) {
                 CrustAuthenticationToken authenticationToken = (CrustAuthenticationToken) authentication;
                 String token = authenticationToken.getToken();
@@ -312,25 +320,38 @@ public class Crust {
                     List<Long> roleIds = userDetails.getRoleIds();
                     CrustUserDetailsService detailsService = ApplicationContextHolder.get().getBean(CrustUserDetailsService.class);
                     T entity = (T) detailsService.findEntityById(uid);
-                    if (props.isEnableCache() && entity != null) {
-                        return CacheHelper.get(crustLightCache, new TypeReference<CrustUserInfo<T>>(){},
-                                id -> CATCH_KEY_PREFIX + id.toString(),
-                                id -> new CrustUserInfo<>(uid, authenticationToken.getName(), token, roleIds,  entity));
-                    }
-                    userInfo = new CrustUserInfo<>(uid, authenticationToken.getName(), token, roleIds, entity);
-                    return userInfo;
+                    return new CrustUserInfo<>(uid, authenticationToken.getName(), token, roleIds,  entity);
                 }
-            }
-
-            // 此时 authentication 就是内部封装的 UsernamePasswordAuthenticationToken
-            Object principal = authentication.getPrincipal();
-            if (principal instanceof CrustUserDetails) {
-                CrustUserDetails userDetails = (CrustUserDetails) principal;
-                userInfo = new CrustUserInfo<>(userDetails.getUid(), userDetails.getUsername(), getToken(), userDetails.getRoleIds(), (T) userDetails.getEntity());
             }
         }
         return userInfo;
     }
+
+    /**
+     * 获取登录时用户信息
+     * <br>
+     * Session方式和Token方式登录时都会调用（Session方式获取用户信息也走这里）
+     *
+     * @param authentication    认证信息
+     * @param clazz             实体类型
+     * @param <T>               实体类型
+     * @return  CrustUserInfo
+     */
+    @SuppressWarnings("unchecked")
+    private <T> CrustUserInfo<T> getLoginUserInfo(Authentication authentication, @NonNull Class<T> clazz) {
+        if (authentication == null) {
+            throw new AuthenticationServiceException("Authentication is must be not null");
+        }
+        // 此时 authentication 就是内部封装的 UsernamePasswordAuthenticationToken
+        Object principal = authentication.getPrincipal();
+        if (!(principal instanceof CrustUserDetails)) {
+            throw new AuthenticationServiceException("Authentication principal must be subtype of CrustUserDetails");
+        }
+        CrustUserDetails userDetails = (CrustUserDetails) principal;
+        return new CrustUserInfo<>(userDetails.getUid(), userDetails.getUsername(), getToken(), userDetails.getRoleIds(), (T) userDetails.getEntity());
+    }
+
+
 
 
     /**
