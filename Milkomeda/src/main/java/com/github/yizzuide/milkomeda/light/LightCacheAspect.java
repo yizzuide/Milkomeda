@@ -67,14 +67,15 @@ public class LightCacheAspect {
             BeanUtils.copyProperties(defaultBean, cache);
         }
         Function<Serializable, String> keyGenerator = isUsedGKey ? id -> gKey : id -> prefix + id;
-        // 根据条件移除缓存数据
-        if (annotation.annotationType() == LightCachePut.class ||
-                annotation.annotationType() == LightCacheEvict.class) {
+        // 删除类型直接返回
+        if (annotation.annotationType() == LightCacheEvict.class) {
+            // 缓存读写策略 - Cache Aside (先删除数据库，再删除缓存）
+            joinPoint.proceed();
             CacheHelper.erase(cache, view, keyGenerator);
-            // 删除类型直接返回
-            if (annotation.annotationType() == LightCacheEvict.class) {
-                return null;
-            }
+            return null;
+        } else if (annotation.annotationType() == LightCachePut.class) { // 更新类型也是先更新数据库，再更新缓存
+            // TODO 实现更新方法
+            // return CacheHelper.update(cache, eType, view, keyGenerator, id -> joinPoint.proceed())
         }
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         Class eType = signature.getReturnType();
