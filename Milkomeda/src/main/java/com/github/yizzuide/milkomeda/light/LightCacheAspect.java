@@ -62,6 +62,8 @@ public class LightCacheAspect {
         LightCache cache = defaultBean;
         // 如果有自定义的bean名，创建动态的Cache对象
         if (!DEFAULT_BEAN_NAME.equals(cacheBeanName)) {
+            // 修改Bean name，防止与开发者项目里重复
+            cacheBeanName += DEFAULT_BEAN_NAME + "_" + cacheBeanName;
             cache = WebContext.registerBean((ConfigurableApplicationContext) ApplicationContextHolder.get(), cacheBeanName, LightCache.class);
             // 判断是否拷贝默认的配置
             if (annotation.annotationType() == LightCacheable.class) {
