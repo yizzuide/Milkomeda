@@ -40,9 +40,11 @@ milkomeda:
   show-log: true
 
   light:
+    # 一级缓存一分钟后过期（只适用于LazyExpire策略）
+    l1-expire: 60
     # 二级缓存一天后过期
     l2-expire: 86400
-    # 使用时间线丢弃策略
+    # 全局使用时间线丢弃策略
     strategy: timeline
 
   echo:

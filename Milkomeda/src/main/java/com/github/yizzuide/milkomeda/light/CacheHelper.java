@@ -14,7 +14,7 @@ import java.util.function.Function;
  * 缓存外层API，集超级缓存、一级缓存、二级缓存于一体的方法
  *
  * @since 1.10.0
- * @version 2.0.0
+ * @version 2.0.1
  * @author yizzuide
  * Create at 2019/07/02 11:36
  */
@@ -126,7 +126,7 @@ public class CacheHelper {
      * @param id                标识值
      * @param keyGenerator      缓存key产生器
      * @param dataGenerator     数据产生器
-     * @param <E> 实体类型
+     * @param <E>               实体类型
      * @return                  缓存数据
      * @throws Throwable 获取异常
      */
@@ -175,5 +175,38 @@ public class CacheHelper {
      */
     public static void erase(Cache cache, Serializable id, Function<Serializable, String> keyGenerator) {
         cache.erase(keyGenerator.apply(id));
+    }
+
+    /**
+     * 更新缓存
+     * @param cache             缓存实例
+     * @param id                标识值
+     * @param keyGenerator      缓存key产生器
+     * @param dataGenerator     数据产生器
+     * @param <E>               实体类型
+     * @return                  缓存数据
+     * @throws Throwable 更新异常
+     */
+    public static <E> E put(Cache cache, Serializable id,
+                            Function<Serializable, String> keyGenerator, ThrowableFunction<String, E> dataGenerator) throws Throwable  {
+        // 先执行数据操作
+        String key = keyGenerator.apply(id);
+        E data = dataGenerator.apply(key);
+        // 检查返回值
+        if (data == null) {
+            throw new NullPointerException("The method return is null, it must be set not null for update cache");
+        }
+
+        // 再在存入缓存
+        Spot<Serializable, E> fastSpot = get(cache);
+        if (fastSpot == null) {
+            // 设置超级缓存
+            set(cache, id);
+            fastSpot = get(cache);
+        }
+        fastSpot.setData(data);
+        // 设置一级缓存 -> 二级缓存
+        cache.set(key, fastSpot);
+        return data;
     }
 }

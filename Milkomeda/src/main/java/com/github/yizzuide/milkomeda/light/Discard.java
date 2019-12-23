@@ -35,8 +35,9 @@ public interface Discard {
      * 提升缓存数据的权重
      *
      * @param spot  缓存数据
+     * @return 是否放弃缓存机会（放弃会马上删除缓存）
      */
-    void ascend(Spot<Serializable, Object> spot);
+    boolean ascend(Spot<Serializable, Object> spot);
 
     /**
      * 丢弃缓存数据

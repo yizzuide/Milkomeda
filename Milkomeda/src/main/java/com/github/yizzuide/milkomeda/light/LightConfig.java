@@ -34,6 +34,7 @@ public class LightConfig {
         LightCache lightCache = new LightCache();
         lightCache.setL1MaxCount(props.getL1MaxCount());
         lightCache.setL1DiscardPercent(props.getL1DiscardPercent());
+        lightCache.setL1Expire(props.getL1Expire());
         lightCache.setStrategy(props.getStrategy());
         lightCache.setStrategyClass(props.getStrategyClass());
         lightCache.setOnlyCacheL1(props.isOnlyCacheL1());

@@ -13,11 +13,14 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @Data
 @ConfigurationProperties(prefix = "milkomeda.light")
 public class LightProperties {
-    /** 一级缓存个数（默认64) */
+    /** 一级缓存个数（不适用于LightDiscardStrategy.LazyExpire） */
     private int l1MaxCount = 64;
 
-    /** 设置一级缓存超出后丢弃的百分比 (默认0.1）*/
-    private float L1DiscardPercent = 0.1f;
+    /** 设置一级缓存超出后丢弃的百分比 （不适用于LightDiscardStrategy.LazyExpire）*/
+    private float l1DiscardPercent = 0.1f;
+
+    /**  一级缓存过期时间（单位s，只适用于LightDiscardStrategy.LazyExpire） */
+    private long l1Expire = -1;
 
     /** 一级缓存丢弃策略（默认为Hot）*/
     private LightDiscardStrategy strategy = LightDiscardStrategy.HOT;

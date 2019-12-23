@@ -2,7 +2,9 @@ package com.github.yizzuide.milkomeda.demo.light.service;
 
 import com.github.yizzuide.milkomeda.demo.light.pojo.Order;
 import com.github.yizzuide.milkomeda.light.LightCacheEvict;
+import com.github.yizzuide.milkomeda.light.LightCachePut;
 import com.github.yizzuide.milkomeda.light.LightCacheable;
+import com.github.yizzuide.milkomeda.light.LightDiscardStrategy;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -25,8 +27,9 @@ public class OrderService {
      * @param orderId  订单id
      */
 //    @Fusion // 这个用于测试Fusion模块，当前Light模块不需要这个注解
-    @LightCacheable(value = "order", keyPrefix = "order:", key = "#orderId", condition = "#orderId!=null")
+    @LightCacheable(value = "order", keyPrefix = "order:", key = "#orderId", condition = "#orderId!=null", discardStrategy = LightDiscardStrategy.LazyExpire)
     public Order findById(String orderId) {
+        log.info("正在从数据库查询：{}", orderId);
         return new Order(orderId, "小明", "1200", new Date());
     }
 
@@ -45,5 +48,10 @@ public class OrderService {
         map.put("createTime", new Date());
         list.add(map);
         return list;
+    }
+
+    @LightCachePut(value = "order", keyPrefix = "order:", key = "#orderId", condition = "#orderId!=null")
+    public Order updateById(String orderId) {
+        return new Order(orderId, "小红", "2000", new Date());
     }
 }

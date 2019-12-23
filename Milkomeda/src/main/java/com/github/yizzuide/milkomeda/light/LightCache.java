@@ -21,61 +21,53 @@ import java.util.concurrent.TimeUnit;
 /**
  * LightCache
  *
- * 缓存方式：超级缓存（当前线程引用，根据业务可选）| 一级缓存（内存缓存池，缓存个数可控）| 二级缓存（Redis）
+ * 缓存方式：超级缓存（ThreadLocal）| 一级缓存（内存缓存池，缓存个数可控）| 二级缓存（Redis）
  *
  * V：标识数据
  * E：缓存业务数据
  *
  * @since 1.8.0
- * @version 1.17.0
+ * @version 2.0.1
  * @author yizzuide
  * Create at 2019/06/28 13:33
  */
 @Slf4j
 public class LightCache implements Cache {
     /**
-     * 默认一级缓存最大个数
-     */
-    private static final Integer DEFAULT_L1_MAX_COUNT = 64;
-
-    /**
-     * 默认一级缓存一次性移除百分比
-     */
-    private static final Float DEFAULT_L1_DISCARD_PERCENT = 0.1F;
-
-    /**
-     * 默认二缓存过期时间
-     */
-    private static final Long DEFAULT_L2_EXPIRE = -1L;
-
-    /**
      * 一级缓存最大个数
      */
     @Setter
     @Getter
-    private Integer l1MaxCount = DEFAULT_L1_MAX_COUNT;
+    private Integer l1MaxCount;
 
     /**
      * 一级缓存一次性移除百分比
      */
     @Getter
-    private Float l1DiscardPercent = DEFAULT_L1_DISCARD_PERCENT;
+    private Float l1DiscardPercent;
 
     /**
-     * 只写入一级缓存, 默认为 {@code false}
+     * 一级缓存过期时间
      */
     @Setter
     @Getter
-    private Boolean onlyCacheL1 = false;
+    private Long l1Expire;
 
     /**
-     * 一级缓存丢弃策略，默认为HOT
+     * 只写入一级缓存
+     */
+    @Setter
+    @Getter
+    private Boolean onlyCacheL1;
+
+    /**
+     * 一级缓存丢弃策略
      */
     @Getter
     private LightDiscardStrategy strategy;
 
     /**
-     * 自定义一级缓存丢弃策略实现
+     * 自定义一级缓存丢弃策略实现，使用自定义丢弃策略时需要指定
      */
     @Setter
     @Getter
@@ -91,16 +83,16 @@ public class LightCache implements Cache {
      */
     @Setter
     @Getter
-    private Long l2Expire =  DEFAULT_L2_EXPIRE;
+    private Long l2Expire;
 
     /**
-     * 超级缓存
+     * 超级缓存（每个Cache都有自己的超级缓存，互不影响）
      */
     @Getter
     private LightContext superCache = new LightContext();
 
     /**
-     * 一级缓存容器
+     * 一级缓存容器（内存池）
      */
     private Map<String, Spot<Serializable, Object>> cacheMap = new ConcurrentSkipListMap<>();
 
@@ -209,8 +201,9 @@ public class LightCache implements Cache {
      * 一级缓存
      * @param key   键
      * @param spot  缓存数据
+     * @return 缓存是否成功
      */
-    private void cacheL1(String key, Spot<Serializable, Object> spot) {
+    private boolean cacheL1(String key, Spot<Serializable, Object> spot) {
         // 一级缓存超出最大个数
         if ((cacheMap.size() + 1) > l1MaxCount) {
             // 根据选择的策略来丢弃数据
@@ -218,10 +211,19 @@ public class LightCache implements Cache {
         }
 
         // 排行加分
-        discardStrategy.ascend(spot);
+        boolean isAbandon = discardStrategy.ascend(spot);
+        // 缓存被识别为过期，使缓存失效
+        if (isAbandon) {
+            if (!onlyCacheL1) {
+                // 从二级缓存移除
+                Polyfill.redisDelete(stringRedisTemplate, key);
+            }
+            return false;
+        }
 
         // 添加到一级缓存池
         cacheMap.put(key, spot);
+        return true;
     }
 
     @Override
@@ -259,7 +261,13 @@ public class LightCache implements Cache {
         Spot<Serializable, Object> spot = cacheMap.get(key);
         if (null != spot) {
             // 排行加分
-            discardStrategy.ascend(spot);
+            boolean isAbandon = discardStrategy.ascend(spot);
+            // 如果放弃缓存
+            if (isAbandon) {
+                // 删除缓存
+                erase(key);
+                return null;
+            }
             return (Spot<Serializable, E>) spot;
         }
 
@@ -272,8 +280,10 @@ public class LightCache implements Cache {
                 } else {
                     spot = JSONUtil.parse(json, discardStrategy.spotClazz());
                 }
-                // 添加到一级缓存池
-                cacheL1(key, spot);
+                // 添加到一级缓存池，缓存失败，放弃从缓存中恢复
+                if (!cacheL1(key, spot)) {
+                    return null;
+                }
             }
         }
         return (Spot<Serializable, E>) spot;
@@ -302,11 +312,15 @@ public class LightCache implements Cache {
             return;
         }
         switch (strategy) {
+            case DEFAULT:
             case HOT:
                 discardStrategy  = new HotDiscard();
                 break;
             case TIMELINE:
                 discardStrategy = new TimelineDiscard();
+                break;
+            case LazyExpire:
+                discardStrategy = new LazyExpireDiscard();
                 break;
             case CUSTOM:
             {
