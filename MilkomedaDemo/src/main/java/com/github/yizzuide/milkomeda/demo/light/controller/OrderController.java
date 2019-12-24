@@ -34,6 +34,11 @@ public class OrderController {
         return ResponseEntity.status(200).build();
     }
 
+    @RequestMapping("update")
+    public ResponseEntity<Order> update(String orderId) {
+        return ResponseEntity.ok(orderService.updateById(orderId));
+    }
+
     @RequestMapping("list")
     public List<Map<String, Object>> list() {
         return orderService.findList();

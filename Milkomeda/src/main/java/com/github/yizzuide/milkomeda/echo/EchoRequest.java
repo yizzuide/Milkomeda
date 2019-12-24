@@ -26,7 +26,7 @@ import java.util.Map;
 public abstract class EchoRequest extends AbstractRequest {
 
     @Override
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     protected <T> EchoResponseData<T> createReturnData(Object respData, TypeReference<T> specType, boolean useStandardHTTP) throws EchoException {
         if (null == respData) {
             return responseData();

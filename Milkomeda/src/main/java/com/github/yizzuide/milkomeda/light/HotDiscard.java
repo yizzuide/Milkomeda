@@ -31,9 +31,10 @@ public class HotDiscard extends SortDiscard {
     }
 
     @Override
-    public void ascend(Spot<Serializable, Object> spot) {
+    public boolean ascend(Spot<Serializable, Object> spot) {
         HotSpot<Serializable, Object> hotSpot = (HotSpot<Serializable, Object>) spot;
         hotSpot.setStar(hotSpot.getStar() + 1);
+        return false;
     }
 
     @Override

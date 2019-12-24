@@ -31,9 +31,10 @@ public class TimelineDiscard extends SortDiscard {
     }
 
     @Override
-    public void ascend(Spot<Serializable, Object> spot) {
+    public boolean ascend(Spot<Serializable, Object> spot) {
         TimelineSpot<Serializable, Object> timelineSpot = (TimelineSpot<Serializable, Object>) spot;
         timelineSpot.setTime(new Date());
+        return false;
     }
 
     @Override

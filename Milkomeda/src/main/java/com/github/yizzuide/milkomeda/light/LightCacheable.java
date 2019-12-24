@@ -43,4 +43,16 @@ public @interface LightCacheable {
      * @return String
      */
     String condition() default "";
+
+    /**
+     * 缓存策略
+     * @return LightDiscardStrategy
+     */
+    LightDiscardStrategy discardStrategy() default LightDiscardStrategy.DEFAULT;
+
+    /**
+     * 新的缓存总是拷贝内置的配置（如果想针对某类型定制配置，设置为false，然后配置LightCache Bean，Bean名与注解属性value()相同）
+     * @return bool
+     */
+    boolean copyDefaultConfig() default true;
 }

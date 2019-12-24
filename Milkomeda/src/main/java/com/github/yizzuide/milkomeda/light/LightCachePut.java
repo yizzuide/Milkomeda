@@ -7,6 +7,7 @@ import java.lang.annotation.*;
  *
  * @author yizzuide
  * @since 2.0.0
+ * @version 2.0.1
  * Create at 2019/12/18 14:29
  */
 @Documented
@@ -37,4 +38,10 @@ public @interface LightCachePut {
      * @return  String
      */
     String gKey() default "";
+
+    /**
+     * 缓存条件，使用EL表达式
+     * @return String
+     */
+    String condition() default "";
 }

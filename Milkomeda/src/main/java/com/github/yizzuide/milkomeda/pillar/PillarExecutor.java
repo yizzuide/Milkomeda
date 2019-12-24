@@ -42,6 +42,10 @@ public class PillarExecutor<P, R> {
 
     /**
      * 根据类型名获取分流柱
+     * <br><br>
+     * PECS：Producer Extends Consumer Super
+     * <br> - ? extends T: 只出不进（用于生产者）
+     * <br> - ? super T: 只进不出（用于消费者）
      * @param type 分流类型
      * @return 分流柱集合
      */

@@ -303,7 +303,7 @@ public class Crust {
     }
 
     @LightCacheable(value = Crust.CATCH_NAME, keyPrefix = CATCH_KEY_PREFIX, key = "T(org.springframework.util.DigestUtils).md5DigestAsHex(#authentication?.token.bytes)", // #authentication 与 args[0] 等价
-            condition = "#authentication!=null&&#target.props.enableCache") // #target 与 @crust、#this.object、#root.object（#this在表达式不同部分解析过程中可能会改变，但是#root总是指向根，，object为自定义root对象属性）等价
+            condition = "#authentication!=null&&#target.props.enableCache") // #target 与 @crust、#this.object、#root.object等价（#this在表达式不同部分解析过程中可能会改变，但是#root总是指向根，object为自定义root对象属性）
     @SuppressWarnings("unchecked")
     public <T> CrustUserInfo<T> getTokenUserInfo(Authentication authentication, @NonNull Class<T> clazz) {
         CrustUserInfo<T> userInfo = null;
