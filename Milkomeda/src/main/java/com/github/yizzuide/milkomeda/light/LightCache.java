@@ -132,7 +132,12 @@ public class LightCache implements Cache {
 
         Spot<Serializable, Object> spot = viableSpot.get();
         // 排行加分
-        discardStrategy.ascend(spot);
+        boolean isAbandon = discardStrategy.ascend(spot);
+        // 丢弃缓存，重新设置数据
+        if (isAbandon) {
+            superCache.set(id);
+            return;
+        }
         // 设置到超级缓存，保存相同缓存数据对象只有一份
         superCache.set(spot);
     }
@@ -158,7 +163,7 @@ public class LightCache implements Cache {
     public void set(String key, Spot<Serializable, ?> spot) {
         // 如果是父类型，需要向下转型（会触发初始化排序状态字段）
         if (spot.getClass() == Spot.class) {
-            spot = discardStrategy.deform(key, (Spot<Serializable, Object>) spot);
+            spot = discardStrategy.deform(key, (Spot<Serializable, Object>) spot, l1Expire);
         }
 
         // 开始缓存

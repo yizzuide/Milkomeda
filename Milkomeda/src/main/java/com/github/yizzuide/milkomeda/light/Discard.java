@@ -9,7 +9,7 @@ import java.util.Map;
  * 缓存数据丢弃策略接口
  *
  * @since 1.8.0
- * @version 1.17.0
+ * @version 2.0.3
  * @author yizzuide
  * Create at 2019/06/28 14:50
  */
@@ -25,11 +25,12 @@ public interface Discard {
     /**
      * 转型
      *
-     * @param key   缓存key
-     * @param spot  缓存数据
+     * @param key       缓存key
+     * @param spot      缓存数据
+     * @param expire    内存缓存过期时间（单位：s)
      * @return  Spot
      */
-    Spot<Serializable, Object> deform(String key, Spot<Serializable, Object> spot);
+    Spot<Serializable, Object> deform(String key, Spot<Serializable, Object> spot, long expire);
 
     /**
      * 提升缓存数据的权重

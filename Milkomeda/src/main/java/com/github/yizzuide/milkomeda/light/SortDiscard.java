@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
  * 抽象的字段排序方案
  *
  * @since 1.8.0
- * @version 2.0.1
+ * @version 2.0.3
  * @author yizzuide
  * Create at 2019/06/28 16:32
  */
@@ -23,7 +23,7 @@ public abstract class SortDiscard implements Discard {
 
     @Override
     @SuppressWarnings("unchecked")
-    public Spot<Serializable, Object> deform(String key, Spot<Serializable, Object> spot) {
+    public Spot<Serializable, Object> deform(String key, Spot<Serializable, Object> spot, long expire) {
         SortSpot<Serializable, Object> sortSpot = null;
         try {
             sortSpot = spotClazz().newInstance();

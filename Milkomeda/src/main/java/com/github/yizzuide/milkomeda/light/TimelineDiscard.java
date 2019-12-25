@@ -10,7 +10,7 @@ import java.util.Date;
  * 时间线丢弃方案
  *
  * @since 1.8.0
- * @version 1.17.0
+ * @version 2.0.3
  * @author yizzuide
  * Create at 2019/06/28 16:25
  */
@@ -22,8 +22,8 @@ public class TimelineDiscard extends SortDiscard {
     }
 
     @Override
-    public Spot<Serializable, Object> deform(String key, Spot<Serializable, Object> spot) {
-        TimelineSpot<Serializable, Object> timelineSpot = (TimelineSpot<Serializable, Object>) super.deform(key, spot);
+    public Spot<Serializable, Object> deform(String key, Spot<Serializable, Object> spot, long expire) {
+        TimelineSpot<Serializable, Object> timelineSpot = (TimelineSpot<Serializable, Object>) super.deform(key, spot, expire);
         if (null == timelineSpot.getTime()) {
             timelineSpot.setTime(new Date());
         }

@@ -64,44 +64,37 @@ public class LightCacheAspect {
         // 解析表达式
         String viewId = extractValue(joinPoint, key);
         LightCache defaultBean = ApplicationContextHolder.get().getBean(DEFAULT_BEAN_NAME, LightCache.class);
-        LightCache cache = defaultBean;
-        // 如果有自定义的bean名，创建动态的Cache对象
-        if (!DEFAULT_BEAN_NAME.equals(cacheBeanName)) {
-            // 修改Bean name，防止与开发者项目里重复
-            cacheBeanName += DEFAULT_BEAN_NAME + "_" + cacheBeanName;
-            cache = WebContext.registerBean((ConfigurableApplicationContext) ApplicationContextHolder.get(), cacheBeanName, LightCache.class);
-            // 针对LightCacheable类型的处理
-            if (annotation.annotationType() == LightCacheable.class && cache.getL1MaxCount() == null) {
-                LightCacheable cacheable = (LightCacheable) annotation;
-                if (cacheable.copyDefaultConfig()) {
-                    // 拷贝默认的配置
-                    cache.copyFrom(defaultBean);
+        // 修改Bean name，防止与开发者项目里重复
+        cacheBeanName += DEFAULT_BEAN_NAME + "_" + cacheBeanName;
+        LightCache cache = WebContext.registerBean((ConfigurableApplicationContext) ApplicationContextHolder.get(), cacheBeanName, LightCache.class);
+        // 针对LightCacheable类型的处理
+        if (annotation.annotationType() == LightCacheable.class && cache.getL1MaxCount() == null) {
+            LightCacheable cacheable = (LightCacheable) annotation;
+            if (cacheable.copyDefaultConfig()) {
+                // 拷贝默认的配置
+                cache.copyFrom(defaultBean);
+                cache.setStrategy(cacheable.discardStrategy());
+                // 如果当前有设定过期时间（默认走配置文件）
+                if (cacheable.expire() != -1) {
+                    // 如果 discardStrategy 为 LazyExpire 策略，设置l1Expire并自动同步配置到l2Expire过期
+                    if (cacheable.discardStrategy() == LightDiscardStrategy.LazyExpire) {
+                        cache.setL1Expire(cacheable.expire() / 1000);
+                    } else {
+                        // 排行类型策略，设置到二级缓存（该策略一级缓存使用排行丢弃方案）
+                        cache.setL2Expire(cacheable.expire() / 1000);
+                    }
                 }
             }
         }
+
         Function<Serializable, String> keyGenerator = id -> prefix + id;
-        // 删除类型直接返回
+
+        // 删除类型
         if (annotation.annotationType() == LightCacheEvict.class) {
             // 缓存读写策略 - Cache Aside (先删除数据库，再删除缓存）
             joinPoint.proceed();
             CacheHelper.erase(cache, viewId, keyGenerator);
             return null;
-        }
-
-        // 设置自定义配置
-        LightCacheable cacheable = (LightCacheable) annotation;
-        if (cacheable.discardStrategy() != LightDiscardStrategy.DEFAULT) {
-            cache.setStrategy(cacheable.discardStrategy());
-            // 如果当前有设定过期时间（默认走配置文件）
-            if (cacheable.expire() != -1) {
-                // 如果 discardStrategy 为 LazyExpire 策略，自动同步配置到l2Expire过期
-                if (cacheable.discardStrategy() == LightDiscardStrategy.LazyExpire) {
-                    cache.setL1Expire(cacheable.expire() / 1000);
-                } else {
-                    // 其它排行类型，设置到二级缓存（一级缓存使用排行丢弃方案）
-                    cache.setL2Expire(cacheable.expire() / 1000);
-                }
-            }
         }
 
         // 更新类型也是先更新数据库，再更新缓存

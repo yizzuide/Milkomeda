@@ -1,7 +1,5 @@
 package com.github.yizzuide.milkomeda.light;
 
-import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
-
 import java.io.Serializable;
 import java.util.Comparator;
 
@@ -11,6 +9,7 @@ import java.util.Comparator;
  *
  * @author yizzuide
  * @since 2.0.1
+ * @version 2.0.3
  * Create at 2019/12/23 16:09
  */
 public class LazyExpireDiscard extends SortDiscard {
@@ -21,13 +20,12 @@ public class LazyExpireDiscard extends SortDiscard {
     }
 
     @Override
-    public Spot<Serializable, Object> deform(String key, Spot<Serializable, Object> spot) {
-        LazyExpireSpot<Serializable, Object> lazyExpireSpot = (LazyExpireSpot<Serializable, Object>) super.deform(key, spot);
-        // 设置一级缓存过期
+    public Spot<Serializable, Object> deform(String key, Spot<Serializable, Object> spot, long expire) {
+        LazyExpireSpot<Serializable, Object> lazyExpireSpot = (LazyExpireSpot<Serializable, Object>) super.deform(key, spot, expire);
+        // 设置过期时间
         if (null == lazyExpireSpot.getExpireTime()) {
-            long l1Expire = ApplicationContextHolder.get().getBean(LightProperties.class).getL1Expire();
-            if (l1Expire > 0) {
-                lazyExpireSpot.setExpireTime(System.currentTimeMillis() + l1Expire * 1000);
+            if (expire > 0) {
+                lazyExpireSpot.setExpireTime(System.currentTimeMillis() + expire * 1000);
             }
         }
         return lazyExpireSpot;
