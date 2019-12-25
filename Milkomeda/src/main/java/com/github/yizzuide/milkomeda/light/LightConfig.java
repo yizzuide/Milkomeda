@@ -13,7 +13,7 @@ import java.util.Collections;
  * LightConfig
  *
  * @author yizzuide
- * @version 1.17.0
+ * @since 1.17.0
  * Create at 2019/12/03 16:22
  */
 @Configuration

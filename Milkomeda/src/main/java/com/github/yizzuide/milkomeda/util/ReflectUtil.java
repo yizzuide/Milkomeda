@@ -18,7 +18,7 @@ import java.lang.reflect.Type;
  *
  * @author yizzuide
  * @since 0.2.0
- * @version 2.0.0
+ * @version 2.0.2
  * Create at 2019/04/11 19:55
  */
 @Slf4j
@@ -90,25 +90,22 @@ public class ReflectUtil {
      * @return 解析的值
      */
     public static String extractValue(JoinPoint joinPoint, String express) {
-        String value = express;
         // 解析Http请求头
         if (express.startsWith(":")) {
             ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
             assert attributes != null;
             String headerName = express.substring(1);
-            value = attributes.getRequest().getHeader(headerName);
-            if (StringUtils.isEmpty(headerName)) {
+            String value = attributes.getRequest().getHeader(headerName);
+            if (StringUtils.isEmpty(headerName) || StringUtils.isEmpty(value)) {
                 throw new IllegalArgumentException("Can't find " + headerName + " from HTTP header.");
             }
+            return value;
         }
 
         // 解析EL表达式
-        try {
-            value = ELContext.getValue(joinPoint, express);
-        } catch (Exception e) {
-            // 解析出错时，返回源值
-            log.error("Compile Spring EL error with msg: {}", e.getMessage(), e);
+        if (express.startsWith("@") || express.startsWith("#") || express.startsWith("T(") || express.startsWith("args[")) {
+            return ELContext.getValue(joinPoint, express);
         }
-        return value;
+        return express;
     }
 }

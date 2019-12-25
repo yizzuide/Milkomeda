@@ -6,7 +6,6 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
-import org.springframework.beans.BeanUtils;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.annotation.Order;
 import org.springframework.util.StringUtils;
@@ -19,10 +18,17 @@ import static com.github.yizzuide.milkomeda.util.ReflectUtil.extractValue;
 
 /**
  * LightCacheAspect
+ * <br>
+ * Aspect注解会被AbstractAutoProxyCreator创建Proxy对象，而@Async会被AsyncAnnotationBeanPostProcessor创建。
+ * 它们都继承了ProxyProcessorSupport，AsyncAnnotationBeanPostProcessor在有Proxy对象时只添加Advice。
+ *
+ * @see org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator
+ * @see org.springframework.scheduling.annotation.AsyncAnnotationBeanPostProcessor
+ * @see org.springframework.aop.framework.AbstractAdvisingBeanPostProcessor
  *
  * @author yizzuide
  * @since 2.0.0
- * @version 2.0.1
+ * @version 2.0.2
  * Create at 2019/12/18 14:45
  */
 @Order(98)
@@ -69,7 +75,7 @@ public class LightCacheAspect {
             if (annotation.annotationType() == LightCacheable.class) {
                 LightCacheable cacheable = (LightCacheable) annotation;
                 if (cacheable.copyDefaultConfig()) {
-                    BeanUtils.copyProperties(defaultBean, cache);
+                    cache.copyFrom(defaultBean);
                 }
             }
         }

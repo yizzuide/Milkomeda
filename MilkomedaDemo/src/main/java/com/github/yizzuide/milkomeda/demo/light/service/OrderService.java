@@ -22,6 +22,18 @@ public class OrderService {
 
     private static final String G_KEY = "order_list";
 
+    @LightCacheable(value = "orders", key = OrderService.G_KEY)
+    public List<Map<String, Object>> findList() {
+        List<Map<String, Object>> list = new ArrayList<>();
+        Map<String, Object> map = new HashMap<>();
+        map.put("orderId", "1111111");
+        map.put("name", "小明");
+        map.put("amount", "12000");
+        map.put("createTime", new Date());
+        list.add(map);
+        return list;
+    }
+
     /**
      * 模拟根据订单id查询
      * @param orderId  订单id
@@ -36,21 +48,9 @@ public class OrderService {
         return new Order(orderId, "小明", "1200", new Date());
     }
 
-    @LightCacheEvict(keyPrefix = "order:", key = "#orderId")
+    @LightCacheEvict(value = "order", keyPrefix = "order:", key = "#orderId")
     public void  deleteById(String orderId) {
       log.info("删除订单：{}", orderId);
-    }
-
-    @LightCacheable(gKey = OrderService.G_KEY)
-    public List<Map<String, Object>> findList() {
-        List<Map<String, Object>> list = new ArrayList<>();
-        Map<String, Object> map = new HashMap<>();
-        map.put("orderId", "1111111");
-        map.put("name", "小明");
-        map.put("amount", "12000");
-        map.put("createTime", new Date());
-        list.add(map);
-        return list;
     }
 
     @LightCachePut(value = "order", keyPrefix = "order:", key = "#orderId", condition = "#orderId!=null")

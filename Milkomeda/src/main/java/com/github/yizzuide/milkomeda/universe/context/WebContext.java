@@ -16,6 +16,7 @@ import javax.servlet.http.HttpSession;
  *
  * @author yizzuide
  * @since 1.14.0
+ * @version 2.0.2
  * Create at 2019/11/11 21:38
  */
 public class WebContext {
@@ -62,19 +63,13 @@ public class WebContext {
      */
     public static <T> T registerBean(ConfigurableApplicationContext applicationContext, String name, Class<T> clazz, Object... args) {
         if (applicationContext.containsBean(name)) {
-            T bean = applicationContext.getBean(name, clazz);
-            if (bean.getClass().isAssignableFrom(clazz)) {
-                return bean;
-            } else {
-                throw new RuntimeException("BeanName 重复 " + name);
-            }
+            return applicationContext.getBean(name, clazz);
         }
         BeanDefinitionBuilder beanDefinitionBuilder = BeanDefinitionBuilder.genericBeanDefinition(clazz);
         for (Object arg : args) {
             beanDefinitionBuilder.addConstructorArgValue(arg);
         }
         BeanDefinition beanDefinition = beanDefinitionBuilder.getRawBeanDefinition();
-
         BeanDefinitionRegistry beanFactory = (BeanDefinitionRegistry) applicationContext.getBeanFactory();
         beanFactory.registerBeanDefinition(name, beanDefinition);
         return applicationContext.getBean(name, clazz);

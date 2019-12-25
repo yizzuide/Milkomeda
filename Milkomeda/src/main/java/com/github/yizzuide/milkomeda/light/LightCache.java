@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit;
  * E：缓存业务数据
  *
  * @since 1.8.0
- * @version 2.0.1
+ * @version 2.0.2
  * @author yizzuide
  * Create at 2019/06/28 13:33
  */
@@ -335,5 +335,19 @@ public class LightCache implements Cache {
                 }
             }
         }
+    }
+
+    /**
+     * 从来源配置拷贝
+     * @param other LightCache
+     */
+    public void copyFrom(LightCache other) {
+        this.setL1MaxCount(other.getL1MaxCount());
+        this.setL1DiscardPercent(other.getL1DiscardPercent());
+        this.setL1Expire(other.getL1Expire());
+        this.setStrategy(other.getStrategy());
+        this.setStrategyClass(other.getStrategyClass());
+        this.setOnlyCacheL1(other.getOnlyCacheL1());
+        this.setL2Expire(other.getL2Expire());
     }
 }
