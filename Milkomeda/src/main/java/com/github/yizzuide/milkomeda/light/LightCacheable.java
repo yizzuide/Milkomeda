@@ -7,7 +7,7 @@ import java.lang.annotation.*;
  *
  * @author yizzuide
  * @since 2.0.0
- * @version 2.0.2
+ * @version 2.0.3
  * Create at 2019/12/18 14:35
  */
 @Documented
@@ -19,26 +19,19 @@ public @interface LightCacheable {
      * 缓存实例名（不同的缓存类型应该设置不能的名字）
      * @return  String
      */
-    String value() default LightCacheAspect.DEFAULT_BEAN_NAME;
+    String value();
 
     /**
      * 缓存key，支持EL表达式获取参数的值
      * @return  String
      */
-    String key() default "";
+    String key();
 
     /**
      * 缓存key前辍，与属性方法 key() 合成完整的key
      * @return String
      */
     String keyPrefix() default "";
-
-    /**
-     * 自定义构建缓存key，与属性方法 key() 二选一；如果同时都设置，则 gKey() 优先级要高
-     * @deprecated since 2.0.2, use key() for instead
-     * @return  String
-     */
-    String gKey() default "";
 
     /**
      * 缓存条件，使用EL表达式
@@ -57,4 +50,10 @@ public @interface LightCacheable {
      * @return bool
      */
     boolean copyDefaultConfig() default true;
+
+    /**
+     * 过期时间
+     * @return  long 单位：ms，默认不过期（不设置则走全局配置文件里的配置，默认也是不过期）
+     */
+    long expire() default -1;
 }

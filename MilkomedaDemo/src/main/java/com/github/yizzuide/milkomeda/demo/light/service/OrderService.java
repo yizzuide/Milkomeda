@@ -21,8 +21,9 @@ import java.util.*;
 public class OrderService {
 
     private static final String G_KEY = "order_list";
+    private static final long DEF_EXPIRE_MS = 60 * 1000;
 
-    @LightCacheable(value = "orders", key = OrderService.G_KEY)
+    @LightCacheable(value = "orders", key = G_KEY)
     public List<Map<String, Object>> findList() {
         List<Map<String, Object>> list = new ArrayList<>();
         Map<String, Object> map = new HashMap<>();
@@ -40,9 +41,9 @@ public class OrderService {
      */
 //    @Fusion // 这个用于测试Fusion模块，当前Light模块不需要这个注解
     // 参数采集方式生成缓存key
-    @LightCacheable(value = "order", keyPrefix = "order:", key = "#orderId", condition = "#orderId!=null", discardStrategy = LightDiscardStrategy.LazyExpire)
+    @LightCacheable(value = "order", keyPrefix = "order:", key = "#orderId", condition = "#orderId!=null", discardStrategy = LightDiscardStrategy.LazyExpire, expire = DEF_EXPIRE_MS)
     // 静态方法生成缓存key
-//    @LightCacheable(value = "order", key = "T(com.github.yizzuide.milkomeda.demo.light.pref.CacheKeys).ORDER.key", condition = "#orderId!=null", discardStrategy = LightDiscardStrategy.LazyExpire)
+//    @LightCacheable(value = "order", key = "T(com.github.yizzuide.milkomeda.demo.light.pref.CacheKeys).ORDER.key", condition = "#orderId!=null", discardStrategy = LightDiscardStrategy.LazyExpire, expire = DEF_EXPIRE_MS)
     public Order findById(String orderId) {
         log.info("正在从数据库查询：{}", orderId);
         return new Order(orderId, "小明", "1200", new Date());

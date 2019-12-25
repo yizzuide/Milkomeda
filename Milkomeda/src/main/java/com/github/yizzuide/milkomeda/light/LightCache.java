@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit;
  * E：缓存业务数据
  *
  * @since 1.8.0
- * @version 2.0.2
+ * @version 2.0.3
  * @author yizzuide
  * Create at 2019/06/28 13:33
  */
@@ -172,10 +172,10 @@ public class LightCache implements Cache {
      */
     private void cache(String key, Spot<Serializable, Object> spot) {
         // 一级缓存
-        cacheL1(key, spot);
+        boolean success = cacheL1(key, spot);
 
         // 二级缓存
-        if (!onlyCacheL1) {
+        if (!onlyCacheL1 && success) {
             cacheL2(key, spot);
         }
     }
