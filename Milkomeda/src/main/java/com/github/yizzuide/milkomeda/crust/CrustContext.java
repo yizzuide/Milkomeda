@@ -8,12 +8,14 @@ import org.springframework.lang.NonNull;
  *
  * @author yizzuide
  * @since 1.14.0
- * @version 1.17.3
+ * @version 2.0.4
  * Create at 2019/11/11 17:53
  */
 public class CrustContext {
 
     private static Crust INSTANCE;
+
+    private CrustContext() {}
 
     static void set(Crust crust) {
         INSTANCE = crust;

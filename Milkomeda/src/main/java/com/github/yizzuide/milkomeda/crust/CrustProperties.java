@@ -8,7 +8,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  *
  * @author yizzuide
  * @since 1.14.0
- * @version 1.16.4
+ * @version 2.0.4
  * Create at 2019/11/11 15:51
  */
 @Data
@@ -75,6 +75,11 @@ public class CrustProperties {
      * Token刷新间隔（默认5分钟，单位：分）
      */
     private int refreshTokenInterval = 5;
+
+    /**
+     * Token刷新响应字段
+     */
+    private String refreshTokenName = "Authorization";
 
     /**
      * 登录路径，只有在stateless=false时有效（默认/login）

@@ -34,14 +34,18 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 1.14.0
- * @version 2.0.0
+ * @version 2.0.4
  * Create at 2019/11/11 15:48
  */
 public class Crust {
     // 缓存标识
     static final String CATCH_NAME = "crustLightCache";
+
     // 缓存前辍
     private static final String CATCH_KEY_PREFIX = "crust:user:";
+
+    // Token元数据（提高访问性能）
+    private static ThreadLocal<CrustTokenMetaData> tokenMetaDataThreadLocal = new ThreadLocal<>();
 
     /**
      * 用户id
@@ -176,7 +180,10 @@ public class Crust {
      * 使登录信息失效
      */
     public void invalidate() {
-        CacheHelper.erase(getCache(), getUserInfo(Serializable.class).getUid(), id -> Crust.CATCH_KEY_PREFIX + id);
+        // Token方式下开启缓存时清空
+        if (getProps().isEnableCache() && getProps().isStateless()) {
+            CacheHelper.erase(crustLightCache, getUserInfo(Serializable.class).getUid(), id -> Crust.CATCH_KEY_PREFIX + id);
+        }
         SecurityContextHolder.clearContext();
     }
 
@@ -185,10 +192,15 @@ public class Crust {
      * @return token issue time
      */
     long getTokenIssue() {
-        String token = getToken();
-        String unSignKey = getUnSignKey();
-        Claims claims = JwtUtil.parseToken(token, unSignKey);
-        return (long) claims.get(CREATED);
+        return tokenMetaDataThreadLocal.get().getIssuedAt();
+    }
+
+    /**
+     * 获取Token过期时间
+     * @return token expire time
+     */
+    long getTokenExpire() {
+        return tokenMetaDataThreadLocal.get().getExpire();
     }
 
     /**
@@ -235,7 +247,13 @@ public class Crust {
                 if (RoleIdsObj != null) {
                     roleIds = Arrays.stream(((String) RoleIdsObj).split(",")).map(Long::parseLong).collect(Collectors.toList());
                 }
-                CrustUserDetails userDetails = new CrustUserDetails((String) claims.get(UID), username, authorities, roleIds);
+                long issuedAt = (long) claims.get(CREATED);
+                String uid = (String) claims.get(UID);
+                long expire = claims.getExpiration().getTime();
+                // 设置Token元数据
+                CrustTokenMetaData tokenMetaData = new CrustTokenMetaData(username, uid, issuedAt, expire);
+                tokenMetaDataThreadLocal.set(tokenMetaData);
+                CrustUserDetails userDetails = new CrustUserDetails(uid, username, authorities, roleIds);
                 authentication = new CrustAuthenticationToken(userDetails, null, authorities, token);
             } else {
                 // 当前上下文认证信息存在，验证token是否正确匹配
@@ -249,16 +267,6 @@ public class Crust {
     }
 
     /**
-     * 获取缓存
-     *
-     * @return Cache
-     */
-    @NonNull
-    Cache getCache() {
-        return crustLightCache;
-    }
-
-    /**
      * 验证令牌
      *
      * @param token    令牌
@@ -267,7 +275,7 @@ public class Crust {
      */
     @NonNull
     private Boolean validateToken(@NonNull String token, @NonNull String username) {
-        String userName = getUsernameFromToken(token);
+        String userName = tokenMetaDataThreadLocal.get().getUsername();
         if (StringUtils.isEmpty(userName)) return false;
         return (userName.equals(username) && !JwtUtil.isTokenExpired(token, getUnSignKey()));
     }
@@ -287,8 +295,7 @@ public class Crust {
         claims.put(USERNAME, userInfo.getUsername());
         claims.put(CREATED, new Date());
         if (!CollectionUtils.isEmpty(authentication.getAuthorities())) {
-            List<String> authors = authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList());
-            claims.put(AUTHORITIES, StringUtils.arrayToCommaDelimitedString(authors.toArray()));
+            claims.put(AUTHORITIES, StringUtils.arrayToCommaDelimitedString(authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).toArray()));
         }
         Object principal = authentication.getPrincipal();
         if (principal instanceof CrustUserDetails) {
@@ -348,27 +355,6 @@ public class Crust {
         }
         CrustUserDetails userDetails = (CrustUserDetails) principal;
         return new CrustUserInfo<>(userDetails.getUid(), userDetails.getUsername(), getToken(), userDetails.getRoleIds(), (T) userDetails.getEntity());
-    }
-
-
-
-
-    /**
-     * 从令牌中获取用户名
-     *
-     * @param token 令牌
-     * @return 用户名
-     */
-    @Nullable
-    private String getUsernameFromToken(@NonNull String token) {
-        String username;
-        try {
-            Claims claims = JwtUtil.parseToken(token, getUnSignKey());
-            username = claims.getSubject();
-        } catch (Exception e) {
-            username = null;
-        }
-        return username;
     }
 
     /**
