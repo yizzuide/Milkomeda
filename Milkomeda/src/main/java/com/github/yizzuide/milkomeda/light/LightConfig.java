@@ -14,6 +14,7 @@ import java.util.Collections;
  *
  * @author yizzuide
  * @since 1.17.0
+ * @version 2.0.5
  * Create at 2019/12/03 16:22
  */
 @Configuration
@@ -43,6 +44,7 @@ public class LightConfig {
     }
 
     @Bean
+    @ConditionalOnMissingBean
     public FilterRegistrationBean<LightCacheClearFilter> lightCacheClearFilter() {
         FilterRegistrationBean<LightCacheClearFilter> lightCacheClearFilter = new FilterRegistrationBean<>();
         lightCacheClearFilter.setFilter(new LightCacheClearFilter());

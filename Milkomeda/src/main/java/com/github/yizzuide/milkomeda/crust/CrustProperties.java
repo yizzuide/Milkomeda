@@ -20,11 +20,11 @@ public class CrustProperties {
     private boolean stateless = true;
 
     /**
-     * 在Token方式情况下，是否开启实体查询的多级缓存（默认为true）
+     * Token方式情况下，是否开启实体查询的多级缓存；Session方式下开启超级缓存（默认为true）
      */
     private boolean enableCache = true;
     /**
-     * 在enableCache=true的情况下，是否缓存到Redis（默认为true）<br>
+     * Token方式在enableCache=true的情况下，是否缓存到Redis（默认为true）<br>
      * 注意：这个配置将覆盖<code>light.onlyCacheL1</code>配置的值（该配置为Light模块）
      */
     private boolean enableCacheL2 = true;

@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 1.14.0
- * @version 2.0.4
+ * @version 2.0.5
  * Create at 2019/11/11 15:48
  */
 public class Crust {
@@ -146,15 +146,15 @@ public class Crust {
             throw new RuntimeException("authentication is null");
         }
 
-        // Session方式下
-        if (!props.isStateless()) {
+        // Session方式开启超级缓存
+        if (getProps().isEnableCache() && !props.isStateless()) {
             // 先检测超级缓存（提高性能）
             Spot<Serializable, CrustUserInfo<T>> spot = CacheHelper.get(crustLightCache);
             if (spot != null && spot.getData() != null) {
                 return spot.getData();
             }
             CrustUserInfo<T> userInfo = getLoginUserInfo(authentication, entityClazz);
-            // 设置用户数据到超级缓存（在内存中已经有一份用户登录元数据了）
+            // 设置用户数据到超级缓存（在内存中已经有一份用户登录数据了）
             Spot<Serializable, CrustUserInfo<T>> sessionSpot = new Spot<>();
             sessionSpot.setView(userInfo.getUid());
             sessionSpot.setData(userInfo);
@@ -264,6 +264,13 @@ public class Crust {
             }
         }
         return authentication;
+    }
+
+    /**
+     * 清除Token元数据
+     */
+    void clearTokenMetaData() {
+        tokenMetaDataThreadLocal.remove();
     }
 
     /**

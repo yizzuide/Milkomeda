@@ -33,7 +33,7 @@ import java.util.List;
  *
  * @author yizzuide
  * @since 1.14.0
- * @version 2.0.0
+ * @version 2.0.5
  * Create at 2019/11/11 17:52
  */
 @Slf4j
@@ -85,6 +85,8 @@ public class CrustAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
         chain.doFilter(request, response);
+        // 清空Token元数据（防止内存泄露）
+        crust.clearTokenMetaData();
     }
 
     protected void unsuccessfulAuthentication(HttpServletRequest request,
