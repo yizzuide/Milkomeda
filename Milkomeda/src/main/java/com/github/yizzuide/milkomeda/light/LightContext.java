@@ -13,14 +13,14 @@ import java.io.Serializable;
  * E：上下文数据
  *
  * @since 1.9.0
- * @version 1.17.0
+ * @version 2.0.6
  * @author yizzuide
  * Create at 2019/06/30 18:57
  */
 @Data
 public class LightContext {
-
-    private static final ThreadLocal<Spot<Serializable, ?>> context = new ThreadLocal<>();
+    // 每个缓存实例都有自己的超级缓存
+    private final ThreadLocal<Spot<Serializable, ?>> context = new ThreadLocal<>();
 
     /**
      * 设置上下文id
