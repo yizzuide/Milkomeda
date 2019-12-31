@@ -1,5 +1,6 @@
 package com.github.yizzuide.milkomeda.ice;
 
+import com.github.yizzuide.milkomeda.util.Polyfill;
 import com.github.yizzuide.milkomeda.util.RedisUtil;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -12,7 +13,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
  *
  * @author yizzuide
  * @since 1.15.0
- * @version 2.1.0
+ * @version 2.1.1
  * Create at 2019/11/16 17:30
  */
 @Slf4j
@@ -42,11 +43,18 @@ public class DelayJobHandler implements Runnable {
      */
     private int index;
 
+    // 延迟桶分布式锁Key
+    private static final String KEY_IDEMPOTENT_LIMITER = "ice:execute_delay_bucket_lock";
+
     @Autowired
     private IceProperties props;
 
     @Override
     public void run() {
+        // 延迟桶处理锁住资源，防止多线程并发执行时出现相同记录问题
+        boolean absent = RedisUtil.setIfAbsent(KEY_IDEMPOTENT_LIMITER, props.getTaskPopCountLockTimeoutSeconds(), redisTemplate);
+        if (absent) return;
+
         DelayJob delayJob = null;
         try {
             delayJob = delayBucket.poll(index);
@@ -80,6 +88,9 @@ public class DelayJobHandler implements Runnable {
         } catch (Exception e) {
             log.error("Ice Timer处理延迟Job {} 异常：{}", delayJob != null ?
                     delayJob.getJodId()  : "[任务数据获取失败]", e.getMessage(), e);
+        } finally {
+            // 删除Lock
+            Polyfill.redisDelete(redisTemplate, KEY_IDEMPOTENT_LIMITER);
         }
     }
 

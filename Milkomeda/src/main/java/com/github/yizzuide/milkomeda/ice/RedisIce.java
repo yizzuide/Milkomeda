@@ -89,9 +89,9 @@ public class RedisIce implements Ice {
         // 如果只取1个时，直接使用pop（保证原子性）
         if (count == 1) return Collections.singletonList(pop(topic));
 
-        // 使用SetEX锁住资源，防止多线程并发执行，造成重复消费问题
-        boolean hasEx = RedisUtil.setIfAbsent(KEY_IDEMPOTENT_LIMITER, props.getTaskPopCountLockTimeoutSeconds(), redisTemplate);
-        if (hasEx) return null;
+        // 使用SetNX锁住资源，防止多线程并发执行，造成重复消费问题
+        boolean absent = RedisUtil.setIfAbsent(KEY_IDEMPOTENT_LIMITER, props.getTaskPopCountLockTimeoutSeconds(), redisTemplate);
+        if (absent) return null;
 
         List<Job<T>> jobList;
         try {
