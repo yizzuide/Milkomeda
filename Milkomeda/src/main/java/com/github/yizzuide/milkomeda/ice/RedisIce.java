@@ -40,6 +40,7 @@ public class RedisIce implements Ice {
 
     private static final String KEY_IDEMPOTENT_LIMITER = "ice:range_pop_lock";
 
+    @SuppressWarnings("rawtypes")
     @Override
     public void add(Job job) {
         job.setId(job.getTopic() + "-" + job.getId());
@@ -108,7 +109,7 @@ public class RedisIce implements Ice {
             List<Job<T>> mJobList = jobList;
             RedisUtil.batchOps(() -> {
                 for (int i = 0; i < mJobList.size(); i++) {
-                    Job mJob = mJobList.get(i);
+                    Job<T> mJob = mJobList.get(i);
                     // 设置为处理中状态
                     mJob.setStatus(JobStatus.RESERVED);
                     // 更新延迟时间为TTR
