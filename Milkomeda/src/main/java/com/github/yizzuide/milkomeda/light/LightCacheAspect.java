@@ -2,6 +2,7 @@ package com.github.yizzuide.milkomeda.light;
 
 import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import com.github.yizzuide.milkomeda.universe.context.WebContext;
+import com.github.yizzuide.milkomeda.universe.el.ELContext;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -28,7 +29,7 @@ import static com.github.yizzuide.milkomeda.util.ReflectUtil.extractValue;
  *
  * @author yizzuide
  * @since 2.0.0
- * @version 2.0.6
+ * @version 2.2.0
  * Create at 2019/12/18 14:45
  */
 @Order(98)
@@ -54,7 +55,7 @@ public class LightCacheAspect {
     @SuppressWarnings("unchecked")
     private Object applyAround(ProceedingJoinPoint joinPoint, Annotation annotation, String condition, String cacheBeanName, String prefix, String key) throws Throwable {
         // 检查缓存条件
-        if (!StringUtils.isEmpty(condition) && !Boolean.parseBoolean(extractValue(joinPoint, condition))) {
+        if (!StringUtils.isEmpty(condition) && !Boolean.parseBoolean(ELContext.getValue(joinPoint, condition))) {
             return joinPoint.proceed();
         }
         if (StringUtils.isEmpty(key)) {
@@ -78,10 +79,10 @@ public class LightCacheAspect {
                 if (cacheable.expire() != -1) {
                     // 如果 discardStrategy 为 LazyExpire 策略，设置l1Expire并自动同步配置到l2Expire过期
                     if (cacheable.discardStrategy() == LightDiscardStrategy.LazyExpire) {
-                        cache.setL1Expire(cacheable.expire() / 1000);
+                        cache.setL1Expire(cacheable.expire());
                     } else {
                         // 排行类型策略，设置到二级缓存（该策略一级缓存使用排行丢弃方案）
-                        cache.setL2Expire(cacheable.expire() / 1000);
+                        cache.setL2Expire(cacheable.expire());
                     }
                 }
             }
