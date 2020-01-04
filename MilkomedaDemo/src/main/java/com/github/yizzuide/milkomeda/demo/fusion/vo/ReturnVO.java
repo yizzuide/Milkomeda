@@ -19,4 +19,10 @@ public class ReturnVO<T> {
         this.data = data;
         return this;
     }
+
+    public ReturnVO<T> error(String msg) {
+        code = "-1";
+        this.msg = msg;
+        return this;
+    }
 }

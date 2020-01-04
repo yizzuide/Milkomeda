@@ -18,6 +18,12 @@ public class FusionWebMvcConfig implements WebMvcConfigurer {
     @Autowired
     public void configFusion(FusionAspect fusionAspect) {
         // 修改返回值
-        fusionAspect.setConverter((tag, retObj) -> new ReturnVO<>().ok(retObj));
+        fusionAspect.setConverter((tag, retObj, error) -> {
+            // 返回错误类型响应数据
+            if (retObj == null) {
+                return new ReturnVO<>().error(error);
+            }
+            return new ReturnVO<>().ok(retObj);
+        });
     }
 }

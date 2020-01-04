@@ -9,8 +9,6 @@ import org.aspectj.lang.annotation.Aspect;
 import org.springframework.core.annotation.Order;
 import org.springframework.util.StringUtils;
 
-import java.util.function.BiFunction;
-
 import static com.github.yizzuide.milkomeda.util.ReflectUtil.getAnnotation;
 
 /**
@@ -29,7 +27,7 @@ public class FusionAspect {
      */
     @Getter
     @Setter
-    private BiFunction<String, Object, Object> converter;
+    private FusionConverter<String, Object, Object> converter;
 
     @Around("@annotation(fusion) || @within(fusion)")
     public Object doAround(ProceedingJoinPoint joinPoint, Fusion fusion) throws Throwable {
@@ -57,6 +55,16 @@ public class FusionAspect {
         if (null ==  converter) {
             return returnData;
         }
-        return converter.apply(tagName, returnData);
+
+        // 处理String类型
+        if (returnData instanceof String) {
+            String str = (String) returnData;
+            // 如果有错误前缀
+            if (str.startsWith(FusionConverter.ERROR_PREFIX)) {
+                String error = str.substring(FusionConverter.ERROR_PREFIX.length());
+                return converter.apply(tagName, null, error);
+            }
+        }
+        return converter.apply(tagName, returnData, null);
     }
 }

@@ -3,6 +3,7 @@ package com.github.yizzuide.milkomeda.demo.fusion.controller;
 import com.github.yizzuide.milkomeda.demo.fusion.service.ProductService;
 import com.github.yizzuide.milkomeda.demo.ice.pojo.Product;
 import com.github.yizzuide.milkomeda.fusion.Fusion;
+import com.github.yizzuide.milkomeda.fusion.FusionConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -33,6 +34,9 @@ public class FusionController {
     @Fusion
     @RequestMapping("product/pull")
     public Object pull() {
-        return productService.pull();
+        // 返回成功的数据
+//        return productService.pull();
+        // 模拟返回错误
+        return FusionConverter.buildError("查询失败");
     }
 }
