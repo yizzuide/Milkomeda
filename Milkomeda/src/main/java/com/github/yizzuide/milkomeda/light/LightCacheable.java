@@ -53,7 +53,7 @@ public @interface LightCacheable {
 
     /**
      * 过期时间
-     * @return  long 单位：ms，默认不过期（不设置则走全局配置文件里的配置，默认也是不过期）
+     * @return  long 单位：s，默认不过期（不设置则走全局配置文件里的配置，默认也是不过期）
      */
     long expire() default -1;
 }
