@@ -29,7 +29,7 @@ import static com.github.yizzuide.milkomeda.util.ReflectUtil.extractValue;
  *
  * @author yizzuide
  * @since 2.0.0
- * @version 2.2.0
+ * @version 2.2.1
  * Create at 2019/12/18 14:45
  */
 @Order(98)
@@ -80,10 +80,9 @@ public class LightCacheAspect {
                     // 如果 discardStrategy 为 LazyExpire 策略，设置l1Expire并自动同步配置到l2Expire过期
                     if (cacheable.discardStrategy() == LightDiscardStrategy.LazyExpire) {
                         cache.setL1Expire(cacheable.expire());
-                    } else {
-                        // 排行类型策略，设置到二级缓存（该策略一级缓存使用排行丢弃方案）
-                        cache.setL2Expire(cacheable.expire());
                     }
+                    // 排行类型策略，设置到二级缓存（该策略一级缓存使用排行丢弃方案）
+                    cache.setL2Expire(cacheable.expire());
                 }
             }
         }

@@ -4,17 +4,21 @@ import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import com.github.yizzuide.milkomeda.universe.context.WebContext;
 import org.springframework.context.ConfigurableApplicationContext;
 
+import java.util.concurrent.locks.ReentrantLock;
+
 /**
  * Moon
  *
  * @author yizzuide
- * @since 2.2.0
+ * @since 2.2.1
  * Create at 2019/12/31 18:13
  */
 public class Moon<T> {
     private MoonNode<T> pointer;
     private MoonNode<T> header;
     private MoonNode<T> next;
+    // 指针锁
+    private ReentrantLock reentrantLock = new ReentrantLock(false);
 
     /**
      * 在不同的业务流程获取当前阶段的类型值
@@ -64,8 +68,10 @@ public class Moon<T> {
      * @return 阶段类型值
      */
     public T getCurrentPhase() {
+        reentrantLock.lock();
         T data = pointer.getData();
         pointer = pointer.getNext();
+        reentrantLock.unlock();
         return data;
     }
 

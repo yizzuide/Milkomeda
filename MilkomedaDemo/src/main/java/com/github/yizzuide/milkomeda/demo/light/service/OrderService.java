@@ -40,7 +40,7 @@ public class OrderService {
      * @param orderId  订单id
      */
     // 参数采集方式生成缓存key
-    @LightCacheable(value = "order", keyPrefix = "order:", key = "#orderId", condition = "#orderId!=null", discardStrategy = LightDiscardStrategy.LazyExpire, expire = DEF_EXPIRE_SECONDS)
+    @LightCacheable(value = "order", keyPrefix = "order:", key = "#orderId", condition = "#orderId!=null", discardStrategy = LightDiscardStrategy.LazyExpire)
     // 静态方法生成缓存key
 //    @LightCacheable(value = "order", key = "T(com.github.yizzuide.milkomeda.demo.light.pref.CacheKeys).ORDER.key", condition = "#orderId!=null", discardStrategy = LightDiscardStrategy.LazyExpire, expire = DEF_EXPIRE_SECONDS)
     public Order findById(String orderId) {

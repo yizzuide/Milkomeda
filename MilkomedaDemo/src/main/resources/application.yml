@@ -44,7 +44,7 @@ milkomeda:
 
   light:
     # 一级缓存一小时后过期（只适用于LazyExpire策略）
-    l1-expire: 3600
+    l1-expire: 10
     # 二级缓存一天后过期
     l2-expire: 86400
     # 全局使用时间线丢弃策略

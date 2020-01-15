@@ -133,7 +133,7 @@ public class CacheHelper {
     public static  <E> E get(Cache cache, TypeReference<E> eTypeRef, Serializable id,
                                 Function<Serializable, String> keyGenerator, ThrowableFunction<String, E> dataGenerator) throws Throwable {
         E data;
-        // 方案一：从超级缓存中获取，内存指针引用即可返回（耗时为O(1)，速度快到没朋友）
+        // 方案一：从超级缓存中获取，内存指针引用即可返回（耗时为O(1)）
         Spot<Serializable, E> fastSpot = get(cache);
         if (fastSpot != null) {
             data = fastSpot.getData();
