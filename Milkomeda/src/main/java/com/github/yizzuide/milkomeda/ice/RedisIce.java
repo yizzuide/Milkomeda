@@ -40,6 +40,7 @@ public class RedisIce implements Ice {
 
     private static final String KEY_IDEMPOTENT_LIMITER = "ice:range_pop_lock";
 
+    @SuppressWarnings("rawtypes")
     @Override
     public void add(Job job) {
         job.setId(job.getTopic() + "-" + job.getId());
@@ -88,9 +89,9 @@ public class RedisIce implements Ice {
         // 如果只取1个时，直接使用pop（保证原子性）
         if (count == 1) return Collections.singletonList(pop(topic));
 
-        // 使用SetEX锁住资源，防止多线程并发执行，造成重复消费问题
-        boolean hasEx = RedisUtil.setIfAbsent(KEY_IDEMPOTENT_LIMITER, props.getTaskPopCountLockTimeoutSeconds(), redisTemplate);
-        if (hasEx) return null;
+        // 使用SetNX锁住资源，防止多线程并发执行，造成重复消费问题
+        boolean absent = RedisUtil.setIfAbsent(KEY_IDEMPOTENT_LIMITER, props.getTaskPopCountLockTimeoutSeconds(), redisTemplate);
+        if (absent) return null;
 
         List<Job<T>> jobList;
         try {
@@ -108,7 +109,7 @@ public class RedisIce implements Ice {
             List<Job<T>> mJobList = jobList;
             RedisUtil.batchOps(() -> {
                 for (int i = 0; i < mJobList.size(); i++) {
-                    Job mJob = mJobList.get(i);
+                    Job<T> mJob = mJobList.get(i);
                     // 设置为处理中状态
                     mJob.setStatus(JobStatus.RESERVED);
                     // 更新延迟时间为TTR

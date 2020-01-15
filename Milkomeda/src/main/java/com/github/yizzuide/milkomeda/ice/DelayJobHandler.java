@@ -1,5 +1,6 @@
 package com.github.yizzuide.milkomeda.ice;
 
+import com.github.yizzuide.milkomeda.util.Polyfill;
 import com.github.yizzuide.milkomeda.util.RedisUtil;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -12,6 +13,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
  *
  * @author yizzuide
  * @since 1.15.0
+ * @version 2.1.1
  * Create at 2019/11/16 17:30
  */
 @Slf4j
@@ -41,11 +43,18 @@ public class DelayJobHandler implements Runnable {
      */
     private int index;
 
+    // 延迟桶分布式锁Key
+    private static final String KEY_IDEMPOTENT_LIMITER = "ice:execute_delay_bucket_lock";
+
     @Autowired
     private IceProperties props;
 
     @Override
     public void run() {
+        // 延迟桶处理锁住资源，防止多线程并发执行时出现相同记录问题
+        boolean absent = RedisUtil.setIfAbsent(KEY_IDEMPOTENT_LIMITER, props.getTaskPopCountLockTimeoutSeconds(), redisTemplate);
+        if (absent) return;
+
         DelayJob delayJob = null;
         try {
             delayJob = delayBucket.poll(index);
@@ -61,7 +70,7 @@ public class DelayJobHandler implements Runnable {
             }
 
             // 获取超时任务（包括延迟超时和TTR超时）
-            Job job = jobPool.get(delayJob.getJodId());
+            Job<?> job = jobPool.get(delayJob.getJodId());
             // 任务元数据不存在（说明任务已被消费）
             if (job == null) {
                 // 移除TTR超时检测任务
@@ -79,13 +88,16 @@ public class DelayJobHandler implements Runnable {
         } catch (Exception e) {
             log.error("Ice Timer处理延迟Job {} 异常：{}", delayJob != null ?
                     delayJob.getJodId()  : "[任务数据获取失败]", e.getMessage(), e);
+        } finally {
+            // 删除Lock
+            Polyfill.redisDelete(redisTemplate, KEY_IDEMPOTENT_LIMITER);
         }
     }
 
     /**
      * 处理ttr的任务
      */
-    private void processTtrJob(DelayJob delayJob, Job job) {
+    private void processTtrJob(DelayJob delayJob, Job<?> job) {
         log.info("Ice处理TTR重试的Job {}，已重试次数为{}", delayJob.getJodId(), delayJob.getRetryCount());
         // 检测重试次数过载
         boolean overload = delayJob.getRetryCount() > job.getRetryCount();
@@ -101,7 +113,7 @@ public class DelayJobHandler implements Runnable {
             // 移除delayBucket中的任务
             delayBucket.remove(index, delayJob);
             // 设置当前重试次数
-            if (overload && delayJob.getRetryCount() < Integer.MAX_VALUE) {
+            if (delayJob.getRetryCount() < Integer.MAX_VALUE) {
                 delayJob.setRetryCount(delayJob.getRetryCount() + 1);
             }
             // 重置到当前延迟
@@ -118,7 +130,7 @@ public class DelayJobHandler implements Runnable {
     /**
      * 处理延时任务
      */
-    private void processDelayJob(DelayJob delayJob, Job job) {
+    private void processDelayJob(DelayJob delayJob, Job<?> job) {
         log.info("Ice正在处理延迟的Job {}，当前状态为：{}", delayJob.getJodId(), job.getStatus());
         RedisUtil.batchOps(() -> {
             // 修改任务池状态

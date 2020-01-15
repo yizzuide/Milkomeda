@@ -8,6 +8,7 @@ import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
+import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 import java.lang.reflect.Method;
 import java.util.Map;
@@ -30,7 +31,7 @@ public class ExpressionEvaluator<T> extends CachedExpressionEvaluator {
     // 条件缓存
     private final Map<ExpressionKey, Expression> conditionCache = new ConcurrentHashMap<>(64);
 
-    // 目标方法缓存
+    // 目标方法缓存（提升查询性能）
     private final Map<AnnotatedElementKey, Method> targetMethodCache = new ConcurrentHashMap<>(64);
 
     /**
@@ -41,14 +42,17 @@ public class ExpressionEvaluator<T> extends CachedExpressionEvaluator {
      * @param args          参数
      * @return  EvaluationContext
      */
-    public EvaluationContext createEvaluationContext(Object object, Class<?> targetClass,
-                                                     Method method, Object[] args) {
-
+    public StandardEvaluationContext createEvaluationContext(Object object, Class<?> targetClass,
+                                                             Method method, Object[] args) {
         Method targetMethod = getTargetMethod(targetClass, method);
+        // 创建自定义EL Root
         ExpressionRootObject root = new ExpressionRootObject(object, args);
-        return new MethodBasedEvaluationContext(root, targetMethod, args, this.paramNameDiscoverer);
+        // 创建基于方法的执行上下文
+        MethodBasedEvaluationContext evaluationContext = new MethodBasedEvaluationContext(root, targetMethod, args, this.paramNameDiscoverer);
+        // 添加变量引用
+        evaluationContext.setVariable("target", root.getObject());
+        return evaluationContext;
     }
-
 
     /**
      * 根据指定的条件表达式获取值
@@ -64,14 +68,17 @@ public class ExpressionEvaluator<T> extends CachedExpressionEvaluator {
                 .getValue(evalContext, clazz);
     }
 
+    /**
+     * 获取并缓存Method
+     * @param targetClass   目标类
+     * @param method        目标方法
+     * @return  Method
+     */
     private Method getTargetMethod(Class<?> targetClass, Method method) {
         AnnotatedElementKey methodKey = new AnnotatedElementKey(method, targetClass);
         Method targetMethod = this.targetMethodCache.get(methodKey);
         if (targetMethod == null) {
             targetMethod = AopUtils.getMostSpecificMethod(method, targetClass);
-            if (targetMethod == null) {
-                targetMethod = method;
-            }
             this.targetMethodCache.put(methodKey, targetMethod);
         }
         return targetMethod;

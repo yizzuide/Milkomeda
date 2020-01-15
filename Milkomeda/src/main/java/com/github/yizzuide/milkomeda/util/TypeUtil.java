@@ -1,6 +1,7 @@
 package com.github.yizzuide.milkomeda.util;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 
 import java.lang.reflect.Type;
@@ -9,7 +10,7 @@ import java.lang.reflect.Type;
  * TypeUtil
  *
  * @since 1.10.0
- * @version 1.13.1
+ * @version 2.1.0
  * @author yizzuide
  * Create at 2019/07/02 13:23
  */
@@ -34,8 +35,8 @@ public class TypeUtil {
      * @param typeRef   TypeReference
      * @return  Class
      */
-    public static Class<?> type2Class(TypeReference typeRef) {
-        return TypeFactory.defaultInstance().constructType(typeRef.getType()).getRawClass();
+    public static Class<?> type2Class(TypeReference<?> typeRef) {
+        return type2JavaType(typeRef.getType()).getRawClass();
     }
 
     /**
@@ -44,6 +45,15 @@ public class TypeUtil {
      * @return  Class
      */
     public static Class<?> type2Class(Type type) {
-        return TypeFactory.defaultInstance().constructType(type).getRawClass();
+        return type2JavaType(type).getRawClass();
+    }
+
+    /**
+     * Type 转 JavaType
+     * @param type Type
+     * @return JavaType
+     */
+    public static JavaType type2JavaType(Type type) {
+        return TypeFactory.defaultInstance().constructType(type);
     }
 }

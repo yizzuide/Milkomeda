@@ -31,9 +31,6 @@
 - [x] Neutron（中子星）：用于定时作业任务，支持数据库持久化，动态创建Job、删除、修改Cron执行表达式。*1.18.0+*
    * 依赖技术：Spring IoC、Quartz
    * 设计模式：门面模式
-   
-## Todo List
-- [ ] 添加一个支持Shiro的模块
     
 ## Requirements
 * Java 8
@@ -45,7 +42,6 @@
 - Dalston.1.11.0-Dalston.1.12.0 for Spring Boot 1.5.x
 - Others for Spring Boot 2.0.x
 
-
 ## Installation
 ```xml
 <dependency>
@@ -55,60 +51,48 @@
 </dependency>
 ```
 
-## Dependency
-```xml
-<dependency>
-   <groupId>org.springframework.boot</groupId>
-   <artifactId>spring-boot-starter-aop</artifactId>
-</dependency>
-<dependency>
-   <groupId>org.springframework.boot</groupId>
-   <artifactId>spring-boot-starter-data-redis</artifactId>
-</dependency>
-<dependency>
-   <groupId>org.apache.httpcomponents</groupId>
-   <artifactId>httpclient</artifactId>
-</dependency>
-<dependency>
-   <groupId>org.apache.commons</groupId>
-   <artifactId>commons-lang3</artifactId>
-</dependency>
-<dependency>
-   <groupId>commons-beanutils</groupId>
-   <artifactId>commons-beanutils</artifactId>
-   <version>1.9.4</version>
-</dependency>
-<dependency>
-   <groupId>joda-time</groupId>
-   <artifactId>joda-time</artifactId>
-</dependency>
-<dependency>
-   <groupId>org.projectlombok</groupId>
-   <artifactId>lombok</artifactId>
-</dependency>
-```
+## 2.0 Release
+Milkomeda 2.0 is now available (Dec 2019).
+
+- 构建的包更小，减少即时的依赖，根据开启的模块选择依赖。
+- 模块的使用更加明了，需要使用什么模块，使用`@EnableXXX`（除了非Spring依赖模块不需要开启）。
+- 部分模块使用API改进，优先使用注解的声明式编程，并使用SpEL增强，然后是API方法调用。
+- 各模块间的功能相互增强，如：`Crust`添加`Light`模块缓存加持、`Comet`添加`Pillar`模块拆分处理等。
+- 重构各模块的Config配置依赖，合理拆分工具类、Context等。
+
+> 在2.0改造中，有了@mars的加入，非常感谢提供很多好的建议和改进
+
+
+## Migrating to 2.x from 1.x
+1. 除了`Pillar`模块外，其它模块都需要通过`@EnableXXX`来启用模块（迁移请注意！）。
+2. 在1.x版本默认依赖的`Spring Data Redis`已被删除，需要根据使用模块是否依赖来在项目中添加（迁移请注意！）。
+3. 模块`Particle`的限制器注解在取请求头的语法`@`改为`:`（由于和SpEL的`@`语法冲突问题）。
+4. 模块`Light`的API方法方式改为使用`@LightCacheable`（仿Spring Cache，部分属性方法支持SpEL），默认使用了超级缓存（不用再操心超级缓存的复杂API了）。
+5. 模块`Crust`的token方式内建支持`Light`模块的高效多级缓存。
+6. 模块`Comet`添加注解`@CometParam`注解用于同时支持解析`application/x-www-form-urlencoded`、`JSON`的Body消息数据（Spring MVC默认是不支持的）。
 
 ## Documentation
-[Pulsar使用文档](https://github.com/yizzuide/Milkomeda/wiki/Pulsar%E6%A8%A1%E5%9D%97%E4%BD%BF%E7%94%A8)
+[See Wiki](https://github.com/yizzuide/Milkomeda/wiki)
 
-[Comet使用文档](https://github.com/yizzuide/Milkomeda/wiki/Comet%E6%A8%A1%E5%9D%97%E4%BD%BF%E7%94%A8)
+## Contributing
+*Mikomeda*还需要更多的业务型实用模块，欢迎有想法的开发者加入进来！可以通过以下原则来Pull Request:
 
-[Pillar使用文档](https://github.com/yizzuide/Milkomeda/wiki/Pillar%E6%A8%A1%E5%9D%97%E4%BD%BF%E7%94%A8)
+- 从`master`分支拉取新分支，新添加的功能模块分支以`feat-`前缀开头，问题修复则以`fix-`为前缀。
+- 添加的模块尽可能地通用，不能含有业务代码，最好可以提供使用的Demo并添加到`MilkomedaDemo`工程里，如果有好的想法需要讨论可以提一个以[feature]开头的issue进行讨论。
+- 新添加的代码尽可能地规范，代码必需经过格式化，类的命名需要添加模块名前缀，新添加的模块需要添加到`Milkomeda`的`com.github.yizzuide.milkomeda`包下，属性和方法需要添加注释表明如果使用。
+- 建议遵行提交注释以`feat|fix|docs|style|refactor|perf|test|workflow|ci|chore|types:`为前缀。
+- 提交时不要提交IDE的配置相关文件和临时生成的文件，请注意排除。
 
-[Particle使用之API方式](https://github.com/yizzuide/Milkomeda/wiki/Particle%E6%A8%A1%E5%9D%97%E4%BD%BF%E7%94%A8%E4%B9%8BAPI%E6%96%B9%E5%BC%8F)
-
-[Particle使用之注解方式](https://github.com/yizzuide/Milkomeda/wiki/Particle%E6%A8%A1%E5%9D%97%E4%BD%BF%E7%94%A8%E4%B9%8B%E6%B3%A8%E8%A7%A3%E6%96%B9%E5%BC%8F)
-
-[Light使用文档](https://github.com/yizzuide/Milkomeda/wiki/Light%E6%A8%A1%E5%9D%97%E4%BD%BF%E7%94%A8)
-
-[Echo使用文档](https://github.com/yizzuide/Milkomeda/wiki/Echo%E6%A8%A1%E5%9D%97%E7%9A%84%E4%BD%BF%E7%94%A8)
-
-
-[Ice使用文档](https://github.com/yizzuide/Milkomeda/wiki/%E4%BD%BF%E7%94%A8Ice%E5%AE%9E%E7%8E%B0%E5%BB%B6%E8%BF%9F%E9%98%9F%E5%88%97)
+> 关于如果开发*Mikomeda*项目：使用IDEA新建空的工程，再把工程模块`Mikomeda`和`MikomedaDemo`导入即可。
 
 ## Author
 yizzuide, fu837014586@163.com
 
 ## License
 Milkomeda is available under the MIT license. See the LICENSE file for more info.
+
+## Thanks
+<a href="https://www.jetbrains.com/idea/" target="_blank">
+          <img width="64px" src="./logo/idea.png" alt="IntelliJ IDEA">
+</a>
 

@@ -19,7 +19,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>1.8</java.version>
-        <milkomeda.version>2.0.0-SNAPSHOT</milkomeda.version>
+        <milkomeda.version>2.2.0-SNAPSHOT</milkomeda.version>
     </properties>
 
     <dependencies>
@@ -35,6 +35,10 @@
             <groupId>com.github.yizzuide</groupId>
             <artifactId>milkomeda-spring-boot-starter</artifactId>
             <version>${milkomeda.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

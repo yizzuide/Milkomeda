@@ -5,7 +5,7 @@ import lombok.Getter;
 
 /**
  * ExpressionRootObject
- * 表达式根对象
+ * 自定义EL根对象
  *
  * @author yizzuide
  * @since 1.5.0
@@ -14,6 +14,12 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class ExpressionRootObject {
+    /**
+     * 方法所属目标对象，通过<code>#this.object</code>获取
+     */
     private final Object object;
+    /**
+     * 方法参数列表，通过<code>#this.args[index]</code>获取
+     */
     private final Object[] args;
 }

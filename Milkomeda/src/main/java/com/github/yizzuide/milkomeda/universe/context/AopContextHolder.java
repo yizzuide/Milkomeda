@@ -3,6 +3,7 @@ package com.github.yizzuide.milkomeda.universe.context;
 import com.github.yizzuide.milkomeda.comet.CometAspect;
 import com.github.yizzuide.milkomeda.comet.WebCometData;
 import com.github.yizzuide.milkomeda.comet.XCometData;
+import com.github.yizzuide.milkomeda.universe.el.ELContext;
 import com.github.yizzuide.milkomeda.universe.metadata.HandlerMetaData;
 import org.springframework.aop.framework.AopContext;
 import org.springframework.aop.support.AopUtils;
@@ -76,24 +77,29 @@ public class AopContextHolder {
         Map<String, List<HandlerMetaData>> handlerMap = new HashMap<>();
         Map<String, Object> beanMap = ApplicationContextHolder.get().getBeansWithAnnotation(handlerAnnotationClazz);
         for (String key : beanMap.keySet()) {
+            Object target = beanMap.get(key);
             // 如果方法有aop切面，可以通过AopUtils.getTargetClass()获取
             Method[] methods = ReflectionUtils.getAllDeclaredMethods(useAOP ?
-                    AopUtils.getTargetClass(beanMap.get(key).getClass()) : beanMap.get(key).getClass());
+                    AopUtils.getTargetClass(target.getClass()) : target.getClass());
             for (Method method : methods) {
                 // 获取指定方法上的注解的属性
                 final Annotation executeAnnotation = AnnotationUtils.findAnnotation(method, executeAnnotationClazz);
                 if (null == executeAnnotation) {
                     continue;
                 }
+                // 支持SpEL
                 String name = nameProvider.apply(executeAnnotation);
+                if (name.startsWith("@") || name.startsWith("#") || name.startsWith("T(") || name.startsWith("args[")) {
+                    name = ELContext.getValue(target, new Object[]{}, target.getClass(), method, name);
+                }
                 if (StringUtils.isEmpty(name)) {
-                    throw new IllegalArgumentException("Please specify the [name] of "+ executeAnnotation +" !");
+                    throw new IllegalArgumentException("Please specify the [topic] of "+ executeAnnotation +" !");
                 }
                 if (handlerMap.containsKey(name)) {
-                    handlerMap.get(name).add(new HandlerMetaData(name, beanMap.get(key), method));
+                    handlerMap.get(name).add(new HandlerMetaData(name, target, method));
                 } else {
                     List<HandlerMetaData> list = new ArrayList<>();
-                    list.add(new HandlerMetaData(name, beanMap.get(key), method));
+                    list.add(new HandlerMetaData(name, target, method));
                     handlerMap.put(name, list);
                 }
                 // 如果一个组件只会一个处理方法，直接返回

@@ -1,10 +1,11 @@
 package com.github.yizzuide.milkomeda.light;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -13,7 +14,7 @@ import java.util.stream.Collectors;
  * 抽象的字段排序方案
  *
  * @since 1.8.0
- * @version 1.17.0
+ * @version 2.0.3
  * @author yizzuide
  * Create at 2019/06/28 16:32
  */
@@ -22,11 +23,12 @@ public abstract class SortDiscard implements Discard {
 
     @Override
     @SuppressWarnings("unchecked")
-    public Spot<Serializable, Object> deform(String key, Spot<Serializable, Object> spot) {
+    public Spot<Serializable, Object> deform(String key, Spot<Serializable, Object> spot, long expire) {
         SortSpot<Serializable, Object> sortSpot = null;
         try {
             sortSpot = spotClazz().newInstance();
-            BeanUtils.copyProperties(spot, sortSpot);
+            sortSpot.setView(spot.getView());
+            sortSpot.setData(spot.getData());
             sortSpot.setKey(key);
         } catch (Exception e) {
             log.error("SortDiscard:- 创建类实例失败：{}", e.getMessage(), e);
@@ -37,10 +39,15 @@ public abstract class SortDiscard implements Discard {
     @Override
     @SuppressWarnings("unchecked")
     public void discard(Map<String, Spot<Serializable, Object>> cacheMap, float l1DiscardPercent) {
+        Comparator<? extends SortSpot<Serializable, Object>> comparator = comparator();
+        // 不支持排序丢弃，直接返回
+        if (comparator == null) {
+            return;
+        }
         List<? extends SortSpot<Serializable, Object>> list = cacheMap.values()
                 .stream()
                 .map(spot -> (SortSpot<Serializable, Object>)spot)
-                .sorted((Comparator<? super SortSpot<Serializable, Object>>) comparator())
+                .sorted((Comparator<? super SortSpot<Serializable, Object>>) comparator)
                 .collect(Collectors.toList());
         int discardCount = Math.round(list.size() * l1DiscardPercent);
         // 一级缓存百分比太小，直接返回

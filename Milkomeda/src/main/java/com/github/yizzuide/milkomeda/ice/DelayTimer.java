@@ -11,7 +11,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
  *
  * @author yizzuide
  * @since 1.15.0
- * @version 1.16.0
+ * @version 2.0.1
  * Create at 2019/11/16 18:57
  */
 public class DelayTimer implements ApplicationListener<ContextRefreshedEvent> {
@@ -34,12 +34,17 @@ public class DelayTimer implements ApplicationListener<ContextRefreshedEvent> {
     @Autowired
     private ThreadPoolTaskScheduler taskScheduler;
 
+    // 启动标识
+    private boolean startup;
+
     @Override
     public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
+        if (startup) return;
         // 启动Timer
         for (int i = 0; i < props.getDelayBucketCount(); i++) {
             taskScheduler.scheduleWithFixedDelay(new DelayJobHandler(redisTemplate, jobPool, delayBucket, readyQueue, i, props),
                     props.getDelayBucketPollRate());
         }
+        startup = true;
     }
 }

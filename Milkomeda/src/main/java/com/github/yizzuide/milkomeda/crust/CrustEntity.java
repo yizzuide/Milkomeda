@@ -1,8 +1,5 @@
 package com.github.yizzuide.milkomeda.crust;
 
-import org.springframework.lang.NonNull;
-import org.springframework.lang.Nullable;
-
 import java.io.Serializable;
 
 /**
@@ -11,7 +8,7 @@ import java.io.Serializable;
  *
  * @author yizzuide
  * @since 1.14.0
- * @version 1.17.3
+ * @version 2.0.4
  * Create at 2019/11/11 18:47
  */
 public interface CrustEntity extends Serializable {
@@ -19,21 +16,18 @@ public interface CrustEntity extends Serializable {
      * 用户id
      * @return user id
      */
-    @NonNull
     String getUID();
 
     /**
      * 用户名
      * @return username
      */
-    @NonNull
     String getUsername();
 
     /**
      * 登录密码
      * @return password
      */
-    @NonNull
     String getPassword();
 
     /**
@@ -41,6 +35,5 @@ public interface CrustEntity extends Serializable {
      * 那个这个字段不需要实现，否则需要实现
      * @return salt
      */
-    @Nullable
     default String getSalt() {return null;}
 }

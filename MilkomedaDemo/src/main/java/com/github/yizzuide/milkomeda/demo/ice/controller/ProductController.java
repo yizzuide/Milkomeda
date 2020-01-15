@@ -24,7 +24,7 @@ public class ProductController {
 
     // 测试：http://localhost:8091/ice/product/publish?id=1000224343494&name=iphone&price=8900
     @RequestMapping("product/publish")
-    public ResponseEntity publish(Product product) {
+    public ResponseEntity<String> publish(Product product) {
         log.info("正在上传商品：{}", product.getId());
         // 模拟审核商品。。
         if (product.getPics() == null) {
