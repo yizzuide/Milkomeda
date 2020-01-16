@@ -2,7 +2,6 @@ package com.github.yizzuide.milkomeda.moon;
 
 import com.github.yizzuide.milkomeda.light.LightCachePut;
 import com.github.yizzuide.milkomeda.light.LightCacheable;
-import com.github.yizzuide.milkomeda.light.LightDiscardStrategy;
 import lombok.Getter;
 
 import java.util.concurrent.locks.ReentrantLock;
@@ -109,7 +108,7 @@ public class Moon<T> {
      * @param key 缓存key
      * @return LeftHandPointer
      */
-    @LightCacheable(value = CACHE_NAME, keyPrefix = "moon:lhp-", key = "#key", discardStrategy = LightDiscardStrategy.TIMELINE, expire = 86400, onlyCacheL2 = true)
+    @LightCacheable(value = CACHE_NAME, keyPrefix = "moon:lhp-", key = "#key", expire = 86400, onlyCacheL2 = true)
     public LeftHandPointer getLeftHandPointer(String key) {
         // 无法从缓存中获取时，创建新的左手指月
         return new LeftHandPointer();
