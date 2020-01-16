@@ -1,6 +1,7 @@
 package com.github.yizzuide.milkomeda.comet;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.servlet.ReadListener;
 import javax.servlet.ServletInputStream;
@@ -16,6 +17,7 @@ import java.nio.charset.Charset;
  *
  * @author yizzuide
  * @since 2.0.0
+ * @version 2.2.2
  * Create at 2019/12/12 17:37
  */
 @Slf4j
@@ -29,6 +31,10 @@ public class CometRequestWrapper extends HttpServletRequestWrapper {
         super(request);
         // 将body数据存储起来
         String bodyStr = getBodyString(request);
+        if (StringUtils.isEmpty(bodyStr)) {
+            body = new byte[0];
+            return;
+        }
         body = bodyStr.getBytes(Charset.defaultCharset());
     }
 
@@ -67,6 +73,10 @@ public class CometRequestWrapper extends HttpServletRequestWrapper {
         StringBuilder sb = new StringBuilder();
         BufferedReader reader = null;
         try {
+            // 如果消息体没有数据
+            if (inputStream == null || inputStream.available() == 0) {
+                return null;
+            }
             reader = new BufferedReader(new InputStreamReader(inputStream, Charset.defaultCharset()));
             String line;
             while ((line = reader.readLine()) != null) {
@@ -98,6 +108,7 @@ public class CometRequestWrapper extends HttpServletRequestWrapper {
         return new ServletInputStream() {
             @Override
             public int read() throws IOException {
+                if (body.length == 0) return -1;
                 return inputStream.read();
             }
 

@@ -11,7 +11,7 @@
 
     <properties>
         <java.version>1.8</java.version>
-        <project.release.version>2.2.1-SNAPSHOT</project.release.version>
+        <project.release.version>2.2.2-SNAPSHOT</project.release.version>
         <jwt.version>0.9.1</jwt.version>
         <commons-beanutils.version>1.9.4</commons-beanutils.version>
     </properties>
@@ -61,7 +61,7 @@
         <profile>
             <id>sonatype-oss-release</id>
             <properties>
-                <project.release.version>2.2.1</project.release.version>
+                <project.release.version>2.2.2</project.release.version>
             </properties>
             <build>
                 <plugins>

@@ -6,10 +6,7 @@ import com.github.yizzuide.milkomeda.demo.comet.pojo.ProfileWebCometData;
 import com.github.yizzuide.milkomeda.demo.comet.service.CollectService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -51,5 +48,11 @@ public class CollectController {
     public ResponseEntity<String> usage(@CometParam Map<String, String> params) {
         log.info("请求参数：{}", params);
         return ResponseEntity.ok("ok");
+    }
+
+    // 测试无参数读body的问题
+    @GetMapping("ping")
+    public ResponseEntity<String> ping() {
+        return ResponseEntity.ok("pong");
     }
 }
