@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit;
  * E：缓存业务数据
  *
  * @since 1.8.0
- * @version 2.0.3
+ * @version 2.3.0
  * @author yizzuide
  * Create at 2019/06/28 13:33
  */
@@ -84,6 +84,13 @@ public class LightCache implements Cache {
     @Setter
     @Getter
     private Long l2Expire;
+
+    /**
+     * 只写入二级缓存
+     */
+    @Setter
+    @Getter
+    private Boolean onlyCacheL2;
 
     /**
      * 超级缓存（每个Cache都有自己的超级缓存，互不影响）
@@ -177,7 +184,10 @@ public class LightCache implements Cache {
      */
     private void cache(String key, Spot<Serializable, Object> spot) {
         // 一级缓存
-        boolean success = cacheL1(key, spot);
+        boolean success = true;
+        if (!onlyCacheL2) {
+            success = cacheL1(key, spot);
+        }
 
         // 二级缓存
         if (!onlyCacheL1 && success) {
@@ -262,19 +272,23 @@ public class LightCache implements Cache {
      */
     @SuppressWarnings("unchecked")
     private <E> Spot<Serializable, E> get(String key, JavaType javaType) {
+        Spot<Serializable, Object> spot = null;
         // 从一级缓存查找
-        Spot<Serializable, Object> spot = cacheMap.get(key);
-        if (null != spot) {
-            // 排行加分
-            boolean isAbandon = discardStrategy.ascend(spot);
-            // 如果放弃缓存
-            if (isAbandon) {
-                // 删除缓存
-                erase(key);
-                return null;
+        if (!onlyCacheL2) {
+            spot = cacheMap.get(key);
+            if (null != spot) {
+                // 排行加分
+                boolean isAbandon = discardStrategy.ascend(spot);
+                // 如果放弃缓存
+                if (isAbandon) {
+                    // 删除缓存
+                    erase(key);
+                    return null;
+                }
+                return (Spot<Serializable, E>) spot;
             }
-            return (Spot<Serializable, E>) spot;
         }
+
 
         // 从二级缓存中查找
         if (!onlyCacheL1) {
@@ -285,9 +299,11 @@ public class LightCache implements Cache {
                 } else {
                     spot = JSONUtil.parse(json, discardStrategy.spotClazz());
                 }
-                // 添加到一级缓存池，缓存失败，放弃从缓存中恢复
-                if (!cacheL1(key, spot)) {
-                    return null;
+                if (!onlyCacheL2) {
+                    // 添加到一级缓存池，缓存失败，放弃从缓存中恢复
+                    if (!cacheL1(key, spot)) {
+                        return null;
+                    }
                 }
             }
         }
@@ -296,10 +312,14 @@ public class LightCache implements Cache {
 
     @Override
     public void erase(String key) {
-        // 从二级缓存移除
-        Polyfill.redisDelete(stringRedisTemplate, key);
-        // 从一级缓存移除
-        cacheMap.remove(key);
+        if (!onlyCacheL1) {
+            // 从二级缓存移除
+            Polyfill.redisDelete(stringRedisTemplate, key);
+        }
+        if (!onlyCacheL2) {
+            // 从一级缓存移除
+            cacheMap.remove(key);
+        }
     }
 
     /**

@@ -7,7 +7,7 @@ import java.lang.annotation.*;
  *
  * @author yizzuide
  * @since 2.0.0
- * @version 2.0.3
+ * @version 2.3.0
  * Create at 2019/12/18 14:35
  */
 @Documented
@@ -56,4 +56,10 @@ public @interface LightCacheable {
      * @return  long 单位：s，默认不过期（不设置则走全局配置文件里的配置，默认也是不过期）
      */
     long expire() default -1;
+
+    /**
+     * 只缓存到二级缓存
+     * @return 默认为false
+     */
+    boolean onlyCacheL2() default false;
 }

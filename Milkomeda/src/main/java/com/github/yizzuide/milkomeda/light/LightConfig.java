@@ -14,7 +14,7 @@ import java.util.Collections;
  *
  * @author yizzuide
  * @since 1.17.0
- * @version 2.0.5
+ * @version 2.3.0
  * Create at 2019/12/03 16:22
  */
 @Configuration
@@ -40,6 +40,7 @@ public class LightConfig {
         lightCache.setStrategyClass(props.getStrategyClass());
         lightCache.setOnlyCacheL1(props.isOnlyCacheL1());
         lightCache.setL2Expire(props.getL2Expire());
+        lightCache.setOnlyCacheL2(props.isOnlyCacheL2());
         return lightCache;
     }
 

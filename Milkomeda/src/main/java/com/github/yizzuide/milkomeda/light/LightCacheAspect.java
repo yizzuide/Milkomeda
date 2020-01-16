@@ -29,7 +29,7 @@ import static com.github.yizzuide.milkomeda.util.ReflectUtil.extractValue;
  *
  * @author yizzuide
  * @since 2.0.0
- * @version 2.2.1
+ * @version 2.3.0
  * Create at 2019/12/18 14:45
  */
 @Order(98)
@@ -64,17 +64,27 @@ public class LightCacheAspect {
 
         // 解析表达式
         String viewId = extractValue(joinPoint, key);
-        LightCache defaultBean = ApplicationContextHolder.get().getBean(DEFAULT_BEAN_NAME, LightCache.class);
-        // 修改Bean name，防止与开发者项目里重复
-        cacheBeanName = DEFAULT_BEAN_NAME + "_" + cacheBeanName;
-        LightCache cache = WebContext.registerBean((ConfigurableApplicationContext) ApplicationContextHolder.get(), cacheBeanName, LightCache.class);
+        LightCache cache;
+        // 记录是否自定义缓存标识
+        boolean customCacheFlag = false;
+        if (ApplicationContextHolder.get().containsBean(cacheBeanName)) {
+            cache = ApplicationContextHolder.get().getBean(DEFAULT_BEAN_NAME, LightCache.class);
+            customCacheFlag = true;
+        } else {
+            // 修改Bean name，防止与开发者项目里重复
+            cacheBeanName = DEFAULT_BEAN_NAME + "_" + cacheBeanName;
+            cache = WebContext.registerBean((ConfigurableApplicationContext) ApplicationContextHolder.get(), cacheBeanName, LightCache.class);
+        }
         // 针对LightCacheable类型的处理
         if (annotation.annotationType() == LightCacheable.class && cache.getL1MaxCount() == null) {
             LightCacheable cacheable = (LightCacheable) annotation;
-            if (cacheable.copyDefaultConfig()) {
+            // 如果允许拷贝默认配置，并且没有找到自定义的缓存配置
+            if (cacheable.copyDefaultConfig() && !customCacheFlag) {
+                LightCache defaultBean = ApplicationContextHolder.get().getBean(DEFAULT_BEAN_NAME, LightCache.class);
                 // 拷贝默认的配置
                 cache.copyFrom(defaultBean);
                 cache.setStrategy(cacheable.discardStrategy());
+                cache.setOnlyCacheL2(cacheable.onlyCacheL2());
                 // 如果当前有设定过期时间（默认走配置文件）
                 if (cacheable.expire() != -1) {
                     // 如果 discardStrategy 为 LazyExpire 策略，设置l1Expire并自动同步配置到l2Expire过期

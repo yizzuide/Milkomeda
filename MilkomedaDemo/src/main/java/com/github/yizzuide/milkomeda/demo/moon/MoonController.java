@@ -19,6 +19,6 @@ public class MoonController {
 
     @RequestMapping("current")
     public String current() {
-        return Moon.getPhase("moon", moon);
+        return Moon.getPhase("go-123", moon);
     }
 }

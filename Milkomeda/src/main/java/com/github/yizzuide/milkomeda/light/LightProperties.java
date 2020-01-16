@@ -33,4 +33,7 @@ public class LightProperties {
 
     /** 二级缓存过期时间（单位s，默认不过期）*/
     private long l2Expire = -1L;
+
+    /** 只缓存在二级缓存上 */
+    private boolean onlyCacheL2 = false;
 }
