@@ -74,6 +74,9 @@ Milkomeda 2.0 is now available (Dec 2019).
 ## Documentation
 [See Wiki](https://github.com/yizzuide/Milkomeda/wiki)
 
+## Releases log
+[See Releases](https://github.com/yizzuide/Milkomeda/releases)
+
 ## Contributing
 *Mikomeda*还需要更多的业务型实用模块，欢迎有想法的开发者加入进来！可以通过以下原则来Pull Request:
 
