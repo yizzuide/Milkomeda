@@ -1,7 +1,6 @@
 package com.github.yizzuide.milkomeda.util;
 
 import com.fasterxml.jackson.databind.JavaType;
-import com.github.yizzuide.milkomeda.ice.Job;
 import com.github.yizzuide.milkomeda.universe.el.ELContext;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
@@ -28,7 +27,7 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 0.2.0
- * @version 2.1.0
+ * @version 2.2.3
  * Create at 2019/04/11 19:55
  */
 @Slf4j
@@ -143,7 +142,7 @@ public class ReflectUtil {
         Class<?> parameterClazz = method.getParameterTypes()[0];
         // Map
         if (parameterClazz == Map.class) {
-            // 去掉Job的包装
+            // 去掉实体的包装
             method.invoke(target, wrapperBody.apply(wrapperList.get(0)));
             return;
         }
@@ -152,7 +151,7 @@ public class ReflectUtil {
         if (parameterClazz == List.class) {
             Type[] genericParameterTypes = method.getGenericParameterTypes();
             if (!(genericParameterTypes[0] instanceof ParameterizedType)) {
-                // 去掉Job的包装
+                // 去掉实体的包装
                 method.invoke(target, wrapperList.stream().map(wrapperBody).collect(Collectors.toList()));
                 return;
             }
@@ -162,24 +161,24 @@ public class ReflectUtil {
             Type actualTypeArgument = actualTypeArguments[0];
             // List<Map>
             if (TypeUtil.type2Class(actualTypeArgument) == Map.class) {
-                // 去掉Job的包装
+                // 去掉实体的包装
                 method.invoke(target, wrapperList.stream().map(wrapperBody).collect(Collectors.toList()));
                 return;
             }
-            // List<Job>
-            if (TypeUtil.type2Class(actualTypeArgument) == Job.class) {
-                // List<Job>
+            // List<Entity>
+            if (TypeUtil.type2Class(actualTypeArgument) == wrapperClazz) {
+                // List<Entity>
                 if (!(actualTypeArgument instanceof ParameterizedTypeImpl)) {
                     method.invoke(target, wrapperList);
                     return;
                 }
-                // List<Job<Map>>
+                // List<Entity<Map>>
                 Type[] subActualTypeArguments = ((ParameterizedTypeImpl) actualTypeArgument).getActualTypeArguments();
                 if (TypeUtil.type2Class(subActualTypeArguments[0]) == Map.class) {
                     method.invoke(target, wrapperList);
                     return;
                 }
-                // List<Job<T>>
+                // List<Entity<T>>
                 JavaType javaType = TypeUtil.type2JavaType(subActualTypeArguments[0]);
                 for (T wrapper : wrapperList) {
                     Object body = JSONUtil.nativeRead(JSONUtil.serialize(wrapperBody.apply(wrapper)), javaType);
@@ -198,5 +197,33 @@ public class ReflectUtil {
 
         // 转到业务类型 T
         method.invoke(target, JSONUtil.nativeRead(JSONUtil.serialize(wrapperBody.apply(wrapperList.get(0))), TypeUtil.class2TypeRef(parameterClazz)));
+    }
+
+    /**
+     * 获取方法返回类型，并返回默认类型值
+     * @param joinPoint JoinPoint
+     * @return  默认类型值
+     */
+    public static Object getMethodDefaultReturnVal(JoinPoint joinPoint) {
+        MethodSignature signature = (MethodSignature) joinPoint.getSignature();
+        Class<?> retType = signature.getReturnType();
+        // 基本数据类型过滤
+        if (Long.class == retType) {
+            return -1L;
+        }
+        if (long.class == retType || int.class == retType || short.class == retType ||
+                float.class == retType || double.class == retType || Number.class.isAssignableFrom(retType)) {
+            return -1;
+        }
+        if (boolean.class == retType || Boolean.class.isAssignableFrom(retType)) {
+            return false;
+        }
+        if (byte.class == retType || Byte.class.isAssignableFrom(retType)) {
+            return 0;
+        }
+        if (char.class == retType || Character.class.isAssignableFrom(retType)) {
+            return '\0';
+        }
+        return null;
     }
 }

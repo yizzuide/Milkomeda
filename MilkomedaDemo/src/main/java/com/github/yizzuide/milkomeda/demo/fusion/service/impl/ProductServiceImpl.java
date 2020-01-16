@@ -18,8 +18,9 @@ public class ProductServiceImpl implements ProductService {
     // 根据条件是否调用业务方法
     @Fusion(allowed = "T(com.github.yizzuide.milkomeda.demo.fusion.pref.Platform).checkActive()")
     @Override
-    public void push(Product product) {
+    public long push(Product product) {
         log.info("正在推送新产品：{}", product.getName());
+        return 1;
     }
 
     @Override

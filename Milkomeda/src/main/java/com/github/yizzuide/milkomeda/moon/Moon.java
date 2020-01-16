@@ -10,7 +10,8 @@ import java.util.concurrent.locks.ReentrantLock;
  * Moon
  *
  * @author yizzuide
- * @since 2.2.1
+ * @since 2.2.0
+ * @version 2.2.1
  * Create at 2019/12/31 18:13
  */
 public class Moon<T> {

@@ -1,6 +1,7 @@
 package com.github.yizzuide.milkomeda.fusion;
 
 import com.github.yizzuide.milkomeda.universe.el.ELContext;
+import com.github.yizzuide.milkomeda.util.ReflectUtil;
 import lombok.Getter;
 import lombok.Setter;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -16,7 +17,7 @@ import static com.github.yizzuide.milkomeda.util.ReflectUtil.getAnnotation;
  *
  * @author yizzuide
  * @since 1.12.0
- * @version 2.2.0
+ * @version 2.2.3
  * Create at 2019/08/09 11:09
  */
 @Order(99)
@@ -41,7 +42,8 @@ public class FusionAspect {
             if (Boolean.parseBoolean(ELContext.getValue(joinPoint, allowed))) {
                 return joinPoint.proceed();
             }
-            return null;
+            // 获取方法返回值
+            return ReflectUtil.getMethodDefaultReturnVal(joinPoint);
         }
 
         String condition = fusion.condition();
