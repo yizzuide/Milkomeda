@@ -95,9 +95,6 @@ public class Moon<T> {
                 next = next.getNext();
             }
         }
-        // 保持指针下标在所有月相范围内
-        p = (p + 1) % prototype.getLen();
-        leftHandPointer.setCurrent(p);
         // 开始左手指月，拔动月相
         prototype.pluckLeftHandPointer(key, leftHandPointer);
         return next.getData();
@@ -109,7 +106,7 @@ public class Moon<T> {
      * @return LeftHandPointer
      */
     @LightCacheable(value = CACHE_NAME, keyPrefix = "moon:lhp-", key = "#key", expire = 86400, onlyCacheL2 = true)
-    public LeftHandPointer getLeftHandPointer(String key) {
+    protected LeftHandPointer getLeftHandPointer(String key) {
         // 无法从缓存中获取时，创建新的左手指月
         return new LeftHandPointer();
     }
@@ -117,11 +114,15 @@ public class Moon<T> {
     /**
      * 根据key拔动当前左手指月
      * @param key             缓存key
-     * @param leftHandPointer 拔动后的左手指月
+     * @param leftHandPointer 左手指月
      * @return LeftHandPointer
      */
     @LightCachePut(value = CACHE_NAME, keyPrefix = "moon:lhp-", key = "#key")
-    public LeftHandPointer pluckLeftHandPointer(String key, LeftHandPointer leftHandPointer) {
+    protected LeftHandPointer pluckLeftHandPointer(String key, LeftHandPointer leftHandPointer) {
+        int p = leftHandPointer.getCurrent();
+        // 保持指针下标在所有月相范围内
+        p = (p + 1) % this.getLen();
+        leftHandPointer.setCurrent(p);
         return leftHandPointer;
     }
 }

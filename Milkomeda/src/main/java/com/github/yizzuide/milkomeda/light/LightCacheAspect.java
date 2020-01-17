@@ -68,7 +68,7 @@ public class LightCacheAspect {
         // 记录是否自定义缓存标识
         boolean customCacheFlag = false;
         if (ApplicationContextHolder.get().containsBean(cacheBeanName)) {
-            cache = ApplicationContextHolder.get().getBean(DEFAULT_BEAN_NAME, LightCache.class);
+            cache = ApplicationContextHolder.get().getBean(cacheBeanName, LightCache.class);
             customCacheFlag = true;
         } else {
             // 修改Bean name，防止与开发者项目里重复
@@ -84,6 +84,7 @@ public class LightCacheAspect {
                 // 拷贝默认的配置
                 cache.copyFrom(defaultBean);
                 cache.setStrategy(cacheable.discardStrategy());
+                cache.setOnlyCacheL1(cacheable.onlyCacheL1());
                 cache.setOnlyCacheL2(cacheable.onlyCacheL2());
                 // 如果当前有设定过期时间（默认走配置文件）
                 if (cacheable.expire() != -1) {
@@ -97,17 +98,18 @@ public class LightCacheAspect {
             }
         }
 
+        // key生成器
         Function<Serializable, String> keyGenerator = id -> prefix + id;
 
         // 删除类型
         if (annotation.annotationType() == LightCacheEvict.class) {
-            // 缓存读写策略 - Cache Aside (先删除数据库，再删除缓存）
+            // 缓存读写策略 - Cache Aside (先删除数据源，再删除缓存）
             joinPoint.proceed();
             CacheHelper.erase(cache, viewId, keyGenerator);
             return null;
         }
 
-        // 更新类型也是先更新数据库，再更新缓存
+        // 更新类型也是先更新数据源，再更新缓存
         if (annotation.annotationType() == LightCachePut.class) {
             return CacheHelper.put(cache, viewId, keyGenerator, id -> joinPoint.proceed());
         }

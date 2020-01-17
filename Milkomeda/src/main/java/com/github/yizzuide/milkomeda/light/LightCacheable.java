@@ -58,6 +58,12 @@ public @interface LightCacheable {
     long expire() default -1;
 
     /**
+     * 只缓存到一级缓存
+     * @return 默认为false
+     */
+    boolean onlyCacheL1() default false;
+
+    /**
      * 只缓存到二级缓存
      * @return 默认为false
      */
