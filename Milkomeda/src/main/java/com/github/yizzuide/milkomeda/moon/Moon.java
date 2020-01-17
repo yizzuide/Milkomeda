@@ -1,8 +1,8 @@
 package com.github.yizzuide.milkomeda.moon;
 
-import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
-import com.github.yizzuide.milkomeda.universe.context.WebContext;
-import org.springframework.context.ConfigurableApplicationContext;
+import com.github.yizzuide.milkomeda.light.LightCachePut;
+import com.github.yizzuide.milkomeda.light.LightCacheable;
+import lombok.Getter;
 
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -11,33 +11,33 @@ import java.util.concurrent.locks.ReentrantLock;
  *
  * @author yizzuide
  * @since 2.2.0
- * @version 2.2.1
+ * @version 2.3.0
  * Create at 2019/12/31 18:13
  */
 public class Moon<T> {
-    private MoonNode<T> pointer;
-    private MoonNode<T> header;
-    private MoonNode<T> next;
-    // 指针锁
-    private ReentrantLock reentrantLock = new ReentrantLock(false);
-
+    public static final String CACHE_NAME = "lightCacheMoon";
     /**
-     * 在不同的业务流程获取当前阶段的类型值
-     * @param name          业务名
-     * @param moonPrototype 原型
-     * @param <T>           阶段的类型
-     * @return  当前阶段的类型值
+     * 链表头指针
      */
-    @SuppressWarnings("unchecked")
-    public static <T> T getPhase(String name, Moon<T> moonPrototype) {
-        Moon<T> moon = WebContext.registerBean((ConfigurableApplicationContext) ApplicationContextHolder.get(), name, Moon.class);
-        // 新的流程创建的实例
-        if (moon.getPointer() == null) {
-            // 重置指针
-            moon.setPointer(moonPrototype.getHeader());
-        }
-        return moon.getCurrentPhase();
-    }
+    @Getter
+    private MoonNode<T> header;
+    /**
+     * 链表记录指针
+     */
+    @Getter
+    private MoonNode<T> pointer;
+    /**
+     * 链块连接指针
+     */
+    private MoonNode<T> next;
+    /**
+     * 链表长度
+     */
+    @Getter
+    private int len;
+
+    // 并发指针锁
+    private ReentrantLock reentrantLock = new ReentrantLock(false);
 
     /**
      * 添加阶段名
@@ -45,46 +45,84 @@ public class Moon<T> {
      */
     @SafeVarargs
     public final void add(T... phaseNames) {
-        int length = phaseNames.length;
-        for (int i = 0; i < length; i++) {
+        this.len = phaseNames.length;
+        for (int i = 0; i < this.len; i++) {
             if (i == 0) {
-                header = new MoonNode<>();
-                header.setData(phaseNames[i]);
-                next = header;
+                this.header = new MoonNode<>();
+                this.header.setData(phaseNames[i]);
+                this.next = this.header;
                 continue;
             }
             MoonNode<T> moonNode = new MoonNode<>();
             moonNode.setData(phaseNames[i]);
-            next.setNext(moonNode);
-            next = moonNode;
+            this.next.setNext(moonNode);
+            this.next = moonNode;
         }
         // 尾连首
-        next.setNext(header);
+        this.next.setNext(this.header);
         // 指向首
-        pointer = header;
+        this.pointer = this.header;
     }
 
     /**
-     * 获得当前阶段类型
+     * 无序并发获得当前阶段类型（每调用一次，内部指针向后移一位）
      * @return 阶段类型值
      */
     public T getCurrentPhase() {
-        reentrantLock.lock();
-        T data = pointer.getData();
-        pointer = pointer.getNext();
-        reentrantLock.unlock();
+        this.reentrantLock.lock();
+        T data = this.pointer.getData();
+        this.pointer = this.pointer.getNext();
+        this.reentrantLock.unlock();
         return data;
     }
 
-    MoonNode<T> getPointer() {
-        return pointer;
+    /**
+     * 根据key获取当前轮的当前阶段的数据值（并发线程安全）
+     * @param key          缓存key，一个轮对应一个key
+     * @param prototype    Moon实例原型
+     * @param <T>          阶段的类型
+     * @return  当前轮的当前阶段的类型值
+     */
+    public static <T> T getPhase(String key, Moon<T> prototype) {
+        // 先获取链头
+        MoonNode<T> next = prototype.getHeader();
+        // 获取左手指月
+        LeftHandPointer leftHandPointer = prototype.getLeftHandPointer(key);
+        int p = leftHandPointer.getCurrent();
+        // 如果不是指向头，向后拔动
+        if (p != 0) {
+            for (int i = 0; i < p; i++) {
+                next = next.getNext();
+            }
+        }
+        // 开始左手指月，拔动月相
+        prototype.pluckLeftHandPointer(key, leftHandPointer);
+        return next.getData();
     }
 
-    void setPointer(MoonNode<T> pointer) {
-        this.pointer = pointer;
+    /**
+     * 根据key获取当前左手指月（缓存默认为一天，仅缓存到CacheL2，自定义配置通过注册名为`lightCacheMoon`的Cache Bean
+     * @param key 缓存key
+     * @return LeftHandPointer
+     */
+    @LightCacheable(value = CACHE_NAME, keyPrefix = "moon:lhp-", key = "#key", expire = 86400, onlyCacheL2 = true)
+    protected LeftHandPointer getLeftHandPointer(String key) {
+        // 无法从缓存中获取时，创建新的左手指月
+        return new LeftHandPointer();
     }
 
-    MoonNode<T> getHeader() {
-        return header;
+    /**
+     * 根据key拔动当前左手指月
+     * @param key             缓存key
+     * @param leftHandPointer 左手指月
+     * @return LeftHandPointer
+     */
+    @LightCachePut(value = CACHE_NAME, keyPrefix = "moon:lhp-", key = "#key")
+    protected LeftHandPointer pluckLeftHandPointer(String key, LeftHandPointer leftHandPointer) {
+        int p = leftHandPointer.getCurrent();
+        // 保持指针下标在所有月相范围内
+        p = (p + 1) % this.getLen();
+        leftHandPointer.setCurrent(p);
+        return leftHandPointer;
     }
 }
