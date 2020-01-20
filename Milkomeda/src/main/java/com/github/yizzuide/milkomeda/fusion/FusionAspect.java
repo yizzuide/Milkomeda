@@ -17,7 +17,7 @@ import static com.github.yizzuide.milkomeda.util.ReflectUtil.getAnnotation;
  *
  * @author yizzuide
  * @since 1.12.0
- * @version 2.2.3
+ * @version 2.4.0
  * Create at 2019/08/09 11:09
  */
 @Order(99)
@@ -42,8 +42,14 @@ public class FusionAspect {
             if (Boolean.parseBoolean(ELContext.getValue(joinPoint, allowed))) {
                 return joinPoint.proceed();
             }
-            // 获取方法返回值
-            return ReflectUtil.getMethodDefaultReturnVal(joinPoint);
+            String fallback = fusion.fallback();
+            // 没有设置反馈
+            if (StringUtils.isEmpty(fallback)) {
+                // 获取方法默认返回值
+                return ReflectUtil.getMethodDefaultReturnVal(joinPoint);
+            }
+            // 否则调用反馈方法
+            return ELContext.getActualValue(joinPoint, fallback, ReflectUtil.getMethodReturnType(joinPoint));
         }
 
         String condition = fusion.condition();

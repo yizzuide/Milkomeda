@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 0.2.0
- * @version 2.2.3
+ * @version 2.4.0
  * Create at 2019/04/11 19:55
  */
 @Slf4j
@@ -199,14 +199,14 @@ public class ReflectUtil {
         method.invoke(target, JSONUtil.nativeRead(JSONUtil.serialize(wrapperBody.apply(wrapperList.get(0))), TypeUtil.class2TypeRef(parameterClazz)));
     }
 
+
     /**
      * 获取方法返回类型，并返回默认类型值
      * @param joinPoint JoinPoint
      * @return  默认类型值
      */
     public static Object getMethodDefaultReturnVal(JoinPoint joinPoint) {
-        MethodSignature signature = (MethodSignature) joinPoint.getSignature();
-        Class<?> retType = signature.getReturnType();
+        Class<?> retType = getMethodReturnType(joinPoint);
         // 基本数据类型过滤
         if (Long.class == retType) {
             return -1L;
@@ -225,5 +225,15 @@ public class ReflectUtil {
             return '\0';
         }
         return null;
+    }
+
+    /**
+     * 获取方法返回值类型
+     * @param joinPoint JoinPoint
+     * @return  返回值类型
+     */
+    public static Class<?> getMethodReturnType(JoinPoint joinPoint) {
+        MethodSignature signature = (MethodSignature) joinPoint.getSignature();
+        return (Class<?>) signature.getReturnType();
     }
 }

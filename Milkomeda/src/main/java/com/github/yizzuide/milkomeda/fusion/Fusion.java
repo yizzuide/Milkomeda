@@ -9,7 +9,7 @@ import java.lang.annotation.*;
  *
  * @author yizzuide
  * @since 1.12.0
- * @version 2.2.0
+ * @version 2.4.0
  * Create at 2019/08/09 10:28
  */
 @Documented
@@ -32,14 +32,20 @@ public @interface Fusion {
     String value() default "fusion";
 
     /**
-     * 根据条件是否修改返回值，支持SpEL（默认执行修改操作，如果条件不成功，则不修改）
+     * 根据条件是否修改返回值，需使用SpEL（默认执行修改操作，如果条件不成功，则不修改）
      * @return  String
      */
     String condition() default "";
 
     /**
-     * 是否允许执行业务方法，支持SpEL（设置了该属性则不再执行修改返回值操作，如果条件不成立，则不执行方法体）
+     * 是否允许执行业务方法，需使用SpEL（设置了该属性则不再执行修改返回值操作，如果条件不成立，则不执行方法体）
      * @return String
      */
     String allowed() default "";
+
+    /**
+     * 当`allowed`方法属性为false时，可选设置反馈的方法，需使用SpEL
+     * @return String
+     */
+    String fallback() default "";
 }

@@ -356,6 +356,7 @@ public class LightCache implements Cache {
                 try {
                     discardStrategy = strategyClass.newInstance();
                 } catch (Exception e) {
+                    discardStrategy  = new HotDiscard();
                     log.error("light create strategy class error with message:{}", e.getMessage(), e);
                 }
             }
