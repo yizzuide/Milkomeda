@@ -25,7 +25,7 @@
 - [x] Echo（回响）：用于第三方请求，支持签名/验签、数据加密、可定制统一响应类型和成功校验。*1.13.0+*
    * 依赖技术：Spring MVC
    * 设计模式：模板方法模式、适配器模式、工厂方法模式
-- [x] Crust（外壳）：用于生成JWT Token，支持验证、刷新Token，可选配置对称与RSA非对称生成Token，BCrypt或自定义salt表字段加密的方式。*1.14.0+*
+- [x] Crust（外壳）：用于Session、JWT Token认证，支持验证、刷新Token，可选配置对称与RSA非对称生成Token，BCrypt或自定义salt表字段加密的方式。*1.14.0+*
    * 依赖技术：Spring Security
    * 设计模式：模板方法模式、适配器模式
 - [x] Ice（冰）：用于延迟列队的需求，支持配置延迟分桶、任务执行超时时间（TTR）、超时重试、Task自动调度等。*1.15.0+*
@@ -34,7 +34,7 @@
 - [x] Neutron（中子星）：用于定时作业任务，支持数据库持久化，动态创建Job、删除、修改Cron执行表达式。*1.18.0+*
    * 依赖技术：Spring IoC、Quartz
    * 设计模式：门面模式
-- [x] Moon（月球）：用于在多个类型值之间轮询，支持并发操作，支持泛型数据值，不同的环业务相互隔离。*2.2.0*
+- [x] Moon（月球）：用于在多个类型值之间轮询，支持并发操作，支持泛型数据值，不同的环业务相互隔离。*2.2.0+*
   * 依赖技术：Spring IoC、SpringBoot Data Redis
   * 设计数据结构：环形链表
   * 设计模式：门面模式
@@ -89,7 +89,7 @@ Milkomeda 2.0 is now available (Dec 2019).
 
 - 从`master`分支拉取新分支，新添加的功能模块分支以`feat-`前缀开头，问题修复则以`fix-`为前缀。
 - 添加的模块尽可能地通用，不能含有业务代码，最好可以提供使用的Demo并添加到`MilkomedaDemo`工程里，如果有好的想法需要讨论可以提一个以[feature]开头的issue进行讨论。
-- 新添加的代码尽可能地规范，代码必需经过格式化，类的命名需要添加模块名前缀，新添加的模块需要添加到`Milkomeda`的`com.github.yizzuide.milkomeda`包下，属性和方法需要添加注释表明如果使用。
+- 新添加的代码尽可能地规范，代码必需经过格式化，类的命名需要添加模块名前缀，新添加的模块需要添加到`Milkomeda`的`com.github.yizzuide.milkomeda`包下，属性和方法需要添加注释表明如何使用。
 - 建议遵行提交注释以`feat|fix|docs|style|refactor|perf|test|workflow|ci|chore|types:`为前缀。
 - 提交时不要提交IDE的配置相关文件和临时生成的文件，请注意排除。
 
