@@ -1,5 +1,6 @@
 package com.github.yizzuide.milkomeda.demo.fusion.service.impl;
 
+import com.github.yizzuide.milkomeda.demo.fusion.pref.Platform;
 import com.github.yizzuide.milkomeda.demo.fusion.service.ProductService;
 import com.github.yizzuide.milkomeda.demo.ice.pojo.Product;
 import com.github.yizzuide.milkomeda.fusion.Fusion;
@@ -16,10 +17,17 @@ import org.springframework.stereotype.Service;
 @Service
 public class ProductServiceImpl implements ProductService {
     // 根据条件是否调用业务方法
-    @Fusion(allowed = "T(com.github.yizzuide.milkomeda.demo.fusion.pref.Platform).checkActive()")
+    // allowed：判断条件
+    // fallback：条件判断结果为false，调用反馈方法
+    @Fusion(allowed = Platform.EL_CHECK_ACTIVE, fallback = "#target.pushNotCheck(args)")
     @Override
     public long push(Product product) {
         log.info("正在推送新产品：{}", product.getName());
+        return 1;
+    }
+    // allowed条件为false，调用该反馈方法返回
+    public long pushNotCheck(Product product) {
+        log.info("非检测环境下不推送新产品：{}", product.getName());
         return 1;
     }
 

@@ -90,7 +90,7 @@ public class AopContextHolder {
                 // 支持SpEL
                 String name = nameProvider.apply(executeAnnotation);
                 if (name.startsWith("@") || name.startsWith("#") || name.startsWith("T(") || name.startsWith("args[")) {
-                    name = ELContext.getValue(target, new Object[]{}, target.getClass(), method, name);
+                    name = ELContext.getValue(target, new Object[]{}, target.getClass(), method, name, String.class);
                 }
                 if (StringUtils.isEmpty(name)) {
                     throw new IllegalArgumentException("Please specify the [topic] of "+ executeAnnotation +" !");
