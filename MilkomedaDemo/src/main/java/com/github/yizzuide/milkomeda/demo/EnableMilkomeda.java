@@ -4,6 +4,7 @@ import com.github.yizzuide.milkomeda.comet.EnableComet;
 import com.github.yizzuide.milkomeda.crust.EnableCrust;
 import com.github.yizzuide.milkomeda.echo.EnableEcho;
 import com.github.yizzuide.milkomeda.fusion.EnableFusion;
+import com.github.yizzuide.milkomeda.halo.EnableHalo;
 import com.github.yizzuide.milkomeda.ice.EnableIce;
 import com.github.yizzuide.milkomeda.light.EnableLight;
 import com.github.yizzuide.milkomeda.neutron.EnableNeutron;
@@ -22,6 +23,7 @@ import java.lang.annotation.Target;
  * @author yizzuide
  * Create at 2019/12/13 01:03
  */
+@EnableHalo
 @EnableNeutron
 @EnableIce
 @EnableCrust

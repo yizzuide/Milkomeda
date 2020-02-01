@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.lang.reflect.Method;
+import java.util.Map;
 
 /**
  * HandlerMetaData
@@ -12,6 +13,7 @@ import java.lang.reflect.Method;
  *
  * @author yizzuide
  * @since 1.15.0
+ * @version 2.5.0
  * Create at 2019/11/18 14:12
  */
 @Data
@@ -22,6 +24,10 @@ public class HandlerMetaData {
      * 处理标识名
      */
     private String name;
+    /**
+     * 其它属性方法值
+     */
+    private Map<String, Object> attributes;
     /**
      * 处理目标对象
      */
