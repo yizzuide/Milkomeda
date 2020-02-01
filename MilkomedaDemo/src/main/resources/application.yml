@@ -5,6 +5,11 @@ server:
       timeout: 120m
 
 spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/milkomeda?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&useSSL=false&rewriteBatchedStatements=true&allowMultiQueries=true
+    username: root
+    password: admin
   redis:
     host: 127.0.0.1
 
@@ -37,6 +42,12 @@ spring:
     scheduler-name: neutron
     overwrite-existing-jobs: true
     wait-for-jobs-to-complete-on-shutdown: true
+
+mybatis:
+  type-aliases-package: com.github.yizzuide.milkomeda.demo.halo.domain
+  mapper-locations:
+    - classpath*:mapper/*.xml
+  config-location: classpath:config/mybatis-config.xml
 
 milkomeda:
   # 配置是否显示跟踪日志信息（线上环境应该关闭）

@@ -42,6 +42,7 @@ public class WebSecurityConfig extends CrustConfigurerAdapter {
                 .antMatchers("/job/**").permitAll()
                 .antMatchers("/neutron/**").permitAll()
                 .antMatchers("/moon/**").permitAll()
-                .antMatchers("/fusion/**").permitAll();
+                .antMatchers("/fusion/**").permitAll()
+                .antMatchers("/halo/**").permitAll();
     }
 }

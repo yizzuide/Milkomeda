@@ -19,7 +19,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>1.8</java.version>
-        <milkomeda.version>2.4.0-SNAPSHOT</milkomeda.version>
+        <milkomeda.version>2.5.0-SNAPSHOT</milkomeda.version>
+        <mybatis.starter>2.1.1</mybatis.starter>
     </properties>
 
     <dependencies>
@@ -47,6 +48,19 @@
         <dependency>
             <groupId>org.quartz-scheduler</groupId>
             <artifactId>quartz</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-jdbc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.mybatis.spring.boot</groupId>
+            <artifactId>mybatis-spring-boot-starter</artifactId>
+            <version>${mybatis.starter}</version>
         </dependency>
     </dependencies>
 
