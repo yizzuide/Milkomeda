@@ -39,7 +39,7 @@
   * 设计数据结构：环形链表
   * 设计模式：门面模式
 - [x] Halo（光晕）：用于监听Mybatis的CRUD操作并执行相应的业务，支持前置、后置类型。*2.5.0+*
-  * 依赖技术：Spring AOP、Mybatis
+  * 依赖技术：Mybatis
   * 设计模式：面向声明式编程
     
 ## Requirements
