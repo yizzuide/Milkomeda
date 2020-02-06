@@ -19,7 +19,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>1.8</java.version>
-        <milkomeda.version>2.5.0-SNAPSHOT</milkomeda.version>
+        <milkomeda.version>2.5.1-SNAPSHOT</milkomeda.version>
         <mybatis.starter>2.1.1</mybatis.starter>
     </properties>
 

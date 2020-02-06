@@ -21,6 +21,7 @@ import java.util.List;
  *
  * @author yizzuide
  * @since 2.5.0
+ * @version 2.5.1
  * Create at 2020/01/30 20:38
  */
 @Slf4j
@@ -40,16 +41,15 @@ public class HaloInterceptor implements Interceptor {
         String sql = mappedStatement.getSqlSource().getBoundSql(param).getSql();
         List<String> tableNames = MybatisUtil.getTableNames(sql);
         String tableName = tableNames.get(0);
-        if (!HaloContext.getTableNameMap().containsKey(tableName)) {
-            return invocation.proceed();
-        }
-        HaloContext.getTableNameMap().get(tableName).stream()
-                .filter(metaData -> metaData.getAttributes().get(HaloContext.ATTR_TYPE) == HaloType.PRE)
-                .forEach(handlerMetaData -> invokeInternal(handlerMetaData, mappedStatement, param, null));
+        // 匹配所有
+        invokeWithTable(tableName,"*", mappedStatement, param, null, HaloType.PRE);
+        // 完全匹配
+        invokeWithTable(tableName, tableName, mappedStatement, param, null, HaloType.PRE);
         Object result = invocation.proceed();
-        HaloContext.getTableNameMap().get(tableName).stream()
-                .filter(metaData -> metaData.getAttributes().get(HaloContext.ATTR_TYPE) == HaloType.POST)
-                .forEach(handlerMetaData -> invokeInternal(handlerMetaData, mappedStatement, param, result));
+        // 匹配所有
+        invokeWithTable(tableName, "*", mappedStatement, param, result, HaloType.POST);
+        // 完全匹配
+        invokeWithTable(tableName, tableName, mappedStatement, param, result, HaloType.POST);
         return result;
     }
 
@@ -61,7 +61,13 @@ public class HaloInterceptor implements Interceptor {
         return target;
     }
 
-    private void invokeInternal(HandlerMetaData handlerMetaData, MappedStatement mappedStatement, Object param, Object result) {
+    private void invokeWithTable(String tableName, String matchTableName, MappedStatement mappedStatement, Object param, Object result, HaloType type) {
+        HaloContext.getTableNameMap().get(matchTableName).stream()
+                .filter(metaData -> metaData.getAttributes().get(HaloContext.ATTR_TYPE) == type)
+                .forEach(handlerMetaData -> invokeHandler(tableName, handlerMetaData, mappedStatement, param, result));
+    }
+
+    private void invokeHandler(String tableName, HandlerMetaData handlerMetaData, MappedStatement mappedStatement, Object param, Object result) {
         try {
             // INSERT/UPDATE/DELETE/SELECT
             SqlCommandType sqlCommandType = mappedStatement.getSqlCommandType();
@@ -69,8 +75,11 @@ public class HaloInterceptor implements Interceptor {
             Object target = handlerMetaData.getTarget();
             // 获取参数类型
             Class<?>[] parameterTypes = method.getParameterTypes();
-            // 检测参数是否有SqlCommandType
-            if (parameterTypes.length > 1) {
+            if (parameterTypes.length == 1 && parameterTypes[0] == HaloMeta.class) {
+                HaloMeta haloMeta = new HaloMeta(sqlCommandType, tableName, param, result);
+                method.invoke(target, haloMeta);
+            } else if (parameterTypes.length > 1) {
+                // 检测参数是否有SqlCommandType
                 if (parameterTypes[0] == SqlCommandType.class) {
                     if (result == null) {
                         method.invoke(target, sqlCommandType, param);

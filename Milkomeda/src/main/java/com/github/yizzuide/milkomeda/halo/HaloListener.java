@@ -19,6 +19,7 @@ import java.lang.annotation.*;
  *
  * @author yizzuide
  * @since 2.5.0
+ * @version 2.5.1
  * Create at 2020/01/30 22:36
  */
 @Documented
@@ -30,14 +31,14 @@ public @interface HaloListener {
      * @return String
      */
     @AliasFor("tableName")
-    String value() default "";
+    String value() default "*";
 
     /**
      * 监听的表名
      * @return  String
      */
     @AliasFor("value")
-    String tableName() default "";
+    String tableName() default "*";
 
     /**
      * 监听类型
