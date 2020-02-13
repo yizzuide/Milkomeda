@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 0.2.0
- * @version 2.4.0
+ * @version 2.5.2
  * Create at 2019/04/11 19:55
  */
 @Slf4j
@@ -112,7 +112,7 @@ public class ReflectUtil {
         }
 
         // 解析EL表达式
-        if (express.startsWith("@") || express.startsWith("#") || express.startsWith("T(") || express.startsWith("args[")) {
+        if (express.startsWith("'") || express.startsWith("@") || express.startsWith("#") || express.startsWith("T(") || express.startsWith("args[")) {
             return ELContext.getValue(joinPoint, express);
         }
         return express;

@@ -40,7 +40,7 @@ public class OrderService {
      * @param orderId  订单id
      */
     // 参数采集方式生成缓存key
-    @LightCacheable(value = "order", keyPrefix = "order:", key = "#orderId", condition = "#orderId!=null", discardStrategy = LightDiscardStrategy.LazyExpire)
+    @LightCacheable(value = "order", key = "'order:' + #orderId", condition = "#orderId!=null", discardStrategy = LightDiscardStrategy.LazyExpire)
     // 静态方法生成缓存key
 //    @LightCacheable(value = "order", key = "T(com.github.yizzuide.milkomeda.demo.light.pref.CacheKeys).ORDER.key", condition = "#orderId!=null", discardStrategy = LightDiscardStrategy.LazyExpire, expire = DEF_EXPIRE_SECONDS)
     public Order findById(String orderId) {
@@ -48,12 +48,12 @@ public class OrderService {
         return new Order(orderId, "小明", "1200", new Date());
     }
 
-    @LightCacheEvict(value = "order", keyPrefix = "order:", key = "#orderId")
+    @LightCacheEvict(value = "order", key = "'order:' + #orderId")
     public void  deleteById(String orderId) {
       log.info("删除订单：{}", orderId);
     }
 
-    @LightCachePut(value = "order", keyPrefix = "order:", key = "#orderId", condition = "#orderId!=null")
+    @LightCachePut(value = "order", key = "'order:' + #orderId", condition = "#orderId!=null")
     public Order updateById(String orderId) {
         return new Order(orderId, "小红", "2000", new Date());
     }
