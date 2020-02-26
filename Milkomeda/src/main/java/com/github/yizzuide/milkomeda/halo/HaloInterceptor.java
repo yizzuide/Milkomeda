@@ -11,6 +11,7 @@ import org.apache.ibatis.mapping.SqlCommandType;
 import org.apache.ibatis.plugin.*;
 import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
+import org.springframework.util.CollectionUtils;
 
 import java.lang.reflect.Method;
 import java.util.List;
@@ -21,7 +22,7 @@ import java.util.List;
  *
  * @author yizzuide
  * @since 2.5.0
- * @version 2.5.1
+ * @version 2.5.3
  * Create at 2020/01/30 20:38
  */
 @Slf4j
@@ -33,6 +34,11 @@ import java.util.List;
 public class HaloInterceptor implements Interceptor {
     @Override
     public Object intercept(Invocation invocation) throws Throwable {
+        // 如果处理器为空，直接返回
+        if (CollectionUtils.isEmpty(HaloContext.getTableNameMap())) {
+            return invocation.proceed();
+        }
+
         Object[] args = invocation.getArgs();
         // 获取第一个参数，MappedStatement
         MappedStatement mappedStatement = (MappedStatement) args[0];
@@ -62,6 +68,9 @@ public class HaloInterceptor implements Interceptor {
     }
 
     private void invokeWithTable(String tableName, String matchTableName, MappedStatement mappedStatement, Object param, Object result, HaloType type) {
+        if (!HaloContext.getTableNameMap().containsKey(matchTableName)) {
+            return;
+        }
         HaloContext.getTableNameMap().get(matchTableName).stream()
                 .filter(metaData -> metaData.getAttributes().get(HaloContext.ATTR_TYPE) == type)
                 .forEach(handlerMetaData -> invokeHandler(tableName, handlerMetaData, mappedStatement, param, result));

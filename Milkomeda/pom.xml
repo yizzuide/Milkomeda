@@ -11,7 +11,7 @@
 
     <properties>
         <java.version>1.8</java.version>
-        <project.release.version>2.5.2-SNAPSHOT</project.release.version>
+        <project.release.version>2.5.3-SNAPSHOT</project.release.version>
         <mybatis.starter.version>2.1.1</mybatis.starter.version>
         <jsqlparser.version>3.1</jsqlparser.version>
         <jwt.version>0.9.1</jwt.version>
@@ -63,7 +63,7 @@
         <profile>
             <id>sonatype-oss-release</id>
             <properties>
-                <project.release.version>2.5.2</project.release.version>
+                <project.release.version>2.5.3</project.release.version>
             </properties>
             <build>
                 <plugins>
