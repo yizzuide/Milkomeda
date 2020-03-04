@@ -26,7 +26,7 @@ public class FusionController {
     public ResponseEntity<Void> push() {
         Product product = new Product();
         product.setName("绿茶");
-        productService.push(product);
+        productService.push(product, false);
         return ResponseEntity.status(200).build();
     }
 

@@ -22,7 +22,7 @@ import java.util.List;
  *
  * @author yizzuide
  * @since 2.5.0
- * @version 2.5.3
+ * @version 2.5.4
  * Create at 2020/01/30 20:38
  */
 @Slf4j
@@ -46,6 +46,9 @@ public class HaloInterceptor implements Interceptor {
         Object param = args.length > 1 ? args[1] : null;
         String sql = mappedStatement.getSqlSource().getBoundSql(param).getSql();
         List<String> tableNames = MybatisUtil.getTableNames(sql);
+        if (CollectionUtils.isEmpty(tableNames)) {
+            return invocation.proceed();
+        }
         String tableName = tableNames.get(0);
         // 匹配所有
         invokeWithTable(tableName,"*", mappedStatement, param, null, HaloType.PRE);

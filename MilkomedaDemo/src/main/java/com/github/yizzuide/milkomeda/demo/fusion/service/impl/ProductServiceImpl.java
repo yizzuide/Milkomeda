@@ -19,15 +19,15 @@ public class ProductServiceImpl implements ProductService {
     // 根据条件是否调用业务方法
     // allowed：判断条件
     // fallback：条件判断结果为false，调用反馈方法
-    @Fusion(allowed = Platform.EL_CHECK_ACTIVE, fallback = "#target.pushNotCheck(args)")
+    @Fusion(allowed = Platform.EL_CHECK_ACTIVE, fallback = "#target.pushNotCheck(#product, #delay)")
     @Override
-    public long push(Product product) {
-        log.info("正在推送新产品：{}", product.getName());
+    public long push(Product product, boolean delay) {
+        log.info("正在推送新产品：{}, 是否延迟：{}", product.getName(), delay);
         return 1;
     }
     // allowed条件为false，调用该反馈方法返回
-    public long pushNotCheck(Product product) {
-        log.info("非检测环境下不推送新产品：{}", product.getName());
+    public long pushNotCheck(Product product, boolean delay) {
+        log.info("非检测环境下不推送新产品：{}, 是否延迟：{}", product.getName(), delay);
         return 1;
     }
 
