@@ -12,7 +12,8 @@ public interface MoonStrategy {
     /**
      * 无序并发获得当前阶段类型（不支持分布式）
      * @param moon Moon
-     * @return 阶段类型值
+     * @param <T> 阶段类型
+     * @return 阶段值
      */
     <T> T getCurrentPhase(Moon<T> moon);
 

@@ -21,6 +21,7 @@ public interface JobPool {
     /**
      * 添加多个任务
      * @param  jobs List
+     * @param <T> 任务类型
      */
     <T> void push(List<Job<T>> jobs);
 

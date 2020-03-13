@@ -39,9 +39,15 @@ public class Moon<T> {
     @Getter
     private int len;
 
+    /**
+     * 阶段列表
+     */
     @Getter
     private List<T> phaseNames;
 
+    /**
+     * 阶段分配策略
+     */
     @Setter @Getter
     private MoonStrategy moonStrategy = new PeriodicMoonStrategy();
 
