@@ -6,7 +6,7 @@ package com.github.yizzuide.milkomeda.moon;
  *
  * 全部阶段总百分比为100，阶段赋值如下：<br>
  * 33% 设置 33：阶段值为索引0
- * 70 设置 70：阶段值为索引1
+ * 70% 设置 70：阶段值为索引1
  *
  * @author yizzuide
  * @since 2.6.0
