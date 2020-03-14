@@ -25,8 +25,10 @@ public class MoonConfig {
     public Moon<Integer> abTestMoon() {
         Moon<Integer> moon = new Moon<>();
         moon.setMoonStrategy(new PercentMoonStrategy());
-        // AB测试：15%为0，85为1
-        moon.add(15, 85);
+        // AB测试阶段值：15%为0，85%为1
+//        moon.add(15, 85);
+//        moon.add(PercentMoonStrategy.parse("15/85"));
+        moon.add(PercentMoonStrategy.parse("1/9"));
         return moon;
     }
 }

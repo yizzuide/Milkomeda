@@ -6,10 +6,11 @@ package com.github.yizzuide.milkomeda.moon;
  *
  * 全部阶段总百分比为100，阶段赋值如下：<br>
  * 33% 设置 33：阶段值为索引0
- * 70% 设置 70：阶段值为索引1
+ * 67% 设置 67：阶段值为索引1
  *
  * @author yizzuide
  * @since 2.6.0
+ * @version 2.6.1
  * Create at 2020/03/13 21:42
  */
 public class PercentMoonStrategy implements MoonStrategy {
@@ -50,5 +51,23 @@ public class PercentMoonStrategy implements MoonStrategy {
         p = (p + 1) % PERCENT;
         leftHandPointer.setCurrent(p);
         return leftHandPointer;
+    }
+
+    /**
+     * 百分比表达式解析, 如：5/5、3/7、25/75
+     * @param percentExpress    百分比表达式
+     * @return 百分比列表
+     */
+    public static Integer[] parse(String percentExpress) {
+        String[] percentComps = percentExpress.split("/");
+        Integer[] percentArray = new Integer[percentComps.length];
+        for (int i = 0; i < percentComps.length; i++) {
+            String percentComp = percentComps[i];
+            if (percentComp.length() == 1) {
+                percentComps[i] = percentComp + "0";
+            }
+            percentArray[i] = Integer.valueOf(percentComps[i]);
+        }
+        return percentArray;
     }
 }
