@@ -2,8 +2,7 @@ package com.github.yizzuide.milkomeda.moon;
 
 import com.github.yizzuide.milkomeda.light.LightCachePut;
 import com.github.yizzuide.milkomeda.light.LightCacheable;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,26 +13,24 @@ import java.util.List;
  *
  * @author yizzuide
  * @since 2.2.0
- * @version 2.7.0
+ * @version 2.7.2
  * Create at 2019/12/31 18:13
  */
+@Data
 public class Moon<T> {
     public static final String CACHE_NAME = "lightCacheMoon";
 
     /**
      * 缓存实例名
      */
-    @Setter @Getter
     private String cacheName = CACHE_NAME;
     /**
      * 链表头指针
      */
-    @Getter
     private MoonNode<T> header;
     /**
      * 链表记录指针
      */
-    @Getter @Setter
     private MoonNode<T> pointer;
     /**
      * 链块连接指针
@@ -42,19 +39,16 @@ public class Moon<T> {
     /**
      * 链表长度
      */
-    @Getter
     private int len;
 
     /**
      * 阶段列表
      */
-    @Getter
     private List<T> phaseNames;
 
     /**
      * 阶段分配策略
      */
-    @Setter @Getter
     private MoonStrategy moonStrategy = new PeriodicMoonStrategy();
 
     /**
@@ -63,24 +57,24 @@ public class Moon<T> {
      */
     @SafeVarargs
     public final void add(T... phaseNames) {
-        this.phaseNames = new ArrayList<>(Arrays.asList(phaseNames));
-        this.len = phaseNames.length;
-        for (int i = 0; i < this.len; i++) {
+        this.setPhaseNames(new ArrayList<>(Arrays.asList(phaseNames)));
+        this.setLen(phaseNames.length);
+        for (int i = 0; i < this.getLen(); i++) {
             if (i == 0) {
-                this.header = new MoonNode<>();
-                this.header.setData(phaseNames[i]);
-                this.next = this.header;
+                this.setHeader(new MoonNode<>());
+                this.getHeader().setData(phaseNames[i]);
+                this.setNext(this.getHeader());
                 continue;
             }
             MoonNode<T> moonNode = new MoonNode<>();
             moonNode.setData(phaseNames[i]);
-            this.next.setNext(moonNode);
-            this.next = moonNode;
+            this.getNext().setNext(moonNode);
+            this.setNext(moonNode);
         }
         // 尾连首
-        this.next.setNext(this.header);
+        this.getNext().setNext(this.getHeader());
         // 指向首
-        this.pointer = this.header;
+        this.setPointer(this.getHeader());
     }
 
     /**
