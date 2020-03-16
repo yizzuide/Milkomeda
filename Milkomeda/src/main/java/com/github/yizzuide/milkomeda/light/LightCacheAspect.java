@@ -29,7 +29,7 @@ import static com.github.yizzuide.milkomeda.util.ReflectUtil.extractValue;
  *
  * @author yizzuide
  * @since 2.0.0
- * @version 2.3.0
+ * @version 2.6.2
  * Create at 2019/12/18 14:45
  */
 @Order(98)
@@ -61,6 +61,9 @@ public class LightCacheAspect {
         if (StringUtils.isEmpty(key)) {
             throw new IllegalArgumentException(String.format("You must set key before use %s.", annotation.annotationType().getSimpleName()));
         }
+
+        // 解析缓存实例名
+        cacheBeanName = extractValue(joinPoint, cacheBeanName);
 
         // 解析表达式
         String viewId = extractValue(joinPoint, key);

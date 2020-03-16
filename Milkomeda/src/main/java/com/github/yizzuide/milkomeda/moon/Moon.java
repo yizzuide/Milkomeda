@@ -14,11 +14,17 @@ import java.util.List;
  *
  * @author yizzuide
  * @since 2.2.0
- * @version 2.6.0
+ * @version 2.6.2
  * Create at 2019/12/31 18:13
  */
 public class Moon<T> {
     public static final String CACHE_NAME = "lightCacheMoon";
+
+    /**
+     * 缓存实例名
+     */
+    @Setter @Getter
+    private String cacheName = CACHE_NAME;
     /**
      * 链表头指针
      */
@@ -108,7 +114,7 @@ public class Moon<T> {
      * @param leftHandPointer 左手指月
      * @return LeftHandPointer
      */
-    @LightCachePut(value = CACHE_NAME, keyPrefix = "moon:lhp-", key = "#key")
+    @LightCachePut(value = "#target.cacheName", keyPrefix = "moon:lhp-", key = "#key")
     protected LeftHandPointer pluckLeftHandPointer(String key, LeftHandPointer leftHandPointer) {
         return this.getMoonStrategy().pluck(this, leftHandPointer);
     }
@@ -118,7 +124,7 @@ public class Moon<T> {
      * @param key 缓存key
      * @return LeftHandPointer
      */
-    @LightCacheable(value = CACHE_NAME, keyPrefix = "moon:lhp-", key = "#key", expire = 86400, onlyCacheL2 = true)
+    @LightCacheable(value = "#target.cacheName", keyPrefix = "moon:lhp-", key = "#key", expire = 86400, onlyCacheL2 = true)
     protected LeftHandPointer getLeftHandPointer(String key) {
         // 无法从缓存中获取时，创建新的左手指月
         return new LeftHandPointer();

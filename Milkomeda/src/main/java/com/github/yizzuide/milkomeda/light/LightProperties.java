@@ -3,11 +3,15 @@ package com.github.yizzuide.milkomeda.light;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * LightProperties
  *
  * @author yizzuide
- * @version 1.17.0
+ * @since 1.17.0
+ * @version 2.6.2
  * Create at 2019/12/03 16:24
  */
 @Data
@@ -36,4 +40,8 @@ public class LightProperties {
 
     /** 只缓存在二级缓存上 */
     private boolean onlyCacheL2 = false;
+    /**
+     * 自定义实例名配置
+     */
+    private Map<String, LightProperties> instance = new HashMap<>();
 }
