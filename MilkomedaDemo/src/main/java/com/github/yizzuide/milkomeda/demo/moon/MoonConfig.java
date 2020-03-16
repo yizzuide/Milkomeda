@@ -1,12 +1,9 @@
 package com.github.yizzuide.milkomeda.demo.moon;
 
-import com.github.yizzuide.milkomeda.light.LightCache;
 import com.github.yizzuide.milkomeda.moon.Moon;
 import com.github.yizzuide.milkomeda.moon.PercentMoonStrategy;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import javax.annotation.Resource;
 
 /**
  * MoonConfig
@@ -16,8 +13,6 @@ import javax.annotation.Resource;
  */
 @Configuration
 public class MoonConfig {
-    @Resource
-    private LightCache lightCache;
 
     @Bean("smsMoon")
     public Moon<String> smsMoon() {
@@ -26,22 +21,11 @@ public class MoonConfig {
         return moon;
     }
 
-
-    @Bean("abTestLightCache")
-    public LightCache abTestLightCache() {
-        LightCache abTestLightCache = new LightCache();
-        abTestLightCache.copyFrom(lightCache);
-        abTestLightCache.setOnlyCacheL2(true);
-        abTestLightCache.setL2Expire(-1L);
-        return abTestLightCache;
-    }
-
-
     @Bean("abTestMoon")
     public Moon<Integer> abTestMoon() {
         Moon<Integer> moon = new Moon<>();
         // 设置L2缓存不过期
-        moon.setCacheName("abTestLightCache");
+        moon.setCacheName("ab-test");
         moon.setMoonStrategy(new PercentMoonStrategy());
         // AB测试阶段值：15%为0，85%为1
 //        moon.add(15, 85);

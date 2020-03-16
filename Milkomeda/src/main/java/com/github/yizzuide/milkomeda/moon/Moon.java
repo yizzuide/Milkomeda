@@ -14,7 +14,7 @@ import java.util.List;
  *
  * @author yizzuide
  * @since 2.2.0
- * @version 2.6.2
+ * @version 2.7.0
  * Create at 2019/12/31 18:13
  */
 public class Moon<T> {
@@ -124,7 +124,7 @@ public class Moon<T> {
      * @param key 缓存key
      * @return LeftHandPointer
      */
-    @LightCacheable(value = "#target.cacheName", keyPrefix = "moon:lhp-", key = "#key", expire = 86400, onlyCacheL2 = true)
+    @LightCacheable(value = "#target.cacheName", keyPrefix = "moon:lhp-", key = "#key", onlyCacheL2 = true)
     protected LeftHandPointer getLeftHandPointer(String key) {
         // 无法从缓存中获取时，创建新的左手指月
         return new LeftHandPointer();

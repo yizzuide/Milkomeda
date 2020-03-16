@@ -14,7 +14,7 @@ import java.util.Collections;
  *
  * @author yizzuide
  * @since 1.17.0
- * @version 2.3.0
+ * @version 2.7.0
  * Create at 2019/12/03 16:22
  */
 @Configuration
@@ -33,14 +33,7 @@ public class LightConfig {
     @Bean(LightCacheAspect.DEFAULT_BEAN_NAME)
     public Cache lightCache() {
         LightCache lightCache = new LightCache();
-        lightCache.setL1MaxCount(props.getL1MaxCount());
-        lightCache.setL1DiscardPercent(props.getL1DiscardPercent());
-        lightCache.setL1Expire(props.getL1Expire());
-        lightCache.setStrategy(props.getStrategy());
-        lightCache.setStrategyClass(props.getStrategyClass());
-        lightCache.setOnlyCacheL1(props.isOnlyCacheL1());
-        lightCache.setL2Expire(props.getL2Expire());
-        lightCache.setOnlyCacheL2(props.isOnlyCacheL2());
+        lightCache.configFrom(props);
         return lightCache;
     }
 

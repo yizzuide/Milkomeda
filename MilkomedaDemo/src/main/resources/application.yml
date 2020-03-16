@@ -60,6 +60,11 @@ milkomeda:
     l2-expire: 86400
     # 全局使用时间线丢弃策略
     strategy: timeline
+    instances:
+      # 缓存实例配置（没有配置的使用默认值），优先级比注解高
+      ab-test:
+        l2-expire: -1
+        only-cache-l2: true
 
   echo:
     # 设置请求读取超时

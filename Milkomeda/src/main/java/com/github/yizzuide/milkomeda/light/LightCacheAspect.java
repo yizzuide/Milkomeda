@@ -7,6 +7,7 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.annotation.Order;
 import org.springframework.util.StringUtils;
@@ -29,13 +30,16 @@ import static com.github.yizzuide.milkomeda.util.ReflectUtil.extractValue;
  *
  * @author yizzuide
  * @since 2.0.0
- * @version 2.6.2
+ * @version 2.7.0
  * Create at 2019/12/18 14:45
  */
 @Order(98)
 @Aspect
 public class LightCacheAspect {
     public static final String DEFAULT_BEAN_NAME = "lightCache";
+
+    @Autowired
+    private LightProperties props;
 
     @Around("execution(@LightCacheable * *.*(..)) && @annotation(cacheable)")
     public Object cacheableAround(ProceedingJoinPoint joinPoint, LightCacheable cacheable) throws Throwable {
@@ -75,7 +79,7 @@ public class LightCacheAspect {
             customCacheFlag = true;
         } else {
             // 修改Bean name，防止与开发者项目里重复
-            cacheBeanName = DEFAULT_BEAN_NAME + "_" + cacheBeanName;
+            cacheBeanName = innerCacheBeanName(cacheBeanName);
             cache = WebContext.registerBean((ConfigurableApplicationContext) ApplicationContextHolder.get(), cacheBeanName, LightCache.class);
         }
         // 针对LightCacheable类型的处理
@@ -101,6 +105,11 @@ public class LightCacheAspect {
             }
         }
 
+        // 缓存实例配置（优先级最高）
+        if (props.getInstances().containsKey(originCacheBeanName(cacheBeanName))) {
+            cache.configFrom(props.getInstances().get(originCacheBeanName(cacheBeanName)));
+        }
+
         // key生成器
         Function<Serializable, String> keyGenerator = id -> prefix + id;
 
@@ -118,5 +127,22 @@ public class LightCacheAspect {
         }
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         return CacheHelper.get(cache, signature.getReturnType(), viewId, keyGenerator, id -> joinPoint.proceed());
+    }
+
+    /**
+     * 转为内部缓存Bean名
+     * @param cacheBeanName 原bean名
+     * @return  内部缓存Bean名
+     */
+    private String innerCacheBeanName(String cacheBeanName) {
+        return DEFAULT_BEAN_NAME + "_" + cacheBeanName;
+    }
+
+    private String originCacheBeanName(String innerCacheBeanName) {
+        String prefix = DEFAULT_BEAN_NAME + "_";
+        if (innerCacheBeanName.startsWith(prefix)) {
+            return innerCacheBeanName.substring(prefix.length());
+        }
+        return innerCacheBeanName;
     }
 }

@@ -11,7 +11,7 @@ import java.util.Map;
  *
  * @author yizzuide
  * @since 1.17.0
- * @version 2.6.2
+ * @version 2.7.0
  * Create at 2019/12/03 16:24
  */
 @Data
@@ -43,5 +43,5 @@ public class LightProperties {
     /**
      * 自定义实例名配置
      */
-    private Map<String, LightProperties> instance = new HashMap<>();
+    private Map<String, LightProperties> instances = new HashMap<>();
 }

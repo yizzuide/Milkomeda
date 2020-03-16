@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit;
  * E：缓存业务数据
  *
  * @since 1.8.0
- * @version 2.3.0
+ * @version 2.7.0
  * @author yizzuide
  * Create at 2019/06/28 13:33
  */
@@ -375,5 +375,21 @@ public class LightCache implements Cache {
         this.setStrategyClass(other.getStrategyClass());
         this.setOnlyCacheL1(other.getOnlyCacheL1());
         this.setL2Expire(other.getL2Expire());
+        this.setOnlyCacheL2(other.getOnlyCacheL2());
+    }
+
+    /**
+     * 配置实例
+     * @param props LightCache
+     */
+    public void configFrom(LightProperties props) {
+        this.setL1MaxCount(props.getL1MaxCount());
+        this.setL1DiscardPercent(props.getL1DiscardPercent());
+        this.setL1Expire(props.getL1Expire());
+        this.setStrategy(props.getStrategy());
+        this.setStrategyClass(props.getStrategyClass());
+        this.setOnlyCacheL1(props.isOnlyCacheL1());
+        this.setL2Expire(props.getL2Expire());
+        this.setOnlyCacheL2(props.isOnlyCacheL2());
     }
 }
