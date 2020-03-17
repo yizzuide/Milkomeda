@@ -30,7 +30,7 @@ public class MoonConfig {
         // AB测试阶段值：15%为0，85%为1
 //        moon.add(15, 85);
 //        moon.add(PercentMoonStrategy.parse("15/85"));
-        moon.add(PercentMoonStrategy.parse("1/9"));
+        moon.add(PercentMoonStrategy.parse("3/7", moon.getMoonStrategy()));
         return moon;
     }
 }
