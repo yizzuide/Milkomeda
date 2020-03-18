@@ -22,7 +22,7 @@ import java.util.List;
  *
  * @author yizzuide
  * @since 2.5.0
- * @version 2.5.4
+ * @version 2.7.4
  * Create at 2020/01/30 20:38
  */
 @Slf4j
@@ -45,7 +45,12 @@ public class HaloInterceptor implements Interceptor {
         // 获取第二个参数，该参数类型根据Mapper方法的参数决定，如果是一个参数，则为实体或简单数据类型；如果是多个参数，则为Map。
         Object param = args.length > 1 ? args[1] : null;
         String sql = mappedStatement.getSqlSource().getBoundSql(param).getSql();
-        List<String> tableNames = MybatisUtil.getTableNames(sql);
+        List<String> tableNames = null;
+        try {
+            tableNames = MybatisUtil.getTableNames(sql);
+        } catch (Exception e) {
+            log.warn("Halo parse sql error: {}, msg: {}", sql, e.getMessage(), e);
+        }
         if (CollectionUtils.isEmpty(tableNames)) {
             return invocation.proceed();
         }
