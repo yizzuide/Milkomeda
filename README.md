@@ -37,7 +37,7 @@
 - [x] Moon（月球）：用于在多个类型值之间轮询，支持并发操作，支持泛型数据值，不同的环业务相互隔离。*2.2.0+*
   * 依赖技术：Spring IoC、SpringBoot Data Redis
   * 设计数据结构：环形链表
-  * 设计模式：门面模式
+  * 设计模式：策略模式、门面模式
 - [x] Halo（光晕）：用于监听Mybatis的CRUD操作并执行相应的业务，支持前置、后置类型。*2.5.0+*
   * 依赖技术：Mybatis
   * 设计模式：面向声明式编程
@@ -65,7 +65,7 @@
 Milkomeda 2.0 is now available (Dec 2019).
 
 - 构建的包更小，减少即时的依赖，根据开启的模块选择依赖。
-- 模块的使用更加明了，需要使用什么模块，使用`@EnableXXX`（除了非Spring依赖模块不需要开启）。
+- 模块的使用更加简单，需要使用什么模块，使用`@EnableXXX`（非Spring依赖模块不需要开启）。
 - 部分模块使用API改进，优先使用注解的声明式编程，并使用SpEL增强，然后是API方法调用。
 - 各模块间的功能相互增强，如：`Crust`添加`Light`模块缓存加持、`Comet`添加`Pillar`模块拆分处理等。
 - 重构各模块的Config配置依赖，合理拆分工具类、Context等。
@@ -79,7 +79,7 @@ Milkomeda 2.0 is now available (Dec 2019).
 3. 模块`Particle`的限制器注解在取请求头的语法`@`改为`:`（由于和SpEL的`@`语法冲突问题）。
 4. 模块`Light`的API方法方式改为使用`@LightCacheable`（仿Spring Cache，部分属性方法支持SpEL），默认使用了超级缓存（不用再操心超级缓存的复杂API了）。
 5. 模块`Crust`的token方式内建支持`Light`模块的高效多级缓存。
-6. 模块`Comet`添加注解`@CometParam`注解用于同时支持解析`application/x-www-form-urlencoded`、`JSON`的Body消息数据（Spring MVC默认是不支持的）。
+6. 模块`Comet`添加注解`@CometParam`注解用于同时支持解析`application/x-www-form-urlencoded`、`application/json`类型的Body消息数据（Spring MVC默认是不支持的）。
 
 ## Documentation
 [See Wiki](https://github.com/yizzuide/Milkomeda/wiki)
