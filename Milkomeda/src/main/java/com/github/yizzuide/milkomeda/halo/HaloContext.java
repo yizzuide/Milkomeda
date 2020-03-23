@@ -22,6 +22,10 @@ public class HaloContext implements ApplicationListener<ContextRefreshedEvent> {
      * 监听类型的方法属性名
      */
     public static final String ATTR_TYPE = "type";
+    /**
+     * 调用处理异步方式的方法属性名
+     */
+    public static final String ATTR_ASYNC = "async";
 
     private static Map<String, List<HandlerMetaData>> tableNameMap = new HashMap<>();
 
@@ -32,6 +36,7 @@ public class HaloContext implements ApplicationListener<ContextRefreshedEvent> {
             // 设置其它属性方法的值
             Map<String, Object> attrs = new HashMap<>(2);
             attrs.put(ATTR_TYPE, haloListener.type());
+            attrs.put(ATTR_ASYNC, haloListener.async());
             metaData.setAttributes(attrs);
             return haloListener.value();
         }, false, false);

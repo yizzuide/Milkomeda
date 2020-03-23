@@ -24,13 +24,15 @@ public class MoonConfig {
     @Bean("abTestMoon")
     public Moon<Integer> abTestMoon() {
         Moon<Integer> moon = new Moon<>();
-        // 设置L2缓存不过期
+        // 设置缓存缓存实例名（需要在milkomeda.light.instances下配置不同的缓存实例）
         moon.setCacheName("ab-test");
-        moon.setMoonStrategy(new PercentMoonStrategy());
+        PercentMoonStrategy moonStrategy = new PercentMoonStrategy();
+        // 设置百分比总量（默认为100)
+        moonStrategy.setPercent(10);
+        moon.setMoonStrategy(moonStrategy);
         // AB测试阶段值：15%为0，85%为1
-//        moon.add(15, 85);
 //        moon.add(PercentMoonStrategy.parse("15/85"));
-        moon.add(PercentMoonStrategy.parse("3/7", moon.getMoonStrategy()));
+        moon.add(PercentMoonStrategy.parse("3/7"));
         return moon;
     }
 }

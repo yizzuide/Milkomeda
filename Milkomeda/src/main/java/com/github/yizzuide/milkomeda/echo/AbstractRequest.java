@@ -345,7 +345,7 @@ public abstract class AbstractRequest {
      * @param headers HttpHeaders
      */
     protected void appendHeaders(HttpHeaders headers) {
-        headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
+        headers.setContentType(MediaType.APPLICATION_JSON);
         headers.add("Accept", MediaType.APPLICATION_JSON_VALUE);
     }
 

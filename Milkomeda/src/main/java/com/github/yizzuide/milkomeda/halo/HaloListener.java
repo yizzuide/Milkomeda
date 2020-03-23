@@ -19,7 +19,7 @@ import java.lang.annotation.*;
  *
  * @author yizzuide
  * @since 2.5.0
- * @version 2.5.1
+ * @version 2.7.5
  * Create at 2020/01/30 22:36
  */
 @Documented
@@ -45,4 +45,10 @@ public @interface HaloListener {
      * @return  默认为后置监听
      */
     HaloType type() default HaloType.POST;
+
+    /**
+     * 支持异步处理
+     * @return 默认使用异步处理
+     */
+    boolean async() default true;
 }

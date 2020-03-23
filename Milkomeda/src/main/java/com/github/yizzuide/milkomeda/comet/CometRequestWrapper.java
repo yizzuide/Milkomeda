@@ -1,6 +1,7 @@
 package com.github.yizzuide.milkomeda.comet;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.catalina.connector.ClientAbortException;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.servlet.ReadListener;
@@ -9,6 +10,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import java.io.*;
+import java.net.SocketTimeoutException;
 import java.nio.charset.Charset;
 
 /**
@@ -17,7 +19,7 @@ import java.nio.charset.Charset;
  *
  * @author yizzuide
  * @since 2.0.0
- * @version 2.2.2
+ * @version 2.7.5
  * Create at 2019/12/12 17:37
  */
 @Slf4j
@@ -48,7 +50,7 @@ public class CometRequestWrapper extends HttpServletRequestWrapper {
         try {
             return inputStream2String(request.getInputStream());
         } catch (IOException e) {
-            log.error("read error", e);
+            log.error("Comet get input stream error:{}", e.getMessage(), e);
             throw new RuntimeException(e);
         }
     }
@@ -82,15 +84,17 @@ public class CometRequestWrapper extends HttpServletRequestWrapper {
             while ((line = reader.readLine()) != null) {
                 sb.append(line);
             }
+        } catch (ClientAbortException | SocketTimeoutException ignore) {
+            return null;
         } catch (IOException e) {
-            log.error("read error", e);
+            log.error("Comet read input stream error:{}", e.getMessage(), e);
             throw new RuntimeException(e);
         } finally {
             if (reader != null) {
                 try {
                     reader.close();
                 } catch (IOException e) {
-                    log.error("read error", e);
+                    log.error("Comet close input stream error:{}", e.getMessage(), e);
                 }
             }
         }

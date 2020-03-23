@@ -1,5 +1,6 @@
 package com.github.yizzuide.milkomeda.halo;
 
+import com.github.yizzuide.milkomeda.pulsar.PulsarHolder;
 import com.github.yizzuide.milkomeda.universe.metadata.HandlerMetaData;
 import com.github.yizzuide.milkomeda.util.MybatisUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +23,7 @@ import java.util.List;
  *
  * @author yizzuide
  * @since 2.5.0
- * @version 2.7.4
+ * @version 2.7.5
  * Create at 2020/01/30 20:38
  */
 @Slf4j
@@ -81,7 +82,13 @@ public class HaloInterceptor implements Interceptor {
         }
         HaloContext.getTableNameMap().get(matchTableName).stream()
                 .filter(metaData -> metaData.getAttributes().get(HaloContext.ATTR_TYPE) == type)
-                .forEach(handlerMetaData -> invokeHandler(tableName, handlerMetaData, mappedStatement, param, result));
+                .forEach(handlerMetaData -> {
+                    if ((boolean) handlerMetaData.getAttributes().get(HaloContext.ATTR_ASYNC)) {
+                        PulsarHolder.getPulsar().post(() -> invokeHandler(tableName, handlerMetaData, mappedStatement, param, result));
+                    } else {
+                        invokeHandler(tableName, handlerMetaData, mappedStatement, param, result);
+                    }
+                });
     }
 
     private void invokeHandler(String tableName, HandlerMetaData handlerMetaData, MappedStatement mappedStatement, Object param, Object result) {
