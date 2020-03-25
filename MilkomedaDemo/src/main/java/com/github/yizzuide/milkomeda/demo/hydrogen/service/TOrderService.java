@@ -1,0 +1,53 @@
+package com.github.yizzuide.milkomeda.demo.hydrogen.service;
+
+import com.github.yizzuide.milkomeda.demo.halo.domain.TOrder;
+import com.github.yizzuide.milkomeda.demo.halo.mapper.TOrderMapper;
+import org.springframework.stereotype.Service;
+
+import javax.annotation.Resource;
+import java.util.Date;
+
+/**
+ * TOrderService
+ *
+ * @author yizzuide
+ * Create at 2020/03/25 21:51
+ */
+@Service
+public class TOrderService {
+    @Resource
+    private TOrderMapper tOrderMapper;
+
+    public void testTx() {
+        TOrder tOrder = new TOrder();
+        tOrder.setUserId(101L);
+        tOrder.setOrderNo(1435433467657L);
+        tOrder.setProductId(151L);
+        tOrder.setProductName("iPhone");
+        tOrder.setPrice(8900L);
+        Date now = new Date();
+        tOrder.setCreateTime(now);
+        tOrder.setUpdateTime(now);
+        tOrderMapper.insert(tOrder);
+
+        // 模拟抛出RuntimeException
+        // int i = 1/0;
+
+        // 模拟事务超时
+        try {
+            Thread.sleep(5200);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        TOrder tOrder2 = new TOrder();
+        tOrder2.setUserId(102L);
+        tOrder2.setOrderNo(14354567899000L);
+        tOrder2.setProductId(156L);
+        tOrder2.setProductName("Mac");
+        tOrder2.setPrice(28900L);
+        tOrder2.setCreateTime(now);
+        tOrder2.setUpdateTime(now);
+        tOrderMapper.insert(tOrder2);
+    }
+}

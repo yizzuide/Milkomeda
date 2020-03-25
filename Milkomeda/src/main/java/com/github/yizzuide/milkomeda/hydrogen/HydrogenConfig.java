@@ -1,6 +1,5 @@
 package com.github.yizzuide.milkomeda.hydrogen;
 
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
@@ -12,7 +11,6 @@ import org.springframework.context.annotation.Import;
  * Create at 2020/03/25 17:46
  */
 @Configuration
-@Import({TransactionAdviceConfig.class})
-@EnableConfigurationProperties(HydrogenProperties.class)
+@Import({TransactionAdviceConfig.class, UniformResponseExceptionConfig.class})
 public class HydrogenConfig {
 }

@@ -14,6 +14,7 @@ spring:
     host: 127.0.0.1
 
 
+
   mvc:
     # Pulsar模块异步超时
     async:
@@ -96,3 +97,20 @@ milkomeda:
     task-topic-pop-max-size: 5
     # 消费轮询间隔（默认5000ms）
     task-execute-rate: 2000
+
+  hydrogen:
+    transaction:
+    # 事务5秒超时回滚（支持自定义时间单位）
+      # rollback-when-timeout: 5 # 不指定单位默认单位：s
+      # rollback-when-timeout: 5s
+      rollback-when-timeout: 5000ms
+      read-only-append-prefix:
+        - fetch*
+    response-front-exception:
+      enable: true
+      body:
+        status: 200
+        code[code]: -1
+        message[errMsg]: 服务器繁忙，请稍后再试！
+        error-stack-msg[innerErrInfo]:
+        error-stack[innerErrInfoDesc]:

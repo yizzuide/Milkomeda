@@ -1,6 +1,5 @@
 package com.github.yizzuide.milkomeda.util;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -17,7 +16,7 @@ import java.util.*;
  *
  * @author yizzuide
  * @since 0.2.0
- * @version 1.13.1
+ * @version 2.8.0
  * Create at 2019/04/11 22:07
  */
 @Slf4j
@@ -27,11 +26,11 @@ public class JSONUtil {
     static {
         // 排除json字符串中实体类没有的字段
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-//        mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
+        // mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
         TimeZone china = TimeZone.getTimeZone("GMT+08:00");
         mapper.setTimeZone(china);
         mapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
-        mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+        // mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
     }
 
     public static String serialize(Object obj) {

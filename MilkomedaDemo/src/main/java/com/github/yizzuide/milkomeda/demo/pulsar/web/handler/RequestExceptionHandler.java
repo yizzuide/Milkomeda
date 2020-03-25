@@ -1,13 +1,12 @@
 package com.github.yizzuide.milkomeda.demo.pulsar.web.handler;
 
+import com.github.yizzuide.milkomeda.demo.pulsar.exception.YizException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
-import com.github.yizzuide.milkomeda.demo.pulsar.exception.YizException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,7 +19,7 @@ import java.util.Map;
  * Create at 2018-12-17 15:41
  */
 @Slf4j
-@ControllerAdvice // 可以用于定义@ExceptionHandler、@InitBinder、@ModelAttribute, 并应用到所有@RequestMapping中
+//@ControllerAdvice // 可以用于定义@ExceptionHandler、@InitBinder、@ModelAttribute, 并应用到所有@RequestMapping中
 public class RequestExceptionHandler extends ResponseEntityExceptionHandler {
 
     /** 处理自定义异常 */
