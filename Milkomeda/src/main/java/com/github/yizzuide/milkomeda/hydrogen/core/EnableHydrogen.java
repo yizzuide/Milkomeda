@@ -1,4 +1,4 @@
-package com.github.yizzuide.milkomeda.hydrogen;
+package com.github.yizzuide.milkomeda.hydrogen.core;
 
 import org.springframework.context.annotation.Import;
 

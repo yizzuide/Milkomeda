@@ -1,5 +1,6 @@
-package com.github.yizzuide.milkomeda.hydrogen;
+package com.github.yizzuide.milkomeda.hydrogen.transaction;
 
+import com.github.yizzuide.milkomeda.hydrogen.core.HydrogenProperties;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.aspectj.AspectJExpressionPointcut;

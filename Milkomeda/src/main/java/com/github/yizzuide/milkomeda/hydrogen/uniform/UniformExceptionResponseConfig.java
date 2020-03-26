@@ -1,5 +1,6 @@
-package com.github.yizzuide.milkomeda.hydrogen;
+package com.github.yizzuide.milkomeda.hydrogen.uniform;
 
+import com.github.yizzuide.milkomeda.hydrogen.core.HydrogenProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -14,7 +15,7 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 @EnableConfigurationProperties(HydrogenProperties.class)
-@ConditionalOnProperty(prefix = "milkomeda.hydrogen.uniform-exception-response", name = "enable", havingValue = "true")
+@ConditionalOnProperty(prefix = "milkomeda.hydrogen.uniform", name = "enable", havingValue = "true")
 public class UniformExceptionResponseConfig {
     @Bean
     public UniformExceptionResponseHandler responseFrontExceptionHandler() {

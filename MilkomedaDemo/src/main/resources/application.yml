@@ -111,12 +111,12 @@ milkomeda:
       read-only-append-prefix:
         - fetch*
 
-    uniform-exception-response:
+    uniform:
       enable: true
       body:
         # Exception异常处理
         status: 200
-        code[code]: -1 # 支持改字段名：[别名]
+        code[code]: -1 # 支持改字段名：[别名]，返回的是这个别名
         message[errMsg]: 服务器繁忙，请稍后再试！
         # 下面字段内部会获取异常栈信息，外面不需要添加值，列出需要的字段即可
         error-stack-msg[innerErrInfo]:

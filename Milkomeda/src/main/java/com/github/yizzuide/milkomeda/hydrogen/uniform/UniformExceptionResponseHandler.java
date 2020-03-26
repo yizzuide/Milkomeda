@@ -1,5 +1,6 @@
-package com.github.yizzuide.milkomeda.hydrogen;
+package com.github.yizzuide.milkomeda.hydrogen.uniform;
 
+import com.github.yizzuide.milkomeda.hydrogen.core.HydrogenProperties;
 import com.github.yizzuide.milkomeda.util.DataTypeConvertUtil;
 import com.github.yizzuide.milkomeda.util.JSONUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -72,7 +73,7 @@ public class UniformExceptionResponseHandler extends ResponseEntityExceptionHand
     @SuppressWarnings("all")
     @ExceptionHandler(Exception.class)
     public void handleException(Exception e, HttpServletResponse response) throws IOException {
-        Map<String, Object> body = props.getUniformExceptionResponse().getBody();
+        Map<String, Object> body = props.getUniform().getBody();
         Object status = body.get("status");
         response.setStatus(status == null ?  500 : Integer.parseInt(status.toString()));
         response.setContentType("application/json; charset=UTF-8");
@@ -131,7 +132,7 @@ public class UniformExceptionResponseHandler extends ResponseEntityExceptionHand
 
     @SuppressWarnings("all")
     public ResponseEntity<Object> handleExceptionResponse(Exception ex, Object presetStatusCode) {
-        Map<String, Object> body = props.getUniformExceptionResponse().getBody();
+        Map<String, Object> body = props.getUniform().getBody();
         Map<String, Object> result = new HashMap<>();
         Object exp4xx = body.get(presetStatusCode.toString());
         if (!(exp4xx instanceof Map)) {

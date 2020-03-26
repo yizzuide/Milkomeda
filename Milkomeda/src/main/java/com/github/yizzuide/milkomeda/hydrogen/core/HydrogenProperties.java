@@ -1,4 +1,4 @@
-package com.github.yizzuide.milkomeda.hydrogen;
+package com.github.yizzuide.milkomeda.hydrogen.core;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -21,15 +21,20 @@ public class HydrogenProperties {
     /**
      * 切面事务
      */
-    private final HydrogenTransaction transaction = new HydrogenTransaction();
+    private final Transaction transaction = new Transaction();
 
     /**
      * 统一异常处理
      */
-    private final UniformExceptionResponse uniformExceptionResponse = new UniformExceptionResponse();
+    private final Uniform uniform = new Uniform();
+
+    /**
+     * 校验器
+     */
+    private Validator validator = new Validator();
 
     @Data
-    public static class HydrogenTransaction {
+    public static class Transaction {
         /**
          * 开启AOP事务
          */
@@ -39,7 +44,7 @@ public class HydrogenProperties {
          */
         private String pointcutExpression = "execution(* com..service.*.*(..))";
         /**
-         * 事务超时回滚（单位：s。-1：不设置超时回滚）
+         * 事务超时回滚（默认单位：s。-1：不设置超时回滚）
          */
         @DurationUnit(ChronoUnit.SECONDS)
         private Duration rollbackWhenTimeout = Duration.ofSeconds(-1);
@@ -58,7 +63,7 @@ public class HydrogenProperties {
     }
 
     @Data
-    public static class UniformExceptionResponse {
+    public static class Uniform {
         /**
          * 启用统一异常处理
          */
@@ -67,6 +72,11 @@ public class HydrogenProperties {
          * 响应数据
          */
         private Map<String, Object> body = new HashMap<>();
+    }
+
+    @Data
+    public static class Validator {
+        private boolean enable = false;
     }
 
 }
