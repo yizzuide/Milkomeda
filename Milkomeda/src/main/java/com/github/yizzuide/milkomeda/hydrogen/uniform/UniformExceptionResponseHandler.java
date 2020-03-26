@@ -2,7 +2,6 @@ package com.github.yizzuide.milkomeda.hydrogen.uniform;
 
 import com.github.yizzuide.milkomeda.hydrogen.core.HydrogenProperties;
 import com.github.yizzuide.milkomeda.util.DataTypeConvertUtil;
-import com.github.yizzuide.milkomeda.util.JSONUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -15,9 +14,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.*;
 
 /**
@@ -72,12 +69,10 @@ public class UniformExceptionResponseHandler extends ResponseEntityExceptionHand
     /** 其它服务器内部异常处理 */
     @SuppressWarnings("all")
     @ExceptionHandler(Exception.class)
-    public void handleException(Exception e, HttpServletResponse response) throws IOException {
+    public ResponseEntity<Object> handleException(Exception e) throws IOException {
         Map<String, Object> body = props.getUniform().getBody();
         Object status = body.get("status");
-        response.setStatus(status == null ?  500 : Integer.parseInt(status.toString()));
-        response.setContentType("application/json; charset=UTF-8");
-        PrintWriter writer = response.getWriter();
+        status = status == null ?  500 : status;
         Map<String, Object> result = new HashMap<>();
 
         // 自定义异常处理
@@ -110,9 +105,7 @@ public class UniformExceptionResponseHandler extends ResponseEntityExceptionHand
                     // 其它自定义key也返回
                     map.keySet().stream().filter(k -> !Arrays.asList("clazz", "status", "code", "message").contains(k) && !result.containsKey(k))
                             .forEach(k ->  putMapElement(map, result, k, null, exMap));
-                    writer.println(JSONUtil.serialize(result));
-                    writer.flush();
-                    return;
+                    return ResponseEntity.status(Integer.parseInt(status.toString())).body(result);
                 }
             }
         }
@@ -126,8 +119,7 @@ public class UniformExceptionResponseHandler extends ResponseEntityExceptionHand
             String errorStack = String.format("exception happened: %s \n invoke root: %s", stackTrace[0], stackTrace[stackTrace.length - 1]);
             putMapElement(body, result, "error-stack", null, errorStack);
         }
-        writer.println(JSONUtil.serialize(result));
-        writer.flush();
+        return ResponseEntity.status(Integer.parseInt(status.toString())).body(result);
     }
 
     @SuppressWarnings("all")

@@ -139,6 +139,7 @@ milkomeda:
           -
             clazz: com.github.yizzuide.milkomeda.demo.hydrogen.exception.YizException
             status: 200
+            # 下面不需要指定值，只需要列出来需要返回，内部将从YizException获取
             code:
             message:
             type:

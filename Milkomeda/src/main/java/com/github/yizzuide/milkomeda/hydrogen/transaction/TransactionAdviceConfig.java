@@ -1,5 +1,6 @@
 package com.github.yizzuide.milkomeda.hydrogen.transaction;
 
+import com.github.yizzuide.milkomeda.hydrogen.core.HydrogenHolder;
 import com.github.yizzuide.milkomeda.hydrogen.core.HydrogenProperties;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.aop.Advisor;
@@ -39,6 +40,11 @@ public class TransactionAdviceConfig {
 
     @Autowired
     private HydrogenProperties props;
+
+    @Autowired
+    public void config(HydrogenProperties props) {
+        HydrogenHolder.setProps(props);
+    }
 
     @Bean
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
