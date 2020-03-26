@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * UniformResponseExceptionConfig
+ * UniformExceptionResponseConfig
  *
  * @author yizzuide
  * @since 2.8.0
@@ -14,10 +14,10 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 @EnableConfigurationProperties(HydrogenProperties.class)
-@ConditionalOnProperty(prefix = "milkomeda.hydrogen.response-front-exception", name = "enable", havingValue = "true")
-public class UniformResponseExceptionConfig {
+@ConditionalOnProperty(prefix = "milkomeda.hydrogen.uniform-exception-response", name = "enable", havingValue = "true")
+public class UniformExceptionResponseConfig {
     @Bean
-    public UniformResponseExceptionHandler responseFrontExceptionHandler() {
-        return new UniformResponseExceptionHandler();
+    public UniformExceptionResponseHandler responseFrontExceptionHandler() {
+        return new UniformExceptionResponseHandler();
     }
 }

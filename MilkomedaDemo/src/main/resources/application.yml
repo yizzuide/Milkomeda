@@ -19,6 +19,12 @@ spring:
     # Pulsar模块异步超时
     async:
       request-timeout: 20s
+    # 404抛出NoHandlerFoundException异常
+    throw-exception-if-no-handler-found: true
+  # 资源不生成mapping映射
+  resources:
+    add-mappings: false
+
 
   # Pulsar模块异步线程池（Async异步任务线程池，SpringBoot 2.1.0+在这里配置）
   task:
@@ -100,17 +106,42 @@ milkomeda:
 
   hydrogen:
     transaction:
-    # 事务5秒超时回滚（支持自定义时间单位）
-      # rollback-when-timeout: 5 # 不指定单位默认单位：s
-      # rollback-when-timeout: 5s
-      rollback-when-timeout: 5000ms
+      # 事务5秒超时回滚（支持自定义时间单位，不指定单位默认单位：s）
+      rollback-when-timeout: 5s
       read-only-append-prefix:
         - fetch*
-    response-front-exception:
+
+    uniform-exception-response:
       enable: true
       body:
+        # Exception异常处理
         status: 200
-        code[code]: -1
+        code[code]: -1 # 支持改字段名：[别名]
         message[errMsg]: 服务器繁忙，请稍后再试！
+        # 下面字段内部会获取异常栈信息，外面不需要添加值，列出需要的字段即可
         error-stack-msg[innerErrInfo]:
         error-stack[innerErrInfoDesc]:
+
+        # 404异常处理，需要配置：spring.mvc.throw-exception-if-no-handler-found=true; spring.mvc.add-mappings=false;
+        404:
+          status: 200
+          code: -1
+          message: 请求的URL错误！
+
+        # 参数异常处理
+        400:
+          status: 200
+          code: -1
+          message: 请求的参数错误！
+
+        # 自定义异常列表处理
+        customs:
+          -
+            clazz: com.github.yizzuide.milkomeda.demo.hydrogen.exception.YizException
+            status: 200
+            code:
+            message:
+            type:
+
+
+

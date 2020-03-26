@@ -11,6 +11,6 @@ import org.springframework.context.annotation.Import;
  * Create at 2020/03/25 17:46
  */
 @Configuration
-@Import({TransactionAdviceConfig.class, UniformResponseExceptionConfig.class})
+@Import({TransactionAdviceConfig.class, UniformExceptionResponseConfig.class})
 public class HydrogenConfig {
 }

@@ -26,7 +26,7 @@ public class HydrogenProperties {
     /**
      * 统一异常处理
      */
-    private final ResponseFrontException responseFrontException = new ResponseFrontException();
+    private final UniformExceptionResponse uniformExceptionResponse = new UniformExceptionResponse();
 
     @Data
     public static class HydrogenTransaction {
@@ -58,7 +58,7 @@ public class HydrogenProperties {
     }
 
     @Data
-    public static class ResponseFrontException {
+    public static class UniformExceptionResponse {
         /**
          * 启用统一异常处理
          */

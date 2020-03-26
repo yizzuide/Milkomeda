@@ -36,7 +36,7 @@ public class UserController {
 //        Thread.sleep(2000);
 
         // 测试运行时异常
-//        throw new YizException(user.getId(), "user", "用户不存在");
+//        throw new RuntimeException("用户不存在");
         // 测试普通异常
 //        throw new IOException("file not find");
         return user;
@@ -54,7 +54,7 @@ public class UserController {
         pulsarDeferredResult.setDeferredResultID(/*RandomStringUtils.random(8)*/"84735252737");
 
         // 测试运行时异常
-//        throw new YizException(id, "user", "用户不存在");
+//        throw new RuntimeException("用户不存在");
         // 测试普通异常
 //        throw new IOException();
 
