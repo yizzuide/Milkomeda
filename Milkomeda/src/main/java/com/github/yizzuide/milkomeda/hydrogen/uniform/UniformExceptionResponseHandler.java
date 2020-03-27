@@ -4,16 +4,23 @@ import com.github.yizzuide.milkomeda.hydrogen.core.HydrogenProperties;
 import com.github.yizzuide.milkomeda.util.DataTypeConvertUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
+import org.springframework.validation.BindException;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.ObjectError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
 import java.io.IOException;
 import java.util.*;
 
@@ -35,38 +42,39 @@ public class UniformExceptionResponseHandler extends ResponseEntityExceptionHand
      */
     private List<Map<String, Object>> customConfList;
 
-    /** 4xx异常处理 */
+    // 4xx异常处理
     @Override
     protected ResponseEntity<Object> handleExceptionInternal(Exception ex, @Nullable Object body, HttpHeaders headers, HttpStatus status, WebRequest request) {
-        ResponseEntity<Object> responseEntity = handleExceptionResponse(ex, status.value());
+        ResponseEntity<Object> responseEntity = handleExceptionResponse(ex, status.value(), ex.getMessage());
         if (responseEntity == null) {
             return super.handleExceptionInternal(ex, body, headers, status, request);
         }
         return responseEntity;
     }
 
-    /*
     // 方法上单个普通类型（如：String、Long等）参数校验异常（校验注解直接写在参数前面的方式）
     @ExceptionHandler(ConstraintViolationException.class)
-    @ResponseBody
-    public HttpBody constraintViolationException(ConstraintViolationException e) {
-        return HttpBody.error(SdErrorCode.REQUEST_PARAM_FORMAT_EXCEPTION, e.getConstraintViolations().iterator().next().getMessage());
+    public ResponseEntity<Object> constraintViolationException(ConstraintViolationException e) {
+        ConstraintViolation<?> constraintViolation = e.getConstraintViolations().iterator().next();
+        String path = constraintViolation.getPropertyPath().toString();
+        String value = String.valueOf(constraintViolation.getInvalidValue());
+        String message = path + "[" + value + "] " + constraintViolation.getMessage();
+        return handleExceptionResponse(e, HttpStatus.BAD_REQUEST.value(), message);
     }
 
     // 对方法上@RequestBody的Bean参数校验的处理
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
-        return ResponseEntity.ok(HttpBody.error(SdErrorCode.REQUEST_PARAM_FORMAT_EXCEPTION, ex.getBindingResult().getAllErrors().get(0).getDefaultMessage()));
+        return handleValidBeanExceptionResponse(ex, ex.getBindingResult());
     }
 
     // 对方法的Form提交参数绑定校验的处理
     @Override
     protected ResponseEntity<Object> handleBindException(BindException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
-        return ResponseEntity.ok(HttpBody.error(SdErrorCode.REQUEST_PARAM_FORMAT_EXCEPTION, ex.getBindingResult().getAllErrors().get(0).getDefaultMessage()));
+        return handleValidBeanExceptionResponse(ex, ex.getBindingResult());
     }
-     */
 
-    /** 其它服务器内部异常处理 */
+    // 其它内部异常处理
     @SuppressWarnings("all")
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Object> handleException(Exception e) throws IOException {
@@ -122,8 +130,31 @@ public class UniformExceptionResponseHandler extends ResponseEntityExceptionHand
         return ResponseEntity.status(Integer.parseInt(status.toString())).body(result);
     }
 
+    /**
+     * 处理Bean校验异常
+     * @param ex            异常
+     * @param bindingResult 错误绑定数据
+     * @return  ResponseEntity
+     */
+    private ResponseEntity<Object> handleValidBeanExceptionResponse(Exception ex, BindingResult bindingResult) {
+        ObjectError objectError = bindingResult.getAllErrors().get(0);
+        String message = objectError.getDefaultMessage();
+        if (objectError.getArguments() != null && objectError.getArguments().length > 0) {
+            String field = ((DefaultMessageSourceResolvable) objectError.getArguments()[0]).getDefaultMessage();
+            message = "[" + field + "] " + message;
+        }
+        return handleExceptionResponse(ex, HttpStatus.BAD_REQUEST.value(), message);
+    }
+
+    /**
+     * 处理非5xx异常响应
+     * @param ex                异常
+     * @param presetStatusCode  预设响应码
+     * @param presetMessage     预设错误消息
+     * @return  ResponseEntity
+     */
     @SuppressWarnings("all")
-    public ResponseEntity<Object> handleExceptionResponse(Exception ex, Object presetStatusCode) {
+    private ResponseEntity<Object> handleExceptionResponse(Exception ex, Object presetStatusCode, String presetMessage) {
         Map<String, Object> body = props.getUniform().getBody();
         Map<String, Object> result = new HashMap<>();
         Object exp4xx = body.get(presetStatusCode.toString());
@@ -137,8 +168,8 @@ public class UniformExceptionResponseHandler extends ResponseEntityExceptionHand
             return ResponseEntity.status(Integer.parseInt(presetStatusCode.toString())).body(null);
         }
 
-        putMapElement(exp4xxBody, result, "code", presetStatusCode, null);
-        putMapElement(exp4xxBody, result, "message", null, null);
+        putMapElement(exp4xxBody, result, "code", presetStatusCode, presetStatusCode);
+        putMapElement(exp4xxBody, result, "message", presetMessage, presetMessage);
         return ResponseEntity.status(Integer.parseInt(statusCode4xx.toString())).body(result);
     }
 

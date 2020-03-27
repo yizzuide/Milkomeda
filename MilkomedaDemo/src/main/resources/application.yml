@@ -126,13 +126,13 @@ milkomeda:
         404:
           status: 200
           code: -1
-          message: 请求的URL错误！
+          message: 请求的路径错误！
 
         # 参数异常处理
         400:
           status: 200
           code: -1
-          message: 请求的参数错误！
+          message:
 
         # 自定义异常列表处理
         customs:
@@ -144,5 +144,6 @@ milkomeda:
             message:
             type:
 
-
+    validator:
+      enable: true
 

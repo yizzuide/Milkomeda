@@ -1,8 +1,11 @@
 package com.github.yizzuide.milkomeda.hydrogen.validator;
 
+import com.github.yizzuide.milkomeda.hydrogen.core.HydrogenHolder;
 import com.github.yizzuide.milkomeda.hydrogen.core.HydrogenProperties;
 import org.hibernate.validator.HibernateValidator;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.validation.ValidationAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,8 +25,10 @@ import javax.validation.ValidatorFactory;
  */
 @Configuration
 @EnableConfigurationProperties(HydrogenProperties.class)
+@AutoConfigureAfter(ValidationAutoConfiguration.class)
 @ConditionalOnProperty(prefix = "milkomeda.hydrogen.validator", name = "enable", havingValue = "true")
 public class ValidatorConfig {
+
     @Bean
     public MethodValidationPostProcessor methodValidationPostProcessor() {
         MethodValidationPostProcessor postProcessor = new MethodValidationPostProcessor();
@@ -40,6 +45,8 @@ public class ValidatorConfig {
                 .failFast(true)
 //                .addProperty( "hibernate.validator.fail_fast", "true" ) // 和上一个方法等同
                 .buildValidatorFactory();
-        return validatorFactory.getValidator();
+        Validator validator = validatorFactory.getValidator();
+        HydrogenHolder.setValidator(validator);
+        return validator;
     }
 }
