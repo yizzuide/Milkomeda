@@ -1,10 +1,10 @@
 package com.github.yizzuide.milkomeda.hydrogen.uniform;
 
 import com.github.yizzuide.milkomeda.hydrogen.core.HydrogenProperties;
+import com.github.yizzuide.milkomeda.universe.context.WebContext;
 import com.github.yizzuide.milkomeda.util.DataTypeConvertUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +12,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -56,9 +57,10 @@ public class UniformExceptionResponseHandler extends ResponseEntityExceptionHand
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<Object> constraintViolationException(ConstraintViolationException e) {
         ConstraintViolation<?> constraintViolation = e.getConstraintViolations().iterator().next();
-        String path = constraintViolation.getPropertyPath().toString();
         String value = String.valueOf(constraintViolation.getInvalidValue());
-        String message = path + "[" + value + "] " + constraintViolation.getMessage();
+        String message = WebContext.getRequest().getRequestURI() +
+                " [" + constraintViolation.getPropertyPath() + "=" + value + "] " + constraintViolation.getMessage();
+        log.warn("Hydrogen uniform valid response exception with msg: {} ", message);
         return handleExceptionResponse(e, HttpStatus.BAD_REQUEST.value(), message);
     }
 
@@ -140,9 +142,10 @@ public class UniformExceptionResponseHandler extends ResponseEntityExceptionHand
         ObjectError objectError = bindingResult.getAllErrors().get(0);
         String message = objectError.getDefaultMessage();
         if (objectError.getArguments() != null && objectError.getArguments().length > 0) {
-            String field = ((DefaultMessageSourceResolvable) objectError.getArguments()[0]).getDefaultMessage();
-            message = "[" + field + "] " + message;
+            FieldError fieldError = (FieldError) objectError;
+            message = WebContext.getRequest().getRequestURI() + " [" + fieldError.getField() + "=" + fieldError.getRejectedValue() + "] " + message;
         }
+        log.warn("Hydrogen uniform valid response exception with msg: {} ", message);
         return handleExceptionResponse(ex, HttpStatus.BAD_REQUEST.value(), message);
     }
 

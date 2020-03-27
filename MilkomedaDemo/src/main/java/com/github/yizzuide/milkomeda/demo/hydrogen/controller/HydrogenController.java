@@ -3,6 +3,7 @@ package com.github.yizzuide.milkomeda.demo.hydrogen.controller;
 import com.github.yizzuide.milkomeda.demo.hydrogen.exception.YizException;
 import com.github.yizzuide.milkomeda.demo.hydrogen.service.TOrderService;
 import com.github.yizzuide.milkomeda.demo.hydrogen.vo.UserVO;
+import com.github.yizzuide.milkomeda.hydrogen.core.HydrogenHolder;
 import com.github.yizzuide.milkomeda.hydrogen.validator.PhoneConstraint;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -51,5 +52,12 @@ public class HydrogenController {
     public String register(@Valid UserVO userVO) {
         log.info("valid userVO:  {}", userVO);
         return HttpStatus.OK.name();
+    }
+
+    // 中国: 127.0.0.1:8091/hydrogen/i18n or 127.0.0.1:8091/hydrogen/i18n?lang=
+    // 印尼：127.0.0.1:8091/hydrogen/i18n?lang=en_ID
+    @RequestMapping("i18n")
+    public String i18n() {
+        return HydrogenHolder.getI18nMessages().getWithParam("operation.success", "OK");
     }
 }

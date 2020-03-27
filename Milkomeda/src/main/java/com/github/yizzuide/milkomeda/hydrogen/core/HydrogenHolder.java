@@ -1,5 +1,7 @@
 package com.github.yizzuide.milkomeda.hydrogen.core;
 
+import com.github.yizzuide.milkomeda.hydrogen.i18n.I18nMessages;
+
 import javax.validation.Validator;
 
 /**
@@ -15,7 +17,15 @@ public class HydrogenHolder {
      */
     private static HydrogenProperties props;
 
+    /**
+     * 验证器
+     */
     private static Validator validator;
+
+    /**
+     * 国际化
+     */
+    private static I18nMessages i18nMessages;
 
     public static void setProps(HydrogenProperties props) {
         HydrogenHolder.props = props;
@@ -31,5 +41,13 @@ public class HydrogenHolder {
 
     public static Validator getValidator() {
         return validator;
+    }
+
+    public static void setI18nMessages(I18nMessages i18nMessages) {
+        HydrogenHolder.i18nMessages = i18nMessages;
+    }
+
+    public static I18nMessages getI18nMessages() {
+        return i18nMessages;
     }
 }

@@ -33,6 +33,11 @@ public class HydrogenProperties {
      */
     private Validator validator = new Validator();
 
+    /**
+     * 国际化
+     */
+    private I18n i18n = new I18n();
+
     @Data
     public static class Transaction {
         /**
@@ -84,6 +89,29 @@ public class HydrogenProperties {
          * 手机号正则表达式
          */
         private String regexPhone = "^((13[0-9])|(14[579])|(15([0-3]|[5-9]))|(166)|(17[0135678])|(18[0-9])|(19[8|9]))\\d{8}$";
+    }
+
+    @Data
+    public static class I18n {
+        /**
+         * 启用国际化
+         */
+        private boolean enable = false;
+
+        /**
+         * 请求语言设置参数名，参数值如：zh_CN （language_country）
+         */
+        private String query = "lang";
+
+        /*
+         * 记录语言选择到会话（API项目设置为false，后端管理项目保存默认）
+         */
+        // private boolean useSessionQuery = true;
+
+        /*
+         * 设置请求语言设置到会话的key（如无特殊情况，不需要修改）
+         */
+        // private String querySessionName = "hydrogen_i18n_language_session";
     }
 
 }

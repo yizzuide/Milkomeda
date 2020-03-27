@@ -18,7 +18,7 @@ public class ValidatorExaminer {
      * @param obj       参数对象
      * @param groups    校验分组
      * @param <T>       参数对象类型
-     * @return 错误信息
+     * @return 错误信息，如果返回null，则验证成功
      */
     public static <T> String valid(T obj, Class<?>... groups) {
         Set<ConstraintViolation<T>> violationSet = HydrogenHolder.getValidator().validate(obj, groups);

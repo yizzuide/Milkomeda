@@ -13,8 +13,6 @@ spring:
   redis:
     host: 127.0.0.1
 
-
-
   mvc:
     # Pulsar模块异步超时
     async:
@@ -24,6 +22,10 @@ spring:
   # 资源不生成mapping映射
   resources:
     add-mappings: false
+
+  # 国际化资源位置
+  messages:
+    basename: i18n/messages
 
 
   # Pulsar模块异步线程池（Async异步任务线程池，SpringBoot 2.1.0+在这里配置）
@@ -144,6 +146,14 @@ milkomeda:
             message:
             type:
 
+    # 参数校验
     validator:
       enable: true
+
+    # 国际化
+    i18n:
+      enable: true
+      # 语言设置参数名，默认为lang，如：zh_CN (language_country)
+      query: lang
+
 

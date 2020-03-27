@@ -52,6 +52,7 @@ public class CometAspect {
     /**
      * 请求参数解析本地线程存储
      */
+    // 官方推荐使用private static能减少弱引用对GC的影响
     static ThreadLocal<String> resolveThreadLocal = new ThreadLocal<>();
     /**
      * 控制器层本地线程存储
