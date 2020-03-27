@@ -24,7 +24,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Config
+ * I18nConfig
  *
  * @author yizzuide
  * @since 2.8.0

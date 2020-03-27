@@ -73,6 +73,14 @@ public class I18nMessages {
 
     /**
      * 设置固定的Locale
+     * @param localeIdentifier    国际化标识符，如: zh_CN
+     */
+    public void setFixedLocale(String localeIdentifier) {
+        setFixedLocale(StringUtils.parseLocale(localeIdentifier));
+    }
+
+    /**
+     * 设置固定的Locale
      * @param locale    Locale
      */
     public void setFixedLocale(Locale locale) {

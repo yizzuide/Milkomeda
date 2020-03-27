@@ -150,7 +150,7 @@ milkomeda:
     validator:
       enable: true
 
-    # 国际化
+    # 国际化：需配置spring.messages.basename
     i18n:
       enable: true
       # 语言设置参数名，默认为lang，如：zh_CN (language_country)
