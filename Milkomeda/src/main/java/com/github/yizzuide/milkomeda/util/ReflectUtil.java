@@ -8,7 +8,6 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
@@ -27,7 +26,7 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 0.2.0
- * @version 2.5.2
+ * @version 2.8.0
  * Create at 2019/04/11 19:55
  */
 @Slf4j
@@ -168,12 +167,12 @@ public class ReflectUtil {
             // List<Entity>
             if (TypeUtil.type2Class(actualTypeArgument) == wrapperClazz) {
                 // List<Entity>
-                if (!(actualTypeArgument instanceof ParameterizedTypeImpl)) {
+                if (!(actualTypeArgument instanceof ParameterizedType)) {
                     method.invoke(target, wrapperList);
                     return;
                 }
                 // List<Entity<Map>>
-                Type[] subActualTypeArguments = ((ParameterizedTypeImpl) actualTypeArgument).getActualTypeArguments();
+                Type[] subActualTypeArguments = ((ParameterizedType) actualTypeArgument).getActualTypeArguments();
                 if (TypeUtil.type2Class(subActualTypeArguments[0]) == Map.class) {
                     method.invoke(target, wrapperList);
                     return;

@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
 @Configuration
 @EnableConfigurationProperties(HydrogenProperties.class)
 @AutoConfigureAfter(TransactionAutoConfiguration.class)
-@ConditionalOnProperty(prefix = "milkomeda.hydrogen.transaction", name = "enable", havingValue = "true", matchIfMissing = true)
+@ConditionalOnProperty(prefix = "milkomeda.hydrogen.transaction", name = "enable", havingValue = "true")
 public class TransactionAdviceConfig {
 
     @Autowired

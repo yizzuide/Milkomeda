@@ -3,6 +3,7 @@ package com.github.yizzuide.milkomeda.hydrogen.core;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.convert.DurationUnit;
+import org.springframework.web.servlet.HandlerInterceptor;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
@@ -21,29 +22,34 @@ public class HydrogenProperties {
     /**
      * 切面事务
      */
-    private final Transaction transaction = new Transaction();
+    private final Transaction transaction = new HydrogenProperties.Transaction();
 
     /**
      * 统一异常处理
      */
-    private final Uniform uniform = new Uniform();
+    private final Uniform uniform = new HydrogenProperties.Uniform();
 
     /**
      * 校验器
      */
-    private Validator validator = new Validator();
+    private Validator validator = new HydrogenProperties.Validator();
 
     /**
      * 国际化
      */
-    private I18n i18n = new I18n();
+    private I18n i18n = new HydrogenProperties.I18n();
+
+    /**
+     * 动态拦截器
+     */
+    private List<Interceptor> interceptors;
 
     @Data
     public static class Transaction {
         /**
-         * 开启AOP事务
+         * 启用AOP事务
          */
-        private boolean enable = true;
+        private boolean enable = false;
         /**
          * 切点表达式
          */
@@ -112,6 +118,34 @@ public class HydrogenProperties {
          * 设置请求语言设置到会话的key（如无特殊情况，不需要修改）
          */
         // private String querySessionName = "hydrogen_i18n_language_session";
+    }
+
+    @Data
+    public static class Interceptor {
+        /**
+         * 拦截器类
+         */
+        private Class<HandlerInterceptor> clazz;
+
+        /**
+         * 包括拦截的URL
+         */
+        private List<String> includeURLs = Collections.singletonList("/**");
+
+        /**
+         * 排除拦截的URL
+         */
+        private List<String> excludeURLs;
+
+        /**
+         * 拦截器执行顺序
+         */
+        private int order = 0;
+
+        /**
+         * 属性
+         */
+        private Map<String, Object> props = new HashMap<>();
     }
 
 }

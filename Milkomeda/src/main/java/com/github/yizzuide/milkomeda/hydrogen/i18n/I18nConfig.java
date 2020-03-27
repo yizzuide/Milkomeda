@@ -2,6 +2,7 @@ package com.github.yizzuide.milkomeda.hydrogen.i18n;
 
 import com.github.yizzuide.milkomeda.hydrogen.core.HydrogenHolder;
 import com.github.yizzuide.milkomeda.hydrogen.core.HydrogenProperties;
+import com.github.yizzuide.milkomeda.universe.polyfill.SpringMvcPolyfill;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
@@ -12,16 +13,11 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.util.StringUtils;
-import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.LocaleResolver;
-import org.springframework.web.servlet.handler.MappedInterceptor;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
-import java.lang.reflect.Field;
 import java.util.Collections;
-import java.util.List;
 
 /**
  * I18nConfig
@@ -60,30 +56,13 @@ public class I18nConfig {
         return new I18nMessages(messageSource);
     }
 
-    // 使用内置拦截器，实现动态注册
     @Autowired
     @SuppressWarnings("all")
-    public void configInterceptors(RequestMappingHandlerMapping requestMappingHandlerMapping) {
+    public void configRequestMappingHandlerMapping(RequestMappingHandlerMapping requestMappingHandlerMapping) {
+        // 使用内置拦截器
         final LocaleChangeInterceptor localeChangeInterceptor = new LocaleChangeInterceptor();
         localeChangeInterceptor.setParamName("lang");
-        String[] include = StringUtils.toStringArray(Collections.singletonList("/**"));
-        // Interceptor -> MappedInterceptor
-        MappedInterceptor mappedInterceptor = new MappedInterceptor(include, localeChangeInterceptor);
-        // 下面这行可以省略，但为了保持内部的处理流程，使表达式成立：interceptors.count() == adaptedInterceptors.count()
-        requestMappingHandlerMapping.setInterceptors(mappedInterceptor);
-        try {
-            // 虽然用了反射，但这些代码在只在启动时加载
-            // 查找继承链 RequestMappingHandlerMapping -> RequestMappingInfoHandlerMapping -> AbstractHandlerMethodMapping -> AbstractHandlerMapping
-            // TODO <mark> 由于使用底层API, 这个AbstractHandlerMapping.adaptedInterceptors很后的版本可能会改
-            Field field = requestMappingHandlerMapping.getClass().getSuperclass().getSuperclass()
-                    .getSuperclass().getDeclaredField("adaptedInterceptors");
-            field.setAccessible(true);
-            // 添加到可采纳的拦截器列表，让拦截器处理器Chain流程获取得到这个拦截器
-            List<HandlerInterceptor> handlerInterceptors = (List<HandlerInterceptor>) field.get(requestMappingHandlerMapping);
-            handlerInterceptors.add(mappedInterceptor);
-            field.set(requestMappingHandlerMapping, handlerInterceptors);
-        } catch (Exception e) {
-            log.error("Hydrogen i18n invoke AbstractHandlerMapping.adaptedInterceptors error with msg: {}",  e.getMessage(), e);
-        }
+        SpringMvcPolyfill.addDynamicInterceptor(localeChangeInterceptor, Collections.singletonList("/**"),
+                null, requestMappingHandlerMapping);
     }
 }

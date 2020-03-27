@@ -108,6 +108,7 @@ milkomeda:
 
   hydrogen:
     transaction:
+      enable: true
       # 事务5秒超时回滚（支持自定义时间单位，不指定单位默认单位：s）
       rollback-when-timeout: 5s
       read-only-append-prefix:
@@ -156,4 +157,12 @@ milkomeda:
       # 语言设置参数名，默认为lang，如：zh_CN (language_country)
       query: lang
 
+    # 动态添加拦截器
+    interceptors:
+        -
+          clazz: com.github.yizzuide.milkomeda.demo.hydrogen.handler.UrlLogInterceptor
+          order: 1
+          # 注入属性值
+          props:
+            open: true
 

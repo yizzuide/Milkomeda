@@ -1,6 +1,7 @@
 package com.github.yizzuide.milkomeda.hydrogen.core;
 
 import com.github.yizzuide.milkomeda.hydrogen.i18n.I18nConfig;
+import com.github.yizzuide.milkomeda.hydrogen.interceptor.InterceptorConfig;
 import com.github.yizzuide.milkomeda.hydrogen.transaction.TransactionAdviceConfig;
 import com.github.yizzuide.milkomeda.hydrogen.uniform.UniformExceptionResponseConfig;
 import com.github.yizzuide.milkomeda.hydrogen.validator.ValidatorConfig;
@@ -15,6 +16,10 @@ import org.springframework.context.annotation.Import;
  * Create at 2020/03/25 17:46
  */
 @Configuration
-@Import({TransactionAdviceConfig.class, UniformExceptionResponseConfig.class, ValidatorConfig.class, I18nConfig.class})
+@Import({TransactionAdviceConfig.class,
+        UniformExceptionResponseConfig.class,
+        ValidatorConfig.class,
+        I18nConfig.class,
+        InterceptorConfig.class})
 public class HydrogenConfig {
 }
