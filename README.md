@@ -1,7 +1,12 @@
 # Milkomeda
 ![tag](https://img.shields.io/github/tag/yizzuide/Milkomeda.svg) ![license](https://img.shields.io/github/license/yizzuide/Milkomeda.svg)
 
-名字源于未来要融合的”银河织女系“，代表当前Spring生态的全家桶体系，这个项目以Spring生态为基础，从实际业务上整理出来的快速开发模块。
+名字源于未来要融合的”银河织女系“，代表当前Spring生态的全家桶体系，这个项目以Spring生态为基础，从实际业务上整理出来的快速开发模块集合，让SpringBoot开发可以更快。
+
+## Goals
+- 能用yml配置文件完成的，绝不会用代码重复配置。
+- 能用注解切面完成的，绝不会用API代码。
+- 能用面向声明式编程的，绝不会用面向过程或面向对象编程。
 
 ## Modules
 - [x] Pulsar（脉冲星）: 用于长轮询、耗时请求fast-timeout等。*0.1.0+*
