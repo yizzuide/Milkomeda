@@ -3,7 +3,7 @@
 
 名字源于未来要融合的”银河织女系“，代表当前Spring生态的全家桶体系，这个项目以Spring生态为基础，从实际业务上整理出来的快速开发模块集合，让SpringBoot开发可以更快。
 
-> 该项目并非Demo或者框架模板工程，而是SpringBoot Plus，每个功能模块需要使用相应注解启用才会加载，模块多而不重，可选择性启用。
+> 该项目并非Demo或者框架模板工程，而是源码级提升的SpringBoot Plus，每个功能模块需要使用相应注解启用才会加载，模块多而不重，可选择性启用。
 
 ## Goals
 - 能用yml配置文件完成的，绝不会用代码重复配置。
@@ -100,13 +100,13 @@ Milkomeda 2.0 is now available (Dec 2019).
 ## Contributing
 *Mikomeda*还需要更多的业务型实用模块，欢迎有想法的开发者加入进来！可以通过以下原则来Pull Request:
 
-- 从`master`分支拉取新分支，新添加的功能模块分支以`feat-`前缀开头，问题修复则以`fix-`为前缀。
+- 从`master`分支拉取新分支，新添加的功能模块分支以`feat_模块名_yyyyMMdd`形式命名，问题修复则以`fix__yyyyMMdd`模块名形式命名。
 - 添加的模块尽可能地通用，不能含有业务代码，最好可以提供使用的Demo并添加到`MilkomedaDemo`工程里，如果有好的想法需要讨论可以提一个以[feature]开头的issue进行讨论。
 - 新添加的代码尽可能地规范，代码必需经过格式化，类的命名需要添加模块名前缀，新添加的模块需要添加到`Milkomeda`的`com.github.yizzuide.milkomeda`包下，属性和方法需要添加注释表明如何使用。
 - 建议遵行提交注释以`feat|fix|docs|style|refactor|perf|test|workflow|ci|chore|types:`为前缀。
 - 提交时不要提交IDE的配置相关文件和临时生成的文件，请注意排除。
 
-> 关于如果开发*Mikomeda*项目：使用IDEA新建空的工程，再把工程模块`Mikomeda`和`MikomedaDemo`导入即可。
+> 关于如何开发*Mikomeda*项目：使用IDEA新建空的工程，再把工程模块`Mikomeda`和`MikomedaDemo`导入即可。
 
 ## Author
 yizzuide, fu837014586@163.com
@@ -116,6 +116,6 @@ Milkomeda is available under the MIT license. See the LICENSE file for more info
 
 ## Thanks
 <a href="https://www.jetbrains.com/idea/" target="_blank">
-          <img width="64px" src="./logo/idea.png" alt="IntelliJ IDEA">
+  <img width="64px" src="./logo/idea.png" alt="IntelliJ IDEA">
 </a>
 
