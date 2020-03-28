@@ -2,6 +2,7 @@ package com.github.yizzuide.milkomeda.comet;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.NestedConfigurationProperty;
 
 import java.util.List;
 
@@ -24,6 +25,7 @@ public class CometProperties {
     /**
      * 请求日志
      */
+    @NestedConfigurationProperty
     private UrlLog urlLog = new UrlLog();
 
     @Data

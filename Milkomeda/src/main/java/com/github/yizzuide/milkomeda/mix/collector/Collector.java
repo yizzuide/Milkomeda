@@ -5,7 +5,7 @@ import com.github.yizzuide.milkomeda.pillar.Pillar;
 
 /**
  * Collector
- * 日志收集器
+ * 日志收集器接口
  *
  * @author yizzuide
  * @since 1.15.0

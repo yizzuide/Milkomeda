@@ -3,7 +3,6 @@ package com.github.yizzuide.milkomeda.mix.collector;
 import com.github.yizzuide.milkomeda.comet.CometData;
 import com.github.yizzuide.milkomeda.comet.CometRecorder;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -18,9 +17,14 @@ import javax.servlet.http.HttpServletRequest;
  */
 @Slf4j
 public class CollectorRecorder implements CometRecorder {
-
-    @Autowired
+    /**
+     * 收集器工厂
+     */
     private CollectorFactory collectorFactory;
+
+    public CollectorRecorder(CollectorFactory collectorFactory) {
+        this.collectorFactory = collectorFactory;
+    }
 
     @Override
     public void onRequest(CometData prototype, String tag, HttpServletRequest request, Object[] args) {

@@ -9,11 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Map;
-
-import static com.github.yizzuide.milkomeda.demo.comet.collector.CollectorType.TAG_PROFILE;
 
 /**
  * CollectController
@@ -30,16 +27,13 @@ public class CollectController {
     private CollectService collectService;
 
     @RequestMapping("feature")
-    @Comet(apiCode = "1.1", name = "上传用户特征", tag = TAG_PROFILE, prototype = ProfileWebCometData.class)
-    public ResponseEntity<Map<String, String>> feature(@RequestParam Map<String, String> params, HttpServletRequest request) {
-        log.info(request.getHeader("accept-language"));
-        log.info("请求参数：{}", params);
+    @Comet(apiCode = "1.1", name = "上传用户特征", tag = "PROFILE", prototype = ProfileWebCometData.class)
+    public ResponseEntity<Map<String, String>> feature(@RequestParam Map<String, String> params) {
         collectService.save(1, params);
         Map<String, String> map = new HashMap<>();
         map.put("code", "200");
         map.put("data", null);
 //        throw new RuntimeException("出错了");
-        // 注意：这里的返回值会被 CometConfig 里的切面修改掉！
         return ResponseEntity.ok(map);
     }
 

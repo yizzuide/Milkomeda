@@ -2,6 +2,7 @@ package com.github.yizzuide.milkomeda.hydrogen.core;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.boot.convert.DurationUnit;
 import org.springframework.web.servlet.HandlerInterceptor;
 
@@ -22,21 +23,25 @@ public class HydrogenProperties {
     /**
      * 切面事务
      */
+    @NestedConfigurationProperty
     private final Transaction transaction = new HydrogenProperties.Transaction();
 
     /**
      * 统一异常处理
      */
+    @NestedConfigurationProperty
     private final Uniform uniform = new HydrogenProperties.Uniform();
 
     /**
      * 校验器
      */
+    @NestedConfigurationProperty
     private Validator validator = new HydrogenProperties.Validator();
 
     /**
      * 国际化
      */
+    @NestedConfigurationProperty
     private I18n i18n = new HydrogenProperties.I18n();
 
     /**
