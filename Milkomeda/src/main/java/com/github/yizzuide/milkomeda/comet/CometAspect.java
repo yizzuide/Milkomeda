@@ -35,7 +35,7 @@ import java.util.function.Function;
  *
  * @author yizzuide
  * @since 0.2.0
- * @version 2.0.0
+ * @version 2.8.0
  * Create at 2019/04/11 19:48
  */
 @Slf4j
@@ -244,7 +244,7 @@ public class CometAspect {
             // 从请求包装里获取
             String body = ((CometRequestWrapper) request).getBodyString();
             // 删除换行符
-            body = body.replaceAll("\\n?\\t?", "");
+            body = body == null ? "" : body.replaceAll("\\n?\\t?", "");
            return body;
         }
         return requestData;

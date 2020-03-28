@@ -62,6 +62,19 @@ milkomeda:
   # 配置是否显示跟踪日志信息（线上环境应该关闭）
   show-log: true
 
+  comet:
+    # 请求日志打印
+    url-log:
+      enable: true
+      # 根据路径匹配策略
+      strategy:
+        -
+          paths: ["/**"]
+          tpl: url->{uri},userId:{uid},token:{token},method->{method},parameters->{params}
+        -
+          paths: ["/error/**"]
+          tpl: url->{uri},method->{method}
+
   light:
     # 一级缓存一小时后过期（只适用于LazyExpire策略）
     l1-expire: 10
@@ -158,11 +171,11 @@ milkomeda:
       query: lang
 
     # 动态添加拦截器
-    interceptors:
-        -
-          clazz: com.github.yizzuide.milkomeda.demo.hydrogen.handler.UrlLogInterceptor
-          order: 1
-          # 注入属性值
-          props:
-            open: true
+#    interceptors:
+#        -
+#          clazz: com.github.yizzuide.milkomeda.demo.hydrogen.handler.UrlLogInterceptor
+#          order: 1
+#          # 注入属性值
+#          props:
+#            open: true
 

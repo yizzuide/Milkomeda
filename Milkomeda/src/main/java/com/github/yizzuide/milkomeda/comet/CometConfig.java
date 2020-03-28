@@ -1,5 +1,6 @@
 package com.github.yizzuide.milkomeda.comet;
 
+import com.github.yizzuide.milkomeda.universe.polyfill.SpringMvcPolyfill;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -8,6 +9,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -19,11 +21,19 @@ import java.util.Objects;
  *
  * @author yizzuide
  * @since 2.0.0
+ * @version 2.8.0
  * Create at 2019/12/12 18:10
  */
 @EnableConfigurationProperties(CometProperties.class)
 @Configuration
 public class CometConfig {
+
+    @Autowired CometProperties cometProperties;
+
+    @Autowired
+    public void config(CometProperties cometProperties) {
+        CometHolder.setProps(cometProperties);
+    }
 
     @Bean
     public CometAspect cometAspect() {
@@ -49,5 +59,18 @@ public class CometConfig {
         argumentResolvers.add(new CometParamResolver());
         argumentResolvers.addAll(Objects.requireNonNull(adapter.getArgumentResolvers()));
         adapter.setArgumentResolvers(argumentResolvers);
+    }
+
+    @Autowired
+    @SuppressWarnings("all")
+    public void configRequestMappingHandlerMapping(RequestMappingHandlerMapping requestMappingHandlerMapping) {
+        // 使用内置拦截器
+        SpringMvcPolyfill.addDynamicInterceptor(cometUrlLogInterceptor(), Collections.singletonList("/**"),
+                null, requestMappingHandlerMapping);
+    }
+
+    @Bean
+    public CometUrlLogInterceptor cometUrlLogInterceptor() {
+        return new CometUrlLogInterceptor(cometProperties);
     }
 }
