@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletRequest;
  *
  * @author yizzuide
  * @since 1.15.0
+ * @version 2.8.0
  * Create at 2019/11/13 19:18
  */
 @Slf4j
@@ -26,9 +27,7 @@ public class CollectorRecorder implements CometRecorder {
         try {
             collectorFactory.get(tag).prepare(prototype);
         } catch (IllegalArgumentException e) {
-            if (e.getMessage().startsWith("type")) {
-                if (!e.getMessage().startsWith("type")) throw e;
-            }
+            if (!e.getMessage().startsWith("type")) throw e;
         }
     }
 

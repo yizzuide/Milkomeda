@@ -46,7 +46,7 @@ public @interface LightCacheable {
     LightDiscardStrategy discardStrategy() default LightDiscardStrategy.DEFAULT;
 
     /**
-     * 新的缓存总是拷贝内置的配置（如果想针对某类型定制配置，设置为false，然后配置LightCache Bean，Bean名与注解属性value()相同）
+     * 新的缓存总是拷贝内置的配置（如果想针对业务定制实例配置，设置为false）
      * @return bool
      */
     boolean copyDefaultConfig() default true;

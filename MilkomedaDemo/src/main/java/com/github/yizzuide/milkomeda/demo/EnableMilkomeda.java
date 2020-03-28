@@ -8,6 +8,7 @@ import com.github.yizzuide.milkomeda.halo.EnableHalo;
 import com.github.yizzuide.milkomeda.hydrogen.core.EnableHydrogen;
 import com.github.yizzuide.milkomeda.ice.EnableIce;
 import com.github.yizzuide.milkomeda.light.EnableLight;
+import com.github.yizzuide.milkomeda.moon.EnableMoon;
 import com.github.yizzuide.milkomeda.neutron.EnableNeutron;
 import com.github.yizzuide.milkomeda.particle.EnableParticle;
 import com.github.yizzuide.milkomeda.pulsar.EnablePulsar;
@@ -25,6 +26,7 @@ import java.lang.annotation.Target;
  * Create at 2019/12/13 01:03
  */
 @EnableHydrogen
+@EnableMoon
 @EnableHalo
 @EnableNeutron
 @EnableIce
