@@ -110,24 +110,24 @@ public class UniformExceptionResponseHandler extends ResponseEntityExceptionHand
                 Class<Exception> exceptionClass = (Class<Exception>) map.get("clazz");
                 if (exceptionClass.isInstance(e)) {
                     Map<String, Object> exMap = DataTypeConvertUtil.beanToMap(e);
-                    YmlParser.parseAliasNodePath(map, result, "code", null, exMap);
-                    YmlParser.parseAliasNodePath(map, result, "message", null, exMap);
+                    YmlParser.parseAliasMapPath(map, result, "code", null, exMap);
+                    YmlParser.parseAliasMapPath(map, result, "message", null, exMap);
                     // 其它自定义key也返回
                     map.keySet().stream().filter(k -> !Arrays.asList("clazz", "status", "code", "message").contains(k) && !result.containsKey(k))
-                            .forEach(k ->  YmlParser.parseAliasNodePath(map, result, k, null, exMap));
+                            .forEach(k ->  YmlParser.parseAliasMapPath(map, result, k, null, exMap));
                     return ResponseEntity.status(Integer.parseInt(status.toString())).body(result);
                 }
             }
         }
 
         log.error("Hydrogen uniform response exception with msg: {}", e.getMessage(), e);
-        YmlParser.parseAliasNodePath(body, result, "code", -1, null);
-        YmlParser.parseAliasNodePath(body, result, "message", "服务器繁忙，请稍后再试！", null);
-        YmlParser.parseAliasNodePath(body, result, "error-stack-msg", null, e.getMessage());
+        YmlParser.parseAliasMapPath(body, result, "code", -1, null);
+        YmlParser.parseAliasMapPath(body, result, "message", "服务器繁忙，请稍后再试！", null);
+        YmlParser.parseAliasMapPath(body, result, "error-stack-msg", null, e.getMessage());
         StackTraceElement[] stackTrace = e.getStackTrace();
         if (stackTrace.length > 0) {
             String errorStack = String.format("exception happened: %s \n invoke root: %s", stackTrace[0], stackTrace[stackTrace.length - 1]);
-            YmlParser.parseAliasNodePath(body, result, "error-stack", null, errorStack);
+            YmlParser.parseAliasMapPath(body, result, "error-stack", null, errorStack);
         }
         return ResponseEntity.status(Integer.parseInt(status.toString())).body(result);
     }
@@ -171,8 +171,8 @@ public class UniformExceptionResponseHandler extends ResponseEntityExceptionHand
             return ResponseEntity.status(Integer.parseInt(presetStatusCode.toString())).body(null);
         }
 
-        YmlParser.parseAliasNodePath(exp4xxBody, result, "code", presetStatusCode, presetStatusCode);
-        YmlParser.parseAliasNodePath(exp4xxBody, result, "message", presetMessage, presetMessage);
+        YmlParser.parseAliasMapPath(exp4xxBody, result, "code", presetStatusCode, presetStatusCode);
+        YmlParser.parseAliasMapPath(exp4xxBody, result, "message", presetMessage, presetMessage);
         return ResponseEntity.status(Integer.parseInt(statusCode4xx.toString())).body(result);
     }
 }

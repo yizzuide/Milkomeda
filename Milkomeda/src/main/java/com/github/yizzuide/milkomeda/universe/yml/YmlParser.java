@@ -45,8 +45,8 @@ public class YmlParser {
      * @param ownerAliasKeys    拥有别名的key列表
      * @return  解析后的节点Map
      */
-    public static Map<String, YmlAliasNode> parseAliasNodeFullPath(Map<String, Object> nodeMap, String... ownerAliasKeys) {
-        return parseAliasNodeFullPath(nodeMap, null, ownerAliasKeys);
+    public static Map<String, YmlAliasNode> parseAliasNodePath(Map<String, Object> nodeMap, String... ownerAliasKeys) {
+        return parseAliasNodePath(nodeMap, null, ownerAliasKeys);
     }
 
     /**
@@ -56,10 +56,10 @@ public class YmlParser {
      * @param ownerAliasKeys    拥有别名的key列表
      * @return  解析后的节点Map
      */
-    public static Map<String, YmlAliasNode> parseAliasNodeFullPath(Map<String, Object> nodeMap, Object replaceData, String... ownerAliasKeys) {
+    public static Map<String, YmlAliasNode> parseAliasNodePath(Map<String, Object> nodeMap, Object replaceData, String... ownerAliasKeys) {
         Map<String, YmlAliasNode> aliasNodeMap = new HashMap<>();
         for (String ownerAliasKey : ownerAliasKeys) {
-            parseAliasNodeFullPath(nodeMap, aliasNodeMap, ownerAliasKey, null, replaceData);
+            parseAliasNodePath(nodeMap, aliasNodeMap, ownerAliasKey, null, replaceData);
         }
         return aliasNodeMap;
     }
@@ -67,14 +67,14 @@ public class YmlParser {
     /**
      * 解析某个别名字段
      * @param nodeMap       拥有别名的节点Map
-     * @param result        返回替换的别名map
+     * @param result        添加替换别名的目标map
      * @param ownerAliasKey 拥有别名的key
      * @param defaultValue  默认的值
      * @param replaceData   如果值存在，使用替换的源强制替换配置的字段
      */
-    public static void parseAliasNodePath(Map<String, Object> nodeMap, Map<String, Object> result, String ownerAliasKey, Object defaultValue, Object replaceData) {
+    public static void parseAliasMapPath(Map<String, Object> nodeMap, Map<String, Object> result, String ownerAliasKey, Object defaultValue, Object replaceData) {
         Map<String, YmlAliasNode> aliasNodeMap = new HashMap<>(2);
-        parseAliasNodeFullPath(nodeMap, aliasNodeMap, ownerAliasKey, defaultValue, replaceData);
+        parseAliasNodePath(nodeMap, aliasNodeMap, ownerAliasKey, defaultValue, replaceData);
         if (aliasNodeMap.isEmpty()) {
             return;
         }
@@ -85,13 +85,13 @@ public class YmlParser {
     /**
      * 解析某个别名字段
      * @param nodeMap       拥有别名的节点Map
-     * @param aliasNodeMap  返回同时带固定的key和替换成别名key的map
+     * @param aliasNodeMap  添加替换别名的目标map（包住源key）
      * @param ownerAliasKey 拥有别名的key
      * @param defaultValue  默认的值
      * @param replaceData   如果值存在，使用替换的源强制替换配置的字段
      */
     @SuppressWarnings("all")
-    public static void parseAliasNodeFullPath(Map<String, Object> nodeMap, Map<String, YmlAliasNode> aliasNodeMap, String ownerAliasKey, Object defaultValue, Object replaceData) {
+    public static void parseAliasNodePath(Map<String, Object> nodeMap, Map<String, YmlAliasNode> aliasNodeMap, String ownerAliasKey, Object defaultValue, Object replaceData) {
         String key = ownerAliasKey;
         Object value = nodeMap.get(ownerAliasKey);
         // 未指定的配置字段，如果有默认值
