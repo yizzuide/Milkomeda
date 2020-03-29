@@ -1,6 +1,6 @@
 package com.github.yizzuide.milkomeda.demo;
 
-import com.github.yizzuide.milkomeda.comet.EnableComet;
+import com.github.yizzuide.milkomeda.comet.core.EnableComet;
 import com.github.yizzuide.milkomeda.crust.EnableCrust;
 import com.github.yizzuide.milkomeda.echo.EnableEcho;
 import com.github.yizzuide.milkomeda.fusion.EnableFusion;
@@ -8,7 +8,6 @@ import com.github.yizzuide.milkomeda.halo.EnableHalo;
 import com.github.yizzuide.milkomeda.hydrogen.core.EnableHydrogen;
 import com.github.yizzuide.milkomeda.ice.EnableIce;
 import com.github.yizzuide.milkomeda.light.EnableLight;
-import com.github.yizzuide.milkomeda.mix.collector.EnableCometCollector;
 import com.github.yizzuide.milkomeda.moon.EnableMoon;
 import com.github.yizzuide.milkomeda.neutron.EnableNeutron;
 import com.github.yizzuide.milkomeda.particle.EnableParticle;
@@ -37,7 +36,6 @@ import java.lang.annotation.Target;
 @EnableParticle
 @EnablePulsar
 @EnableFusion
-@EnableCometCollector
 @EnableComet
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)

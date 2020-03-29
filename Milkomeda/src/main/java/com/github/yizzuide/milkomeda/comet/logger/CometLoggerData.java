@@ -1,4 +1,4 @@
-package com.github.yizzuide.milkomeda.comet;
+package com.github.yizzuide.milkomeda.comet.logger;
 
 import lombok.Data;
 
@@ -10,7 +10,7 @@ import lombok.Data;
  * Create at 2020/03/28 12:19
  */
 @Data
-public class CometUrlLogData {
+public class CometLoggerData {
     private String uri;
     private String method;
     private String params;

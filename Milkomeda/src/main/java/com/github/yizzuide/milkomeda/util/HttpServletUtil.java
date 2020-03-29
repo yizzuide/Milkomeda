@@ -1,7 +1,6 @@
 package com.github.yizzuide.milkomeda.util;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -10,7 +9,7 @@ import java.util.Map;
  *
  * @author yizzuide
  * @since 0.2.0
- * @version 2.0.0
+ * @version 2.8.0
  * Create at 2019/04/11 20:10
  */
 public class HttpServletUtil {
@@ -21,12 +20,17 @@ public class HttpServletUtil {
      * @return json字符串
      */
     public static String getRequestData(HttpServletRequest request) {
-        Enumeration<String> names = request.getParameterNames();
-        Map<String, String> inputs = new HashMap<>();
-        while (names.hasMoreElements()) {
-            String name = names.nextElement();
-            String value = request.getParameter(name);
-            inputs.put(name, value);
+        Map<String, String[]> names = request.getParameterMap();
+        Map<String, Object> inputs = new HashMap<>();
+        for (Map.Entry<String, String[]> paramEntry : names.entrySet()) {
+            String[] value = paramEntry.getValue();
+            if (value == null) {
+                inputs.put(paramEntry.getKey(), "");
+            } else if (value.length == 1) {
+                inputs.put(paramEntry.getKey(), value[0]);
+            } else {
+                inputs.put(paramEntry.getKey(), value);
+            }
         }
         return JSONUtil.serialize(inputs);
     }

@@ -2,6 +2,7 @@ package com.github.yizzuide.milkomeda.hydrogen.uniform;
 
 import com.github.yizzuide.milkomeda.hydrogen.core.HydrogenProperties;
 import com.github.yizzuide.milkomeda.universe.context.WebContext;
+import com.github.yizzuide.milkomeda.universe.yml.YmlParser;
 import com.github.yizzuide.milkomeda.util.DataTypeConvertUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,7 +10,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
-import org.springframework.util.StringUtils;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -110,24 +110,24 @@ public class UniformExceptionResponseHandler extends ResponseEntityExceptionHand
                 Class<Exception> exceptionClass = (Class<Exception>) map.get("clazz");
                 if (exceptionClass.isInstance(e)) {
                     Map<String, Object> exMap = DataTypeConvertUtil.beanToMap(e);
-                    putMapElement(map, result, "code", null, exMap);
-                    putMapElement(map, result, "message", null, exMap);
+                    YmlParser.parseAliasNodePath(map, result, "code", null, exMap);
+                    YmlParser.parseAliasNodePath(map, result, "message", null, exMap);
                     // 其它自定义key也返回
                     map.keySet().stream().filter(k -> !Arrays.asList("clazz", "status", "code", "message").contains(k) && !result.containsKey(k))
-                            .forEach(k ->  putMapElement(map, result, k, null, exMap));
+                            .forEach(k ->  YmlParser.parseAliasNodePath(map, result, k, null, exMap));
                     return ResponseEntity.status(Integer.parseInt(status.toString())).body(result);
                 }
             }
         }
 
-        log.error("Hydrogen uniform response exception with msg:{} ", e.getMessage(), e);
-        putMapElement(body, result, "code", -1, null);
-        putMapElement(body, result, "message", "服务器繁忙，请稍后再试！", null);
-        putMapElement(body, result, "error-stack-msg", null, e.getMessage());
+        log.error("Hydrogen uniform response exception with msg: {}", e.getMessage(), e);
+        YmlParser.parseAliasNodePath(body, result, "code", -1, null);
+        YmlParser.parseAliasNodePath(body, result, "message", "服务器繁忙，请稍后再试！", null);
+        YmlParser.parseAliasNodePath(body, result, "error-stack-msg", null, e.getMessage());
         StackTraceElement[] stackTrace = e.getStackTrace();
         if (stackTrace.length > 0) {
             String errorStack = String.format("exception happened: %s \n invoke root: %s", stackTrace[0], stackTrace[stackTrace.length - 1]);
-            putMapElement(body, result, "error-stack", null, errorStack);
+            YmlParser.parseAliasNodePath(body, result, "error-stack", null, errorStack);
         }
         return ResponseEntity.status(Integer.parseInt(status.toString())).body(result);
     }
@@ -171,41 +171,8 @@ public class UniformExceptionResponseHandler extends ResponseEntityExceptionHand
             return ResponseEntity.status(Integer.parseInt(presetStatusCode.toString())).body(null);
         }
 
-        putMapElement(exp4xxBody, result, "code", presetStatusCode, presetStatusCode);
-        putMapElement(exp4xxBody, result, "message", presetMessage, presetMessage);
+        YmlParser.parseAliasNodePath(exp4xxBody, result, "code", presetStatusCode, presetStatusCode);
+        YmlParser.parseAliasNodePath(exp4xxBody, result, "message", presetMessage, presetMessage);
         return ResponseEntity.status(Integer.parseInt(statusCode4xx.toString())).body(result);
-    }
-
-    /**
-     * 添加响应字段
-     * @param body          响应字段集
-     * @param result        返回map
-     * @param originKey     定制的key
-     * @param defaultValue  默认的值
-     * @param replace       配置中没有设置的字段，使用替换的值
-     */
-    @SuppressWarnings("all")
-    private void putMapElement(Map<String, Object> body, Map<String, Object> result, String originKey, Object defaultValue, Object replace) {
-        String key = originKey;
-        Object value = body.get(originKey);
-        if (value == null && defaultValue != null) { // 未指定的配置字段，如果有默认值
-            value = defaultValue;
-        } else if (value instanceof Map) { // 别名替换
-            Map<String, Object> valueMap = (Map<String, Object>) value;
-            key = String.valueOf(valueMap.keySet().toArray()[0]);
-            value = valueMap.get(key);
-        }
-        // 配置中未指定返回的字段，直接返回
-        if (value == null) {
-            return;
-        }
-        // 替换是数据来源
-        if (replace instanceof Map) {
-            Map<String, Object> replaceMap = (Map<String, Object>) replace;
-            result.put(key, replaceMap.get(key));
-            return;
-        }
-        // 替换是指定的值
-        result.put(key, StringUtils.isEmpty(value) && replace != null ? replace : value);
     }
 }

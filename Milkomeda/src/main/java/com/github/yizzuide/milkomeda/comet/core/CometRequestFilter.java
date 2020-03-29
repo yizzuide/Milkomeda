@@ -1,4 +1,4 @@
-package com.github.yizzuide.milkomeda.comet;
+package com.github.yizzuide.milkomeda.comet.core;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;

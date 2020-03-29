@@ -1,4 +1,4 @@
-package com.github.yizzuide.milkomeda.comet;
+package com.github.yizzuide.milkomeda.comet.core;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -26,14 +26,22 @@ public class CometProperties {
      * 请求日志
      */
     @NestedConfigurationProperty
-    private UrlLog urlLog = new UrlLog();
+    private CometProperties.Logger logger = new CometProperties.Logger();
 
     @Data
-    public static class UrlLog {
+    public static class Logger {
         /**
          * 启用请求日志打印
          */
         private boolean enable = false;
+        /**
+         * 占位符前缀
+         */
+        private String prefix = "{";
+        /**
+         * 占位符后缀
+         */
+        private String suffix = "}";
         /**
          * 需要排除打印的路径
          */
@@ -42,7 +50,7 @@ public class CometProperties {
          * 打印策略
          * [{paths: ["/xxx/x"], tpl: "url->{userId}"}]
          */
-        private List<Strategy> strategy;
+        private List<CometProperties.Strategy> strategy;
     }
 
     @Data

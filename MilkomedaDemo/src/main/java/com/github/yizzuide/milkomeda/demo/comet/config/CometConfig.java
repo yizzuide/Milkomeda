@@ -1,6 +1,6 @@
 package com.github.yizzuide.milkomeda.demo.comet.config;
 
-import com.github.yizzuide.milkomeda.comet.CometUrlLogResolver;
+import com.github.yizzuide.milkomeda.comet.logger.CometLoggerResolver;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Bean;
@@ -18,7 +18,7 @@ public class CometConfig {
 
     // UrlLog解析uid占位符
     @Bean
-    public CometUrlLogResolver cometUrlLogResolver() {
+    public CometLoggerResolver cometUrlLogResolver() {
         return (k, request) -> {
             if ("uid".equals(k)) {
                 String token = request.getHeader("token");

@@ -1,20 +1,20 @@
-package com.github.yizzuide.milkomeda.comet;
+package com.github.yizzuide.milkomeda.comet.collector;
 
 import org.springframework.context.annotation.Import;
 
 import java.lang.annotation.*;
 
 /**
- * EnableComet
+ * EnableCometCollector
  *
  * @author yizzuide
- * @since 2.0.0
- * Create at 2019/12/13 00:56
+ * @since 2.8.0
+ * Create at 2020/03/28 18:55
  */
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Inherited
-@Import(CometConfig.class)
-public @interface EnableComet {
+@Import(CometCollectorConfig.class)
+public @interface EnableCometCollector {
 }

@@ -1,4 +1,4 @@
-package com.github.yizzuide.milkomeda.comet;
+package com.github.yizzuide.milkomeda.comet.core;
 
 import com.github.yizzuide.milkomeda.universe.config.MilkomedaProperties;
 import com.github.yizzuide.milkomeda.universe.context.WebContext;
@@ -7,11 +7,11 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.Signature;
 import org.aspectj.lang.annotation.AfterThrowing;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
+import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.ResponseEntity;
@@ -24,7 +24,6 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.annotation.Annotation;
 import java.net.UnknownHostException;
 import java.util.*;
 import java.util.function.Function;
@@ -52,11 +51,11 @@ public class CometAspect {
     /**
      * 请求参数解析本地线程存储
      */
-    // 官方推荐使用private static能减少弱引用对GC的影响
     static ThreadLocal<String> resolveThreadLocal = new ThreadLocal<>();
     /**
      * 控制器层本地线程存储
      */
+    // 官方推荐使用private static能减少弱引用对GC的影响
     private static ThreadLocal<CometData> threadLocal = new ThreadLocal<>();
     /**
      * 服务层本地线程存储
@@ -80,10 +79,10 @@ public class CometAspect {
     }
 
     // 定义切入点
-    @Pointcut("@annotation(com.github.yizzuide.milkomeda.comet.Comet)")
+    @Pointcut("@annotation(com.github.yizzuide.milkomeda.comet.core.Comet)")
     public void comet() {}
 
-    @Pointcut("@annotation(com.github.yizzuide.milkomeda.comet.CometX)")
+    @Pointcut("@annotation(com.github.yizzuide.milkomeda.comet.core.CometX)")
     public void cometX() {}
 
     @Around("comet()")
@@ -91,27 +90,12 @@ public class CometAspect {
         Date requestTime = new Date();
         Comet comet = ReflectUtil.getAnnotation(joinPoint, Comet.class);
         // 获取记录原型对象
-        WebCometData cometData = comet.prototype().newInstance();
         HttpServletRequest request = WebContext.getRequest();
+        WebCometData cometData = WebCometData.createFormRequest(request, comet.prototype(), cometProperties.isEnableReadRequestBody());
         cometData.setApiCode(comet.apiCode());
         cometData.setDescription(StringUtils.isEmpty(comet.name()) ? comet.description() : comet.name());
         cometData.setRequestType(comet.requestType());
-        cometData.setRequestURL(request.getRequestURL().toString());
-        cometData.setRequestPath(request.getServletPath());
-        cometData.setRequestMethod(request.getMethod());
-        String requestParams = resolveThreadLocal.get();
-        cometData.setRequestParams(requestParams != null ? requestParams :
-                resolveRequestParams(cometProperties.isEnableReadRequestBody()));
-        Map<String, Object> headers = new HashMap<>();
-        Enumeration<String> enumeration = request.getHeaderNames();
-        while (enumeration.hasMoreElements()) {
-            String key = enumeration.nextElement();
-            headers.put(key, request.getHeader(key));
-        }
-        cometData.setRequestHeaders(JSONUtil.serialize(headers));
-        cometData.setRequestIP(NetworkUtil.getRemoteAddr(request));
-        cometData.setDeviceInfo(request.getHeader("user-agent"));
-        return applyAround(comet, cometData, threadLocal, joinPoint, request, requestTime, comet.name(), comet.tag(), (returnData) -> {
+        return applyAround(cometData, threadLocal, joinPoint, request, requestTime, comet.name(), comet.tag(), (returnData) -> {
             if (returnData.getClass() == DeferredResult.class) {
                 return "[DeferredResult]";
             }
@@ -137,7 +121,7 @@ public class CometAspect {
         CometX comet = ReflectUtil.getAnnotation(joinPoint, CometX.class);
         // 获取记录原型对象
         XCometData cometData = comet.prototype().newInstance();
-        return applyAround(comet, cometData, threadLocalX, joinPoint, null, requestTime, comet.name(), comet.tag(), null);
+        return applyAround(cometData, threadLocalX, joinPoint, null, requestTime, comet.name(), comet.tag(), null);
     }
 
     @AfterThrowing(pointcut = "cometX()", throwing = "e")
@@ -163,32 +147,31 @@ public class CometAspect {
         threadLocal.remove();
     }
 
-    private Object applyAround(Annotation comet, CometData cometData, ThreadLocal<CometData> threadLocal, ProceedingJoinPoint joinPoint,
+    @SuppressWarnings("rawtypes")
+    private Object applyAround(CometData cometData, ThreadLocal<CometData> threadLocal, ProceedingJoinPoint joinPoint,
                                HttpServletRequest request, Date requestTime, String name, String tag,
                                Function<Object, Object> mapReturnData) throws Throwable {
+        cometData.setRequest(request);
         cometData.setRequestTime(requestTime);
         cometData.setName(name);
         cometData.setTag(tag);
-        Signature signature = joinPoint.getSignature();
+        MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         cometData.setClazzName(signature.getDeclaringTypeName());
         cometData.setExecMethod(signature.getName());
-        StringBuilder params = new StringBuilder();
+        Map<String, Object> params = new HashMap<>();
+        // 获取参数名
+        String[] parameterNames = signature.getParameterNames();
         Object[] args = joinPoint.getArgs();
         if (args !=  null && args.length > 0) {
             for (int i = 0; i < args.length; i++) {
-                Object arg = args[i];
-                if (hasFilter(arg)) {
+                String argName = parameterNames[i];
+                Object argValue = args[i];
+                if (hasFilter(argValue)) {
                     continue;
                 }
-                params.append(RecognizeUtil.isCompoundType(arg) ? JSONUtil.serialize(arg) : arg);
-                if (i < args.length - 1) {
-                    if (i + 1 < args.length && args[i+1] instanceof CometData) {
-                        continue;
-                    }
-                    params.append(";");
-                }
+                params.put(argName, argValue);
             }
-            cometData.setRequestData(params.toString());
+            cometData.setRequestData(JSONUtil.serialize(params));
         }
         try {
             String host = NetworkUtil.getHost();
@@ -235,8 +218,7 @@ public class CometAspect {
         return returnObj;
     }
 
-    public static String resolveRequestParams(boolean formBody) {
-        HttpServletRequest request = WebContext.getRequest();
+    public static String resolveRequestParams(HttpServletRequest request, boolean formBody) {
         String requestData = HttpServletUtil.getRequestData(request);
         // 如果form方式获取为空，取消息体内容
         if (formBody && "{}".equals(requestData)

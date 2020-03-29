@@ -1,7 +1,7 @@
 package com.github.yizzuide.milkomeda.demo.comet.web.controller;
 
-import com.github.yizzuide.milkomeda.comet.Comet;
-import com.github.yizzuide.milkomeda.comet.CometParam;
+import com.github.yizzuide.milkomeda.comet.core.Comet;
+import com.github.yizzuide.milkomeda.comet.core.CometParam;
 import com.github.yizzuide.milkomeda.demo.comet.pojo.ProfileWebCometData;
 import com.github.yizzuide.milkomeda.demo.comet.service.CollectService;
 import lombok.extern.slf4j.Slf4j;
@@ -33,8 +33,18 @@ public class CollectController {
         Map<String, String> map = new HashMap<>();
         map.put("code", "200");
         map.put("data", null);
-//        throw new RuntimeException("出错了");
-        return ResponseEntity.ok(map);
+        throw new RuntimeException("出错了");
+//        return ResponseEntity.ok(map);
+    }
+
+    @RequestMapping("product/click")
+    public ResponseEntity<Map<String, String>> click(@RequestParam("productId") String productId) {
+        log.info("用户点击了产品：{}", productId);
+        Map<String, String> map = new HashMap<>();
+        map.put("code", "200");
+        map.put("data", null);
+        throw new RuntimeException("出错了");
+//        return ResponseEntity.ok(map);
     }
 
     @PostMapping("usage")

@@ -1,6 +1,6 @@
-package com.github.yizzuide.milkomeda.mix.collector;
+package com.github.yizzuide.milkomeda.comet.collector;
 
-import com.github.yizzuide.milkomeda.comet.CometData;
+import com.github.yizzuide.milkomeda.comet.core.CometData;
 import com.github.yizzuide.milkomeda.pillar.PillarExecutor;
 import lombok.AllArgsConstructor;
 

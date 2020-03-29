@@ -1,4 +1,4 @@
-package com.github.yizzuide.milkomeda.comet;
+package com.github.yizzuide.milkomeda.comet.core;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

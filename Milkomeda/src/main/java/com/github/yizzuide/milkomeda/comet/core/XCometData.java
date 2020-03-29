@@ -1,4 +1,4 @@
-package com.github.yizzuide.milkomeda.comet;
+package com.github.yizzuide.milkomeda.comet.core;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -13,4 +13,5 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class XCometData extends CometData {
+    private static final long serialVersionUID = 6781190633733977589L;
 }

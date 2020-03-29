@@ -1,5 +1,6 @@
-package com.github.yizzuide.milkomeda.comet;
+package com.github.yizzuide.milkomeda.comet.core;
 
+import com.github.yizzuide.milkomeda.universe.context.WebContext;
 import com.github.yizzuide.milkomeda.util.JSONUtil;
 import org.springframework.core.MethodParameter;
 import org.springframework.web.bind.support.WebDataBinderFactory;
@@ -31,7 +32,7 @@ public class CometParamResolver implements HandlerMethodArgumentResolver {
     @Override
     public Object resolveArgument(MethodParameter methodParameter, ModelAndViewContainer modelAndViewContainer, NativeWebRequest nativeWebRequest, WebDataBinderFactory webDataBinderFactory) throws Exception {
         // methodParameter.getParameterAnnotation(CometParam.class);
-        String params = CometAspect.resolveRequestParams(true);
+        String params = CometAspect.resolveRequestParams(WebContext.getRequest(),true);
         CometAspect.resolveThreadLocal.set(params);
         Class<?> parameterType = methodParameter.getParameterType();
         // Map类型

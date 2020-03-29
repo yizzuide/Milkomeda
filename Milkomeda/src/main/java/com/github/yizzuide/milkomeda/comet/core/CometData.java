@@ -1,7 +1,10 @@
-package com.github.yizzuide.milkomeda.comet;
+package com.github.yizzuide.milkomeda.comet.core;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
+import javax.servlet.http.HttpServletRequest;
+import java.io.Serializable;
 import java.util.Date;
 
 /**
@@ -9,11 +12,12 @@ import java.util.Date;
  *
  * @author yizzuide
  * @since 0.2.0
- * @version 1.13.4
+ * @version 2.8.0
  * Create at 2019/09/21 00:48
  */
 @Data
-public class CometData {
+public class CometData implements Serializable {
+    private static final long serialVersionUID = -8296355140769902642L;
     /**
      * 日志记录名
      */
@@ -78,5 +82,11 @@ public class CometData {
     /**
      * 跟踪附件，用于设置日志记录实体
      */
-    private Object attachment;
+    @JsonIgnore
+    private transient Object attachment;
+    /**
+     * 请求对象
+     */
+    @JsonIgnore
+    private transient HttpServletRequest request;
 }

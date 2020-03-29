@@ -1,12 +1,15 @@
-package com.github.yizzuide.milkomeda.comet;
+package com.github.yizzuide.milkomeda.comet.core;
 
+import com.github.yizzuide.milkomeda.pulsar.PulsarConfig;
 import com.github.yizzuide.milkomeda.universe.polyfill.SpringMvcPolyfill;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
@@ -24,8 +27,9 @@ import java.util.Objects;
  * @version 2.8.0
  * Create at 2019/12/12 18:10
  */
-@EnableConfigurationProperties(CometProperties.class)
 @Configuration
+@AutoConfigureAfter(PulsarConfig.class)
+@EnableConfigurationProperties(CometProperties.class)
 public class CometConfig {
 
     @Autowired CometProperties cometProperties;
@@ -65,12 +69,12 @@ public class CometConfig {
     @SuppressWarnings("all")
     public void configRequestMappingHandlerMapping(RequestMappingHandlerMapping requestMappingHandlerMapping) {
         // 使用内置拦截器
-        SpringMvcPolyfill.addDynamicInterceptor(cometUrlLogInterceptor(), Collections.singletonList("/**"),
+        SpringMvcPolyfill.addDynamicInterceptor(cometUrlLogInterceptor(),  Ordered.HIGHEST_PRECEDENCE, Collections.singletonList("/**"),
                 null, requestMappingHandlerMapping);
     }
 
     @Bean
-    public CometUrlLogInterceptor cometUrlLogInterceptor() {
-        return new CometUrlLogInterceptor(cometProperties);
+    public CometInterceptor cometUrlLogInterceptor() {
+        return new CometInterceptor();
     }
 }

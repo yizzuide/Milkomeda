@@ -1,9 +1,8 @@
 package com.github.yizzuide.milkomeda.demo.comet.collector;
 
-import com.github.yizzuide.milkomeda.comet.CometData;
+import com.github.yizzuide.milkomeda.comet.collector.Collector;
+import com.github.yizzuide.milkomeda.comet.core.CometData;
 import com.github.yizzuide.milkomeda.demo.comet.pojo.ProfileWebCometData;
-import com.github.yizzuide.milkomeda.mix.collector.Collector;
-import com.github.yizzuide.milkomeda.universe.context.WebContext;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -23,7 +22,7 @@ public class ProfileAPICollector implements Collector {
     @Override
     public void prepare(CometData params) {
         ProfileWebCometData profileCometData = (ProfileWebCometData) params;
-        String uid = String.valueOf(WebContext.getRequest().getParameter("uid"));
+        String uid = String.valueOf(params.getRequest().getParameter("uid"));
         profileCometData.setUid(uid);
         // 模拟一个日志实体，实际情况应该是一个Model类
         Map<String, Object> log = new HashMap<>();

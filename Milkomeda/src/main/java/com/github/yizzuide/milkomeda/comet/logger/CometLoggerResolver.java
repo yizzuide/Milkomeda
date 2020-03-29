@@ -1,9 +1,9 @@
-package com.github.yizzuide.milkomeda.comet;
+package com.github.yizzuide.milkomeda.comet.logger;
 
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * CometUrlLogResolver
+ * CometLoggerResolver
  * 占位符解析器
  *
  * @author yizzuide
@@ -11,7 +11,7 @@ import javax.servlet.http.HttpServletRequest;
  * Create at 2020/03/28 12:55
  */
 @FunctionalInterface
-public interface CometUrlLogResolver {
+public interface CometLoggerResolver {
     /**
      * 占位符解析
      * @param key       占位符

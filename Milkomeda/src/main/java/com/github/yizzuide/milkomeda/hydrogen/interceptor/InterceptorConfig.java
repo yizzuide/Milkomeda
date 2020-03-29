@@ -74,7 +74,7 @@ public class InterceptorConfig {
                     declaredField.setAccessible(true);
                     declaredField.set(handlerInterceptorBean, entry.getValue());
                 }
-                SpringMvcPolyfill.addDynamicInterceptor(handlerInterceptorBean, hi.getIncludeURLs(), hi.getExcludeURLs(), requestMappingHandlerMapping);
+                SpringMvcPolyfill.addDynamicInterceptor(handlerInterceptorBean, null, hi.getIncludeURLs(), hi.getExcludeURLs(), requestMappingHandlerMapping);
             } catch (Exception e) {
                 log.error("Hydrogen interceptor add error with msg: {}", e.getMessage(), e);
             }

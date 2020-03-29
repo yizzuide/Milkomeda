@@ -63,8 +63,8 @@ milkomeda:
   show-log: true
 
   comet:
-    # 请求日志打印
-    url-log:
+    # 统一请求日志打印
+    logger:
       enable: true
       # 根据路径匹配策略
       strategy:
@@ -74,6 +74,19 @@ milkomeda:
         -
           paths: ["/error/**"]
           tpl: url->{uri},method->{method}
+    # 日志收集器
+    collector:
+      enable-tag: true
+      tags:
+        product-tag:
+          # 错误条件：由于异常可能被 @ControllerAdvice 吞没，拦截器就获取不到异常
+          failure-condition:
+            # 忽略正常的响应
+            ignore-code[code]: 1
+            # 错误信息记录
+            error-stack-msg[innerErrInfo]:
+            error-stack[innerErrInfoDesc]:
+          paths: ["/collect/product/*"]
 
   light:
     # 一级缓存一小时后过期（只适用于LazyExpire策略）
