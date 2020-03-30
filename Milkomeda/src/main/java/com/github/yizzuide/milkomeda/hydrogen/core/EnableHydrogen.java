@@ -8,7 +8,7 @@ import java.lang.annotation.*;
  * EnableHydrogen
  *
  * @author yizzuide
- * @since 2.8.0
+ * @since 3.0.0
  * Create at 2020/03/25 17:46
  */
 @Target({ElementType.TYPE})

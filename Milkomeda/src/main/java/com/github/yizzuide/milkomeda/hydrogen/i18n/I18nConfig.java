@@ -23,7 +23,7 @@ import java.util.Collections;
  * I18nConfig
  *
  * @author yizzuide
- * @since 2.8.0
+ * @since 3.0.0
  * @see org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport#requestMappingHandlerAdapter(org.springframework.web.accept.ContentNegotiationManager, org.springframework.format.support.FormattingConversionService, org.springframework.validation.Validator)
  * @see org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport#requestMappingHandlerMapping(org.springframework.web.accept.ContentNegotiationManager, org.springframework.format.support.FormattingConversionService, org.springframework.web.servlet.resource.ResourceUrlProvider)
  * @see org.springframework.web.servlet.handler.AbstractHandlerMapping

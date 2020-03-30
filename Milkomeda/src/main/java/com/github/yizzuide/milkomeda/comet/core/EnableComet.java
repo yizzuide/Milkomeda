@@ -11,7 +11,7 @@ import java.lang.annotation.*;
  *
  * @author yizzuide
  * @since 2.0.0
- * @version 2.8.0
+ * @version 3.0.0
  * Create at 2019/12/13 00:56
  */
 @Target({ElementType.TYPE})

@@ -11,7 +11,7 @@ import java.util.List;
  * 日志路径匹配器
  *
  * @author yizzuide
- * @since 2.8.0
+ * @since 3.0.0
  * Create at 2020/03/29 14:07
  */
 public class CometLoggerPathMatcher {

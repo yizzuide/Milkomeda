@@ -10,7 +10,7 @@ import java.util.Map;
  * yml解析器
  *
  * @author yizzuide
- * @since 2.8.0
+ * @since 3.0.0
  * Create at 2020/03/29 19:24
  */
 public class YmlParser {

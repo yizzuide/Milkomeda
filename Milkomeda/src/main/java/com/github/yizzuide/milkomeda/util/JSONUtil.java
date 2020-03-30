@@ -16,7 +16,7 @@ import java.util.*;
  *
  * @author yizzuide
  * @since 0.2.0
- * @version 2.8.0
+ * @version 3.0.0
  * Create at 2019/04/11 22:07
  */
 @Slf4j

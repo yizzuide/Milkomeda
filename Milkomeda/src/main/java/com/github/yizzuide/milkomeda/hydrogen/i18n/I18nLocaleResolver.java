@@ -10,7 +10,7 @@ import java.util.Locale;
  * CustomLocaleResolver
  *
  * @author yizzuide
- * @since 2.8.0
+ * @since 3.0.0
  * @see org.springframework.web.servlet.i18n.LocaleChangeInterceptor
  * @see org.springframework.web.servlet.i18n.AbstractLocaleContextResolver
  * @see org.springframework.web.servlet.i18n.FixedLocaleResolver

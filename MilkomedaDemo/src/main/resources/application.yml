@@ -200,11 +200,11 @@ milkomeda:
       query: lang
 
     # 动态添加拦截器
-#    interceptors:
-#        -
-#          clazz: com.github.yizzuide.milkomeda.demo.hydrogen.handler.UrlLogInterceptor
-#          order: 1
-#          # 注入属性值
-#          props:
-#            open: true
+    interceptors:
+        -
+          clazz: com.github.yizzuide.milkomeda.demo.hydrogen.handler.UrlLogInterceptor
+          order: 1
+          # 注入属性值
+          props:
+            open: true
 

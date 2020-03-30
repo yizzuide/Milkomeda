@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
  * InterceptorConfig
  *
  * @author yizzuide
- * @since 2.8.0
+ * @since 3.0.0
  * Create at 2020/03/28 00:23
  */
 @Slf4j

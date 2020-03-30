@@ -12,7 +12,7 @@ import java.util.Map;
  * CometCollectorProperties
  *
  * @author yizzuide
- * @since 2.8.0
+ * @since 3.0.0
  * Create at 2020/03/28 21:28
  */
 @Data

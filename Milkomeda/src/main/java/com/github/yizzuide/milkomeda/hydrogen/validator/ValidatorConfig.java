@@ -20,7 +20,7 @@ import javax.validation.ValidatorFactory;
  * 参数效验器配置
  *
  * @author yizzuide
- * @since 2.8.0
+ * @since 3.0.0
  * Create at 2019/11/28 17:38
  */
 @Configuration

@@ -16,7 +16,7 @@ import java.util.Map;
  *
  * @author yizzuide
  * @since 1.12.0
- * @version 2.8.0
+ * @version 3.0.0
  * Create at 2019/04/11 19:32
  */
 @Slf4j

@@ -26,7 +26,7 @@ public class UrlLogInterceptor extends HandlerInterceptorAdapter implements Init
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         if (open) {
-            log.info("url-> {}", request.getRequestURI());
+            log.info("当前请求：{}", request.getRequestURI());
         }
         return super.preHandle(request, response, handler);
     }

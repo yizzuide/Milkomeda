@@ -6,7 +6,7 @@ import lombok.Data;
  * CometUrlLogData
  *
  * @author yizzuide
- * @since 2.8.0
+ * @since 3.0.0
  * Create at 2020/03/28 12:19
  */
 @Data

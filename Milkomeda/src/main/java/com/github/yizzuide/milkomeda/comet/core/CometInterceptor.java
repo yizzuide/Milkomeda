@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
  * CometUrlLogInterceptor
  *
  * @author yizzuide
- * @since 2.8.0
+ * @since 3.0.0
  * Create at 2020/03/28 01:08
  */
 @Slf4j

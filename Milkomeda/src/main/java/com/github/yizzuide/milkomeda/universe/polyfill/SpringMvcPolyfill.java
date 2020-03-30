@@ -15,7 +15,7 @@ import java.util.List;
  * Spring MVC功能填充类
  *
  * @author yizzuide
- * @since 2.8.0
+ * @since 3.0.0
  * Create at 2020/03/28 00:33
  */
 @Slf4j
@@ -68,7 +68,7 @@ public class SpringMvcPolyfill {
             }
             adaptedInterceptorsField.set(handlerMapping, handlerInterceptors);
         } catch (Exception e) {
-            log.error("Hydrogen i18n invoke AbstractHandlerMapping.adaptedInterceptors error with msg: {}",  e.getMessage(), e);
+            log.error("SpringMvcPolyfill invoke AbstractHandlerMapping.adaptedInterceptors error with msg: {}",  e.getMessage(), e);
         }
     }
 }

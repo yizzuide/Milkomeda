@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
  * 切面事务配置
  *
  * @author yizzuide
- * @since 2.8.0
+ * @since 3.0.0
  * Create at 2019/11/25 10:56
  */
 @Aspect

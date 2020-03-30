@@ -8,7 +8,7 @@ import java.lang.annotation.*;
  * EnableCometCollector
  *
  * @author yizzuide
- * @since 2.8.0
+ * @since 3.0.0
  * Create at 2020/03/28 18:55
  */
 @Target({ElementType.TYPE})

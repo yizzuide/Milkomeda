@@ -15,7 +15,7 @@ import java.util.List;
  * MoonConfig
  *
  * @author yizzuide
- * @since 2.8.0
+ * @since 3.0.0
  * Create at 2020/03/28 17:40
  */
 @Slf4j

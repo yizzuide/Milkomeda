@@ -5,7 +5,7 @@ package com.github.yizzuide.milkomeda.comet.collector;
  * 标签收集器
  *
  * @author yizzuide
- * @since 2.8.0
+ * @since 3.0.0
  * Create at 2020/03/29 17:12
  */
 public abstract class TagCollector implements Collector {

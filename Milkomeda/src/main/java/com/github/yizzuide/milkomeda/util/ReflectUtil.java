@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 0.2.0
- * @version 2.8.0
+ * @version 3.0.0
  * Create at 2019/04/11 19:55
  */
 @Slf4j

@@ -12,7 +12,7 @@ import java.util.Date;
  *
  * @author yizzuide
  * @since 0.2.0
- * @version 2.8.0
+ * @version 3.0.0
  * Create at 2019/09/21 00:48
  */
 @Data

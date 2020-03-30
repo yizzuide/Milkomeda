@@ -29,7 +29,7 @@ import java.util.*;
  * UniformResponseExceptionHandler
  *
  * @author yizzuide
- * @since 2.8.0
+ * @since 3.0.0
  * Create at 2020/03/25 22:47
  */
 @Slf4j
