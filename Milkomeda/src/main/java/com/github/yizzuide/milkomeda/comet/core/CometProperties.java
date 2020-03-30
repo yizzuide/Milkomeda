@@ -26,7 +26,7 @@ public class CometProperties {
      * 请求日志
      */
     @NestedConfigurationProperty
-    private CometProperties.Logger logger = new CometProperties.Logger();
+    private Logger logger = new CometProperties.Logger();
 
     @Data
     public static class Logger {
@@ -50,7 +50,7 @@ public class CometProperties {
          * 打印策略
          * [{paths: ["/xxx/x"], tpl: "url->{userId}"}]
          */
-        private List<CometProperties.Strategy> strategy;
+        private List<Strategy> strategy;
     }
 
     @Data

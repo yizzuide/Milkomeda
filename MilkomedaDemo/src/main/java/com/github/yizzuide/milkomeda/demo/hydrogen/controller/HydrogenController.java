@@ -6,8 +6,11 @@ import com.github.yizzuide.milkomeda.demo.hydrogen.vo.UserVO;
 import com.github.yizzuide.milkomeda.hydrogen.core.HydrogenHolder;
 import com.github.yizzuide.milkomeda.hydrogen.validator.PhoneConstraint;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.context.refresh.ContextRefresher;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -26,6 +29,9 @@ import javax.validation.Valid;
 @RequestMapping("hydrogen")
 @RestController
 public class HydrogenController {
+
+    @Autowired
+    private ContextRefresher contextRefresher;
 
     @Resource
     private TOrderService tOrderService;
@@ -59,5 +65,13 @@ public class HydrogenController {
     @RequestMapping("i18n")
     public String i18n() {
         return HydrogenHolder.getI18nMessages().getWithParam("operation.success", "OK");
+    }
+
+    // 测试刷新
+    @GetMapping(path = "/refresh")
+    public String refresh() {
+        System.setProperty("milkomeda.show-log", "false");
+        new Thread(() -> contextRefresher.refresh()).start();
+        return HttpStatus.OK.name();
     }
 }

@@ -142,11 +142,11 @@ milkomeda:
         cacheName: ab-test
         # 使用百分比分配策略
         moonStrategyClazz: com.github.yizzuide.milkomeda.moon.PercentMoonStrategy
-        # 20%的0，90%的1
-        # phases: [20, 90]
+        # 20%的0，80%的1
+        # phases: [20, 80]
         # 缩小总占百分比，使分配更均匀
         percent: 10
-        phases: [2, 9]
+        phases: [2, 8]
 
   hydrogen:
     transaction:
