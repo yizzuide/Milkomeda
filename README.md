@@ -83,6 +83,8 @@ Milkomeda 3.0 coming soon（April 2020).
 
 - [Comet] 模块包由`com.github.yizzuide.milkomeda.comet`迁移到`com.github.yizzuide.milkomeda.comet.core`，因为该模块聚合了`Collector`和`Logger`。
 
+### [More](https://github.com/yizzuide/Milkomeda/wiki/Upgrade-Guide)
+
 ## Documentation
 [See Wiki](https://github.com/yizzuide/Milkomeda/wiki)
 
