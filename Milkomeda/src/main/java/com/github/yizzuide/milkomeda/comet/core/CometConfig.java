@@ -69,12 +69,12 @@ public class CometConfig {
     @SuppressWarnings("all")
     public void configRequestMappingHandlerMapping(RequestMappingHandlerMapping requestMappingHandlerMapping) {
         // 使用内置拦截器
-        SpringMvcPolyfill.addDynamicInterceptor(cometUrlLogInterceptor(),  Ordered.HIGHEST_PRECEDENCE, Collections.singletonList("/**"),
+        SpringMvcPolyfill.addDynamicInterceptor(cometInterceptor(),  Ordered.HIGHEST_PRECEDENCE, Collections.singletonList("/**"),
                 null, requestMappingHandlerMapping);
     }
 
     @Bean
-    public CometInterceptor cometUrlLogInterceptor() {
+    public CometInterceptor cometInterceptor() {
         return new CometInterceptor();
     }
 }

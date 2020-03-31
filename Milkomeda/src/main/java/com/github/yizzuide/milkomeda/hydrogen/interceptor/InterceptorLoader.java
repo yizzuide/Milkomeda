@@ -12,8 +12,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.event.EventListener;
-import org.springframework.core.OrderComparator;
-import org.springframework.core.Ordered;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
@@ -24,7 +22,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
-import java.util.stream.Collectors;
 
 /**
  * InterceptorLoader
@@ -62,28 +59,40 @@ public class InterceptorLoader implements ApplicationContextAware {
 
     /**
      * 加载拦截器
-     * @param hInterceptor  拦截器元信息
+     * @param clazz     HandlerInterceptor实现类
+     * @param include   拦截的URL
+     * @param exclude   排除的URL
+     * @param order     排序
      */
-    public void load(HydrogenProperties.Interceptor hInterceptor) {
+    public void load(@NonNull Class<? extends HandlerInterceptor> clazz, List<String> include, List<String> exclude, int order) {
+        HydrogenProperties.Interceptor hInterceptor = new HydrogenProperties.Interceptor();
+        hInterceptor.setClazz(clazz);
+        if (include != null) {
+            hInterceptor.setIncludeURLs(include);
+        }
+        hInterceptor.setExcludeURLs(exclude);
+        hInterceptor.setOrder(order);
         transform(Collections.singletonList(hInterceptor), (hi, handlerInterceptor)  -> SpringMvcPolyfill.addDynamicInterceptor(handlerInterceptor,
-                null, hi.getIncludeURLs(), hi.getExcludeURLs(), this.requestMappingHandlerMapping));
+                hInterceptor.getOrder(), hi.getIncludeURLs(), hi.getExcludeURLs(), this.requestMappingHandlerMapping));
     }
 
     /**
      * 卸载拦截器
-     * @param hInterceptor  拦截器元信息
+     * @param clazz     HandlerInterceptor实现类
      */
-    public void unLoad(HydrogenProperties.Interceptor hInterceptor) {
+    public void unLoad(@NonNull Class<? extends HandlerInterceptor> clazz) {
+        HydrogenProperties.Interceptor hInterceptor = new HydrogenProperties.Interceptor();
+        hInterceptor.setClazz(clazz);
         transform(Collections.singletonList(hInterceptor), (hi, handlerInterceptor)  ->
                 SpringMvcPolyfill.removeDynamicInterceptor(handlerInterceptor, this.requestMappingHandlerMapping));
     }
 
     /**
-     * 探查拦截器列表
-     * @return  拦截器JSON信息
+     * 探查拦截器信息，包含：class、include、exclude、order
+     * @return  拦截器列表信息
      */
-    public String inspect() {
-        return "[]";
+    public List<Map<String, Object>> inspect() {
+        return SpringMvcPolyfill.getAdaptedInterceptors(this.requestMappingHandlerMapping);
     }
 
     @EventListener
@@ -106,23 +115,13 @@ public class InterceptorLoader implements ApplicationContextAware {
                 SpringMvcPolyfill.removeDynamicInterceptor(handlerInterceptor, this.requestMappingHandlerMapping));
         // 加载新配置的拦截器
         transform(afterInterceptors, (hi, handlerInterceptor)  -> SpringMvcPolyfill.addDynamicInterceptor(handlerInterceptor,
-                null, hi.getIncludeURLs(), hi.getExcludeURLs(), this.requestMappingHandlerMapping));
+                hi.getOrder(), hi.getIncludeURLs(), hi.getExcludeURLs(), this.requestMappingHandlerMapping));
         this.loadedInterceptors = afterInterceptors;
     }
 
     private void transform(List<HydrogenProperties.Interceptor> hydrogenInterceptors, @NonNull BiConsumer<HydrogenProperties.Interceptor, HandlerInterceptor> performAction) {
         if (CollectionUtils.isEmpty(hydrogenInterceptors)) {
             return;
-        }
-        // 仿Spring MVC源码对拦截器排序
-        if (hydrogenInterceptors.size() > 1) {
-            hydrogenInterceptors = hydrogenInterceptors.stream()
-                    .sorted(OrderComparator.INSTANCE.withSourceProvider(object -> {
-                        if (object instanceof HydrogenProperties.Interceptor) {
-                            return (Ordered) ((HydrogenProperties.Interceptor) object)::getOrder;
-                        }
-                        return null;
-                    })).collect(Collectors.toList());
         }
         hydrogenInterceptors.forEach(hi -> {
             HandlerInterceptor handlerInterceptorBean = null;

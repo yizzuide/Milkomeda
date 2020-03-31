@@ -31,7 +31,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * CometUrlLogInterceptor
+ * CometInterceptor
  *
  * @author yizzuide
  * @since 3.0.0

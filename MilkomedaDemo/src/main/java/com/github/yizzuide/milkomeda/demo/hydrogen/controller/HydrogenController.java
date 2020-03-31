@@ -5,7 +5,6 @@ import com.github.yizzuide.milkomeda.demo.hydrogen.handler.WaitTimeInterceptor;
 import com.github.yizzuide.milkomeda.demo.hydrogen.service.TOrderService;
 import com.github.yizzuide.milkomeda.demo.hydrogen.vo.UserVO;
 import com.github.yizzuide.milkomeda.hydrogen.core.HydrogenHolder;
-import com.github.yizzuide.milkomeda.hydrogen.core.HydrogenProperties;
 import com.github.yizzuide.milkomeda.hydrogen.interceptor.InterceptorLoader;
 import com.github.yizzuide.milkomeda.hydrogen.validator.PhoneConstraint;
 import com.github.yizzuide.milkomeda.pulsar.PulsarHolder;
@@ -85,17 +84,19 @@ public class HydrogenController {
 
     @GetMapping(path = "/load/waitTime")
     public String loadWaitTimeInterceptor() {
-        HydrogenProperties.Interceptor hi = new HydrogenProperties.Interceptor();
-        hi.setClazz(WaitTimeInterceptor.class);
-        interceptorLoader.load(hi);
+        interceptorLoader.load(WaitTimeInterceptor.class,null, null, 0);
         return HttpStatus.OK.name();
     }
 
     @GetMapping(path = "/unload/waitTime")
     public String unloadWaitTimeInterceptor() {
-        HydrogenProperties.Interceptor hi = new HydrogenProperties.Interceptor();
-        hi.setClazz(WaitTimeInterceptor.class);
-        interceptorLoader.unLoad(hi);
+        interceptorLoader.unLoad(WaitTimeInterceptor.class);
         return HttpStatus.OK.name();
     }
+
+    @GetMapping(path = "/load/info")
+    public Object loadInterceptorsInfo() {
+        return interceptorLoader.inspect();
+    }
+
 }

@@ -13,6 +13,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
@@ -62,7 +63,7 @@ public class I18nConfig {
         // 使用内置拦截器
         final LocaleChangeInterceptor localeChangeInterceptor = new LocaleChangeInterceptor();
         localeChangeInterceptor.setParamName("lang");
-        SpringMvcPolyfill.addDynamicInterceptor(localeChangeInterceptor, null, Collections.singletonList("/**"),
+        SpringMvcPolyfill.addDynamicInterceptor(localeChangeInterceptor, Ordered.HIGHEST_PRECEDENCE + 1, Collections.singletonList("/**"),
                 null, requestMappingHandlerMapping);
     }
 }
