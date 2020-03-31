@@ -24,7 +24,7 @@ public class InterceptorConfig {
 
     @SuppressWarnings("all")
     @Bean
-    public InterceptorHandler interceptorHandler(RequestMappingHandlerMapping requestMappingHandlerMapping) {
-        return new InterceptorHandler(requestMappingHandlerMapping);
+    public InterceptorLoader interceptorHandler(RequestMappingHandlerMapping requestMappingHandlerMapping) {
+        return new InterceptorLoader(requestMappingHandlerMapping);
     }
 }

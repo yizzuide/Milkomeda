@@ -130,7 +130,7 @@ public class HydrogenProperties {
         /**
          * 拦截器类
          */
-        private Class<HandlerInterceptor> clazz;
+        private Class<? extends HandlerInterceptor> clazz;
 
         /**
          * 包括拦截的URL

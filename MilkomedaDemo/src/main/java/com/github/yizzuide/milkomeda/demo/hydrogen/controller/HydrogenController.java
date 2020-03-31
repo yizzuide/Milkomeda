@@ -1,10 +1,14 @@
 package com.github.yizzuide.milkomeda.demo.hydrogen.controller;
 
 import com.github.yizzuide.milkomeda.demo.hydrogen.exception.YizException;
+import com.github.yizzuide.milkomeda.demo.hydrogen.handler.WaitTimeInterceptor;
 import com.github.yizzuide.milkomeda.demo.hydrogen.service.TOrderService;
 import com.github.yizzuide.milkomeda.demo.hydrogen.vo.UserVO;
 import com.github.yizzuide.milkomeda.hydrogen.core.HydrogenHolder;
+import com.github.yizzuide.milkomeda.hydrogen.core.HydrogenProperties;
+import com.github.yizzuide.milkomeda.hydrogen.interceptor.InterceptorLoader;
 import com.github.yizzuide.milkomeda.hydrogen.validator.PhoneConstraint;
+import com.github.yizzuide.milkomeda.pulsar.PulsarHolder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.context.refresh.ContextRefresher;
@@ -30,11 +34,15 @@ import javax.validation.Valid;
 @RestController
 public class HydrogenController {
 
-    @Autowired
-    private ContextRefresher contextRefresher;
-
     @Resource
     private TOrderService tOrderService;
+
+    @Autowired
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
+    private ContextRefresher contextRefresher;
+
+    @Autowired
+    private InterceptorLoader interceptorLoader;
 
     @RequestMapping("tx")
     public String testTx(@RequestParam("id") Integer id) {
@@ -71,7 +79,23 @@ public class HydrogenController {
     @GetMapping(path = "/refresh")
     public String refresh() {
         System.setProperty("milkomeda.show-log", "false");
-        new Thread(() -> contextRefresher.refresh()).start();
+        PulsarHolder.getPulsar().post(() -> contextRefresher.refresh());
+        return HttpStatus.OK.name();
+    }
+
+    @GetMapping(path = "/load/waitTime")
+    public String loadWaitTimeInterceptor() {
+        HydrogenProperties.Interceptor hi = new HydrogenProperties.Interceptor();
+        hi.setClazz(WaitTimeInterceptor.class);
+        interceptorLoader.load(hi);
+        return HttpStatus.OK.name();
+    }
+
+    @GetMapping(path = "/unload/waitTime")
+    public String unloadWaitTimeInterceptor() {
+        HydrogenProperties.Interceptor hi = new HydrogenProperties.Interceptor();
+        hi.setClazz(WaitTimeInterceptor.class);
+        interceptorLoader.unLoad(hi);
         return HttpStatus.OK.name();
     }
 }
