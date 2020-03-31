@@ -4,6 +4,7 @@ import com.github.yizzuide.milkomeda.demo.fusion.pref.Platform;
 import com.github.yizzuide.milkomeda.demo.fusion.service.ProductService;
 import com.github.yizzuide.milkomeda.demo.ice.pojo.Product;
 import com.github.yizzuide.milkomeda.fusion.Fusion;
+import com.github.yizzuide.milkomeda.fusion.FusionGroup;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -19,7 +20,9 @@ public class ProductServiceImpl implements ProductService {
     // 根据条件是否调用业务方法
     // allowed：判断条件
     // fallback：条件判断结果为false，调用反馈方法
-    @Fusion(allowed = Platform.EL_CHECK_ACTIVE, fallback = "#target.pushNotCheck(#product, #delay)")
+    @FusionGroup({
+            @Fusion(allowed = Platform.EL_CHECK_ACTIVE, fallback = "#target.pushNotCheck(#product, #delay)"),
+            @Fusion(tag = "product-push")})
     @Override
     public long push(Product product, boolean delay) {
         log.info("正在推送新产品：{}, 是否延迟：{}", product.getName(), delay);
