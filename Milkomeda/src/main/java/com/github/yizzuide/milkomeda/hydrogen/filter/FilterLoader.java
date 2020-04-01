@@ -31,6 +31,7 @@ public class FilterLoader {
             Map<String, String> filterInfoMap = new HashMap<>();
             filterInfoMap.put("name",  entry.getKey());
             FilterRegistration filterRegistration = entry.getValue();
+            filterInfoMap.put("class", filterRegistration.getClassName());
             filterInfoMap.put("urlPattern", filterRegistration.getUrlPatternMappings().toString());
             list.add(filterInfoMap);
         }
