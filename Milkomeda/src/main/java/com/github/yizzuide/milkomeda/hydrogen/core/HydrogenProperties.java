@@ -49,6 +49,11 @@ public class HydrogenProperties {
      */
     private List<Interceptor> interceptors;
 
+    /**
+     * 动态过滤器
+     */
+    private Filter filter = new HydrogenProperties.Filter();
+
     @Data
     public static class Transaction {
         /**
@@ -151,6 +156,14 @@ public class HydrogenProperties {
          * 属性
          */
         private Map<String, Object> props = new HashMap<>();
+    }
+
+    @Data
+    public static class Filter {
+        /**
+         * 启用过滤模块
+         */
+        private boolean enable = false;
     }
 
 }
