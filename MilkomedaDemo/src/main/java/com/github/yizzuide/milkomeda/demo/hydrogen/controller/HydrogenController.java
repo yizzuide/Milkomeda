@@ -66,7 +66,7 @@ public class HydrogenController {
     }
 
     @RequestMapping("register")
-    public String register(@Valid UserVO userVO) {
+    public String register(@Valid UserVO userVO) { // @Valid是JSR303校验
         log.info("valid userVO:  {}", userVO);
         return HttpStatus.OK.name();
     }
