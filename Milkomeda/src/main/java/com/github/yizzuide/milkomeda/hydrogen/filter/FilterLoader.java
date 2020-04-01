@@ -1,8 +1,7 @@
 package com.github.yizzuide.milkomeda.hydrogen.filter;
 
 import lombok.Data;
-import org.apache.tomcat.util.descriptor.web.FilterDef;
-import org.apache.tomcat.util.descriptor.web.FilterMap;
+import org.apache.catalina.core.*;
 
 import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
@@ -16,6 +15,10 @@ import java.util.*;
  *
  * @author yizzuide
  * @since 3.0.0
+ * @see ApplicationContextFacade#addFilter(java.lang.String, java.lang.String)
+ * @see ApplicationContext#addFilter(java.lang.String, java.lang.Class)
+ * @see StandardContext#filterStart()
+ * @see ApplicationFilterFactory#createFilterChain(javax.servlet.ServletRequest, org.apache.catalina.Wrapper, javax.servlet.Servlet)
  * Create at 2020/04/01 18:19
  */
 @Data
@@ -71,12 +74,7 @@ public class FilterLoader {
      */
     @SuppressWarnings("unchecked")
     public void unload(String name) {
-        // ((ApplicationContextFacade) servletContext).context.context.filterConfigs (具体会读这个属性里的过滤器，不用管删除的问题）
-        // ((ApplicationContextFacade) servletContext).context.context.filterDefs
-        // ((ApplicationContextFacade) servletContext).context.context.filterMaps
-        // ((ApplicationContextFacade) servletContext).context.context.removeFilterDef(FilterDef)
-        // ((ApplicationContextFacade) servletContext).context.context.removeFilterMap(FilterMap)
-        // boolean ((ApplicationContextFacade) servletContext).context.context.filterStart()（添加到filterConfigs）
+        // ((ApplicationContextFacade) servletContext).context.context.filterConfigs (具体会读这个属性里的过滤器）
         try {
             Field contextFieldLevel1 = servletContext.getClass().getDeclaredField("context");
             contextFieldLevel1.setAccessible(true);
@@ -85,27 +83,10 @@ public class FilterLoader {
             contextFieldLevel2.setAccessible(true);
             Object contextLevel2 = contextFieldLevel2.get(contextLevel1);
 
-            Field filterDefsFiled = contextLevel2.getClass().getDeclaredField("filterDefs");
-            filterDefsFiled.setAccessible(true);
-            Map<String, FilterDef> filterDefs = (Map<String, FilterDef>)filterDefsFiled.get(contextLevel2);
-            FilterDef filterDef = filterDefs.get(name);
-            // remove
-
-            Field filterMapsFiled = contextLevel2.getClass().getDeclaredField("filterMaps");
-            Object filterMaps = filterMapsFiled.get(contextLevel2);
-            Field filterMapsArrayField = filterMaps.getClass().getDeclaredField("array");
-            filterMapsArrayField.setAccessible(true);
-            FilterMap[] filterMapsArray = (FilterMap[]) filterMapsArrayField.get(filterMaps);
-            FilterMap filterMapTag = null;
-            for (FilterMap filterMap : filterMapsArray) {
-                if (filterMap.getFilterName().equals(name)) {
-                    filterMapTag = filterMap;
-                }
-            }
-            // remove
-
-            // restart
-
+            Field filterConfigsFiled = contextLevel2.getClass().getDeclaredField("filterConfigs");
+            filterConfigsFiled.setAccessible(true);
+            Map<String, ApplicationFilterConfig> filterConfigs = (Map<String, ApplicationFilterConfig>) filterConfigsFiled.get(contextLevel2);
+            filterConfigs.remove(name);
         } catch (Exception e) {
             e.printStackTrace();
         }
