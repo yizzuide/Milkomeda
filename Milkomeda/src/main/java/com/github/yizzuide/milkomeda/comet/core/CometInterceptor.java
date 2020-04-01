@@ -130,14 +130,14 @@ public class CometInterceptor extends HandlerInterceptorAdapter implements Appli
         Map<String, YmlAliasNode> aliasNodeMap = null;
         Map<String, Object> bodyMap = null;
         boolean isResponseOk = false;
-        if (ex == null && tag.getFailureCondition().size() > 0) {
+        if (ex == null && tag.getExceptionMonitor().size() > 0) {
             // body转为Map
             if (!(body instanceof Map)) {
                 body = DataTypeConvertUtil.beanToMap(body);
             }
             bodyMap = (Map<String, Object>) body;
             // 解析别名配置项
-            aliasNodeMap = YmlParser.parseAliasMap(tag.getFailureCondition());
+            aliasNodeMap = YmlParser.parseAliasMap(tag.getExceptionMonitor());
             YmlAliasNode ignoreCodeNode = aliasNodeMap.get("ignore-code");
             Object code = bodyMap.get(ignoreCodeNode.getKey());
             // 忽略的code相同，则不是异常
@@ -180,7 +180,12 @@ public class CometInterceptor extends HandlerInterceptorAdapter implements Appli
         String selectTag = null;
         Map<String, CometCollectorProperties.Tag> tagMap = cometCollectorProperties.getTags();
         for (Map.Entry<String, CometCollectorProperties.Tag> tag : tagMap.entrySet()) {
-            if (CometLoggerPathMatcher.match(tag.getValue().getPaths(), request.getRequestURI())) {
+            if (!CollectionUtils.isEmpty(tag.getValue().getExclude())) {
+                if (CometLoggerPathMatcher.match(tag.getValue().getExclude(), request.getRequestURI())) {
+                    continue;
+                }
+            }
+            if (CometLoggerPathMatcher.match(tag.getValue().getInclude(), request.getRequestURI())) {
                 selectTag = tag.getKey();
                 break;
             }

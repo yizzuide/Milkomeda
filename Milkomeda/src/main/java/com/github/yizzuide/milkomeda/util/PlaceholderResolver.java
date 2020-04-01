@@ -77,7 +77,13 @@ public class PlaceholderResolver {
         List<String> keys = new ArrayList<>();
         while (start != -1) {
             int end = content.indexOf(this.placeholderSuffix, start + 1);
-            keys.add(content.substring(start + 1, end));
+            String subContent = content.substring(start + 1, end);
+            // 忽略包含有占位符的内容
+            if (subContent.contains(this.placeholderPrefix)) {
+                start = content.indexOf(this.placeholderPrefix, start + 1);
+                continue;
+            }
+            keys.add(subContent);
             start = content.indexOf(this.placeholderPrefix, end + 1);
         }
         return keys;
@@ -144,6 +150,10 @@ public class PlaceholderResolver {
             int end = result.indexOf(this.placeholderSuffix, start);
             // 获取占位符属性值，如${id}, 即获取id
             String placeholder = result.substring(start + this.placeholderPrefix.length(), end);
+            if (placeholder.contains(this.placeholderPrefix)) {
+                start = content.indexOf(this.placeholderPrefix, start + 1);
+                continue;
+            }
             // 替换整个占位符内容，即将${id}值替换为替换规则回调中的内容
             String replaceContent = placeholder.trim().isEmpty() ? "" : rule.apply(placeholder);
             if (replaceContent == null) replaceContent = "";

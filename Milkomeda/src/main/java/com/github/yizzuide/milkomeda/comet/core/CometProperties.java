@@ -4,6 +4,7 @@ import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -48,9 +49,8 @@ public class CometProperties {
         private List<String> exclude;
         /**
          * 打印策略
-         * [{paths: ["/xxx/x"], tpl: "url->{userId}"}]
          */
-        private List<Strategy> strategy;
+        private List<Strategy> strategy = Collections.singletonList(new CometProperties.Strategy());
     }
 
     @Data
@@ -58,14 +58,22 @@ public class CometProperties {
         /**
          * 策略包含路径
          */
-        private List<String> paths;
+        private List<String> paths = Collections.singletonList("/**");
         /**
-         * 策略模板
+         * 策略模板，默认能识别的占位符：uri、method、params、token（如果请求头有token）
          */
-        private String tpl;
+        private String tpl = "{\"uri\":\"{uri}\", \"method\": \"{method}\", \"params\": \"{params}\", \"token\": \"{token}\"}";
         /**
-         * 缓存占位符
+         * 缓存占位符（模块内部使用）
          */
         private List<String> cacheKeys;
+
+        void setCacheKeys(List<String> cacheKeys) {
+            this.cacheKeys = cacheKeys;
+        }
+
+        List<String> getCacheKeys() {
+            return this.cacheKeys;
+        }
     }
 }

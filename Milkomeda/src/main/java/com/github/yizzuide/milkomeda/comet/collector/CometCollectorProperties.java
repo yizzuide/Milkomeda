@@ -36,13 +36,19 @@ public class CometCollectorProperties {
         private Class<? extends WebCometData> prototype = WebCometData.class;
 
         /**
-         * 失败条件匹配
+         * 匹配包含的路径
          */
-        private Map<String, Object> failureCondition;
+        private List<String> include;
 
         /**
-         * 匹配的请求路径
+         * 排除路径
          */
-        private List<String> paths;
+        private List<String> exclude;
+
+
+        /**
+         * 异常监控器（由于异常可能被 @ControllerAdvice 吞没）
+         */
+        private Map<String, Object> exceptionMonitor;
     }
 }

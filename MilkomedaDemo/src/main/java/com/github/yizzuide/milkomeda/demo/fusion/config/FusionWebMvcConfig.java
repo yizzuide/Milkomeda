@@ -19,6 +19,9 @@ public class FusionWebMvcConfig implements WebMvcConfigurer {
     public void configFusion(FusionAspect fusionAspect) {
         // 修改返回值
         fusionAspect.setConverter((tag, retObj, error) -> {
+            if ("product-push".equals(tag)) {
+                return 0;
+            }
             // 返回错误类型响应数据
             if (retObj == null) {
                 return new ReturnVO<>().error(error);
