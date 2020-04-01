@@ -30,6 +30,7 @@ public class ProductServiceImpl implements ProductService {
         log.info("正在推送新产品：{}, 是否延迟：{}", product.getName(), delay);
         return 1;
     }
+
     // allowed条件为false，调用该反馈方法返回
     public long pushNotCheck(Product product, boolean delay) {
         log.info("非检测环境下不推送新产品：{}, 是否延迟：{}", product.getName(), delay);
