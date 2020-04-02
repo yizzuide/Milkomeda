@@ -13,7 +13,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
  *
  * @author yizzuide
  * @since 1.15.0
- * @version 2.1.1
+ * @version 3.0.0
  * Create at 2019/11/16 17:30
  */
 @Slf4j
@@ -51,8 +51,9 @@ public class DelayJobHandler implements Runnable {
 
     @Override
     public void run() {
-        // 延迟桶处理锁住资源，防止多线程并发执行时出现相同记录问题
-        boolean absent = RedisUtil.setIfAbsent(KEY_IDEMPOTENT_LIMITER, props.getTaskPopCountLockTimeoutSeconds(), redisTemplate);
+        String indexLockKey = indexLockKey();
+        // 延迟桶处理锁住资源，防止同一桶索引分布式并发执行时出现相同记录问题
+        boolean absent = RedisUtil.setIfAbsent(indexLockKey, props.getTaskPopCountLockTimeoutSeconds(), redisTemplate);
         if (absent) return;
 
         DelayJob delayJob = null;
@@ -63,7 +64,7 @@ public class DelayJobHandler implements Runnable {
                 return;
             }
 
-            // 发现延时任务，延迟时间没到
+            // 延时任务的延迟时间还没到
             long currentTime = System.currentTimeMillis();
             if (delayJob.getDelayTime() > currentTime) {
                 return;
@@ -90,7 +91,7 @@ public class DelayJobHandler implements Runnable {
                     delayJob.getJodId()  : "[任务数据获取失败]", e.getMessage(), e);
         } finally {
             // 删除Lock
-            Polyfill.redisDelete(redisTemplate, KEY_IDEMPOTENT_LIMITER);
+            Polyfill.redisDelete(redisTemplate, indexLockKey);
         }
     }
 
@@ -141,5 +142,13 @@ public class DelayJobHandler implements Runnable {
             // 移除delayBucket中的任务
             delayBucket.remove(index, delayJob);
         }, redisTemplate);
+    }
+
+    /**
+     * 获取桶索引锁key
+     * @return key
+     */
+    private String indexLockKey() {
+        return KEY_IDEMPOTENT_LIMITER + "_" + index;
     }
 }

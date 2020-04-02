@@ -3,6 +3,7 @@ package com.github.yizzuide.milkomeda.demo.ice.handler;
 import com.github.yizzuide.milkomeda.demo.ice.pojo.Product;
 import com.github.yizzuide.milkomeda.ice.IceHandler;
 import com.github.yizzuide.milkomeda.ice.IceListener;
+import com.github.yizzuide.milkomeda.ice.Job;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
@@ -21,7 +22,7 @@ public class ProductCheckHandler {
 
     // 监听topic消息（支持SpEL)
     @IceListener(topic = "#target.topicName()")
-    public void handle(List<Product> products) {
+    public void handle(List<Job<Product>> products) {
       log.info("products: {}", products);
     }
 

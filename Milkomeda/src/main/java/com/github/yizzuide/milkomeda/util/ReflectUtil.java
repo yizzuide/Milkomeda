@@ -1,10 +1,10 @@
 package com.github.yizzuide.milkomeda.util;
 
-import com.fasterxml.jackson.databind.JavaType;
 import com.github.yizzuide.milkomeda.universe.el.ELContext;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.springframework.core.ResolvableType;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -135,11 +135,12 @@ public class ReflectUtil {
             method.invoke(target);
             return;
         }
-
+        // ResolvableType是Spring核心包里的泛型解决方案，简化对泛型识别处理（下面注释保留Java API处理方式）
+        ResolvableType resolvableType = ResolvableType.forMethodParameter(method, 0);
         // 获取参数类型
-        Class<?> parameterClazz = method.getParameterTypes()[0];
-        // Map
-        if (parameterClazz == Map.class) {
+        Class<?> parameterClazz = resolvableType.resolve(); // method.getParameterTypes()[0];
+        // Map 或 Object
+        if (parameterClazz == Map.class || parameterClazz == Object.class) {
             // 去掉实体的包装
             method.invoke(target, wrapperBody.apply(wrapperList.get(0)));
             return;
@@ -147,39 +148,49 @@ public class ReflectUtil {
 
         // List
         if (parameterClazz == List.class) {
-            Type[] genericParameterTypes = method.getGenericParameterTypes();
-            if (!(genericParameterTypes[0] instanceof ParameterizedType)) {
+            // List
+//            Type[] genericParameterTypes = method.getGenericParameterTypes();
+//            if (!(genericParameterTypes[0] instanceof ParameterizedType)) {
+            ResolvableType[] wrapperGenerics = resolvableType.getGenerics();
+            Class<?> elementGenericType = wrapperGenerics[0].resolve();
+            if (elementGenericType == null) {
                 // 去掉实体的包装
                 method.invoke(target, wrapperList.stream().map(wrapperBody).collect(Collectors.toList()));
                 return;
             }
             // List<?>
-            ParameterizedType parameterizedType = (ParameterizedType) genericParameterTypes[0];
-            Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
-            Type actualTypeArgument = actualTypeArguments[0];
+//            ParameterizedType parameterizedType = (ParameterizedType) genericParameterTypes[0];
+//            Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
+//            Type actualTypeArgument = actualTypeArguments[0];
             // List<Map>
-            if (TypeUtil.type2Class(actualTypeArgument) == Map.class) {
+//            if (TypeUtil.type2Class(actualTypeArgument) == Map.class) {
+            if (elementGenericType == Map.class) {
                 // 去掉实体的包装
                 method.invoke(target, wrapperList.stream().map(wrapperBody).collect(Collectors.toList()));
                 return;
             }
             // List<Entity>
-            if (TypeUtil.type2Class(actualTypeArgument) == wrapperClazz) {
+//            if (TypeUtil.type2Class(actualTypeArgument) == wrapperClazz) {
+            if (elementGenericType == wrapperClazz) {
                 // List<Entity>
-                if (!(actualTypeArgument instanceof ParameterizedType)) {
+                Class<?> entityGenericType = wrapperGenerics[0].getGeneric(0).resolve();
+//                if (!(actualTypeArgument instanceof ParameterizedType)) {
+                if (entityGenericType == null) {
                     method.invoke(target, wrapperList);
                     return;
                 }
                 // List<Entity<Map>>
-                Type[] subActualTypeArguments = ((ParameterizedType) actualTypeArgument).getActualTypeArguments();
-                if (TypeUtil.type2Class(subActualTypeArguments[0]) == Map.class) {
+//                Type[] subActualTypeArguments = ((ParameterizedType) actualTypeArgument).getActualTypeArguments();
+//                if (TypeUtil.type2Class(subActualTypeArguments[0]) == Map.class) {
+                if (entityGenericType == Map.class) {
                     method.invoke(target, wrapperList);
                     return;
                 }
                 // List<Entity<T>>
-                JavaType javaType = TypeUtil.type2JavaType(subActualTypeArguments[0]);
+//                JavaType javaType = TypeUtil.type2JavaType(subActualTypeArguments[0]);
                 for (T wrapper : wrapperList) {
-                    Object body = JSONUtil.nativeRead(JSONUtil.serialize(wrapperBody.apply(wrapper)), javaType);
+//                    Object body = JSONUtil.nativeRead(JSONUtil.serialize(wrapperBody.apply(wrapper)), javaType);
+                    Object body = JSONUtil.parse(JSONUtil.serialize(wrapperBody.apply(wrapper)), entityGenericType);
                     wipeWrapperBody.accept(wrapper, body);
                 }
                 method.invoke(target, wrapperList);
@@ -187,14 +198,15 @@ public class ReflectUtil {
             }
 
             // List<T>
-            method.invoke(target, wrapperList.stream()
-                    .map(wrapper -> JSONUtil.nativeRead(JSONUtil.serialize(wrapperBody.apply(wrapper)),
-                            TypeUtil.type2JavaType(actualTypeArgument))).collect(Collectors.toList()));
+//            method.invoke(target, wrapperList.stream().map(wrapper ->
+//                    JSONUtil.nativeRead(JSONUtil.serialize(wrapperBody.apply(wrapper)), TypeUtil.type2JavaType(actualTypeArgument))).collect(Collectors.toList()));
+            method.invoke(target, wrapperList.stream().map(wrapper ->
+                    JSONUtil.parse(JSONUtil.serialize(wrapperBody.apply(wrapper)), elementGenericType)).collect(Collectors.toList()));
             return;
         }
 
         // 转到业务类型 T
-        method.invoke(target, JSONUtil.nativeRead(JSONUtil.serialize(wrapperBody.apply(wrapperList.get(0))), TypeUtil.class2TypeRef(parameterClazz)));
+        method.invoke(target, JSONUtil.parse(JSONUtil.serialize(wrapperBody.apply(wrapperList.get(0))), parameterClazz));
     }
 
 
@@ -232,7 +244,17 @@ public class ReflectUtil {
      */
     public static Class<?> getMethodReturnType(JoinPoint joinPoint) {
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
-        return (Class<?>) signature.getReturnType();
+        // (Class<?>) signature.getReturnType()
+        return getMethodReturnType(signature.getMethod());
+    }
+
+    /**
+     * 获取方法返回值值类型
+     * @param method    Method
+     * @return  返回值类型
+     */
+    public static Class<?> getMethodReturnType(Method method) {
+        return ResolvableType.forMethodReturnType(method).resolve();
     }
 
     /**

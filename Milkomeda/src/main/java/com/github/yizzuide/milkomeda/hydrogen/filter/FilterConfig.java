@@ -5,7 +5,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * HydrogenFilterConfig
+ * FilterConfig
  *
  * @author yizzuide
  * @since 3.0.0
@@ -15,7 +15,7 @@ import org.springframework.context.annotation.Configuration;
 @ConditionalOnProperty(prefix = "milkomeda.hydrogen.filter", name = "enable", havingValue = "true")
 public class FilterConfig {
     @Bean
-    public FilterLoader hydrogenFilter() {
+    public FilterLoader filterLoader() {
         return new FilterLoader();
     }
 
