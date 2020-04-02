@@ -1,6 +1,7 @@
 package com.github.yizzuide.milkomeda.demo.hydrogen.controller;
 
 import com.github.yizzuide.milkomeda.demo.hydrogen.exception.YizException;
+import com.github.yizzuide.milkomeda.demo.hydrogen.handler.IPLimiterFilter;
 import com.github.yizzuide.milkomeda.demo.hydrogen.handler.WaitTimeInterceptor;
 import com.github.yizzuide.milkomeda.demo.hydrogen.service.TOrderService;
 import com.github.yizzuide.milkomeda.demo.hydrogen.vo.UserVO;
@@ -106,6 +107,18 @@ public class HydrogenController {
     @GetMapping("filter/load/info")
     public Object loadFiltersInfo() {
         return filterLoader.inspect();
+    }
+
+    @RequestMapping("filter/load/ipLimiter")
+    public Object loadIPLimiterFilter() {
+        boolean load = filterLoader.load("ipLimiterFilter", IPLimiterFilter.class, "/*");
+        return load ? HttpStatus.OK.name() : HttpStatus.INTERNAL_SERVER_ERROR.name();
+    }
+
+    @RequestMapping("filter/unload/ipLimiter")
+    public Object unloadIPLimiterFilter() {
+        boolean unload = filterLoader.unload("ipLimiterFilter");
+        return unload ? HttpStatus.OK.name() : HttpStatus.INTERNAL_SERVER_ERROR.name();
     }
 
 }

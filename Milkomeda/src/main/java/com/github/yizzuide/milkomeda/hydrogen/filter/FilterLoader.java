@@ -1,13 +1,20 @@
 package com.github.yizzuide.milkomeda.hydrogen.filter;
 
+import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
+import com.github.yizzuide.milkomeda.universe.context.WebContext;
+import com.github.yizzuide.milkomeda.util.ReflectUtil;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.catalina.Context;
 import org.apache.catalina.core.*;
+import org.apache.tomcat.util.descriptor.web.FilterDef;
+import org.apache.tomcat.util.descriptor.web.FilterMap;
+import org.springframework.context.ConfigurableApplicationContext;
 
 import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
 import javax.servlet.FilterRegistration;
 import javax.servlet.ServletContext;
-import java.lang.reflect.Field;
 import java.util.*;
 
 /**
@@ -21,6 +28,7 @@ import java.util.*;
  * @see ApplicationFilterFactory#createFilterChain(javax.servlet.ServletRequest, org.apache.catalina.Wrapper, javax.servlet.Servlet)
  * Create at 2020/04/01 18:19
  */
+@Slf4j
 @Data
 public class FilterLoader {
 
@@ -45,50 +53,77 @@ public class FilterLoader {
     }
 
     /**
-     * 初始化加载一个Filter
+     * 动态加载一个Filter（仅适用于容器Tomcat)
      * @param name          过滤器名
-     * @param filter        过滤器
-     * @param urlPattern    匹配路径
-     */
-    public void load(String name, Class<? extends Filter> filter, String urlPattern) {
-        FilterRegistration.Dynamic filterRegistration = servletContext.addFilter(name, filter);
-        filterRegistration.addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST), true, urlPattern);
-    }
-
-    /**
-     * 动态加载一个Filter（仅用于Tomcat 9.0)
-     * @param name          过滤器名
-     * @param filter        过滤器
+     * @param clazz         过滤器类
      * @param urlPattern    匹配路径
      * @return 加载是否成功
      */
-    public boolean loadDynamic(String name, Class<? extends Filter> filter, String urlPattern) {
-        load(name, filter, urlPattern);
-        // boolean ((ApplicationContextFacade) servletContext).context.context.filterStart()
-        return false;
+    public boolean load(String name, Class<? extends Filter> clazz, String urlPattern) {
+        Filter filterBean = WebContext.registerBean((ConfigurableApplicationContext) ApplicationContextHolder.get(), name, clazz);
+        ApplicationContextHolder.get().getAutowireCapableBeanFactory().autowireBean(filterBean);
+        Context standContext = ReflectUtil.invokeFieldPath(servletContext, "context.context");
+        if (standContext == null) {
+            log.warn("Hydrogen filter find path '((ApplicationContextFacade) servletContext).context.context' fail.");
+            return false;
+        }
+        // ((ApplicationContextFacade) servletContext).context.context.filterDefs（filterMaps和filterConfigs的数据源，并提供给外部接口访问）
+        FilterDef filterDef = ReflectUtil.invokeMethod(standContext, "findFilterDef", new Class[]{String.class}, name);
+        if (filterDef == null) {
+            filterDef = new FilterDef();
+            filterDef.setFilterName(name);
+            ReflectUtil.invokeMethod(standContext, "addFilterDef", new Class[]{FilterDef.class}, filterDef);
+        }
+        filterDef.setFilterClass(filterBean.getClass().getName());
+        filterDef.setFilter(filterBean);
+        // 在内部创建filterMaps（作为请求调用链的路径映射过滤器集合）
+        FilterRegistration.Dynamic filterRegistration = new ApplicationFilterRegistration(filterDef, standContext);
+        filterRegistration.addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST), false, urlPattern);
+
+        // boolean ((ApplicationContextFacade) servletContext).context.context.filterStart() (把filterDefs加载到filterConfigs)
+        return (boolean) ReflectUtil.invokeMethod(standContext, "filterStart", null);
     }
 
     /**
-     * 动态删除一个Filter（仅用于Tomcat 9.0)
+     * 动态删除一个Filter（仅适用于容器Tomcat)
      * @param name  过滤器名
+     * @return 删除是否成功
      */
-    @SuppressWarnings("unchecked")
-    public void unload(String name) {
-        // ((ApplicationContextFacade) servletContext).context.context.filterConfigs (具体会读这个属性里的过滤器）
-        try {
-            Field contextFieldLevel1 = servletContext.getClass().getDeclaredField("context");
-            contextFieldLevel1.setAccessible(true);
-            Object contextLevel1 = contextFieldLevel1.get(servletContext);
-            Field contextFieldLevel2 = contextLevel1.getClass().getDeclaredField("context");
-            contextFieldLevel2.setAccessible(true);
-            Object contextLevel2 = contextFieldLevel2.get(contextLevel1);
-
-            Field filterConfigsFiled = contextLevel2.getClass().getDeclaredField("filterConfigs");
-            filterConfigsFiled.setAccessible(true);
-            Map<String, ApplicationFilterConfig> filterConfigs = (Map<String, ApplicationFilterConfig>) filterConfigsFiled.get(contextLevel2);
-            filterConfigs.remove(name);
-        } catch (Exception e) {
-            e.printStackTrace();
+    public boolean unload(String name) {
+        Context standContext = ReflectUtil.invokeFieldPath(servletContext, "context.context");
+        if (standContext == null) {
+            log.warn("Hydrogen filter find path '((ApplicationContextFacade) servletContext).context.context' fail.");
+            return false;
         }
+
+        // ((ApplicationContextFacade) servletContext).context.context.filterMaps（在filterChain里根据映射的filterMaps转filterConfigs）
+        FilterMap[] filterMaps = ReflectUtil.invokeMethod(standContext, "findFilterMaps", null);
+        if (filterMaps == null) {
+            log.warn("Hydrogen filter find path '((ApplicationContextFacade) servletContext).context.context.findFilterMaps()' fail.");
+            return false;
+        }
+        for (FilterMap filterMap : filterMaps) {
+            if (filterMap.getFilterName().equals(name)) {
+                ReflectUtil.invokeMethod(standContext, "removeFilterMap", new Class[]{FilterMap.class}, filterMap);
+                break;
+            }
+        }
+
+        // ((ApplicationContextFacade) servletContext).context.context.filterDefs（filterMaps和filterConfigs的数据源，并提供给外部接口访问）
+        FilterDef filterDef = ReflectUtil.invokeMethod(standContext, "findFilterDef", new Class[]{String.class}, name);
+        if (filterDef != null) {
+            ReflectUtil.invokeMethod(standContext, "removeFilterDef", new Class[]{FilterDef.class}, filterDef);
+        }
+
+        // ((ApplicationContextFacade) servletContext).context.context.filterConfigs (FilterChain具体会读这个属性里的过滤器）
+        Map<String, ApplicationFilterConfig> filterConfigs = ReflectUtil.invokeFieldPath(standContext, "filterConfigs");
+        if (filterConfigs == null) {
+            log.warn("Hydrogen filter find path '((ApplicationContextFacade) servletContext).context.context.filterConfigs' fail.");
+            return false;
+        }
+        filterConfigs.remove(name);
+
+        // boolean ((ApplicationContextFacade) servletContext).context.context.filterStart() (把filterDefs加载到filterConfigs)
+        return (boolean) ReflectUtil.invokeMethod(standContext, "filterStart", null);
     }
 }

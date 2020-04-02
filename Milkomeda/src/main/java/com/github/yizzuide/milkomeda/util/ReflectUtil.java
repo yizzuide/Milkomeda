@@ -5,17 +5,16 @@ import com.github.yizzuide.milkomeda.universe.el.ELContext;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
+import java.lang.reflect.*;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -234,5 +233,46 @@ public class ReflectUtil {
     public static Class<?> getMethodReturnType(JoinPoint joinPoint) {
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         return (Class<?>) signature.getReturnType();
+    }
+
+    /**
+     * 获取属性路径值
+     * @param target    目标对象
+     * @param fieldPath 属性路径
+     * @param <T>       值类型
+     * @return  属性值
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> T invokeFieldPath(Object target, String fieldPath) {
+        if (target == null || StringUtils.isEmpty(fieldPath)) {
+            return null;
+        }
+        String[] fieldNames = StringUtils.delimitedListToStringArray(fieldPath, ".");
+        for (String fieldName : fieldNames) {
+            Field field = ReflectionUtils.findField(Objects.requireNonNull(target).getClass(), fieldName);
+            if (field == null) return null;
+            ReflectionUtils.makeAccessible(field);
+            target = ReflectionUtils.getField(field, target);
+        }
+        return (T) target;
+    }
+
+    /**
+     * 获取方法值
+     * @param target        目标对象
+     * @param methodName    方法名
+     * @param paramTypes    参数类型列表
+     * @param args          参数值
+     * @param <T>           返回值类型
+     * @return  返回值
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> T invokeMethod(Object target, String methodName, Class<?>[] paramTypes, Object... args) {
+        Method method = ReflectionUtils.findMethod(target.getClass(), methodName, paramTypes);
+        if (method == null) {
+            return null;
+        }
+        ReflectionUtils.makeAccessible(method);
+        return (T) ReflectionUtils.invokeMethod(method, target, args);
     }
 }
