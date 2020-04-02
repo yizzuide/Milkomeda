@@ -3,6 +3,7 @@ package com.github.yizzuide.milkomeda.hydrogen.filter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
 /**
  * FilterConfig
@@ -12,13 +13,9 @@ import org.springframework.context.annotation.Configuration;
  * Create at 2020/04/01 18:18
  */
 @Configuration
+@Import(FilterImportSelector.class)
 @ConditionalOnProperty(prefix = "milkomeda.hydrogen.filter", name = "enable", havingValue = "true")
 public class FilterConfig {
-    @Bean
-    public FilterLoader filterLoader() {
-        return new FilterLoader();
-    }
-
     @Bean
     public ServletContextListener servletContextListener() {
        return new ServletContextListener();
