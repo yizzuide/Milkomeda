@@ -23,35 +23,37 @@ public class HydrogenProperties {
      * 切面事务
      */
     @NestedConfigurationProperty
-    private final Transaction transaction = new HydrogenProperties.Transaction();
+    private final Transaction transaction = new Transaction();
 
     /**
      * 统一异常处理
      */
     @NestedConfigurationProperty
-    private final Uniform uniform = new HydrogenProperties.Uniform();
+    private final Uniform uniform = new Uniform();
 
     /**
      * 校验器
      */
     @NestedConfigurationProperty
-    private Validator validator = new HydrogenProperties.Validator();
+    private Validator validator = new Validator();
 
     /**
      * 国际化
      */
     @NestedConfigurationProperty
-    private I18n i18n = new HydrogenProperties.I18n();
+    private I18n i18n = new I18n();
 
     /**
      * 动态拦截器
      */
-    private List<Interceptor> interceptors;
+    @NestedConfigurationProperty
+    private Interceptor interceptor = new Interceptor();
 
     /**
      * 动态过滤器
      */
-    private Filter filter = new HydrogenProperties.Filter();
+    @NestedConfigurationProperty
+    private Filter filter = new Filter();
 
     @Data
     public static class Transaction {
@@ -132,6 +134,18 @@ public class HydrogenProperties {
     @Data
     public static class Interceptor {
         /**
+         * 启用拦截器模块
+         */
+        private boolean enable = false;
+        /**
+         * 拦截器列表
+         */
+        private List<Interceptors> interceptors;
+    }
+
+    @Data
+    public static class Interceptors {
+        /**
          * 拦截器类
          */
         private Class<?> clazz;
@@ -163,6 +177,41 @@ public class HydrogenProperties {
          * 启用过滤模块
          */
         private boolean enable = false;
+
+        /**
+         * 过滤器列表
+         */
+        private List<Filters> filters;
+    }
+
+    @Data
+    public static class Filters {
+        /**
+         * 过滤器名
+         */
+        private String name;
+        /**
+         * 过滤器类
+         */
+        private Class<? extends javax.servlet.Filter> clazz;
+
+        /**
+         * 匹配的URL
+         */
+        private List<String> urlPatterns = Collections.singletonList("/*");
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Filters filters = (Filters) o;
+            return name.equals(filters.name);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(name);
+        }
     }
 
 }

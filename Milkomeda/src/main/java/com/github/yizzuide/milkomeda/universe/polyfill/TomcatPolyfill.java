@@ -30,14 +30,15 @@ public class TomcatPolyfill {
 
     /***
      * 动态添加过滤器
-     * @param name              过滤器名
-     * @param clazz             过滤器类
-     * @param urlPattern        过滤路径
-     * @param servletContext    ServletContext
+     * @param servletContext     ServletContext
+     * @param applicationContext 应用上下文
+     * @param name               过滤器名
+     * @param clazz              过滤器类
+     * @param urlPattern         过滤路径
      * @return 添加是否成功
      */
-    public static boolean addDynamicFilter(String name, Class<? extends Filter> clazz, String urlPattern, ServletContext servletContext) {
-        Filter filterBean = WebContext.registerBean((ConfigurableApplicationContext) ApplicationContextHolder.get(), name, clazz);
+    public static boolean addDynamicFilter(ServletContext servletContext, ConfigurableApplicationContext applicationContext,  String name, Class<? extends Filter> clazz, String... urlPattern) {
+        Filter filterBean = WebContext.registerBean(applicationContext, name, clazz);
         ApplicationContextHolder.get().getAutowireCapableBeanFactory().autowireBean(filterBean);
         Context standContext = ReflectUtil.invokeFieldPath(servletContext, "context.context");
         if (standContext == null) {

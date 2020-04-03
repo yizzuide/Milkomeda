@@ -25,7 +25,8 @@ public abstract class AbstractHydrogenLoader implements HydrogenLoader, Applicat
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
-        // 刷新拦截器
+
+        // 刷新处理器列表
         refresh();
     }
 

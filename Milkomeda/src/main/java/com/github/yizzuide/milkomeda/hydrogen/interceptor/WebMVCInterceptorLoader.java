@@ -37,7 +37,7 @@ public class WebMVCInterceptorLoader extends AbstractInterceptorLoader {
     /**
      * 加载完成的拦截器配置
      */
-    private List<HydrogenProperties.Interceptor> loadedInterceptors;
+    private List<HydrogenProperties.Interceptors> loadedInterceptors;
 
     public WebMVCInterceptorLoader(RequestMappingHandlerMapping requestMappingHandlerMapping) {
         this.requestMappingHandlerMapping = requestMappingHandlerMapping;
@@ -46,7 +46,7 @@ public class WebMVCInterceptorLoader extends AbstractInterceptorLoader {
     
     @Override
     public void load(@NonNull Class<?> clazz, List<String> include, List<String> exclude, int order) {
-        HydrogenProperties.Interceptor hInterceptor = new HydrogenProperties.Interceptor();
+        HydrogenProperties.Interceptors hInterceptor = new HydrogenProperties.Interceptors();
         hInterceptor.setClazz(clazz);
         if (include != null) {
             hInterceptor.setIncludeURLs(include);
@@ -59,7 +59,7 @@ public class WebMVCInterceptorLoader extends AbstractInterceptorLoader {
     
     @Override
     public void unLoad(@NonNull Class<?> clazz) {
-        HydrogenProperties.Interceptor hInterceptor = new HydrogenProperties.Interceptor();
+        HydrogenProperties.Interceptors hInterceptor = new HydrogenProperties.Interceptors();
         hInterceptor.setClazz(clazz);
         transform(Collections.singletonList(hInterceptor), (hi, handlerInterceptor)  ->
                 SpringMvcPolyfill.removeDynamicInterceptor(handlerInterceptor, this.requestMappingHandlerMapping));
@@ -73,7 +73,7 @@ public class WebMVCInterceptorLoader extends AbstractInterceptorLoader {
     @Override
     protected void refresh() {
         // 刷新配置后的拦截器列表
-        List<HydrogenProperties.Interceptor> afterInterceptors = HydrogenHolder.getProps().getInterceptors();
+        List<HydrogenProperties.Interceptors> afterInterceptors = HydrogenHolder.getProps().getInterceptor().getInterceptors();
         // 删除加载过的拦截器
         transform(this.loadedInterceptors, (hi, handlerInterceptor)  ->
                 SpringMvcPolyfill.removeDynamicInterceptor(handlerInterceptor, this.requestMappingHandlerMapping));
@@ -83,7 +83,7 @@ public class WebMVCInterceptorLoader extends AbstractInterceptorLoader {
         this.loadedInterceptors = afterInterceptors;
     }
 
-    private void transform(List<HydrogenProperties.Interceptor> hydrogenInterceptors, @NonNull BiConsumer<HydrogenProperties.Interceptor, HandlerInterceptor> performAction) {
+    private void transform(List<HydrogenProperties.Interceptors> hydrogenInterceptors, @NonNull BiConsumer<HydrogenProperties.Interceptors, HandlerInterceptor> performAction) {
         if (CollectionUtils.isEmpty(hydrogenInterceptors)) {
             return;
         }

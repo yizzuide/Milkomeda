@@ -199,11 +199,11 @@ milkomeda:
       # 语言设置参数名，默认为lang，如：zh_CN (language_country)
       query: lang
 
-    filter:
-      enable: true
 
     # 动态添加拦截器
-    interceptors:
+    interceptor:
+      enable: true
+      interceptors:
         -
           clazz: com.github.yizzuide.milkomeda.demo.hydrogen.handler.UrlLogInterceptor
           order: 1
@@ -211,3 +211,6 @@ milkomeda:
           props:
             open: true
 
+    # 过滤器
+    filter:
+      enable: true

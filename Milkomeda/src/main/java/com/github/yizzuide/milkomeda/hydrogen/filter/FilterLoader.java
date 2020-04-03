@@ -25,10 +25,10 @@ public interface FilterLoader extends HydrogenLoader {
      * 动态加载一个Filter（仅适用于容器Tomcat)
      * @param name          过滤器名
      * @param clazz         过滤器类
-     * @param urlPattern    匹配路径
+     * @param urlPatterns   匹配路径
      * @return 加载是否成功
      */
-    boolean load(String name, Class<? extends Filter> clazz, String urlPattern);
+    boolean load(String name, Class<? extends Filter> clazz, String... urlPatterns);
 
     /**
      * 动态删除一个Filter（仅适用于容器Tomcat)
