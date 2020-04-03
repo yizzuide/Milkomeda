@@ -1,6 +1,8 @@
 package com.github.yizzuide.milkomeda.hydrogen.filter;
 
+import com.github.yizzuide.milkomeda.hydrogen.core.AbstractHydrogenLoader;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import javax.servlet.FilterRegistration;
 import javax.servlet.ServletContext;
@@ -17,7 +19,8 @@ import java.util.Map;
  * Create at 2020/04/03 01:01
  */
 @Data
-public abstract class AbstractFilterLoader implements FilterLoader {
+@EqualsAndHashCode(callSuper = true)
+public abstract class AbstractFilterLoader extends AbstractHydrogenLoader implements FilterLoader {
     /**
      * Servlet上下文
      */

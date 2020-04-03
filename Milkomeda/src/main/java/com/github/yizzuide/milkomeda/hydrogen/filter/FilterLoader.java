@@ -1,9 +1,9 @@
 package com.github.yizzuide.milkomeda.hydrogen.filter;
 
+import com.github.yizzuide.milkomeda.hydrogen.core.HydrogenLoader;
+
 import javax.servlet.Filter;
 import javax.servlet.ServletContext;
-import java.util.List;
-import java.util.Map;
 
 /**
  * FilterLoader
@@ -13,19 +13,13 @@ import java.util.Map;
  * @since 3.0.0
  * Create at 2020/04/03 01:04
  */
-public interface FilterLoader {
+public interface FilterLoader extends HydrogenLoader {
 
-    /***
+    /**
      * 设置Servlet上下文
      * @param servletContext    ServletContext
      */
     void setServletContext(ServletContext servletContext);
-
-    /**
-     * 探查过滤器信息
-     * @return 过滤器信息列表
-     */
-    List<Map<String, String>> inspect();
 
     /**
      * 动态加载一个Filter（仅适用于容器Tomcat)

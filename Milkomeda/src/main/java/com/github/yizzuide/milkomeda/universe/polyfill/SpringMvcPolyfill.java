@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 public class SpringMvcPolyfill {
+
     // 缓存反射字段
     private static Field adaptedInterceptorsField;
 
@@ -128,12 +129,12 @@ public class SpringMvcPolyfill {
      * @return 拦截器列表
      */
     @SuppressWarnings("unchecked")
-    public static List<Map<String, Object>> getAdaptedInterceptors(AbstractHandlerMapping handlerMapping) {
+    public static List<Map<String, String>> getInterceptorsInfo(AbstractHandlerMapping handlerMapping) {
         try {
             List<HandlerInterceptor> handlerInterceptors = (List<HandlerInterceptor>) adaptedInterceptorsField.get(handlerMapping);
             return handlerInterceptors.stream().map(interceptor -> {
                 MappedInterceptor mappedInterceptor = null;
-                Map<String, Object> map = new HashMap<>();
+                Map<String, String> map = new HashMap<>();
                 String clazz = "";
                 String include = "[/**]";
                 String exclude = "[]";

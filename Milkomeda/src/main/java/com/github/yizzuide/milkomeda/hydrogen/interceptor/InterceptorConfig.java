@@ -3,6 +3,7 @@ package com.github.yizzuide.milkomeda.hydrogen.interceptor;
 import com.github.yizzuide.milkomeda.hydrogen.core.HydrogenProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -24,7 +25,8 @@ public class InterceptorConfig {
 
     @SuppressWarnings("all")
     @Bean
+    @ConditionalOnClass(name = "org.springframework.web.servlet.HandlerInterceptor")
     public InterceptorLoader interceptorHandler(RequestMappingHandlerMapping requestMappingHandlerMapping) {
-        return new InterceptorLoader(requestMappingHandlerMapping);
+        return new WebMVCInterceptorLoader(requestMappingHandlerMapping);
     }
 }

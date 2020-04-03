@@ -4,7 +4,6 @@ import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.boot.convert.DurationUnit;
-import org.springframework.web.servlet.HandlerInterceptor;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
@@ -135,7 +134,7 @@ public class HydrogenProperties {
         /**
          * 拦截器类
          */
-        private Class<? extends HandlerInterceptor> clazz;
+        private Class<?> clazz;
 
         /**
          * 包括拦截的URL

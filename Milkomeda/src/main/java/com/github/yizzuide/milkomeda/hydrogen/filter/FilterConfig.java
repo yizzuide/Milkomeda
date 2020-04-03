@@ -13,7 +13,8 @@ import org.springframework.context.annotation.Import;
  * Create at 2020/04/01 18:18
  */
 @Configuration
-@Import(FilterImportSelector.class)
+//@Import(FilterImportSelector.class)
+@Import(TomcatFilterConfig.class)
 @ConditionalOnProperty(prefix = "milkomeda.hydrogen.filter", name = "enable", havingValue = "true")
 public class FilterConfig {
     @Bean
