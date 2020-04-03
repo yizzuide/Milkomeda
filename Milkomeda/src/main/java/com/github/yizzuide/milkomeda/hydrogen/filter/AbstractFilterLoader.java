@@ -20,7 +20,7 @@ import java.util.Map;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public abstract class AbstractFilterLoader extends AbstractHydrogenLoader implements FilterLoader {
+public abstract class AbstractFilterLoader<T> extends AbstractHydrogenLoader<T> implements FilterLoader {
     /**
      * Servlet上下文
      */

@@ -207,7 +207,8 @@ milkomeda:
         -
           clazz: com.github.yizzuide.milkomeda.demo.hydrogen.handler.UrlLogInterceptor
           order: 1
-          # 注入属性值
+          exclude-urls:
+            - /error
           props:
             open: true
 

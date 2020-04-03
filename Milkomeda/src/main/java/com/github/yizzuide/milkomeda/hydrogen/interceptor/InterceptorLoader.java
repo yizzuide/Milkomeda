@@ -4,6 +4,7 @@ import com.github.yizzuide.milkomeda.hydrogen.core.HydrogenLoader;
 import lombok.NonNull;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * InterceptorLoader
@@ -20,8 +21,9 @@ public interface InterceptorLoader extends HydrogenLoader {
      * @param include   拦截的URL
      * @param exclude   排除的URL
      * @param order     排序
+     * @param props     属性Map
      */
-    void load(@NonNull Class<?> clazz, List<String> include, List<String> exclude, int order);
+    void load(@NonNull Class<?> clazz, List<String> include, List<String> exclude, int order, Map<String, Object> props);
 
     /**
      * 卸载拦截器

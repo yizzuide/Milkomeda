@@ -13,14 +13,13 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
 
 /**
- * InterceptorLoader
+ * WebMvcInterceptorLoader
  * 拦截器加载器
  *
  * @author yizzuide
@@ -28,24 +27,19 @@ import java.util.function.BiConsumer;
  * Create at 2020/03/31 00:12
  */
 @Slf4j
-public class WebMVCInterceptorLoader extends AbstractInterceptorLoader {
+public class WebMvcInterceptorLoader extends AbstractInterceptorLoader<HydrogenProperties.Interceptors> {
+
     /**
      * 请求映射处理器
      */
     private RequestMappingHandlerMapping requestMappingHandlerMapping;
 
-    /**
-     * 加载完成的拦截器配置
-     */
-    private List<HydrogenProperties.Interceptors> loadedInterceptors;
-
-    public WebMVCInterceptorLoader(RequestMappingHandlerMapping requestMappingHandlerMapping) {
+    public WebMvcInterceptorLoader(RequestMappingHandlerMapping requestMappingHandlerMapping) {
         this.requestMappingHandlerMapping = requestMappingHandlerMapping;
-        this.loadedInterceptors = new ArrayList<>();
     }
     
     @Override
-    public void load(@NonNull Class<?> clazz, List<String> include, List<String> exclude, int order) {
+    public void load(@NonNull Class<?> clazz, List<String> include, List<String> exclude, int order, Map<String, Object> props) {
         HydrogenProperties.Interceptors hInterceptor = new HydrogenProperties.Interceptors();
         hInterceptor.setClazz(clazz);
         if (include != null) {
@@ -53,6 +47,9 @@ public class WebMVCInterceptorLoader extends AbstractInterceptorLoader {
         }
         hInterceptor.setExcludeURLs(exclude);
         hInterceptor.setOrder(order);
+        if (props != null) {
+            hInterceptor.setProps(props);
+        }
         transform(Collections.singletonList(hInterceptor), (hi, handlerInterceptor)  -> SpringMvcPolyfill.addDynamicInterceptor(handlerInterceptor,
                 hInterceptor.getOrder(), hi.getIncludeURLs(), hi.getExcludeURLs(), this.requestMappingHandlerMapping));
     }
@@ -74,13 +71,8 @@ public class WebMVCInterceptorLoader extends AbstractInterceptorLoader {
     protected void refresh() {
         // 刷新配置后的拦截器列表
         List<HydrogenProperties.Interceptors> afterInterceptors = HydrogenHolder.getProps().getInterceptor().getInterceptors();
-        // 删除加载过的拦截器
-        transform(this.loadedInterceptors, (hi, handlerInterceptor)  ->
-                SpringMvcPolyfill.removeDynamicInterceptor(handlerInterceptor, this.requestMappingHandlerMapping));
-        // 加载新配置的拦截器
-        transform(afterInterceptors, (hi, handlerInterceptor)  -> SpringMvcPolyfill.addDynamicInterceptor(handlerInterceptor,
-                hi.getOrder(), hi.getIncludeURLs(), hi.getExcludeURLs(), this.requestMappingHandlerMapping));
-        this.loadedInterceptors = afterInterceptors;
+        merge(afterInterceptors, i -> this.unLoad(i.getClazz()), i ->
+                this.load(i.getClazz(), i.getIncludeURLs(), i.getExcludeURLs(), i.getOrder(), i.getProps()));
     }
 
     private void transform(List<HydrogenProperties.Interceptors> hydrogenInterceptors, @NonNull BiConsumer<HydrogenProperties.Interceptors, HandlerInterceptor> performAction) {
@@ -110,10 +102,7 @@ public class WebMVCInterceptorLoader extends AbstractInterceptorLoader {
                 performAction.accept(hi, handlerInterceptorBean);
             } catch (Exception e) {
                 log.error("Hydrogen interceptor add error with msg: {}", e.getMessage(), e);
-                return;
             }
-            // 记录已加载拦截器
-            this.loadedInterceptors.add(hi);
         });
     }
 }

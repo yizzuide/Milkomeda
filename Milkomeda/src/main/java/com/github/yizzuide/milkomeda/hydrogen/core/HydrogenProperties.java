@@ -153,7 +153,7 @@ public class HydrogenProperties {
         /**
          * 包括拦截的URL
          */
-        private List<String> includeURLs = Collections.singletonList("/**");
+        private List<String> includeURLs;
 
         /**
          * 排除拦截的URL
@@ -169,6 +169,19 @@ public class HydrogenProperties {
          * 属性
          */
         private Map<String, Object> props = new HashMap<>();
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Interceptors that = (Interceptors) o;
+            return clazz.equals(that.clazz);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(clazz);
+        }
     }
 
     @Data

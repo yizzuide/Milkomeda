@@ -1,5 +1,6 @@
 package com.github.yizzuide.milkomeda.hydrogen.interceptor;
 
+import com.github.yizzuide.milkomeda.hydrogen.core.HydrogenHolder;
 import lombok.Data;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
@@ -7,6 +8,8 @@ import org.springframework.web.servlet.handler.MappedInterceptor;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import static org.springframework.web.servlet.HandlerMapping.LOOKUP_PATH;
 
 /**
  * HydrogenMappedInterceptor
@@ -33,12 +36,19 @@ public class HydrogenMappedInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        return mappedInterceptor.preHandle(request, response, handler);
+        String lookupPath = HydrogenHolder.getUrlPathHelper().getLookupPathForRequest(request, LOOKUP_PATH);
+        if (mappedInterceptor.matches(lookupPath, HydrogenHolder.getMvcPathMatcher())) {
+            return mappedInterceptor.preHandle(request, response, handler);
+        }
+        return true;
     }
 
     @Override
     public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
-        mappedInterceptor.postHandle(request, response, handler, modelAndView);
+        String lookupPath = HydrogenHolder.getUrlPathHelper().getLookupPathForRequest(request, LOOKUP_PATH);
+        if (mappedInterceptor.matches(lookupPath, HydrogenHolder.getMvcPathMatcher())) {
+            mappedInterceptor.postHandle(request, response, handler, modelAndView);
+        }
     }
 
     @Override

@@ -9,13 +9,11 @@ import org.apache.catalina.core.ApplicationContextFacade;
 import org.apache.catalina.core.ApplicationFilterFactory;
 import org.apache.catalina.core.StandardContext;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.util.CollectionUtils;
 
 import javax.servlet.Filter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * TomcatFilterLoader
@@ -30,15 +28,11 @@ import java.util.stream.Collectors;
  * Create at 2020/04/01 18:19
  */
 @Slf4j
-public class TomcatFilterLoader extends AbstractFilterLoader {
+public class TomcatFilterLoader extends AbstractFilterLoader<HydrogenProperties.Filters> {
     /**
      * 初始化预加载过滤器
      */
     private List<HydrogenProperties.Filters> filtersList;
-    /**
-     * 加载过的过滤器
-     */
-    private List<HydrogenProperties.Filters> loadFiltersList;
 
     public boolean load(String name, Class<? extends Filter> clazz, String... urlPatterns) {
         // 初始时调用加载
@@ -78,19 +72,7 @@ public class TomcatFilterLoader extends AbstractFilterLoader {
 
         // 配置动态加载
         List<HydrogenProperties.Filters> filtersList = HydrogenHolder.getProps().getFilter().getFilters();
-        if (CollectionUtils.isEmpty(filtersList)) {
-            loadFiltersList.forEach(f -> this.unload(f.getName()));
-            loadFiltersList = null;
-        }
-        if (!CollectionUtils.isEmpty(loadFiltersList)) {
-            // 需删除过滤器
-            loadFiltersList.stream().filter(f -> !filtersList.contains(f)).collect(Collectors.toList())
-                    .forEach(f -> this.unload(f.getName()));
-        }
-        // 需要添加的过滤器
-        filtersList.stream().filter(f -> !loadFiltersList.contains(f)).forEach(f ->
+        merge(filtersList, f -> this.unload(f.getName()), f ->
                 this.load(f.getName(), f.getClazz(), f.getUrlPatterns().toArray(new String[0])));
-        // 记录最新配置
-        loadFiltersList = filtersList;
     }
 }

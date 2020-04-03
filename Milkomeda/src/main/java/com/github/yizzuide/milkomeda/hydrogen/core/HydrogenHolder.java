@@ -1,6 +1,8 @@
 package com.github.yizzuide.milkomeda.hydrogen.core;
 
 import com.github.yizzuide.milkomeda.hydrogen.i18n.I18nMessages;
+import org.springframework.util.PathMatcher;
+import org.springframework.web.util.UrlPathHelper;
 
 import javax.validation.Validator;
 
@@ -27,6 +29,16 @@ public class HydrogenHolder {
      */
     private static I18nMessages i18nMessages;
 
+    /**
+     * 路径匹配器
+     */
+    private static PathMatcher mvcPathMatcher;
+
+    /**
+     * URL路径帮助类
+     */
+    private static UrlPathHelper urlPathHelper;
+
     public static void setProps(HydrogenProperties props) {
         HydrogenHolder.props = props;
     }
@@ -50,4 +62,21 @@ public class HydrogenHolder {
     public static I18nMessages getI18nMessages() {
         return i18nMessages;
     }
+
+    public static void setMvcPathMatcher(PathMatcher mvcPathMatcher) {
+        HydrogenHolder.mvcPathMatcher = mvcPathMatcher;
+    }
+
+    public static PathMatcher getMvcPathMatcher() {
+        return mvcPathMatcher;
+    }
+
+    public static void setUrlPathHelper(UrlPathHelper urlPathHelper) {
+        HydrogenHolder.urlPathHelper = urlPathHelper;
+    }
+
+    public static UrlPathHelper getUrlPathHelper() {
+        return urlPathHelper;
+    }
+
 }

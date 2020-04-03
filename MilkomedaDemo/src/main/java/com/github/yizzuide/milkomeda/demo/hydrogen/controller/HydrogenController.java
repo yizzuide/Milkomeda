@@ -89,7 +89,7 @@ public class HydrogenController {
 
     @GetMapping(path = "interceptor/load/waitTime")
     public String loadWaitTimeInterceptor() {
-        interceptorLoader.load(WaitTimeInterceptor.class,null, null, 0);
+        interceptorLoader.load(WaitTimeInterceptor.class,null, null, 0, null);
         return HttpStatus.OK.name();
     }
 
