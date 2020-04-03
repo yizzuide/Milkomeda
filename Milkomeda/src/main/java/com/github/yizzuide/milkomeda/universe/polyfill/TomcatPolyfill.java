@@ -1,6 +1,5 @@
 package com.github.yizzuide.milkomeda.universe.polyfill;
 
-import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import com.github.yizzuide.milkomeda.universe.context.WebContext;
 import com.github.yizzuide.milkomeda.util.ReflectUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -39,7 +38,7 @@ public class TomcatPolyfill {
      */
     public static boolean addDynamicFilter(ServletContext servletContext, ConfigurableApplicationContext applicationContext,  String name, Class<? extends Filter> clazz, String... urlPattern) {
         Filter filterBean = WebContext.registerBean(applicationContext, name, clazz);
-        ApplicationContextHolder.get().getAutowireCapableBeanFactory().autowireBean(filterBean);
+        applicationContext.getAutowireCapableBeanFactory().autowireBean(filterBean);
         Context standContext = ReflectUtil.invokeFieldPath(servletContext, "context.context");
         if (standContext == null) {
             log.warn("Hydrogen filter find path '((ApplicationContextFacade) servletContext).context.context' fail.");
@@ -47,11 +46,12 @@ public class TomcatPolyfill {
         }
         // ((ApplicationContextFacade) servletContext).context.context.filterDefs（filterMaps和filterConfigs的数据源，并提供给外部接口访问）
         FilterDef filterDef = ReflectUtil.invokeMethod(standContext, "findFilterDef", new Class[]{String.class}, name);
-        if (filterDef == null) {
-            filterDef = new FilterDef();
-            filterDef.setFilterName(name);
-            ReflectUtil.invokeMethod(standContext, "addFilterDef", new Class[]{FilterDef.class}, filterDef);
+        if (filterDef != null) {
+            return false;
         }
+        filterDef = new FilterDef();
+        filterDef.setFilterName(name);
+        ReflectUtil.invokeMethod(standContext, "addFilterDef", new Class[]{FilterDef.class}, filterDef);
         filterDef.setFilterClass(filterBean.getClass().getName());
         filterDef.setFilter(filterBean);
         // 在内部创建filterMaps（作为请求调用链的路径映射过滤器集合）
