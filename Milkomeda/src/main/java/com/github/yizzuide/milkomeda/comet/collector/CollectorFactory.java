@@ -3,6 +3,7 @@ package com.github.yizzuide.milkomeda.comet.collector;
 import com.github.yizzuide.milkomeda.comet.core.CometData;
 import com.github.yizzuide.milkomeda.pillar.PillarExecutor;
 import lombok.AllArgsConstructor;
+import lombok.Data;
 
 /**
  * CollectorFactory
@@ -13,6 +14,7 @@ import lombok.AllArgsConstructor;
  * @version 1.16.0
  * Create at 2019/11/13 19:11
  */
+@Data
 @AllArgsConstructor
 public class CollectorFactory {
     /**
