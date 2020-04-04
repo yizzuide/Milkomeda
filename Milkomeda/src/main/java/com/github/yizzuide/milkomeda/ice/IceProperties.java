@@ -20,6 +20,10 @@ class IceProperties {
      */
     private boolean enableJobTimer = true;
     /**
+     * 开启JobTimer分布式并发功能（单机布署应该设置为false）
+     */
+    private boolean enableJobTimerDistributed = false;
+    /**
      * 延迟分桶数量（默认为3）
      */
     private int delayBucketCount = 3;

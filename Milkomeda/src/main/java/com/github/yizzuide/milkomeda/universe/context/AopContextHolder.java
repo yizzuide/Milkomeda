@@ -90,7 +90,7 @@ public class AopContextHolder {
                 HandlerMetaData metaData = new HandlerMetaData();
                 // 支持SpEL
                 String name = nameProvider.apply(executeAnnotation, metaData);
-                if (name.startsWith("@") || name.startsWith("#") || name.startsWith("T(") || name.startsWith("args[")) {
+                if (name.startsWith("'") || name.startsWith("@") || name.startsWith("#") || name.startsWith("T(") || name.startsWith("args[")) {
                     name = ELContext.getValue(target, new Object[]{}, target.getClass(), method, name, String.class);
                 }
                 if (StringUtils.isEmpty(name)) {

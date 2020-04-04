@@ -217,7 +217,7 @@ milkomeda:
       enable: true
       filters:
         -
-          name: ipLimiter
+          name: ipLimiterFilter
           clazz: com.github.yizzuide.milkomeda.demo.hydrogen.handler.IPLimiterFilter
           url-patterns:
             - /*

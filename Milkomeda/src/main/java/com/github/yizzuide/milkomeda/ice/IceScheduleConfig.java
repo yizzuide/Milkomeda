@@ -21,7 +21,7 @@ import java.util.Map;
  *
  * @author yizzuide
  * @since 1.15.0
- * @version 2.1.0
+ * @version 3.0.0
  * Create at 2019/11/17 17:00
  */
 @Slf4j
@@ -37,6 +37,7 @@ public class IceScheduleConfig {
             List<Job<Map<String, Object>>> jobs = ice.pop(topic, props.getTaskTopicPopMaxSize());
             if (CollectionUtils.isEmpty(jobs)) return;
 
+            boolean hasError = false;
             List<HandlerMetaData> metaDataList = IceContext.getTopicMap().get(topic);
             for (HandlerMetaData metaData : metaDataList) {
                 try {
@@ -45,11 +46,13 @@ public class IceScheduleConfig {
                     ReflectUtil.invokeWithWrapperInject(metaData.getTarget(), method, jobList, Job.class, Job::getBody, Job::setBody);
                 } catch (Exception e) {
                     log.error("Ice schedule error: {}", e.getMessage(), e);
-                    return;
+                    hasError = true;
                 }
             }
-            // 标记完成，清除元数据
-            ice.finish(jobs);
+            if (!hasError) {
+                // 标记完成，清除元数据
+                ice.finish(jobs);
+            }
         }), Duration.ofMillis(props.getTaskExecuteRate()));
     }
 }
