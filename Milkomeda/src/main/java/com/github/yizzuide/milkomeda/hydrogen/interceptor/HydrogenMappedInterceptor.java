@@ -36,6 +36,7 @@ public class HydrogenMappedInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+        // 由于Spring MVC源码在创建interceptorChain时只识别MappedInterceptor类型才能匹配URL，这里补充进来
         String lookupPath = HydrogenHolder.getUrlPathHelper().getLookupPathForRequest(request, LOOKUP_PATH);
         if (mappedInterceptor.matches(lookupPath, HydrogenHolder.getMvcPathMatcher())) {
             return mappedInterceptor.preHandle(request, response, handler);
@@ -61,6 +62,7 @@ public class HydrogenMappedInterceptor implements HandlerInterceptor {
         if (!(obj instanceof HandlerInterceptor)) {
             return false;
         }
+        // 当前装饰类的比较
         if (obj instanceof HydrogenMappedInterceptor) {
             return this.getMappedInterceptor().getInterceptor().getClass() ==
                     ((HydrogenMappedInterceptor) obj).getMappedInterceptor().getInterceptor().getClass();

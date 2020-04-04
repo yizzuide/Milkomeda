@@ -84,6 +84,7 @@ public class WebMvcInterceptorLoader extends AbstractInterceptorLoader<HydrogenP
             try {
                 handlerInterceptorBean = (HandlerInterceptor) getApplicationContext().getBean(hi.getClazz());
             } catch (BeansException ignore) {
+                // Just ignore this exception!
             }
             if (handlerInterceptorBean == null) {
                 // 动态注册到IoC

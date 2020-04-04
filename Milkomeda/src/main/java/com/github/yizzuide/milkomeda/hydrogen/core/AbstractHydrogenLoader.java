@@ -35,7 +35,7 @@ public abstract class AbstractHydrogenLoader<T> implements HydrogenLoader, Appli
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
 
-        // 刷新处理器列表
+        // 获取ApplicationContext后，刷新处理器列表
         refresh();
     }
 
@@ -79,7 +79,7 @@ public abstract class AbstractHydrogenLoader<T> implements HydrogenLoader, Appli
     }
 
     /**
-     * 刷新配置后加载拦截器
+     * 配置刷新，加载处理器
      */
     protected abstract void refresh();
 
