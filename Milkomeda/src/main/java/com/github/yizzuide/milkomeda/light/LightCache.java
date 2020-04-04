@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.github.yizzuide.milkomeda.pulsar.PulsarHolder;
 import com.github.yizzuide.milkomeda.util.JSONUtil;
-import com.github.yizzuide.milkomeda.util.Polyfill;
+import com.github.yizzuide.milkomeda.universe.polyfill.RedisPolyfill;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -231,7 +231,7 @@ public class LightCache implements Cache {
         if (isAbandon) {
             if (!onlyCacheL1) {
                 // 从二级缓存移除
-                Polyfill.redisDelete(stringRedisTemplate, key);
+                RedisPolyfill.redisDelete(stringRedisTemplate, key);
             }
             return false;
         }
@@ -314,7 +314,7 @@ public class LightCache implements Cache {
     public void erase(String key) {
         if (!onlyCacheL1) {
             // 从二级缓存移除
-            Polyfill.redisDelete(stringRedisTemplate, key);
+            RedisPolyfill.redisDelete(stringRedisTemplate, key);
         }
         if (!onlyCacheL2) {
             // 从一级缓存移除

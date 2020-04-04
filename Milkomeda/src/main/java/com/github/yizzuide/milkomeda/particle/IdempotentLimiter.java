@@ -1,6 +1,6 @@
 package com.github.yizzuide.milkomeda.particle;
 
-import com.github.yizzuide.milkomeda.util.Polyfill;
+import com.github.yizzuide.milkomeda.universe.polyfill.RedisPolyfill;
 import com.github.yizzuide.milkomeda.util.RedisUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -37,7 +37,7 @@ public class IdempotentLimiter extends LimitHandler {
         } finally {
             // 只有第一次设置key的线程有权删除这个key
             if (isAbsent) {
-                Polyfill.redisDelete(redisTemplate, decoratedKey);
+                RedisPolyfill.redisDelete(redisTemplate, decoratedKey);
             }
         }
     }

@@ -1,7 +1,7 @@
 package com.github.yizzuide.milkomeda.ice;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.github.yizzuide.milkomeda.util.Polyfill;
+import com.github.yizzuide.milkomeda.universe.polyfill.RedisPolyfill;
 import com.github.yizzuide.milkomeda.util.RedisUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -121,7 +121,7 @@ public class RedisIce implements Ice {
             }, redisTemplate);
         } finally {
             // 删除Lock
-            Polyfill.redisDelete(redisTemplate, KEY_IDEMPOTENT_LIMITER);
+            RedisPolyfill.redisDelete(redisTemplate, KEY_IDEMPOTENT_LIMITER);
         }
         return jobList;
     }

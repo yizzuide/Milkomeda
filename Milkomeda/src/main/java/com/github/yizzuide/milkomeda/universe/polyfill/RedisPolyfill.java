@@ -1,4 +1,4 @@
-package com.github.yizzuide.milkomeda.util;
+package com.github.yizzuide.milkomeda.universe.polyfill;
 
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -12,7 +12,7 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
  * @since 1.5.0
  * Create at 2019/07/25 18:23
  */
-public class Polyfill {
+public class RedisPolyfill {
     /**
      * 在redisTemplate.delete函数上兼容1.5.x.RELEASE 和 2.x.x.RELEASE版本
      * @param redisTemplate RedisTemplate

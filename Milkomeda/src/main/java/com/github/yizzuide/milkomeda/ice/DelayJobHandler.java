@@ -1,7 +1,7 @@
 package com.github.yizzuide.milkomeda.ice;
 
 import com.github.yizzuide.milkomeda.universe.metadata.HandlerMetaData;
-import com.github.yizzuide.milkomeda.util.Polyfill;
+import com.github.yizzuide.milkomeda.universe.polyfill.RedisPolyfill;
 import com.github.yizzuide.milkomeda.util.RedisUtil;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -99,7 +99,7 @@ public class DelayJobHandler implements Runnable {
         } finally {
             if (props.isEnableJobTimerDistributed()) {
                 // 删除Lock
-                Polyfill.redisDelete(redisTemplate, indexLockKey);
+                RedisPolyfill.redisDelete(redisTemplate, indexLockKey);
             }
         }
     }
