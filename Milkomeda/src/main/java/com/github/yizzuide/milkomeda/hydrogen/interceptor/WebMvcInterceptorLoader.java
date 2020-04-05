@@ -68,7 +68,7 @@ public class WebMvcInterceptorLoader extends AbstractInterceptorLoader<HydrogenP
     }
     
     @Override
-    protected void refresh() {
+    public void refresh() {
         // 刷新配置后的拦截器列表
         List<HydrogenProperties.Interceptors> afterInterceptors = HydrogenHolder.getProps().getInterceptor().getInterceptors();
         merge(afterInterceptors, i -> this.unLoad(i.getClazz()), i ->

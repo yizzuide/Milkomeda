@@ -4,6 +4,7 @@ import com.github.yizzuide.milkomeda.comet.collector.CometCollectorProperties;
 import com.github.yizzuide.milkomeda.comet.collector.TagCollector;
 import com.github.yizzuide.milkomeda.comet.logger.CometLoggerData;
 import com.github.yizzuide.milkomeda.comet.logger.CometLoggerPathMatcher;
+import com.github.yizzuide.milkomeda.comet.logger.CometLoggerProperties;
 import com.github.yizzuide.milkomeda.comet.logger.CometLoggerResolver;
 import com.github.yizzuide.milkomeda.pulsar.PulsarHolder;
 import com.github.yizzuide.milkomeda.universe.yml.YmlAliasNode;
@@ -43,8 +44,11 @@ public class CometInterceptor extends HandlerInterceptorAdapter implements Appli
     @Autowired
     private CometProperties cometProperties;
 
-    @Autowired
+    @Autowired(required = false)
     private CometCollectorProperties cometCollectorProperties;
+
+    @Autowired(required = false)
+    private CometLoggerProperties cometLoggerProperties;
 
     @Autowired(required = false)
     private CometLoggerResolver cometLoggerResolver;
@@ -53,7 +57,7 @@ public class CometInterceptor extends HandlerInterceptorAdapter implements Appli
     private PlaceholderResolver placeholderResolver;
 
     // logger策略
-    private List<CometProperties.Strategy> strategyList;
+    private List<CometLoggerProperties.Strategy> strategyList;
 
     // 线程日志记录
     private static ThreadLocal<CometData> threadLocal;
@@ -63,9 +67,12 @@ public class CometInterceptor extends HandlerInterceptorAdapter implements Appli
 
     @PostConstruct
     public void init() {
-        CometProperties.Logger logger = this.cometProperties.getLogger();
+        CometLoggerProperties logger = cometLoggerProperties;
+        if (logger == null) {
+            return;
+        }
         placeholderResolver = PlaceholderResolver.getResolver(logger.getPrefix(), logger.getSuffix());
-        List<CometProperties.Strategy> strategyList = logger.getStrategy();
+        List<CometLoggerProperties.Strategy> strategyList = logger.getStrategy();
         if (CollectionUtils.isEmpty(strategyList)) {
             return;
         }
@@ -89,20 +96,23 @@ public class CometInterceptor extends HandlerInterceptorAdapter implements Appli
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        if (this.cometCollectorProperties.isEnableTag()) {
-            Map<String, CometCollectorProperties.Tag> tagMap = cometCollectorProperties.getTags();
-            this.tagCollectorMap = tagMap.keySet().stream()
-                    .collect(Collectors.toMap(Object::toString, tagName -> applicationContext.getBean(tagName, TagCollector.class)));
-            threadLocal = new ThreadLocal<>();
+        if (this.cometCollectorProperties == null || !this.cometCollectorProperties.isEnableTag()) {
+            return;
         }
+
+        Map<String, CometCollectorProperties.Tag> tagMap = cometCollectorProperties.getTags();
+        this.tagCollectorMap = tagMap.keySet().stream()
+                .collect(Collectors.toMap(Object::toString, tagName -> applicationContext.getBean(tagName, TagCollector.class)));
+        threadLocal = new ThreadLocal<>();
     }
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        PulsarHolder.getPulsar().post(() -> {
-            printLog(request);
-        });
-        if (cometCollectorProperties.isEnableTag() && !CollectionUtils.isEmpty(this.tagCollectorMap)) {
+        if (this.cometLoggerProperties != null) {
+            PulsarHolder.getPulsar().post(() -> printLog(request));
+        }
+
+        if (cometCollectorProperties != null && cometCollectorProperties.isEnableTag() && !CollectionUtils.isEmpty(this.tagCollectorMap)) {
             collectPreLog(request);
         }
         return super.preHandle(request, response, handler);
@@ -110,11 +120,12 @@ public class CometInterceptor extends HandlerInterceptorAdapter implements Appli
 
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
-        // 获取返回值
-        Object body = request.getAttribute("comet.collect.body");
-        if (CollectionUtils.isEmpty(this.tagCollectorMap) || threadLocal.get() == null) {
+        if (cometCollectorProperties == null || !cometCollectorProperties.isEnableTag() ||
+                CollectionUtils.isEmpty(this.tagCollectorMap) || threadLocal.get() == null) {
             return;
         }
+        // 获取返回值
+        Object body = request.getAttribute("comet.collect.body");
         this.collectPostLog(body, ex);
     }
 
@@ -209,18 +220,15 @@ public class CometInterceptor extends HandlerInterceptorAdapter implements Appli
     }
 
     private void printLog(HttpServletRequest request) {
-        CometProperties.Logger urlLog = this.cometProperties.getLogger();
-        if (!urlLog.isEnable()) {
-            return;
-        }
-        List<String> exclude = urlLog.getExclude();
+        CometLoggerProperties logger = this.cometLoggerProperties;
+        List<String> exclude = logger.getExclude();
         String requestURI = request.getRequestURI();
         if (!CollectionUtils.isEmpty(exclude)) {
             if (exclude.contains(requestURI)) {
                 return;
             }
         }
-        List<CometProperties.Strategy> strategyList = this.strategyList;
+        List<CometLoggerProperties.Strategy> strategyList = this.strategyList;
         if (CollectionUtils.isEmpty(strategyList)) {
             return;
         }
@@ -234,7 +242,7 @@ public class CometInterceptor extends HandlerInterceptorAdapter implements Appli
         urlLogData.setMethod(method);
         urlLogData.setParams(requestParams);
         urlLogData.setToken(token);
-        for (CometProperties.Strategy strategy : strategyList) {
+        for (CometLoggerProperties.Strategy strategy : strategyList) {
             if (CollectionUtils.isEmpty(strategy.getPaths()) ||
                     !CometLoggerPathMatcher.match(strategy.getPaths(), requestURI)) {
                 continue;

@@ -1,6 +1,7 @@
 package com.github.yizzuide.milkomeda.comet.core;
 
-import com.github.yizzuide.milkomeda.comet.collector.EnableCometCollector;
+import com.github.yizzuide.milkomeda.comet.collector.CometCollectorConfig;
+import com.github.yizzuide.milkomeda.comet.logger.CometLoggerConfig;
 import com.github.yizzuide.milkomeda.pulsar.EnablePulsar;
 import org.springframework.context.annotation.Import;
 
@@ -19,7 +20,6 @@ import java.lang.annotation.*;
 @Documented
 @Inherited
 @EnablePulsar
-@EnableCometCollector
-@Import(CometConfig.class)
+@Import({CometConfig.class, CometCollectorConfig.class, CometLoggerConfig.class})
 public @interface EnableComet {
 }

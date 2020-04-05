@@ -2,10 +2,6 @@ package com.github.yizzuide.milkomeda.comet.core;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.NestedConfigurationProperty;
-
-import java.util.Collections;
-import java.util.List;
 
 /**
  * CometProperties
@@ -22,58 +18,4 @@ public class CometProperties {
      * 允许读取请求消息体（使用@CometParam时必须开启）
      */
     private boolean enableReadRequestBody = true;
-
-    /**
-     * 请求日志
-     */
-    @NestedConfigurationProperty
-    private Logger logger = new CometProperties.Logger();
-
-    @Data
-    public static class Logger {
-        /**
-         * 启用请求日志打印
-         */
-        private boolean enable = false;
-        /**
-         * 占位符前缀
-         */
-        private String prefix = "{";
-        /**
-         * 占位符后缀
-         */
-        private String suffix = "}";
-        /**
-         * 需要排除打印的路径
-         */
-        private List<String> exclude;
-        /**
-         * 打印策略
-         */
-        private List<Strategy> strategy = Collections.singletonList(new CometProperties.Strategy());
-    }
-
-    @Data
-    public static class Strategy {
-        /**
-         * 策略包含路径
-         */
-        private List<String> paths = Collections.singletonList("/**");
-        /**
-         * 策略模板，默认能识别的占位符：uri、method、params、token（如果请求头有token）
-         */
-        private String tpl = "{\"uri\":\"{uri}\", \"method\": \"{method}\", \"params\": \"{params}\", \"token\": \"{token}\"}";
-        /**
-         * 缓存占位符（模块内部使用）
-         */
-        private List<String> cacheKeys;
-
-        void setCacheKeys(List<String> cacheKeys) {
-            this.cacheKeys = cacheKeys;
-        }
-
-        List<String> getCacheKeys() {
-            return this.cacheKeys;
-        }
-    }
 }

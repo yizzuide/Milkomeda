@@ -77,10 +77,4 @@ public abstract class AbstractHydrogenLoader<T> implements HydrogenLoader, Appli
         // 记录最新配置处理器
         setLoadConfigHandlerList(configHandlerList);
     }
-
-    /**
-     * 配置刷新，加载处理器
-     */
-    protected abstract void refresh();
-
 }

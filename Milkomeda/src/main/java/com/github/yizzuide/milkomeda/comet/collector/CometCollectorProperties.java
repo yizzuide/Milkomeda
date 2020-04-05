@@ -19,6 +19,10 @@ import java.util.Map;
 @ConfigurationProperties("milkomeda.comet.collector")
 public class CometCollectorProperties {
     /**
+     * 启用日志收集器
+     */
+    private boolean enable = false;
+    /**
      * 开启URL标签日志收集
      */
     private boolean enableTag = false;

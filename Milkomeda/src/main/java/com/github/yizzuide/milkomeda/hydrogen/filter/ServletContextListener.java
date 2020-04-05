@@ -22,5 +22,6 @@ public class ServletContextListener implements ServletContextInitializer {
     @Override
     public void onStartup(ServletContext servletContext) throws ServletException {
         filterLoader.setServletContext(servletContext);
+        filterLoader.refresh();
     }
 }

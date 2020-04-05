@@ -76,6 +76,7 @@ milkomeda:
           tpl: url->{uri},method->{method}
     # 日志收集器
     collector:
+      enable: true
       enable-tag: true
       tags:
         product-tag:

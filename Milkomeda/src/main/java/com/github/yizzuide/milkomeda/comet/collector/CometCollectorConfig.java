@@ -32,6 +32,7 @@ import java.util.stream.Collectors;
 @Configuration
 @AutoConfigureAfter(CometConfig.class)
 @EnableConfigurationProperties(CometCollectorProperties.class)
+@ConditionalOnProperty(prefix = "milkomeda.comet.collector", name = "enable", havingValue = "true")
 public class CometCollectorConfig implements ApplicationContextAware {
 
     @Autowired(required = false)

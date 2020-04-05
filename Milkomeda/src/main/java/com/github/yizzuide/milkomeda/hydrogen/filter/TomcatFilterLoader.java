@@ -59,7 +59,12 @@ public class TomcatFilterLoader extends AbstractFilterLoader<HydrogenProperties.
     }
 
     @Override
-    protected void refresh() {
+    public void refresh() {
+        // 如果ServletContext还未加载完成，等待ServletContext加载完成事件
+        if (this.getServletContext() == null) {
+            return;
+        }
+
         // 初始化Filter加载
         if (filtersList != null) {
             for (HydrogenProperties.Filters initFilters : filtersList) {
