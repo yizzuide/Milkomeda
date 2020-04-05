@@ -1,7 +1,5 @@
 package com.github.yizzuide.milkomeda.hydrogen.interceptor;
 
-import com.github.yizzuide.milkomeda.hydrogen.core.HydrogenHolder;
-import com.github.yizzuide.milkomeda.hydrogen.core.HydrogenProperties;
 import com.github.yizzuide.milkomeda.universe.context.WebContext;
 import com.github.yizzuide.milkomeda.universe.polyfill.SpringMvcPolyfill;
 import lombok.NonNull;
@@ -27,20 +25,25 @@ import java.util.function.BiConsumer;
  * Create at 2020/03/31 00:12
  */
 @Slf4j
-public class WebMvcInterceptorLoader extends AbstractInterceptorLoader<HydrogenProperties.Interceptors> {
-
+public class WebMvcInterceptorLoader extends AbstractInterceptorLoader<InterceptorProperties.Interceptors> {
+    
     /**
      * 请求映射处理器
      */
     private RequestMappingHandlerMapping requestMappingHandlerMapping;
+    /**
+     * 配置
+     */
+    private InterceptorProperties props;
 
-    public WebMvcInterceptorLoader(RequestMappingHandlerMapping requestMappingHandlerMapping) {
+    public WebMvcInterceptorLoader(InterceptorProperties interceptorProperties, RequestMappingHandlerMapping requestMappingHandlerMapping) {
+        this.props = interceptorProperties;
         this.requestMappingHandlerMapping = requestMappingHandlerMapping;
     }
     
     @Override
     public void load(@NonNull Class<?> clazz, List<String> include, List<String> exclude, int order, Map<String, Object> props) {
-        HydrogenProperties.Interceptors hInterceptor = new HydrogenProperties.Interceptors();
+        InterceptorProperties.Interceptors hInterceptor = new InterceptorProperties.Interceptors();
         hInterceptor.setClazz(clazz);
         if (include != null) {
             hInterceptor.setIncludeURLs(include);
@@ -56,7 +59,7 @@ public class WebMvcInterceptorLoader extends AbstractInterceptorLoader<HydrogenP
     
     @Override
     public void unLoad(@NonNull Class<?> clazz) {
-        HydrogenProperties.Interceptors hInterceptor = new HydrogenProperties.Interceptors();
+        InterceptorProperties.Interceptors hInterceptor = new InterceptorProperties.Interceptors();
         hInterceptor.setClazz(clazz);
         transform(Collections.singletonList(hInterceptor), (hi, handlerInterceptor)  ->
                 SpringMvcPolyfill.removeDynamicInterceptor(handlerInterceptor, this.requestMappingHandlerMapping));
@@ -70,12 +73,12 @@ public class WebMvcInterceptorLoader extends AbstractInterceptorLoader<HydrogenP
     @Override
     public void refresh() {
         // 刷新配置后的拦截器列表
-        List<HydrogenProperties.Interceptors> afterInterceptors = HydrogenHolder.getProps().getInterceptor().getInterceptors();
+        List<InterceptorProperties.Interceptors> afterInterceptors = this.props.getInterceptors();
         merge(afterInterceptors, i -> this.unLoad(i.getClazz()), i ->
                 this.load(i.getClazz(), i.getIncludeURLs(), i.getExcludeURLs(), i.getOrder(), i.getProps()));
     }
 
-    private void transform(List<HydrogenProperties.Interceptors> hydrogenInterceptors, @NonNull BiConsumer<HydrogenProperties.Interceptors, HandlerInterceptor> performAction) {
+    private void transform(List<InterceptorProperties.Interceptors> hydrogenInterceptors, @NonNull BiConsumer<InterceptorProperties.Interceptors, HandlerInterceptor> performAction) {
         if (CollectionUtils.isEmpty(hydrogenInterceptors)) {
             return;
         }

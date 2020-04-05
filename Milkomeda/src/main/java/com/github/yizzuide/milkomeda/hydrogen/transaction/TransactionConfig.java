@@ -1,7 +1,5 @@
 package com.github.yizzuide.milkomeda.hydrogen.transaction;
 
-import com.github.yizzuide.milkomeda.hydrogen.core.HydrogenHolder;
-import com.github.yizzuide.milkomeda.hydrogen.core.HydrogenProperties;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.aspectj.AspectJExpressionPointcut;
@@ -33,18 +31,13 @@ import java.util.stream.Collectors;
  */
 @Aspect
 @Configuration
-@EnableConfigurationProperties(HydrogenProperties.class)
+@EnableConfigurationProperties(TransactionProperties.class)
 @AutoConfigureAfter(TransactionAutoConfiguration.class)
 @ConditionalOnProperty(prefix = "milkomeda.hydrogen.transaction", name = "enable", havingValue = "true")
 public class TransactionConfig {
 
     @Autowired
-    private HydrogenProperties props;
-
-    @Autowired
-    public void config(HydrogenProperties props) {
-        HydrogenHolder.setProps(props);
-    }
+    private TransactionProperties props;
 
     @Bean
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
@@ -53,10 +46,10 @@ public class TransactionConfig {
         // 设置传播行为：若当前存在事务，则加入该事务；如果当前没有事务，则创建一个新的事务。这是默认值。
         txAttr_REQUIRED.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
         // 抛出异常后执行切点回滚
-        txAttr_REQUIRED.setRollbackRules(props.getTransaction().getRollbackWhenException()
+        txAttr_REQUIRED.setRollbackRules(props.getRollbackWhenException()
                 .stream().map(RollbackRuleAttribute::new).collect(Collectors.toList()));
         // 设置超时
-        txAttr_REQUIRED.setTimeout((int) props.getTransaction().getRollbackWhenTimeout().getSeconds());
+        txAttr_REQUIRED.setTimeout((int) props.getRollbackWhenTimeout().getSeconds());
 
         RuleBasedTransactionAttribute txAttr_READONLY = new RuleBasedTransactionAttribute();
         // 设置传播行为：以非事务运行，如果当前存在事务，则把当前事务挂起
@@ -65,14 +58,14 @@ public class TransactionConfig {
 
         NameMatchTransactionAttributeSource source = new NameMatchTransactionAttributeSource();
         // 开启只读,提高数据库访问性能
-        if (!CollectionUtils.isEmpty(props.getTransaction().getReadOnlyPrefix())) {
-            for (String prefix : props.getTransaction().getReadOnlyPrefix()) {
+        if (!CollectionUtils.isEmpty(props.getReadOnlyPrefix())) {
+            for (String prefix : props.getReadOnlyPrefix()) {
                 source.addTransactionalMethod(prefix, txAttr_READONLY);
             }
         }
 
-        if (!CollectionUtils.isEmpty(props.getTransaction().getReadOnlyAppendPrefix())) {
-            for (String prefix : props.getTransaction().getReadOnlyAppendPrefix()) {
+        if (!CollectionUtils.isEmpty(props.getReadOnlyAppendPrefix())) {
+            for (String prefix : props.getReadOnlyAppendPrefix()) {
                 source.addTransactionalMethod(prefix, txAttr_READONLY);
             }
         }
@@ -85,7 +78,7 @@ public class TransactionConfig {
     @Bean
     public Advisor txAdviceAdvisor(TransactionInterceptor txAdvice) {
         AspectJExpressionPointcut pointcut = new AspectJExpressionPointcut();
-        pointcut.setExpression(props.getTransaction().getPointcutExpression());
+        pointcut.setExpression(props.getPointcutExpression());
         return new DefaultPointcutAdvisor(pointcut, txAdvice);
     }
 }

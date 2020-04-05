@@ -1,7 +1,5 @@
 package com.github.yizzuide.milkomeda.hydrogen.validator;
 
-import com.github.yizzuide.milkomeda.hydrogen.core.HydrogenHolder;
-
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 import java.util.regex.Pattern;
@@ -18,6 +16,6 @@ public class PhoneConstraintValidator implements ConstraintValidator<PhoneConstr
     public boolean isValid(String value, ConstraintValidatorContext context) {
         // 如果为空就不验证
         if (null == value || "".equals(value)) return true;
-        return Pattern.matches(HydrogenHolder.getProps().getValidator().getRegexPhone(), value);
+        return Pattern.matches(ValidatorHolder.getProps().getRegexPhone(), value);
     }
 }

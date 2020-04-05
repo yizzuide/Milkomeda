@@ -1,7 +1,5 @@
 package com.github.yizzuide.milkomeda.hydrogen.interceptor;
 
-import com.github.yizzuide.milkomeda.hydrogen.core.HydrogenHolder;
-import com.github.yizzuide.milkomeda.hydrogen.core.HydrogenProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
@@ -24,7 +22,7 @@ import org.springframework.web.util.UrlPathHelper;
  */
 @Slf4j
 @Configuration
-@EnableConfigurationProperties(HydrogenProperties.class)
+@EnableConfigurationProperties(InterceptorProperties.class)
 @AutoConfigureAfter(WebMvcAutoConfiguration.class)
 @ConditionalOnProperty(prefix = "milkomeda.hydrogen.interceptor", name = "enable", havingValue = "true")
 public class InterceptorConfig {
@@ -32,14 +30,14 @@ public class InterceptorConfig {
     @SuppressWarnings("all")
     @Bean
     @ConditionalOnClass(name = "org.springframework.web.servlet.HandlerInterceptor")
-    public InterceptorLoader interceptorHandler(RequestMappingHandlerMapping requestMappingHandlerMapping) {
-        return new WebMvcInterceptorLoader(requestMappingHandlerMapping);
+    public InterceptorLoader interceptorHandler(InterceptorProperties interceptorProperties, RequestMappingHandlerMapping requestMappingHandlerMapping) {
+        return new WebMvcInterceptorLoader(interceptorProperties, requestMappingHandlerMapping);
     }
 
     @Autowired
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     public void config(PathMatcher mvcPathMatcher, UrlPathHelper mvcUrlPathHelper) {
-        HydrogenHolder.setMvcPathMatcher(mvcPathMatcher);
-        HydrogenHolder.setUrlPathHelper(mvcUrlPathHelper);
+        InterceptorHolder.setMvcPathMatcher(mvcPathMatcher);
+        InterceptorHolder.setUrlPathHelper(mvcUrlPathHelper);
     }
 }

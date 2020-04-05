@@ -1,7 +1,6 @@
 package com.github.yizzuide.milkomeda.hydrogen.i18n;
 
 import com.github.yizzuide.milkomeda.hydrogen.core.HydrogenHolder;
-import com.github.yizzuide.milkomeda.hydrogen.core.HydrogenProperties;
 import com.github.yizzuide.milkomeda.universe.polyfill.SpringMvcPolyfill;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,10 +31,12 @@ import java.util.Collections;
  */
 @Slf4j
 @Configuration
-@EnableConfigurationProperties(HydrogenProperties.class)
+@EnableConfigurationProperties(I18nProperties.class)
 @AutoConfigureAfter({MessageSourceAutoConfiguration.class, WebMvcAutoConfiguration.class})
 @ConditionalOnProperty(prefix = "milkomeda.hydrogen.i18n", name = "enable", havingValue = "true")
 public class I18nConfig {
+    @Autowired
+    private I18nProperties i18nProperties;
 
     @Autowired
     private MessageSource messageSource;
@@ -62,7 +63,7 @@ public class I18nConfig {
     public void configRequestMappingHandlerMapping(RequestMappingHandlerMapping requestMappingHandlerMapping) {
         // 使用内置拦截器
         final LocaleChangeInterceptor localeChangeInterceptor = new LocaleChangeInterceptor();
-        localeChangeInterceptor.setParamName("lang");
+        localeChangeInterceptor.setParamName(i18nProperties.getQuery());
         SpringMvcPolyfill.addDynamicInterceptor(localeChangeInterceptor, Ordered.HIGHEST_PRECEDENCE + 1, Collections.singletonList("/**"),
                 null, requestMappingHandlerMapping);
     }

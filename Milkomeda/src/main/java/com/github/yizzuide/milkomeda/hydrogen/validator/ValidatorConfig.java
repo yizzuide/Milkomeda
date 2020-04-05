@@ -1,8 +1,8 @@
 package com.github.yizzuide.milkomeda.hydrogen.validator;
 
 import com.github.yizzuide.milkomeda.hydrogen.core.HydrogenHolder;
-import com.github.yizzuide.milkomeda.hydrogen.core.HydrogenProperties;
 import org.hibernate.validator.HibernateValidator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.validation.ValidationAutoConfiguration;
@@ -24,10 +24,15 @@ import javax.validation.ValidatorFactory;
  * Create at 2019/11/28 17:38
  */
 @Configuration
-@EnableConfigurationProperties(HydrogenProperties.class)
+@EnableConfigurationProperties(ValidatorProperties.class)
 @AutoConfigureAfter(ValidationAutoConfiguration.class)
 @ConditionalOnProperty(prefix = "milkomeda.hydrogen.validator", name = "enable", havingValue = "true")
 public class ValidatorConfig {
+
+    @Autowired
+    public void config(ValidatorProperties validatorProperties) {
+        ValidatorHolder.setProps(validatorProperties);
+    }
 
     @Bean
     public MethodValidationPostProcessor methodValidationPostProcessor() {
@@ -38,7 +43,7 @@ public class ValidatorConfig {
     }
 
     @Bean
-    public Validator validator(){
+    public Validator validator() {
         ValidatorFactory validatorFactory = Validation.byProvider(HibernateValidator.class )
                 .configure()
                 // 设置validator模式为快速失败（只要有一个校验不通过就不立即返回错误）
