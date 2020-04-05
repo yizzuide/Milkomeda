@@ -24,7 +24,7 @@ import org.springframework.util.CollectionUtils;
 import java.util.stream.Collectors;
 
 /**
- * TransactionAdviceConfig
+ * TransactionConfig
  * 切面事务配置
  *
  * @author yizzuide
@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
 @EnableConfigurationProperties(HydrogenProperties.class)
 @AutoConfigureAfter(TransactionAutoConfiguration.class)
 @ConditionalOnProperty(prefix = "milkomeda.hydrogen.transaction", name = "enable", havingValue = "true")
-public class TransactionAdviceConfig {
+public class TransactionConfig {
 
     @Autowired
     private HydrogenProperties props;

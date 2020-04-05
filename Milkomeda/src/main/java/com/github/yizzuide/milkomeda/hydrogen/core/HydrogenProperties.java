@@ -26,12 +26,6 @@ public class HydrogenProperties {
     private final Transaction transaction = new Transaction();
 
     /**
-     * 统一异常处理
-     */
-    @NestedConfigurationProperty
-    private final Uniform uniform = new Uniform();
-
-    /**
      * 校验器
      */
     @NestedConfigurationProperty
@@ -82,18 +76,6 @@ public class HydrogenProperties {
          * 追加只读事务方法前辍
          */
         private List<String> readOnlyAppendPrefix;
-    }
-
-    @Data
-    public static class Uniform {
-        /**
-         * 启用统一异常处理
-         */
-        private boolean enable = false;
-        /**
-         * 响应数据
-         */
-        private Map<String, Object> body = new HashMap<>();
     }
 
     @Data

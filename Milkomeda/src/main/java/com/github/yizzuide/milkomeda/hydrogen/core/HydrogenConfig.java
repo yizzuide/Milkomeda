@@ -3,8 +3,8 @@ package com.github.yizzuide.milkomeda.hydrogen.core;
 import com.github.yizzuide.milkomeda.hydrogen.filter.FilterConfig;
 import com.github.yizzuide.milkomeda.hydrogen.i18n.I18nConfig;
 import com.github.yizzuide.milkomeda.hydrogen.interceptor.InterceptorConfig;
-import com.github.yizzuide.milkomeda.hydrogen.transaction.TransactionAdviceConfig;
-import com.github.yizzuide.milkomeda.hydrogen.uniform.UniformExceptionResponseConfig;
+import com.github.yizzuide.milkomeda.hydrogen.transaction.TransactionConfig;
+import com.github.yizzuide.milkomeda.hydrogen.uniform.UniformConfig;
 import com.github.yizzuide.milkomeda.hydrogen.validator.ValidatorConfig;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -18,8 +18,8 @@ import org.springframework.context.annotation.Import;
  */
 @Configuration
 @Import({
-        TransactionAdviceConfig.class,
-        UniformExceptionResponseConfig.class,
+        TransactionConfig.class,
+        UniformConfig.class,
         ValidatorConfig.class,
         I18nConfig.class,
         InterceptorConfig.class,

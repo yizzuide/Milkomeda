@@ -1,6 +1,5 @@
 package com.github.yizzuide.milkomeda.hydrogen.uniform;
 
-import com.github.yizzuide.milkomeda.hydrogen.core.HydrogenProperties;
 import com.github.yizzuide.milkomeda.universe.context.WebContext;
 import com.github.yizzuide.milkomeda.universe.yml.YmlParser;
 import com.github.yizzuide.milkomeda.util.DataTypeConvertUtil;
@@ -26,7 +25,7 @@ import java.io.IOException;
 import java.util.*;
 
 /**
- * UniformResponseExceptionHandler
+ * UniformHandler
  *
  * @author yizzuide
  * @since 3.0.0
@@ -34,10 +33,10 @@ import java.util.*;
  */
 @Slf4j
 @ControllerAdvice // 可以用于定义@ExceptionHandler、@InitBinder、@ModelAttribute, 并应用到所有@RequestMapping中
-public class UniformExceptionResponseHandler extends ResponseEntityExceptionHandler {
+public class UniformHandler extends ResponseEntityExceptionHandler {
 
     @Autowired
-    private HydrogenProperties props;
+    private UniformProperties props;
     /**
      * 自定义异常配置列表缓存
      */
@@ -80,13 +79,13 @@ public class UniformExceptionResponseHandler extends ResponseEntityExceptionHand
     @SuppressWarnings("all")
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Object> handleException(Exception e) throws IOException {
-        Map<String, Object> body = props.getUniform().getBody();
-        Object status = body.get("status");
+        Map<String, Object> response = props.getResponse();
+        Object status = response.get("status");
         status = status == null ?  500 : status;
         Map<String, Object> result = new HashMap<>();
 
         // 自定义异常处理
-        Object customs = body.get("customs");
+        Object customs = response.get("customs");
         if (customs != null) {
             if (this.customConfList == null) {
                 this.customConfList = new ArrayList<>();
@@ -121,13 +120,13 @@ public class UniformExceptionResponseHandler extends ResponseEntityExceptionHand
         }
 
         log.error("Hydrogen uniform response exception with msg: {}", e.getMessage(), e);
-        YmlParser.parseAliasMapPath(body, result, "code", -1, null);
-        YmlParser.parseAliasMapPath(body, result, "message", "服务器繁忙，请稍后再试！", null);
-        YmlParser.parseAliasMapPath(body, result, "error-stack-msg", null, e.getMessage());
+        YmlParser.parseAliasMapPath(response, result, "code", -1, null);
+        YmlParser.parseAliasMapPath(response, result, "message", "服务器繁忙，请稍后再试！", null);
+        YmlParser.parseAliasMapPath(response, result, "error-stack-msg", null, e.getMessage());
         StackTraceElement[] stackTrace = e.getStackTrace();
         if (stackTrace.length > 0) {
             String errorStack = String.format("exception happened: %s \n invoke root: %s", stackTrace[0], stackTrace[stackTrace.length - 1]);
-            YmlParser.parseAliasMapPath(body, result, "error-stack", null, errorStack);
+            YmlParser.parseAliasMapPath(response, result, "error-stack", null, errorStack);
         }
         return ResponseEntity.status(Integer.parseInt(status.toString())).body(result);
     }
@@ -158,21 +157,21 @@ public class UniformExceptionResponseHandler extends ResponseEntityExceptionHand
      */
     @SuppressWarnings("all")
     private ResponseEntity<Object> handleExceptionResponse(Exception ex, Object presetStatusCode, String presetMessage) {
-        Map<String, Object> body = props.getUniform().getBody();
+        Map<String, Object> response = props.getResponse();
         Map<String, Object> result = new HashMap<>();
-        Object exp4xx = body.get(presetStatusCode.toString());
+        Object exp4xx = response.get(presetStatusCode.toString());
         if (!(exp4xx instanceof Map)) {
             return null;
         }
-        Map<String, Object> exp4xxBody = (Map<String, Object>) exp4xx;
-        Object statusCode4xx = exp4xxBody.get("status");
+        Map<String, Object> exp4xxResponse = (Map<String, Object>) exp4xx;
+        Object statusCode4xx = exp4xxResponse.get("status");
         if (statusCode4xx == null || presetStatusCode.equals(statusCode4xx)) {
             presetStatusCode = statusCode4xx;
             return ResponseEntity.status(Integer.parseInt(presetStatusCode.toString())).body(null);
         }
 
-        YmlParser.parseAliasMapPath(exp4xxBody, result, "code", presetStatusCode, presetStatusCode);
-        YmlParser.parseAliasMapPath(exp4xxBody, result, "message", presetMessage, presetMessage);
+        YmlParser.parseAliasMapPath(exp4xxResponse, result, "code", presetStatusCode, presetStatusCode);
+        YmlParser.parseAliasMapPath(exp4xxResponse, result, "message", presetMessage, presetMessage);
         return ResponseEntity.status(Integer.parseInt(statusCode4xx.toString())).body(result);
     }
 }
