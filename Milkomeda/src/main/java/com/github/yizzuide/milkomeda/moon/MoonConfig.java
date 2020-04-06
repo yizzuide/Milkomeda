@@ -48,6 +48,9 @@ public class MoonConfig {
                     log.error("Moon invoke error with msg: {}", e.getMessage(), e);
                 }
             }
+            if (CollectionUtils.isEmpty(instance.getPhases())) {
+                return;
+            }
             moon.add(instance.getPhases().toArray(new Object[0]));
         }
     }
