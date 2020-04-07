@@ -1,5 +1,7 @@
 package com.github.yizzuide.milkomeda.comet.core;
 
+import com.github.yizzuide.milkomeda.comet.collector.CometCollectorProperties;
+
 /**
  * CometHolder
  *
@@ -10,11 +12,21 @@ package com.github.yizzuide.milkomeda.comet.core;
 public class CometHolder {
     private static CometProperties props;
 
+    private static CometCollectorProperties collectorProps;
+
     static void setProps(CometProperties props) {
         CometHolder.props = props;
     }
 
-    public static CometProperties getProps() {
+    static CometProperties getProps() {
         return props;
+    }
+
+    public static void setCollectorProps(CometCollectorProperties collectorProps) {
+        CometHolder.collectorProps = collectorProps;
+    }
+
+    static CometCollectorProperties getCollectorProps() {
+        return collectorProps;
     }
 }

@@ -4,11 +4,15 @@ import com.github.yizzuide.milkomeda.comet.core.Comet;
 import com.github.yizzuide.milkomeda.comet.core.CometParam;
 import com.github.yizzuide.milkomeda.demo.comet.pojo.ProfileWebCometData;
 import com.github.yizzuide.milkomeda.demo.comet.service.CollectService;
+import com.github.yizzuide.milkomeda.util.JSONUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -38,13 +42,19 @@ public class CollectController {
     }
 
     @RequestMapping("product/click")
-    public ResponseEntity<Map<String, String>> click(@RequestParam("productId") String productId) {
+    public void /*ResponseEntity<Map<String, String>>*/ click(@RequestParam("productId") String productId, HttpServletResponse response) throws IOException {
         log.info("用户点击了产品：{}", productId);
         Map<String, String> map = new HashMap<>();
-        map.put("code", "200");
-        map.put("data", null);
-        throw new RuntimeException("出错了");
+        map.put("code", "1");
+        map.put("data", "成功");
+//        throw new RuntimeException("出错了");
 //        return ResponseEntity.ok(map);
+
+        response.setStatus(200);
+        response.setContentType("application/json;charset=UTF-8");
+        PrintWriter writer = response.getWriter();
+        writer.println(JSONUtil.serialize(map));
+        writer.flush();
     }
 
     @PostMapping("usage")

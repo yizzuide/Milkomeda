@@ -4,6 +4,7 @@ import com.github.yizzuide.milkomeda.util.JSONUtil;
 import com.github.yizzuide.milkomeda.util.NetworkUtil;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.servlet.http.HttpServletRequest;
@@ -22,6 +23,7 @@ import java.util.Map;
 @Slf4j
 @Data
 @EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true, exclude = {"requestHeaders", "deviceInfo"})
 public class WebCometData extends CometData {
     private static final long serialVersionUID = -2078666744044889106L;
     /**

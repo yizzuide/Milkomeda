@@ -18,13 +18,16 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.http.MediaType;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
+import org.springframework.web.util.WebUtils;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -124,8 +127,23 @@ public class CometInterceptor extends HandlerInterceptorAdapter implements Appli
                 CollectionUtils.isEmpty(this.tagCollectorMap) || threadLocal.get() == null) {
             return;
         }
-        // 获取返回值
+        // 获取ResponseEntity返回值
         Object body = request.getAttribute("comet.collect.body");
+        if (body == null) {
+            // 从ResponseWrapper获取
+            CometResponseWrapper responseWrapper =
+                    WebUtils.getNativeResponse(response, CometResponseWrapper.class);
+            if (responseWrapper != null) {
+                String content = new String(responseWrapper.getContentAsByteArray(), StandardCharsets.UTF_8);
+                String contentType = responseWrapper.getResponse().getContentType();
+                // JSON -> Map
+                if (contentType.startsWith(MediaType.APPLICATION_JSON_VALUE)) {
+                    body = JSONUtil.parseMap(content, String.class, Object.class);
+                } else { // String!
+                    body = content;
+                }
+            }
+        }
         this.collectPostLog(body, ex);
     }
 
@@ -138,24 +156,41 @@ public class CometInterceptor extends HandlerInterceptorAdapter implements Appli
         cometData.setResponseTime(now);
         CometCollectorProperties.Tag tag = cometCollectorProperties.getTags().get(cometData.getTag());
         TagCollector tagCollector = tagCollectorMap.get(cometData.getTag());
+
+        // 如果响应消息体为空，按成功处理
+        if (body == null) {
+            cometData.setStatus(cometProperties.getStatusSuccessCode());
+            cometData.setResponseData(null);
+            tagCollector.onSuccess(cometData);
+            threadLocal.remove();
+            return;
+        }
+
         Map<String, YmlAliasNode> aliasNodeMap = null;
         Map<String, Object> bodyMap = null;
         boolean isResponseOk = false;
-        if (ex == null && tag.getExceptionMonitor().size() > 0) {
-            // body转为Map
-            if (!(body instanceof Map)) {
-                body = DataTypeConvertUtil.beanToMap(body);
+        // 检测响应码是否有成功
+        if (ex == null && !CollectionUtils.isEmpty(tag.getExceptionMonitor())) {
+            // Response text/plain
+            if (body instanceof String) {
+                isResponseOk = true;
+            } else { // ResponseEntity || Response application/json
+                // Custom Object -> Map
+                if (!(body instanceof Map)) {
+                    body = DataTypeConvertUtil.beanToMap(body);
+                }
+                bodyMap = (Map<String, Object>) body;
+                // 解析别名配置项
+                aliasNodeMap = YmlParser.parseAliasMap(tag.getExceptionMonitor());
+                YmlAliasNode ignoreCodeNode = aliasNodeMap.get("ignore-code");
+                Object code = bodyMap.get(ignoreCodeNode.getKey());
+                // 忽略的code相同，则不是异常
+                isResponseOk = String.valueOf(code).equals(String.valueOf(ignoreCodeNode.getValue()));
             }
-            bodyMap = (Map<String, Object>) body;
-            // 解析别名配置项
-            aliasNodeMap = YmlParser.parseAliasMap(tag.getExceptionMonitor());
-            YmlAliasNode ignoreCodeNode = aliasNodeMap.get("ignore-code");
-            Object code = bodyMap.get(ignoreCodeNode.getKey());
-            // 忽略的code相同，则不是异常
-            isResponseOk = String.valueOf(code).equals(String.valueOf(ignoreCodeNode.getValue()));
         }
+        // 有异常 或 响应码不成功
         if (ex != null || !isResponseOk) {
-            cometData.setStatus("2");
+            cometData.setStatus(cometProperties.getStatusFailCode());
             cometData.setResponseData(null);
             // 如果有异常
             if (ex != null) {
@@ -179,9 +214,9 @@ public class CometInterceptor extends HandlerInterceptorAdapter implements Appli
                 cometData.setTraceStack(errorStack == null ? null : errorStack.toString());
             }
             tagCollector.onFailure(cometData);
-        } else {
-            cometData.setStatus("1");
-            cometData.setResponseData(JSONUtil.serialize(body));
+        } else {  // Response OK
+            cometData.setStatus(cometProperties.getStatusSuccessCode());
+            cometData.setResponseData(body instanceof String ? body.toString() : JSONUtil.serialize(body));
             tagCollector.onSuccess(cometData);
         }
         threadLocal.remove();

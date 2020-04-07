@@ -18,12 +18,14 @@ import java.util.Map;
 @Data
 @ConfigurationProperties("milkomeda.comet.collector")
 public class CometCollectorProperties {
+
     /**
      * 启用日志收集器
      */
     private boolean enable = false;
+
     /**
-     * 开启URL标签日志收集
+     * 开启URL标签日志收集，通过Response直接写流的方式需要设置<code>ContentType</code>的字符编码<code>charset=UTF-8</code>，不然中文为乱码
      */
     private boolean enableTag = false;
 

@@ -3,6 +3,7 @@ package com.github.yizzuide.milkomeda.comet.collector;
 import com.github.yizzuide.milkomeda.comet.core.CometAspect;
 import com.github.yizzuide.milkomeda.comet.core.CometConfig;
 import com.github.yizzuide.milkomeda.comet.core.CometData;
+import com.github.yizzuide.milkomeda.comet.core.CometHolder;
 import com.github.yizzuide.milkomeda.pillar.PillarExecutor;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactoryUtils;
@@ -54,9 +55,10 @@ public class CometCollectorConfig implements ApplicationContextAware {
 
     @SuppressWarnings("all")
     @Autowired
-    public void config(CometAspect cometAspect) {
+    public void config(CometAspect cometAspect, CometCollectorProperties cometCollectorProperties) {
         // 设置日志采集器
         cometAspect.setRecorder(collectorRecorder());
+        CometHolder.setCollectorProps(cometCollectorProperties);
     }
 
     @Bean

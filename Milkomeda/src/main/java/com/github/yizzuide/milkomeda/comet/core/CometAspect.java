@@ -2,7 +2,10 @@ package com.github.yizzuide.milkomeda.comet.core;
 
 import com.github.yizzuide.milkomeda.universe.config.MilkomedaProperties;
 import com.github.yizzuide.milkomeda.universe.context.WebContext;
-import com.github.yizzuide.milkomeda.util.*;
+import com.github.yizzuide.milkomeda.util.HttpServletUtil;
+import com.github.yizzuide.milkomeda.util.JSONUtil;
+import com.github.yizzuide.milkomeda.util.NetworkUtil;
+import com.github.yizzuide.milkomeda.util.ReflectUtil;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -14,10 +17,12 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.context.request.async.WebAsyncTask;
+import org.springframework.web.util.WebUtils;
 
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
@@ -25,6 +30,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.Function;
 
@@ -133,7 +139,7 @@ public class CometAspect {
         CometData cometData = threadLocal.get();
         Date now = new Date();
         long duration = now.getTime() - cometData.getRequestTime().getTime();
-        cometData.setStatus("2");
+        cometData.setStatus(cometProperties.getStatusFailCode());
         cometData.setResponseTime(now);
         cometData.setResponseData(null);
         cometData.setDuration(String.valueOf(duration));
@@ -190,7 +196,7 @@ public class CometAspect {
 
         long duration = new Date().getTime() - cometData.getRequestTime().getTime();
         cometData.setDuration(String.valueOf(duration));
-        cometData.setStatus("1");
+        cometData.setStatus(cometProperties.getStatusSuccessCode());
         cometData.setResponseTime(new Date());
         if (returnData != null) {
             // returnData应用map转换类型
@@ -204,6 +210,17 @@ public class CometAspect {
                 cometData.setResponseData(body instanceof String ? (String) body : JSONUtil.serialize(body));
             } else {
                 cometData.setResponseData(returnData instanceof String ? (String) returnData : JSONUtil.serialize(returnData));
+            }
+        } else {
+            // 读取Response
+            if (CometHolder.getCollectorProps() != null && CometHolder.getCollectorProps().isEnable()) {
+                CometResponseWrapper responseWrapper =
+                        WebUtils.getNativeResponse(WebContext.getResponse(), CometResponseWrapper.class);
+                if (responseWrapper != null) {
+                    cometData.setStatus(WebContext.getResponse().getStatus() == HttpStatus.OK.value() ? cometProperties.getStatusSuccessCode() : cometProperties.getStatusFailCode());
+                    String content = new String(responseWrapper.getContentAsByteArray(), StandardCharsets.UTF_8);
+                    cometData.setResponseData(content);
+                }
             }
         }
 
@@ -221,10 +238,13 @@ public class CometAspect {
     public static String resolveRequestParams(HttpServletRequest request, boolean formBody) {
         String requestData = HttpServletUtil.getRequestData(request);
         // 如果form方式获取为空，取消息体内容
-        if (formBody && "{}".equals(requestData)
-                && request instanceof CometRequestWrapper) {
+        if (formBody && "{}".equals(requestData)) {
+            CometRequestWrapper requestWrapper = WebUtils.getNativeRequest(request, CometRequestWrapper.class);
+            if (requestWrapper == null) {
+                return requestData;
+            }
             // 从请求包装里获取
-            String body = ((CometRequestWrapper) request).getBodyString();
+            String body = requestWrapper.getBodyString();
             // 删除换行符
             body = body == null ? "" : body.replaceAll("\\n?\\t?", "");
            return body;

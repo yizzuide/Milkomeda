@@ -2,6 +2,7 @@ package com.github.yizzuide.milkomeda.comet.core;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
+import lombok.ToString;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.Serializable;
@@ -16,6 +17,7 @@ import java.util.Date;
  * Create at 2019/09/21 00:48
  */
 @Data
+@ToString(exclude = {"attachment", "request"})
 public class CometData implements Serializable {
     private static final long serialVersionUID = -8296355140769902642L;
     /**
@@ -68,7 +70,7 @@ public class CometData implements Serializable {
      */
     private String responseData;
     /**
-     * 状态 1-成功；2-失败
+     * 状态
      */
     private String status;
     /**
