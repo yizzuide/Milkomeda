@@ -63,6 +63,8 @@ milkomeda:
   show-log: true
 
   comet:
+    # 志收集器读取Response直接写出的内容时需要开启
+    enable-read-response-body: true
     # 统一请求日志打印
     logger:
       enable: true
@@ -88,12 +90,6 @@ milkomeda:
             # 错误信息记录
             error-stack-msg[innerErrInfo]:
             error-stack[innerErrInfoDesc]:
-
-  # 异步超时自定义响应
-  pulsar:
-    timeout:
-      response:
-        status: 200
 
   # 限制器
   particle:
@@ -193,6 +189,11 @@ milkomeda:
         # 下面字段内部会获取异常栈信息，外面不需要添加值，列出需要的字段即可
         error-stack-msg[innerErrInfo]:
         error-stack[innerErrInfoDesc]:
+
+        503:
+          status: 200
+          code: -1
+          message: 请求响应超时！
 
         # 404异常处理，需要配置：
         # spring.mvc.throw-exception-if-no-handler-found=true; spring.mvc.add-mappings=false;

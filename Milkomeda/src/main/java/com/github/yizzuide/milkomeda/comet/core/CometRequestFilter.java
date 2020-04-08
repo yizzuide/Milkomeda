@@ -1,5 +1,6 @@
 package com.github.yizzuide.milkomeda.comet.core;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.util.WebUtils;
@@ -19,6 +20,7 @@ import java.io.IOException;
  * @see org.apache.coyote.Response#isCommitted()
  * Create at 2019/12/12 17:48
  */
+@Slf4j
 public class CometRequestFilter implements Filter {
 
     @Override
@@ -32,7 +34,7 @@ public class CometRequestFilter implements Filter {
         if (CollectionUtils.isEmpty(servletRequest.getParameterMap())) {
             requestWrapper = new CometRequestWrapper((HttpServletRequest) servletRequest);
         }
-        boolean enableAddResponseWrapper = CometHolder.getCollectorProps() != null && CometHolder.getCollectorProps().isEnable();
+        boolean enableAddResponseWrapper = CometHolder.getProps().isEnableReadResponseBody() && CometHolder.getCollectorProps() != null;
         if (enableAddResponseWrapper) {
             servletResponse = new CometResponseWrapper((HttpServletResponse) servletResponse);
         }
