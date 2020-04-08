@@ -12,9 +12,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -277,6 +275,30 @@ public class ReflectUtil {
             target = ReflectionUtils.getField(field, target);
         }
         return (T) target;
+    }
+
+    /**
+     * 设置对象的值
+     * @param target    对象
+     * @param props     属性Map
+     */
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public static void setField(Object target, Map<String, Object> props) {
+        for (Map.Entry<String, Object> entry : props.entrySet()) {
+            Field field = ReflectionUtils.findField(target.getClass(), entry.getKey());
+            if (field == null) continue;
+            ReflectionUtils.makeAccessible(field);
+            // String -> Enum
+            if (Enum.class.isAssignableFrom(field.getType()) && entry.getValue() instanceof String) {
+                ReflectionUtils.setField(field, target, Enum.valueOf((Class<? extends Enum>) field.getType(), (String) entry.getValue()));
+            } else if(Long.class.isAssignableFrom(field.getType()) && entry.getValue() instanceof Integer) {
+                ReflectionUtils.setField(field, target, Long.valueOf(String.valueOf(entry.getValue())));
+            } else if(List.class.isAssignableFrom(field.getType()) && entry.getValue() instanceof Map) {
+                ReflectionUtils.setField(field, target, new ArrayList(((LinkedHashMap) entry.getValue()).values()));
+            } else {
+                ReflectionUtils.setField(field, target, entry.getValue());
+            }
+        }
     }
 
     /**

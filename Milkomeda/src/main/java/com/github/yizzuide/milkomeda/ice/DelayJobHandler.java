@@ -59,7 +59,7 @@ public class DelayJobHandler implements Runnable {
         String indexLockKey = null;
         if (props.isEnableJobTimerDistributed()) {
             indexLockKey = indexLockKey();
-            boolean absent = RedisUtil.setIfAbsent(indexLockKey, props.getTaskPopCountLockTimeoutSeconds(), redisTemplate);
+            boolean absent = RedisUtil.setIfAbsent(indexLockKey, props.getTaskPopCountLockTimeoutSeconds().getSeconds(), redisTemplate);
             if (absent) return;
         }
 

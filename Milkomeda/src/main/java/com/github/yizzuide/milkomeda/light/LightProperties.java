@@ -2,7 +2,10 @@ package com.github.yizzuide.milkomeda.light;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.convert.DurationUnit;
 
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -11,7 +14,7 @@ import java.util.Map;
  *
  * @author yizzuide
  * @since 1.17.0
- * @version 2.7.0
+ * @version 3.0.0
  * Create at 2019/12/03 16:24
  */
 @Data
@@ -24,7 +27,8 @@ public class LightProperties {
     private float l1DiscardPercent = 0.1f;
 
     /**  一级缓存过期时间（单位s，只适用于LightDiscardStrategy.LazyExpire） */
-    private long l1Expire = -1;
+    @DurationUnit(ChronoUnit.SECONDS)
+    private Duration l1Expire = Duration.ofSeconds(-1);
 
     /** 一级缓存丢弃策略（默认为Hot）*/
     private LightDiscardStrategy strategy = LightDiscardStrategy.HOT;
@@ -36,7 +40,8 @@ public class LightProperties {
     private boolean onlyCacheL1 = false;
 
     /** 二级缓存过期时间（单位s，默认不过期）*/
-    private long l2Expire = -1L;
+    @DurationUnit(ChronoUnit.SECONDS)
+    private Duration l2Expire = Duration.ofSeconds(-1);
 
     /** 只缓存在二级缓存上 */
     private boolean onlyCacheL2 = false;

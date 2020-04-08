@@ -1,6 +1,8 @@
 package com.github.yizzuide.milkomeda.particle;
 
 import com.github.yizzuide.milkomeda.util.RedisUtil;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import org.joda.time.DateTime;
@@ -17,21 +19,25 @@ import java.util.Date;
  * @version 1.14.0
  * Create at 2019/05/30 17:32
  */
+@Data
+@EqualsAndHashCode(callSuper = true)
 public class TimesLimiter extends LimitHandler {
     /**
      * 限制时间类型
      */
-    @Getter @Setter
     private TimesType timesType;
 
     /**
      * 限制次数
      */
-    @Getter @Setter
+    @Getter
+    @Setter
     private Long limitTimes;
 
     // 装饰后缀
     private static final String POSTFIX = ":times";
+
+    public TimesLimiter() { }
 
     /**
      * 构造限制配置

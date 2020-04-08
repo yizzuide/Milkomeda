@@ -37,8 +37,8 @@ public class CollectController {
         Map<String, String> map = new HashMap<>();
         map.put("code", "200");
         map.put("data", null);
-        throw new RuntimeException("出错了");
-//        return ResponseEntity.ok(map);
+//        throw new RuntimeException("出错了");
+        return ResponseEntity.ok(map);
     }
 
     @RequestMapping("product/click")

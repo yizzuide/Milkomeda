@@ -115,7 +115,7 @@ public class Moon<T> {
     }
 
     /**
-     * 根据key获取当前左手指月（缓存默认为一天，仅缓存到CacheL2，自定义配置通过注册名为`lightCacheMoon`的Cache Bean
+     * 根据key获取当前左手指月（由于用于分布式，所以仅缓存到CacheL2，自定义缓存配置通过 {@link Moon#setCacheName(String)}）
      * @param key 缓存key
      * @return LeftHandPointer
      */

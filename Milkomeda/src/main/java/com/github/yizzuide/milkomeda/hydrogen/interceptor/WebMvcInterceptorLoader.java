@@ -2,6 +2,7 @@ package com.github.yizzuide.milkomeda.hydrogen.interceptor;
 
 import com.github.yizzuide.milkomeda.universe.context.WebContext;
 import com.github.yizzuide.milkomeda.universe.polyfill.SpringMvcPolyfill;
+import com.github.yizzuide.milkomeda.util.ReflectUtil;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
@@ -10,7 +11,6 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
-import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -97,12 +97,7 @@ public class WebMvcInterceptorLoader extends AbstractInterceptorLoader<Intercept
             }
             try {
                 // set props
-                Map<String, Object> props = hi.getProps();
-                for (Map.Entry<String, Object> entry : props.entrySet()) {
-                    Field declaredField = handlerInterceptorBean.getClass().getDeclaredField(entry.getKey());
-                    declaredField.setAccessible(true);
-                    declaredField.set(handlerInterceptorBean, entry.getValue());
-                }
+                ReflectUtil.setField(handlerInterceptorBean, hi.getProps());
                 performAction.accept(hi, handlerInterceptorBean);
             } catch (Exception e) {
                 log.error("Hydrogen interceptor add error with msg: {}", e.getMessage(), e);

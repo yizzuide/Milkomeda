@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.CollectionUtils;
 
+import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -17,7 +18,7 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 1.15.0
- * @version 1.15.2
+ * @version 3.0.0
  * Create at 2019/11/16 15:20
  */
 @Slf4j
@@ -52,8 +53,13 @@ public class RedisIce implements Ice {
     }
 
     @Override
+    public <T> void add(String id, String topic, T body, Duration delay) {
+        add(id, topic, body, delay.toMillis());
+    }
+
+    @Override
     public <T> void add(String id, String topic, T body, long delay) {
-        Job<T> job = new Job<>(id, topic, delay, props.getTtr(), props.getRetryCount(), body);
+        Job<T> job = new Job<>(id, topic, delay, props.getTtr().toMillis(), props.getRetryCount(), body);
         add(job);
     }
 
@@ -90,7 +96,7 @@ public class RedisIce implements Ice {
         if (count == 1) return Collections.singletonList(pop(topic));
 
         // 使用SetNX锁住资源，防止多线程并发执行，造成重复消费问题
-        boolean absent = RedisUtil.setIfAbsent(KEY_IDEMPOTENT_LIMITER, props.getTaskPopCountLockTimeoutSeconds(), redisTemplate);
+        boolean absent = RedisUtil.setIfAbsent(KEY_IDEMPOTENT_LIMITER, props.getTaskPopCountLockTimeoutSeconds().getSeconds(), redisTemplate);
         if (absent) return null;
 
         List<Job<T>> jobList;

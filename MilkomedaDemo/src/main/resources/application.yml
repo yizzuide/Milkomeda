@@ -88,12 +88,30 @@ milkomeda:
             # 错误信息记录
             error-stack-msg[innerErrInfo]:
             error-stack[innerErrInfoDesc]:
+  # 限制器
+  particle:
+    limiters:
+      -
+        # 新配置一个去重限制器（内部配置了idempotentLimiter），用来添加到BarrierLimiter组合链，防止污染限制器链
+        name: noRepeatLimiter
+        handler-clazz: com.github.yizzuide.milkomeda.particle.IdempotentLimiter
+      -
+        name: timesLimiter
+        handler-clazz: com.github.yizzuide.milkomeda.particle.TimesLimiter
+        props:
+          timesType: MIN
+          limitTimes: 3
+      -
+        name: barrierLimiter
+        handler-clazz: com.github.yizzuide.milkomeda.particle.BarrierLimiter
+        props:
+          chain: ["noRepeatLimiter", "timesLimiter"]
 
   light:
     # 一级缓存一小时后过期（只适用于LazyExpire策略）
-    l1-expire: 10
+    l1-expire: 1h
     # 二级缓存一天后过期
-    l2-expire: 86400
+    l2-expire: 1d
     # 全局使用时间线丢弃策略
     strategy: timeline
     instances:
@@ -104,7 +122,7 @@ milkomeda:
 
   echo:
     # 设置请求读取超时
-    read-timeout: 10000
+    read-timeout: 10s
 
   crust:
 #    stateless: false
@@ -119,11 +137,11 @@ milkomeda:
     # 开启Job作业（默认为true，仅作为消费端使用时，设置false）
 #    enable-job-timer: false
     # Job作业频率（默认1000ms）
-    delay-bucket-poll-rate: 2000
+    delay-bucket-poll-rate: 2s
     # 延迟队列分桶数量（默认为3）
     delay-bucket-count: 2
     # 消费执行超时时间（默认5000ms）
-    ttr: 10000
+    ttr: 10s
     # 重试时添加延迟增长因子（默认为1，计算公式：delay * (retryCount++) * factor）
     retry-delay-multi-factor: 2
     # 开启Task功能（使用@EnableIce时消费端需要配置为true）
@@ -131,7 +149,7 @@ milkomeda:
     # 最大消费个数（默认为10）
     task-topic-pop-max-size: 5
     # 消费轮询间隔（默认5000ms）
-    task-execute-rate: 2000
+    task-execute-rate: 2s
 
   moon:
     instances:

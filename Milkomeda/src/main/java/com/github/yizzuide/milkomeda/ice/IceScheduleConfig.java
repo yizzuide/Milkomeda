@@ -12,7 +12,6 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.util.CollectionUtils;
 
 import java.lang.reflect.Method;
-import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 
@@ -53,6 +52,6 @@ public class IceScheduleConfig {
                 // 标记完成，清除元数据
                 ice.finish(jobs);
             }
-        }), Duration.ofMillis(props.getTaskExecuteRate()));
+        }), props.getTaskExecuteRate());
     }
 }
