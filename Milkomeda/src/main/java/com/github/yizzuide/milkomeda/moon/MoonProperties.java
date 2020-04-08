@@ -4,6 +4,7 @@ import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * MoonProperties
@@ -35,9 +36,9 @@ public class MoonProperties {
          */
         private Class<MoonStrategy> moonStrategyClazz;
         /**
-         * PercentMoonStrategy百分比策略下，设置百分占值
+         * 自定义属性
          */
-        private int percent = 100;
+        private Map<String, Object> props;
         /**
          * 环形阶段值
          */

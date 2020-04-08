@@ -1,6 +1,7 @@
 package com.github.yizzuide.milkomeda.hydrogen.interceptor;
 
 import lombok.Data;
+import org.springframework.core.Ordered;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.handler.MappedInterceptor;
@@ -19,7 +20,7 @@ import static org.springframework.web.servlet.HandlerMapping.LOOKUP_PATH;
  * Create at 2020/03/31 14:56
  */
 @Data
-public class HydrogenMappedInterceptor implements HandlerInterceptor {
+public class HydrogenMappedInterceptor implements HandlerInterceptor, Ordered {
 
     // 由于MappedInterceptor被final修饰，所以使用继承方式无解
     private MappedInterceptor mappedInterceptor;

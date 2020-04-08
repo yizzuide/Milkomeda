@@ -16,7 +16,7 @@ spring:
   mvc:
     # Pulsar模块异步超时
     async:
-      request-timeout: 20s
+      request-timeout: 1s
     # 404抛出NoHandlerFoundException异常
     throw-exception-if-no-handler-found: true
   # 资源不生成mapping映射
@@ -88,6 +88,13 @@ milkomeda:
             # 错误信息记录
             error-stack-msg[innerErrInfo]:
             error-stack[innerErrInfoDesc]:
+
+  # 异步超时自定义响应
+  pulsar:
+    timeout:
+      response:
+        status: 200
+
   # 限制器
   particle:
     limiters:
@@ -161,10 +168,11 @@ milkomeda:
         cacheName: ab-test
         # 使用百分比分配策略
         moonStrategyClazz: com.github.yizzuide.milkomeda.moon.PercentMoonStrategy
+        props:
+          # 缩小总占百分比，使分配更均匀
+          percent: 10
         # 20%的0，80%的1
-        # phases: [20, 80]
-        # 缩小总占百分比，使分配更均匀
-        percent: 10
+        #phases: [20, 80]
         phases: [2, 8]
 
   hydrogen:

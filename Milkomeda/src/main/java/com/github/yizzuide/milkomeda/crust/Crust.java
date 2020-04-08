@@ -107,12 +107,12 @@ public class Crust {
      * @return Token
      */
     public String refreshToken() {
-        if (!props.isStateless()) return null;
+        if (!props.isStateless()) { return null; }
         String refreshedToken;
         try {
             Claims claims = JwtUtil.parseToken(getToken(), getUnSignKey());
             claims.put(CREATED, new Date());
-            refreshedToken = JwtUtil.generateToken(claims, getSignKey(), props.getExpire(), props.isUseRsa());
+            refreshedToken = JwtUtil.generateToken(claims, getSignKey(), Math.toIntExact(props.getExpire().toMinutes()), props.isUseRsa());
         } catch (Exception e) {
             refreshedToken = null;
         }
@@ -283,7 +283,7 @@ public class Crust {
     @NonNull
     private Boolean validateToken(@NonNull String token, @NonNull String username) {
         String userName = tokenMetaDataThreadLocal.get().getUsername();
-        if (StringUtils.isEmpty(userName)) return false;
+        if (StringUtils.isEmpty(userName)) { return false; }
         return (userName.equals(username) && !JwtUtil.isTokenExpired(token, getUnSignKey()));
     }
 
@@ -311,7 +311,7 @@ public class Crust {
                 claims.put(ROLE_IDS, StringUtils.arrayToCommaDelimitedString(roleIds.toArray()));
             }
         }
-        String token = JwtUtil.generateToken(claims, getSignKey(), props.getExpire(), props.isUseRsa());
+        String token = JwtUtil.generateToken(claims, getSignKey(), Math.toIntExact(props.getExpire().toMinutes()), props.isUseRsa());
         userInfo.setToken(token);
         return userInfo;
     }
@@ -383,9 +383,9 @@ public class Crust {
      */
     @Nullable
     public String getToken() {
-        if (!props.isStateless()) return null;
+        if (!props.isStateless()) { return null; }
         String token = WebContext.getRequest().getHeader(props.getTokenName());
-        if (StringUtils.isEmpty(token)) return null;
+        if (StringUtils.isEmpty(token)) { return null; }
         // 一般请求头Authorization的值会添加Bearer
         String tokenHead = "Bearer ";
         if (token.contains(tokenHead)) {
