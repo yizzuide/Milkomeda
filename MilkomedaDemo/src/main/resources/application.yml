@@ -190,6 +190,7 @@ milkomeda:
         error-stack-msg[innerErrInfo]:
         error-stack[innerErrInfoDesc]:
 
+        # 服务器响应超时，DeferredResult异步超时
         503:
           status: 200
           code: -1

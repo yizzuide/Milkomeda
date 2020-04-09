@@ -34,7 +34,9 @@ public class CometRequestFilter implements Filter {
         if (CollectionUtils.isEmpty(servletRequest.getParameterMap())) {
             requestWrapper = new CometRequestWrapper((HttpServletRequest) servletRequest);
         }
-        boolean enableAddResponseWrapper = CometHolder.getProps().isEnableReadResponseBody() && CometHolder.getCollectorProps() != null;
+        // 只有Tag Collector开启，并且指定开启`comet.enable-read-response-body`，才会装饰包装类读Response Body
+        boolean enableAddResponseWrapper = CometHolder.getProps().isEnableReadResponseBody() &&
+                CometHolder.getCollectorProps() != null && CometHolder.getCollectorProps().isEnableTag();
         if (enableAddResponseWrapper) {
             servletResponse = new CometResponseWrapper((HttpServletResponse) servletResponse);
         }

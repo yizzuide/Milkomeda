@@ -1,5 +1,6 @@
 package com.github.yizzuide.milkomeda.comet.collector;
 
+import com.github.yizzuide.milkomeda.comet.core.CometProperties;
 import com.github.yizzuide.milkomeda.comet.core.WebCometData;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -25,7 +26,7 @@ public class CometCollectorProperties {
     private boolean enable = false;
 
     /**
-     * 开启URL标签日志收集，通过Response直接写流的方式需要设置<code>ContentType</code>的字符编码<code>charset=UTF-8</code>，不然中文为乱码
+     * 开启URL标签日志收集，通过注入HttpServletResponse直接写出流需要开启 {@link CometProperties#isEnableReadResponseBody()}
      */
     private boolean enableTag = false;
 

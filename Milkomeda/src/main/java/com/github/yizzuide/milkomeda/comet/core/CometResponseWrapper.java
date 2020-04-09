@@ -13,7 +13,7 @@ import java.io.*;
 
 /**
  * CometResponseWrapper
- * 响应包装类，基于Spring源码类ContentCachingResponseWrapper修改，因为直接用ContentCachingResponseWrapper在
+ * 响应包装类，基于SpringWeb源码类ContentCachingResponseWrapper修改，因为直接用ContentCachingResponseWrapper在
  *  {@link DeferredResult} 异步响应情况下有bug。
  *
  * @author yizzuide
@@ -34,7 +34,7 @@ public class CometResponseWrapper extends HttpServletResponseWrapper {
 
     @Nullable
     private Integer contentLength;
-    
+
     public CometResponseWrapper(HttpServletResponse response) {
         super(response);
     }
@@ -74,6 +74,8 @@ public class CometResponseWrapper extends HttpServletResponseWrapper {
     @Override
     public ServletOutputStream getOutputStream() throws IOException {
         if (this.outputStream == null) {
+            // 设置默认编码，默认为ISO-8859-1
+            this.getResponse().setCharacterEncoding("UTF-8");
             this.outputStream = new ResponseServletOutputStream(getResponse().getOutputStream());
         }
         return this.outputStream;
@@ -82,6 +84,8 @@ public class CometResponseWrapper extends HttpServletResponseWrapper {
     @Override
     public PrintWriter getWriter() throws IOException {
         if (this.writer == null) {
+            // 设置默认编码，默认为ISO-8859-1
+            this.getResponse().setCharacterEncoding("UTF-8");
             String characterEncoding = getCharacterEncoding();
             this.writer = (characterEncoding != null ? new ResponsePrintWriter(characterEncoding) :
                     new ResponsePrintWriter(WebUtils.DEFAULT_CHARACTER_ENCODING));
@@ -224,12 +228,12 @@ public class CometResponseWrapper extends HttpServletResponseWrapper {
             this.os.setWriteListener(writeListener);
         }
 
-        // 在DeferredResult第二次响应时，会在获取OutputStream写出后，调用这个方法
+        // 在DeferredResult第二次Response响应时，会在获取OutputStream写出后，调用这个方法
         @Override
         public void flush() throws IOException {
-            super.flush();
             // 写出到响应输出流（解决 DeferredResult 异步响应问题）
             CometResponseWrapper.this.copyBodyToResponse();
+            super.flush();
         }
     }
 
