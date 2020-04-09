@@ -1,5 +1,6 @@
 package com.github.yizzuide.milkomeda.hydrogen.interceptor;
 
+import com.github.yizzuide.milkomeda.universe.context.WebContext;
 import lombok.Data;
 import org.springframework.core.Ordered;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -37,8 +38,8 @@ public class HydrogenMappedInterceptor implements HandlerInterceptor, Ordered {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         // 由于Spring MVC源码在创建interceptorChain时只识别MappedInterceptor类型才能匹配URL，这里补充进来
-        String lookupPath = InterceptorHolder.getUrlPathHelper().getLookupPathForRequest(request, LOOKUP_PATH);
-        if (mappedInterceptor.matches(lookupPath, InterceptorHolder.getMvcPathMatcher())) {
+        String lookupPath = WebContext.getUrlPathHelper().getLookupPathForRequest(request, LOOKUP_PATH);
+        if (mappedInterceptor.matches(lookupPath, WebContext.getMvcPathMatcher())) {
             return mappedInterceptor.preHandle(request, response, handler);
         }
         return true;
@@ -46,8 +47,8 @@ public class HydrogenMappedInterceptor implements HandlerInterceptor, Ordered {
 
     @Override
     public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
-        String lookupPath = InterceptorHolder.getUrlPathHelper().getLookupPathForRequest(request, LOOKUP_PATH);
-        if (mappedInterceptor.matches(lookupPath, InterceptorHolder.getMvcPathMatcher())) {
+        String lookupPath = WebContext.getUrlPathHelper().getLookupPathForRequest(request, LOOKUP_PATH);
+        if (mappedInterceptor.matches(lookupPath, WebContext.getMvcPathMatcher())) {
             mappedInterceptor.postHandle(request, response, handler, modelAndView);
         }
     }

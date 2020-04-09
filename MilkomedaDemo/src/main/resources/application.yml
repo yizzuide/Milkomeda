@@ -72,7 +72,7 @@ milkomeda:
       strategy:
         -
           paths: ["/**"]
-          tpl: url->{uri},userId:{uid},token:{token},method->{method},parameters->{params}
+          tpl: url->{uri},userId:{uid},token:[token],method->{method},parameters->{params}
         -
           paths: ["/error/**"]
           tpl: url->{uri},method->{method}

@@ -36,6 +36,10 @@ public class ParticleProperties {
          * 限制处理器属性
          */
         private Map<String, Object> props;
+        /**
+         * 分布式key模板
+         */
+        private String keyTpl = "limit_{method}_{uri}_[token]";
 
         /**
          * 限制的路径（暂不支持，在开发计划中）
@@ -55,7 +59,12 @@ public class ParticleProperties {
         /**
          * 限制器实例（内部使用）
          */
-        LimitHandler limitHandler;
+        private LimitHandler limitHandler;
+
+        /**
+         * 缓存占位符（模块内部使用）
+         */
+        private Map<String, List<String>> cacheKeys;
 
         void setLimitHandler(LimitHandler limitHandler) {
             this.limitHandler = limitHandler;
@@ -63,6 +72,14 @@ public class ParticleProperties {
 
         LimitHandler getLimitHandler() {
             return  this.limitHandler;
+        }
+
+        void setCacheKeys(Map<String, List<String>> cacheKeys) {
+            this.cacheKeys = cacheKeys;
+        }
+
+        Map<String, List<String>> getCacheKeys() {
+            return this.cacheKeys;
         }
 
     }

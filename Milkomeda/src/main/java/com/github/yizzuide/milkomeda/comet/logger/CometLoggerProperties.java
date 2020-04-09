@@ -5,6 +5,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  * CometLoggerProperties
@@ -44,12 +45,12 @@ public class CometLoggerProperties {
          */
         private List<String> paths = Collections.singletonList("/**");
         /**
-         * 策略模板，默认能识别的占位符：uri、method、params、token（如果请求头有token）
+         * 策略模板，默认能识别的占位符：uri、method、params（参数可配置占位符，请求头固定使用[]）
          */
-        private String tpl = "{\"uri\":\"{uri}\", \"method\": \"{method}\", \"params\": \"{params}\", \"token\": \"{token}\"}";
+        private String tpl = "{\"uri\":\"{uri}\", \"method\": \"{method}\", \"params\": \"{params}\", \"token\": \"[token]\"}";
         /**
          * 缓存占位符（模块内部使用）
          */
-        private List<String> cacheKeys;
+        private Map<String, List<String>> cacheKeys;
     }
 }

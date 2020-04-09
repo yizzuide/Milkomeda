@@ -1,6 +1,7 @@
 package com.github.yizzuide.milkomeda.particle;
 
 import com.github.yizzuide.milkomeda.universe.context.WebContext;
+import com.github.yizzuide.milkomeda.universe.polyfill.SpringMvcPolyfill;
 import com.github.yizzuide.milkomeda.util.ReflectUtil;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,13 +14,12 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * ParticleConfig
@@ -34,6 +34,16 @@ import java.util.Map;
 @AutoConfigureAfter(RedisAutoConfiguration.class)
 @EnableConfigurationProperties(ParticleProperties.class)
 public class ParticleConfig implements ApplicationContextAware {
+
+    @Autowired
+    private ParticleProperties particleProperties;
+
+    /**
+     * 缓存创建的LimitHandler
+     */
+    private Map<String, LimitHandler> cacheHandlerBeans = new HashMap<>();
+
+
     @Bean
     public ParticleAspect particleAspect() {
         return new ParticleAspect();
@@ -44,13 +54,18 @@ public class ParticleConfig implements ApplicationContextAware {
         return new IdempotentLimiter();
     }
 
-    @Autowired
-    private ParticleProperties particleProperties;
+    @Bean
+    public ParticleInterceptor particleInterceptor() {
+        return new ParticleInterceptor();
+    }
 
-    /**
-     * 缓存创建的LimitHandler
-     */
-    private Map<String, LimitHandler> cacheHandlerBeans = new HashMap<>();
+    @Autowired
+    @SuppressWarnings("all")
+    public void configRequestMappingHandlerMapping(RequestMappingHandlerMapping requestMappingHandlerMapping) {
+        // 使用内置拦截器
+        SpringMvcPolyfill.addDynamicInterceptor(particleInterceptor(),  Ordered.HIGHEST_PRECEDENCE + 2, Collections.singletonList("/**"),
+                null, requestMappingHandlerMapping);
+    }
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
@@ -68,6 +83,7 @@ public class ParticleConfig implements ApplicationContextAware {
                 barrierLimiters.add(limiter);
             }
         }
+        // 创建barrierLimiter类型限制器链
         for (ParticleProperties.Limiter limiter : barrierLimiters) {
             BarrierLimiter barrierLimiter = (BarrierLimiter) limiter.getLimitHandler();
             List<String> chain = barrierLimiter.getChain();

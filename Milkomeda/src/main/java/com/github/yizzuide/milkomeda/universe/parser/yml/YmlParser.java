@@ -1,4 +1,4 @@
-package com.github.yizzuide.milkomeda.universe.yml;
+package com.github.yizzuide.milkomeda.universe.parser.yml;
 
 import org.springframework.util.StringUtils;
 

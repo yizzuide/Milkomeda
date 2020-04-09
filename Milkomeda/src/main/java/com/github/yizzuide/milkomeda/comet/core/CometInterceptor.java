@@ -2,20 +2,21 @@ package com.github.yizzuide.milkomeda.comet.core;
 
 import com.github.yizzuide.milkomeda.comet.collector.CometCollectorProperties;
 import com.github.yizzuide.milkomeda.comet.collector.TagCollector;
-import com.github.yizzuide.milkomeda.comet.logger.CometLoggerData;
-import com.github.yizzuide.milkomeda.comet.logger.CometLoggerPathMatcher;
+import com.github.yizzuide.milkomeda.universe.metadata.BeanIds;
+import com.github.yizzuide.milkomeda.universe.parser.url.URLPathMatcher;
 import com.github.yizzuide.milkomeda.comet.logger.CometLoggerProperties;
-import com.github.yizzuide.milkomeda.comet.logger.CometLoggerResolver;
 import com.github.yizzuide.milkomeda.pulsar.PulsarHolder;
-import com.github.yizzuide.milkomeda.universe.yml.YmlAliasNode;
-import com.github.yizzuide.milkomeda.universe.yml.YmlParser;
+import com.github.yizzuide.milkomeda.universe.parser.url.URLPlaceholderParser;
+import com.github.yizzuide.milkomeda.universe.parser.url.URLPlaceholderResolver;
+import com.github.yizzuide.milkomeda.universe.parser.yml.YmlAliasNode;
+import com.github.yizzuide.milkomeda.universe.parser.yml.YmlParser;
 import com.github.yizzuide.milkomeda.util.DataTypeConvertUtil;
 import com.github.yizzuide.milkomeda.util.JSONUtil;
 import com.github.yizzuide.milkomeda.util.NetworkUtil;
-import com.github.yizzuide.milkomeda.util.PlaceholderResolver;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.http.MediaType;
@@ -28,7 +29,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -53,11 +53,11 @@ public class CometInterceptor extends HandlerInterceptorAdapter implements Appli
     @Autowired(required = false)
     private CometLoggerProperties cometLoggerProperties;
 
-    @Autowired(required = false)
-    private CometLoggerResolver cometLoggerResolver;
+    @Autowired(required = false) @Qualifier(BeanIds.COMET_LOGGER_RESOLVER)
+    private URLPlaceholderResolver cometLoggerURLPlaceholderResolver;
 
-    // 占位符解析器
-    private PlaceholderResolver placeholderResolver;
+    // 占位解析器
+    private URLPlaceholderParser urlPlaceholderParser;
 
     // logger策略
     private List<CometLoggerProperties.Strategy> strategyList;
@@ -74,7 +74,8 @@ public class CometInterceptor extends HandlerInterceptorAdapter implements Appli
         if (logger == null) {
             return;
         }
-        placeholderResolver = PlaceholderResolver.getResolver(logger.getPrefix(), logger.getSuffix());
+        urlPlaceholderParser = new URLPlaceholderParser(logger.getPrefix(), logger.getSuffix());
+        urlPlaceholderParser.setCustomURLPlaceholderResolver(cometLoggerURLPlaceholderResolver);
         List<CometLoggerProperties.Strategy> strategyList = logger.getStrategy();
         if (CollectionUtils.isEmpty(strategyList)) {
             return;
@@ -82,17 +83,17 @@ public class CometInterceptor extends HandlerInterceptorAdapter implements Appli
 
         // make pref
         this.strategyList = strategyList.stream().peek(s -> {
-            if (CollectionUtils.containsAny(s.getPaths(), CometLoggerPathMatcher.getMatchWildSymbols())) {
-                s.setPaths(CometLoggerPathMatcher.getWildSymbols());
+            if (CollectionUtils.containsAny(s.getPaths(), URLPathMatcher.getMatchWildSymbols())) {
+                s.setPaths(URLPathMatcher.getWildSymbols());
             }
-            List<String> placeHolders = s.getCacheKeys() == null ?
-                    placeholderResolver.getPlaceHolders(s.getTpl()) : s.getCacheKeys();
+            Map<String, List<String>> placeHolders = s.getCacheKeys() == null ?
+                    urlPlaceholderParser.grabPlaceHolders(s.getTpl()) : s.getCacheKeys();
             s.setCacheKeys(placeHolders);
         }).sorted((s1, s2) -> {
             // 前面包含/**向后移
-            if (CollectionUtils.containsAny(s1.getPaths(), CometLoggerPathMatcher.getMatchWildSymbols())) return 1;
+            if (CollectionUtils.containsAny(s1.getPaths(), URLPathMatcher.getMatchWildSymbols())) return 1;
             // 后面包含/**，保持不变
-            if (CollectionUtils.containsAny(s2.getPaths(), CometLoggerPathMatcher.getMatchWildSymbols())) return -1;
+            if (CollectionUtils.containsAny(s2.getPaths(), URLPathMatcher.getMatchWildSymbols())) return -1;
             return 0;
         }).collect(Collectors.toList());
     }
@@ -227,11 +228,11 @@ public class CometInterceptor extends HandlerInterceptorAdapter implements Appli
         Map<String, CometCollectorProperties.Tag> tagMap = cometCollectorProperties.getTags();
         for (Map.Entry<String, CometCollectorProperties.Tag> tag : tagMap.entrySet()) {
             if (!CollectionUtils.isEmpty(tag.getValue().getExclude())) {
-                if (CometLoggerPathMatcher.match(tag.getValue().getExclude(), request.getRequestURI())) {
+                if (URLPathMatcher.match(tag.getValue().getExclude(), request.getRequestURI())) {
                     continue;
                 }
             }
-            if (CometLoggerPathMatcher.match(tag.getValue().getInclude(), request.getRequestURI())) {
+            if (URLPathMatcher.match(tag.getValue().getInclude(), request.getRequestURI())) {
                 selectTag = tag.getKey();
                 break;
             }
@@ -267,31 +268,15 @@ public class CometInterceptor extends HandlerInterceptorAdapter implements Appli
         if (CollectionUtils.isEmpty(strategyList)) {
             return;
         }
-        String method = request.getMethod();
         String requestParams = CometAspect.resolveThreadLocal.get();
         requestParams = requestParams == null ?
                 CometAspect.resolveRequestParams(request, CometHolder.getProps().isEnableReadRequestBody()) : requestParams;
-        String token = request.getHeader("token");
-        CometLoggerData urlLogData = new CometLoggerData();
-        urlLogData.setUri(requestURI);
-        urlLogData.setMethod(method);
-        urlLogData.setParams(requestParams);
-        urlLogData.setToken(token);
         for (CometLoggerProperties.Strategy strategy : strategyList) {
             if (CollectionUtils.isEmpty(strategy.getPaths()) ||
-                    !CometLoggerPathMatcher.match(strategy.getPaths(), requestURI)) {
+                    !URLPathMatcher.match(strategy.getPaths(), requestURI)) {
                 continue;
             }
-            List<String> placeHolders = strategy.getCacheKeys();
-            List<String> ignorePlaceHolders = Arrays.asList("uri", "method", "params");
-            Map<String, Object> map = DataTypeConvertUtil.beanToMap(urlLogData);
-            for (String placeHolder : placeHolders) {
-                if (ignorePlaceHolders.contains(placeHolder)) continue;
-                Object value = map.get(placeHolder);
-                map.put(placeHolder, value == null ? (cometLoggerResolver == null ? "" :
-                        String.valueOf(cometLoggerResolver.resolver(placeHolder, request))) : value);
-            }
-            log.info(placeholderResolver.resolveByObject(strategy.getTpl(), map));
+            log.info(urlPlaceholderParser.parse(strategy.getTpl(), request, requestParams, strategy.getCacheKeys()));
             break;
         }
     }

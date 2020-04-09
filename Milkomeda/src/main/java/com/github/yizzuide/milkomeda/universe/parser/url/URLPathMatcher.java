@@ -1,4 +1,4 @@
-package com.github.yizzuide.milkomeda.comet.logger;
+package com.github.yizzuide.milkomeda.universe.parser.url;
 
 import org.springframework.util.StringUtils;
 
@@ -7,14 +7,14 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * CometLoggerPathMatcher
- * 日志路径匹配器
+ * URLPathMatcher
+ * 路径匹配器
  *
  * @author yizzuide
  * @since 3.0.0
  * Create at 2020/03/29 14:07
  */
-public class CometLoggerPathMatcher {
+public class URLPathMatcher {
 
     private final static List<String> wildSymbols = Arrays.asList("*", "/**");
 

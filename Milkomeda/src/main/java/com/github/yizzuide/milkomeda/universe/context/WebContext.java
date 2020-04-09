@@ -4,8 +4,10 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.util.PathMatcher;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.web.util.UrlPathHelper;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -20,6 +22,41 @@ import javax.servlet.http.HttpSession;
  * Create at 2019/11/11 21:38
  */
 public class WebContext {
+
+    /**
+     * 路径匹配器
+     */
+    private static PathMatcher mvcPathMatcher;
+
+    /**
+     * URL路径帮助类
+     */
+    private static UrlPathHelper urlPathHelper;
+
+    public static void setMvcPathMatcher(PathMatcher mvcPathMatcher) {
+        WebContext.mvcPathMatcher = mvcPathMatcher;
+    }
+
+    /**
+     * 路径匹配器
+     * @return  PathMatcher
+     */
+    public static PathMatcher getMvcPathMatcher() {
+        return mvcPathMatcher;
+    }
+
+    public static void setUrlPathHelper(UrlPathHelper urlPathHelper) {
+        WebContext.urlPathHelper = urlPathHelper;
+    }
+
+    /**
+     * 请求路径帮助类
+     * @return  UrlPathHelper
+     */
+    public static UrlPathHelper getUrlPathHelper() {
+        return urlPathHelper;
+    }
+
     /**
      * 获取请求信息
      * @return  ServletRequestAttributes

@@ -1,6 +1,7 @@
 package com.github.yizzuide.milkomeda.demo.comet.config;
 
-import com.github.yizzuide.milkomeda.comet.logger.CometLoggerResolver;
+import com.github.yizzuide.milkomeda.universe.metadata.BeanIds;
+import com.github.yizzuide.milkomeda.universe.parser.url.URLPlaceholderResolver;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Bean;
@@ -16,11 +17,11 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class CometConfig {
 
-    // UrlLog解析uid占位符
-    @Bean
-    public CometLoggerResolver cometUrlLogResolver() {
-        return (k, request) -> {
-            if ("uid".equals(k)) {
+    // 自定义Logger解析，必需使用这个Bean名
+    @Bean(BeanIds.COMET_LOGGER_RESOLVER)
+    public URLPlaceholderResolver urlPlaceholderResolver() {
+        return (placeholder, request) -> {
+            if ("uid".equals(placeholder)) {
                 String token = request.getHeader("token");
                 // 假设以前四位为用户id
                 return StringUtils.isBlank(token) ? null : token.substring(0, 4);
