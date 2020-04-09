@@ -82,6 +82,7 @@ Milkomeda 3.0 coming soon（April 2020).
 ### Migrating to 3.x from 2.x
 
 - [Comet] 模块包由`com.github.yizzuide.milkomeda.comet`迁移到`com.github.yizzuide.milkomeda.comet.core`，因为该模块聚合了`Collector`和`Logger`。
+- [Pulsar] 删除了`timeoutCallback` 和 `errorCallback`回调设置，替换为`Hydrogen`的`Uniform`统一处理异常响应配置方式。
 
 ### [More](https://github.com/yizzuide/Milkomeda/wiki/Upgrade-Guide)
 
