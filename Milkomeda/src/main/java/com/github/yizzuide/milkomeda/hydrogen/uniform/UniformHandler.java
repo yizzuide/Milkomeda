@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import javax.annotation.PostConstruct;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import java.io.IOException;
@@ -37,10 +38,36 @@ public class UniformHandler extends ResponseEntityExceptionHandler {
 
     @Autowired
     private UniformProperties props;
+
     /**
      * 自定义异常配置列表缓存
      */
     private List<Map<String, Object>> customConfList;
+
+    @SuppressWarnings("unchecked")
+    @PostConstruct
+    public void init() {
+        // 初始化自定义异常
+        Object customs = props.getResponse().get("customs");
+        if (customs == null) {
+            return;
+        }
+        this.customConfList = new ArrayList<>();
+        Map<String, Map<String, Object>> customsMap = (Map<String, Map<String, Object>>) customs;
+        for (String k : customsMap.keySet()) {
+            Map<String, Object> eleMap = customsMap.get(k);
+            Object clazz = eleMap.get("clazz");
+            if (clazz == null) continue;
+            Class<?> expClazz = null;
+            try {
+                expClazz = Class.forName(clazz.toString());
+            } catch (Exception ex) {
+                log.error("Hydrogen load class error with msg: {}", ex.getMessage(), ex);
+            }
+            eleMap.put("clazz", expClazz);
+            this.customConfList.add(eleMap);
+        }
+    }
 
     // 4xx异常处理
     @Override
@@ -76,7 +103,7 @@ public class UniformHandler extends ResponseEntityExceptionHandler {
     }
 
     // 其它内部异常处理
-    @SuppressWarnings("all")
+    @SuppressWarnings("unchecked")
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Object> handleException(Exception e) throws IOException {
         Map<String, Object> response = props.getResponse();
@@ -84,27 +111,8 @@ public class UniformHandler extends ResponseEntityExceptionHandler {
         status = status == null ?  500 : status;
         Map<String, Object> result = new HashMap<>();
 
-        // 自定义异常处理
-        Object customs = response.get("customs");
-        if (customs != null) {
-            if (this.customConfList == null) {
-                this.customConfList = new ArrayList<>();
-                Map<String, Map<String, Object>> customsMap = (Map<String, Map<String, Object>>) customs;
-                for (String k : customsMap.keySet()) {
-                    Map<String, Object> eleMap = customsMap.get(k);
-                    Object clazz = eleMap.get("clazz");
-                    if (clazz == null) continue;
-                    Class<?> expClazz = null;
-                    try {
-                        expClazz = Class.forName(clazz.toString());
-                    } catch (Exception ex) {
-                        log.error("Hydrogen load class error with msg: {}", ex.getMessage(), e);
-                    }
-                    eleMap.put("clazz", expClazz);
-                    this.customConfList.add(eleMap);
-                }
-            }
-
+        // 查找自定义异常处理
+        if (this.customConfList != null) {
             for (Map<String, Object> map : this.customConfList) {
                 Class<Exception> exceptionClass = (Class<Exception>) map.get("clazz");
                 if (exceptionClass.isInstance(e)) {
@@ -119,6 +127,7 @@ public class UniformHandler extends ResponseEntityExceptionHandler {
             }
         }
 
+        // 500异常
         log.error("Hydrogen uniform response exception with msg: {}", e.getMessage(), e);
         YmlParser.parseAliasMapPath(response, result, "code", -1, null);
         YmlParser.parseAliasMapPath(response, result, "message", "服务器繁忙，请稍后再试！", null);
@@ -155,18 +164,19 @@ public class UniformHandler extends ResponseEntityExceptionHandler {
      * @param presetMessage     预设错误消息
      * @return  ResponseEntity
      */
-    @SuppressWarnings("all")
+    @SuppressWarnings("unchecked")
     private ResponseEntity<Object> handleExceptionResponse(Exception ex, Object presetStatusCode, String presetMessage) {
         Map<String, Object> response = props.getResponse();
         Map<String, Object> result = new HashMap<>();
         Object exp4xx = response.get(presetStatusCode.toString());
         if (!(exp4xx instanceof Map)) {
+            log.warn("Hydrogen uniform can't find {} code response.", presetStatusCode);
             return null;
         }
+
         Map<String, Object> exp4xxResponse = (Map<String, Object>) exp4xx;
         Object statusCode4xx = exp4xxResponse.get("status");
         if (statusCode4xx == null || presetStatusCode.equals(statusCode4xx)) {
-            presetStatusCode = statusCode4xx;
             return ResponseEntity.status(Integer.parseInt(presetStatusCode.toString())).body(null);
         }
 

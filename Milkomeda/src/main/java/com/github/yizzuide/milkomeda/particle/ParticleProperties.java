@@ -2,7 +2,10 @@ package com.github.yizzuide.milkomeda.particle;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.convert.DurationUnit;
 
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 
@@ -17,9 +20,30 @@ import java.util.Map;
 @ConfigurationProperties("milkomeda.particle")
 public class ParticleProperties {
     /**
+     * 开启请求过滤
+     */
+    private boolean enableFilter = false;
+
+    /**
+     * 排除的URL
+     */
+    private List<String> excludeUrls;
+
+    /**
+     * 包含的URL
+     */
+    private List<String> includeUrls;
+
+    /**
+     * 限制后的响应
+     */
+    private Map<String, Object> response;
+
+    /**
      * 限制处理器列表
      */
     private List<Limiter> limiters;
+
 
     @Data
     public static class Limiter {
@@ -36,25 +60,22 @@ public class ParticleProperties {
          * 限制处理器属性
          */
         private Map<String, Object> props;
+
         /**
          * 分布式key模板
          */
         private String keyTpl = "limit_{method}_{uri}_[token]";
 
         /**
-         * 限制的路径（暂不支持，在开发计划中）
+         * 分布式key过期时间
+         */
+        @DurationUnit(ChronoUnit.SECONDS)
+        private Duration keyExpire = Duration.ofSeconds(60);
+
+        /**
+         * 限制的路径
          */
         private List<String> urls;
-
-        /**
-         * 限制成功后抛出的异常（暂不支持，在开发计划中）
-         */
-        private Class<? extends RuntimeException> exceptionClazz;
-
-        /**
-         * 异常属性（暂不支持，在开发计划中）
-         */
-        private Map<String, Object> exceptionProps;
 
         /**
          * 限制器实例（内部使用）
@@ -62,7 +83,7 @@ public class ParticleProperties {
         private LimitHandler limitHandler;
 
         /**
-         * 缓存占位符（模块内部使用）
+         * 缓存占位符（内部使用）
          */
         private Map<String, List<String>> cacheKeys;
 

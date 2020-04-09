@@ -51,6 +51,7 @@ public class CometConfig {
         cometRequestFilter.setFilter(new CometRequestFilter());
         cometRequestFilter.setName("cometRequestFilter");
         cometRequestFilter.setUrlPatterns(Collections.singleton("/*"));
+        cometRequestFilter.setOrder(Ordered.HIGHEST_PRECEDENCE);
         return cometRequestFilter;
     }
 

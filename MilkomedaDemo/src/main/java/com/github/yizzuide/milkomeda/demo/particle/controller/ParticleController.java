@@ -182,4 +182,9 @@ public class ParticleController {
         resp.getWriter().println("OK");
         resp.getWriter().flush();
     }
+
+    @RequestMapping("pay")
+    public String pay(String orderNo) {
+        return "OK";
+    }
 }
