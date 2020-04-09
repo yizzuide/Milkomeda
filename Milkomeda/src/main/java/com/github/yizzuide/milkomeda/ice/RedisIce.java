@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 
 /**
  * RedisIce
+ * 基于Redis的延迟队列实现
  *
  * @author yizzuide
  * @since 1.15.0

@@ -137,7 +137,7 @@ milkomeda:
   #    use-bcrypt: false
 
   ice:
-    # 开启Job作业（默认为true，仅作为消费端使用时，设置false）
+    # 开启Job作业（使用@EnableIce时仅作为消费端使用时，设置为false）
 #    enable-job-timer: false
     # Job作业频率（默认1000ms）
     delay-bucket-poll-rate: 2s

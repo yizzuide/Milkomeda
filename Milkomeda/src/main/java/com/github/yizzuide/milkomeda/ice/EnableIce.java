@@ -7,7 +7,7 @@ import java.lang.annotation.*;
 
 /**
  * EnableIce
- * 启用Ice，该注解是<code>@EnableIceServer</code>和<code>@EnableIceClient</code>的合并注解，
+ * 启用Ice，该注解是 {@link EnableIceServer} 和 {@link EnableIceClient} 的合并注解，
  * 需要在配置文件中配置成你想要的启动类型：<br>
  *     <dl>
  *        <dt>配置为服务端</dt>
@@ -16,7 +16,7 @@ import java.lang.annotation.*;
  *              # 延迟队列分桶数量（默认为3）
  *              delay-bucket-count: 2
  *              # 消费执行超时时间（默认5000ms）
- *              ttr: 10000
+ *              ttr: 10s
  *              # 重试时添加延迟增长因子（默认为1，计算公式：delay * (retryCount++) * factor）
  *              retry-delay-multi-factor: 2
  *            </pre>
@@ -31,7 +31,7 @@ import java.lang.annotation.*;
  *               # 最大消费个数（默认为10）
  *               task-topic-pop-max-size: 5
  *               # 消费轮询间隔（默认5000ms）
- *               task-execute-rate: 2000
+ *               task-execute-rate: 2s
  *            </pre>
  *        </dd>
  *        <dt>配置为单体应用（服务端+消费端）</dt>
@@ -40,7 +40,7 @@ import java.lang.annotation.*;
  *               # 延迟队列分桶数量（默认为3）
  *               delay-bucket-count: 2
  *               # 消费执行超时时间（默认5000ms）
- *               ttr: 10000
+ *               ttr: 10s
  *               # 重试时添加延迟增长因子（默认为1，计算公式：delay * (retryCount++) * factor）
  *               retry-delay-multi-factor: 2
  *               # 开启Task功能，开发者就可以通过注解方式接收topic消息
@@ -48,7 +48,7 @@ import java.lang.annotation.*;
  *               # 最大消费个数（默认为10）
  *               task-topic-pop-max-size: 5
  *               # 消费轮询间隔（默认5000ms）
- *               task-execute-rate: 2000
+ *               task-execute-rate: 2s
  *            </pre>
  *        </dd>
  *     </dl>

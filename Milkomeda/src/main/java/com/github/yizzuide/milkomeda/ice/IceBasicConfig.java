@@ -18,6 +18,7 @@ import org.springframework.data.redis.core.RedisTemplate;
  *
  * @author yizzuide
  * @since 1.15.2
+ * @since 3.0.0
  * Create at 2019/11/21 11:16
  */
 @Import(MilkomedaContextConfig.class)
@@ -26,6 +27,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 @EnableConfigurationProperties(IceProperties.class)
 public class IceBasicConfig {
 
+    // 提前注入应用上下文，用于配置Bean初始化调用
     @Autowired
     private ApplicationContextHolder applicationContextHolder;
 
@@ -50,6 +52,8 @@ public class IceBasicConfig {
     @Bean
     @ConditionalOnMissingBean(Ice.class)
     public Ice redisIce() {
-        return new RedisIce();
+        RedisIce redisIce = new RedisIce();
+        IceHolder.setIce(redisIce);
+        return redisIce;
     }
 }

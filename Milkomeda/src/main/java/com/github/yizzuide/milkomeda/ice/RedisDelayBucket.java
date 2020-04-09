@@ -69,7 +69,7 @@ public class RedisDelayBucket implements DelayBucket, InitializingBean {
     @Override
     public void remove(Integer index, DelayJob delayJob) {
         String name = bucketNames.get(index);
-        BoundZSetOperations bucket = getBucket(name);
+        BoundZSetOperations<String, String> bucket = getBucket(name);
         bucket.remove(JSONUtil.serialize(delayJob));
     }
 
