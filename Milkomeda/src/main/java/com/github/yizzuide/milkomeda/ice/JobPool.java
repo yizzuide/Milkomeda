@@ -9,6 +9,7 @@ import java.util.List;
  *
  * @author yizzuide
  * @since 1.15.0
+ * @version  3.0.0
  * Create at 2019/11/16 15:42
  */
 public interface JobPool {
@@ -16,6 +17,7 @@ public interface JobPool {
      * 添加任务
      * @param job Job
      */
+    @SuppressWarnings("rawtypes")
     void push(Job job);
 
     /**
@@ -26,10 +28,19 @@ public interface JobPool {
     <T> void push(List<Job<T>> jobs);
 
     /**
+     * 任务是否存在
+     * @param jobId 任务id
+     * @return 是否存在
+     * @since 3.0.0
+     */
+    boolean exists(String jobId);
+
+    /**
      * 获取任务
      * @param jobId 任务id
      * @return Job
      */
+    @SuppressWarnings("rawtypes")
     Job get(String jobId);
 
     /**

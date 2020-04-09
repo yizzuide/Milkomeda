@@ -17,6 +17,7 @@ public interface Ice {
      * 添加延迟任务
      * @param job   Job
      */
+    @SuppressWarnings("rawtypes")
     void add(Job job);
 
     /**

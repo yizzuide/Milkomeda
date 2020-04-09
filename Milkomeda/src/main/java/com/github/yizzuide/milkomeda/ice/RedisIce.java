@@ -46,6 +46,9 @@ public class RedisIce implements Ice {
     @Override
     public void add(Job job) {
         job.setId(job.getTopic() + "-" + job.getId());
+        if (jobPool.exists(job.getId())) {
+            return;
+        }
         job.setStatus(JobStatus.DELAY);
         RedisUtil.batchOps(() -> {
             jobPool.push(job);
