@@ -4,7 +4,7 @@ import com.github.yizzuide.milkomeda.universe.metadata.BeanIds;
 import com.github.yizzuide.milkomeda.universe.parser.url.URLPathMatcher;
 import com.github.yizzuide.milkomeda.universe.parser.url.URLPlaceholderParser;
 import com.github.yizzuide.milkomeda.universe.parser.url.URLPlaceholderResolver;
-import com.github.yizzuide.milkomeda.universe.parser.yml.YmlParser;
+import com.github.yizzuide.milkomeda.universe.parser.yml.YmlResponseOutput;
 import com.github.yizzuide.milkomeda.util.JSONUtil;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -84,16 +84,15 @@ public class ParticleFilter implements Filter {
 
             Map<String, Object> returnData = limiter.getLimitHandler().limit(key, limiter.getKeyExpire().getSeconds(), particle -> {
                 if (particle.isLimited()) {
-                    Map<String, Object> result = new HashMap<>(5);
+                    Map<String, Object> result = new HashMap<>(9);
                     Map<String, Object> responseInfo = particleProperties.getResponse();
-                    if (responseInfo == null || responseInfo.get("status") == null) {
-                        result.put("status", 416);
+                    if (responseInfo == null || responseInfo.get(YmlResponseOutput.STATUS) == null) {
+                        result.put(YmlResponseOutput.STATUS, 416);
                         return result;
                     }
-                    int status = Integer.parseInt(responseInfo.get("status").toString());
-                    result.put("status", status);
-                    YmlParser.parseAliasMapPath(responseInfo, result, "code", -1, null);
-                    YmlParser.parseAliasMapPath(responseInfo, result, "message", "服务器繁忙，请稍后再试！", null);
+                    int status = Integer.parseInt(responseInfo.get(YmlResponseOutput.STATUS).toString());
+                    result.put(YmlResponseOutput.STATUS, status);
+                    YmlResponseOutput.output(responseInfo, result, null, null, false);
                     return result;
                 }
                 return null;
@@ -101,8 +100,8 @@ public class ParticleFilter implements Filter {
 
             if (returnData != null) {
                 HttpServletResponse httpServletResponse = (HttpServletResponse) response;
-                httpServletResponse.setStatus(Integer.parseInt(returnData.get("status").toString()));
-                returnData.remove("status");
+                httpServletResponse.setStatus(Integer.parseInt(returnData.get(YmlResponseOutput.STATUS).toString()));
+                returnData.remove(YmlResponseOutput.STATUS);
                 httpServletResponse.setCharacterEncoding("UTF-8");
                 httpServletResponse.setContentType(MediaType.APPLICATION_JSON_VALUE);
                 PrintWriter writer = httpServletResponse.getWriter();

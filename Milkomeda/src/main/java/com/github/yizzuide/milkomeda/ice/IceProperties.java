@@ -35,12 +35,12 @@ class IceProperties {
      * 延迟分桶任务轮询间隔（单位：ms）
      */
     @DurationUnit(ChronoUnit.MILLIS)
-    private Duration delayBucketPollRate = Duration.ofMillis(1000);
+    private Duration delayBucketPollRate = Duration.ofMillis(5000);
     /**
      * 任务执行超时时间（单位：ms）
      */
     @DurationUnit(ChronoUnit.MILLIS)
-    private Duration ttr = Duration.ofMillis(5000);
+    private Duration ttr = Duration.ofMillis(30000);
     /**
      * 任务执行超时重试次数
      */

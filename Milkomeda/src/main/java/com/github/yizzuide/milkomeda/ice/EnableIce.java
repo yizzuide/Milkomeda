@@ -15,8 +15,8 @@ import java.lang.annotation.*;
  *            <pre class="code">
  *              # 延迟队列分桶数量（默认为3）
  *              delay-bucket-count: 2
- *              # 消费执行超时时间（默认5000ms）
- *              ttr: 10s
+ *              # 消费执行超时时间（默认30s）
+ *              ttr: 20s
  *              # 重试时添加延迟增长因子（默认为1，计算公式：delay * (retryCount++) * factor）
  *              retry-delay-multi-factor: 2
  *            </pre>
@@ -30,7 +30,7 @@ import java.lang.annotation.*;
  *               enable-task: true
  *               # 最大消费个数（默认为10）
  *               task-topic-pop-max-size: 5
- *               # 消费轮询间隔（默认5000ms）
+ *               # 消费轮询间隔（默认5s）
  *               task-execute-rate: 2s
  *            </pre>
  *        </dd>
@@ -39,15 +39,15 @@ import java.lang.annotation.*;
  *            <pre class="code">
  *               # 延迟队列分桶数量（默认为3）
  *               delay-bucket-count: 2
- *               # 消费执行超时时间（默认5000ms）
- *               ttr: 10s
+ *               # 消费执行超时时间（默认30s）
+ *               ttr: 20s
  *               # 重试时添加延迟增长因子（默认为1，计算公式：delay * (retryCount++) * factor）
  *               retry-delay-multi-factor: 2
  *               # 开启Task功能，开发者就可以通过注解方式接收topic消息
  *               enable-task: true
  *               # 最大消费个数（默认为10）
  *               task-topic-pop-max-size: 5
- *               # 消费轮询间隔（默认5000ms）
+ *               # 消费轮询间隔（默认5s）
  *               task-execute-rate: 2s
  *            </pre>
  *        </dd>

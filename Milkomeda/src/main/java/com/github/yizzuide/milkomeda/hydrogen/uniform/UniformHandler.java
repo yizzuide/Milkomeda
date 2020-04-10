@@ -1,8 +1,7 @@
 package com.github.yizzuide.milkomeda.hydrogen.uniform;
 
 import com.github.yizzuide.milkomeda.universe.context.WebContext;
-import com.github.yizzuide.milkomeda.universe.parser.yml.YmlParser;
-import com.github.yizzuide.milkomeda.util.DataTypeConvertUtil;
+import com.github.yizzuide.milkomeda.universe.parser.yml.YmlResponseOutput;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -23,7 +22,10 @@ import javax.annotation.PostConstruct;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * UniformHandler
@@ -48,7 +50,7 @@ public class UniformHandler extends ResponseEntityExceptionHandler {
     @PostConstruct
     public void init() {
         // 初始化自定义异常
-        Object customs = props.getResponse().get("customs");
+        Object customs = props.getResponse().get(YmlResponseOutput.CUSTOMS);
         if (customs == null) {
             return;
         }
@@ -56,7 +58,7 @@ public class UniformHandler extends ResponseEntityExceptionHandler {
         Map<String, Map<String, Object>> customsMap = (Map<String, Map<String, Object>>) customs;
         for (String k : customsMap.keySet()) {
             Map<String, Object> eleMap = customsMap.get(k);
-            Object clazz = eleMap.get("clazz");
+            Object clazz = eleMap.get(YmlResponseOutput.CLAZZ);
             if (clazz == null) continue;
             Class<?> expClazz = null;
             try {
@@ -64,7 +66,7 @@ public class UniformHandler extends ResponseEntityExceptionHandler {
             } catch (Exception ex) {
                 log.error("Hydrogen load class error with msg: {}", ex.getMessage(), ex);
             }
-            eleMap.put("clazz", expClazz);
+            eleMap.put(YmlResponseOutput.CLAZZ, expClazz);
             this.customConfList.add(eleMap);
         }
     }
@@ -87,19 +89,22 @@ public class UniformHandler extends ResponseEntityExceptionHandler {
         String message = WebContext.getRequest().getRequestURI() +
                 " [" + constraintViolation.getPropertyPath() + "=" + value + "] " + constraintViolation.getMessage();
         log.warn("Hydrogen uniform valid response exception with msg: {} ", message);
-        return handleExceptionResponse(e, HttpStatus.BAD_REQUEST.value(), message);
+        ResponseEntity<Object> responseEntity = handleExceptionResponse(e, HttpStatus.BAD_REQUEST.value(), message);
+        return responseEntity == null ? ResponseEntity.status(HttpStatus.BAD_REQUEST.value()).body(null) : responseEntity;
     }
 
     // 对方法上@RequestBody的Bean参数校验的处理
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
-        return handleValidBeanExceptionResponse(ex, ex.getBindingResult());
+        ResponseEntity<Object> responseEntity = handleValidBeanExceptionResponse(ex, ex.getBindingResult());
+        return responseEntity == null ? super.handleMethodArgumentNotValid(ex, headers, status, request) : responseEntity;
     }
 
     // 对方法的Form提交参数绑定校验的处理
     @Override
     protected ResponseEntity<Object> handleBindException(BindException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
-        return handleValidBeanExceptionResponse(ex, ex.getBindingResult());
+        ResponseEntity<Object> responseEntity = handleValidBeanExceptionResponse(ex, ex.getBindingResult());
+        return responseEntity == null ? super.handleBindException(ex, headers, status, request) : responseEntity;
     }
 
     // 其它内部异常处理
@@ -107,21 +112,16 @@ public class UniformHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Object> handleException(Exception e) throws IOException {
         Map<String, Object> response = props.getResponse();
-        Object status = response.get("status");
+        Object status = response.get(YmlResponseOutput.STATUS);
         status = status == null ?  500 : status;
         Map<String, Object> result = new HashMap<>();
 
         // 查找自定义异常处理
         if (this.customConfList != null) {
             for (Map<String, Object> map : this.customConfList) {
-                Class<Exception> exceptionClass = (Class<Exception>) map.get("clazz");
+                Class<Exception> exceptionClass = (Class<Exception>) map.get(YmlResponseOutput.CLAZZ);
                 if (exceptionClass.isInstance(e)) {
-                    Map<String, Object> exMap = DataTypeConvertUtil.beanToMap(e);
-                    YmlParser.parseAliasMapPath(map, result, "code", null, exMap);
-                    YmlParser.parseAliasMapPath(map, result, "message", null, exMap);
-                    // 其它自定义key也返回
-                    map.keySet().stream().filter(k -> !Arrays.asList("clazz", "status", "code", "message").contains(k) && !result.containsKey(k))
-                            .forEach(k ->  YmlParser.parseAliasMapPath(map, result, k, null, exMap));
+                    YmlResponseOutput.output(map, result, null, e, true);
                     return ResponseEntity.status(Integer.parseInt(status.toString())).body(result);
                 }
             }
@@ -129,14 +129,7 @@ public class UniformHandler extends ResponseEntityExceptionHandler {
 
         // 500异常
         log.error("Hydrogen uniform response exception with msg: {}", e.getMessage(), e);
-        YmlParser.parseAliasMapPath(response, result, "code", -1, null);
-        YmlParser.parseAliasMapPath(response, result, "message", "服务器繁忙，请稍后再试！", null);
-        YmlParser.parseAliasMapPath(response, result, "error-stack-msg", null, e.getMessage());
-        StackTraceElement[] stackTrace = e.getStackTrace();
-        if (stackTrace.length > 0) {
-            String errorStack = String.format("exception happened: %s \n invoke root: %s", stackTrace[0], stackTrace[stackTrace.length - 1]);
-            YmlParser.parseAliasMapPath(response, result, "error-stack", null, errorStack);
-        }
+        YmlResponseOutput.output(response, result, null, e, false);
         return ResponseEntity.status(Integer.parseInt(status.toString())).body(result);
     }
 
@@ -171,17 +164,19 @@ public class UniformHandler extends ResponseEntityExceptionHandler {
         Object exp4xx = response.get(presetStatusCode.toString());
         if (!(exp4xx instanceof Map)) {
             log.warn("Hydrogen uniform can't find {} code response.", presetStatusCode);
+            // 调用方判断，按框架默认处理
             return null;
         }
 
         Map<String, Object> exp4xxResponse = (Map<String, Object>) exp4xx;
-        Object statusCode4xx = exp4xxResponse.get("status");
+        Object statusCode4xx = exp4xxResponse.get(YmlResponseOutput.STATUS);
         if (statusCode4xx == null || presetStatusCode.equals(statusCode4xx)) {
             return ResponseEntity.status(Integer.parseInt(presetStatusCode.toString())).body(null);
         }
-
-        YmlParser.parseAliasMapPath(exp4xxResponse, result, "code", presetStatusCode, presetStatusCode);
-        YmlParser.parseAliasMapPath(exp4xxResponse, result, "message", presetMessage, presetMessage);
+        Map<String, Object> defValMap = new HashMap<>();
+        defValMap.put(YmlResponseOutput.CODE, presetStatusCode);
+        defValMap.put(YmlResponseOutput.MESSAGE, presetMessage);
+        YmlResponseOutput.output(exp4xxResponse, result, defValMap, null, false);
         return ResponseEntity.status(Integer.parseInt(statusCode4xx.toString())).body(result);
     }
 }

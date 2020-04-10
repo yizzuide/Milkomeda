@@ -2,6 +2,7 @@ package com.github.yizzuide.milkomeda.particle;
 
 import com.github.yizzuide.milkomeda.universe.context.WebContext;
 import com.github.yizzuide.milkomeda.util.ReflectUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
@@ -30,6 +31,7 @@ import java.util.*;
  * @since 3.0.0
  * Create at 2019/11/11 11:26
  */
+@Slf4j
 @Configuration
 @ConditionalOnClass(RedisTemplate.class)
 @AutoConfigureAfter(RedisAutoConfiguration.class)
@@ -93,6 +95,10 @@ public class ParticleConfig implements ApplicationContextAware {
         for (ParticleProperties.Limiter limiter : barrierLimiters) {
             BarrierLimiter barrierLimiter = (BarrierLimiter) limiter.getLimitHandler();
             List<String> chain = barrierLimiter.getChain();
+            if (CollectionUtils.isEmpty(chain)) {
+                log.warn("Particle add barrier limiter find chain is empty, make true add at least one limiter.");
+                continue;
+            }
             List<LimitHandler> handlers = new ArrayList<>();
             for (String name : chain) {
                 handlers.add(cacheHandlerBeans.get(name));

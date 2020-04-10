@@ -116,6 +116,9 @@ milkomeda:
       status: 200
       code: -1
       message: 请求太频繁，请稍后再试！
+      addition:
+        data: "{}"
+
 
   light:
     # 一级缓存一小时后过期（只适用于LazyExpire策略）
@@ -146,19 +149,19 @@ milkomeda:
   ice:
     # 开启Job作业（使用@EnableIce时仅作为消费端使用时，设置为false）
 #    enable-job-timer: false
-    # Job作业频率（默认1000ms）
+    # Job作业频率（默认5s）
     delay-bucket-poll-rate: 2s
     # 延迟队列分桶数量（默认为3）
     delay-bucket-count: 2
-    # 消费执行超时时间（默认5000ms）
-    ttr: 10s
+    # 消费执行超时时间（默认30s）
+    ttr: 20s
     # 重试时添加延迟增长因子（默认为1，计算公式：delay * (retryCount++) * factor）
     retry-delay-multi-factor: 2
     # 开启Task功能（使用@EnableIce时消费端需要配置为true）
     enable-task: true
     # 最大消费个数（默认为10）
     task-topic-pop-max-size: 5
-    # 消费轮询间隔（默认5000ms）
+    # 消费轮询间隔（默认5s）
     task-execute-rate: 2s
 
   moon:
@@ -219,7 +222,10 @@ milkomeda:
         400:
           status: 200
           code: -1
-          message:
+          # 使用内部异常信息，不需要指定
+          #message: 参数异常
+          addition:
+            data: "{}"
 
         # 自定义异常列表处理
         customs:

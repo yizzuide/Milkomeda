@@ -94,8 +94,8 @@ public class RedisIce implements Ice {
 
     @Override
     public <T> List<Job<T>> pop(String topic, int count) {
-        // 空队列直接返回
-        if (readyQueue.size(topic) == 0) return null;
+        // 获取个数小于1或空队列直接返回
+        if (count < 1 || readyQueue.size(topic) == 0) return null;
         // 如果只取1个时，直接使用pop（保证原子性）
         if (count == 1) return Collections.singletonList(pop(topic));
 
