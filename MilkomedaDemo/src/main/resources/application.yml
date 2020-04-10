@@ -13,17 +13,19 @@ spring:
   redis:
     host: 127.0.0.1
 
-
-
   mvc:
     # Pulsar模块异步超时
     async:
-      request-timeout: 20s
+      request-timeout: 1s
     # 404抛出NoHandlerFoundException异常
     throw-exception-if-no-handler-found: true
   # 资源不生成mapping映射
   resources:
     add-mappings: false
+
+  # 国际化资源位置
+  messages:
+    basename: i18n/messages
 
 
   # Pulsar模块异步线程池（Async异步任务线程池，SpringBoot 2.1.0+在这里配置）
@@ -60,11 +62,69 @@ milkomeda:
   # 配置是否显示跟踪日志信息（线上环境应该关闭）
   show-log: true
 
+  comet:
+    # 志收集器读取Response直接写出的内容时需要开启
+    enable-read-response-body: true
+    # 统一请求日志打印
+    logger:
+      enable: true
+      # 根据路径匹配策略
+      strategy:
+        -
+          paths: ["/**"]
+          tpl: url->{uri},userId:{uid},token:[token],method->{method},parameters->{params}
+        -
+          paths: ["/error/**"]
+          tpl: url->{uri},method->{method}
+    # 日志收集器
+    collector:
+      enable: true
+      enable-tag: true
+      tags:
+        product-tag:
+          include: ["/collect/product/*"]
+          # 异常监控：由于异常可能被 @ControllerAdvice 吞没，拦截器就获取不到异常
+          exception-monitor:
+            # 忽略正常的响应
+            ignore-code[code]: 1
+            # 错误信息记录
+            error-stack-msg[innerErrInfo]:
+            error-stack[innerErrInfoDesc]:
+
+  # 限制器
+  particle:
+    enable-filter: true
+    limiters:
+      -
+        # 新配置一个去重限制器（内部配置了idempotentLimiter），用来添加到BarrierLimiter组合链，防止污染限制器链
+        name: noRepeatLimiter
+        handler-clazz: com.github.yizzuide.milkomeda.particle.IdempotentLimiter
+      -
+        name: timesLimiter
+        handler-clazz: com.github.yizzuide.milkomeda.particle.TimesLimiter
+        props:
+          timesType: MIN
+          limitTimes: 3
+        urls: ["/particle/pay"]
+      -
+        name: barrierLimiter
+        handler-clazz: com.github.yizzuide.milkomeda.particle.BarrierLimiter
+        props:
+          chain: ["noRepeatLimiter", "timesLimiter"]
+    exclude-urls: ["/favicon.ico"]
+    response:
+      status: 200
+      code: -1
+      message: 请求太频繁，请稍后再试！
+      addition:
+        data: "{}"
+
+
   light:
     # 一级缓存一小时后过期（只适用于LazyExpire策略）
-    l1-expire: 10
+    l1-expire: 1h
     # 二级缓存一天后过期
-    l2-expire: 86400
+    l2-expire: 1d
     # 全局使用时间线丢弃策略
     strategy: timeline
     instances:
@@ -75,7 +135,7 @@ milkomeda:
 
   echo:
     # 设置请求读取超时
-    read-timeout: 10000
+    read-timeout: 10s
 
   crust:
 #    stateless: false
@@ -87,61 +147,125 @@ milkomeda:
   #    use-bcrypt: false
 
   ice:
-    # 开启Job作业（默认为true，仅作为消费端使用时，设置false）
+    # 开启Job作业（使用@EnableIce时仅作为消费端使用时，设置为false）
 #    enable-job-timer: false
-    # Job作业频率（默认1000ms）
-    delay-bucket-poll-rate: 2000
+    # Job作业频率（默认5s）
+    delay-bucket-poll-rate: 2s
     # 延迟队列分桶数量（默认为3）
     delay-bucket-count: 2
-    # 消费执行超时时间（默认5000ms）
-    ttr: 10000
+    # 消费执行超时时间（默认30s）
+    ttr: 20s
     # 重试时添加延迟增长因子（默认为1，计算公式：delay * (retryCount++) * factor）
     retry-delay-multi-factor: 2
     # 开启Task功能（使用@EnableIce时消费端需要配置为true）
     enable-task: true
     # 最大消费个数（默认为10）
     task-topic-pop-max-size: 5
-    # 消费轮询间隔（默认5000ms）
-    task-execute-rate: 2000
+    # 消费轮询间隔（默认5s）
+    task-execute-rate: 2s
+
+  moon:
+    instances:
+      -
+        name: smsMoon
+        phases: ["七牛云短信", "阿里云短信", "容联云短信"]
+      -
+        name: abTestMoon
+        cacheName: ab-test
+        # 使用百分比分配策略
+        moonStrategyClazz: com.github.yizzuide.milkomeda.moon.PercentMoonStrategy
+        props:
+          # 缩小总占百分比，使分配更均匀
+          percent: 10
+        # 20%的0，80%的1
+        #phases: [20, 80]
+        phases: [2, 8]
 
   hydrogen:
     transaction:
+      enable: true
       # 事务5秒超时回滚（支持自定义时间单位，不指定单位默认单位：s）
       rollback-when-timeout: 5s
       read-only-append-prefix:
         - fetch*
 
-    uniform-exception-response:
+    uniform:
       enable: true
-      body:
-        # Exception异常处理
+      response:
+        # 500异常处理
         status: 200
-        code[code]: -1 # 支持改字段名：[别名]
+        code[code]: -1 # 支持改字段名：[别名]，返回的是这个别名
         message[errMsg]: 服务器繁忙，请稍后再试！
         # 下面字段内部会获取异常栈信息，外面不需要添加值，列出需要的字段即可
         error-stack-msg[innerErrInfo]:
         error-stack[innerErrInfoDesc]:
 
-        # 404异常处理，需要配置：spring.mvc.throw-exception-if-no-handler-found=true; spring.mvc.add-mappings=false;
+        # 服务器响应超时，DeferredResult异步超时
+        503:
+          status: 200
+          code: -1
+          message: 请求响应超时！
+
+        # 404异常处理，需要配置：
+        # spring.mvc.throw-exception-if-no-handler-found=true; spring.mvc.add-mappings=false;
         404:
           status: 200
           code: -1
-          message: 请求的URL错误！
+          message: 请求的路径错误！
+
+        405:
+          status: 200
+          code: -1
+          message: 请求方式不支持！
 
         # 参数异常处理
         400:
           status: 200
           code: -1
-          message: 请求的参数错误！
+          # 使用内部异常信息，不需要指定
+          #message: 参数异常
+          addition:
+            data: "{}"
 
         # 自定义异常列表处理
         customs:
           -
             clazz: com.github.yizzuide.milkomeda.demo.hydrogen.exception.YizException
             status: 200
+            # 下面不需要指定值，只需要列出来需要返回，内部将从YizException获取
             code:
             message:
             type:
 
+    # 参数校验
+    validator:
+      enable: true
+
+    # 国际化：需配置spring.messages.basename
+    i18n:
+      enable: true
+      # 语言设置参数名，默认为lang，如：zh_CN (language_country)
+      query: lang
 
 
+    # 动态添加拦截器
+    interceptor:
+      enable: true
+      interceptors:
+        -
+          clazz: com.github.yizzuide.milkomeda.demo.hydrogen.handler.UrlLogInterceptor
+          order: 1
+          exclude-urls:
+            - /error
+          props:
+            open: true
+
+    # 过滤器
+    filter:
+      enable: true
+      filters:
+        -
+          name: ipLimiterFilter
+          clazz: com.github.yizzuide.milkomeda.demo.hydrogen.handler.IPLimiterFilter
+          url-patterns:
+            - /*

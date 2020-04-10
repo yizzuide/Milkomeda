@@ -1,5 +1,6 @@
 package com.github.yizzuide.milkomeda.ice;
 
+import java.time.Duration;
 import java.util.List;
 
 /**
@@ -8,6 +9,7 @@ import java.util.List;
  *
  * @author yizzuide
  * @since 1.15.0
+ * @version 3.0.0
  * Create at 2019/11/16 15:11
  */
 public interface Ice {
@@ -15,7 +17,19 @@ public interface Ice {
      * 添加延迟任务
      * @param job   Job
      */
+    @SuppressWarnings("rawtypes")
     void add(Job job);
+
+    /**
+     * 添加延迟任务
+     * @param id    任务id
+     * @param topic 任务分组
+     * @param body  业务数据
+     * @param delay 延迟时间
+     * @param <T>   业务数据类型
+     * @since 3.0.0
+     */
+    <T> void add(String id, String topic, T body, Duration delay);
 
     /**
      * 添加延迟任务

@@ -1,5 +1,8 @@
 package com.github.yizzuide.milkomeda.particle;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.List;
 
 /**
@@ -10,7 +13,7 @@ import java.util.List;
  *
  * @author yizzuide
  * @since 1.5.0
- * @version 1.6.0
+ * @version 3.0.0
  * Create at 2019/05/31 11:25
  */
 public class BarrierLimiter extends LimitHandler {
@@ -18,6 +21,12 @@ public class BarrierLimiter extends LimitHandler {
      * 拦截链头
      */
     private LimitHandler head;
+
+    /**
+     * 限制器名链（作为YML配置使用）
+     */
+    @Setter @Getter
+    private List<String> chain;
 
     /**
      * 添加限制处理器

@@ -1,23 +1,25 @@
 package com.github.yizzuide.milkomeda.ice;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.github.yizzuide.milkomeda.util.Polyfill;
+import com.github.yizzuide.milkomeda.universe.polyfill.RedisPolyfill;
 import com.github.yizzuide.milkomeda.util.RedisUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.CollectionUtils;
 
+import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 /**
  * RedisIce
+ * 基于Redis的延迟队列实现
  *
  * @author yizzuide
  * @since 1.15.0
- * @version 1.15.2
+ * @version 3.0.0
  * Create at 2019/11/16 15:20
  */
 @Slf4j
@@ -44,6 +46,9 @@ public class RedisIce implements Ice {
     @Override
     public void add(Job job) {
         job.setId(job.getTopic() + "-" + job.getId());
+        if (jobPool.exists(job.getId())) {
+            return;
+        }
         job.setStatus(JobStatus.DELAY);
         RedisUtil.batchOps(() -> {
             jobPool.push(job);
@@ -52,8 +57,13 @@ public class RedisIce implements Ice {
     }
 
     @Override
+    public <T> void add(String id, String topic, T body, Duration delay) {
+        add(id, topic, body, delay.toMillis());
+    }
+
+    @Override
     public <T> void add(String id, String topic, T body, long delay) {
-        Job<T> job = new Job<>(id, topic, delay, props.getTtr(), props.getRetryCount(), body);
+        Job<T> job = new Job<>(id, topic, delay, props.getTtr().toMillis(), props.getRetryCount(), body);
         add(job);
     }
 
@@ -84,13 +94,13 @@ public class RedisIce implements Ice {
 
     @Override
     public <T> List<Job<T>> pop(String topic, int count) {
-        // 空队列直接返回
-        if (readyQueue.size(topic) == 0) return null;
+        // 获取个数小于1或空队列直接返回
+        if (count < 1 || readyQueue.size(topic) == 0) return null;
         // 如果只取1个时，直接使用pop（保证原子性）
         if (count == 1) return Collections.singletonList(pop(topic));
 
         // 使用SetNX锁住资源，防止多线程并发执行，造成重复消费问题
-        boolean absent = RedisUtil.setIfAbsent(KEY_IDEMPOTENT_LIMITER, props.getTaskPopCountLockTimeoutSeconds(), redisTemplate);
+        boolean absent = RedisUtil.setIfAbsent(KEY_IDEMPOTENT_LIMITER, props.getTaskPopCountLockTimeoutSeconds().getSeconds(), redisTemplate);
         if (absent) return null;
 
         List<Job<T>> jobList;
@@ -121,7 +131,7 @@ public class RedisIce implements Ice {
             }, redisTemplate);
         } finally {
             // 删除Lock
-            Polyfill.redisDelete(redisTemplate, KEY_IDEMPOTENT_LIMITER);
+            RedisPolyfill.redisDelete(redisTemplate, KEY_IDEMPOTENT_LIMITER);
         }
         return jobList;
     }

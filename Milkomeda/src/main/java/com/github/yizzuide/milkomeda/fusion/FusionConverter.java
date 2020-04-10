@@ -5,8 +5,10 @@ package com.github.yizzuide.milkomeda.fusion;
  *
  * @author yizzuide
  * @since 2.2.0
+ * @version 3.0.0
  * Create at 2020/01/04 11:14
  */
+@FunctionalInterface
 public interface FusionConverter<T, O, R> {
     /**
      * 错误消息前缀
@@ -24,10 +26,10 @@ public interface FusionConverter<T, O, R> {
 
     /**
      * 修改返回值
-     * @param t         转换类型tag
-     * @param o         返回的原方法数据
-     * @param error     业务错误
+     * @param tag           转换类型tag
+     * @param returnObj     返回的原方法数据
+     * @param error         业务错误
      * @return  替换后的返回数据
      */
-    R apply(T t, O o, String error);
+    R apply(T tag, O returnObj, String error);
 }

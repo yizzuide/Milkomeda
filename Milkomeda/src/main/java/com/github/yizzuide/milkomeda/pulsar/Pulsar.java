@@ -18,7 +18,6 @@ import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
 
 import static com.github.yizzuide.milkomeda.util.ReflectUtil.*;
 
@@ -30,7 +29,7 @@ import static com.github.yizzuide.milkomeda.util.ReflectUtil.*;
  *
  * @author yizzuide
  * @since 0.1.0
- * @version 1.16.0
+ * @version 3.0.0
  * Create at 2019/03/29 10:36
  */
 @Slf4j
@@ -47,19 +46,6 @@ public class Pulsar {
      */
     @Autowired
     private ThreadPoolTaskExecutor applicationTaskExecutor;
-
-    /**
-     * Error 错误回调
-     * <p>
-     * Throwable：错误异常
-     * Object：响应数据
-     */
-    private Function<Throwable, Object> errorCallback;
-
-    /**
-     * 超时回调，返回参数为自定义响应数据
-     */
-    private Callable<Object> timeoutCallback;
 
     /**
      * 初始化容器容量大小
@@ -132,34 +118,24 @@ public class Pulsar {
 
         // 如果没有设置DeferredResult，则使用WebAsyncTask
         if (!pulsarFlow.useDeferredResult()) {
-            // 返回异步任务
-            WebAsyncTask<Object> webAsyncTask = new WebAsyncTask<>(new WebAsyncTaskCallable(joinPoint));
-            if (null != timeoutCallback) {
-                webAsyncTask.onTimeout(timeoutCallback);
-            }
-            return webAsyncTask;
+            // 返回异步任务（交给统一异常处理响应）
+            /*if (null != timeoutCallback) {
+                webAsyncTask.onTimeout(() -> this.timeoutCallback);
+            }*/
+            return new WebAsyncTask<>(new WebAsyncTaskCallable(joinPoint));
         }
 
         // 使用DeferredResult方式
         DeferredResult<Object> deferredResult = new DeferredResult<>();
-        if (null != timeoutCallback) {
-            // 适配超时处理
-            deferredResult.onTimeout(() -> {
-                try {
-                    log.warn("pulsar:- DeferredResult handle timeout on method {}", invokeMethodName);
-                    deferredResult.setErrorResult(timeoutCallback.call());
-                } catch (Exception e) {
-                    log.error("pulsar:- DeferredResult happen timeout callback error with message: {} ", e.getMessage(), e);
-                    if (null == this.errorCallback) return;
-                    this.errorCallback.apply(e);
-                }
-            });
-        }
 
-        // 设置DeferredResult的错误处理
+        // 设置DeferredResult的错误处理（交给统一异常处理响应）
+        /*if (null != timeoutCallback) {
+            // 适配超时处理
+            deferredResult.onTimeout(() -> deferredResult.setResult(this.timeoutCallback.get()));
+        }
         if (null != errorCallback) {
             deferredResult.onError((throwable) -> deferredResult.setErrorResult(errorCallback.apply(throwable)));
-        }
+        }*/
 
         // 创建增强DeferredResult
         PulsarDeferredResult pulsarDeferredResult = new PulsarDeferredResult();
@@ -210,7 +186,7 @@ public class Pulsar {
     /**
      * 基于WebAsyncTask实现的Callable
      */
-    private class WebAsyncTaskCallable implements Callable<Object> {
+    private static class WebAsyncTaskCallable implements Callable<Object> {
         /**
          * 切面连接点
          */
@@ -231,9 +207,10 @@ public class Pulsar {
                 if (t instanceof Exception) {
                     throw (Exception) t;
                 } else { // Error类型
-                    if (null != errorCallback) {
+                    // 错误处理（交给统一异常处理响应）
+                    /*if (null != errorCallback) {
                         return errorCallback.apply(t);
-                    }
+                    }*/
                     return ResponseEntity.status(500).body(t.getMessage());
                 }
             }
@@ -269,31 +246,12 @@ public class Pulsar {
      * @param queueCapacity    队列容量
      * @param keepAliveSeconds 线程保存存活时间
      * @param timeout          超时时间，ms
-     * @deprecated  since 1.16.0，因为SpringBoot 2.1.0版本开始默认已装配
+     * @deprecated since 1.16.0，因为SpringBoot 2.1.0版本开始默认已装配
      */
     public void configure(AsyncSupportConfigurer configurer, int corePoolSize, int maxPoolSize, int queueCapacity, int keepAliveSeconds, long timeout) {
         // 默认超时时间
         configurer.setDefaultTimeout(timeout);
         ThreadUtil.configTaskExecutor(applicationTaskExecutor, "pulsar-", corePoolSize, maxPoolSize, queueCapacity, keepAliveSeconds);
         configurer.setTaskExecutor(applicationTaskExecutor);
-    }
-
-    /**
-     * 用于处理 Error 类型（Exception类型还是使用 @ExceptionHandler 捕获）
-     *
-     * @param errorCallback 失败回调
-     */
-    public void setErrorCallback(Function<Throwable, Object> errorCallback) {
-        this.errorCallback = errorCallback;
-        PulsarHolder.setErrorCallback(this.errorCallback);
-    }
-
-    /**
-     * 处理超时
-     *
-     * @param timeoutCallback 需要返回响应的超时数据
-     */
-    public void setTimeoutCallback(Callable<Object> timeoutCallback) {
-        this.timeoutCallback = timeoutCallback;
     }
 }

@@ -108,16 +108,18 @@ public class Moon<T> {
      * @param leftHandPointer 左手指月
      * @return LeftHandPointer
      */
+    @SuppressWarnings({"UnusedReturnValue", "unused"})
     @LightCachePut(value = "#target.cacheName", keyPrefix = "moon:lhp-", key = "#key")
     protected LeftHandPointer pluckLeftHandPointer(String key, LeftHandPointer leftHandPointer) {
         return this.getMoonStrategy().pluck(this, leftHandPointer);
     }
 
     /**
-     * 根据key获取当前左手指月（缓存默认为一天，仅缓存到CacheL2，自定义配置通过注册名为`lightCacheMoon`的Cache Bean
+     * 根据key获取当前左手指月（由于用于分布式，所以仅缓存到CacheL2，自定义缓存配置通过 {@link Moon#setCacheName(String)}）
      * @param key 缓存key
      * @return LeftHandPointer
      */
+    @SuppressWarnings("unused")
     @LightCacheable(value = "#target.cacheName", keyPrefix = "moon:lhp-", key = "#key", onlyCacheL2 = true)
     protected LeftHandPointer getLeftHandPointer(String key) {
         // 无法从缓存中获取时，创建新的左手指月

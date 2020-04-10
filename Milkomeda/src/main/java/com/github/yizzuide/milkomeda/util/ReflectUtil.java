@@ -1,22 +1,18 @@
 package com.github.yizzuide.milkomeda.util;
 
-import com.fasterxml.jackson.databind.JavaType;
 import com.github.yizzuide.milkomeda.universe.el.ELContext;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.springframework.core.ResolvableType;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.List;
-import java.util.Map;
+import java.lang.reflect.*;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -27,7 +23,7 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 0.2.0
- * @version 2.5.2
+ * @version 3.0.0
  * Create at 2019/04/11 19:55
  */
 @Slf4j
@@ -137,11 +133,12 @@ public class ReflectUtil {
             method.invoke(target);
             return;
         }
-
+        // ResolvableType是Spring核心包里的泛型解决方案，简化对泛型识别处理（下面注释保留Java API处理方式）
+        ResolvableType resolvableType = ResolvableType.forMethodParameter(method, 0);
         // 获取参数类型
-        Class<?> parameterClazz = method.getParameterTypes()[0];
-        // Map
-        if (parameterClazz == Map.class) {
+        Class<?> parameterClazz = resolvableType.resolve(); // method.getParameterTypes()[0];
+        // Map 或 Object
+        if (parameterClazz == Map.class || parameterClazz == Object.class) {
             // 去掉实体的包装
             method.invoke(target, wrapperBody.apply(wrapperList.get(0)));
             return;
@@ -149,39 +146,49 @@ public class ReflectUtil {
 
         // List
         if (parameterClazz == List.class) {
-            Type[] genericParameterTypes = method.getGenericParameterTypes();
-            if (!(genericParameterTypes[0] instanceof ParameterizedType)) {
+            // List
+//            Type[] genericParameterTypes = method.getGenericParameterTypes();
+//            if (!(genericParameterTypes[0] instanceof ParameterizedType)) {
+            ResolvableType[] wrapperGenerics = resolvableType.getGenerics();
+            Class<?> elementGenericType = wrapperGenerics[0].resolve();
+            if (elementGenericType == null) {
                 // 去掉实体的包装
                 method.invoke(target, wrapperList.stream().map(wrapperBody).collect(Collectors.toList()));
                 return;
             }
             // List<?>
-            ParameterizedType parameterizedType = (ParameterizedType) genericParameterTypes[0];
-            Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
-            Type actualTypeArgument = actualTypeArguments[0];
+//            ParameterizedType parameterizedType = (ParameterizedType) genericParameterTypes[0];
+//            Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
+//            Type actualTypeArgument = actualTypeArguments[0];
             // List<Map>
-            if (TypeUtil.type2Class(actualTypeArgument) == Map.class) {
+//            if (TypeUtil.type2Class(actualTypeArgument) == Map.class) {
+            if (elementGenericType == Map.class) {
                 // 去掉实体的包装
                 method.invoke(target, wrapperList.stream().map(wrapperBody).collect(Collectors.toList()));
                 return;
             }
             // List<Entity>
-            if (TypeUtil.type2Class(actualTypeArgument) == wrapperClazz) {
+//            if (TypeUtil.type2Class(actualTypeArgument) == wrapperClazz) {
+            if (elementGenericType == wrapperClazz) {
                 // List<Entity>
-                if (!(actualTypeArgument instanceof ParameterizedTypeImpl)) {
+                Class<?> entityGenericType = wrapperGenerics[0].getGeneric(0).resolve();
+//                if (!(actualTypeArgument instanceof ParameterizedType)) {
+                if (entityGenericType == null) {
                     method.invoke(target, wrapperList);
                     return;
                 }
                 // List<Entity<Map>>
-                Type[] subActualTypeArguments = ((ParameterizedTypeImpl) actualTypeArgument).getActualTypeArguments();
-                if (TypeUtil.type2Class(subActualTypeArguments[0]) == Map.class) {
+//                Type[] subActualTypeArguments = ((ParameterizedType) actualTypeArgument).getActualTypeArguments();
+//                if (TypeUtil.type2Class(subActualTypeArguments[0]) == Map.class) {
+                if (entityGenericType == Map.class) {
                     method.invoke(target, wrapperList);
                     return;
                 }
                 // List<Entity<T>>
-                JavaType javaType = TypeUtil.type2JavaType(subActualTypeArguments[0]);
+//                JavaType javaType = TypeUtil.type2JavaType(subActualTypeArguments[0]);
                 for (T wrapper : wrapperList) {
-                    Object body = JSONUtil.nativeRead(JSONUtil.serialize(wrapperBody.apply(wrapper)), javaType);
+//                    Object body = JSONUtil.nativeRead(JSONUtil.serialize(wrapperBody.apply(wrapper)), javaType);
+                    Object body = JSONUtil.parse(JSONUtil.serialize(wrapperBody.apply(wrapper)), entityGenericType);
                     wipeWrapperBody.accept(wrapper, body);
                 }
                 method.invoke(target, wrapperList);
@@ -189,14 +196,15 @@ public class ReflectUtil {
             }
 
             // List<T>
-            method.invoke(target, wrapperList.stream()
-                    .map(wrapper -> JSONUtil.nativeRead(JSONUtil.serialize(wrapperBody.apply(wrapper)),
-                            TypeUtil.type2JavaType(actualTypeArgument))).collect(Collectors.toList()));
+//            method.invoke(target, wrapperList.stream().map(wrapper ->
+//                    JSONUtil.nativeRead(JSONUtil.serialize(wrapperBody.apply(wrapper)), TypeUtil.type2JavaType(actualTypeArgument))).collect(Collectors.toList()));
+            method.invoke(target, wrapperList.stream().map(wrapper ->
+                    JSONUtil.parse(JSONUtil.serialize(wrapperBody.apply(wrapper)), elementGenericType)).collect(Collectors.toList()));
             return;
         }
 
         // 转到业务类型 T
-        method.invoke(target, JSONUtil.nativeRead(JSONUtil.serialize(wrapperBody.apply(wrapperList.get(0))), TypeUtil.class2TypeRef(parameterClazz)));
+        method.invoke(target, JSONUtil.parse(JSONUtil.serialize(wrapperBody.apply(wrapperList.get(0))), parameterClazz));
     }
 
 
@@ -234,6 +242,81 @@ public class ReflectUtil {
      */
     public static Class<?> getMethodReturnType(JoinPoint joinPoint) {
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
-        return (Class<?>) signature.getReturnType();
+        // (Class<?>) signature.getReturnType()
+        return getMethodReturnType(signature.getMethod());
+    }
+
+    /**
+     * 获取方法返回值值类型
+     * @param method    Method
+     * @return  返回值类型
+     */
+    public static Class<?> getMethodReturnType(Method method) {
+        return ResolvableType.forMethodReturnType(method).resolve();
+    }
+
+    /**
+     * 获取属性路径值
+     * @param target    目标对象
+     * @param fieldPath 属性路径
+     * @param <T>       值类型
+     * @return  属性值
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> T invokeFieldPath(Object target, String fieldPath) {
+        if (target == null || StringUtils.isEmpty(fieldPath)) {
+            return null;
+        }
+        String[] fieldNames = StringUtils.delimitedListToStringArray(fieldPath, ".");
+        for (String fieldName : fieldNames) {
+            Field field = ReflectionUtils.findField(Objects.requireNonNull(target).getClass(), fieldName);
+            if (field == null) return null;
+            ReflectionUtils.makeAccessible(field);
+            target = ReflectionUtils.getField(field, target);
+        }
+        return (T) target;
+    }
+
+    /**
+     * 设置对象的值
+     * @param target    对象
+     * @param props     属性Map
+     */
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public static void setField(Object target, Map<String, Object> props) {
+        for (Map.Entry<String, Object> entry : props.entrySet()) {
+            Field field = ReflectionUtils.findField(target.getClass(), entry.getKey());
+            if (field == null) continue;
+            ReflectionUtils.makeAccessible(field);
+            // String -> Enum
+            if (Enum.class.isAssignableFrom(field.getType()) && entry.getValue() instanceof String) {
+                ReflectionUtils.setField(field, target, Enum.valueOf((Class<? extends Enum>) field.getType(), (String) entry.getValue()));
+            } else if(Long.class.isAssignableFrom(field.getType()) && entry.getValue() instanceof Integer) {
+                ReflectionUtils.setField(field, target, Long.valueOf(String.valueOf(entry.getValue())));
+            } else if(List.class.isAssignableFrom(field.getType()) && entry.getValue() instanceof Map) {
+                ReflectionUtils.setField(field, target, new ArrayList(((LinkedHashMap) entry.getValue()).values()));
+            } else {
+                ReflectionUtils.setField(field, target, entry.getValue());
+            }
+        }
+    }
+
+    /**
+     * 获取方法值
+     * @param target        目标对象
+     * @param methodName    方法名
+     * @param paramTypes    参数类型列表
+     * @param args          参数值
+     * @param <T>           返回值类型
+     * @return  返回值
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> T invokeMethod(Object target, String methodName, Class<?>[] paramTypes, Object... args) {
+        Method method = ReflectionUtils.findMethod(target.getClass(), methodName, paramTypes);
+        if (method == null) {
+            return null;
+        }
+        ReflectionUtils.makeAccessible(method);
+        return (T) ReflectionUtils.invokeMethod(method, target, args);
     }
 }

@@ -15,7 +15,7 @@ import java.util.Map;
  *
  * @author yizzuide
  * @since 1.15.0
- * @version 1.16.0
+ * @version 3.0.0
  * Create at 2019/11/17 18:40
  */
 @Slf4j
@@ -23,15 +23,25 @@ public class IceContext implements ApplicationListener<ContextRefreshedEvent> {
 
     private static Map<String, List<HandlerMetaData>> topicMap = new HashMap<>();
 
+    private static Map<String, List<HandlerMetaData>> topicTtrOverloadMap = new HashMap<>();
+
     @Override
     public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
         topicMap = AopContextHolder.getHandlerMetaData(IceHandler.class, IceListener.class, (annotation, metaData) -> {
                     IceListener iceListener = (IceListener) annotation;
                     return iceListener.value();
                 }, false, true);
+        topicTtrOverloadMap = AopContextHolder.getHandlerMetaData(IceHandler.class, IceTtrOverloadListener.class, (annotation, metaData) -> {
+            IceTtrOverloadListener iceTtrOverloadListener = (IceTtrOverloadListener) annotation;
+            return iceTtrOverloadListener.value();
+        }, false, true);
     }
 
     static Map<String, List<HandlerMetaData>> getTopicMap() {
         return topicMap;
+    }
+
+    static Map<String, List<HandlerMetaData>> getTopicTtrOverloadMap() {
+        return topicTtrOverloadMap;
     }
 }

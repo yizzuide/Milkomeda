@@ -63,11 +63,11 @@ public class CrustConfig {
         LightCache lightCache = new LightCache();
         lightCache.setL1MaxCount(lightProps.getL1MaxCount());
         lightCache.setL1DiscardPercent(lightProps.getL1DiscardPercent());
-        lightCache.setL1Expire(lightProps.getL1Expire());
+        lightCache.setL1Expire(lightProps.getL1Expire().getSeconds());
         lightCache.setStrategy(lightProps.getStrategy());
         lightCache.setStrategyClass(lightProps.getStrategyClass());
         lightCache.setOnlyCacheL1(!crustProps.isEnableCacheL2());
-        lightCache.setL2Expire(lightProps.getL2Expire());
+        lightCache.setL2Expire(lightProps.getL2Expire().getSeconds());
         lightCache.setOnlyCacheL2(false);
         return lightCache;
     }

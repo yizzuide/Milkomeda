@@ -26,14 +26,17 @@ import java.util.stream.Collectors;
  */
 public class RedisDelayBucket implements DelayBucket, InitializingBean {
 
-    private StringRedisTemplate redisTemplate;
+    @Autowired
+    private IceProperties props;
 
-    private static AtomicInteger index = new AtomicInteger(0);
+    private StringRedisTemplate redisTemplate;
 
     private List<String> bucketNames = new ArrayList<>();
 
-    @Autowired
-    private IceProperties props;
+    private static AtomicInteger index = new AtomicInteger(0);
+
+    // 默认最大桶大小
+    public static final int DEFAULT_MAX_BUCKET_SIZE = 100;
 
     @Override
     public void add(DelayJob delayJob) {
@@ -69,7 +72,7 @@ public class RedisDelayBucket implements DelayBucket, InitializingBean {
     @Override
     public void remove(Integer index, DelayJob delayJob) {
         String name = bucketNames.get(index);
-        BoundZSetOperations bucket = getBucket(name);
+        BoundZSetOperations<String, String> bucket = getBucket(name);
         bucket.remove(JSONUtil.serialize(delayJob));
     }
 
@@ -89,7 +92,7 @@ public class RedisDelayBucket implements DelayBucket, InitializingBean {
      * @return BucketName
      */
     private String getCurrentBucketName() {
-        int thisIndex = index.getAndIncrement();
+        int thisIndex = index.getAndIncrement() % DEFAULT_MAX_BUCKET_SIZE;
         return bucketNames.get(thisIndex % props.getDelayBucketCount());
     }
 

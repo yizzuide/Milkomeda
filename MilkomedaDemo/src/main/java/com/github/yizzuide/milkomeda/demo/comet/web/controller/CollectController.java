@@ -1,19 +1,21 @@
 package com.github.yizzuide.milkomeda.demo.comet.web.controller;
 
-import com.github.yizzuide.milkomeda.comet.Comet;
-import com.github.yizzuide.milkomeda.comet.CometParam;
+import com.github.yizzuide.milkomeda.comet.core.Comet;
+import com.github.yizzuide.milkomeda.comet.core.CometParam;
 import com.github.yizzuide.milkomeda.demo.comet.pojo.ProfileWebCometData;
 import com.github.yizzuide.milkomeda.demo.comet.service.CollectService;
+import com.github.yizzuide.milkomeda.util.JSONUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
-
-import static com.github.yizzuide.milkomeda.demo.comet.collector.CollectorType.TAG_PROFILE;
 
 /**
  * CollectController
@@ -30,17 +32,30 @@ public class CollectController {
     private CollectService collectService;
 
     @RequestMapping("feature")
-    @Comet(apiCode = "1.1", name = "上传用户特征", tag = TAG_PROFILE, prototype = ProfileWebCometData.class)
-    public ResponseEntity<Map<String, String>> feature(@RequestParam Map<String, String> params, HttpServletRequest request) {
-        log.info(request.getHeader("accept-language"));
-        log.info("请求参数：{}", params);
+    @Comet(apiCode = "1.1", name = "上传用户特征", tag = "PROFILE", prototype = ProfileWebCometData.class)
+    public ResponseEntity<Map<String, String>> feature(@RequestParam Map<String, String> params) {
         collectService.save(1, params);
         Map<String, String> map = new HashMap<>();
         map.put("code", "200");
         map.put("data", null);
 //        throw new RuntimeException("出错了");
-        // 注意：这里的返回值会被 CometConfig 里的切面修改掉！
         return ResponseEntity.ok(map);
+    }
+
+    @RequestMapping("product/click")
+    public void /*ResponseEntity<Map<String, String>>*/ click(@RequestParam("productId") String productId, HttpServletResponse response) throws IOException {
+        log.info("用户点击了产品：{}", productId);
+        Map<String, String> map = new HashMap<>();
+        map.put("code", "1");
+        map.put("data", "成功");
+//        throw new RuntimeException("出错了");
+//        return ResponseEntity.ok(map);
+
+        response.setStatus(200);
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        PrintWriter writer = response.getWriter();
+        writer.println(JSONUtil.serialize(map));
+        writer.flush();
     }
 
     @PostMapping("usage")

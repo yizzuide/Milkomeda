@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.github.yizzuide.milkomeda.pulsar.PulsarHolder;
 import com.github.yizzuide.milkomeda.util.JSONUtil;
-import com.github.yizzuide.milkomeda.util.Polyfill;
+import com.github.yizzuide.milkomeda.universe.polyfill.RedisPolyfill;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -231,7 +231,7 @@ public class LightCache implements Cache {
         if (isAbandon) {
             if (!onlyCacheL1) {
                 // 从二级缓存移除
-                Polyfill.redisDelete(stringRedisTemplate, key);
+                RedisPolyfill.redisDelete(stringRedisTemplate, key);
             }
             return false;
         }
@@ -314,7 +314,7 @@ public class LightCache implements Cache {
     public void erase(String key) {
         if (!onlyCacheL1) {
             // 从二级缓存移除
-            Polyfill.redisDelete(stringRedisTemplate, key);
+            RedisPolyfill.redisDelete(stringRedisTemplate, key);
         }
         if (!onlyCacheL2) {
             // 从一级缓存移除
@@ -385,11 +385,11 @@ public class LightCache implements Cache {
     public void configFrom(LightProperties props) {
         this.setL1MaxCount(props.getL1MaxCount());
         this.setL1DiscardPercent(props.getL1DiscardPercent());
-        this.setL1Expire(props.getL1Expire());
+        this.setL1Expire(props.getL1Expire().getSeconds());
         this.setStrategy(props.getStrategy());
         this.setStrategyClass(props.getStrategyClass());
         this.setOnlyCacheL1(props.isOnlyCacheL1());
-        this.setL2Expire(props.getL2Expire());
+        this.setL2Expire(props.getL2Expire().getSeconds());
         this.setOnlyCacheL2(props.isOnlyCacheL2());
     }
 }

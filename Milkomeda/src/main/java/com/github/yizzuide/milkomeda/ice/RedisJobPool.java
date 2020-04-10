@@ -7,6 +7,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.data.redis.core.BoundHashOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +18,7 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 1.15.0
+ * @version 3.0.0
  * Create at 2019/11/16 15:45
  */
 public class RedisJobPool implements JobPool, InitializingBean {
@@ -29,6 +31,7 @@ public class RedisJobPool implements JobPool, InitializingBean {
         return redisTemplate.boundHashOps(PREFIX_NAME);
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public void push(Job job) {
         getPool().put(job.getId(), JSONUtil.serialize(job));
@@ -39,6 +42,13 @@ public class RedisJobPool implements JobPool, InitializingBean {
         getPool().putAll(jobs.stream().collect(Collectors.toMap(Job::getId, JSONUtil::serialize)));
     }
 
+    @Override
+    public boolean exists(String jobId) {
+        String job = getPool().get(jobId);
+        return !StringUtils.isEmpty(job);
+    }
+
+    @SuppressWarnings("rawtypes")
     @Override
     public Job get(String jobId) {
         String job = getPool().get(jobId);
