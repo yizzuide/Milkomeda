@@ -7,7 +7,7 @@ import java.lang.annotation.*;
 /**
  * EnableIceBasic
  * 基本Ice Job Pool存储，只提供Job的Push功能，可用于只添加延迟Job的服务，
- * 配置项 {@link IceProperties#isEnableJobTimer()} 和 {@link IceProperties#isEnableTask()} 的开启将失效 <br>
+ * 配置项 <code>enableJobTimer</code> 和 <code>enableTask</code> 的开启将失效 <br>
  *
  * 只需要配置两项即可，如果使用默认值，则不需要配置，以下是定制配置的例子：
  * <pre class="code">

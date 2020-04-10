@@ -52,8 +52,8 @@ public class CometResponseWrapper extends HttpServletResponseWrapper {
         }
     }
 
-    @Override
     @SuppressWarnings("deprecation")
+    @Override
     public void sendError(int sc, String msg) throws IOException {
         copyBodyToResponse(false);
         try {
@@ -139,16 +139,8 @@ public class CometResponseWrapper extends HttpServletResponseWrapper {
     }
 
     /**
-     * Return the status code as specified on the response.
-     * @deprecated as of 5.2 in favor of {@link HttpServletResponse#getStatus()}
-     */
-    @Deprecated
-    public int getStatusCode() {
-        return getStatus();
-    }
-
-    /**
      * Return the cached response content as a byte array.
+     * @return Content byte array.
      */
     public byte[] getContentAsByteArray() {
         return this.content.toByteArray();
@@ -156,7 +148,7 @@ public class CometResponseWrapper extends HttpServletResponseWrapper {
 
     /**
      * Return an {@link InputStream} to the cached content.
-     * @since 3.0.0
+     * @return  InputStream
      */
     public InputStream getContentInputStream() {
         return this.content.getInputStream();
@@ -164,7 +156,7 @@ public class CometResponseWrapper extends HttpServletResponseWrapper {
 
     /**
      * Return the current size of the cached content.
-     * @since 3.0.0
+     * @return  Content size.
      */
     public int getContentSize() {
         return this.content.size();
@@ -172,7 +164,7 @@ public class CometResponseWrapper extends HttpServletResponseWrapper {
 
     /**
      * Copy the complete cached body content to the response.
-     * @since 3.0.0
+     * @throws IOException  Network IO exception
      */
     public void copyBodyToResponse() throws IOException {
         copyBodyToResponse(true);
@@ -182,7 +174,6 @@ public class CometResponseWrapper extends HttpServletResponseWrapper {
      * Copy the cached body content to the response.
      * @param complete whether to set a corresponding content length
      * for the complete cached body content
-     * @since 3.0.0
      */
     protected void copyBodyToResponse(boolean complete) throws IOException {
         if (this.content.size() > 0) {

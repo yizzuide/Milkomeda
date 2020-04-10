@@ -66,6 +66,7 @@ public class PlaceholderResolver {
 
     /**
      * 获取所有占位符
+     *
      * @param content   模板字符串
      * @return  占位符列表
      */
@@ -90,12 +91,7 @@ public class PlaceholderResolver {
     }
 
     /**
-     * 解析带有指定占位符的模板字符串 <br/>
-     * <pre>
-     *  content = "category:${}:product:${}"
-     *  values = {"1", "2"}
-     *  output: "category:1:product:2"
-     * </pre>
+     * 解析带有指定占位符的模板字符串
      *
      * @param content 要解析的带有占位符的模板字符串
      * @param values   按照模板占位符索引位置设置对应的值
@@ -119,12 +115,7 @@ public class PlaceholderResolver {
     }
 
     /**
-     * 解析带有指定占位符的模板字符串 <br/>
-     * <pre>
-     *  content = "category:${}:product:${}"
-     *  values = {"1", "2"}
-     *  output: "category:1:product:2"
-     * </pre>
+     * 解析带有指定占位符的模板字符串
      *
      * @param content 要解析的带有占位符的模板字符串
      * @param values   按照模板占位符索引位置设置对应的值
@@ -136,6 +127,7 @@ public class PlaceholderResolver {
 
     /**
      * 根据替换规则来替换指定模板中的占位符值
+     *
      * @param content  要解析的字符串
      * @param rule  解析规则回调
      * @return 解析的字符串
@@ -164,12 +156,7 @@ public class PlaceholderResolver {
     }
 
     /**
-     * 替换模板中占位符内容，占位符的内容即为map，key为占位符中的内容。<br/>
-     * <pre>
-     *  content = "product:${id}:detail:${did}"
-     *  valueMap = {"id": 1, "pid": 2}
-     *  output: "product:1:detail:2"
-     * </pre>
+     * 替换模板中占位符内容，占位符的内容即为map，key为占位符中的内容
      *
      * @param content  模板内容
      * @param valueMap 值映射
@@ -181,6 +168,7 @@ public class PlaceholderResolver {
 
     /**
      * 根据properties文件替换占位符内容
+     *
      * @param content       模板内容
      * @param properties    Properties
      * @return  替换完成后的字符串
@@ -190,15 +178,10 @@ public class PlaceholderResolver {
     }
 
     /**
-     * 根据对象中字段路径(即类似js访问对象属性值)替换模板中的占位符 <br/>
-     * <pre>
-     *  content = "product:${id}:detail:${detail.id}"
-     *  obj = Product.builder().id(1).detail(Detail.builder().id(2).build()).build();
-     *  output: "product:1:detail:2"
-     * </pre>
+     * 根据对象中字段路径(即类似js访问对象属性值)替换模板中的占位符
      *
      * @param content  要解析的内容
-     * @param obj   填充解析内容的对象(如果是基本类型，则所有占位符替换为相同的值)
+     * @param obj      填充解析内容的对象(如果是基本类型，则所有占位符替换为相同的值)
      * @return  替换完成后的字符串
      */
     @SuppressWarnings({"unchecked", "rawtypes"})

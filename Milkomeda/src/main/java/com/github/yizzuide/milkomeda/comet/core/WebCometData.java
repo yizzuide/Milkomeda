@@ -68,6 +68,7 @@ public class WebCometData extends CometData {
      * @param request           HttpServletRequest
      * @param prototype         实例原型
      * @param readRequestBody   是否允许读取body
+     * @return  WebCometData
      */
     public static WebCometData createFormRequest(HttpServletRequest request, Class<? extends WebCometData> prototype,  boolean readRequestBody) {
         WebCometData cometData;
