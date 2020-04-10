@@ -73,7 +73,7 @@
 
 ## Upgrade
 ### 3.0 Release
-Milkomeda 3.0 coming is now available（April 2020). 
+Milkomeda 3.0 is now available（April 2020). 
 
 - Yml配置提升为开发的一等公民，使开发者可以快速接入模块。
 - 新增`Hydrogen`模块，对Spring、SpringMVC的基础建设功能全部包揽，从源码级发掘实用功能。
