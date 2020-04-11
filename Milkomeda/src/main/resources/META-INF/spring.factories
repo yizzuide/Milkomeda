@@ -1,1 +1,10 @@
+# Auto Configure
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=com.github.yizzuide.milkomeda.universe.config.MilkomedaAutoConfiguration
+
+# Environment Post Processors
+org.springframework.boot.env.EnvironmentPostProcessor=\
+com.github.yizzuide.milkomeda.universe.env.CollectionsPropertySourceLocator
+
+# Application Listeners
+org.springframework.context.ApplicationListener=\
+com.github.yizzuide.milkomeda.universe.env.SourcesLogApplicationListener

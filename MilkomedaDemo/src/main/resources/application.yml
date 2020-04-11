@@ -60,7 +60,7 @@ mybatis:
 
 milkomeda:
   # 配置是否显示跟踪日志信息（线上环境应该关闭）
-  show-log: true
+  #show-log: true
 
   comet:
     # 志收集器读取Response直接写出的内容时需要开启
@@ -70,11 +70,9 @@ milkomeda:
       enable: true
       # 根据路径匹配策略
       strategy:
-        -
-          paths: ["/**"]
+        - paths: ["/**"]
           tpl: url->{uri},userId:{uid},token:[token],method->{method},parameters->{params}
-        -
-          paths: ["/error/**"]
+        - paths: ["/error/**"]
           tpl: url->{uri},method->{method}
     # 日志收集器
     collector:
@@ -117,7 +115,7 @@ milkomeda:
       code: -1
       message: 请求太频繁，请稍后再试！
       addition:
-        data: "{}"
+        data: ${collections.emptyMap}
 
 
   light:

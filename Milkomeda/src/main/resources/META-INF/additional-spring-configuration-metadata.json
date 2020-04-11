@@ -1,0 +1,86 @@
+{
+  "groups": [
+    {
+      "name": "milkomeda.particle.response",
+      "type": "java.util.Map"
+    },
+    {
+      "name": "milkomeda.hydrogen.uniform.response",
+      "type": "java.util.Map"
+    }
+  ],
+  "properties": [
+    {
+      "name": "milkomeda.particle.response.status",
+      "type": "java.lang.Integer",
+      "description": "Http response status After limited.",
+      "defaultValue": 416
+    },
+    {
+      "name": "milkomeda.particle.response.code",
+      "type": "java.lang.Integer",
+      "description": "Business code returned After limited.",
+      "defaultValue": -1
+    },
+    {
+      "name": "milkomeda.particle.response.message",
+      "type": "java.lang.String",
+      "description": "Business hint info returned After limited.",
+      "defaultValue": "服务器繁忙，请稍后再试！"
+    },
+    {
+      "name": "milkomeda.particle.response.addition",
+      "type": "java.util.Map",
+      "description": "Business other field returned After limited, excluding self."
+    },
+    {
+      "name": "milkomeda.particle.response.addition.data",
+      "type": "java.util.Map",
+      "description": "Business additional data field returned After limited."
+    },
+    {
+      "name": "milkomeda.hydrogen.uniform.response.status",
+      "type": "java.lang.Integer",
+      "description": "Http response status After server error.",
+      "defaultValue": 500
+    },
+    {
+      "name": "milkomeda.hydrogen.uniform.response.code",
+      "type": "java.lang.Integer",
+      "description": "Business code returned After server error.",
+      "defaultValue": -1
+    },
+    {
+      "name": "milkomeda.hydrogen.uniform.response.message",
+      "type": "java.lang.String",
+      "description": "Business hint info returned After server error.",
+      "defaultValue": "服务器繁忙，请稍后再试！"
+    },
+    {
+      "name": "milkomeda.hydrogen.uniform.response.addition",
+      "type": "java.util.Map",
+      "description": "Business other field returned After server error, excluding self."
+    },
+    {
+      "name": "milkomeda.hydrogen.uniform.response.addition.data",
+      "type": "java.util.Map",
+      "description": "Business additional data field returned After server error."
+    },
+    {
+      "name": "milkomeda.hydrogen.uniform.response.error-stack-msg",
+      "type": "java.lang.String",
+      "description": "Exception stack message returned After server error."
+    },
+    {
+      "name": "milkomeda.hydrogen.uniform.response.error-stack",
+      "type": "java.lang.String",
+      "description": "Exception stack info returned After server error."
+    },
+    {
+      "name": "milkomeda.hydrogen.uniform.response.customs",
+      "type": "java.util.List<java.util.Map>",
+      "description": "Customize the exception according to the specified exception class with [clazz].",
+      "sourceType": "com.github.yizzuide.milkomeda.hydrogen.uniform.UniformProperties"
+    }
+  ]
+}

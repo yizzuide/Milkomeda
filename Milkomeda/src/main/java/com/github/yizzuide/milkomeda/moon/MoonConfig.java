@@ -6,7 +6,6 @@ import com.github.yizzuide.milkomeda.util.ReflectUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.boot.env.RandomValuePropertySource;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.CollectionUtils;
@@ -18,7 +17,6 @@ import java.util.List;
  *
  * @author yizzuide
  * @since 3.0.0
- * @see RandomValuePropertySource#addToEnvironment(org.springframework.core.env.ConfigurableEnvironment)
  * Create at 2020/03/28 17:40
  */
 @Slf4j

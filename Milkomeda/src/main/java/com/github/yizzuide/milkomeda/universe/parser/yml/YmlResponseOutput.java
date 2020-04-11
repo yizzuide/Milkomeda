@@ -1,5 +1,6 @@
 package com.github.yizzuide.milkomeda.universe.parser.yml;
 
+import com.github.yizzuide.milkomeda.universe.env.CollectionsPropertySource;
 import com.github.yizzuide.milkomeda.util.DataTypeConvertUtil;
 import lombok.NonNull;
 import org.springframework.lang.Nullable;
@@ -66,11 +67,11 @@ public class YmlResponseOutput {
             Map<String, Object> additionMap = (Map) addition;
             for (String key : additionMap.keySet()) {
                 Object ele = additionMap.get(key);
-                if ("{}".equals(ele)) {
+                if (CollectionsPropertySource.COLLECTIONS_EMPTY_MAP.equals(ele)) {
                     additionMap.put(key, Collections.emptyMap());
                     continue;
                 }
-                if ("[]".equals(ele)) {
+                if (CollectionsPropertySource.COLLECTIONS_EMPTY_LIST.equals(ele)) {
                     additionMap.put(key, Collections.emptyList());
                 }
             }

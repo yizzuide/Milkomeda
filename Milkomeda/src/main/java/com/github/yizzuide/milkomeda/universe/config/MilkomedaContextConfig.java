@@ -16,7 +16,7 @@ import org.springframework.web.util.UrlPathHelper;
  *
  * @author yizzuide
  * @since 2.0.0
- * @version 3.0.0
+ * @version 3.0.1
  * Create at 2019/12/13 19:09
  */
 @Configuration
