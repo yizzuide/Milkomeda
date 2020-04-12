@@ -115,7 +115,6 @@ public class CometInterceptor extends HandlerInterceptorAdapter implements Appli
         Map<String, CometCollectorProperties.Tag> tagMap = cometCollectorProperties.getTags();
         this.tagCollectorMap = tagMap.keySet().stream()
                 .collect(Collectors.toMap(Object::toString, tagName -> applicationContext.getBean(tagName, TagCollector.class)));
-        threadLocal = new ThreadLocal<>();
 
         aliasNodesMap = new HashMap<>();
         for (Map.Entry<String, CometCollectorProperties.Tag> tagCollectorEntry : cometCollectorProperties.getTags().entrySet()) {
@@ -126,6 +125,7 @@ public class CometInterceptor extends HandlerInterceptorAdapter implements Appli
             String tag = tagCollectorEntry.getKey();
             aliasNodesMap.put(tag, YmlParser.parseAliasMap(exceptionMonitor));
         }
+        threadLocal = new ThreadLocal<>();
     }
 
     @Override

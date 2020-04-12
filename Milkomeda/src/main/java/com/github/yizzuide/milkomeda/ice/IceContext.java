@@ -30,11 +30,11 @@ public class IceContext implements ApplicationListener<ContextRefreshedEvent> {
         topicMap = AopContextHolder.getHandlerMetaData(IceHandler.class, IceListener.class, (annotation, metaData) -> {
                     IceListener iceListener = (IceListener) annotation;
                     return iceListener.value();
-                }, false, true);
+                }, true);
         topicTtrOverloadMap = AopContextHolder.getHandlerMetaData(IceHandler.class, IceTtrOverloadListener.class, (annotation, metaData) -> {
             IceTtrOverloadListener iceTtrOverloadListener = (IceTtrOverloadListener) annotation;
             return iceTtrOverloadListener.value();
-        }, false, true);
+        }, true);
     }
 
     static Map<String, List<HandlerMetaData>> getTopicMap() {

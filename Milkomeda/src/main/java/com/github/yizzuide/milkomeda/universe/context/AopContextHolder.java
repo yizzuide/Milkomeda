@@ -24,7 +24,7 @@ import java.util.function.BiFunction;
  *
  * @author yizzuide
  * @since 1.13.4
- * @version 2.5.0
+ * @version 3.0.1
  * Create at 2019/10/24 21:17
  */
 public class AopContextHolder {
@@ -64,7 +64,6 @@ public class AopContextHolder {
      * @param handlerAnnotationClazz    处理器注解类
      * @param executeAnnotationClazz    执行方法注解类
      * @param nameProvider              标识名称提供函数
-     * @param useAOP                    执行方法是否使用了切面
      * @param onlyOneExecutorPerHandler 一个组件只有一个处理方法是传true
      * @return  Map
      */
@@ -72,15 +71,14 @@ public class AopContextHolder {
             Class<? extends Annotation> handlerAnnotationClazz,
             Class<? extends Annotation> executeAnnotationClazz,
             BiFunction<Annotation, HandlerMetaData, String> nameProvider,
-            boolean useAOP,
             boolean onlyOneExecutorPerHandler) {
         Map<String, List<HandlerMetaData>> handlerMap = new HashMap<>();
         Map<String, Object> beanMap = ApplicationContextHolder.get().getBeansWithAnnotation(handlerAnnotationClazz);
         for (String key : beanMap.keySet()) {
             Object target = beanMap.get(key);
-            // 如果方法有aop切面，可以通过AopUtils.getTargetClass()获取
-            Method[] methods = ReflectionUtils.getAllDeclaredMethods(useAOP ?
-                    AopUtils.getTargetClass(target.getClass()) : target.getClass());
+            // 查找AOP切面（通过Proxy.isProxyClass()判断类是否是代理的接口类，AopUtils.isAopProxy()判断对象是否被代理），可以通过AopUtils.getTargetClass()获取原Class
+            Method[] methods = ReflectionUtils.getAllDeclaredMethods(AopUtils.isAopProxy(target) ?
+                    AopUtils.getTargetClass(target) : target.getClass());
             for (Method method : methods) {
                 // 获取指定方法上的注解的属性
                 final Annotation executeAnnotation = AnnotationUtils.findAnnotation(method, executeAnnotationClazz);

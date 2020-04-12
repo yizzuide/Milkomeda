@@ -39,7 +39,7 @@ public class HaloContext implements ApplicationListener<ContextRefreshedEvent> {
             attrs.put(ATTR_ASYNC, haloListener.async());
             metaData.setAttributes(attrs);
             return haloListener.value();
-        }, false, false);
+        }, false);
     }
 
     static Map<String, List<HandlerMetaData>> getTableNameMap() {

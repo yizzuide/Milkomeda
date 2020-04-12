@@ -1,17 +1,23 @@
 package com.github.yizzuide.milkomeda.universe.polyfill;
 
 import com.github.yizzuide.milkomeda.hydrogen.interceptor.HydrogenMappedInterceptor;
+import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import com.github.yizzuide.milkomeda.util.ReflectUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.OrderComparator;
 import org.springframework.core.Ordered;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.method.ControllerAdviceBean;
+import org.springframework.web.method.annotation.ExceptionHandlerMethodResolver;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
+import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.handler.AbstractHandlerMapping;
+import org.springframework.web.servlet.handler.HandlerExceptionResolverComposite;
 import org.springframework.web.servlet.handler.MappedInterceptor;
 import org.springframework.web.servlet.mvc.method.annotation.AbstractMessageConverterMethodArgumentResolver;
+import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
 import java.lang.reflect.Field;
@@ -23,7 +29,7 @@ import java.util.stream.Collectors;
 
 /**
  * SpringMvcPolyfill
- * Spring MVC功能填充类
+ * Spring MVC功能扩展类
  *
  * @author yizzuide
  * @since 3.0.0
@@ -35,6 +41,37 @@ public class SpringMvcPolyfill {
 
     // 缓存反射字段
     private static Field adaptedInterceptorsField;
+
+    /**
+     * 动态添加异常切面
+     * @param handlerExceptionResolver  HandlerExceptionResolver
+     * @param beanName                  异常拦截处理器bean名
+     */
+    public static void addDynamicExceptionAdvice(HandlerExceptionResolver handlerExceptionResolver, String beanName) {
+        if (handlerExceptionResolver instanceof HandlerExceptionResolverComposite) {
+            List<HandlerExceptionResolver> exceptionResolvers = ((HandlerExceptionResolverComposite) handlerExceptionResolver).getExceptionResolvers();
+            for (HandlerExceptionResolver exceptionResolver : exceptionResolvers) {
+                if (exceptionResolver instanceof ExceptionHandlerExceptionResolver) {
+                    // TODO <mark> 由于使用底层API, 这个exceptionHandlerAdviceCache属性在未来版本中可能会改
+                    Map<ControllerAdviceBean, ExceptionHandlerMethodResolver> resolverMap = ReflectUtil.invokeFieldPath(exceptionResolver, "exceptionHandlerAdviceCache");
+                    if (resolverMap == null) {
+                        resolverMap = new HashMap<>(2);
+                    }
+                    // 仿Spring MVC源码创建advice
+                    ControllerAdviceBean adviceBean = new ControllerAdviceBean(beanName, ApplicationContextHolder.get(), null);
+                    Class<?> beanType = adviceBean.getBeanType();
+                    if (beanType == null) {
+                        throw new IllegalStateException("SpringMvcPolyfill find unresolvable type for ControllerAdviceBean: " + adviceBean);
+                    }
+                    ExceptionHandlerMethodResolver resolver = new ExceptionHandlerMethodResolver(beanType);
+                    if (resolver.hasExceptionMappings()) {
+                        resolverMap.put(adviceBean, resolver);
+                    }
+                    break;
+                }
+            }
+        }
+    }
 
     /**
      * 动态添加消息体响应切面
@@ -50,7 +87,7 @@ public class SpringMvcPolyfill {
         for (HandlerMethodReturnValueHandler returnValueHandler : returnValueHandlers) {
             // 只有AbstractMessageConverterMethodArgumentResolver继承类型（主要是HttpEntityMethodProcessor、RequestResponseBodyMethodProcessor）有Advice Chain
             if (returnValueHandler instanceof AbstractMessageConverterMethodArgumentResolver) {
-            // TODO <mark> 由于使用底层API, 这个advice.responseBodyAdvice属性在未来版本中可能会改
+                // TODO <mark> 由于使用底层API, 这个advice.responseBodyAdvice属性在未来版本中可能会改
                 List<Object> advices = ReflectUtil.invokeFieldPath(returnValueHandler, "advice.responseBodyAdvice");
                 if (CollectionUtils.isEmpty(advices)) {
                     continue;
@@ -99,7 +136,7 @@ public class SpringMvcPolyfill {
                         if (itor instanceof HydrogenMappedInterceptor) {
                             return (Ordered) ((HydrogenMappedInterceptor) itor)::getOrder;
                         }
-                        return 0;
+                        return null;
                     })).collect(Collectors.toList());
             adaptedInterceptorsField.set(handlerMapping, handlerInterceptors);
         } catch (Exception e) {

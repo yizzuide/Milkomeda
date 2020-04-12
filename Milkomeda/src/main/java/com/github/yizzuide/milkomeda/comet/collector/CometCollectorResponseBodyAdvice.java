@@ -8,6 +8,8 @@ import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
+import org.springframework.web.servlet.mvc.method.annotation.AbstractMessageConverterMethodArgumentResolver;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
 /**
@@ -17,6 +19,10 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
  * @author yizzuide
  * @since 3.0.0
  * @version 3.0.1
+ * @see WebMvcConfigurationSupport#handlerExceptionResolver(org.springframework.web.accept.ContentNegotiationManager)
+ * #see RequestMappingHandlerAdapter#getDefaultReturnValueHandlers()
+ * @see AbstractMessageConverterMethodArgumentResolver#AbstractMessageConverterMethodArgumentResolver(java.util.List, java.util.List)
+ * #see RequestResponseBodyAdviceChain#getAdviceByType(java.util.List, java.lang.Class)
  * Create at 2020/03/29 11:30
  */
 //@ControllerAdvice // 这种方式默认就会扫描并加载到Ioc，不好动态控制是否加载，但好处是外部API对未来版本的兼容性强
