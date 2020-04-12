@@ -1,13 +1,18 @@
 package com.github.yizzuide.milkomeda.universe.polyfill;
 
 import com.github.yizzuide.milkomeda.hydrogen.interceptor.HydrogenMappedInterceptor;
+import com.github.yizzuide.milkomeda.util.ReflectUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.OrderComparator;
 import org.springframework.core.Ordered;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.handler.AbstractHandlerMapping;
 import org.springframework.web.servlet.handler.MappedInterceptor;
+import org.springframework.web.servlet.mvc.method.annotation.AbstractMessageConverterMethodArgumentResolver;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
@@ -22,6 +27,7 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 3.0.0
+ * @version 3.0.1
  * Create at 2020/03/28 00:33
  */
 @Slf4j
@@ -29,6 +35,30 @@ public class SpringMvcPolyfill {
 
     // 缓存反射字段
     private static Field adaptedInterceptorsField;
+
+    /**
+     * 动态添加消息体响应切面
+     * @param returnValueHandlers   响应处理器列表
+     * @param responseBodyAdvice    ResponseBodyAdvice
+     */
+    public static void addDynamicResponseBodyAdvice(List<HandlerMethodReturnValueHandler> returnValueHandlers, ResponseBodyAdvice<?> responseBodyAdvice) {
+        if (CollectionUtils.isEmpty(returnValueHandlers)) {
+            return;
+        }
+        // 下面这行添加不起作用，由于内部构建已经完成
+        // adapter.setResponseBodyAdvice(Collections.singletonList(responseBodyAdvice));
+        for (HandlerMethodReturnValueHandler returnValueHandler : returnValueHandlers) {
+            // 只有AbstractMessageConverterMethodArgumentResolver继承类型（主要是HttpEntityMethodProcessor、RequestResponseBodyMethodProcessor）有Advice Chain
+            if (returnValueHandler instanceof AbstractMessageConverterMethodArgumentResolver) {
+            // TODO <mark> 由于使用底层API, 这个advice.responseBodyAdvice属性在未来版本中可能会改
+                List<Object> advices = ReflectUtil.invokeFieldPath(returnValueHandler, "advice.responseBodyAdvice");
+                if (CollectionUtils.isEmpty(advices)) {
+                    continue;
+                }
+                advices.add(responseBodyAdvice);
+            }
+        }
+    }
 
     /**
      * 动态添加拦截器

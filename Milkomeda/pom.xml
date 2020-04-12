@@ -14,6 +14,7 @@
         <project.release.version>3.0.1-SNAPSHOT</project.release.version>
         <spring-boot.version>2.2.4</spring-boot.version>
         <spring-cloud.version>Hoxton.RELEASE</spring-cloud.version>
+        <mica-auto.version>1.2.1</mica-auto.version>
         <mybatis.starter.version>2.1.1</mybatis.starter.version>
         <jsqlparser.version>3.1</jsqlparser.version>
         <jwt.version>0.9.1</jwt.version>
@@ -180,6 +181,20 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
+            <optional>true</optional>
+            <scope>provided</scope>
+        </dependency>
+        <!--
+         生成 Spring boot starter 的一些基础配置：
+            @AutoContextInitializer、@AutoListener、@AutoRunListener、@AutoEnvPostProcessor、@AutoFailureAnalyzer、@Component、@AutoService
+            ApplicationContextInitializer、ApplicationListener、SpringApplicationRunListener、EnvironmentPostProcessor、FailureAnalyzer、EnableAutoConfiguration、Java SPI Service
+         注意：将 mica-auto 的依赖放置到 Lombok 后面
+         -->
+        <dependency>
+            <groupId>net.dreamlu</groupId>
+            <artifactId>mica-auto</artifactId>
+            <version>${mica-auto.version}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>

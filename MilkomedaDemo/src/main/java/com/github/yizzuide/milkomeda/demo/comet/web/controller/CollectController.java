@@ -43,13 +43,14 @@ public class CollectController {
     }
 
     @RequestMapping("product/click")
-    public void /*ResponseEntity<Map<String, String>>*/ click(@RequestParam("productId") String productId, HttpServletResponse response) throws IOException {
+    public void /*Map<String, String>*/ click(@RequestParam("productId") String productId, HttpServletResponse response) throws IOException {
         log.info("用户点击了产品：{}", productId);
         Map<String, String> map = new HashMap<>();
         map.put("code", "1");
         map.put("data", "成功");
 //        throw new RuntimeException("出错了");
-//        return ResponseEntity.ok(map);
+//        int i = 1 / 0;
+//        return map;
 
         response.setStatus(200);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);

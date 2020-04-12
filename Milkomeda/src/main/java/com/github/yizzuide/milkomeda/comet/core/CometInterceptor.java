@@ -1,6 +1,7 @@
 package com.github.yizzuide.milkomeda.comet.core;
 
 import com.github.yizzuide.milkomeda.comet.collector.CometCollectorProperties;
+import com.github.yizzuide.milkomeda.comet.collector.CometCollectorResponseBodyAdvice;
 import com.github.yizzuide.milkomeda.comet.collector.TagCollector;
 import com.github.yizzuide.milkomeda.universe.metadata.BeanIds;
 import com.github.yizzuide.milkomeda.universe.parser.url.URLPathMatcher;
@@ -10,6 +11,7 @@ import com.github.yizzuide.milkomeda.universe.parser.url.URLPlaceholderParser;
 import com.github.yizzuide.milkomeda.universe.parser.url.URLPlaceholderResolver;
 import com.github.yizzuide.milkomeda.universe.parser.yml.YmlAliasNode;
 import com.github.yizzuide.milkomeda.universe.parser.yml.YmlParser;
+import com.github.yizzuide.milkomeda.universe.parser.yml.YmlResponseOutput;
 import com.github.yizzuide.milkomeda.util.DataTypeConvertUtil;
 import com.github.yizzuide.milkomeda.util.JSONUtil;
 import com.github.yizzuide.milkomeda.util.NetworkUtil;
@@ -21,6 +23,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.http.MediaType;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 import org.springframework.web.util.WebUtils;
 
@@ -30,6 +33,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -39,6 +43,7 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 3.0.0
+ * @version 3.0.1
  * Create at 2020/03/28 01:08
  */
 @Slf4j
@@ -67,6 +72,9 @@ public class CometInterceptor extends HandlerInterceptorAdapter implements Appli
 
     // tag收集器
     private Map<String, TagCollector> tagCollectorMap;
+
+    // 异常body识别节点
+    private Map<String, Map<String, YmlAliasNode>> aliasNodesMap;
 
     @PostConstruct
     public void init() {
@@ -108,6 +116,16 @@ public class CometInterceptor extends HandlerInterceptorAdapter implements Appli
         this.tagCollectorMap = tagMap.keySet().stream()
                 .collect(Collectors.toMap(Object::toString, tagName -> applicationContext.getBean(tagName, TagCollector.class)));
         threadLocal = new ThreadLocal<>();
+
+        aliasNodesMap = new HashMap<>();
+        for (Map.Entry<String, CometCollectorProperties.Tag> tagCollectorEntry : cometCollectorProperties.getTags().entrySet()) {
+            Map<String, Object> exceptionMonitor = tagCollectorEntry.getValue().getExceptionMonitor();
+            if(CollectionUtils.isEmpty(exceptionMonitor)) {
+                continue;
+            }
+            String tag = tagCollectorEntry.getKey();
+            aliasNodesMap.put(tag, YmlParser.parseAliasMap(exceptionMonitor));
+        }
     }
 
     @Override
@@ -129,19 +147,23 @@ public class CometInterceptor extends HandlerInterceptorAdapter implements Appli
             return;
         }
         // 获取ResponseEntity返回值
-        Object body = request.getAttribute("comet.collect.body");
+        Object body = request.getAttribute(CometCollectorResponseBodyAdvice.REQUEST_ATTRIBUTE_BODY);
         if (body == null) {
             // 从ResponseWrapper获取
             CometResponseWrapper responseWrapper =
                     WebUtils.getNativeResponse(response, CometResponseWrapper.class);
             if (responseWrapper != null) {
                 String content = new String(responseWrapper.getContentAsByteArray(), StandardCharsets.UTF_8);
-                String contentType = responseWrapper.getResponse().getContentType();
-                // JSON -> Map
-                if (contentType.startsWith(MediaType.APPLICATION_JSON_VALUE)) {
-                    body = JSONUtil.parseMap(content, String.class, Object.class);
-                } else { // String!
-                    body = content;
+                if (StringUtils.isEmpty(content)) {
+                    body = null;
+                } else {
+                    String contentType = responseWrapper.getResponse().getContentType();
+                    // JSON -> Map
+                    if (contentType.startsWith(MediaType.APPLICATION_JSON_VALUE)) {
+                        body = JSONUtil.parseMap(content, String.class, Object.class);
+                    } else { // String!
+                        body = content;
+                    }
                 }
             }
         }
@@ -155,8 +177,23 @@ public class CometInterceptor extends HandlerInterceptorAdapter implements Appli
         long duration = now.getTime() - cometData.getRequestTime().getTime();
         cometData.setDuration(String.valueOf(duration));
         cometData.setResponseTime(now);
-        CometCollectorProperties.Tag tag = cometCollectorProperties.getTags().get(cometData.getTag());
-        TagCollector tagCollector = tagCollectorMap.get(cometData.getTag());
+        String tag = cometData.getTag();
+        TagCollector tagCollector = tagCollectorMap.get(tag);
+
+        // 如果有异常（说明没有统一异常拦截响应处理）
+        if (ex != null) {
+            cometData.setStatus(cometProperties.getStatusFailCode());
+            cometData.setResponseData(null);
+            cometData.setErrorInfo(ex.getMessage());
+            StackTraceElement[] stackTrace = ex.getStackTrace();
+            if (stackTrace.length > 0) {
+                String errorStack = String.format("exception happened: %s \n invoke root: %s", stackTrace[0], stackTrace[stackTrace.length - 1]);
+                cometData.setTraceStack(errorStack);
+            }
+            tagCollector.onFailure(cometData);
+            threadLocal.remove();
+            return;
+        }
 
         // 如果响应消息体为空，按成功处理
         if (body == null) {
@@ -167,52 +204,41 @@ public class CometInterceptor extends HandlerInterceptorAdapter implements Appli
             return;
         }
 
-        Map<String, YmlAliasNode> aliasNodeMap = null;
+        // 检测Body返回code
         Map<String, Object> bodyMap = null;
         boolean isResponseOk = false;
         // 检测响应码是否有成功
-        if (ex == null && !CollectionUtils.isEmpty(tag.getExceptionMonitor())) {
+        Map<String, YmlAliasNode> aliasNodes = aliasNodesMap.get(tag);
+        if (!CollectionUtils.isEmpty(aliasNodes)) {
             // Response text/plain
             if (body instanceof String) {
                 isResponseOk = true;
-            } else { // ResponseEntity || Response application/json
-                // Custom Object -> Map
+            } else { // Map or Custom Return Object
+                // Custom Return Object -> Map
                 if (!(body instanceof Map)) {
                     body = DataTypeConvertUtil.beanToMap(body);
                 }
                 bodyMap = (Map<String, Object>) body;
                 // 解析别名配置项
-                aliasNodeMap = YmlParser.parseAliasMap(tag.getExceptionMonitor());
-                YmlAliasNode ignoreCodeNode = aliasNodeMap.get("ignore-code");
+                YmlAliasNode ignoreCodeNode = aliasNodes.get("ignore-code");
                 Object code = bodyMap.get(ignoreCodeNode.getKey());
                 // 忽略的code相同，则不是异常
                 isResponseOk = String.valueOf(code).equals(String.valueOf(ignoreCodeNode.getValue()));
             }
         }
-        // 有异常 或 响应码不成功
-        if (ex != null || !isResponseOk) {
+
+        // 响应码不成功
+        if (!isResponseOk) {
             cometData.setStatus(cometProperties.getStatusFailCode());
             cometData.setResponseData(null);
-            // 如果有异常
-            if (ex != null) {
-                cometData.setErrorInfo(ex.getMessage());
-                StackTraceElement[] stackTrace = ex.getStackTrace();
-                if (stackTrace.length > 0) {
-                    String errorStack = String.format("exception happened: %s \n invoke root: %s", stackTrace[0], stackTrace[stackTrace.length - 1]);
-                    cometData.setTraceStack(errorStack);
-                }
-            } else {
-                // 从body里取异常
-                Object errorStatckMsg = null;
-                Object errorStack = null;
-                if (bodyMap != null) {
-                    YmlAliasNode errorStatckMsgNode = aliasNodeMap.get("error-stack-msg");
-                    errorStatckMsg = errorStatckMsgNode == null ? null : bodyMap.get(errorStatckMsgNode.getKey());
-                    YmlAliasNode errorStackNode = aliasNodeMap.get("error-stack");
-                    errorStack = errorStackNode == null ? null : bodyMap.get(errorStackNode.getKey());
-                }
-                cometData.setErrorInfo(errorStatckMsg == null ? null : errorStatckMsg.toString());
-                cometData.setTraceStack(errorStack == null ? null : errorStack.toString());
+            // 从body里取异常
+            Object errorStatckMsg = null;
+            Object errorStack = null;
+            if (bodyMap != null) {
+                YmlAliasNode errorStatckMsgNode = aliasNodes.get(YmlResponseOutput.ERROR_STACK_MSG);
+                cometData.setErrorInfo(errorStatckMsgNode == null ? null : DataTypeConvertUtil.extractValue(errorStatckMsgNode.getKey(), bodyMap));
+                YmlAliasNode errorStackNode = aliasNodes.get(YmlResponseOutput.ERROR_STACK);
+                cometData.setTraceStack(errorStackNode == null ? null : DataTypeConvertUtil.extractValue(errorStackNode.getKey(), bodyMap));
             }
             tagCollector.onFailure(cometData);
         } else {  // Response OK

@@ -32,6 +32,11 @@ import java.util.Map;
  *
  * @author yizzuide
  * @since 3.0.0
+ * @see org.springframework.boot.SpringApplication#run(java.lang.String...)
+ * #see org.springframework.boot.SpringApplication#registerLoggedException(java.lang.Throwable)
+ * #see org.springframework.boot.SpringBootExceptionHandler.LoggedExceptionHandlerThreadLocal#initialValue()
+ * @see org.springframework.boot.SpringApplication#setRegisterShutdownHook(boolean)
+ * @see org.springframework.context.support.AbstractApplicationContext#registerShutdownHook()
  * Create at 2020/03/25 22:47
  */
 @Slf4j
@@ -59,12 +64,13 @@ public class UniformHandler extends ResponseEntityExceptionHandler {
         for (String k : customsMap.keySet()) {
             Map<String, Object> eleMap = customsMap.get(k);
             Object clazz = eleMap.get(YmlResponseOutput.CLAZZ);
-            if (clazz == null) continue;
-            Class<?> expClazz = null;
+            if (!(clazz instanceof String)) continue;
+            Class<?> expClazz;
             try {
                 expClazz = Class.forName(clazz.toString());
             } catch (Exception ex) {
                 log.error("Hydrogen load class error with msg: {}", ex.getMessage(), ex);
+                continue;
             }
             eleMap.put(YmlResponseOutput.CLAZZ, expClazz);
             this.customConfList.add(eleMap);

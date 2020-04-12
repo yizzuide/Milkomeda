@@ -16,7 +16,7 @@ import java.util.regex.Pattern;
  *
  * @author yizzuide
  * @since 1.13.0
- * @version 1.15.0
+ * @version 3.0.1
  * Create at 2019/09/21 17:23
  */
 public class DataTypeConvertUtil {
@@ -205,6 +205,7 @@ public class DataTypeConvertUtil {
      * @param deleteNullValue   是否去空
      * @return 表单字段
      */
+    @SuppressWarnings("rawtypes")
     public static String map2FormData(Map<String, Object> map, boolean deleteNullValue) {
         map = sortMap(map, deleteNullValue);
         int count = map.size();
@@ -233,5 +234,20 @@ public class DataTypeConvertUtil {
             index++;
         }
         return builder.toString();
+    }
+
+    /**
+     * 从源Map采集key的值
+     * @param key       采集key
+     * @param source    源Map
+     * @return 采集到的字符串
+     */
+    public static String extractValue(String key, Map<String, Object> source) {
+        if (key == null || source == null) {
+            return null;
+        }
+        Object value = source.get(key);
+        if (value == null) return null;
+        return value.toString();
     }
 }
