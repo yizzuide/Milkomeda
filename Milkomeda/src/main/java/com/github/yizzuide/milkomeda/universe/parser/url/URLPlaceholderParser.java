@@ -1,13 +1,18 @@
 package com.github.yizzuide.milkomeda.universe.parser.url;
 
+import com.github.yizzuide.milkomeda.comet.core.CometRequestWrapper;
+import com.github.yizzuide.milkomeda.util.DataTypeConvertUtil;
 import com.github.yizzuide.milkomeda.util.JSONUtil;
 import com.github.yizzuide.milkomeda.util.PlaceholderResolver;
 import lombok.Data;
 import org.apache.commons.collections.CollectionUtils;
-import org.springframework.util.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * URLPlaceholderParser
@@ -15,6 +20,7 @@ import java.util.*;
  *
  * @author yizzuide
  * @since 3.0.0
+ * @version 3.0.3
  * Create at 2020/04/09 15:07
  */
 @Data
@@ -22,7 +28,7 @@ public class URLPlaceholderParser {
     // 请求参数解析
     private PlaceholderResolver paramsPlaceholderResolver;
     // 请求头解析
-    private static PlaceholderResolver headerPlaceholderResolver = PlaceholderResolver.getResolver("[", "]");
+    private static PlaceholderResolver headerPlaceholderResolver = PlaceholderResolver.getResolver("(", ")");
     // 忽略的固定参数
     private static List<String> ignorePlaceHolders = Arrays.asList("uri", "method", "params");
 
@@ -68,15 +74,24 @@ public class URLPlaceholderParser {
      * @return  解析后的结果
      */
     public String parse(String tpl, HttpServletRequest request, String params, Map<String, List<String>> placeHolders) {
+        if (params == null) {
+            params = CometRequestWrapper.resolveRequestParams(request, true);
+        }
         Map<String, Object> placeholderResultMap = new HashMap<>();
         placeholderResultMap.put("uri", request.getRequestURI());
         placeholderResultMap.put("method", request.getMethod());
-        placeholderResultMap.put("params", StringUtils.isEmpty(params) ? JSONUtil.serialize(request.getParameterMap()) : params);
+        placeholderResultMap.put(KEY_PARAMS, params);
+
+        Map<String, Object> paramsMap = null;
+        if (StringUtils.isNotEmpty(params)) {
+            paramsMap = JSONUtil.parseMap(params, String.class, Object.class);
+        }
 
         // 参数占位替换
         for (String placeHolder : placeHolders.get(KEY_PARAMS)) {
             if (ignorePlaceHolders.contains(placeHolder)) continue;
-            Object paramValue = request.getParameter(placeHolder);
+            Object paramValue = paramsMap == null ? request.getParameter(placeHolder) :
+                    DataTypeConvertUtil.extractPath(placeHolder, paramsMap, "");
             placeholderResultMap.put(placeHolder, paramValue == null ? (this.customURLPlaceholderResolver == null ? "" :
                     String.valueOf(this.customURLPlaceholderResolver.resolver(placeHolder, request))) : paramValue);
         }

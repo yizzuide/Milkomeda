@@ -2,7 +2,6 @@ package com.github.yizzuide.milkomeda.util;
 
 import lombok.extern.slf4j.Slf4j;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +14,7 @@ import java.util.stream.Stream;
  *
  * @author yizzuide
  * @since 3.0.0
+ * @version 3.0.3
  * Creat at 2020/03/28 11:08
  */
 @Slf4j
@@ -32,7 +32,7 @@ public class PlaceholderResolver {
     /**
      * 默认单例解析器
      */
-    private static PlaceholderResolver defaultResolver = new PlaceholderResolver();
+    private static final PlaceholderResolver defaultResolver = new PlaceholderResolver();
 
     /**
      * 占位符前缀
@@ -189,15 +189,6 @@ public class PlaceholderResolver {
         if (obj instanceof Map) {
             return resolveByMap(content, (Map) obj);
         }
-        return resolveByRule(content, placeholderValue -> {
-            try {
-                Field declaredField = obj.getClass().getDeclaredField(placeholderValue);
-                declaredField.setAccessible(true);
-                return String.valueOf(declaredField.get(obj));
-            } catch (Exception e) {
-                log.error("Invoke field from obj[{}] error: {}", obj, e.getMessage(), e);
-            }
-            return null;
-        });
+        return resolveByRule(content, placeholderValue -> ReflectUtil.invokeFieldPath(obj, placeholderValue));
     }
 }

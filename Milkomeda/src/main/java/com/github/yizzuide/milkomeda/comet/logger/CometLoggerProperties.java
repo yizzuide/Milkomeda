@@ -12,6 +12,7 @@ import java.util.Map;
  *
  * @author yizzuide
  * @since 3.0.0
+ * @since 3.0.3
  * Create at 2020/04/05 18:47
  */
 @Data
@@ -47,7 +48,7 @@ public class CometLoggerProperties {
         /**
          * 策略模板，默认能识别的占位符：uri、method、params（参数可配置占位符，请求头固定使用[]）
          */
-        private String tpl = "{\"uri\":\"{uri}\", \"method\": \"{method}\", \"params\": \"{params}\", \"token\": \"[token]\"}";
+        private String tpl = "{\"uri\":\"{uri}\", \"method\": \"{method}\", \"params\": \"{params}\", \"token\": \"(token)\"}";
         /**
          * 缓存占位符（模块内部使用）
          */

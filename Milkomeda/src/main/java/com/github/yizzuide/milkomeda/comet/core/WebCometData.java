@@ -83,7 +83,7 @@ public class WebCometData extends CometData {
         cometData.setRequestMethod(request.getMethod());
         String requestParams = CometAspect.resolveThreadLocal.get();
         cometData.setRequestParams(requestParams != null ? requestParams :
-                CometAspect.resolveRequestParams(request, readRequestBody));
+                CometRequestWrapper.resolveRequestParams(request, readRequestBody));
         Map<String, Object> headers = new HashMap<>();
         Enumeration<String> enumeration = request.getHeaderNames();
         while (enumeration.hasMoreElements()) {

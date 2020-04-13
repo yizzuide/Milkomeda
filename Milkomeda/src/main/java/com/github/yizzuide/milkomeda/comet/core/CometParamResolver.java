@@ -32,7 +32,7 @@ public class CometParamResolver implements HandlerMethodArgumentResolver {
     @Override
     public Object resolveArgument(MethodParameter methodParameter, ModelAndViewContainer modelAndViewContainer, NativeWebRequest nativeWebRequest, WebDataBinderFactory webDataBinderFactory) throws Exception {
         // methodParameter.getParameterAnnotation(CometParam.class);
-        String params = CometAspect.resolveRequestParams(WebContext.getRequest(),true);
+        String params = CometRequestWrapper.resolveRequestParams(WebContext.getRequest(),true);
         CometAspect.resolveThreadLocal.set(params);
         Class<?> parameterType = methodParameter.getParameterType();
         // Map类型

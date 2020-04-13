@@ -1,6 +1,8 @@
 package com.github.yizzuide.milkomeda.util;
 
+
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.util.CollectionUtils;
 
 import java.beans.BeanInfo;
 import java.beans.Introspector;
@@ -16,12 +18,12 @@ import java.util.regex.Pattern;
  *
  * @author yizzuide
  * @since 1.13.0
- * @version 3.0.1
+ * @version 3.0.3
  * Create at 2019/09/21 17:23
  */
 public class DataTypeConvertUtil {
 
-    private static Pattern linePattern = Pattern.compile("_(\\w)");
+    private static final Pattern linePattern = Pattern.compile("_(\\w)");
 
     /**
      * 下划线转驼峰
@@ -243,11 +245,96 @@ public class DataTypeConvertUtil {
      * @return 采集到的字符串
      */
     public static String extractValue(String key, Map<String, Object> source) {
+        return extractValue(key, source, null);
+    }
+
+    /**
+     * 从源Map采集key的值
+     * @param key           采集key
+     * @param source        源Map
+     * @param defaultValue  默认值
+     * @return 采集到的字符串
+     * @since 3.0.3
+     */
+    public static String extractValue(String key, Map<String, Object> source, String defaultValue) {
         if (key == null || source == null) {
-            return null;
+            return defaultValue;
         }
         Object value = source.get(key);
-        if (value == null) return null;
+        if (value == null) return defaultValue;
         return value.toString();
     }
+
+    /**
+     * 从源Map采集key路径的值
+     * @param keyPath       采集key
+     * @param source        源Map
+     * @param defaultValue  默认值
+     * @return 采集到的字符串
+     * @since 3.0.3
+     */
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    public static String extractPath(String keyPath, Map<String, Object> source, String defaultValue) {
+        if (StringUtils.isEmpty(keyPath)) {
+            return defaultValue;
+        }
+        if (!keyPath.contains(".")) {
+            return extractValue(keyPath, source, defaultValue);
+        }
+        String[] keys = org.springframework.util.StringUtils.delimitedListToStringArray(keyPath, ".");
+        Map<String, Object> nodeMap = new HashMap<>(source);
+        for (String key : keys) {
+            // Map类型路径
+            if (!key.endsWith("]")) {
+                Object node = nodeMap.get(key);
+                if (node == null) {
+                    return defaultValue;
+                }
+                if (isSugarType(node)) {
+                    return node.toString();
+                }
+                nodeMap = (Map<String, Object>) node;
+                continue;
+            }
+
+            // 数组类型
+            int startBracket = key.indexOf('[');
+            int index = Integer.parseInt(key.substring(startBracket + 1, key.indexOf(']')));
+            key = key.substring(0, startBracket);
+            Object node = nodeMap.get(key);
+            if (node == null) {
+                return defaultValue;
+            }
+            if (isSugarType(node)) {
+                return node.toString();
+            }
+            if (node instanceof List) {
+                if (CollectionUtils.isEmpty(((List) node))) {
+                    return defaultValue;
+                }
+                Object value = ((List) node).get(index);
+                if (value == null) return defaultValue;
+                if (isSugarType(value)) {
+                    return value.toString();
+                }
+                nodeMap = (Map<String, Object>) value;
+                continue;
+            }
+            // 实际值为Map，忽略下标索引
+            nodeMap = (Map<String, Object>) node;
+        }
+        // 未找到路径，返回默认值
+        return defaultValue;
+    }
+
+    /**
+     * 是否是简单值类型
+     * @param obj   对象
+     * @return  false为容器类型
+     * @since 3.0.3
+     */
+    public static boolean isSugarType(Object obj) {
+        return !(obj instanceof List) && !(obj instanceof Map);
+    }
+
 }

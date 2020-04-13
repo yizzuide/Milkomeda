@@ -14,6 +14,7 @@ import java.util.Map;
  *
  * @author yizzuide
  * @since 3.0.0
+ * @version 3.0.3
  * Create at 2020/04/08 11:12
  */
 @Data
@@ -64,7 +65,7 @@ public class ParticleProperties {
         /**
          * 分布式key模板
          */
-        private String keyTpl = "limit_{method}_{uri}_[token]";
+        private String keyTpl = "limit_{method}_{uri}_(token)";
 
         /**
          * 分布式key过期时间

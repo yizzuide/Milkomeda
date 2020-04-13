@@ -28,7 +28,7 @@ public @interface Limit {
     /**
      * 唯一标识键，用于组成redis的key
      * 1. 支持Spring EL表达式，如：#id
-     * 2. 支持HTTP Header获取表达式（内建支持），如：[token]
+     * 2. 支持HTTP Header获取表达式（内建支持），如：:token
      * @return String
      */
     String key() default "";

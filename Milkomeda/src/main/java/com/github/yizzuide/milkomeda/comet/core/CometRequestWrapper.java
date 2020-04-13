@@ -1,8 +1,10 @@
 package com.github.yizzuide.milkomeda.comet.core;
 
+import com.github.yizzuide.milkomeda.util.HttpServletUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.catalina.connector.ClientAbortException;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.web.util.WebUtils;
 
 import javax.servlet.ReadListener;
 import javax.servlet.ServletInputStream;
@@ -19,7 +21,7 @@ import java.nio.charset.Charset;
  *
  * @author yizzuide
  * @since 2.0.0
- * @version 2.7.5
+ * @version 3.0.3
  * @see org.springframework.web.util.ContentCachingRequestWrapper
  * Create at 2019/12/12 17:37
  */
@@ -39,6 +41,30 @@ public class CometRequestWrapper extends HttpServletRequestWrapper {
             return;
         }
         body = bodyStr.getBytes(Charset.defaultCharset());
+    }
+
+    /**
+     * 获取请求参数
+     * @param request   HttpServletRequest
+     * @param formBody  是否从消息体获取
+     * @return  JSON格式化字符串
+     * @since 3.0.3
+     */
+    public static String resolveRequestParams(HttpServletRequest request, boolean formBody) {
+        String requestData = HttpServletUtil.getRequestData(request);
+        // 如果form方式获取为空，取消息体内容
+        if (formBody && "{}".equals(requestData)) {
+            CometRequestWrapper requestWrapper = WebUtils.getNativeRequest(request, CometRequestWrapper.class);
+            if (requestWrapper == null) {
+                return requestData;
+            }
+            // 从请求包装里获取
+            String body = requestWrapper.getBodyString();
+            // 删除换行符
+            body = body == null ? "" : body.replaceAll("\\n?\\t?", "");
+           return body;
+        }
+        return requestData;
     }
 
     /**

@@ -71,7 +71,7 @@ milkomeda:
       # 根据路径匹配策略
       strategy:
         - paths: ["/**"]
-          tpl: url->{uri},userId:{uid},token:[token],method->{method},parameters->{params}
+          tpl: url->{uri},userId:{uid},token:(token),method->{method},parameters->{params},dataId->{data.id}
         - paths: ["/error/**"]
           tpl: url->{uri},method->{method}
     # 日志收集器

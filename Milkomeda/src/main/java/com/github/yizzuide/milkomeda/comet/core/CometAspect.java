@@ -2,7 +2,6 @@ package com.github.yizzuide.milkomeda.comet.core;
 
 import com.github.yizzuide.milkomeda.universe.config.MilkomedaProperties;
 import com.github.yizzuide.milkomeda.universe.context.WebContext;
-import com.github.yizzuide.milkomeda.util.HttpServletUtil;
 import com.github.yizzuide.milkomeda.util.JSONUtil;
 import com.github.yizzuide.milkomeda.util.NetworkUtil;
 import com.github.yizzuide.milkomeda.util.ReflectUtil;
@@ -40,7 +39,7 @@ import java.util.function.Function;
  *
  * @author yizzuide
  * @since 0.2.0
- * @version 3.0.0
+ * @version 3.0.3
  * Create at 2019/04/11 19:48
  */
 @Slf4j
@@ -62,15 +61,15 @@ public class CometAspect {
      * 控制器层本地线程存储
      */
     // 官方推荐使用private static能减少弱引用对GC的影响
-    private static ThreadLocal<CometData> threadLocal = new ThreadLocal<>();
+    private static final ThreadLocal<CometData> threadLocal = new ThreadLocal<>();
     /**
      * 服务层本地线程存储
      */
-    private static ThreadLocal<CometData> threadLocalX = new ThreadLocal<>();
+    private static final ThreadLocal<CometData> threadLocalX = new ThreadLocal<>();
     /**
      * 忽略序列化的参数
      */
-    private List<Class<?>> ignoreParams;
+    private final List<Class<?>> ignoreParams;
     /**
      * 记录器
      */
@@ -233,23 +232,6 @@ public class CometAspect {
         }
         threadLocal.remove();
         return returnObj;
-    }
-
-    public static String resolveRequestParams(HttpServletRequest request, boolean formBody) {
-        String requestData = HttpServletUtil.getRequestData(request);
-        // 如果form方式获取为空，取消息体内容
-        if (formBody && "{}".equals(requestData)) {
-            CometRequestWrapper requestWrapper = WebUtils.getNativeRequest(request, CometRequestWrapper.class);
-            if (requestWrapper == null) {
-                return requestData;
-            }
-            // 从请求包装里获取
-            String body = requestWrapper.getBodyString();
-            // 删除换行符
-            body = body == null ? "" : body.replaceAll("\\n?\\t?", "");
-           return body;
-        }
-        return requestData;
     }
 
     /**

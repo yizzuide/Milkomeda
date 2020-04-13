@@ -43,7 +43,7 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 3.0.0
- * @version 3.0.1
+ * @version 3.0.3
  * Create at 2020/03/28 01:08
  */
 @Slf4j
@@ -295,8 +295,6 @@ public class CometInterceptor extends HandlerInterceptorAdapter implements Appli
             return;
         }
         String requestParams = CometAspect.resolveThreadLocal.get();
-        requestParams = requestParams == null ?
-                CometAspect.resolveRequestParams(request, CometHolder.getProps().isEnableReadRequestBody()) : requestParams;
         for (CometLoggerProperties.Strategy strategy : strategyList) {
             if (CollectionUtils.isEmpty(strategy.getPaths()) ||
                     !URLPathMatcher.match(strategy.getPaths(), requestURI)) {
