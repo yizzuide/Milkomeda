@@ -68,7 +68,7 @@ public class CometConfig {
     }
 
     @Autowired
-    @SuppressWarnings("all")
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     public void configRequestMappingHandlerMapping(RequestMappingHandlerMapping requestMappingHandlerMapping) {
         // 使用内置拦截器
         SpringMvcPolyfill.addDynamicInterceptor(cometInterceptor(),  Ordered.HIGHEST_PRECEDENCE, Collections.singletonList("/**"),

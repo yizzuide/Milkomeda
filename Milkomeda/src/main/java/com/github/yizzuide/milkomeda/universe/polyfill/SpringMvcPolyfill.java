@@ -4,6 +4,7 @@ import com.github.yizzuide.milkomeda.hydrogen.interceptor.HydrogenMappedIntercep
 import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import com.github.yizzuide.milkomeda.util.ReflectUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.core.OrderComparator;
 import org.springframework.core.Ordered;
 import org.springframework.util.CollectionUtils;
@@ -45,9 +46,10 @@ public class SpringMvcPolyfill {
     /**
      * 动态添加异常切面
      * @param handlerExceptionResolver  HandlerExceptionResolver
+     * @param beanFactory               BeanFactory
      * @param beanName                  异常拦截处理器bean名
      */
-    public static void addDynamicExceptionAdvice(HandlerExceptionResolver handlerExceptionResolver, String beanName) {
+    public static void addDynamicExceptionAdvice(HandlerExceptionResolver handlerExceptionResolver, BeanFactory beanFactory, String beanName) {
         if (handlerExceptionResolver instanceof HandlerExceptionResolverComposite) {
             List<HandlerExceptionResolver> exceptionResolvers = ((HandlerExceptionResolverComposite) handlerExceptionResolver).getExceptionResolvers();
             for (HandlerExceptionResolver exceptionResolver : exceptionResolvers) {

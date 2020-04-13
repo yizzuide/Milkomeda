@@ -27,7 +27,8 @@ import org.springframework.data.redis.core.RedisTemplate;
 @EnableConfigurationProperties(IceProperties.class)
 public class IceBasicConfig {
 
-    // 提前注入应用上下文，用于配置Bean初始化调用
+    // 注入需要需要使用的ApplicationContext（让MilkomedaContextConfig先配置）
+    @SuppressWarnings("unused")
     @Autowired
     private ApplicationContextHolder applicationContextHolder;
 

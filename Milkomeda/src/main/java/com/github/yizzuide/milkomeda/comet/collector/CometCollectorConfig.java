@@ -111,9 +111,10 @@ public class CometCollectorConfig implements ApplicationContextAware {
         // 如果为空，到BeanFactory里查找
         if (CollectionUtils.isEmpty(collectors)) {
             collectors = new ArrayList<>(BeanFactoryUtils.beansOfTypeIncludingAncestors(applicationContext, Collector.class).values());
-            if (!CollectionUtils.isEmpty(collectors)) {
-                applicationContext.getBean(CollectorFactory.class).getPillarExecutor().addPillarList(collectors.stream().filter(c -> StringUtils.hasLength(c.supportType())).collect(Collectors.toList()));
+            if (CollectionUtils.isEmpty(collectors)) {
+                return;
             }
+            applicationContext.getBean(CollectorFactory.class).getPillarExecutor().addPillarList(collectors.stream().filter(c -> StringUtils.hasLength(c.supportType())).collect(Collectors.toList()));
         }
     }
 }

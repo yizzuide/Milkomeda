@@ -7,7 +7,7 @@ import java.lang.annotation.*;
 
 /**
  * EnableIce
- * 启用Ice，该注解是 {@link EnableIceServer} 和 {@link EnableIceClient} 的合并注解，
+ * <br>
  * 需要在配置文件中配置成你想要的启动类型：<br>
  *     <dl>
  *        <dt>配置为服务端</dt>
@@ -50,6 +50,17 @@ import java.lang.annotation.*;
  *               # 消费轮询间隔（默认5s）
  *               task-execute-rate: 2s
  *            </pre>
+ *        </dd>
+ *        <dt>配置为数据发送端</dt>
+ *        <dd>
+ *            <pre>
+ *               # 禁止启动Job作业
+ *               enable-job-timer: false
+ *               # 延迟队列分桶数量（默认为3）
+ *               delay-bucket-count: 2
+ *               # 消费执行超时时间（默认5000ms）
+ *               ttr: 10s
+ *           </pre>
  *        </dd>
  *     </dl>
  *

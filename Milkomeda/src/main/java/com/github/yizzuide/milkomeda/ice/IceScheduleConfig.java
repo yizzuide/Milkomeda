@@ -4,10 +4,10 @@ import com.github.yizzuide.milkomeda.universe.metadata.HandlerMetaData;
 import com.github.yizzuide.milkomeda.util.ReflectUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.task.TaskSchedulingAutoConfiguration;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.scheduling.annotation.SchedulingConfigurer;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.util.CollectionUtils;
 
@@ -25,7 +25,7 @@ import java.util.Map;
  */
 @Slf4j
 @Configuration
-@ConditionalOnMissingBean(SchedulingConfigurer.class)
+@AutoConfigureAfter(TaskSchedulingAutoConfiguration.class)
 @ConditionalOnProperty(prefix = "milkomeda.ice", name = "enable-task", havingValue = "true")
 public class IceScheduleConfig {
 

@@ -30,6 +30,7 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 3.0.0
+ * @version 3.0.2
  * Create at 2020/04/08 11:41
  */
 public class ParticleFilter implements Filter {
@@ -47,18 +48,19 @@ public class ParticleFilter implements Filter {
     private boolean skip = false;
 
     @PostConstruct
-    public void awareInit() {
-        if (CollectionUtils.isEmpty(particleProperties.getLimiters())) {
+    public void init() {
+        List<ParticleProperties.Limiter> limiters = particleProperties.getLimiters();
+        if (CollectionUtils.isEmpty(limiters)) {
             skip = true;
             return;
         }
-        skip = particleProperties.getLimiters().stream().allMatch(limiter -> CollectionUtils.isEmpty(limiter.getUrls()));
+        skip = limiters.stream().allMatch(limiter -> CollectionUtils.isEmpty(limiter.getUrls()));
         if (skip) {
             return;
         }
         urlPlaceholderParser = new URLPlaceholderParser();
         urlPlaceholderParser.setCustomURLPlaceholderResolver(particleURLPlaceholderResolver);
-        for (ParticleProperties.Limiter limiter : particleProperties.getLimiters()) {
+        for (ParticleProperties.Limiter limiter : limiters) {
             if (CollectionUtils.isEmpty(limiter.getUrls()) || StringUtils.isEmpty(limiter.getKeyTpl())) {
                 continue;
             }
