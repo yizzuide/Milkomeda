@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 3.0.0
- * @version 3.0.2
+ * @version 3.0.4
  * Create at 2020/04/08 11:41
  */
 public class ParticleFilter implements Filter {
@@ -87,7 +87,12 @@ public class ParticleFilter implements Filter {
             Map<String, Object> returnData = limiter.getLimitHandler().limit(key, limiter.getKeyExpire().getSeconds(), particle -> {
                 if (particle.isLimited()) {
                     Map<String, Object> result = new HashMap<>(9);
-                    Map<String, Object> responseInfo = particleProperties.getResponse();
+                    Map<String, Object> responseInfo = limiter.getResponse();
+                    // 查找全局的响应
+                    if (responseInfo == null) {
+                        responseInfo = particleProperties.getResponse();
+                    }
+                    // 如果没有响应，返回默认响应码
                     if (responseInfo == null || responseInfo.get(YmlResponseOutput.STATUS) == null) {
                         result.put(YmlResponseOutput.STATUS, 416);
                         return result;

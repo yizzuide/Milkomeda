@@ -43,7 +43,7 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 3.0.0
- * @version 3.0.3
+ * @version 3.0.4
  * Create at 2020/03/28 01:08
  */
 @Slf4j
@@ -167,11 +167,11 @@ public class CometInterceptor extends HandlerInterceptorAdapter implements Appli
                 }
             }
         }
-        this.collectPostLog(body, ex);
+        this.collectPostLog(response.getStatus(), body, ex);
     }
 
     @SuppressWarnings("all")
-    private void collectPostLog(Object body, Exception ex) {
+    private void collectPostLog(int status, Object body, Exception ex) {
         CometData cometData = threadLocal.get();
         Date now = new Date();
         long duration = now.getTime() - cometData.getRequestTime().getTime();
@@ -190,6 +190,15 @@ public class CometInterceptor extends HandlerInterceptorAdapter implements Appli
                 String errorStack = String.format("exception happened: %s \n invoke root: %s", stackTrace[0], stackTrace[stackTrace.length - 1]);
                 cometData.setTraceStack(errorStack);
             }
+            tagCollector.onFailure(cometData);
+            threadLocal.remove();
+            return;
+        }
+
+        // 状态码错误
+        if (status >= 400) {
+            cometData.setStatus(cometProperties.getStatusFailCode());
+            cometData.setResponseData(body == null ? null : JSONUtil.serialize(body));
             tagCollector.onFailure(cometData);
             threadLocal.remove();
             return;

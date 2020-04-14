@@ -14,7 +14,7 @@ import java.util.Map;
  *
  * @author yizzuide
  * @since 3.0.0
- * @version 3.0.3
+ * @version 3.0.4
  * Create at 2020/04/08 11:12
  */
 @Data
@@ -26,17 +26,17 @@ public class ParticleProperties {
     private boolean enableFilter = false;
 
     /**
-     * 排除的URL
+     * 全局排除的URL
      */
     private List<String> excludeUrls;
 
     /**
-     * 包含的URL
+     * 全局包含的URL
      */
     private List<String> includeUrls;
 
     /**
-     * 限制后的响应
+     * 全局限制后的响应
      */
     private Map<String, Object> response;
 
@@ -77,6 +77,11 @@ public class ParticleProperties {
          * 限制的路径
          */
         private List<String> urls;
+
+        /**
+         * 限制后的响应
+         */
+        private Map<String, Object> response;
 
         /**
          * 限制器实例（内部使用）

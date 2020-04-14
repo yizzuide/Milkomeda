@@ -104,18 +104,18 @@ milkomeda:
           timesType: MIN
           limitTimes: 3
         urls: ["/particle/pay"]
+        response:
+          status: 200
+          code: -1
+          message: 请求太频繁，请稍后再试！
+          addition:
+            data: ${collections.emptyMap}
       -
         name: barrierLimiter
         handler-clazz: com.github.yizzuide.milkomeda.particle.BarrierLimiter
         props:
           chain: ["noRepeatLimiter", "timesLimiter"]
     exclude-urls: ["/favicon.ico"]
-    response:
-      status: 200
-      code: -1
-      message: 请求太频繁，请稍后再试！
-      addition:
-        data: ${collections.emptyMap}
 
 
   light:
