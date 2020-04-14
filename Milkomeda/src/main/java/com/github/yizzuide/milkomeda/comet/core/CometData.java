@@ -13,7 +13,7 @@ import java.util.Date;
  *
  * @author yizzuide
  * @since 0.2.0
- * @version 3.0.0
+ * @version 3.0.5
  * Create at 2019/09/21 00:48
  */
 @Data
@@ -91,4 +91,18 @@ public class CometData implements Serializable {
      */
     @JsonIgnore
     private transient HttpServletRequest request;
+
+    /**
+     * 传递给日志收集器的意图数据
+     * @since 3.0.5
+     */
+    @JsonIgnore
+    private transient Object intentData;
+
+    /**
+     * 标识失败并设置异常，日志收集器将走失败没流程
+     * @since 3.0.5
+     */
+    @JsonIgnore
+    private transient Object failure;
 }

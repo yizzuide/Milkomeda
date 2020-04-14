@@ -43,7 +43,7 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 3.0.0
- * @version 3.0.4
+ * @version 3.0.5
  * Create at 2020/03/28 01:08
  */
 @Slf4j
@@ -195,7 +195,22 @@ public class CometInterceptor extends HandlerInterceptorAdapter implements Appli
             return;
         }
 
-        // 状态码错误
+        // 如果有标识异常，按失败处理
+        Object failure = cometData.getFailure();
+        if (failure != null && failure instanceof Exception) {
+            cometData.setStatus(cometProperties.getStatusFailCode());
+            cometData.setResponseData(body == null ? null : JSONUtil.serialize(body));
+            ex = (Exception) failure;
+            cometData.setErrorInfo(ex.getMessage());
+            StackTraceElement[] stackTrace = ex.getStackTrace();
+            String errorStack = String.format("exception happened: %s \n invoke root: %s", stackTrace[0], stackTrace[stackTrace.length - 1]);
+            cometData.setTraceStack(errorStack);
+            tagCollector.onFailure(cometData);
+            threadLocal.remove();
+            return;
+        }
+
+        // 响应状态码错误
         if (status >= 400) {
             cometData.setStatus(cometProperties.getStatusFailCode());
             cometData.setResponseData(body == null ? null : JSONUtil.serialize(body));
@@ -312,5 +327,15 @@ public class CometInterceptor extends HandlerInterceptorAdapter implements Appli
             log.info(urlPlaceholderParser.parse(strategy.getTpl(), request, requestParams, strategy.getCacheKeys()));
             break;
         }
+    }
+
+    /**
+     * 获取WebCometData
+     * @return  日志采集数据
+     * @since 3.0.5
+     */
+    public static WebCometData getWebCometData() {
+        if (threadLocal == null) return null;
+        return (WebCometData) threadLocal.get();
     }
 }

@@ -1,6 +1,7 @@
 package com.github.yizzuide.milkomeda.universe.context;
 
 import com.github.yizzuide.milkomeda.comet.core.CometAspect;
+import com.github.yizzuide.milkomeda.comet.core.CometInterceptor;
 import com.github.yizzuide.milkomeda.comet.core.WebCometData;
 import com.github.yizzuide.milkomeda.comet.core.XCometData;
 import com.github.yizzuide.milkomeda.universe.el.ELContext;
@@ -24,7 +25,7 @@ import java.util.function.BiFunction;
  *
  * @author yizzuide
  * @since 1.13.4
- * @version 3.0.1
+ * @version 3.0.5
  * Create at 2019/10/24 21:17
  */
 public class AopContextHolder {
@@ -47,7 +48,13 @@ public class AopContextHolder {
      * @return WebCometData
      */
     public static WebCometData getWebCometData() {
-        return CometAspect.getCurrentWebCometData();
+        // Filter层采集
+        WebCometData webCometData = CometInterceptor.getWebCometData();
+        if (webCometData == null) {
+            // 方法注解采集
+            return CometAspect.getCurrentWebCometData();
+        }
+        return webCometData;
     }
 
     /**

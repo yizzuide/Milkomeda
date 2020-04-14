@@ -4,6 +4,7 @@ import com.github.yizzuide.milkomeda.comet.core.Comet;
 import com.github.yizzuide.milkomeda.comet.core.CometParam;
 import com.github.yizzuide.milkomeda.demo.comet.pojo.ProfileWebCometData;
 import com.github.yizzuide.milkomeda.demo.comet.service.CollectService;
+import com.github.yizzuide.milkomeda.universe.context.AopContextHolder;
 import com.github.yizzuide.milkomeda.util.JSONUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
@@ -49,8 +50,26 @@ public class CollectController {
         map.put("code", "1");
         map.put("data", "成功");
 //        throw new RuntimeException("出错了");
-//        int i = 1 / 0;
 //        return map;
+
+        try {
+            // 设置中间解析的数据
+            Map<String, Object> data = new HashMap<>();
+            data.put("code", "137");
+            data.put("taskId", "123354665656");
+            AopContextHolder.getWebCometData().setIntentData(data);
+            // 测试异常
+            int i = 1 / 0;
+        } catch (Exception e) {
+            // 标记异常
+            AopContextHolder.getWebCometData().setFailure(e);
+            response.setStatus(500);
+            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+            PrintWriter writer = response.getWriter();
+            writer.println("{}");
+            writer.flush();
+            return;
+        }
 
         response.setStatus(200);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
