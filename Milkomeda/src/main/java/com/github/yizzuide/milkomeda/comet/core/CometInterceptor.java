@@ -206,7 +206,7 @@ public class CometInterceptor extends HandlerInterceptorAdapter implements Appli
 
         // 检测Body返回code
         Map<String, Object> bodyMap = null;
-        boolean isResponseOk = false;
+        boolean isResponseOk = true;
         // 检测响应码是否有成功
         Map<String, YmlAliasNode> aliasNodes = aliasNodesMap.get(tag);
         if (!CollectionUtils.isEmpty(aliasNodes)) {
