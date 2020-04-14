@@ -19,7 +19,7 @@ import java.util.List;
  *
  * @author yizzuide
  * @since 3.0.0
- * @version 3.0.2
+ * @version 3.0.3
  * Create at 2020/03/28 17:40
  */
 @Slf4j
@@ -38,7 +38,6 @@ public class MoonConfig implements ApplicationContextAware {
             return;
         }
         for (MoonProperties.Instance instance : instances) {
-            if (CollectionUtils.isEmpty(instance.getPhases())) continue;
             String beanName = instance.getName();
             String cacheName = instance.getCacheName();
             Class<MoonStrategy> moonStrategyClazz = instance.getMoonStrategyClazz();
@@ -56,7 +55,7 @@ public class MoonConfig implements ApplicationContextAware {
                 }
             }
             if (CollectionUtils.isEmpty(instance.getPhases())) {
-                return;
+                continue;
             }
             moon.add(instance.getPhases().toArray(new Object[0]));
         }
