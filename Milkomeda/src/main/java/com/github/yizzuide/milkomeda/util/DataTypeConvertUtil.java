@@ -285,15 +285,15 @@ public class DataTypeConvertUtil {
         Map<String, Object> nodeMap = new HashMap<>(source);
         for (String key : keys) {
             // Map类型路径
-            if (!key.endsWith("]")) {
+            if (key.indexOf('[') == -1) {
                 Object value = nodeMap.get(key);
-                Object node = findNextNode(nodeMap, value, defaultValue);
-                if (isSugarType(node)) return node.toString();
-                nodeMap = (Map<String, Object>) node;
+                Object nextNode = findNextNode(value, defaultValue);
+                if (isSugarType(nextNode)) return nextNode.toString();
+                nodeMap = (Map<String, Object>) nextNode;
                 continue;
             }
 
-            // 数组类型
+            // List类型路径
             int startBracket = key.indexOf('[');
             int index = Integer.parseInt(key.substring(startBracket + 1, key.indexOf(']')));
             key = key.substring(0, startBracket);
@@ -301,18 +301,20 @@ public class DataTypeConvertUtil {
             if (node == null) {
                 return defaultValue;
             }
-            if (node instanceof List) {
-                if (CollectionUtils.isEmpty(((List) node))) {
-                    return defaultValue;
-                }
-                Object value = ((List) node).get(index);
-                Object nextNode = findNextNode(nodeMap, value, defaultValue);
-                if (isSugarType(nextNode)) return nextNode.toString();
-                nodeMap = (Map<String, Object>) nextNode;
-                continue;
+            // list string -> list
+            if (node instanceof String && ((String) node).indexOf('[') == 0) {
+                node = JSONUtil.parseList(node.toString(), Map.class);
             }
-            // 实际值为Map，忽略下标索引
-            nodeMap = (Map<String, Object>) node;
+            if (!(node instanceof List)) {
+                return defaultValue;
+            }
+            if (CollectionUtils.isEmpty(((List) node))) {
+                return defaultValue;
+            }
+            Object value = ((List) node).get(index);
+            Object nextNode = findNextNode(value, defaultValue);
+            if (isSugarType(nextNode)) return nextNode.toString();
+            nodeMap = (Map<String, Object>) nextNode;
         }
         // 未找到路径，返回默认值
         return defaultValue;
@@ -329,12 +331,14 @@ public class DataTypeConvertUtil {
     }
 
 
-    private static Object findNextNode(Map<String, Object> nodeMap, Object node, String defaultValue) {
+    private static Object findNextNode(Object node, String defaultValue) {
         if (node == null) {
             return defaultValue;
         }
+        Map<String, Object> nodeMap;
         if (isSugarType(node)) {
             String strValue = node.toString();
+            // map string -> map
             if (strValue.startsWith("{") && strValue.endsWith("}"))  {
                 nodeMap = JSONUtil.parseMap(strValue, String.class, Object.class);
                 if (nodeMap == null) {
