@@ -286,13 +286,9 @@ public class DataTypeConvertUtil {
         for (String key : keys) {
             // Map类型路径
             if (!key.endsWith("]")) {
-                Object node = nodeMap.get(key);
-                if (node == null) {
-                    return defaultValue;
-                }
-                if (isSugarType(node)) {
-                    return node.toString();
-                }
+                Object value = nodeMap.get(key);
+                Object node = findNextNode(nodeMap, value, defaultValue);
+                if (isSugarType(node)) return node.toString();
                 nodeMap = (Map<String, Object>) node;
                 continue;
             }
@@ -305,19 +301,14 @@ public class DataTypeConvertUtil {
             if (node == null) {
                 return defaultValue;
             }
-            if (isSugarType(node)) {
-                return node.toString();
-            }
             if (node instanceof List) {
                 if (CollectionUtils.isEmpty(((List) node))) {
                     return defaultValue;
                 }
                 Object value = ((List) node).get(index);
-                if (value == null) return defaultValue;
-                if (isSugarType(value)) {
-                    return value.toString();
-                }
-                nodeMap = (Map<String, Object>) value;
+                Object nextNode = findNextNode(nodeMap, value, defaultValue);
+                if (isSugarType(nextNode)) return nextNode.toString();
+                nodeMap = (Map<String, Object>) nextNode;
                 continue;
             }
             // 实际值为Map，忽略下标索引
@@ -337,4 +328,22 @@ public class DataTypeConvertUtil {
         return !(obj instanceof List) && !(obj instanceof Map);
     }
 
+
+    private static Object findNextNode(Map<String, Object> nodeMap, Object node, String defaultValue) {
+        if (node == null) {
+            return defaultValue;
+        }
+        if (isSugarType(node)) {
+            String strValue = node.toString();
+            if (strValue.startsWith("{") && strValue.endsWith("}"))  {
+                nodeMap = JSONUtil.parseMap(strValue, String.class, Object.class);
+                if (nodeMap == null) {
+                    return defaultValue;
+                }
+                return nodeMap;
+            }
+            return strValue;
+        }
+        return node;
+    }
 }
