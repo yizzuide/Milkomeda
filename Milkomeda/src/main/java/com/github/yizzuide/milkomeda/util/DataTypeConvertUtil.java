@@ -18,7 +18,7 @@ import java.util.regex.Pattern;
  *
  * @author yizzuide
  * @since 1.13.0
- * @version 3.0.3
+ * @version 3.0.6
  * Create at 2019/09/21 17:23
  */
 public class DataTypeConvertUtil {
