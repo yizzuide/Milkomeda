@@ -164,7 +164,7 @@ milkomeda:
     # 消费轮询间隔（默认5s）
     task-execute-rate: 2s
     # 消费处理器支持多个监听器
-#    multi-topic-listener-per-handler: true
+  #    multi-topic-listener-per-handler: true
 
   moon:
     instances:

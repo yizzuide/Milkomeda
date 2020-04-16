@@ -3,10 +3,9 @@ package com.github.yizzuide.milkomeda.ice;
 import com.github.yizzuide.milkomeda.universe.metadata.HandlerMetaData;
 import com.github.yizzuide.milkomeda.universe.polyfill.RedisPolyfill;
 import com.github.yizzuide.milkomeda.util.RedisUtil;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
 import java.lang.reflect.Method;
@@ -22,8 +21,9 @@ import java.util.List;
  */
 @Slf4j
 @Data
-@AllArgsConstructor
-public class DelayJobHandler implements Runnable {
+public class DelayJobHandler implements Runnable, ApplicationListener<IceInstanceChangeEvent> {
+
+    private IceProperties props;
 
     private StringRedisTemplate redisTemplate;
 
@@ -48,18 +48,27 @@ public class DelayJobHandler implements Runnable {
     private int index;
 
     // 延迟桶分布式锁Key
-    private static final String KEY_IDEMPOTENT_LIMITER = "ice:execute_delay_bucket_lock_";
+    private String lockKey;
 
-    @Autowired
-    private IceProperties props;
+    public void fill(StringRedisTemplate redisTemplate, JobPool jobPool, DelayBucket delayBucket, ReadyQueue readyQueue, int i, IceProperties props) {
+        this.redisTemplate = redisTemplate;
+        this.jobPool = jobPool;
+        this.delayBucket = delayBucket;
+        this.readyQueue = readyQueue;
+        this.index = i;
+        this.props = props;
+        if (IceProperties.DEFAULT_INSTANCE_NAME.equals(props.getInstanceName())) {
+            this.lockKey = "ice:execute_delay_bucket_lock_" + i;
+        } else {
+            this.lockKey = "ice:execute_delay_bucket_lock_" + i + ":" + props.getInstanceName();
+        }
+    }
 
     @Override
     public void run() {
         // 延迟桶处理锁住资源，防止同一桶索引分布式并发执行时出现相同记录问题
-        String indexLockKey = null;
         if (props.isEnableJobTimerDistributed()) {
-            indexLockKey = indexLockKey();
-            boolean hasObtainLock = RedisUtil.setIfAbsent(indexLockKey, props.getJobTimerLockTimeoutSeconds().getSeconds(), redisTemplate);
+            boolean hasObtainLock = RedisUtil.setIfAbsent(this.lockKey, props.getJobTimerLockTimeoutSeconds().getSeconds(), redisTemplate);
             if (!hasObtainLock) return;
         }
 
@@ -99,7 +108,7 @@ public class DelayJobHandler implements Runnable {
         } finally {
             if (props.isEnableJobTimerDistributed()) {
                 // 删除Lock
-                RedisPolyfill.redisDelete(redisTemplate, indexLockKey);
+                RedisPolyfill.redisDelete(redisTemplate, this.lockKey);
             }
         }
     }
@@ -164,14 +173,9 @@ public class DelayJobHandler implements Runnable {
         }, redisTemplate);
     }
 
-    /**
-     * 获取桶索引锁key
-     * @return key
-     */
-    private String indexLockKey() {
-        String indexLockKey = KEY_IDEMPOTENT_LIMITER + index;
-        // 使用常量池里的引用
-        indexLockKey = indexLockKey.intern();
-        return indexLockKey;
+    @Override
+    public void onApplicationEvent(IceInstanceChangeEvent event) {
+        String instanceName = event.getSource().toString();
+        this.lockKey = "ice:execute_delay_bucket_lock_" + this.index + ":" + instanceName;
     }
 }

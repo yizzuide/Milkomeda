@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import com.github.yizzuide.milkomeda.util.JSONUtil;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.ApplicationListener;
 import org.springframework.data.redis.core.BoundHashOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.CollectionUtils;
@@ -18,17 +19,23 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 1.15.0
- * @version 3.0.0
+ * @version 3.0.7
  * Create at 2019/11/16 15:45
  */
-public class RedisJobPool implements JobPool, InitializingBean {
+public class RedisJobPool implements JobPool, InitializingBean, ApplicationListener<IceInstanceChangeEvent> {
 
     private StringRedisTemplate redisTemplate;
 
-    private static final String PREFIX_NAME = "ice:job_pool";
+    private String jobPoolKey = "ice:job_pool";
+
+    public RedisJobPool(IceProperties props) {
+        if (!IceProperties.DEFAULT_INSTANCE_NAME.equals(props.getInstanceName())) {
+            this.jobPoolKey = "ice:job_pool" + ":" + props.getInstanceName();
+        }
+    }
 
     private BoundHashOperations<String, String, String> getPool () {
-        return redisTemplate.boundHashOps(PREFIX_NAME);
+        return redisTemplate.boundHashOps(jobPoolKey);
     }
 
     @SuppressWarnings("rawtypes")
@@ -93,5 +100,11 @@ public class RedisJobPool implements JobPool, InitializingBean {
     @Override
     public void afterPropertiesSet() {
         redisTemplate = ApplicationContextHolder.get().getBean(StringRedisTemplate.class);
+    }
+
+    @Override
+    public void onApplicationEvent(IceInstanceChangeEvent event) {
+        String instanceName = event.getSource().toString();
+        jobPoolKey = "ice:job_pool" + ":" + instanceName;
     }
 }

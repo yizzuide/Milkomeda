@@ -5,6 +5,7 @@ import com.github.yizzuide.milkomeda.universe.polyfill.RedisPolyfill;
 import com.github.yizzuide.milkomeda.util.RedisUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.CollectionUtils;
 
@@ -23,7 +24,7 @@ import java.util.stream.Collectors;
  * Create at 2019/11/16 15:20
  */
 @Slf4j
-public class RedisIce implements Ice {
+public class RedisIce implements Ice, ApplicationListener<IceInstanceChangeEvent> {
 
     @Autowired
     private JobPool jobPool;
@@ -37,10 +38,16 @@ public class RedisIce implements Ice {
     @Autowired
     private StringRedisTemplate redisTemplate;
 
-    @Autowired
     private IceProperties props;
 
-    private static final String KEY_IDEMPOTENT_LIMITER = "ice:range_pop_lock";
+    private String lockKey = "ice:range_pop_lock";
+
+    public RedisIce(IceProperties props) {
+        this.props = props;
+        if (!IceProperties.DEFAULT_INSTANCE_NAME.equals(props.getInstanceName())) {
+            this.lockKey = "ice:range_pop_lock:" + props.getInstanceName();
+        }
+    }
 
     @SuppressWarnings("rawtypes")
     @Override
@@ -100,7 +107,7 @@ public class RedisIce implements Ice {
         if (count == 1) return Collections.singletonList(pop(topic));
 
         // 使用SetNX锁住资源，防止多线程并发执行，造成重复消费问题
-        boolean hasObtainLock = RedisUtil.setIfAbsent(KEY_IDEMPOTENT_LIMITER, props.getTaskPopCountLockTimeoutSeconds().getSeconds(), redisTemplate);
+        boolean hasObtainLock = RedisUtil.setIfAbsent(this.lockKey, props.getTaskPopCountLockTimeoutSeconds().getSeconds(), redisTemplate);
         if (!hasObtainLock) return null;
 
         List<Job<T>> jobList;
@@ -131,7 +138,7 @@ public class RedisIce implements Ice {
             }, redisTemplate);
         } finally {
             // 删除Lock
-            RedisPolyfill.redisDelete(redisTemplate, KEY_IDEMPOTENT_LIMITER);
+            RedisPolyfill.redisDelete(redisTemplate, this.lockKey);
         }
         return jobList;
     }
@@ -155,5 +162,11 @@ public class RedisIce implements Ice {
     @Override
     public void delete(Object... jobIds) {
         jobPool.remove(jobIds);
+    }
+
+    @Override
+    public void onApplicationEvent(IceInstanceChangeEvent event) {
+        String instanceName = event.getSource().toString();
+        this.lockKey = "ice:range_pop_lock:" + instanceName;
     }
 }

@@ -18,6 +18,13 @@ import java.time.temporal.ChronoUnit;
 @Data
 @ConfigurationProperties("milkomeda.ice")
 class IceProperties {
+
+    public static final String DEFAULT_INSTANCE_NAME = "default";
+
+    /**
+     * 实例名（用于多产品隔离，否则不要修改）
+     */
+    private String instanceName = DEFAULT_INSTANCE_NAME;
     /**
      * 开启作业Timer（仅作为消费端使用时需要设置为false）<br>
      * 注意：使用 {@link EnableIceServer} 时，设置为false无效
