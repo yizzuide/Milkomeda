@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationListener;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.util.CollectionUtils;
 
 import java.lang.reflect.Method;
 import java.util.List;
@@ -16,7 +17,7 @@ import java.util.List;
  *
  * @author yizzuide
  * @since 1.15.0
- * @version 3.0.7
+ * @version 3.0.8
  * Create at 2019/11/16 17:30
  */
 @Slf4j
@@ -43,6 +44,11 @@ public class DelayJobHandler implements Runnable, ApplicationListener<IceInstanc
     private ReadyQueue readyQueue;
 
     /**
+     * TTR Overload队列
+     */
+    private DeadQueue deadQueue;
+
+    /**
      * 索引
      */
     private int index;
@@ -50,11 +56,12 @@ public class DelayJobHandler implements Runnable, ApplicationListener<IceInstanc
     // 延迟桶分布式锁Key
     private String lockKey;
 
-    public void fill(StringRedisTemplate redisTemplate, JobPool jobPool, DelayBucket delayBucket, ReadyQueue readyQueue, int i, IceProperties props) {
+    public void fill(StringRedisTemplate redisTemplate, JobPool jobPool, DelayBucket delayBucket, ReadyQueue readyQueue, DeadQueue deadQueue, int i, IceProperties props) {
         this.redisTemplate = redisTemplate;
         this.jobPool = jobPool;
         this.delayBucket = delayBucket;
         this.readyQueue = readyQueue;
+        this.deadQueue = deadQueue;
         this.index = i;
         this.props = props;
         if (IceProperties.DEFAULT_INSTANCE_NAME.equals(props.getInstanceName())) {
@@ -117,23 +124,35 @@ public class DelayJobHandler implements Runnable, ApplicationListener<IceInstanc
      * 处理ttr的任务
      */
     private void processTtrJob(DelayJob delayJob, Job<?> job) {
-        log.info("Ice处理TTR重试的Job {}，已重试次数为{}", delayJob.getJodId(), delayJob.getRetryCount());
+        log.info("Ice处理TTR的Job {}，当前重试次数为{}", delayJob.getJodId(), delayJob.getRetryCount() + 1);
         // 检测重试次数过载
-        boolean overload = delayJob.getRetryCount() > job.getRetryCount();
+        boolean overload = delayJob.getRetryCount() >= job.getRetryCount();
         if (overload) {
-            log.error("Ice检测到 Job {} 的TTR超时重试超过预设的{}次，重试次数为{}", job.getId(),
-                    job.getRetryCount(), delayJob.getRetryCount());
+            log.error("Ice检测到 Job {} 的TTR超过预设的{}次，将进入dead queue!", job.getId(), job.getRetryCount());
+            // 调用Overload监听器
             List<HandlerMetaData> handlerMetaDataList = IceContext.getTopicTtrOverloadMap().get(job.getTopic());
-            if (handlerMetaDataList != null) {
-                handlerMetaDataList.forEach(handlerMetaData -> {
-                    Method method = handlerMetaData.getMethod();
-                    try {
-                        method.invoke(handlerMetaData.getTarget(), job);
-                    } catch (Exception e) {
-                        log.error("Ice invoke TTR overload listener error: {}", e.getMessage(), e);
-                    }
-                });
+            if (CollectionUtils.isEmpty(handlerMetaDataList)) {
+                return;
             }
+            handlerMetaDataList.forEach(handlerMetaData -> {
+                Method method = handlerMetaData.getMethod();
+                try {
+                    method.invoke(handlerMetaData.getTarget(), job);
+                } catch (Exception e) {
+                    log.error("Ice invoke TTR overload listener error: {}", e.getMessage(), e);
+                }
+            });
+            // 移除delayBucket中的任务
+            delayBucket.remove(index, delayJob);
+            // 修改池中状态
+            job.setStatus(JobStatus.DELAY);
+            jobPool.push(job);
+            // 重置延迟作业状态
+            delayJob.setDelayTime(job.getDelay());
+            delayJob.setRetryCount(0);
+            // 添加dead queue
+            deadQueue.add(delayJob);
+            return;
         }
 
         RedisUtil.batchOps(() -> {

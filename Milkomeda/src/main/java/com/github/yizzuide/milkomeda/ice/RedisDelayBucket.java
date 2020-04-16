@@ -27,13 +27,13 @@ import java.util.stream.Collectors;
  */
 public class RedisDelayBucket implements DelayBucket, InitializingBean, ApplicationListener<IceInstanceChangeEvent> {
 
-    private IceProperties props;
+    private final IceProperties props;
 
     private StringRedisTemplate redisTemplate;
 
-    private List<String> bucketNames = new ArrayList<>();
+    private final List<String> bucketNames = new ArrayList<>();
 
-    private static AtomicInteger index = new AtomicInteger(0);
+    private static final AtomicInteger index = new AtomicInteger(0);
 
     // 默认最大桶大小
     public static final int DEFAULT_MAX_BUCKET_SIZE = 100;

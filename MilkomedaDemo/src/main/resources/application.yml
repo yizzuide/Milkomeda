@@ -156,7 +156,7 @@ milkomeda:
     # 消费执行超时时间（默认30s）
     ttr: 20s
     # 重试时添加延迟增长因子（默认为1，计算公式：delay * (retryCount++) * factor）
-    retry-delay-multi-factor: 2
+#    retry-delay-multi-factor: 2
     # 开启Task功能（使用@EnableIce时消费端需要配置为true）
     enable-task: true
     # 最大消费个数（默认为10）

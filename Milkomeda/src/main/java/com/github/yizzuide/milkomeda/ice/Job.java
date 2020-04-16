@@ -29,7 +29,7 @@ public class Job<T> implements Serializable {
      */
     private String topic;
     /**
-     * 需要延迟的时间，单位ms
+     * 延迟时间，单位ms
      */
     private long delay;
     /**

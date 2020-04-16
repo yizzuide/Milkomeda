@@ -9,7 +9,7 @@ package com.github.yizzuide.milkomeda.ice;
  */
 public enum JobStatus {
     /**
-     * 延迟中（等待时钟周期）
+     * 延迟中（准备状态、TTR Overload休眠状态）
      */
     DELAY,
     /**

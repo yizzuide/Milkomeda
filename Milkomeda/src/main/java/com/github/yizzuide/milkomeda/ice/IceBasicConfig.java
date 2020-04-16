@@ -18,7 +18,7 @@ import org.springframework.data.redis.core.RedisTemplate;
  *
  * @author yizzuide
  * @since 1.15.2
- * @since 3.0.7
+ * @since 3.0.8
  * Create at 2019/11/21 11:16
  */
 @Import(MilkomedaContextConfig.class)
@@ -51,6 +51,12 @@ public class IceBasicConfig {
     @ConditionalOnMissingBean(ReadyQueue.class)
     public ReadyQueue readyQueue() {
         return new RedisReadyQueue(props);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(DeadQueue.class)
+    public DeadQueue deadQueue() {
+        return new RedisDeadQueue(props);
     }
 
     @Bean

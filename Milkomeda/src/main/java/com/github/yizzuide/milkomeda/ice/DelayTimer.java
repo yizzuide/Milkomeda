@@ -18,7 +18,7 @@ import java.util.List;
  *
  * @author yizzuide
  * @since 1.15.0
- * @version 3.0.7
+ * @version 3.0.8
  * Create at 2019/11/16 18:57
  */
 public class DelayTimer implements InitializingBean, ApplicationListener<ContextRefreshedEvent> {
@@ -31,6 +31,9 @@ public class DelayTimer implements InitializingBean, ApplicationListener<Context
 
     @Autowired
     private ReadyQueue readyQueue;
+
+    @Autowired
+    private DeadQueue deadQueue;
 
     @Autowired
     private IceProperties props;
@@ -63,7 +66,7 @@ public class DelayTimer implements InitializingBean, ApplicationListener<Context
         for (int i = 0; i < props.getDelayBucketCount(); i++) {
             // 注册为bean，让其可以接收Spring事件
             DelayJobHandler delayJobHandler = WebContext.registerBean((ConfigurableApplicationContext) ApplicationContextHolder.get(), "delayJobHandler" + i, DelayJobHandler.class);
-            delayJobHandler.fill(redisTemplate, jobPool, delayBucket, readyQueue, i, props);
+            delayJobHandler.fill(redisTemplate, jobPool, delayBucket, readyQueue, deadQueue, i, props);
             delayJobHandlers.add(delayJobHandler);
         }
     }
