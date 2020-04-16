@@ -12,7 +12,7 @@ import java.time.temporal.ChronoUnit;
  *
  * @author yizzuide
  * @since 1.15.0
- * @version 3.0.0
+ * @version 3.0.7
  * Create at 2019/11/16 19:02
  */
 @Data
@@ -27,6 +27,11 @@ class IceProperties {
      * 开启JobTimer分布式并发功能（分布式应该设置为true）
      */
     private boolean enableJobTimerDistributed = false;
+    /**
+     * 多个JobTimer的并发锁超时（单位：s）
+     */
+    @DurationUnit(ChronoUnit.SECONDS)
+    private Duration jobTimerLockTimeoutSeconds = Duration.ofSeconds(60);
     /**
      * 延迟分桶数量
      */
@@ -90,4 +95,9 @@ class IceProperties {
      */
     @DurationUnit(ChronoUnit.SECONDS)
     private Duration taskPopCountLockTimeoutSeconds = Duration.ofSeconds(60);
+
+    /**
+     * 开启消费处理器扫描多个Topic监听器
+     */
+    private boolean multiTopicListenerPerHandler = false;
 }

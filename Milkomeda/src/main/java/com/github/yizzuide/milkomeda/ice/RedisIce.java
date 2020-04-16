@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 1.15.0
- * @version 3.0.0
+ * @version 3.0.7
  * Create at 2019/11/16 15:20
  */
 @Slf4j
@@ -100,8 +100,8 @@ public class RedisIce implements Ice {
         if (count == 1) return Collections.singletonList(pop(topic));
 
         // 使用SetNX锁住资源，防止多线程并发执行，造成重复消费问题
-        boolean absent = RedisUtil.setIfAbsent(KEY_IDEMPOTENT_LIMITER, props.getTaskPopCountLockTimeoutSeconds().getSeconds(), redisTemplate);
-        if (absent) return null;
+        boolean hasObtainLock = RedisUtil.setIfAbsent(KEY_IDEMPOTENT_LIMITER, props.getTaskPopCountLockTimeoutSeconds().getSeconds(), redisTemplate);
+        if (!hasObtainLock) return null;
 
         List<Job<T>> jobList;
         try {
