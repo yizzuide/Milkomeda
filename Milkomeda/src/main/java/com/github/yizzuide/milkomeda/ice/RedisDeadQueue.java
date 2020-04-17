@@ -46,6 +46,17 @@ public class RedisDeadQueue implements DeadQueue, InitializingBean, ApplicationL
     }
 
     @Override
+    public List<DelayJob> pop(long count) {
+        BoundSetOperations<String, String> deadQueue = getDeadQueue(this.deadQueueKey);
+        Set<String> members = deadQueue.distinctRandomMembers(count);
+        if (CollectionUtils.isEmpty(members)) {
+            return null;
+        }
+        deadQueue.remove(members.toArray());
+        return members.stream().map(s -> JSONUtil.parse(s, DelayJob.class)).collect(Collectors.toList());
+    }
+
+    @Override
     public List<DelayJob> popALL() {
         Set<String> members = getDeadQueue(this.deadQueueKey).members();
         if (CollectionUtils.isEmpty(members)) {

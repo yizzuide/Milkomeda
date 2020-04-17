@@ -27,7 +27,7 @@ public class ProductCheckHandler {
     public void handle(List<Job<Product>> products) {
       log.info("products: {}", products);
       // 测试处理失败
-      int i = 1 / 0;
+//      int i = 1 / 0;
     }
 
     // 该方法被上面SpEL调用

@@ -44,7 +44,9 @@ public class IceBasicConfig {
     @Bean
     @ConditionalOnMissingBean(DelayBucket.class)
     public DelayBucket delayBucket() {
-        return new RedisDelayBucket(props);
+        RedisDelayBucket delayBucket = new RedisDelayBucket(props);
+        IceHolder.setDelayBucket(delayBucket);
+        return delayBucket;
     }
 
     @Bean
@@ -56,7 +58,9 @@ public class IceBasicConfig {
     @Bean
     @ConditionalOnMissingBean(DeadQueue.class)
     public DeadQueue deadQueue() {
-        return new RedisDeadQueue(props);
+        RedisDeadQueue deadQueue = new RedisDeadQueue(props);
+        IceHolder.setDeadQueue(deadQueue);
+        return deadQueue;
     }
 
     @Bean

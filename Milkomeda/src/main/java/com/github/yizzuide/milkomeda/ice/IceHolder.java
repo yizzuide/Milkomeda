@@ -2,6 +2,10 @@ package com.github.yizzuide.milkomeda.ice;
 
 import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.CollectionUtils;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * IceHolder
@@ -52,19 +56,32 @@ public class IceHolder {
     }
 
     /**
-     * 重新激活所有TTR Overload的Job，并添加到DelayJobBucket
+     * 重新激活所有Dead Queue的Job，并添加到延迟队列（用于启动时调用）
+     * @since 3.0.8
      */
     public static void activeDeadJobs() {
-        DelayJob delayJob = deadQueue.pop();
+        int retrieveCount = 10;
+        List<DelayJob> delayJobs = deadQueue.pop(retrieveCount);
+        if (CollectionUtils.isEmpty(delayJobs)) {
+            return;
+        }
         int count = 0;
-        while (delayJob != null) {
-            log.info("Ice 正在添加到延迟作业Job {}", delayJob);
-            delayBucket.add(delayJob);
-            delayJob = deadQueue.pop();
-            count++;
+        while (!CollectionUtils.isEmpty(delayJobs)) {
+            log.info("Ice 正在恢复延迟作业Jobs {}", delayJobs.stream().map(DelayJob::getJodId).collect(Collectors.toList()));
+            delayBucket.add(delayJobs);
+            count += delayJobs.size();
+            // 如果恢复完成，退出
+            if (delayJobs.size() != retrieveCount) {
+                break;
+            }
+            try {
+                Thread.sleep(retrieveCount);
+            } catch (InterruptedException ignore) {
+            }
+            delayJobs = deadQueue.pop(retrieveCount);
         }
         if (count > 0) {
-            log.info("Ice 添加到延迟总个数：{}", count);
+            log.info("Ice 恢复Dead Queue Job到延迟队列总个数：{}", count);
         }
     }
 }

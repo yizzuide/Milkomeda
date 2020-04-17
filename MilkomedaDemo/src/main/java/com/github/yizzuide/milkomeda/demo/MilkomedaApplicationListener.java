@@ -16,5 +16,6 @@ public class MilkomedaApplicationListener implements ApplicationListener<Context
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
         IceHolder.setInstanceName("product");
+        IceHolder.activeDeadJobs();
     }
 }

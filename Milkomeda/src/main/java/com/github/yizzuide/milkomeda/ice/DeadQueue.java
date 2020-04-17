@@ -25,6 +25,13 @@ public interface DeadQueue {
     DelayJob pop();
 
     /**
+     * 获取指定延迟Job个数
+     * @param count 获取数量
+     * @return  延迟Job列表
+     */
+    List<DelayJob> pop(long count);
+
+    /**
      * 获得所有TTR Overload的DelayJob
      *
      * @return DelayJob数组

@@ -124,7 +124,7 @@ public class DelayJobHandler implements Runnable, ApplicationListener<IceInstanc
      * 处理ttr的任务
      */
     private void processTtrJob(DelayJob delayJob, Job<?> job) {
-        log.info("Ice处理TTR的Job {}，当前重试次数为{}", delayJob.getJodId(), delayJob.getRetryCount() + 1);
+        log.warn("Ice处理TTR的Job {}，当前重试次数为{}", delayJob.getJodId(), delayJob.getRetryCount() + 1);
         // 检测重试次数过载
         boolean overload = delayJob.getRetryCount() >= job.getRetryCount();
         if (overload) {
