@@ -3,6 +3,7 @@ package com.github.yizzuide.milkomeda.ice;
 import com.github.yizzuide.milkomeda.universe.metadata.HandlerMetaData;
 import com.github.yizzuide.milkomeda.universe.polyfill.RedisPolyfill;
 import com.github.yizzuide.milkomeda.util.RedisUtil;
+import com.github.yizzuide.milkomeda.util.ReflectUtil;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationListener;
@@ -10,6 +11,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.CollectionUtils;
 
 import java.lang.reflect.Method;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -17,7 +19,7 @@ import java.util.List;
  *
  * @author yizzuide
  * @since 1.15.0
- * @version 3.0.8
+ * @version 3.0.10
  * Create at 2019/11/16 17:30
  */
 @Slf4j
@@ -123,6 +125,7 @@ public class DelayJobHandler implements Runnable, ApplicationListener<IceInstanc
     /**
      * 处理ttr的任务
      */
+    @SuppressWarnings("unchecked")
     private void processTtrJob(DelayJob delayJob, Job<?> job) {
         log.warn("Ice处理TTR的Job {}，当前重试次数为{}", delayJob.getJodId(), delayJob.getRetryCount() + 1);
         // 检测重试次数过载
@@ -137,7 +140,7 @@ public class DelayJobHandler implements Runnable, ApplicationListener<IceInstanc
             handlerMetaDataList.forEach(handlerMetaData -> {
                 Method method = handlerMetaData.getMethod();
                 try {
-                    method.invoke(handlerMetaData.getTarget(), job);
+                    ReflectUtil.invokeWithWrapperInject(handlerMetaData.getTarget(), method, Collections.singletonList(job), Job.class, Job::getBody, Job::setBody);
                 } catch (Exception e) {
                     log.error("Ice invoke TTR overload listener error: {}", e.getMessage(), e);
                 }

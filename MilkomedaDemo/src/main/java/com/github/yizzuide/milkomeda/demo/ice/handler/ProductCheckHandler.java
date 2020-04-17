@@ -5,7 +5,6 @@ import com.github.yizzuide.milkomeda.ice.*;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.Duration;
-import java.util.Map;
 
 /**
  * ProductCheckHandler
@@ -22,9 +21,9 @@ public class ProductCheckHandler {
     // 监听topic消息（支持SpEL)
     @IceListener(topic = "#target.topicName()")
     public Job<Product> handle(Job<Product> productJob) {
-      log.info("接收到Job: {}", productJob);
-      // 测试处理失败
-//      int i = 1 / 0;
+        log.info("接收到Job: {}", productJob);
+        // 测试处理失败
+//        int i = 1 / 0;
         // 重新入队到新topic
         Product product = productJob.getBody();
         product.setDesc("再次审核");
@@ -43,7 +42,7 @@ public class ProductCheckHandler {
     }
 
     @IceTtrOverloadListener(topic = "#target.topicName()")
-    public void ttrHandle(Job<Map<String, Object>> job) {
+    public void ttrHandle(Product job) {
         log.error("trr overload with job: {}", job);
     }
 }
