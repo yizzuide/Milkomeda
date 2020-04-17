@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 1.15.0
- * @version 3.0.7
+ * @version 3.0.9
  * Create at 2019/11/16 15:20
  */
 @Slf4j
@@ -52,7 +52,15 @@ public class RedisIce implements Ice, ApplicationListener<IceInstanceChangeEvent
     @SuppressWarnings("rawtypes")
     @Override
     public void add(Job job) {
-        job.setId(job.getTopic() + "-" + job.getId());
+        add(job, true);
+    }
+
+    @SuppressWarnings("rawtypes")
+    @Override
+    public void add(Job job, boolean mergeIdWithTopic) {
+        if (mergeIdWithTopic) {
+            job.setId(job.getTopic() + "-" + job.getId());
+        }
         if (jobPool.exists(job.getId())) {
             return;
         }
@@ -65,13 +73,22 @@ public class RedisIce implements Ice, ApplicationListener<IceInstanceChangeEvent
 
     @Override
     public <T> void add(String id, String topic, T body, Duration delay) {
-        add(id, topic, body, delay.toMillis());
+        add(build(id, topic, body, delay));
     }
 
     @Override
     public <T> void add(String id, String topic, T body, long delay) {
-        Job<T> job = new Job<>(id, topic, delay, props.getTtr().toMillis(), props.getRetryCount(), body);
-        add(job);
+        add(build(id, topic, body, delay));
+    }
+
+    @Override
+    public <T> Job<T> build(String id, String topic, T body, Duration delay) {
+        return build(id, topic, body, delay.toMillis());
+    }
+
+    @Override
+    public <T> Job<T> build(String id, String topic, T body, long delay) {
+        return new Job<>(id, topic, delay, props.getTtr().toMillis(), props.getRetryCount(), body);
     }
 
     @Override

@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 0.2.0
- * @version 3.0.0
+ * @version 3.0.9
  * Create at 2019/04/11 19:55
  */
 @Slf4j
@@ -127,11 +127,10 @@ public class ReflectUtil {
      * @throws IllegalAccessException       非法访问异常
      * @throws InvocationTargetException    方法调用异常
      */
-    public static <T> void invokeWithWrapperInject(Object target, Method method, List<T> wrapperList, Class<T> wrapperClazz, Function<T, Object> wrapperBody, BiConsumer<T, Object> wipeWrapperBody) throws IllegalAccessException, InvocationTargetException {
+    public static <T> Object invokeWithWrapperInject(Object target, Method method, List<T> wrapperList, Class<T> wrapperClazz, Function<T, Object> wrapperBody, BiConsumer<T, Object> wipeWrapperBody) throws IllegalAccessException, InvocationTargetException {
         // 没有参数
         if(method.getParameterTypes().length == 0) {
-            method.invoke(target);
-            return;
+            return method.invoke(target);
         }
         // ResolvableType是Spring核心包里的泛型解决方案，简化对泛型识别处理（下面注释保留Java API处理方式）
         ResolvableType resolvableType = ResolvableType.forMethodParameter(method, 0);
@@ -140,8 +139,23 @@ public class ReflectUtil {
         // Map 或 Object
         if (parameterClazz == Map.class || parameterClazz == Object.class) {
             // 去掉实体的包装
-            method.invoke(target, wrapperBody.apply(wrapperList.get(0)));
-            return;
+            return method.invoke(target, wrapperBody.apply(wrapperList.get(0)));
+        }
+
+        // Entity
+        if (parameterClazz == wrapperClazz) {
+            T entity = wrapperList.get(0);
+            ResolvableType[] wrapperGenerics = resolvableType.getGenerics();
+            Class<?> elementGenericType = wrapperGenerics[0].resolve();
+            // Entity or Entity<Map>
+            if (elementGenericType == null || elementGenericType == Map.class) {
+                return method.invoke(target, entity);
+            }
+
+            // Entity<T>
+            Object body = JSONUtil.parse(JSONUtil.serialize(wrapperBody.apply(wrapperList.get(0))), elementGenericType);
+            wipeWrapperBody.accept(entity, body);
+            return method.invoke(target, entity);
         }
 
         // List
@@ -153,8 +167,7 @@ public class ReflectUtil {
             Class<?> elementGenericType = wrapperGenerics[0].resolve();
             if (elementGenericType == null) {
                 // 去掉实体的包装
-                method.invoke(target, wrapperList.stream().map(wrapperBody).collect(Collectors.toList()));
-                return;
+                return method.invoke(target, wrapperList.stream().map(wrapperBody).collect(Collectors.toList()));
             }
             // List<?>
 //            ParameterizedType parameterizedType = (ParameterizedType) genericParameterTypes[0];
@@ -164,8 +177,7 @@ public class ReflectUtil {
 //            if (TypeUtil.type2Class(actualTypeArgument) == Map.class) {
             if (elementGenericType == Map.class) {
                 // 去掉实体的包装
-                method.invoke(target, wrapperList.stream().map(wrapperBody).collect(Collectors.toList()));
-                return;
+                return method.invoke(target, wrapperList.stream().map(wrapperBody).collect(Collectors.toList()));
             }
             // List<Entity>
 //            if (TypeUtil.type2Class(actualTypeArgument) == wrapperClazz) {
@@ -174,15 +186,13 @@ public class ReflectUtil {
                 Class<?> entityGenericType = wrapperGenerics[0].getGeneric(0).resolve();
 //                if (!(actualTypeArgument instanceof ParameterizedType)) {
                 if (entityGenericType == null) {
-                    method.invoke(target, wrapperList);
-                    return;
+                    return method.invoke(target, wrapperList);
                 }
                 // List<Entity<Map>>
 //                Type[] subActualTypeArguments = ((ParameterizedType) actualTypeArgument).getActualTypeArguments();
 //                if (TypeUtil.type2Class(subActualTypeArguments[0]) == Map.class) {
                 if (entityGenericType == Map.class) {
-                    method.invoke(target, wrapperList);
-                    return;
+                    return method.invoke(target, wrapperList);
                 }
                 // List<Entity<T>>
 //                JavaType javaType = TypeUtil.type2JavaType(subActualTypeArguments[0]);
@@ -191,20 +201,18 @@ public class ReflectUtil {
                     Object body = JSONUtil.parse(JSONUtil.serialize(wrapperBody.apply(wrapper)), entityGenericType);
                     wipeWrapperBody.accept(wrapper, body);
                 }
-                method.invoke(target, wrapperList);
-                return;
+                return method.invoke(target, wrapperList);
             }
 
             // List<T>
 //            method.invoke(target, wrapperList.stream().map(wrapper ->
 //                    JSONUtil.nativeRead(JSONUtil.serialize(wrapperBody.apply(wrapper)), TypeUtil.type2JavaType(actualTypeArgument))).collect(Collectors.toList()));
-            method.invoke(target, wrapperList.stream().map(wrapper ->
+            return method.invoke(target, wrapperList.stream().map(wrapper ->
                     JSONUtil.parse(JSONUtil.serialize(wrapperBody.apply(wrapper)), elementGenericType)).collect(Collectors.toList()));
-            return;
         }
 
         // 转到业务类型 T
-        method.invoke(target, JSONUtil.parse(JSONUtil.serialize(wrapperBody.apply(wrapperList.get(0))), parameterClazz));
+        return method.invoke(target, JSONUtil.parse(JSONUtil.serialize(wrapperBody.apply(wrapperList.get(0))), parameterClazz));
     }
 
 

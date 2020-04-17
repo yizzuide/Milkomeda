@@ -20,7 +20,7 @@ import java.util.Map;
  *
  * @author yizzuide
  * @since 1.15.0
- * @version 3.0.0
+ * @version 3.0.9
  * Create at 2019/11/17 17:00
  */
 @Slf4j
@@ -36,21 +36,37 @@ public class IceScheduleConfig {
             List<Job<Map<String, Object>>> jobs = ice.pop(topic, props.getTaskTopicPopMaxSize());
             if (CollectionUtils.isEmpty(jobs)) return;
 
-            boolean hasError = false;
             List<HandlerMetaData> metaDataList = IceContext.getTopicMap().get(topic);
-            for (HandlerMetaData metaData : metaDataList) {
-                try {
+            Object resultData = null;
+            try {
+                for (HandlerMetaData metaData : metaDataList) {
                     Method method = metaData.getMethod();
                     List<Job> jobList = (List) jobs;
-                    ReflectUtil.invokeWithWrapperInject(metaData.getTarget(), method, jobList, Job.class, Job::getBody, Job::setBody);
-                } catch (Exception e) {
-                    log.error("Ice schedule error: {}", e.getMessage(), e);
-                    hasError = true;
+                    Object result = ReflectUtil.invokeWithWrapperInject(metaData.getTarget(), method, jobList, Job.class, Job::getBody, Job::setBody);
+                    if (result != null) {
+                        resultData = result;
+                    }
                 }
-            }
-            if (!hasError) {
+
                 // 标记完成，清除元数据
                 ice.finish(jobs);
+
+                // 是否有重新入队
+                if (resultData == null) {
+                    return;
+                }
+                if (resultData instanceof Job) {
+                    ice.add((Job) resultData);
+                    return;
+                }
+                if (resultData instanceof List) {
+                    List<Job> rePushJobs = (List<Job>) resultData;
+                    for (Job rePushJob : rePushJobs) {
+                        ice.add(rePushJob);
+                    }
+                }
+            } catch (Exception e) {
+                log.error("Ice schedule error: {}", e.getMessage(), e);
             }
         }), props.getTaskExecuteRate());
     }
