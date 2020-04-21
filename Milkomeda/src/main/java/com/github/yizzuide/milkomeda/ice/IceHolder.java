@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 3.0.0
- * @version 3.0.8
+ * @version 3.1.0
  * Create at 2020/04/09 14:03
  */
 @Slf4j
@@ -67,21 +67,17 @@ public class IceHolder {
         }
         int count = 0;
         while (!CollectionUtils.isEmpty(delayJobs)) {
-            log.info("Ice 正在恢复延迟作业Jobs {}", delayJobs.stream().map(DelayJob::getJodId).collect(Collectors.toList()));
+            log.info("Ice 正在Dead Queue恢复延迟作业Jobs {}", delayJobs.stream().map(DelayJob::getJodId).collect(Collectors.toList()));
             delayBucket.add(delayJobs);
             count += delayJobs.size();
             // 如果恢复完成，退出
             if (delayJobs.size() != retrieveCount) {
                 break;
             }
-            try {
-                Thread.sleep(retrieveCount);
-            } catch (InterruptedException ignore) {
-            }
             delayJobs = deadQueue.pop(retrieveCount);
         }
         if (count > 0) {
-            log.info("Ice 恢复Dead Queue Job到延迟队列总个数：{}", count);
+            log.info("Ice 完成从Dead Queue恢复Job到延迟队列总个数：{}", count);
         }
     }
 }

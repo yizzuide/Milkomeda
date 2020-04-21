@@ -61,9 +61,9 @@ public class ParticleController {
     }
 
     @RequestMapping("check3")
-    // 注解的方式限制一次请求的重复调用（:用于取HTTP请求header里的值）
+    // 注解的方式限制一次请求的重复调用（#env获取自定义环境变量，#request获取请求对象）
     // 注意：由于配置了限制器链，就有了两个去重限制器，由于框架内部根据类型查找，这里需要通过limiterBeanName指定
-    @Limit(name = "user:check", key = ":Token", expire = 60L, limiterBeanName = "idempotentLimiter")
+    @Limit(name = "user:check", key = "#env['product'] + #request.getHeader('token')", expire = 60L, limiterBeanName = "idempotentLimiter")
     public ResponseEntity<String> check3(Particle particle/*这个状态值自动注入*/) throws Throwable {
         // 判断是否被限制
         log.info("limited: {}", particle.isLimited());

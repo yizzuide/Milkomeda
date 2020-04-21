@@ -14,6 +14,7 @@ import java.lang.annotation.Target;
  *
  * @author yizzuide
  * @since 1.5.0
+ * @version 3.1.0
  * Create at 2019/05/30 22:22
  */
 @Target({ElementType.PARAMETER, ElementType.METHOD})
@@ -26,9 +27,7 @@ public @interface Limit {
     String name() default "";
 
     /**
-     * 唯一标识键，用于组成redis的key
-     * 1. 支持Spring EL表达式，如：#id
-     * 2. 支持HTTP Header获取表达式（内建支持），如：:token
+     * 唯一标识键，用于组成redis的key，支持Spring EL表达式，如：#id、#request.getHeader('token')、#env['title']、@env.get('spring.application.name')
      * @return String
      */
     String key() default "";

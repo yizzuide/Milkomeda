@@ -3,7 +3,7 @@ package com.github.yizzuide.milkomeda.ice;
 import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import com.github.yizzuide.milkomeda.util.JSONUtil;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.EventListener;
 import org.springframework.data.redis.core.BoundSetOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.CollectionUtils;
@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
  * @since 3.0.8
  * Create at 2020/04/17 00:51
  */
-public class RedisDeadQueue implements DeadQueue, InitializingBean, ApplicationListener<IceInstanceChangeEvent> {
+public class RedisDeadQueue implements DeadQueue, InitializingBean {
 
     private StringRedisTemplate redisTemplate;
 
@@ -74,7 +74,7 @@ public class RedisDeadQueue implements DeadQueue, InitializingBean, ApplicationL
         redisTemplate = ApplicationContextHolder.get().getBean(StringRedisTemplate.class);
     }
 
-    @Override
+    @EventListener
     public void onApplicationEvent(IceInstanceChangeEvent event) {
         String instanceName = event.getSource().toString();
         this.deadQueueKey = "ice:dead_queue:" + instanceName;
