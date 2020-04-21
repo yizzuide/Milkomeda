@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 3.0.0
- * @version 3.0.4
+ * @version 3.1.1
  * Create at 2020/04/08 11:41
  */
 public class ParticleFilter implements Filter {
@@ -101,8 +101,10 @@ public class ParticleFilter implements Filter {
                     result.put(YmlResponseOutput.STATUS, status);
                     YmlResponseOutput.output(responseInfo, result, null, null, false);
                     return result;
+                } else {
+                    chain.doFilter(request, response);
+                    return null;
                 }
-                return null;
             });
 
             if (returnData != null) {
@@ -116,7 +118,8 @@ public class ParticleFilter implements Filter {
                 writer.flush();
                 return;
             }
+
         }
-        chain.doFilter(request, response);
+
     }
 }
