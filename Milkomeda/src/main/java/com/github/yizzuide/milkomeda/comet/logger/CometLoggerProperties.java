@@ -12,7 +12,7 @@ import java.util.Map;
  *
  * @author yizzuide
  * @since 3.0.0
- * @since 3.0.3
+ * @since 3.1.0
  * Create at 2020/04/05 18:47
  */
 @Data
@@ -46,9 +46,9 @@ public class CometLoggerProperties {
          */
         private List<String> paths = Collections.singletonList("/**");
         /**
-         * 策略模板，默认能识别的占位符：uri、method、params（参数可配置占位符，请求头固定使用[]）
+         * 策略模板（固定占位符：uri、method、params；请求参数域：$params.name；请求头域：$header.name；cookie域：$cookie.name）
          */
-        private String tpl = "{\"uri\":\"{uri}\", \"method\": \"{method}\", \"params\": \"{params}\", \"token\": \"(token)\"}";
+        private String tpl = "{\"uri\":\"{uri}\", \"method\": \"{method}\", \"params\": \"{params}\", \"token\": \"{$header.token}\"}";
         /**
          * 缓存占位符（模块内部使用）
          */
