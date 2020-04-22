@@ -46,7 +46,7 @@ public class CometLoggerProperties {
          */
         private List<String> paths = Collections.singletonList("/**");
         /**
-         * 策略模板（固定占位符：uri、method、params；请求参数域：$params.name；请求头域：$header.name；cookie域：$cookie.name）
+         * 策略模板（固定占位符：uri、method、params；请求参数域/自定义解析参数：$params.name；请求头域：$header.name；cookie域：$cookie.name）
          */
         private String tpl = "{\"uri\":\"{uri}\", \"method\": \"{method}\", \"params\": \"{params}\", \"token\": \"{$header.token}\"}";
         /**

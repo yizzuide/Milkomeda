@@ -13,7 +13,7 @@ import java.util.List;
  *
  * @author yizzuide
  * @since 2.2.0
- * @version 3.0.3
+ * @version 3.1.2
  * Create at 2019/12/31 18:13
  */
 @Data
@@ -49,7 +49,7 @@ public class Moon<T> {
     /**
      * 阶段分配策略
      */
-    private MoonStrategy moonStrategy = new PeriodicMoonStrategy();
+    private MoonStrategy moonStrategy;
 
     /**
      * 设置并替换阶段

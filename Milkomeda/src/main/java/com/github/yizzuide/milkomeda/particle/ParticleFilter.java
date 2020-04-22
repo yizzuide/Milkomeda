@@ -22,7 +22,6 @@ import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * ParticleFilter
@@ -30,7 +29,7 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 3.0.0
- * @version 3.1.1
+ * @version 3.1.2
  * Create at 2020/04/08 11:41
  */
 public class ParticleFilter implements Filter {
@@ -54,14 +53,10 @@ public class ParticleFilter implements Filter {
             skip = true;
             return;
         }
-        skip = limiters.stream().allMatch(limiter -> CollectionUtils.isEmpty(limiter.getUrls()));
-        if (skip) {
-            return;
-        }
         urlPlaceholderParser = new URLPlaceholderParser();
         urlPlaceholderParser.setCustomURLPlaceholderResolver(particleURLPlaceholderResolver);
         for (ParticleProperties.Limiter limiter : limiters) {
-            if (CollectionUtils.isEmpty(limiter.getUrls()) || StringUtils.isEmpty(limiter.getKeyTpl())) {
+            if (StringUtils.isEmpty(limiter.getKeyTpl())) {
                 continue;
             }
             limiter.setCacheKeys(urlPlaceholderParser.grabPlaceHolders(limiter.getKeyTpl()));
@@ -78,15 +73,25 @@ public class ParticleFilter implements Filter {
             return;
         }
 
-        List<ParticleProperties.Limiter> urlLimiters = particleProperties.getLimiters().stream()
-                .filter(limiter -> !CollectionUtils.isEmpty(limiter.getUrls()) && URLPathMatcher.match(limiter.getUrls(), httpServletRequest.getRequestURI()))
-                .collect(Collectors.toList());
+        boolean matchFlag = false;
+        List<ParticleProperties.Limiter> urlLimiters = particleProperties.getLimiters();
         for (ParticleProperties.Limiter limiter : urlLimiters) {
+            // 忽略需排除的URL
+            if (!CollectionUtils.isEmpty(limiter.getExcludeUrls()) && URLPathMatcher.match(limiter.getExcludeUrls(), httpServletRequest.getRequestURI())) {
+                continue;
+            }
+            if (CollectionUtils.isEmpty(limiter.getIncludeUrls())) {
+                continue;
+            }
+            if (!URLPathMatcher.match(limiter.getIncludeUrls(), httpServletRequest.getRequestURI())) {
+                continue;
+            }
+            // 设置匹配标识
+            matchFlag = true;
             String key = urlPlaceholderParser.parse(limiter.getKeyTpl(), httpServletRequest, null, limiter.getCacheKeys());
-
             Map<String, Object> returnData = limiter.getLimitHandler().limit(key, limiter.getKeyExpire().getSeconds(), particle -> {
                 if (particle.isLimited()) {
-                    Map<String, Object> result = new HashMap<>(9);
+                    Map<String, Object> result = new HashMap<>(8);
                     Map<String, Object> responseInfo = limiter.getResponse();
                     // 查找全局的响应
                     if (responseInfo == null) {
@@ -101,10 +106,9 @@ public class ParticleFilter implements Filter {
                     result.put(YmlResponseOutput.STATUS, status);
                     YmlResponseOutput.output(responseInfo, result, null, null, false);
                     return result;
-                } else {
-                    chain.doFilter(request, response);
-                    return null;
                 }
+                chain.doFilter(request, response);
+                return null;
             });
 
             if (returnData != null) {
@@ -119,7 +123,13 @@ public class ParticleFilter implements Filter {
                 return;
             }
 
+            // 只支持一个限制器，可通过排序来确定，限制器链可以使用Barrier类型
+            break;
         }
 
+        // 放过不需要限制的请求
+        if (!matchFlag) {
+            chain.doFilter(request, response);
+        }
     }
 }
