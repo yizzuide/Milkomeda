@@ -19,7 +19,7 @@ import java.util.List;
  *
  * @author yizzuide
  * @since 1.15.0
- * @version 3.0.10
+ * @version 3.1.3
  * Create at 2019/11/16 17:30
  */
 @Slf4j
@@ -131,31 +131,49 @@ public class DelayJobHandler implements Runnable, ApplicationListener<IceInstanc
         // 检测重试次数过载
         boolean overload = delayJob.getRetryCount() >= job.getRetryCount();
         if (overload) {
-            log.error("Ice检测到 Job {} 的TTR超过预设的{}次，将进入dead queue!", job.getId(), job.getRetryCount());
-            // 调用Overload监听器
+            log.error("Ice检测到 Job {} 的TTR超过预设的{}次!", job.getId(), job.getRetryCount());
+            boolean handleFlag = false;
+            // 调用TTR Overload监听器
             List<HandlerMetaData> handlerMetaDataList = IceContext.getTopicTtrOverloadMap().get(job.getTopic());
-            if (CollectionUtils.isEmpty(handlerMetaDataList)) {
+            if (!CollectionUtils.isEmpty(handlerMetaDataList)) {
+                for (HandlerMetaData handlerMetaData : handlerMetaDataList) {
+                    Method method = handlerMetaData.getMethod();
+                    try {
+                        ReflectUtil.invokeWithWrapperInject(handlerMetaData.getTarget(), method, Collections.singletonList(job), Job.class, Job::getBody, Job::setBody);
+                        handleFlag = true;
+                    } catch (Exception e) {
+                        log.error("Ice invoke TTR overload listener error: {}", e.getMessage(), e);
+                    }
+                }
+            }
+            // 如果调用TTR Overload监听成功
+            if (handleFlag) {
+                // 移除delayBucket中的任务
+                delayBucket.remove(index, delayJob);
+                // 没有开启Dead queue就移除原数据
+                if (!props.isEnableRetainToDeadQueueWhenTtrOverload()) {
+                    IceHolder.getIce().finish(job.getId());
+                }
+            }
+            if (props.isEnableRetainToDeadQueueWhenTtrOverload()) {
+                // 没有TTR Overload处理器时，从延迟队列移除
+                if (!handleFlag) {
+                    delayBucket.remove(index, delayJob);
+                }
+                // 修改池中状态
+                job.setStatus(JobStatus.DELAY);
+                jobPool.push(job);
+                // 重置延迟作业状态
+                delayJob.setDelayTime(job.getDelay());
+                delayJob.setRetryCount(0);
+                // 添加dead queue
+                deadQueue.add(delayJob);
+                log.warn("Ice处理TTR Overload的 Job {} 进入Dead queue", job.getId());
+            }
+            // 如果有处理方案，不再重试
+            if (handleFlag || props.isEnableRetainToDeadQueueWhenTtrOverload()) {
                 return;
             }
-            handlerMetaDataList.forEach(handlerMetaData -> {
-                Method method = handlerMetaData.getMethod();
-                try {
-                    ReflectUtil.invokeWithWrapperInject(handlerMetaData.getTarget(), method, Collections.singletonList(job), Job.class, Job::getBody, Job::setBody);
-                } catch (Exception e) {
-                    log.error("Ice invoke TTR overload listener error: {}", e.getMessage(), e);
-                }
-            });
-            // 移除delayBucket中的任务
-            delayBucket.remove(index, delayJob);
-            // 修改池中状态
-            job.setStatus(JobStatus.DELAY);
-            jobPool.push(job);
-            // 重置延迟作业状态
-            delayJob.setDelayTime(job.getDelay());
-            delayJob.setRetryCount(0);
-            // 添加dead queue
-            deadQueue.add(delayJob);
-            return;
         }
 
         RedisUtil.batchOps(() -> {

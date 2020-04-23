@@ -41,6 +41,7 @@ public class ProductCheckHandler {
         return "topic_product_check";
     }
 
+    // TTR超载监听器
     @IceTtrOverloadListener(topic = "#target.topicName()")
     public void ttrHandle(Product job) {
         log.error("trr overload with job: {}", job);
