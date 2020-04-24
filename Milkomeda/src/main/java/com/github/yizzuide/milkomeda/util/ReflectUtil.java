@@ -126,6 +126,7 @@ public class ReflectUtil {
      * @param <T>               包装对象类型
      * @throws IllegalAccessException       非法访问异常
      * @throws InvocationTargetException    方法调用异常
+     * @return 返回原有值
      */
     public static <T> Object invokeWithWrapperInject(Object target, Method method, List<T> wrapperList, Class<T> wrapperClazz, Function<T, Object> wrapperBody, BiConsumer<T, Object> wipeWrapperBody) throws IllegalAccessException, InvocationTargetException {
         // 没有参数

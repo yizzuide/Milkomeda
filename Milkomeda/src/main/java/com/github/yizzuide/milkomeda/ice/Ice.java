@@ -57,6 +57,7 @@ public interface Ice {
      * @param body  业务数据
      * @param delay 延迟时间
      * @param <T>   业务数据类型
+     * @return Job
      * @since 3.0.9
      */
     <T> Job<T> build(String id, String topic, T body, Duration delay);
@@ -68,6 +69,7 @@ public interface Ice {
      * @param body  业务数据
      * @param delay 延迟时间ms
      * @param <T>   业务数据类型
+     * @return Job
      * @since 3.0.9
      */
     <T> Job<T> build(String id, String topic, T body, long delay);

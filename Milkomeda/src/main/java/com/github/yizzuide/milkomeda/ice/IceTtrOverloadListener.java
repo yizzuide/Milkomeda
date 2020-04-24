@@ -9,7 +9,7 @@ import java.lang.annotation.*;
  * TTR重试超载监听器
  *
  * <pre>
- *     通过配置 {@link IceProperties#isEnableJobTimerDistributed()} 配合Dead queue的使用有以下情况：
+ *     通过配置 `ice.enable-job-timer-distributed` 配合Dead queue的使用有以下情况：
  *     1. TTR重试超载监听器未添加或执行失败 + 未开启Dead queue：通过计算延迟因子继续重试，并有错误级别的日志打印
  *     2. TTR重试超载监听器未添加或执行失败 + 开启Dead queue：延迟任务进入Dead queue，原数据保留
  *     3. TTR重试超载监听器执行成功 + 未开启Dead queue：延迟任务和原数据都将被移除
