@@ -16,12 +16,13 @@ import org.springframework.stereotype.Service;
  * Create at 2020/01/02 14:39
  */
 @Slf4j
-@Service
+@Service("productService")
 public class ProductServiceImpl implements ProductService {
     @FusionGroup({
             @Fusion(tag = "product-push"),
             // 根据条件是否调用业务方法 allowed：判断条件；fallback：条件判断结果为false时调用的反馈方法
-            @Fusion(allowed = Platform.EL_CHECK_ACTIVE, fallback = "#target.pushNotCheck(#product, #delay)"),
+//            @Fusion(allowed = Platform.EL_CHECK_ACTIVE, fallback = "#target.pushNotCheck(#product, #delay)"),
+            @Fusion(allowed = Platform.EL_CHECK_ACTIVE, fallback = "@productService.pushNotCheck(#product, #delay)"),
             // allowedType：逻辑条件类型，默认为AND
             @Fusion(allowedType = FusionAllowedType.OR, allowed = Platform.EL_IS_TEST)
     })

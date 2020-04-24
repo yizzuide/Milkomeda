@@ -52,7 +52,7 @@ public class CometConfig {
         cometRequestFilter.setFilter(new CometRequestFilter());
         cometRequestFilter.setName("cometRequestFilter");
         cometRequestFilter.setUrlPatterns(Collections.singleton("/*"));
-        cometRequestFilter.setOrder(Ordered.HIGHEST_PRECEDENCE);
+        cometRequestFilter.setOrder(Ordered.HIGHEST_PRECEDENCE + 10);
         return cometRequestFilter;
     }
 

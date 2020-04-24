@@ -54,6 +54,18 @@ spring:
     overwrite-existing-jobs: true
     wait-for-jobs-to-complete-on-shutdown: true
 
+
+management:
+  endpoint:
+    shutdown:
+      enabled: false
+    health:
+      show-details: always
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+
 mybatis:
   type-aliases-package: com.github.yizzuide.milkomeda.demo.halo.domain
   mapper-locations:

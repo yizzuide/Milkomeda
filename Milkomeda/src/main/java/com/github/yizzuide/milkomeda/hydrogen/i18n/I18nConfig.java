@@ -64,7 +64,7 @@ public class I18nConfig {
         // 使用内置拦截器
         final LocaleChangeInterceptor localeChangeInterceptor = new LocaleChangeInterceptor();
         localeChangeInterceptor.setParamName(i18nProperties.getQuery());
-        SpringMvcPolyfill.addDynamicInterceptor(localeChangeInterceptor, Ordered.HIGHEST_PRECEDENCE + 1, Collections.singletonList("/**"),
+        SpringMvcPolyfill.addDynamicInterceptor(localeChangeInterceptor, Ordered.HIGHEST_PRECEDENCE + 10, Collections.singletonList("/**"),
                 null, requestMappingHandlerMapping);
     }
 }
