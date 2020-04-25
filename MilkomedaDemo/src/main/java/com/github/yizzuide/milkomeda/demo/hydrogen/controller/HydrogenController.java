@@ -39,7 +39,6 @@ public class HydrogenController {
     private TOrderService tOrderService;
 
     @Autowired
-    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     private ContextRefresher contextRefresher;
 
     @Autowired

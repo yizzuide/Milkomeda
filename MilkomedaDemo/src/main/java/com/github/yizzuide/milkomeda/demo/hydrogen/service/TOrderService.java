@@ -13,7 +13,7 @@ import java.util.Date;
  * @author yizzuide
  * Create at 2020/03/25 21:51
  */
-@Service
+@Service("tOrderService")
 public class TOrderService {
     @Resource
     private TOrderMapper tOrderMapper;

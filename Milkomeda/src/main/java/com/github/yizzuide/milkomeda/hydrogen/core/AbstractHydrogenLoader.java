@@ -2,7 +2,6 @@ package com.github.yizzuide.milkomeda.hydrogen.core;
 
 import lombok.Data;
 import org.springframework.beans.BeansException;
-import org.springframework.cloud.context.environment.EnvironmentChangeEvent;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.event.EventListener;
@@ -40,7 +39,7 @@ public abstract class AbstractHydrogenLoader<T> implements HydrogenLoader, Appli
     }
 
     @EventListener
-    public void configListener(EnvironmentChangeEvent event) {
+    public void configListener(DelegatingEnvironmentChangeEvent event) {
         // 键没有修改，直接返回
         if (CollectionUtils.isEmpty(event.getKeys())) {
             return;
