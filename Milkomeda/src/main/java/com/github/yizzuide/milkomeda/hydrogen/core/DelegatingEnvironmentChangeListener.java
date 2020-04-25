@@ -6,7 +6,7 @@ import org.springframework.context.event.EventListener;
 
 /**
  * DelegatingEnvironmentChangeListener
- * 桥接到EnvironmentChangeEvent监听器
+ * 桥接到Spring Cloud EnvironmentChangeEvent的监听器
  *
  * @author yizzuide
  * @since 3.2.0
