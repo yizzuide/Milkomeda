@@ -41,9 +41,15 @@ public class ProductCheckHandler {
         return "topic_product_check";
     }
 
-    // TTR超载监听器
+    // TTR监听器（接收参数固定为TtrJob）
+    @IceTtrListener(topic = "#target.topicName()")
+    public void ttrHandle(TtrJob<Product> ttrJob) {
+        log.error("TTR retry with topic: {}，count:{}, overload:{}, job:{}", ttrJob.getJob().getTopic(), ttrJob.getRetryCount(), ttrJob.isOverload(), ttrJob.getJob());
+    }
+
+    // TTR超载监听器（接收参数可以是Job<Product>、Product、Map)
     @IceTtrOverloadListener(topic = "#target.topicName()")
-    public void ttrHandle(Product job) {
-        log.error("trr overload with job: {}", job);
+    public void ttrOverloadHandle(Product job) {
+        log.error("TTR overload with job: {}", job);
     }
 }

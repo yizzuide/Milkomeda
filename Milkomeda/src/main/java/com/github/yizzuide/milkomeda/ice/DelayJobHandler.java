@@ -10,7 +10,6 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.CollectionUtils;
 
-import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.List;
 
@@ -19,7 +18,7 @@ import java.util.List;
  *
  * @author yizzuide
  * @since 1.15.0
- * @version 3.1.3
+ * @version 3.2.0
  * Create at 2019/11/16 17:30
  */
 @Slf4j
@@ -125,21 +124,42 @@ public class DelayJobHandler implements Runnable, ApplicationListener<IceInstanc
     /**
      * 处理ttr的任务
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     private void processTtrJob(DelayJob delayJob, Job<?> job) {
-        log.warn("Ice处理TTR的Job {}，当前重试次数为{}", delayJob.getJodId(), delayJob.getRetryCount() + 1);
+        if (delayJob.getRetryCount() > Integer.MAX_VALUE - 1) {
+            log.error("Ice处理TTR的Job {}, 重试次数超过Integer.MAX_VALUE，放弃重试", delayJob.getJodId());
+            return;
+        }
+        int currentRetryCount = delayJob.getRetryCount() + 1;
+        log.warn("Ice处理TTR的Job {}，当前重试次数为{}", delayJob.getJodId(), currentRetryCount);
         // 检测重试次数过载
         boolean overload = delayJob.getRetryCount() >= job.getRetryCount();
+        // 过载处理标识
+        boolean handleFlag = false;
+        // 调用TTR监听器
+        List<HandlerMetaData> ttrMetaDataList = IceContext.getTopicTtrMap().get(job.getTopic());
+        if (!CollectionUtils.isEmpty(ttrMetaDataList)) {
+            for (HandlerMetaData handlerMetaData : ttrMetaDataList) {
+                try {
+                    TtrJob<?> ttrJob = new TtrJob<>();
+                    ttrJob.setOverload(overload);
+                    ttrJob.setRetryCount(currentRetryCount);
+                    ttrJob.setJob((Job) job);
+                    ReflectUtil.invokeWithWrapperInject(handlerMetaData.getTarget(), handlerMetaData.getMethod(), Collections.singletonList(ttrJob), TtrJob.class, tj -> tj.getJob().getBody(), (tj, body) -> tj.getJob().setBody(body));
+                    handleFlag = true;
+                } catch (Exception e) {
+                    log.error("Ice invoke TTR listener error: {}", e.getMessage(), e);
+                }
+            }
+        }
         if (overload) {
             log.error("Ice检测到 Job {} 的TTR超过预设的{}次!", job.getId(), job.getRetryCount());
-            boolean handleFlag = false;
             // 调用TTR Overload监听器
-            List<HandlerMetaData> handlerMetaDataList = IceContext.getTopicTtrOverloadMap().get(job.getTopic());
-            if (!CollectionUtils.isEmpty(handlerMetaDataList)) {
-                for (HandlerMetaData handlerMetaData : handlerMetaDataList) {
-                    Method method = handlerMetaData.getMethod();
+            List<HandlerMetaData> ttrOverloadMetaDataList = IceContext.getTopicTtrOverloadMap().get(job.getTopic());
+            if (!CollectionUtils.isEmpty(ttrOverloadMetaDataList)) {
+                for (HandlerMetaData handlerMetaData : ttrOverloadMetaDataList) {
                     try {
-                        ReflectUtil.invokeWithWrapperInject(handlerMetaData.getTarget(), method, Collections.singletonList(job), Job.class, Job::getBody, Job::setBody);
+                        ReflectUtil.invokeWithWrapperInject(handlerMetaData.getTarget(), handlerMetaData.getMethod(), Collections.singletonList(job), Job.class, Job::getBody, Job::setBody);
                         handleFlag = true;
                     } catch (Exception e) {
                         log.error("Ice invoke TTR overload listener error: {}", e.getMessage(), e);
@@ -183,13 +203,11 @@ public class DelayJobHandler implements Runnable, ApplicationListener<IceInstanc
             // 移除delayBucket中的任务
             delayBucket.remove(index, delayJob);
             // 设置当前重试次数
-            if (delayJob.getRetryCount() < Integer.MAX_VALUE - 1) {
-                delayJob.setRetryCount(delayJob.getRetryCount() + 1);
-            }
+            delayJob.setRetryCount(currentRetryCount);
             // 重置到当前延迟
             long delayDate = System.currentTimeMillis() +
                     (props.isEnableDelayMultiRetryCount() ?
-                            job.getDelay() * (delayJob.getRetryCount() + 1) * props.getRetryDelayMultiFactor() :
+                            job.getDelay() * (currentRetryCount) * props.getRetryDelayMultiFactor() :
                             job.getDelay());
             delayJob.setDelayTime(delayDate);
             // 再次添加到任务中
