@@ -39,7 +39,7 @@ import java.util.stream.Collectors;
  */
 public class Crust {
     // 缓存标识
-    static final String CATCH_NAME = "crustLightCache";
+    static final String CATCH_NAME = "lightCacheCrust";
 
     // 缓存前辍
     private static final String CATCH_KEY_PREFIX = "crust:user:";
@@ -73,7 +73,7 @@ public class Crust {
     private CrustProperties props;
 
     @Resource
-    Cache crustLightCache;
+    Cache lightCacheCrust;
 
     /**
      * 登录认证
@@ -107,12 +107,12 @@ public class Crust {
      * @return Token
      */
     public String refreshToken() {
-        if (!props.isStateless()) return null;
+        if (!props.isStateless()) { return null; }
         String refreshedToken;
         try {
             Claims claims = JwtUtil.parseToken(getToken(), getUnSignKey());
             claims.put(CREATED, new Date());
-            refreshedToken = JwtUtil.generateToken(claims, getSignKey(), props.getExpire(), props.isUseRsa());
+            refreshedToken = JwtUtil.generateToken(claims, getSignKey(), Math.toIntExact(props.getExpire().toMinutes()), props.isUseRsa());
         } catch (Exception e) {
             refreshedToken = null;
         }
@@ -149,7 +149,7 @@ public class Crust {
         // Session方式开启超级缓存
         if (getProps().isEnableCache() && !props.isStateless()) {
             // 先检测超级缓存（提高性能）
-            Spot<Serializable, CrustUserInfo<T>> spot = CacheHelper.get(crustLightCache);
+            Spot<Serializable, CrustUserInfo<T>> spot = CacheHelper.get(lightCacheCrust);
             if (spot != null && spot.getData() != null) {
                 return spot.getData();
             }
@@ -158,7 +158,7 @@ public class Crust {
             Spot<Serializable, CrustUserInfo<T>> sessionSpot = new Spot<>();
             sessionSpot.setView(userInfo.getUid());
             sessionSpot.setData(userInfo);
-            CacheHelper.set(crustLightCache, sessionSpot);
+            CacheHelper.set(lightCacheCrust, sessionSpot);
             return userInfo;
         }
 
@@ -182,7 +182,7 @@ public class Crust {
     public void invalidate() {
         // Token方式下开启缓存时清空
         if (getProps().isEnableCache() && getProps().isStateless()) {
-            CacheHelper.erase(crustLightCache, getUserInfo(Serializable.class).getUid(), id -> Crust.CATCH_KEY_PREFIX + id);
+            CacheHelper.erase(lightCacheCrust, getUserInfo(Serializable.class).getUid(), id -> Crust.CATCH_KEY_PREFIX + id);
         }
         SecurityContextHolder.clearContext();
     }
@@ -283,7 +283,7 @@ public class Crust {
     @NonNull
     private Boolean validateToken(@NonNull String token, @NonNull String username) {
         String userName = tokenMetaDataThreadLocal.get().getUsername();
-        if (StringUtils.isEmpty(userName)) return false;
+        if (StringUtils.isEmpty(userName)) { return false; }
         return (userName.equals(username) && !JwtUtil.isTokenExpired(token, getUnSignKey()));
     }
 
@@ -311,12 +311,12 @@ public class Crust {
                 claims.put(ROLE_IDS, StringUtils.arrayToCommaDelimitedString(roleIds.toArray()));
             }
         }
-        String token = JwtUtil.generateToken(claims, getSignKey(), props.getExpire(), props.isUseRsa());
+        String token = JwtUtil.generateToken(claims, getSignKey(), Math.toIntExact(props.getExpire().toMinutes()), props.isUseRsa());
         userInfo.setToken(token);
         return userInfo;
     }
 
-    @LightCacheable(value = Crust.CATCH_NAME, keyPrefix = CATCH_KEY_PREFIX, key = "T(org.springframework.util.DigestUtils).md5DigestAsHex(#authentication?.token.bytes)", // #authentication 与 args[0] 等价
+    @LightCacheable(value = CATCH_NAME, keyPrefix = CATCH_KEY_PREFIX, key = "T(org.springframework.util.DigestUtils).md5DigestAsHex(#authentication?.token.bytes)", // #authentication 与 args[0] 等价
             condition = "#authentication!=null&&#target.props.enableCache") // #target 与 @crust、#this.object、#root.object等价（#this在表达式不同部分解析过程中可能会改变，但是#root总是指向根，object为自定义root对象属性）
     @SuppressWarnings("unchecked")
     public <T> CrustUserInfo<T> getTokenUserInfo(Authentication authentication, @NonNull Class<T> clazz) {
@@ -383,9 +383,9 @@ public class Crust {
      */
     @Nullable
     public String getToken() {
-        if (!props.isStateless()) return null;
+        if (!props.isStateless()) { return null; }
         String token = WebContext.getRequest().getHeader(props.getTokenName());
-        if (StringUtils.isEmpty(token)) return null;
+        if (StringUtils.isEmpty(token)) { return null; }
         // 一般请求头Authorization的值会添加Bearer
         String tokenHead = "Bearer ";
         if (token.contains(tokenHead)) {

@@ -3,6 +3,7 @@ package com.github.yizzuide.milkomeda.ice;
 import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import com.github.yizzuide.milkomeda.util.JSONUtil;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.ApplicationListener;
 import org.springframework.data.redis.core.BoundListOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.CollectionUtils;
@@ -15,13 +16,20 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 1.15.0
- * @version 1.15.2
+ * @version 3.0.7
  * Create at 2019/11/16 17:07
  */
-public class RedisReadyQueue implements ReadyQueue, InitializingBean {
-    private static final String PREFIX_NAME = "ice:ready_queue";
+public class RedisReadyQueue implements ReadyQueue, InitializingBean, ApplicationListener<IceInstanceChangeEvent> {
 
     private StringRedisTemplate redisTemplate;
+
+    private String readyQueueKey = "ice:ready_queue";
+
+    public RedisReadyQueue(IceProperties props) {
+        if (!IceProperties.DEFAULT_INSTANCE_NAME.equals(props.getInstanceName())) {
+            this.readyQueueKey = "ice:ready_queue:" + props.getInstanceName();
+        }
+    }
 
     @Override
     public void push(DelayJob delayJob) {
@@ -62,11 +70,17 @@ public class RedisReadyQueue implements ReadyQueue, InitializingBean {
     }
 
     private String getKey(String topic) {
-        return PREFIX_NAME + ":" + topic;
+        return this.readyQueueKey + ":" + topic;
     }
 
     @Override
     public void afterPropertiesSet() {
         redisTemplate = ApplicationContextHolder.get().getBean(StringRedisTemplate.class);
+    }
+
+    @Override
+    public void onApplicationEvent(IceInstanceChangeEvent event) {
+        String instanceName = event.getSource().toString();
+        this.readyQueueKey = "ice:ready_queue:" + instanceName;
     }
 }

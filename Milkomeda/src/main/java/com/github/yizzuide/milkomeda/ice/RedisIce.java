@@ -1,27 +1,30 @@
 package com.github.yizzuide.milkomeda.ice;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.github.yizzuide.milkomeda.util.Polyfill;
+import com.github.yizzuide.milkomeda.universe.polyfill.RedisPolyfill;
 import com.github.yizzuide.milkomeda.util.RedisUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.CollectionUtils;
 
+import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 /**
  * RedisIce
+ * 基于Redis的延迟队列实现
  *
  * @author yizzuide
  * @since 1.15.0
- * @version 1.15.2
+ * @version 3.0.9
  * Create at 2019/11/16 15:20
  */
 @Slf4j
-public class RedisIce implements Ice {
+public class RedisIce implements Ice, ApplicationListener<IceInstanceChangeEvent> {
 
     @Autowired
     private JobPool jobPool;
@@ -35,15 +38,32 @@ public class RedisIce implements Ice {
     @Autowired
     private StringRedisTemplate redisTemplate;
 
-    @Autowired
     private IceProperties props;
 
-    private static final String KEY_IDEMPOTENT_LIMITER = "ice:range_pop_lock";
+    private String lockKey = "ice:range_pop_lock";
+
+    public RedisIce(IceProperties props) {
+        this.props = props;
+        if (!IceProperties.DEFAULT_INSTANCE_NAME.equals(props.getInstanceName())) {
+            this.lockKey = "ice:range_pop_lock:" + props.getInstanceName();
+        }
+    }
 
     @SuppressWarnings("rawtypes")
     @Override
     public void add(Job job) {
-        job.setId(job.getTopic() + "-" + job.getId());
+        add(job, true);
+    }
+
+    @SuppressWarnings("rawtypes")
+    @Override
+    public void add(Job job, boolean mergeIdWithTopic) {
+        if (mergeIdWithTopic) {
+            job.setId(job.getTopic() + "-" + job.getId());
+        }
+        if (jobPool.exists(job.getId())) {
+            return;
+        }
         job.setStatus(JobStatus.DELAY);
         RedisUtil.batchOps(() -> {
             jobPool.push(job);
@@ -52,9 +72,23 @@ public class RedisIce implements Ice {
     }
 
     @Override
+    public <T> void add(String id, String topic, T body, Duration delay) {
+        add(build(id, topic, body, delay));
+    }
+
+    @Override
     public <T> void add(String id, String topic, T body, long delay) {
-        Job<T> job = new Job<>(id, topic, delay, props.getTtr(), props.getRetryCount(), body);
-        add(job);
+        add(build(id, topic, body, delay));
+    }
+
+    @Override
+    public <T> Job<T> build(String id, String topic, T body, Duration delay) {
+        return build(id, topic, body, delay.toMillis());
+    }
+
+    @Override
+    public <T> Job<T> build(String id, String topic, T body, long delay) {
+        return new Job<>(id, topic, delay, props.getTtr().toMillis(), props.getRetryCount(), body);
     }
 
     @Override
@@ -84,14 +118,14 @@ public class RedisIce implements Ice {
 
     @Override
     public <T> List<Job<T>> pop(String topic, int count) {
-        // 空队列直接返回
-        if (readyQueue.size(topic) == 0) return null;
+        // 获取个数小于1或空队列直接返回
+        if (count < 1 || readyQueue.size(topic) == 0) return null;
         // 如果只取1个时，直接使用pop（保证原子性）
         if (count == 1) return Collections.singletonList(pop(topic));
 
         // 使用SetNX锁住资源，防止多线程并发执行，造成重复消费问题
-        boolean absent = RedisUtil.setIfAbsent(KEY_IDEMPOTENT_LIMITER, props.getTaskPopCountLockTimeoutSeconds(), redisTemplate);
-        if (absent) return null;
+        boolean hasObtainLock = RedisUtil.setIfAbsent(this.lockKey, props.getTaskPopCountLockTimeoutSeconds().getSeconds(), redisTemplate);
+        if (!hasObtainLock) return null;
 
         List<Job<T>> jobList;
         try {
@@ -121,7 +155,7 @@ public class RedisIce implements Ice {
             }, redisTemplate);
         } finally {
             // 删除Lock
-            Polyfill.redisDelete(redisTemplate, KEY_IDEMPOTENT_LIMITER);
+            RedisPolyfill.redisDelete(redisTemplate, this.lockKey);
         }
         return jobList;
     }
@@ -145,5 +179,11 @@ public class RedisIce implements Ice {
     @Override
     public void delete(Object... jobIds) {
         jobPool.remove(jobIds);
+    }
+
+    @Override
+    public void onApplicationEvent(IceInstanceChangeEvent event) {
+        String instanceName = event.getSource().toString();
+        this.lockKey = "ice:range_pop_lock:" + instanceName;
     }
 }

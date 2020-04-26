@@ -61,13 +61,13 @@ public class CrustAuthenticationConfigurer<T extends CrustAuthenticationConfigur
 
 class RefreshSuccessHandler implements AuthenticationSuccessHandler {
     // token刷新间隔
-    private final int tokenRefreshInterval;
+    private final long tokenRefreshInterval;
     // token刷新响应字段
     private final String refreshTokenName;
 
     RefreshSuccessHandler(String refreshTokenName) {
         tokenRefreshInterval = ApplicationContextHolder.get().getBean(CrustProperties.class)
-                .getRefreshTokenInterval();
+                .getRefreshTokenInterval().toMinutes();
         this.refreshTokenName = refreshTokenName;
     }
 

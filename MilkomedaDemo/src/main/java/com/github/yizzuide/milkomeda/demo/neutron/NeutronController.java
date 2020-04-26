@@ -40,4 +40,10 @@ public class NeutronController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
+    @RequestMapping("startNow")
+    public ResponseEntity<?> startNow() {
+        Neutron.startJobNow(jobName);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
 }

@@ -9,6 +9,7 @@ import java.io.Serializable;
 
 /**
  * Job
+ * 一个被创建的包装业务数据的延迟任务类
  *
  * @author yizzuide
  * @since 1.15.0
@@ -19,16 +20,16 @@ import java.io.Serializable;
 public class Job<T> implements Serializable {
     private static final long serialVersionUID = -3823440541412673211L;
     /**
-     * 全局唯一ID（可以通过topic + id)
+     * 全局唯一ID（内部会将topic拼接进来：topic-id，以保证唯一性）
      */
     @JsonSerialize(using = ToStringSerializer.class)
     private String id;
     /**
-     * 消费者订阅的Job类型
+     * 消费者订阅的Job类型（命名类型建议：产品名_业务名_topic）
      */
     private String topic;
     /**
-     * 需要延迟的时间，单位ms
+     * 延迟时间，单位ms
      */
     private long delay;
     /**
@@ -36,7 +37,7 @@ public class Job<T> implements Serializable {
      */
     private long ttr;
     /**
-     * 重试次数
+     * 初始重试次数
      */
     private int retryCount;
     /**

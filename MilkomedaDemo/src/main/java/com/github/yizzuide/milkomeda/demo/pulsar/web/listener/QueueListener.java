@@ -27,7 +27,7 @@ public class QueueListener implements ApplicationListener<ContextRefreshedEvent>
                 if (null != deferredResult) {
                     // 模拟超时
                     /*try {
-                        Thread.sleep(6000);
+                        Thread.sleep(2000);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }*/

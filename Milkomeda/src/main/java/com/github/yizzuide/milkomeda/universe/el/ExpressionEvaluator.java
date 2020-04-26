@@ -1,5 +1,8 @@
 package com.github.yizzuide.milkomeda.universe.el;
 
+import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
+import com.github.yizzuide.milkomeda.universe.context.WebContext;
+import com.github.yizzuide.milkomeda.universe.env.Environment;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.context.expression.AnnotatedElementKey;
 import org.springframework.context.expression.CachedExpressionEvaluator;
@@ -9,6 +12,7 @@ import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.lang.reflect.Method;
 import java.util.Map;
@@ -20,6 +24,7 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @author yizzuide
  * @since 1.5.0
+ * @version 3.1.0
  * Create at 2019/05/30 22:24
  */
 public class ExpressionEvaluator<T> extends CachedExpressionEvaluator {
@@ -50,7 +55,16 @@ public class ExpressionEvaluator<T> extends CachedExpressionEvaluator {
         // 创建基于方法的执行上下文
         MethodBasedEvaluationContext evaluationContext = new MethodBasedEvaluationContext(root, targetMethod, args, this.paramNameDiscoverer);
         // 添加变量引用
-        evaluationContext.setVariable("target", root.getObject());
+        Environment env = ApplicationContextHolder.getEnvironment();
+        if (env != null) {
+            evaluationContext.setVariable("env", env.getProperties());
+        }
+        evaluationContext.setVariable("target", object);
+        ServletRequestAttributes requestAttributes = WebContext.getRequestAttributes();
+        if (requestAttributes != null) {
+            evaluationContext.setVariable("request", requestAttributes.getRequest());
+            evaluationContext.setVariable("reqParams", requestAttributes.getRequest().getParameterMap());
+        }
         return evaluationContext;
     }
 

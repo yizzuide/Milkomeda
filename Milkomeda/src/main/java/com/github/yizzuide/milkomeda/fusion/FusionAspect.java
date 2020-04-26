@@ -1,13 +1,19 @@
 package com.github.yizzuide.milkomeda.fusion;
 
 import com.github.yizzuide.milkomeda.universe.el.ELContext;
+import com.github.yizzuide.milkomeda.util.ReflectUtil;
 import lombok.Getter;
 import lombok.Setter;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.core.annotation.Order;
 import org.springframework.util.StringUtils;
+
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.github.yizzuide.milkomeda.util.ReflectUtil.getAnnotation;
 
@@ -16,7 +22,7 @@ import static com.github.yizzuide.milkomeda.util.ReflectUtil.getAnnotation;
  *
  * @author yizzuide
  * @since 1.12.0
- * @version 2.2.0
+ * @version 3.0.0
  * Create at 2019/08/09 11:09
  */
 @Order(99)
@@ -29,29 +35,119 @@ public class FusionAspect {
     @Setter
     private FusionConverter<String, Object, Object> converter;
 
-    @Around("@annotation(fusion) || @within(fusion)")
-    public Object doAround(ProceedingJoinPoint joinPoint, Fusion fusion) throws Throwable {
-        // 在方法上的切面无法注入
-        if (fusion == null) {
-            fusion = getAnnotation(joinPoint, Fusion.class);
+    @Pointcut("@within(com.github.yizzuide.milkomeda.fusion.Fusion) && execution(public * *(..))")
+    public void classPointCut() {}
+
+    @Pointcut("@within(com.github.yizzuide.milkomeda.fusion.Fusion) && execution(public * *(..))")
+    public void classGroupPointCut() {}
+
+    @Pointcut("@annotation(com.github.yizzuide.milkomeda.fusion.Fusion) && execution(public * *(..))")
+    public void actionPointCut() {}
+
+    @Pointcut("@annotation(com.github.yizzuide.milkomeda.fusion.FusionGroup) && execution(public * *(..))")
+    public void actionGroupPointCut() {}
+
+    @Around("classPointCut() || actionPointCut() || classGroupPointCut() || actionGroupPointCut()")
+    public Object doAround(ProceedingJoinPoint joinPoint) throws Throwable {
+        Fusion fusion = getAnnotation(joinPoint, Fusion.class);
+        if (fusion != null) {
+            return fusionAroundApply(joinPoint, fusion);
         }
-        String allowed = fusion.allowed();
-        // 如果条件不成功，不执行方法体
-        if (!StringUtils.isEmpty(allowed)) {
-            if (Boolean.parseBoolean(ELContext.getValue(joinPoint, allowed))) {
-                return joinPoint.proceed();
-            }
-            return null;
+        FusionGroup fusionGroup = getAnnotation(joinPoint, FusionGroup.class);
+        return fusionGroupAroundApply(joinPoint, fusionGroup);
+    }
+
+    private Object fusionGroupAroundApply(ProceedingJoinPoint joinPoint, FusionGroup fusionGroup) throws Throwable {
+        List<Fusion> fusions = Stream.of(fusionGroup.value()).sorted((f1, f2) -> {
+            if (StringUtils.isEmpty(f1.allowed())) return 1;
+            if (StringUtils.isEmpty(f2.allowed())) return -1;
+            return 0;
+        }).collect(Collectors.toList());
+
+        // 返回值修改类型
+        Fusion resultTagFusion = fusions.get(fusions.size() - 1);
+        if (!StringUtils.isEmpty(resultTagFusion.allowed())) {
+            resultTagFusion = null;
         }
 
-        String condition = fusion.condition();
-        // 检查修改条件
-        if (!StringUtils.isEmpty(condition) && !Boolean.parseBoolean(ELContext.getValue(joinPoint, condition))) {
+        StringBuilder allowedExpress = new StringBuilder();
+        String fallback = "";
+        for (Fusion fusion : fusions) {
+            // 忽略不是条件执行类型的
+            if (fusion == resultTagFusion || StringUtils.isEmpty(fusion.allowed())) {
+                continue;
+            }
+            // 拼接Spring EL执行语句
+            if (StringUtils.isEmpty(allowedExpress.toString())) {
+                allowedExpress.append(fusion.allowed());
+                fallback = fusion.fallback();
+                continue;
+            }
+            if (fusion.allowedType() == FusionAllowedType.AND) {
+                allowedExpress.append(" && ");
+            } else {
+                allowedExpress.append(" || ");
+            }
+            allowedExpress.append(fusion.allowed());
+            if (StringUtils.isEmpty(fusion.fallback())) {
+                continue;
+            }
+            fallback = fusion.fallback();
+        }
+        Object originReturnObj = checkAllow(joinPoint, allowedExpress.toString(), fallback);
+        if (resultTagFusion == null) {
+            return originReturnObj;
+        }
+        return modifyReturn(resultTagFusion, joinPoint, originReturnObj);
+    }
+
+    private Object fusionAroundApply(ProceedingJoinPoint joinPoint, Fusion fusion) throws Throwable {
+        String allowed = fusion.allowed();
+        if (!StringUtils.isEmpty(allowed)) {
+            return checkAllow(joinPoint, allowed, fusion.fallback());
+        }
+        return modifyReturn(fusion, joinPoint, null);
+    }
+
+    /**
+     * 检测执行条件
+     * @param joinPoint 切面连接点
+     * @param allowed   放行EL表达式
+     * @param fallback  反馈EL表达式
+     * @return  方法体返回值
+     * @throws Throwable 方法体异常
+     */
+    private Object checkAllow(ProceedingJoinPoint joinPoint, String allowed, String fallback) throws Throwable {
+        // 如果允许执行方法体
+        if (Boolean.parseBoolean(ELContext.getValue(joinPoint, allowed))) {
             return joinPoint.proceed();
         }
-        String tagName = fusion.value();
+        // 没有设置反馈
+        if (StringUtils.isEmpty(fallback)) {
+            // 获取方法默认返回值
+            return ReflectUtil.getMethodDefaultReturnVal(joinPoint);
+        }
+        // 否则调用反馈方法
+        return ELContext.getActualValue(joinPoint, fallback, ReflectUtil.getMethodReturnType(joinPoint));
+    }
+
+    /**
+     * 修改返回值
+     * @param resultTagFusion   Fusion
+     * @param joinPoint         切面连接点
+     * @param originReturnObj   原返回值
+     * @return  实际返回值
+     * @throws Throwable    方法体异常
+     */
+    private Object modifyReturn(Fusion resultTagFusion, ProceedingJoinPoint joinPoint, Object originReturnObj) throws Throwable {
+        String condition = resultTagFusion.condition();
+        // 检查修改条件
+        if (!StringUtils.isEmpty(condition) && !Boolean.parseBoolean(ELContext.getValue(joinPoint, condition))) {
+            return originReturnObj == null ? joinPoint.proceed() : originReturnObj;
+        }
+        String tagName = StringUtils.isEmpty(resultTagFusion.value()) ? resultTagFusion.tag() : resultTagFusion.value();
         // 执行方法体
-        Object returnData = joinPoint.proceed();
+        Object returnData = originReturnObj == null ? joinPoint.proceed() : originReturnObj;
         if (null ==  converter) {
             return returnData;
         }

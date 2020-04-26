@@ -22,7 +22,7 @@ public class RedisUtil {
      * @param key           键
      * @param liveTime      过期时间
      * @param redisTemplate RedisTemplate
-     * @return 返回true，表示存在
+     * @return 返回true，表示加锁成功
      */
     public static Boolean setIfAbsent(String key, long liveTime, RedisTemplate<String, String> redisTemplate) {
         return redisTemplate.opsForValue().setIfAbsent(key, "1", liveTime, TimeUnit.SECONDS);

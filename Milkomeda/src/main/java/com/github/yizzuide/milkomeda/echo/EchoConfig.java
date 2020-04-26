@@ -106,7 +106,7 @@ public class EchoConfig {
             public long getKeepAliveDuration(HttpResponse response, HttpContext context) {
                 long keepAlive = super.getKeepAliveDuration(response, context);
                 if (keepAlive == -1) {
-                    keepAlive = echoProperties.getKeepAlive();
+                    keepAlive = echoProperties.getKeepAlive().toMillis();
                 }
                 return keepAlive;
             }
@@ -120,11 +120,11 @@ public class EchoConfig {
         HttpComponentsClientHttpRequestFactory clientHttpRequestFactory = new HttpComponentsClientHttpRequestFactory();
         clientHttpRequestFactory.setHttpClient(closeableHttpClient());
         //设置客户端和服务端建立连接的超时时间
-        clientHttpRequestFactory.setConnectTimeout(echoProperties.getConnectTimeout());
+        clientHttpRequestFactory.setConnectTimeout((int) echoProperties.getConnectTimeout().toMillis());
         //设置客户端从服务端读取数据的超时时间
-        clientHttpRequestFactory.setReadTimeout(echoProperties.getReadTimeout());
+        clientHttpRequestFactory.setReadTimeout((int) echoProperties.getReadTimeout().toMillis());
         //设置从连接池获取连接的超时时间，不宜过长
-        clientHttpRequestFactory.setConnectionRequestTimeout(echoProperties.getConnectionRequestTimeout());
+        clientHttpRequestFactory.setConnectionRequestTimeout((int) echoProperties.getConnectionRequestTimeout().toMillis());
         //缓冲请求数据，默认为true。通过POST或者PUT大量发送数据时，建议将此更改为false，以免耗尽内存（注意：Spring boot 1.5.x下需要注释掉这行）
         clientHttpRequestFactory.setBufferRequestBody(echoProperties.isEnableBufferRequestBody());
         return clientHttpRequestFactory;

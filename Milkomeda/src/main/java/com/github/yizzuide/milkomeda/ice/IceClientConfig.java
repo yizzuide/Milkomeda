@@ -1,5 +1,6 @@
 package com.github.yizzuide.milkomeda.ice;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -14,6 +15,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class IceClientConfig extends IceBasicConfig {
     @Bean
+    @ConditionalOnMissingBean
     public IceContext iceContext() {
         return new IceContext();
     }

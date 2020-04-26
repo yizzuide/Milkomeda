@@ -12,7 +12,7 @@ public interface ProductService {
     /**
      * 推送给第三方平台
      */
-    void push(Product product);
+    long push(Product product, boolean delay);
 
     /**
      * 从第三方拉取

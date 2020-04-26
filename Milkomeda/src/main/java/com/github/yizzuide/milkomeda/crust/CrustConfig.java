@@ -19,7 +19,7 @@ import java.util.Collections;
  *
  * @author yizzuide
  * @since 1.14.0
- * @version 2.0.5
+ * @version 2.3.0
  * Create at 2019/11/11 14:56
  */
 @Configuration
@@ -63,11 +63,12 @@ public class CrustConfig {
         LightCache lightCache = new LightCache();
         lightCache.setL1MaxCount(lightProps.getL1MaxCount());
         lightCache.setL1DiscardPercent(lightProps.getL1DiscardPercent());
-        lightCache.setL1Expire(lightProps.getL1Expire());
+        lightCache.setL1Expire(lightProps.getL1Expire().getSeconds());
         lightCache.setStrategy(lightProps.getStrategy());
         lightCache.setStrategyClass(lightProps.getStrategyClass());
         lightCache.setOnlyCacheL1(!crustProps.isEnableCacheL2());
-        lightCache.setL2Expire(lightProps.getL2Expire());
+        lightCache.setL2Expire(lightProps.getL2Expire().getSeconds());
+        lightCache.setOnlyCacheL2(false);
         return lightCache;
     }
 

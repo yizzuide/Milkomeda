@@ -1,6 +1,8 @@
 package com.github.yizzuide.milkomeda.util;
 
+
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.util.CollectionUtils;
 
 import java.beans.BeanInfo;
 import java.beans.Introspector;
@@ -16,12 +18,12 @@ import java.util.regex.Pattern;
  *
  * @author yizzuide
  * @since 1.13.0
- * @version 1.15.0
+ * @version 3.0.6
  * Create at 2019/09/21 17:23
  */
 public class DataTypeConvertUtil {
 
-    private static Pattern linePattern = Pattern.compile("_(\\w)");
+    private static final Pattern linePattern = Pattern.compile("_(\\w)");
 
     /**
      * 下划线转驼峰
@@ -205,6 +207,7 @@ public class DataTypeConvertUtil {
      * @param deleteNullValue   是否去空
      * @return 表单字段
      */
+    @SuppressWarnings("rawtypes")
     public static String map2FormData(Map<String, Object> map, boolean deleteNullValue) {
         map = sortMap(map, deleteNullValue);
         int count = map.size();
@@ -233,5 +236,118 @@ public class DataTypeConvertUtil {
             index++;
         }
         return builder.toString();
+    }
+
+    /**
+     * 从源Map采集key的值
+     * @param key       采集key
+     * @param source    源Map
+     * @return 采集到的字符串
+     */
+    public static String extractValue(String key, Map<String, Object> source) {
+        return extractValue(key, source, null);
+    }
+
+    /**
+     * 从源Map采集key的值
+     * @param key           采集key
+     * @param source        源Map
+     * @param defaultValue  默认值
+     * @return 采集到的字符串
+     * @since 3.0.3
+     */
+    public static String extractValue(String key, Map<String, Object> source, String defaultValue) {
+        if (key == null || source == null) {
+            return defaultValue;
+        }
+        Object value = source.get(key);
+        if (value == null) return defaultValue;
+        return value.toString();
+    }
+
+    /**
+     * 从源Map采集key路径的值
+     * @param keyPath       采集key
+     * @param source        源Map
+     * @param defaultValue  默认值
+     * @return 采集到的字符串
+     * @since 3.0.3
+     */
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    public static String extractPath(String keyPath, Map<String, Object> source, String defaultValue) {
+        if (StringUtils.isEmpty(keyPath)) {
+            return defaultValue;
+        }
+        if (!keyPath.contains(".")) {
+            return extractValue(keyPath, source, defaultValue);
+        }
+        String[] keys = org.springframework.util.StringUtils.delimitedListToStringArray(keyPath, ".");
+        Map<String, Object> nodeMap = new HashMap<>(source);
+        for (String key : keys) {
+            // Map类型路径
+            if (key.indexOf('[') == -1) {
+                Object value = nodeMap.get(key);
+                Object nextNode = findNextNode(value, defaultValue);
+                if (isSugarType(nextNode)) return nextNode.toString();
+                nodeMap = (Map<String, Object>) nextNode;
+                continue;
+            }
+
+            // List类型路径
+            int startBracket = key.indexOf('[');
+            int index = Integer.parseInt(key.substring(startBracket + 1, key.indexOf(']')));
+            key = key.substring(0, startBracket);
+            Object node = nodeMap.get(key);
+            if (node == null) {
+                return defaultValue;
+            }
+            // list string -> list
+            if (node instanceof String && ((String) node).indexOf('[') == 0) {
+                node = JSONUtil.parseList(node.toString(), Map.class);
+            }
+            if (!(node instanceof List)) {
+                return defaultValue;
+            }
+            if (CollectionUtils.isEmpty(((List) node))) {
+                return defaultValue;
+            }
+            Object value = ((List) node).get(index);
+            Object nextNode = findNextNode(value, defaultValue);
+            if (isSugarType(nextNode)) return nextNode.toString();
+            nodeMap = (Map<String, Object>) nextNode;
+        }
+        // 未找到路径，返回默认值
+        return defaultValue;
+    }
+
+    /**
+     * 是否是简单值类型
+     * @param obj   对象
+     * @return  false为容器类型
+     * @since 3.0.3
+     */
+    public static boolean isSugarType(Object obj) {
+        return !(obj instanceof List) && !(obj instanceof Map);
+    }
+
+
+    private static Object findNextNode(Object node, String defaultValue) {
+        if (node == null) {
+            return defaultValue;
+        }
+        Map<String, Object> nodeMap;
+        if (isSugarType(node)) {
+            String strValue = node.toString();
+            // map string -> map
+            if (strValue.startsWith("{") && strValue.endsWith("}"))  {
+                nodeMap = JSONUtil.parseMap(strValue, String.class, Object.class);
+                if (nodeMap == null) {
+                    return defaultValue;
+                }
+                return nodeMap;
+            }
+            return strValue;
+        }
+        return node;
     }
 }

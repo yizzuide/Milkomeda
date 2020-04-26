@@ -16,13 +16,13 @@ import java.lang.annotation.*;
 @Inherited
 public @interface LightCacheEvict {
     /**
-     * 缓存实例名（不同的缓存类型应该设置不能的名字）
+     * 缓存实例名（不同的缓存类型应该设置不能的名字），支持EL表达式
      * @return  String
      */
     String value();
 
     /**
-     * 缓存key，支持EL表达式获取参数的值
+     * 缓存key，支持EL表达式
      * @return  String
      */
     String key();
@@ -34,7 +34,7 @@ public @interface LightCacheEvict {
     String keyPrefix() default "";
 
     /**
-     * 缓存条件，使用EL表达式
+     * 缓存条件，需要使用EL表达式
      * @return String
      */
     String condition() default "";

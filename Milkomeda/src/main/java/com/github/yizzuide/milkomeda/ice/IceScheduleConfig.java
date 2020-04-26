@@ -4,15 +4,14 @@ import com.github.yizzuide.milkomeda.universe.metadata.HandlerMetaData;
 import com.github.yizzuide.milkomeda.util.ReflectUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.task.TaskSchedulingAutoConfiguration;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.scheduling.annotation.SchedulingConfigurer;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.util.CollectionUtils;
 
 import java.lang.reflect.Method;
-import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 
@@ -21,12 +20,12 @@ import java.util.Map;
  *
  * @author yizzuide
  * @since 1.15.0
- * @version 2.1.0
+ * @version 3.0.9
  * Create at 2019/11/17 17:00
  */
 @Slf4j
 @Configuration
-@ConditionalOnMissingBean(SchedulingConfigurer.class)
+@AutoConfigureAfter(TaskSchedulingAutoConfiguration.class)
 @ConditionalOnProperty(prefix = "milkomeda.ice", name = "enable-task", havingValue = "true")
 public class IceScheduleConfig {
 
@@ -38,18 +37,37 @@ public class IceScheduleConfig {
             if (CollectionUtils.isEmpty(jobs)) return;
 
             List<HandlerMetaData> metaDataList = IceContext.getTopicMap().get(topic);
-            for (HandlerMetaData metaData : metaDataList) {
-                try {
+            Object resultData = null;
+            try {
+                for (HandlerMetaData metaData : metaDataList) {
                     Method method = metaData.getMethod();
                     List<Job> jobList = (List) jobs;
-                    ReflectUtil.invokeWithWrapperInject(metaData.getTarget(), method, jobList, Job.class, Job::getBody, Job::setBody);
-                } catch (Exception e) {
-                    log.error("Ice schedule error: {}", e.getMessage(), e);
+                    Object result = ReflectUtil.invokeWithWrapperInject(metaData.getTarget(), method, jobList, Job.class, Job::getBody, Job::setBody);
+                    if (result != null) {
+                        resultData = result;
+                    }
+                }
+
+                // 标记完成，清除元数据
+                ice.finish(jobs);
+
+                // 是否有重新入队
+                if (resultData == null) {
                     return;
                 }
+                if (resultData instanceof Job) {
+                    ice.add((Job) resultData);
+                    return;
+                }
+                if (resultData instanceof List) {
+                    List<Job> rePushJobs = (List<Job>) resultData;
+                    for (Job rePushJob : rePushJobs) {
+                        ice.add(rePushJob);
+                    }
+                }
+            } catch (Exception e) {
+                log.error("Ice schedule error: {}", e.getMessage(), e);
             }
-            // 标记完成，清除元数据
-            ice.finish(jobs);
-        }), Duration.ofMillis(props.getTaskExecuteRate()));
+        }), props.getTaskExecuteRate());
     }
 }

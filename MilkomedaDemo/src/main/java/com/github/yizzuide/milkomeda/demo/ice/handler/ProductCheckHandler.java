@@ -1,11 +1,10 @@
 package com.github.yizzuide.milkomeda.demo.ice.handler;
 
 import com.github.yizzuide.milkomeda.demo.ice.pojo.Product;
-import com.github.yizzuide.milkomeda.ice.IceHandler;
-import com.github.yizzuide.milkomeda.ice.IceListener;
+import com.github.yizzuide.milkomeda.ice.*;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.List;
+import java.time.Duration;
 
 /**
  * ProductCheckHandler
@@ -21,12 +20,29 @@ public class ProductCheckHandler {
 
     // 监听topic消息（支持SpEL)
     @IceListener(topic = "#target.topicName()")
-    public void handle(List<Product> products) {
-      log.info("products: {}", products);
+    public Job<Product> handle(Job<Product> productJob) {
+        log.info("接收到Job: {}", productJob);
+        // 测试处理失败
+//        int i = 1 / 0;
+        // 重新入队到新topic
+        Product product = productJob.getBody();
+        product.setDesc("再次审核");
+        // 注意：重新入队的job，需要重新构建新的topic
+        return IceHolder.getIce().build(product.getId(), "topic_product_check_again", product, Duration.ofSeconds(2));
+    }
+
+    @IceListener(topic = "topic_product_check_again")
+    public void handleAgain(Product product) {
+        log.info("接收到Product: {}", product);
     }
 
     // 该方法被上面SpEL调用
     public String topicName() {
         return "topic_product_check";
+    }
+
+    @IceTtrOverloadListener(topic = "#target.topicName()")
+    public void ttrHandle(Product job) {
+        log.error("trr overload with job: {}", job);
     }
 }

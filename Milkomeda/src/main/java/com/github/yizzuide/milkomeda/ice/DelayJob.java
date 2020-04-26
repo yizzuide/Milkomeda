@@ -23,7 +23,7 @@ class DelayJob implements Serializable {
     private String jodId;
 
     /**
-     * 任务的执行时间ms
+     * 任务的执行时间（单位：ms）
      */
     private long delayTime;
 
@@ -37,6 +37,7 @@ class DelayJob implements Serializable {
      */
     private int retryCount;
 
+    @SuppressWarnings("rawtypes")
     DelayJob(Job job) {
         this.jodId = job.getId();
         this.delayTime = System.currentTimeMillis() + job.getDelay();

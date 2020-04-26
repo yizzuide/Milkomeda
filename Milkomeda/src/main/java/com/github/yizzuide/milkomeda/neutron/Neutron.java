@@ -50,6 +50,7 @@ public class Neutron {
      * @param jobName   job名称
      * @param group     job组
      * @param jobClass  job类
+     * @param description job描述
      * @return  jobDetail
      */
     public static JobDetail createJobDetail(String jobName, String group, Class<? extends Job> jobClass, String description) {
@@ -67,6 +68,7 @@ public class Neutron {
      * @param triggerGroup 触发器所在组
      * @param cronExpression cron表达式
      * @return CronTrigger
+     * @throws ParseException cron解析异常
      */
     public static CronTrigger createCronTrigger(String triggerName, String triggerGroup, String cronExpression) throws ParseException {
         CronTriggerFactoryBean factoryBean = new CronTriggerFactoryBean();

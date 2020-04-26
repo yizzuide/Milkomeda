@@ -1,6 +1,6 @@
 package com.github.yizzuide.milkomeda.demo.comet.service;
 
-import com.github.yizzuide.milkomeda.comet.CometX;
+import com.github.yizzuide.milkomeda.comet.core.CometX;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 

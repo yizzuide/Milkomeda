@@ -2,7 +2,6 @@ package com.github.yizzuide.milkomeda.demo.particle.controller;
 
 import com.github.yizzuide.milkomeda.particle.*;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,14 +25,14 @@ public class ParticleController {
     @Resource
     private IdempotentLimiter idempotentLimiter;
 
-    @Autowired
+    @Resource
     private TimesLimiter timesLimiter;
 
-    @Autowired
+    @Resource
     private BarrierLimiter barrierLimiter;
 
     @RequestMapping("check")
-    public ResponseEntity check(String token) throws Throwable {
+    public ResponseEntity<String> check(String token) throws Throwable {
         // 使用内置的方法限制一次请求的重复调用
         return idempotentLimiter.limit(token, 60L, (particle) -> {
             // 判断是否被限制
@@ -50,7 +49,7 @@ public class ParticleController {
     // 注解的方式限制一次请求的重复调用（注：'#'为Spring EL表达式）
     // 注意：由于配置了限制器链，就有了两个去重限制器，由于框架内部根据类型查找，这里需要通过limiterBeanName指定
     @Limit(name = "user:check", key = "#token", expire = 60L, limiterBeanName = "idempotentLimiter")
-    public ResponseEntity check2(String token, Particle particle/*这个状态值自动注入*/) throws Throwable {
+    public ResponseEntity<String> check2(String token, Particle particle/*这个状态值自动注入*/) throws Throwable {
         log.info("check2: token={}", token);
         // 判断是否被限制
         if (particle.isLimited()) {
@@ -62,10 +61,10 @@ public class ParticleController {
     }
 
     @RequestMapping("check3")
-    // 注解的方式限制一次请求的重复调用（:用于取HTTP请求header里的值）
+    // 注解的方式限制一次请求的重复调用（#env获取自定义环境变量，#request获取请求对象）
     // 注意：由于配置了限制器链，就有了两个去重限制器，由于框架内部根据类型查找，这里需要通过limiterBeanName指定
-    @Limit(name = "user:check", key = ":Token", expire = 60L, limiterBeanName = "idempotentLimiter")
-    public ResponseEntity check3(Particle particle/*这个状态值自动注入*/) throws Throwable {
+    @Limit(name = "user:check", key = "#env['product'] + #request.getHeader('token')", expire = 60L, limiterBeanName = "idempotentLimiter")
+    public ResponseEntity<String> check3(Particle particle/*这个状态值自动注入*/) throws Throwable {
         // 判断是否被限制
         log.info("limited: {}", particle.isLimited());
         if (particle.isLimited()) {
@@ -80,7 +79,7 @@ public class ParticleController {
 
 
     @RequestMapping("send")
-    public ResponseEntity send(String phone) throws Throwable {
+    public ResponseEntity<String> send(String phone) throws Throwable {
         // 使用内置的方法限制调用次数
         return timesLimiter.limit(phone, (particle) -> {
             if (particle.isLimited()) {
@@ -93,7 +92,7 @@ public class ParticleController {
     @RequestMapping("send2")
     // 注解的方式限制调用次数
     @Limit(name = "user:send", key = "#phone", limiterBeanClass = TimesLimiter.class)
-    public ResponseEntity send2(String phone, Particle particle/*这个状态值自动注入*/) {
+    public ResponseEntity<String> send2(String phone, Particle particle/*这个状态值自动注入*/) {
         log.info("check2: phone={}", phone);
         if (particle.isLimited()) {
             return ResponseEntity.status(406).body("超过使用次数：" + particle.getValue() + "次");
@@ -103,7 +102,7 @@ public class ParticleController {
 
     // 方法嵌套调用的组合方式
     @RequestMapping("verify")
-    public ResponseEntity verify(String phone) throws Throwable {
+    public ResponseEntity<String> verify(String phone) throws Throwable {
         // 先请求重复检查
         return idempotentLimiter.limit(phone, 60L, (particle) -> {
             // 判断是否被限制
@@ -126,7 +125,7 @@ public class ParticleController {
     }
 
     @RequestMapping("verify3")
-    public ResponseEntity verify3(String phone) throws Throwable {
+    public ResponseEntity<String> verify3(String phone) throws Throwable {
         // 先请求重复检查
         return barrierLimiter.limit(phone, 60L, (particle) -> {
             // 判断是否被限制
@@ -148,7 +147,7 @@ public class ParticleController {
     // 基于注解的拦截链组合方式
     @RequestMapping("verify2")
     @Limit(name = "user:send", key = "#phone", expire = 60L, limiterBeanClass = BarrierLimiter.class)
-    public ResponseEntity verify2(String phone, Particle particle/*这个状态值自动注入*/) throws Throwable {
+    public ResponseEntity<String> verify2(String phone, Particle particle/*这个状态值自动注入*/) throws Throwable {
         log.info("verify2: phone={}", phone);
         // 判断是否被限制
         if (particle.isLimited()) {
@@ -182,5 +181,10 @@ public class ParticleController {
         resp.setStatus(200);
         resp.getWriter().println("OK");
         resp.getWriter().flush();
+    }
+
+    @RequestMapping("pay")
+    public String pay(String orderNo) {
+        return "OK";
     }
 }

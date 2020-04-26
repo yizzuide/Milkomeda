@@ -14,7 +14,7 @@ import java.util.function.Function;
  * 缓存外层API，集超级缓存、一级缓存、二级缓存于一体的方法
  *
  * @since 1.10.0
- * @version 2.0.1
+ * @version 2.3.0
  * @author yizzuide
  * Create at 2019/07/02 11:36
  */
@@ -133,19 +133,29 @@ public class CacheHelper {
     public static  <E> E get(Cache cache, TypeReference<E> eTypeRef, Serializable id,
                                 Function<Serializable, String> keyGenerator, ThrowableFunction<String, E> dataGenerator) throws Throwable {
         E data;
-        // 方案一：从超级缓存中获取，内存指针引用即可返回（耗时为O(1)，速度快到没朋友）
-        Spot<Serializable, E> fastSpot = get(cache);
-        if (fastSpot != null) {
-            data = fastSpot.getData();
-            if (data != null) {
-                return data;
+        Spot<Serializable, E> fastSpot = null;
+        if (cache instanceof LightCache) {
+            LightCache lightCache = (LightCache) cache;
+            if (!lightCache.getOnlyCacheL2()) {
+                // 方案一：从超级缓存中获取，内存指针引用即可返回（耗时为O(1)）
+                fastSpot = get(cache);
+                if (fastSpot != null) {
+                    data = fastSpot.getData();
+                    if (data != null) {
+                        return data;
+                    }
+                } else {
+                    // 设置超级缓存
+                    set(cache, id);
+                    fastSpot = get(cache);
+                }
+            } else {
+                fastSpot = new Spot<>();
+                fastSpot.setView(id);
             }
-        } else {
-            // 设置超级缓存
-            set(cache, id);
-            fastSpot = get(cache);
         }
 
+        assert fastSpot != null;
         // 设置缓存key
         String key = keyGenerator.apply(fastSpot.getView());
 
@@ -197,13 +207,23 @@ public class CacheHelper {
             throw new NullPointerException("The method return is null, it must be set not null for update cache");
         }
 
-        // 再在存入缓存
-        Spot<Serializable, E> fastSpot = get(cache);
-        if (fastSpot == null) {
-            // 设置超级缓存
-            set(cache, id);
-            fastSpot = get(cache);
+        // 再存入缓存
+        Spot<Serializable, E> fastSpot = null;
+        if (cache instanceof LightCache) {
+            LightCache lightCache = (LightCache) cache;
+            if (!lightCache.getOnlyCacheL2()) {
+                fastSpot = get(cache);
+                if (fastSpot == null) {
+                    // 设置超级缓存
+                    set(cache, id);
+                    fastSpot = get(cache);
+                }
+            } else {
+                fastSpot = new Spot<>();
+                fastSpot.setView(id);
+            }
         }
+        assert fastSpot != null;
         fastSpot.setData(data);
         // 设置一级缓存 -> 二级缓存
         cache.set(key, fastSpot);

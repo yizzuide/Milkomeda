@@ -3,7 +3,7 @@ package com.github.yizzuide.milkomeda.ice;
 import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import com.github.yizzuide.milkomeda.util.JSONUtil;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
 import org.springframework.data.redis.core.BoundZSetOperations;
 import org.springframework.data.redis.core.DefaultTypedTuple;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -22,18 +22,32 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 1.15.0
+ * @version 3.0.7
  * Create at 2019/11/16 16:17
  */
-public class RedisDelayBucket implements DelayBucket, InitializingBean {
+public class RedisDelayBucket implements DelayBucket, InitializingBean, ApplicationListener<IceInstanceChangeEvent> {
+
+    private final IceProperties props;
 
     private StringRedisTemplate redisTemplate;
 
-    private static AtomicInteger index = new AtomicInteger(0);
+    private final List<String> bucketNames = new ArrayList<>();
 
-    private List<String> bucketNames = new ArrayList<>();
+    private static final AtomicInteger index = new AtomicInteger(0);
 
-    @Autowired
-    private IceProperties props;
+    // 默认最大桶大小
+    public static final int DEFAULT_MAX_BUCKET_SIZE = 100;
+
+    public RedisDelayBucket(IceProperties props) {
+        this.props = props;
+        for (int i = 0; i < props.getDelayBucketCount(); i++) {
+            if (IceProperties.DEFAULT_INSTANCE_NAME.equals(props.getInstanceName())) {
+                bucketNames.add("ice:bucket" + i);
+            } else {
+                bucketNames.add("ice:bucket" + i + ":" + props.getInstanceName());
+            }
+        }
+    }
 
     @Override
     public void add(DelayJob delayJob) {
@@ -69,7 +83,7 @@ public class RedisDelayBucket implements DelayBucket, InitializingBean {
     @Override
     public void remove(Integer index, DelayJob delayJob) {
         String name = bucketNames.get(index);
-        BoundZSetOperations bucket = getBucket(name);
+        BoundZSetOperations<String, String> bucket = getBucket(name);
         bucket.remove(JSONUtil.serialize(delayJob));
     }
 
@@ -89,15 +103,21 @@ public class RedisDelayBucket implements DelayBucket, InitializingBean {
      * @return BucketName
      */
     private String getCurrentBucketName() {
-        int thisIndex = index.getAndIncrement();
+        int thisIndex = index.getAndIncrement() % DEFAULT_MAX_BUCKET_SIZE;
         return bucketNames.get(thisIndex % props.getDelayBucketCount());
     }
 
     @Override
     public void afterPropertiesSet() {
         redisTemplate = ApplicationContextHolder.get().getBean(StringRedisTemplate.class);
+    }
+
+    @Override
+    public void onApplicationEvent(IceInstanceChangeEvent event) {
+        String instanceName = event.getSource().toString();
+        bucketNames.clear();
         for (int i = 0; i < props.getDelayBucketCount(); i++) {
-            bucketNames.add("ice:bucket" + i);
+            bucketNames.add("ice:bucket" + i + ":" + instanceName);
         }
     }
 }

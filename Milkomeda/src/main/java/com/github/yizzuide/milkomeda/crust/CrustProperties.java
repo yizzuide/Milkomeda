@@ -1,7 +1,12 @@
 package com.github.yizzuide.milkomeda.crust;
 
+import com.github.yizzuide.milkomeda.light.LightCache;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.convert.DurationUnit;
+
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 
 /**
  * CrustProperties
@@ -15,17 +20,17 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties("milkomeda.crust")
 public class CrustProperties {
     /**
-     * 使用Token的无状态登录（默认为true, 设置为false使用session管理）
+     * 使用Token的无状态登录（后台session管理方式设置为false）
      */
     private boolean stateless = true;
 
     /**
-     * Token方式情况下，是否开启实体查询的多级缓存；Session方式下开启超级缓存（默认为true）
+     * Token方式情况下，是否开启实体查询的多级缓存（API服务建议不开启）；Session方式下开启超级缓存（建议开启）
      */
     private boolean enableCache = true;
     /**
-     * Token方式在enableCache=true的情况下，是否缓存到Redis（默认为true）<br>
-     * 注意：这个配置将覆盖<code>light.onlyCacheL1</code>配置的值（该配置为Light模块）
+     * Token方式情况下，并且 <code>enableCache=true</code>，是否缓存到Redis <br>
+     * 注意：这个配置将覆盖缓存模块 {@link LightCache#getOnlyCacheL2()} 配置的值
      */
     private boolean enableCacheL2 = true;
 
@@ -53,7 +58,8 @@ public class CrustProperties {
     /**
      * Token过期时间（默认30分钟，单位：分）
      */
-    private int expire = 30;
+    @DurationUnit(ChronoUnit.MINUTES)
+    private Duration expire = Duration.ofMinutes(30);
 
     /**
      * 请求头自定义的token名（默认为token)
@@ -74,7 +80,8 @@ public class CrustProperties {
     /**
      * Token刷新间隔（默认5分钟，单位：分）
      */
-    private int refreshTokenInterval = 5;
+    @DurationUnit(ChronoUnit.MINUTES)
+    private Duration refreshTokenInterval = Duration.ofMinutes(5);
 
     /**
      * Token刷新响应字段

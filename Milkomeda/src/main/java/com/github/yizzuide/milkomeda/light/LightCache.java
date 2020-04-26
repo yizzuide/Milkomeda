@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.github.yizzuide.milkomeda.pulsar.PulsarHolder;
 import com.github.yizzuide.milkomeda.util.JSONUtil;
-import com.github.yizzuide.milkomeda.util.Polyfill;
+import com.github.yizzuide.milkomeda.universe.polyfill.RedisPolyfill;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit;
  * E：缓存业务数据
  *
  * @since 1.8.0
- * @version 2.0.3
+ * @version 2.7.0
  * @author yizzuide
  * Create at 2019/06/28 13:33
  */
@@ -84,6 +84,13 @@ public class LightCache implements Cache {
     @Setter
     @Getter
     private Long l2Expire;
+
+    /**
+     * 只写入二级缓存
+     */
+    @Setter
+    @Getter
+    private Boolean onlyCacheL2;
 
     /**
      * 超级缓存（每个Cache都有自己的超级缓存，互不影响）
@@ -177,7 +184,10 @@ public class LightCache implements Cache {
      */
     private void cache(String key, Spot<Serializable, Object> spot) {
         // 一级缓存
-        boolean success = cacheL1(key, spot);
+        boolean success = true;
+        if (!onlyCacheL2) {
+            success = cacheL1(key, spot);
+        }
 
         // 二级缓存
         if (!onlyCacheL1 && success) {
@@ -221,7 +231,7 @@ public class LightCache implements Cache {
         if (isAbandon) {
             if (!onlyCacheL1) {
                 // 从二级缓存移除
-                Polyfill.redisDelete(stringRedisTemplate, key);
+                RedisPolyfill.redisDelete(stringRedisTemplate, key);
             }
             return false;
         }
@@ -262,19 +272,23 @@ public class LightCache implements Cache {
      */
     @SuppressWarnings("unchecked")
     private <E> Spot<Serializable, E> get(String key, JavaType javaType) {
+        Spot<Serializable, Object> spot = null;
         // 从一级缓存查找
-        Spot<Serializable, Object> spot = cacheMap.get(key);
-        if (null != spot) {
-            // 排行加分
-            boolean isAbandon = discardStrategy.ascend(spot);
-            // 如果放弃缓存
-            if (isAbandon) {
-                // 删除缓存
-                erase(key);
-                return null;
+        if (!onlyCacheL2) {
+            spot = cacheMap.get(key);
+            if (null != spot) {
+                // 排行加分
+                boolean isAbandon = discardStrategy.ascend(spot);
+                // 如果放弃缓存
+                if (isAbandon) {
+                    // 删除缓存
+                    erase(key);
+                    return null;
+                }
+                return (Spot<Serializable, E>) spot;
             }
-            return (Spot<Serializable, E>) spot;
         }
+
 
         // 从二级缓存中查找
         if (!onlyCacheL1) {
@@ -285,9 +299,11 @@ public class LightCache implements Cache {
                 } else {
                     spot = JSONUtil.parse(json, discardStrategy.spotClazz());
                 }
-                // 添加到一级缓存池，缓存失败，放弃从缓存中恢复
-                if (!cacheL1(key, spot)) {
-                    return null;
+                if (!onlyCacheL2) {
+                    // 添加到一级缓存池，缓存失败，放弃从缓存中恢复
+                    if (!cacheL1(key, spot)) {
+                        return null;
+                    }
                 }
             }
         }
@@ -296,10 +312,14 @@ public class LightCache implements Cache {
 
     @Override
     public void erase(String key) {
-        // 从二级缓存移除
-        Polyfill.redisDelete(stringRedisTemplate, key);
-        // 从一级缓存移除
-        cacheMap.remove(key);
+        if (!onlyCacheL1) {
+            // 从二级缓存移除
+            RedisPolyfill.redisDelete(stringRedisTemplate, key);
+        }
+        if (!onlyCacheL2) {
+            // 从一级缓存移除
+            cacheMap.remove(key);
+        }
     }
 
     /**
@@ -336,6 +356,7 @@ public class LightCache implements Cache {
                 try {
                     discardStrategy = strategyClass.newInstance();
                 } catch (Exception e) {
+                    discardStrategy  = new HotDiscard();
                     log.error("light create strategy class error with message:{}", e.getMessage(), e);
                 }
             }
@@ -354,5 +375,21 @@ public class LightCache implements Cache {
         this.setStrategyClass(other.getStrategyClass());
         this.setOnlyCacheL1(other.getOnlyCacheL1());
         this.setL2Expire(other.getL2Expire());
+        this.setOnlyCacheL2(other.getOnlyCacheL2());
+    }
+
+    /**
+     * 配置实例
+     * @param props LightCache
+     */
+    public void configFrom(LightProperties props) {
+        this.setL1MaxCount(props.getL1MaxCount());
+        this.setL1DiscardPercent(props.getL1DiscardPercent());
+        this.setL1Expire(props.getL1Expire().getSeconds());
+        this.setStrategy(props.getStrategy());
+        this.setStrategyClass(props.getStrategyClass());
+        this.setOnlyCacheL1(props.isOnlyCacheL1());
+        this.setL2Expire(props.getL2Expire().getSeconds());
+        this.setOnlyCacheL2(props.isOnlyCacheL2());
     }
 }

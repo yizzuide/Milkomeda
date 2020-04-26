@@ -10,12 +10,13 @@ import java.lang.annotation.*;
  *
  * @author yizzuide
  * @since 1.13.0
+ * @version 2.5.4
  * Create at 2019/09/21 18:38
  */
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Inherited
-@Import({EchoConfig.class})
+@Import({EchoConfig.class, EchoCloudConfig.class})
 public @interface EnableEcho {
 }
