@@ -19,7 +19,7 @@ import java.util.List;
  *
  * @author yizzuide
  * @since 3.0.0
- * @version 3.0.3
+ * @version 3.1.2
  * Create at 2020/03/28 17:40
  */
 @Slf4j
@@ -40,19 +40,27 @@ public class MoonConfig implements ApplicationContextAware {
         for (MoonProperties.Instance instance : instances) {
             String beanName = instance.getName();
             String cacheName = instance.getCacheName();
-            Class<MoonStrategy> moonStrategyClazz = instance.getMoonStrategyClazz();
+            if (instance.getMoonStrategyClazz() == null && instance.getType() != null) {
+                switch (instance.getType()) {
+                    case PERIODIC:
+                        instance.setMoonStrategyClazz(PeriodicMoonStrategy.class);
+                        break;
+                    case PERCENT:
+                        instance.setMoonStrategyClazz(PercentMoonStrategy.class);
+                        break;
+                }
+            }
+            Class<? extends MoonStrategy> moonStrategyClazz = instance.getMoonStrategyClazz();
             Moon moon = WebContext.registerBean((ConfigurableApplicationContext) applicationContext, beanName, Moon.class);
             moon.setCacheName(cacheName);
-            if (moonStrategyClazz != null) {
-                try {
-                    MoonStrategy moonStrategy = moonStrategyClazz.newInstance();
-                    moon.setMoonStrategy(moonStrategy);
-                    if (!CollectionUtils.isEmpty(instance.getProps())) {
-                        ReflectUtil.setField(moonStrategy, instance.getProps());
-                    }
-                } catch (Exception e) {
-                    log.error("Moon invoke error with msg: {}", e.getMessage(), e);
+            try {
+                MoonStrategy moonStrategy = moonStrategyClazz.newInstance();
+                moon.setMoonStrategy(moonStrategy);
+                if (!CollectionUtils.isEmpty(instance.getProps())) {
+                    ReflectUtil.setField(moonStrategy, instance.getProps());
                 }
+            } catch (Exception e) {
+                log.error("Moon invoke error with msg: {}", e.getMessage(), e);
             }
             if (CollectionUtils.isEmpty(instance.getPhases())) {
                 continue;

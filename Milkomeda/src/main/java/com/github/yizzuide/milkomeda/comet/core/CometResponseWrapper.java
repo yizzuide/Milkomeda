@@ -174,6 +174,7 @@ public class CometResponseWrapper extends HttpServletResponseWrapper {
      * Copy the cached body content to the response.
      * @param complete whether to set a corresponding content length
      * for the complete cached body content
+     * @throws IOException Socket IO exception
      */
     protected void copyBodyToResponse(boolean complete) throws IOException {
         if (this.content.size() > 0) {

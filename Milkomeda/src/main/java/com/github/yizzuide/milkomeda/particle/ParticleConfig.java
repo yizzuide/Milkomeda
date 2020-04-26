@@ -16,19 +16,21 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.OrderComparator;
 import org.springframework.core.Ordered;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.filter.DelegatingFilterProxy;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * ParticleConfig
  *
  * @author yizzuide
  * @since 1.14.0
- * @since 3.0.0
+ * @since 3.1.2
  * Create at 2019/11/11 11:26
  */
 @Slf4j
@@ -71,7 +73,7 @@ public class ParticleConfig implements ApplicationContextAware {
         particleFilterRegistrationBean.setFilter(new DelegatingFilterProxy("particleFilter"));
         particleFilterRegistrationBean.setName("particleFilter");
         particleFilterRegistrationBean.setUrlPatterns(Collections.singleton("/*"));
-        particleFilterRegistrationBean.setOrder(Ordered.HIGHEST_PRECEDENCE + 1);
+        particleFilterRegistrationBean.setOrder(Ordered.HIGHEST_PRECEDENCE + 20);
         return particleFilterRegistrationBean;
     }
 
@@ -81,6 +83,20 @@ public class ParticleConfig implements ApplicationContextAware {
         List<ParticleProperties.Limiter> barrierLimiters = new ArrayList<>();
         for (ParticleProperties.Limiter limiter : limiters) {
             String limiterName = limiter.getName();
+            // 使用枚举类型填充处理器clazz
+            if (limiter.getHandlerClazz() == null && limiter.getType() != null) {
+                switch (limiter.getType()) {
+                    case IDEMPOTENT:
+                        limiter.setHandlerClazz(IdempotentLimiter.class);
+                        break;
+                    case TIMES:
+                        limiter.setHandlerClazz(TimesLimiter.class);
+                        break;
+                    case BARRIER:
+                        limiter.setHandlerClazz(BarrierLimiter.class);
+                        break;
+                }
+            }
             LimitHandler limitHandler = WebContext.registerBean((ConfigurableApplicationContext) applicationContext, limiterName, limiter.getHandlerClazz());
             cacheHandlerBeans.put(limiterName, limitHandler);
             if (!CollectionUtils.isEmpty(limiter.getProps())) {
@@ -105,5 +121,10 @@ public class ParticleConfig implements ApplicationContextAware {
             }
             barrierLimiter.addLimitHandlerList(handlers);
         }
+
+        // 根据order排序
+        List<ParticleProperties.Limiter> orderLimiters = limiters.stream()
+                .sorted(OrderComparator.INSTANCE.withSourceProvider(limiter -> limiter)).collect(Collectors.toList());
+        particleProperties.setLimiters(orderLimiters);
     }
 }

@@ -25,6 +25,7 @@ import org.springframework.web.util.UrlPathHelper;
 public class MilkomedaContextConfig {
 
     @Bean
+    @ConditionalOnMissingBean
     public Environment env() {
         return new Environment();
     }

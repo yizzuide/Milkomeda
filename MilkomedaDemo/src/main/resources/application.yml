@@ -54,6 +54,18 @@ spring:
     overwrite-existing-jobs: true
     wait-for-jobs-to-complete-on-shutdown: true
 
+
+management:
+  endpoint:
+    shutdown:
+      enabled: false
+    health:
+      show-details: always
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+
 mybatis:
   type-aliases-package: com.github.yizzuide.milkomeda.demo.halo.domain
   mapper-locations:
@@ -98,25 +110,31 @@ milkomeda:
       -
         # 新配置一个去重限制器（内部配置了idempotentLimiter），用来添加到BarrierLimiter组合链，防止污染限制器链
         name: noRepeatLimiter
-        handler-clazz: com.github.yizzuide.milkomeda.particle.IdempotentLimiter
-      -
-        name: timesLimiter
-        handler-clazz: com.github.yizzuide.milkomeda.particle.TimesLimiter
-        props:
-          timesType: MIN
-          limitTimes: 3
-        urls: ["/particle/pay"]
+        include-urls: ["/particle/pay"]
         response:
           status: 200
           code: -1
           message: 请求太频繁，请稍后再试！
+      -
+        name: timesLimiter
+        order: -1
+        type: TIMES
+        props:
+          timesType: MIN
+          limitTimes: 3
+        include-urls: ["/particle/pay"]
+        response:
+          status: 200
+          code: -1
+          message: 请求超过次数，请稍后再试！
           addition:
             data: ${collections.emptyMap}
       -
         name: barrierLimiter
-        handler-clazz: com.github.yizzuide.milkomeda.particle.BarrierLimiter
+        type: BARRIER
         props:
           chain: ["noRepeatLimiter", "timesLimiter"]
+        include-urls: ["/particle/pay"]
     exclude-urls: ["/favicon.ico"]
 
 
@@ -126,7 +144,7 @@ milkomeda:
     # 二级缓存一天后过期
     l2-expire: 1d
     # 全局使用时间线丢弃策略
-    strategy: timeline
+    strategy: TIMELINE
     instances:
       # 缓存实例配置（没有配置的使用默认值），优先级比注解高
       ab-test:
@@ -167,6 +185,8 @@ milkomeda:
     task-execute-rate: 2s
     # 消费处理器支持多个监听器
     multi-topic-listener-per-handler: true
+    # TTR超载任务进入Dead queue
+    enable-retain-to-dead-queue-when-ttr-overload: true
 
   moon:
     instances:
@@ -177,7 +197,7 @@ milkomeda:
         name: abTestMoon
         cacheName: ab-test
         # 使用百分比分配策略
-        moonStrategyClazz: com.github.yizzuide.milkomeda.moon.PercentMoonStrategy
+        type: PERCENT
         props:
           # 缩小总占百分比，使分配更均匀
           percent: 10
@@ -229,7 +249,7 @@ milkomeda:
           # 使用内部异常信息，不需要指定
           #message: 参数异常
           addition:
-            data: "{}"
+            data: ${collections.emptyMap}
 
         # 自定义异常列表处理
         customs:

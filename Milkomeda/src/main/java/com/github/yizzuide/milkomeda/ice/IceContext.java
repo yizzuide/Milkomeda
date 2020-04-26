@@ -24,7 +24,10 @@ public class IceContext implements ApplicationListener<ContextRefreshedEvent> {
 
     private static Map<String, List<HandlerMetaData>> topicMap = new HashMap<>();
 
+    private static Map<String, List<HandlerMetaData>> topicTtrMap = new HashMap<>();
+
     private static Map<String, List<HandlerMetaData>> topicTtrOverloadMap = new HashMap<>();
+
 
     @Autowired
     private IceProperties props;
@@ -35,6 +38,10 @@ public class IceContext implements ApplicationListener<ContextRefreshedEvent> {
                     IceListener iceListener = (IceListener) annotation;
                     return iceListener.value();
                 }, !props.isMultiTopicListenerPerHandler());
+        topicTtrMap = AopContextHolder.getHandlerMetaData(IceHandler.class, IceTtrListener.class, (annotation, metaData) -> {
+            IceTtrListener iceTtrListener = (IceTtrListener) annotation;
+            return iceTtrListener.value();
+        }, !props.isMultiTopicListenerPerHandler());
         topicTtrOverloadMap = AopContextHolder.getHandlerMetaData(IceHandler.class, IceTtrOverloadListener.class, (annotation, metaData) -> {
             IceTtrOverloadListener iceTtrOverloadListener = (IceTtrOverloadListener) annotation;
             return iceTtrOverloadListener.value();
@@ -43,6 +50,10 @@ public class IceContext implements ApplicationListener<ContextRefreshedEvent> {
 
     static Map<String, List<HandlerMetaData>> getTopicMap() {
         return topicMap;
+    }
+
+    static Map<String, List<HandlerMetaData>> getTopicTtrMap() {
+        return topicTtrMap;
     }
 
     static Map<String, List<HandlerMetaData>> getTopicTtrOverloadMap() {

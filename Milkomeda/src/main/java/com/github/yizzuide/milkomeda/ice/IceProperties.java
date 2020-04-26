@@ -12,7 +12,7 @@ import java.time.temporal.ChronoUnit;
  *
  * @author yizzuide
  * @since 1.15.0
- * @version 3.0.7
+ * @version 3.1.3
  * Create at 2019/11/16 19:02
  */
 @Data
@@ -104,7 +104,13 @@ class IceProperties {
     private Duration taskPopCountLockTimeoutSeconds = Duration.ofSeconds(60);
 
     /**
-     * 开启消费处理器扫描多个Topic监听器
+     * 开启同一个消费处理器扫描多个Topic监听器
      */
     private boolean multiTopicListenerPerHandler = false;
+
+    /**
+     * TTR超时后是否放入到Dead queue
+     * @see IceTtrOverloadListener
+     */
+    private boolean enableRetainToDeadQueueWhenTtrOverload = false;
 }

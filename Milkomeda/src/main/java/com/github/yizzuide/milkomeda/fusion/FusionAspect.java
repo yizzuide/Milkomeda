@@ -22,7 +22,7 @@ import static com.github.yizzuide.milkomeda.util.ReflectUtil.getAnnotation;
  *
  * @author yizzuide
  * @since 1.12.0
- * @version 3.0.0
+ * @version 3.1.3
  * Create at 2019/08/09 11:09
  */
 @Order(99)
@@ -50,10 +50,17 @@ public class FusionAspect {
     @Around("classPointCut() || actionPointCut() || classGroupPointCut() || actionGroupPointCut()")
     public Object doAround(ProceedingJoinPoint joinPoint) throws Throwable {
         Fusion fusion = getAnnotation(joinPoint, Fusion.class);
+        // 从类上查找
+        if (fusion == null) {
+            fusion = joinPoint.getTarget().getClass().getDeclaredAnnotation(Fusion.class);
+        }
         if (fusion != null) {
             return fusionAroundApply(joinPoint, fusion);
         }
         FusionGroup fusionGroup = getAnnotation(joinPoint, FusionGroup.class);
+        if (fusionGroup == null) {
+            fusionGroup = joinPoint.getTarget().getClass().getDeclaredAnnotation(FusionGroup.class);
+        }
         return fusionGroupAroundApply(joinPoint, fusionGroup);
     }
 

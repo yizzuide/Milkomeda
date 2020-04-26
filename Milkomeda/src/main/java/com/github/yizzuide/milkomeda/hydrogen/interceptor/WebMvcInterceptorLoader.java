@@ -30,11 +30,11 @@ public class WebMvcInterceptorLoader extends AbstractInterceptorLoader<Intercept
     /**
      * 请求映射处理器
      */
-    private RequestMappingHandlerMapping requestMappingHandlerMapping;
+    private final RequestMappingHandlerMapping requestMappingHandlerMapping;
     /**
      * 配置
      */
-    private InterceptorProperties props;
+    private final InterceptorProperties props;
 
     public WebMvcInterceptorLoader(InterceptorProperties interceptorProperties, RequestMappingHandlerMapping requestMappingHandlerMapping) {
         this.props = interceptorProperties;

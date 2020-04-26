@@ -11,7 +11,7 @@
 
     <properties>
         <java.version>1.8</java.version>
-        <project.release.version>3.1.0-SNAPSHOT</project.release.version>
+        <project.release.version>3.2.0-SNAPSHOT</project.release.version>
         <spring-boot.version>2.2.4</spring-boot.version>
         <spring-cloud.version>Hoxton.RELEASE</spring-cloud.version>
         <mybatis.starter.version>2.1.1</mybatis.starter.version>
@@ -68,7 +68,7 @@
         <profile>
             <id>sonatype-oss-release</id>
             <properties>
-                <project.release.version>3.1.0</project.release.version>
+                <project.release.version>3.2.0</project.release.version>
             </properties>
             <build>
                 <plugins>
@@ -115,17 +115,17 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
-            <scope>provided</scope>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-redis</artifactId>
-            <scope>provided</scope>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
-            <scope>provided</scope>
+            <optional>true</optional>
         </dependency>
         <!--shiro-->
         <dependency>
@@ -147,13 +147,13 @@
         <dependency>
             <groupId>org.quartz-scheduler</groupId>
             <artifactId>quartz</artifactId>
-            <scope>provided</scope>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.mybatis.spring.boot</groupId>
             <artifactId>mybatis-spring-boot-starter</artifactId>
             <version>${mybatis.starter.version}</version>
-            <scope>provided</scope>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>com.github.jsqlparser</groupId>

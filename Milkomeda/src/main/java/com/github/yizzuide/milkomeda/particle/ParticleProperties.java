@@ -3,9 +3,11 @@ package com.github.yizzuide.milkomeda.particle;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.convert.DurationUnit;
+import org.springframework.core.Ordered;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -14,7 +16,7 @@ import java.util.Map;
  *
  * @author yizzuide
  * @since 3.0.0
- * @version 3.1.0
+ * @version 3.1.2
  * Create at 2020/04/08 11:12
  */
 @Data
@@ -47,13 +49,24 @@ public class ParticleProperties {
 
 
     @Data
-    public static class Limiter {
+    public static class Limiter implements Ordered {
         /**
          * 限制处理器Bean名（用于注解方式或lazy注入，Bean名不可重复）
          */
         private String name;
+
         /**
-         * 限制处理器类
+         * 排序
+         */
+        private int order = 0;
+
+        /**
+         * 限制器类型
+         */
+        private LimiterType type = LimiterType.IDEMPOTENT;
+
+        /**
+         * 自定义限制处理器类（如果这个有值，则忽略type）
          */
         private Class<? extends LimitHandler> handlerClazz;
 
@@ -63,7 +76,7 @@ public class ParticleProperties {
         private Map<String, Object> props;
 
         /**
-         * 分布式key模板（固定占位符：uri、method、params；请求参数域：$params.name；请求头域：$header.name；cookie域：$cookie.name）
+         * 分布式key模板（固定占位符：uri、method、params；请求参数域/自定义解析参数：$params.name；请求头域：$header.name；cookie域：$cookie.name）
          */
         private String keyTpl = "limit_{method}_{uri}_{$header.token}";
 
@@ -74,9 +87,14 @@ public class ParticleProperties {
         private Duration keyExpire = Duration.ofSeconds(60);
 
         /**
-         * 限制的路径
+         * 排除的URL
          */
-        private List<String> urls;
+        private List<String> excludeUrls;
+
+        /**
+         * 包含的URL
+         */
+        private List<String> includeUrls = Collections.singletonList("/**");
 
         /**
          * 限制后的响应
