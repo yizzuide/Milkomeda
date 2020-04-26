@@ -19,6 +19,8 @@
         <jwt.version>0.9.1</jwt.version>
         <shiro.version>1.4.2</shiro.version>
         <commons-beanutils.version>1.9.4</commons-beanutils.version>
+        <redisson.version>3.12.5</redisson.version>
+
     </properties>
 
     <parent>
@@ -194,6 +196,12 @@
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.redisson</groupId>
+            <artifactId>redisson</artifactId>
+            <optional>true</optional>
             <scope>provided</scope>
         </dependency>
     </dependencies>
