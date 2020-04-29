@@ -29,7 +29,7 @@ public class EchoResponseErrorHandler implements ResponseErrorHandler {
         } catch (RestClientException e) {
             if (e instanceof HttpStatusCodeException) {
                 HttpStatusCodeException ce = (HttpStatusCodeException) e;
-                log.error("echo request with error code: {}, msg:{}, body:{}", ce.getStatusCode().value(), ce.getMessage(), ce.getResponseBodyAsString());
+                log.error("Echo request with error code: {}, msg:{}, body:{}", ce.getStatusCode().value(), ce.getMessage(), ce.getResponseBodyAsString());
                 throw new EchoException(ce.getStatusCode().value(), ce.getMessage(), ce.getResponseBodyAsString());
             }
             throw new EchoException(ErrorCode.VENDOR_REQUEST_ERROR, e.getMessage());

@@ -5,13 +5,14 @@ import org.springframework.boot.env.EnvironmentPostProcessor;
 import org.springframework.core.env.ConfigurableEnvironment;
 
 /**
- * MilkomedaPropertySourceLocator
+ * CustomPropertySourceLocator
  *
  * @author yizzuide
  * @since 3.0.1
+ * @version 3.2.1
  * Create at 2020/04/11 10:48
  */
-public class CollectionsPropertySourceLocator implements /*PropertySourceLocator,*/ EnvironmentPostProcessor {
+public class CustomPropertySourceLocator implements /*PropertySourceLocator,*/ EnvironmentPostProcessor {
 
     // 添加自定义属性来源方式一：实现PropertySourceLocator接口，把CollectionsPropertySourceLocator注册为Bean
     /*@Override
@@ -25,5 +26,6 @@ public class CollectionsPropertySourceLocator implements /*PropertySourceLocator
     @Override
     public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
         CollectionsPropertySource.addToEnvironment(environment);
+        ConditionPropertySource.addToEnvironment(environment);
     }
 }

@@ -91,7 +91,7 @@ public class EchoConfig {
                     .register("https", sslSocketFactory)
                     .build();
         } catch (Exception e) {
-            log.error("echo create httpClient SSL error", e);
+            log.error("Echo create httpClient SSL error", e);
         }
 
         // 4. now, we create connection-manager using our Registry.

@@ -19,7 +19,7 @@ import java.util.Map;
  *
  * @author yizzuide
  * @since 1.13.0
- * @since 1.13.10
+ * @version 3.2.1
  * Create at 2019/09/21 19:00
  */
 @Slf4j
@@ -90,6 +90,11 @@ public abstract class EchoRequest extends AbstractRequest {
             // 有规范格式的响应数据
             if (respData instanceof Map) {
                 BeanUtils.populate(responseData, (Map) respData);
+            }
+
+            // 如果消息体为空，直接返回
+            if (responseData.getData() == null) {
+                return responseData;
             }
 
             // 指定类型为非Map的处理

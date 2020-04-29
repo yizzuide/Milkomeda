@@ -16,19 +16,19 @@ public interface EchoResponseData<T> {
      * @return String
      */
     String getCode();
-    default void setCode(String code) {};
+    default void setCode(String code) {}
 
     /**
      * 响应消息
      * @return String
      */
     String getMsg();
-    default void setMsg(String msg) {};
+    default void setMsg(String msg) {}
 
     /**
      * 响应业务数据
      * @return T
      */
     T getData();
-    default void setData(T respData) {};
+    default void setData(T respData) {}
 }

@@ -19,7 +19,7 @@ import java.time.Duration;
 public class ProductCheckHandler {
 
     // 监听topic消息（支持SpEL)
-    @IceListener(topic = "#target.topicName()")
+    @IceListener(topic = "@productCheckHandler.topicName()")
     public Job<Product> handle(Job<Product> productJob) {
         log.info("接收到Job: {}", productJob);
         // 测试处理失败

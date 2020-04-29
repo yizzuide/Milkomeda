@@ -286,7 +286,9 @@ milkomeda:
 
     # 过滤器
     filter:
-      enable: true
+      #enable: true
+      # 测试表达式计算
+      enable: ${condition.equals(${spring.application.name}, milkomeda)}
       filters:
         -
           name: ipLimiterFilter
