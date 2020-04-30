@@ -295,3 +295,7 @@ milkomeda:
           clazz: com.github.yizzuide.milkomeda.demo.hydrogen.handler.IPLimiterFilter
           url-patterns:
             - /*
+
+  # 分布式锁
+  atom:
+    strategy: redis # 默认的策略为redis

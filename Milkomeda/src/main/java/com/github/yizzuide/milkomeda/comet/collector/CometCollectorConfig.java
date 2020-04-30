@@ -18,10 +18,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.web.method.support.HandlerMethodReturnValueHandlerComposite;
 import org.springframework.web.servlet.HandlerExceptionResolver;
-import org.springframework.web.servlet.handler.HandlerExceptionResolverComposite;
-import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 
 import java.util.ArrayList;
@@ -33,7 +30,7 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 3.0.0
- * @version 3.0.1
+ * @version 3.3.0
  * @see BeanFactoryUtils#beansOfTypeIncludingAncestors(org.springframework.beans.factory.ListableBeanFactory, java.lang.Class)
  * Create at 2020/03/28 18:54
  */
@@ -83,27 +80,9 @@ public class CometCollectorConfig implements ApplicationContextAware {
         if (!props.isEnableTag()) {
             return;
         }
-
         CometCollectorResponseBodyAdvice collectorResponseBodyAdvice = cometResponseBodyAdvice();
-        // 动态添加到正常响应处理
-        SpringMvcPolyfill.addDynamicResponseBodyAdvice(adapter.getReturnValueHandlers(), collectorResponseBodyAdvice);
-        // 动态添加到异常处理（因为源码流程中的异常处理是新加载的HandlerExceptionResolver，与正常响应处理不是同个处理集）
-        if (handlerExceptionResolver instanceof HandlerExceptionResolverComposite) {
-            // SpringMVC默认为注册HandlerExceptionResolverComposite的Bean
-            List<HandlerExceptionResolver> exceptionResolvers = ((HandlerExceptionResolverComposite) handlerExceptionResolver).getExceptionResolvers();
-            if (CollectionUtils.isEmpty(exceptionResolvers)) {
-                return;
-            }
-            for (HandlerExceptionResolver exceptionResolver : exceptionResolvers) {
-                if (exceptionResolver instanceof ExceptionHandlerExceptionResolver) {
-                    HandlerMethodReturnValueHandlerComposite returnValueHandlerComposite = ((ExceptionHandlerExceptionResolver) exceptionResolver).getReturnValueHandlers();
-                    if (returnValueHandlerComposite == null) {
-                        return;
-                    }
-                    SpringMvcPolyfill.addDynamicResponseBodyAdvice(returnValueHandlerComposite.getHandlers(), collectorResponseBodyAdvice);
-                }
-            }
-        }
+        // 动态添加到响应处理
+        SpringMvcPolyfill.addDynamicResponseBodyAdvice(adapter.getReturnValueHandlers(), handlerExceptionResolver, collectorResponseBodyAdvice);
     }
 
     @Override

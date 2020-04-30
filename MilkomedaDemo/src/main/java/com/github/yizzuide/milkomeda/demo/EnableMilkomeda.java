@@ -1,5 +1,6 @@
 package com.github.yizzuide.milkomeda.demo;
 
+import com.github.yizzuide.milkomeda.atom.EnableAtom;
 import com.github.yizzuide.milkomeda.comet.core.EnableComet;
 import com.github.yizzuide.milkomeda.crust.EnableCrust;
 import com.github.yizzuide.milkomeda.echo.EnableEcho;
@@ -25,6 +26,7 @@ import java.lang.annotation.Target;
  * @author yizzuide
  * Create at 2019/12/13 01:03
  */
+@EnableAtom
 @EnableHydrogen
 @EnableMoon
 @EnableHalo
