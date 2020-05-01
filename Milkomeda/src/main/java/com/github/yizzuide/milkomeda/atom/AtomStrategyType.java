@@ -9,10 +9,5 @@ package com.github.yizzuide.milkomeda.atom;
  */
 public enum AtomStrategyType {
     REDIS,
-    ZK;
-
-    @Override
-    public String toString() {
-        return super.toString();
-    }
+    ZK
 }

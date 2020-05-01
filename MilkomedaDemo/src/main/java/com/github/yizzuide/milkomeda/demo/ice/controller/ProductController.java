@@ -1,5 +1,6 @@
 package com.github.yizzuide.milkomeda.demo.ice.controller;
 
+import com.github.yizzuide.milkomeda.atom.AtomLock;
 import com.github.yizzuide.milkomeda.demo.ice.pojo.Product;
 import com.github.yizzuide.milkomeda.ice.Ice;
 import lombok.extern.slf4j.Slf4j;
@@ -22,10 +23,16 @@ public class ProductController {
     @Autowired
     private Ice ice;
 
+    @AtomLock(key = "'ice-product_' + #product.id", waitTime = 5000)
     // 测试：http://localhost:8091/ice/product/publish?id=1000224343494&name=iphone&price=8900
     @RequestMapping("product/publish")
     public ResponseEntity<String> publish(Product product) {
         log.info("正在上传商品：{}", product.getId());
+        try {
+            Thread.sleep(50000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         // 模拟审核商品。。
         if (product.getPics() == null) {
             log.info("当前商品没有上传图片，加入黑名单");

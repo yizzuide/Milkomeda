@@ -63,8 +63,8 @@ public class RedisAtomConfig {
     }
 
     @Bean
-    public RedisAtomLockStrategy redisAtomLockStrategy(RedissonClient redissonClient) {
-        return new RedisAtomLockStrategy(redissonClient);
+    public RedisAtom redisAtomLockStrategy(RedissonClient redissonClient) {
+        return new RedisAtom(redissonClient);
     }
 
 
