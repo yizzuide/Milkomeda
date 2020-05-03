@@ -32,7 +32,7 @@ public class RedisAtomConfig {
     private RedisProperties redisProperties;
 
     @Bean
-    @ConditionalOnProperty(prefix = "milkomeda.atom", name = "use-cluster", havingValue = "false", matchIfMissing = true)
+    @ConditionalOnProperty(prefix = "milkomeda.atom.redis", name = "use-cluster", havingValue = "false", matchIfMissing = true)
     public RedissonClient redissonClient() {
         Config config = new Config();
         String redisUrl = String.format("redis://%s:%d", redisProperties.getHost(), redisProperties.getPort());
@@ -48,7 +48,7 @@ public class RedisAtomConfig {
     }
 
     @Bean
-    @ConditionalOnProperty(prefix = "milkomeda.atom", name = "use-cluster", havingValue = "true")
+    @ConditionalOnProperty(prefix = "milkomeda.atom.redis", name = "use-cluster", havingValue = "true")
     public RedissonClient clusterRedissonClient() {
         Config config = new Config();
         ClusterServersConfig clusterServersConfig = config.useClusterServers();
@@ -63,7 +63,7 @@ public class RedisAtomConfig {
     }
 
     @Bean
-    public RedisAtom redisAtomLockStrategy(RedissonClient redissonClient) {
+    public Atom atom(RedissonClient redissonClient) {
         return new RedisAtom(redissonClient);
     }
 

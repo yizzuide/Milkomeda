@@ -28,28 +28,30 @@ public class AtomLockAspect {
     @Around("@annotation(atomLock) && execution(public * *(..))")
     public Object pointCut(ProceedingJoinPoint joinPoint, AtomLock atomLock) throws Throwable {
         String keyPath = ELContext.getValue(joinPoint, atomLock.key());
-        boolean needUnlock = true;
+        Object lock = null;
         try {
             if (atomLock.waitTime() > 0) {
-                boolean tryAcquireOnce = atom.tryLock(keyPath, atomLock.type(), atomLock.readOnly());
-                if (tryAcquireOnce || atom.tryLock(keyPath,
-                        Duration.ofMillis(atomLock.waitTime()), Duration.ofMillis(atomLock.leaseTime()), atomLock.type(), atomLock.readOnly())) {
+                AtomLockInfo lockInfo = atom.tryLock(keyPath, atomLock.type(), atomLock.readOnly());
+                boolean isLocked = lockInfo.isLocked();
+                lock = lockInfo.getLock();
+                if (!isLocked) {
+                    lockInfo = atom.tryLock(keyPath, Duration.ofMillis(atomLock.waitTime()), Duration.ofMillis(atomLock.leaseTime()), atomLock.type(), atomLock.readOnly());
+                    isLocked = lockInfo.isLocked();
+                    lock = lockInfo.getLock();
+                }
+                if (isLocked) {
                     return joinPoint.proceed();
                 }
-                needUnlock = false;
                 throw new AtomLockWaitTimeoutException();
             }
-            atom.lock(keyPath, Duration.ofMillis(atomLock.leaseTime()), atomLock.type(), atomLock.readOnly());
+            AtomLockInfo lockInfo = atom.lock(keyPath, Duration.ofMillis(atomLock.leaseTime()), atomLock.type(), atomLock.readOnly());
+            lock = lockInfo.getLock();
             return joinPoint.proceed();
         } catch (InterruptedException e) {
             log.error("Atom try lock error with msg: {}", e.getMessage(), e);
         } finally {
-            if (needUnlock) {
-                try {
-                    atom.unlock(keyPath);
-                } catch (IllegalMonitorStateException ignore) {
-                    // Ignore unlock fail which auto unlocked!
-                }
+            if (lock != null) {
+                atom.unlock(lock);
             }
         }
         // unreachable code!

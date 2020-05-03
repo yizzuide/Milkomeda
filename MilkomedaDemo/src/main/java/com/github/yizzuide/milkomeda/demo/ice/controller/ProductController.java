@@ -29,7 +29,7 @@ public class ProductController {
     public ResponseEntity<String> publish(Product product) {
         log.info("正在上传商品：{}", product.getId());
         try {
-            Thread.sleep(50000);
+            Thread.sleep(5000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

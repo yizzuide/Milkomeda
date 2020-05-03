@@ -2,8 +2,10 @@ package com.github.yizzuide.milkomeda.atom;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.convert.DurationUnit;
 
-import java.util.Map;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 
 /**
  * AtomProperties
@@ -21,12 +23,44 @@ public class AtomProperties {
     private AtomStrategyType strategy = AtomStrategyType.REDIS;
 
     /**
-     * 使用集群方案
+     * redis配置
      */
-    private boolean useCluster = false;
+    private Redis redis = new Redis();
 
     /**
-     * 策略属性设置
+     * Zk配置
      */
-    private Map<String, Object> props;
+    private Zk zk = new Zk();
+
+    @Data
+    static class Redis {
+        /**
+         * 使用集群方案
+         */
+        private boolean useCluster = false;
+    }
+
+    @Data
+    static class Zk {
+        /**
+         * 连接地址
+         */
+        private String address = "127.0.0.1:2181";
+
+        /**
+         * 根节点名称
+         */
+        private String rootLockNode = "mk_atom_locks";
+
+        /**
+         * 重试睡眠时间
+         */
+        @DurationUnit(ChronoUnit.MILLIS)
+        private Duration sleepTime = Duration.ofMillis(1000);
+
+        /**
+         * 最大重试次数
+         */
+        private int maxRetry = 3;
+    }
 }

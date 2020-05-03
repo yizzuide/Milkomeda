@@ -23,53 +23,33 @@ public class RedisAtom implements Atom {
     private RedissonClient redisson;
 
     @Override
-    public void lock(String keyPath, Duration leaseTime) {
-        lock(keyPath, leaseTime, AtomLockType.NON_FAIR, false);
-    }
-
-    @Override
-    public boolean tryLock(String keyPath, AtomLockType type, boolean readOnly) {
-        RLock lock = getLock(keyPath, type, readOnly);
-        // 默认leaseTime为30s，并自动续约
-        return lock.tryLock();
-    }
-
-    @Override
-    public void lock(String keyPath, Duration leaseTime, AtomLockType type, boolean readOnly) {
+    public AtomLockInfo lock(String keyPath, Duration leaseTime, AtomLockType type, boolean readOnly) {
         RLock lock = getLock(keyPath, type, readOnly);
         lock.lock(leaseTime.toMillis(), TimeUnit.MILLISECONDS);
+        return AtomLockInfo.builder().isLocked(true).lock(lock).build();
     }
 
     @Override
-    public boolean tryLock(String keyPath, Duration waitTime, Duration leaseTime) throws InterruptedException {
-        return tryLock(keyPath, waitTime, leaseTime, AtomLockType.NON_FAIR, false);
-    }
-
-
-    @Override
-    public boolean tryLock(String keyPath, Duration waitTime, Duration leaseTime, AtomLockType type, boolean readOnly) throws InterruptedException {
+    public AtomLockInfo tryLock(String keyPath, AtomLockType type, boolean readOnly) {
         RLock lock = getLock(keyPath, type, readOnly);
-        return lock.tryLock(waitTime.toMillis(), waitTime.toMillis(), TimeUnit.MILLISECONDS);
+        boolean isLocked = lock.tryLock();
+        return AtomLockInfo.builder().isLocked(isLocked).lock(lock).build();
+    }
+
+
+    @Override
+    public AtomLockInfo tryLock(String keyPath, Duration waitTime, Duration leaseTime, AtomLockType type, boolean readOnly) throws InterruptedException {
+        RLock lock = getLock(keyPath, type, readOnly);
+        boolean isLocked = lock.tryLock(waitTime.toMillis(), leaseTime.toMillis(), TimeUnit.MILLISECONDS);
+        return AtomLockInfo.builder().isLocked(isLocked).lock(lock).build();
     }
 
     @Override
-    public void unlock(String keyPath) {
-        RLock lock = redisson.getLock(keyPath);
-        lock.unlock();
+    public void unlock(Object lock) {
+        ((RLock) lock).unlock();
     }
 
-    @Override
-    public boolean forceUnlock(String keyPath) {
-        RLock lock = redisson.getLock(keyPath);
-        return lock.forceUnlock();
-    }
-
-    @Override
-    public boolean isLocked(String keyPath) {
-        RLock lock = redisson.getLock(keyPath);
-        return lock.isLocked();
-    }
-
+    // 获取红锁
     private RLock getLock(String keyPath, AtomLockType type, boolean readOnly) {
         switch (type) {
             case FAIR:

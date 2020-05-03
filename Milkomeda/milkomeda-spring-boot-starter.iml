@@ -71,17 +71,6 @@
     <orderEntry type="library" name="Maven: org.apache.commons:commons-pool2:2.4.2" level="project" />
     <orderEntry type="library" name="Maven: joda-time:joda-time:2.9.9" level="project" />
     <orderEntry type="library" name="Maven: org.projectlombok:lombok:1.16.16" level="project" />
-    <orderEntry type="library" name="Maven: org.redisson:redisson:3.12.5" level="project" />
-    <orderEntry type="library" name="Maven: io.netty:netty-resolver-dns:4.1.45.Final" level="project" />
-    <orderEntry type="library" name="Maven: io.netty:netty-codec-dns:4.1.45.Final" level="project" />
-    <orderEntry type="library" name="Maven: javax.cache:cache-api:1.1.1" level="project" />
-    <orderEntry type="library" name="Maven: io.reactivex.rxjava2:rxjava:2.2.17" level="project" />
-    <orderEntry type="library" name="Maven: de.ruedigermoeller:fst:2.57" level="project" />
-    <orderEntry type="library" name="Maven: org.javassist:javassist:3.21.0-GA" level="project" />
-    <orderEntry type="library" name="Maven: org.objenesis:objenesis:2.5.1" level="project" />
-    <orderEntry type="library" name="Maven: com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.10.2" level="project" />
-    <orderEntry type="library" name="Maven: org.jodd:jodd-bean:5.0.13" level="project" />
-    <orderEntry type="library" name="Maven: org.jodd:jodd-core:5.0.13" level="project" />
     <orderEntry type="library" name="Maven: org.springframework.boot:spring-boot-autoconfigure:2.2.4.RELEASE" level="project" />
     <orderEntry type="library" name="Maven: org.springframework.boot:spring-boot:2.2.4.RELEASE" level="project" />
     <orderEntry type="library" name="Maven: org.springframework:spring-core:5.2.3.RELEASE" level="project" />
@@ -166,6 +155,12 @@
     <orderEntry type="library" name="Maven: net.bytebuddy:byte-buddy:1.10.6" level="project" />
     <orderEntry type="library" name="Maven: org.jodd:jodd-bean:5.0.13" level="project" />
     <orderEntry type="library" name="Maven: org.jodd:jodd-core:5.0.13" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.curator:curator-recipes:4.0.1" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.curator:curator-framework:4.0.1" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.curator:curator-client:4.0.1" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.zookeeper:zookeeper:3.5.3-beta" level="project" />
+    <orderEntry type="library" name="Maven: commons-cli:commons-cli:1.2" level="project" />
+    <orderEntry type="library" name="Maven: com.google.guava:guava:20.0" level="project" />
     <orderEntry type="library" name="Maven: org.apache.httpcomponents:httpclient:4.5.10" level="project" />
     <orderEntry type="library" name="Maven: org.apache.httpcomponents:httpcore:4.4.13" level="project" />
     <orderEntry type="library" name="Maven: commons-codec:commons-codec:1.13" level="project" />
