@@ -25,7 +25,7 @@ import java.util.function.BiFunction;
  *
  * @author yizzuide
  * @since 1.13.4
- * @version 3.0.5
+ * @version 3.3.0
  * Create at 2019/10/24 21:17
  */
 public class AopContextHolder {
@@ -116,6 +116,24 @@ public class AopContextHolder {
                     break;
                 }
             }
+        }
+        return handlerMap;
+    }
+
+    /**
+     * 获取实现了指定接口的处理器
+     * @param handlerAnnotationClazz    处理注解
+     * @param <T>                       接口类型
+     * @return  处理器列表
+     * @since 3.3.0
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> List<T> getTypeHandlers(Class<? extends Annotation> handlerAnnotationClazz) {
+        List<T> handlerMap = new ArrayList<>();
+        Map<String, Object> beanMap = ApplicationContextHolder.get().getBeansWithAnnotation(handlerAnnotationClazz);
+        for (String key : beanMap.keySet()) {
+            T target = (T) beanMap.get(key);
+            handlerMap.add(target);
         }
         return handlerMap;
     }
