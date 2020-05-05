@@ -3,6 +3,9 @@ server:
   servlet:
     session:
       timeout: 120m
+      cookie:
+        http-only: true
+        name: mk-sessionid
 
 spring:
   application:
