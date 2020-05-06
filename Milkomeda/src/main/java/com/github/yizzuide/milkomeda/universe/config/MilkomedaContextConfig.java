@@ -3,21 +3,27 @@ package com.github.yizzuide.milkomeda.universe.config;
 import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import com.github.yizzuide.milkomeda.universe.context.WebContext;
 import com.github.yizzuide.milkomeda.universe.env.Environment;
+import com.github.yizzuide.milkomeda.universe.handler.DelegatingContextFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
 import org.springframework.util.PathMatcher;
+import org.springframework.web.filter.DelegatingFilterProxy;
 import org.springframework.web.util.UrlPathHelper;
+
+import java.util.Collections;
 
 /**
  * MilkomedaContextConfig
  *
  * @author yizzuide
  * @since 2.0.0
- * @version 3.1.0
+ * @version 3.3.0
  * Create at 2019/12/13 19:09
  */
 @Configuration
@@ -43,5 +49,22 @@ public class MilkomedaContextConfig {
     public void config(PathMatcher mvcPathMatcher, UrlPathHelper mvcUrlPathHelper) {
         WebContext.setMvcPathMatcher(mvcPathMatcher);
         WebContext.setUrlPathHelper(mvcUrlPathHelper);
+    }
+
+    @Bean
+    public DelegatingContextFilter delegatingContextFilter() {
+        return new DelegatingContextFilter();
+    }
+
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    @Bean
+    public FilterRegistrationBean delegatingFilterRegistrationBean() {
+        FilterRegistrationBean delegatingFilterRegistrationBean = new FilterRegistrationBean();
+        // 设置代理注册的Bean
+        delegatingFilterRegistrationBean.setFilter(new DelegatingFilterProxy("delegatingContextFilter"));
+        delegatingFilterRegistrationBean.setName("delegatingContextFilter");
+        delegatingFilterRegistrationBean.setUrlPatterns(Collections.singleton("/*"));
+        delegatingFilterRegistrationBean.setOrder(Ordered.HIGHEST_PRECEDENCE + 40);
+        return delegatingFilterRegistrationBean;
     }
 }

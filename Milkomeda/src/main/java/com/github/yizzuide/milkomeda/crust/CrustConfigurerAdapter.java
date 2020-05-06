@@ -83,6 +83,7 @@ public class CrustConfigurerAdapter extends WebSecurityConfigurerAdapter {
                     .sessionAuthenticationFailureHandler(authFailureHandler().get()).and()
             .logout()
                     .logoutUrl(props.getLogoutUrl())
+                    .addLogoutHandler((req, res, auth) -> CrustContext.invalidate())
                     .logoutSuccessUrl(props.getLoginUrl())
                     .invalidateHttpSession(true);
         }

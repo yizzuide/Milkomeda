@@ -18,6 +18,7 @@ public interface Atom {
      * @param type      锁类型
      * @param readOnly  只读（只在读写锁有效）
      * @return  AtomLockInfo
+     * @throws Exception 加锁异常
      */
     AtomLockInfo lock(String keyPath, Duration leaseTime, AtomLockType type, boolean readOnly) throws Exception;
 
@@ -27,6 +28,7 @@ public interface Atom {
      * @param type      锁类型
      * @param readOnly  只读（只在读写锁有效）
      * @return AtomLockInfo
+     * @throws Exception 加锁异常
      */
     AtomLockInfo tryLock(String keyPath, AtomLockType type, boolean readOnly) throws Exception;
 
