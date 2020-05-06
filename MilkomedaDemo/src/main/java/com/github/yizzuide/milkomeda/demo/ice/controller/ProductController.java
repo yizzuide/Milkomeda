@@ -1,6 +1,5 @@
 package com.github.yizzuide.milkomeda.demo.ice.controller;
 
-import com.github.yizzuide.milkomeda.atom.AtomLock;
 import com.github.yizzuide.milkomeda.demo.ice.pojo.Product;
 import com.github.yizzuide.milkomeda.ice.Ice;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +22,6 @@ public class ProductController {
     @Autowired
     private Ice ice;
 
-    @AtomLock(key = "'ice-product_' + #product.id", waitTime = 5000)
     // 测试：http://localhost:8091/ice/product/publish?id=1000224343494&name=iphone&price=8900
     @RequestMapping("product/publish")
     public ResponseEntity<String> publish(Product product) {
