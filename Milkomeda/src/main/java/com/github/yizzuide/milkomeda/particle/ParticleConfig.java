@@ -19,6 +19,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.OrderComparator;
 import org.springframework.core.Ordered;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.lang.NonNull;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.filter.DelegatingFilterProxy;
 
@@ -78,7 +79,7 @@ public class ParticleConfig implements ApplicationContextAware {
     }
 
     @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+    public void setApplicationContext(@NonNull ApplicationContext applicationContext) throws BeansException {
         List<ParticleProperties.Limiter> limiters = particleProperties.getLimiters();
         List<ParticleProperties.Limiter> barrierLimiters = new ArrayList<>();
         for (ParticleProperties.Limiter limiter : limiters) {

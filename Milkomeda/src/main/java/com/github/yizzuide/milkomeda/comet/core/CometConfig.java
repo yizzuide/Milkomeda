@@ -48,7 +48,7 @@ public class CometConfig {
 
     @Bean
     //@ConditionalOnMissingBean // 识别类型：FilterRegistrationBean，会导致永远无法加载
-    // 下面两方式在版本2.1.0推出，用于识别泛型类型：FilterRegistrationBean<LightCacheClearFilter>
+    // 下面两方式在版本2.1.0推出，用于识别泛型类型：FilterRegistrationBean<CometRequestFilter>
     // @ConditionalOnMissingBean(parameterizedContainer = FilterRegistrationBean.class)
     @ConditionalOnMissingFilterBean
     @ConditionalOnProperty(prefix = "milkomeda.comet", name = "enable-read-request-body", havingValue = "true", matchIfMissing = true)

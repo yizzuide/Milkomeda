@@ -6,6 +6,7 @@ import lombok.Getter;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.lang.NonNull;
 
 /**
  * ApplicationContextHolder
@@ -30,7 +31,7 @@ public class ApplicationContextHolder implements ApplicationContextAware {
     }
 
     @Override
-    public void setApplicationContext(ApplicationContext applicationContext) {
+    public void setApplicationContext(@NonNull ApplicationContext applicationContext) {
         this.applicationContext = applicationContext;
         ELContext.setApplicationContext(applicationContext);
         if (applicationContext instanceof ConfigurableApplicationContext) {

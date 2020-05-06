@@ -3,10 +3,10 @@ package com.github.yizzuide.milkomeda.comet.core;
 import com.github.yizzuide.milkomeda.comet.collector.CometCollectorProperties;
 import com.github.yizzuide.milkomeda.comet.collector.CometCollectorResponseBodyAdvice;
 import com.github.yizzuide.milkomeda.comet.collector.TagCollector;
-import com.github.yizzuide.milkomeda.universe.metadata.BeanIds;
-import com.github.yizzuide.milkomeda.universe.parser.url.URLPathMatcher;
 import com.github.yizzuide.milkomeda.comet.logger.CometLoggerProperties;
 import com.github.yizzuide.milkomeda.pulsar.PulsarHolder;
+import com.github.yizzuide.milkomeda.universe.metadata.BeanIds;
+import com.github.yizzuide.milkomeda.universe.parser.url.URLPathMatcher;
 import com.github.yizzuide.milkomeda.universe.parser.url.URLPlaceholderParser;
 import com.github.yizzuide.milkomeda.universe.parser.url.URLPlaceholderResolver;
 import com.github.yizzuide.milkomeda.universe.parser.yml.YmlAliasNode;
@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.http.MediaType;
+import org.springframework.lang.NonNull;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
@@ -107,7 +108,7 @@ public class CometInterceptor extends HandlerInterceptorAdapter implements Appli
     }
 
     @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+    public void setApplicationContext(@NonNull ApplicationContext applicationContext) throws BeansException {
         if (this.cometCollectorProperties == null || !this.cometCollectorProperties.isEnableTag()) {
             return;
         }
