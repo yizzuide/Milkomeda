@@ -1,5 +1,5 @@
 # Milkomeda
-![tag](https://img.shields.io/github/tag/yizzuide/Milkomeda.svg) ![Java CI](https://github.com/yizzuide/Milkomeda/workflows/Java%20CI/badge.svg?branch=master) ![license](https://img.shields.io/github/license/yizzuide/Milkomeda.svg)
+![tag](https://img.shields.io/github/tag/yizzuide/Milkomeda.svg) ![Java CI](https://github.com/yizzuide/Milkomeda/workflows/Java%20CI/badge.svg?branch=master) [![Production Ready](https://img.shields.io/badge/production-ready-blue.svg)](https://github.com/yizzuide/Milkomeda) ![license](https://img.shields.io/github/license/yizzuide/Milkomeda.svg)
 
 名字源于未来要融合的”银河织女系“，代表当前Spring生态的全家桶体系，这个项目以Spring生态为基础，从实际业务上整理出来的快速开发模块集合，让SpringBoot开发可以更快。
 
