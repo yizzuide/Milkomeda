@@ -44,7 +44,8 @@ public class IOUtils {
             line = StringUtils.trimLeadingWhitespace(line);
             line = line.replaceAll("[\n\r\t]", "");
             out.append(line);
-            if (line.endsWith("then") || line.endsWith("else")) {
+            if (line.startsWith("if") || line.startsWith("then") || line.endsWith("else") || line.startsWith("for") || line.startsWith("do")
+                || line.startsWith("while") || line.startsWith("function")) {
                 out.append(" ");
             } else {
                 out.append("; ");
