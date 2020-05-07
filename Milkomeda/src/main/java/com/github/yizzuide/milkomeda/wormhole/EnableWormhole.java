@@ -1,15 +1,5 @@
 package com.github.yizzuide.milkomeda.wormhole;
 
-<<<<<<< HEAD
-
-/**
- * EnableWormhole
- * @author jsq
- * @since 1.16.0
- * Create at 2019/11/23 00:18
- */
-public interface EnableWormhole {
-=======
 import org.springframework.context.annotation.Import;
 
 import java.lang.annotation.*;
@@ -27,5 +17,4 @@ import java.lang.annotation.*;
 @Inherited
 @Import(WormholeConfig.class)
 public @interface EnableWormhole {
->>>>>>> 5363ee339f0dcb5d921d49d83dd3f6064f4ac8d2
 }
