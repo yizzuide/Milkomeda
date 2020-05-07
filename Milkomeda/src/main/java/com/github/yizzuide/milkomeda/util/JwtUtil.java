@@ -1,11 +1,12 @@
 package com.github.yizzuide.milkomeda.util;
 
 import io.jsonwebtoken.*;
-import org.joda.time.DateTime;
 
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SignatureException;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.Map;
 
@@ -28,7 +29,7 @@ public class JwtUtil {
     public static String generateToken(Map<String, Object> claims, PrivateKey privateKey, int expireMinutes) {
         return Jwts.builder()
                 .setClaims(claims)
-                .setExpiration(DateTime.now().plusMinutes(expireMinutes).toDate())
+                .setExpiration(Date.from(LocalDateTime.now().plusMinutes(expireMinutes).atZone(ZoneId.systemDefault()).toInstant()))
                 .signWith(SignatureAlgorithm.RS256, privateKey)
                 .compact();
     }
@@ -44,7 +45,7 @@ public class JwtUtil {
     public static String generateToken(Map<String, Object> claims, String secureKey, int expireMinutes, boolean usedRSA) {
         return Jwts.builder()
                 .setClaims(claims)
-                .setExpiration(DateTime.now().plusMinutes(expireMinutes).toDate())
+                .setExpiration(Date.from(LocalDateTime.now().plusMinutes(expireMinutes).atZone(ZoneId.systemDefault()).toInstant()))
                 .signWith(usedRSA ? SignatureAlgorithm.RS256 : SignatureAlgorithm.HS512, secureKey)
                 .compact();
     }

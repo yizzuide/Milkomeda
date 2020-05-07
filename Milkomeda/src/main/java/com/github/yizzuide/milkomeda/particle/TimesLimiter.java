@@ -1,14 +1,16 @@
 package com.github.yizzuide.milkomeda.particle;
 
-import com.github.yizzuide.milkomeda.util.RedisUtil;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
-import org.joda.time.DateTime;
-import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
+import org.springframework.data.redis.core.script.RedisScript;
 
-import java.util.Date;
+import java.io.Serializable;
+import java.time.Duration;
+import java.util.Collections;
 
 /**
  * TimesLimiter
@@ -37,6 +39,9 @@ public class TimesLimiter extends LimitHandler {
     // 装饰后缀
     private static final String POSTFIX = ":times";
 
+    // lua 脚本
+    private static String luaScript;
+
     public TimesLimiter() { }
 
     /**
@@ -64,25 +69,27 @@ public class TimesLimiter extends LimitHandler {
     @Override
     public <R> R limit(String key, long expire, Process<R> process) throws Throwable {
         String decoratedKey = key + POSTFIX;
-        StringRedisTemplate redisTemplate = getRedisTemplate();
-        Date date;
+        RedisTemplate<String, Serializable> redisTemplate = getJsonRedisTemplate();
+        long expireSeconds;
         switch (timesType) {
             case SEC:
-                date = DateTime.now().plusSeconds(1).toDate();
+                expireSeconds = 1;
                 break;
             case MIN:
-                date = DateTime.now().plusMinutes(1).toDate();
+                expireSeconds = Duration.ofMinutes(1).getSeconds();
                 break;
             case HOUR:
-                date = DateTime.now().plusHours(1).toDate();
+                expireSeconds = Duration.ofHours(1).getSeconds();
                 break;
             case DAY:
-                date = DateTime.now().plusDays(1).toDate();
+                expireSeconds = Duration.ofDays(1).getSeconds();
                 break;
             default:
                 throw new IllegalStateException("Unexpected value: " + timesType);
         }
-        long times = RedisUtil.incr(decoratedKey, 1, date, redisTemplate);
+        RedisScript<Long> redisScript = new DefaultRedisScript<>(luaScript, Long.class);
+        Long times = redisTemplate.execute(redisScript, Collections.singletonList(decoratedKey), limitTimes, expireSeconds);
+        assert times != null;
         // 判断是否超过次数
         boolean isOver = times > limitTimes;
         Particle particle = new Particle(this.getClass(), isOver, times);
@@ -91,5 +98,9 @@ public class TimesLimiter extends LimitHandler {
             return getNext().limit(key, expire, process);
         }
         return process.apply(particle);
+    }
+
+    static void setLuaScript(String luaScript) {
+        TimesLimiter.luaScript = luaScript;
     }
 }

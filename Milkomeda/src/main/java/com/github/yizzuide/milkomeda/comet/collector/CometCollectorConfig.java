@@ -50,6 +50,7 @@ public class CometCollectorConfig implements ApplicationContextAware {
     @Bean
     public CollectorFactory collectorFactory() {
         PillarExecutor<CometData, Object> pillarExecutor = new PillarExecutor<>();
+        // 排除tag-collector
         if (!CollectionUtils.isEmpty(collectors)) {
             pillarExecutor.addPillarList(collectors.stream().filter(c -> StringUtils.hasLength(c.supportType())).collect(Collectors.toList()));
         }
@@ -94,6 +95,7 @@ public class CometCollectorConfig implements ApplicationContextAware {
             if (CollectionUtils.isEmpty(collectors)) {
                 return;
             }
+            // 排除tag-collector
             applicationContext.getBean(CollectorFactory.class).getPillarExecutor().addPillarList(collectors.stream().filter(c -> StringUtils.hasLength(c.supportType())).collect(Collectors.toList()));
         }
     }
