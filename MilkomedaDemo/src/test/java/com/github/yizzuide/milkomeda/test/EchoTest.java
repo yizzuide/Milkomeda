@@ -1,18 +1,24 @@
 package com.github.yizzuide.milkomeda.test;
 
 import com.github.yizzuide.milkomeda.demo.MilkomedaDemoApplication;
-import com.github.yizzuide.milkomeda.echo.EchoRequest;
-import com.github.yizzuide.milkomeda.echo.EchoResponseData;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.context.WebApplicationContext;
 
-import javax.annotation.Resource;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Collections;
 
 /**
  * EchoTest
@@ -24,21 +30,28 @@ import java.util.Map;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = MilkomedaDemoApplication.class)
 public class EchoTest {
-    @Resource
-    private EchoRequest simpleEchoRequest;
+    @Autowired
+    private WebApplicationContext wac;
+
+    private MockMvc mockMvc;
+
+    @Before
+    public void setup() {
+        mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
+    }
 
     @Test
-    public void testOpenAccount() {
-        Map<String, Object> reqParams = new HashMap<>();
-        reqParams.put("uid", "1101");
-        reqParams.put("name", "yiz");
-        reqParams.put("id_no", "14324357894594483");
+    public void testOpenAccount() throws Exception {
+        MultiValueMap<String, String> reqParams = new LinkedMultiValueMap<>();
+        reqParams.put("uid", Collections.singletonList("1101"));
+        reqParams.put("name", Collections.singletonList("yiz"));
+        reqParams.put("id_no", Collections.singletonList("14324357894594483"));
 
-        // 发送请求，内部会进行签名
-        // TypeReference比用xxx.class在泛型的支持上要强得多，IDE也会智能检测匹配成功
-        // 如果第三方的data是一个json数组，可以传new TypeReference<List<Map<String, Object>>>() {}，返回结果用EchoResponseData<List<Map<String, Object>>>接收
-//            EchoResponseData<Map<String, Object>> responseData = simpleEchoRequest.sendPostForResult("http://localhost:8091/echo/account/open", reqParams, new TypeReference<Map<String, Object>>() {}, true);
-        EchoResponseData<Map<String, Object>> responseData = simpleEchoRequest.fetch(HttpMethod.POST, "http://localhost:8091/echo/account/open", reqParams);
-        log.info("responseData: {}", responseData);
+        val ret = mockMvc.perform(MockMvcRequestBuilders.get("/echo/account/open")
+                .params(reqParams)
+                .contentType(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        System.out.println(ret);
     }
 }
