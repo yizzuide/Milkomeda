@@ -31,7 +31,9 @@ import java.util.function.Supplier;
  *
  * @author yizzuide
  * @since 1.14.0
- * @version 1.17.3
+ * @version 3.3.0
+ * @see org.springframework.security.web.session.SessionManagementFilter
+ * @see org.springframework.security.config.annotation.web.configurers.SessionManagementConfigurer
  * Create at 2019/11/11 18:25
  */
 public class CrustConfigurerAdapter extends WebSecurityConfigurerAdapter {
@@ -49,8 +51,6 @@ public class CrustConfigurerAdapter extends WebSecurityConfigurerAdapter {
         // 添加自定义身份验证组件
         auth.authenticationProvider(authenticationProvider);
     }
-
-
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -78,10 +78,12 @@ public class CrustConfigurerAdapter extends WebSecurityConfigurerAdapter {
             http.httpBasic().authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint(props.getLoginUrl()))
                     .and()
                     .sessionManagement()
+                    .sessionFixation().changeSessionId()
                     .sessionAuthenticationErrorUrl(props.getLoginUrl())
                     .sessionAuthenticationFailureHandler(authFailureHandler().get()).and()
             .logout()
                     .logoutUrl(props.getLogoutUrl())
+                    .addLogoutHandler((req, res, auth) -> CrustContext.invalidate())
                     .logoutSuccessUrl(props.getLoginUrl())
                     .invalidateHttpSession(true);
         }
@@ -91,7 +93,7 @@ public class CrustConfigurerAdapter extends WebSecurityConfigurerAdapter {
      * 自定义配置数据源提供及<code>PasswordEncoder</code>
      * @param provider  DaoAuthenticationProvider
      */
-    protected void configureProvider(@NonNull DaoAuthenticationProvider provider) { }
+    protected void configureProvider(DaoAuthenticationProvider provider) { }
 
     /**
      * 认证失败处理器

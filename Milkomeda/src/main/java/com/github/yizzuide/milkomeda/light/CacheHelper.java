@@ -14,7 +14,7 @@ import java.util.function.Function;
  * 缓存外层API，集超级缓存、一级缓存、二级缓存于一体的方法
  *
  * @since 1.10.0
- * @version 2.3.0
+ * @version 3.2.1
  * @author yizzuide
  * Create at 2019/07/02 11:36
  */
@@ -170,6 +170,10 @@ public class CacheHelper {
 
         // 方案三：从数据库获取（耗时最长，一个标识只会查一次）
         data = dataGenerator.apply(fastSpot.getView().toString());
+        // 如果返回值为null，不缓存
+        if (data == null) {
+            return data;
+        }
         // 设置到超级缓存
         fastSpot.setData(data);
         // 一级缓存（内存，默认缓存64个，超出时使用热点旧数据丢弃策略） -> 二级缓存（Redis）
@@ -202,9 +206,11 @@ public class CacheHelper {
         // 先执行数据操作
         String key = keyGenerator.apply(id);
         E data = dataGenerator.apply(key);
-        // 检查返回值
+
+        // 返回值如果为空，清空缓存
         if (data == null) {
-            throw new NullPointerException("The method return is null, it must be set not null for update cache");
+            erase(cache, id, keyGenerator);
+            return data;
         }
 
         // 再存入缓存

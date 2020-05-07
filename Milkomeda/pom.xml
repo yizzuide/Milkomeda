@@ -11,7 +11,7 @@
 
     <properties>
         <java.version>1.8</java.version>
-        <project.release.version>3.2.0-SNAPSHOT</project.release.version>
+        <project.release.version>3.3.1-SNAPSHOT</project.release.version>
         <spring-boot.version>2.2.4</spring-boot.version>
         <spring-cloud.version>Hoxton.RELEASE</spring-cloud.version>
         <mybatis.starter.version>2.1.1</mybatis.starter.version>
@@ -20,7 +20,6 @@
         <shiro.version>1.4.2</shiro.version>
         <commons-beanutils.version>1.9.4</commons-beanutils.version>
         <redisson.version>3.12.5</redisson.version>
-
     </properties>
 
     <parent>
@@ -68,7 +67,7 @@
         <profile>
             <id>sonatype-oss-release</id>
             <properties>
-                <project.release.version>3.2.0</project.release.version>
+                <project.release.version>3.3.1</project.release.version>
             </properties>
             <build>
                 <plugins>
@@ -161,6 +160,17 @@
             <version>${jsqlparser.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.redisson</groupId>
+            <artifactId>redisson</artifactId>
+            <version>${redission.version}</version>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.curator</groupId>
+            <artifactId>curator-recipes</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
         </dependency>
@@ -177,10 +187,6 @@
             <groupId>commons-beanutils</groupId>
             <artifactId>commons-beanutils</artifactId>
             <version>${commons-beanutils.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>joda-time</groupId>
-            <artifactId>joda-time</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

@@ -26,9 +26,9 @@ import java.util.function.Supplier;
  */
 public class CrustAuthenticationConfigurer<T extends CrustAuthenticationConfigurer<T, B>, B extends HttpSecurityBuilder<B>> extends AbstractHttpConfigurer<T, B> {
     // 认证过滤器
-    private CrustAuthenticationFilter authFilter;
+    private final CrustAuthenticationFilter authFilter;
     // 认证失败处理器
-    private Supplier<AuthenticationFailureHandler> authFailureHandler;
+    private final Supplier<AuthenticationFailureHandler> authFailureHandler;
 
     public CrustAuthenticationConfigurer() {
         this(null);

@@ -147,7 +147,8 @@ public abstract class AbstractRequest {
      * @return  EchoResponseData
      * @throws EchoException 请求异常
      */
-    public <T> EchoResponseData<T> sendRequest(HttpMethod method, String url,  Map<String, String> headerMap, Map<String, Object> params, TypeReference<T> specType, boolean forceCamel) throws EchoException {
+    @SuppressWarnings("rawtypes")
+    public <T> EchoResponseData<T> sendRequest(HttpMethod method, String url, Map<String, String> headerMap, Map<String, Object> params, TypeReference<T> specType, boolean forceCamel) throws EchoException {
         // 有消息体的请求方式
         boolean hasBody = hasBody(method);
         // 请求参数
@@ -325,7 +326,7 @@ public abstract class AbstractRequest {
      * @param inParams  需要签名的业务参数
      * @param outParams 加上签名后的参数，如果Content-Type是APPLICATION_FORM_URLENCODED, 则类型为LinkedMultiValueMap，添加参数需要调用add方法
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     protected void signParam(Map<String, Object> inParams, Map<String, Object> outParams) {
         if (outParams instanceof LinkedMultiValueMap) {
             LinkedMultiValueMap multiValueMap = (LinkedMultiValueMap) outParams;
@@ -363,6 +364,7 @@ public abstract class AbstractRequest {
      * @param responseData 统一响应数据类
      * @throws EchoException 请求异常
      */
+    @SuppressWarnings("rawtypes")
     protected void checkResponse(EchoResponseData responseData) throws EchoException {}
 
     /**

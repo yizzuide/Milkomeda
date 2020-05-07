@@ -3,6 +3,9 @@ server:
   servlet:
     session:
       timeout: 120m
+      cookie:
+        http-only: true
+        name: mk-sessionid
 
 spring:
   application:
@@ -286,10 +289,16 @@ milkomeda:
 
     # 过滤器
     filter:
-      enable: true
+      #enable: true
+      # 测试表达式计算
+      enable: ${condition.equals(${spring.application.name}, milkomeda)}
       filters:
         -
           name: ipLimiterFilter
           clazz: com.github.yizzuide.milkomeda.demo.hydrogen.handler.IPLimiterFilter
           url-patterns:
             - /*
+
+  # 分布式锁
+  atom:
+    strategy: redis # 默认的策略为redis

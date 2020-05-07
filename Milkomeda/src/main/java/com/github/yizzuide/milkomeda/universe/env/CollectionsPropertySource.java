@@ -27,14 +27,6 @@ public class CollectionsPropertySource extends PropertySource<Object> {
 
     private static final String PREFIX = "collections.";
 
-    public CollectionsPropertySource(String name, Object source) {
-        super(name, source);
-    }
-
-    public CollectionsPropertySource(String name) {
-        super(name);
-    }
-
     public CollectionsPropertySource() {
         super(COLLECTIONS_PROPERTY_SOURCE_NAME);
     }

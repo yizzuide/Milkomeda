@@ -1,7 +1,9 @@
 package com.github.yizzuide.milkomeda.particle;
 
 import com.github.yizzuide.milkomeda.universe.context.WebContext;
+import com.github.yizzuide.milkomeda.util.IOUtils;
 import com.github.yizzuide.milkomeda.util.ReflectUtil;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +21,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.OrderComparator;
 import org.springframework.core.Ordered;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.lang.NonNull;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.filter.DelegatingFilterProxy;
 
@@ -77,8 +80,9 @@ public class ParticleConfig implements ApplicationContextAware {
         return particleFilterRegistrationBean;
     }
 
+    @SneakyThrows
     @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+    public void setApplicationContext(@NonNull ApplicationContext applicationContext) throws BeansException {
         List<ParticleProperties.Limiter> limiters = particleProperties.getLimiters();
         List<ParticleProperties.Limiter> barrierLimiters = new ArrayList<>();
         for (ParticleProperties.Limiter limiter : limiters) {
@@ -126,5 +130,9 @@ public class ParticleConfig implements ApplicationContextAware {
         List<ParticleProperties.Limiter> orderLimiters = limiters.stream()
                 .sorted(OrderComparator.INSTANCE.withSourceProvider(limiter -> limiter)).collect(Collectors.toList());
         particleProperties.setLimiters(orderLimiters);
+
+        // 读取lua脚本
+        String luaScript = IOUtils.loadLua("/META-INF/scripts", "particle_times_limiter.lua");
+        TimesLimiter.setLuaScript(luaScript);
     }
 }

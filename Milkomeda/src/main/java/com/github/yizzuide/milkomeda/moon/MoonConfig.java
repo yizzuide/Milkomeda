@@ -10,6 +10,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.lang.NonNull;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
@@ -32,7 +33,7 @@ public class MoonConfig implements ApplicationContextAware {
 
     @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+    public void setApplicationContext(@NonNull ApplicationContext applicationContext) throws BeansException {
         List<MoonProperties.Instance> instances = moonProperties.getInstances();
         if (CollectionUtils.isEmpty(instances)) {
             return;

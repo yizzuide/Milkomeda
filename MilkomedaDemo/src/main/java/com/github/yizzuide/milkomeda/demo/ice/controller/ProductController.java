@@ -26,6 +26,11 @@ public class ProductController {
     @RequestMapping("product/publish")
     public ResponseEntity<String> publish(Product product) {
         log.info("正在上传商品：{}", product.getId());
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         // 模拟审核商品。。
         if (product.getPics() == null) {
             log.info("当前商品没有上传图片，加入黑名单");

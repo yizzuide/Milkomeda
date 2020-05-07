@@ -2,7 +2,10 @@ package com.github.yizzuide.milkomeda.particle;
 
 import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import lombok.Data;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
+
+import java.io.Serializable;
 
 /**
  * LimitHandler
@@ -22,10 +25,20 @@ public abstract class LimitHandler implements Limiter {
 
     private StringRedisTemplate redisTemplate;
 
-    StringRedisTemplate getRedisTemplate() {
+    private RedisTemplate<String, Serializable> jsonRedisTemplate;
+
+    protected final StringRedisTemplate getRedisTemplate() {
         if (redisTemplate == null) {
             redisTemplate = ApplicationContextHolder.get().getBean(StringRedisTemplate.class);
         }
         return redisTemplate;
+    }
+
+    @SuppressWarnings("unchecked")
+    protected final RedisTemplate<String, Serializable> getJsonRedisTemplate() {
+        if (jsonRedisTemplate == null) {
+            jsonRedisTemplate = ApplicationContextHolder.get().getBean("jsonRedisTemplate", RedisTemplate.class);
+        }
+        return jsonRedisTemplate;
     }
 }

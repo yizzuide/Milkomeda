@@ -12,6 +12,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.method.ControllerAdviceBean;
 import org.springframework.web.method.annotation.ExceptionHandlerMethodResolver;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
+import org.springframework.web.method.support.HandlerMethodReturnValueHandlerComposite;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.handler.AbstractHandlerMapping;
@@ -34,7 +35,7 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 3.0.0
- * @version 3.0.1
+ * @version 3.3.0
  * Create at 2020/03/28 00:33
  */
 @Slf4j
@@ -77,10 +78,11 @@ public class SpringMvcPolyfill {
 
     /**
      * 动态添加消息体响应切面
-     * @param returnValueHandlers   响应处理器列表
-     * @param responseBodyAdvice    ResponseBodyAdvice
+     * @param returnValueHandlers       响应处理器列表（需要注入 {@link org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter#getReturnValueHandlers()}）
+     * @param handlerExceptionResolver  异常处理解析器（需要注入 {@link org.springframework.web.servlet.HandlerExceptionResolver}）
+     * @param responseBodyAdvice        ResponseBodyAdvice
      */
-    public static void addDynamicResponseBodyAdvice(List<HandlerMethodReturnValueHandler> returnValueHandlers, ResponseBodyAdvice<?> responseBodyAdvice) {
+    public static void addDynamicResponseBodyAdvice(List<HandlerMethodReturnValueHandler> returnValueHandlers, HandlerExceptionResolver handlerExceptionResolver, ResponseBodyAdvice<?> responseBodyAdvice) {
         if (CollectionUtils.isEmpty(returnValueHandlers)) {
             return;
         }
@@ -95,6 +97,24 @@ public class SpringMvcPolyfill {
                     continue;
                 }
                 advices.add(responseBodyAdvice);
+            }
+        }
+
+        // 动态添加到异常处理（因为源码流程中的异常处理是新加载的HandlerExceptionResolver，与正常响应处理不是同个处理集）
+        if (handlerExceptionResolver instanceof HandlerExceptionResolverComposite) {
+            // SpringMVC默认为注册HandlerExceptionResolverComposite的Bean
+            List<HandlerExceptionResolver> exceptionResolvers = ((HandlerExceptionResolverComposite) handlerExceptionResolver).getExceptionResolvers();
+            if (CollectionUtils.isEmpty(exceptionResolvers)) {
+                return;
+            }
+            for (HandlerExceptionResolver exceptionResolver : exceptionResolvers) {
+                if (exceptionResolver instanceof ExceptionHandlerExceptionResolver) {
+                    HandlerMethodReturnValueHandlerComposite returnValueHandlerComposite = ((ExceptionHandlerExceptionResolver) exceptionResolver).getReturnValueHandlers();
+                    if (returnValueHandlerComposite == null) {
+                        return;
+                    }
+                    SpringMvcPolyfill.addDynamicResponseBodyAdvice(returnValueHandlerComposite.getHandlers(), null, responseBodyAdvice);
+                }
             }
         }
     }

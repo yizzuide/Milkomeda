@@ -1,5 +1,6 @@
 package com.github.yizzuide.milkomeda.demo;
 
+import com.github.yizzuide.milkomeda.atom.EnableAtom;
 import com.github.yizzuide.milkomeda.comet.core.EnableComet;
 import com.github.yizzuide.milkomeda.crust.EnableCrust;
 import com.github.yizzuide.milkomeda.echo.EnableEcho;
@@ -12,6 +13,7 @@ import com.github.yizzuide.milkomeda.moon.EnableMoon;
 import com.github.yizzuide.milkomeda.neutron.EnableNeutron;
 import com.github.yizzuide.milkomeda.particle.EnableParticle;
 import com.github.yizzuide.milkomeda.pulsar.EnablePulsar;
+import com.github.yizzuide.milkomeda.wormhole.EnableWormhole;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -25,6 +27,8 @@ import java.lang.annotation.Target;
  * @author yizzuide
  * Create at 2019/12/13 01:03
  */
+@EnableWormhole
+@EnableAtom
 @EnableHydrogen
 @EnableMoon
 @EnableHalo
