@@ -36,9 +36,9 @@ public class CometTest {
 
     @Test
     public void feature() throws Exception {
-        val ret = mockMvc.perform(MockMvcRequestBuilders.get("/collect/feature")
-                .param("uid", "1123458897655")
-                .contentType(MediaType.APPLICATION_JSON_UTF8))
+        val ret = mockMvc.perform(MockMvcRequestBuilders.get("/collect/product/click")
+                .param("productId", "1000")
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andReturn().getResponse().getContentAsString();
         System.out.println(ret);

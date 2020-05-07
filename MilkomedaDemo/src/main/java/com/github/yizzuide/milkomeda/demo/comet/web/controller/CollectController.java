@@ -59,7 +59,7 @@ public class CollectController {
             data.put("taskId", "123354665656");
             AopContextHolder.getWebCometData().setIntentData(data);
             // 测试异常
-            int i = 1 / 0;
+            // int i = 1 / 0;
         } catch (Exception e) {
             // 标记异常
             AopContextHolder.getWebCometData().setFailure(e);
