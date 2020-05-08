@@ -3,6 +3,7 @@ package com.github.yizzuide.milkomeda.hydrogen.interceptor;
 import com.github.yizzuide.milkomeda.universe.context.WebContext;
 import lombok.Data;
 import org.springframework.core.Ordered;
+import org.springframework.lang.NonNull;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.handler.MappedInterceptor;
@@ -36,7 +37,7 @@ public class HydrogenMappedInterceptor implements HandlerInterceptor, Ordered {
     }
 
     @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+    public boolean preHandle(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull Object handler) throws Exception {
         // 由于Spring MVC源码在创建interceptorChain时只识别MappedInterceptor类型才能匹配URL，这里补充进来
         String lookupPath = WebContext.getUrlPathHelper().getLookupPathForRequest(request, LOOKUP_PATH);
         if (mappedInterceptor.matches(lookupPath, WebContext.getMvcPathMatcher())) {
@@ -46,7 +47,7 @@ public class HydrogenMappedInterceptor implements HandlerInterceptor, Ordered {
     }
 
     @Override
-    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
+    public void postHandle(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull Object handler, ModelAndView modelAndView) throws Exception {
         String lookupPath = WebContext.getUrlPathHelper().getLookupPathForRequest(request, LOOKUP_PATH);
         if (mappedInterceptor.matches(lookupPath, WebContext.getMvcPathMatcher())) {
             mappedInterceptor.postHandle(request, response, handler, modelAndView);
@@ -54,7 +55,7 @@ public class HydrogenMappedInterceptor implements HandlerInterceptor, Ordered {
     }
 
     @Override
-    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+    public void afterCompletion(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull Object handler, Exception ex) throws Exception {
         mappedInterceptor.afterCompletion(request, response, handler, ex);
     }
 

@@ -59,7 +59,6 @@ public class I18nConfig {
     }
 
     @Autowired
-    @SuppressWarnings("all")
     public void configRequestMappingHandlerMapping(RequestMappingHandlerMapping requestMappingHandlerMapping) {
         // 使用内置拦截器
         final LocaleChangeInterceptor localeChangeInterceptor = new LocaleChangeInterceptor();
