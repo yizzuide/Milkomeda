@@ -29,7 +29,7 @@ import java.util.Collections;
  *
  * @author yizzuide
  * @since 2.0.0
- * @version 3.3.1
+ * @version 3.4.0
  * Create at 2019/12/13 19:09
  */
 @Configuration

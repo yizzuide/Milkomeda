@@ -2,6 +2,7 @@ package com.github.yizzuide.milkomeda.light;
 
 import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import com.github.yizzuide.milkomeda.universe.handler.AstrolabeHandler;
+import org.springframework.core.Ordered;
 
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
@@ -24,5 +25,10 @@ public class LightCacheCleanAstrolabeHandler implements AstrolabeHandler {
         for (Cache cache : cacheMap.values()) {
             CacheHelper.remove(cache);
         }
+    }
+
+    @Override
+    public int getOrder() {
+        return Ordered.LOWEST_PRECEDENCE;
     }
 }

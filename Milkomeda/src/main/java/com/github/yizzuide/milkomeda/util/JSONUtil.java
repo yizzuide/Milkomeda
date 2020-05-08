@@ -102,7 +102,7 @@ public class JSONUtil {
      * @return 结果类型
      * @throws IOException 转换异常
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public static <T> T toCamel(Object data, TypeReference<T> clazz) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         Object result = data;
@@ -132,6 +132,7 @@ public class JSONUtil {
      * @param data  源Map
      * @return  Map
      */
+    @SuppressWarnings("rawtypes")
     public static Map<String, Object> toCamel(Map data) {
         Map<String, Object> tmpMap = new HashMap<>();
         for (Object k : data.keySet()) {

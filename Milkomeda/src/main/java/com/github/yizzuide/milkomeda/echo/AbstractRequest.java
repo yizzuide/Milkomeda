@@ -211,7 +211,8 @@ public abstract class AbstractRequest {
      * @param params    源请求参数
      * @return  InputStream
      */
-    public InputStream sendRequest(HttpMethod method, String url,  Map<String, String> headerMap, Map<String, Object> params) {
+    @SuppressWarnings("rawtypes")
+    public InputStream sendRequest(HttpMethod method, String url, Map<String, String> headerMap, Map<String, Object> params) {
         // 有消息体的请求方式
         boolean hasBody = hasBody(method);
         // 请求参数

@@ -1,5 +1,7 @@
 package com.github.yizzuide.milkomeda.universe.handler;
 
+import org.springframework.core.Ordered;
+
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
@@ -12,7 +14,7 @@ import javax.servlet.ServletResponse;
  * @see DelegatingContextFilter
  * Create at 2020/05/06 11:38
  */
-public interface AstrolabeHandler {
+public interface AstrolabeHandler extends Ordered {
     /**
      * 请求前置
      * @param request  ServletRequest
@@ -25,4 +27,9 @@ public interface AstrolabeHandler {
      * @param response  ServletResponse
      */
     default void postHandle(ServletRequest request, ServletResponse response) {}
+
+    @Override
+    default int getOrder() {
+        return 0;
+    }
 }
