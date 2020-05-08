@@ -10,7 +10,7 @@ import java.lang.annotation.Target;
  *
  * @author yizzuide
  * @since 3.3.0
- * @version 3.4.0
+ * @version 3.3.1
  * Create at 2020/04/30 16:26
  */
 @Target({ElementType.METHOD})
@@ -49,14 +49,14 @@ public @interface AtomLock {
     /**
      * 锁等待超时处理方案
      * @return AtomLockWaitTimeoutType
-     * @since 3.4.0
+     * @since 3.3.1
      */
     AtomLockWaitTimeoutType waitTimeoutType() default AtomLockWaitTimeoutType.THROW_EXCEPTION;
 
     /**
      * 锁等待超时反馈处理
      * @return Spring EL表达式
-     * @since 3.4.0
+     * @since 3.3.1
      */
     String fallback() default "";
 }

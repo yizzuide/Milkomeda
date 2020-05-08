@@ -5,7 +5,7 @@ package com.github.yizzuide.milkomeda.atom;
  * 锁等待超时处理类型
  *
  * @author yizzuide
- * @since 3.4.0
+ * @since 3.3.1
  * Create at 2020/05/08 13:46
  */
 public enum AtomLockWaitTimeoutType {
