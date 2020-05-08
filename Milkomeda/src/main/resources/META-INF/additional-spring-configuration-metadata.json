@@ -7,6 +7,10 @@
     {
       "name": "milkomeda.hydrogen.uniform.response",
       "type": "java.util.Map"
+    },
+    {
+      "name": "milkomeda.sundial.instances",
+      "type": "java.util.Map"
     }
   ],
   "properties": [
@@ -81,6 +85,36 @@
       "type": "java.util.List<java.util.Map>",
       "description": "Customize the exception according to the specified exception class with [clazz].",
       "sourceType": "com.github.yizzuide.milkomeda.hydrogen.uniform.UniformProperties"
+    },
+    {
+      "name": "milkomeda.sundial.instances.read-only",
+      "type": "com.github.yizzuide.milkomeda.sundial.SundialProperties$Datasource",
+      "description": "A read only datasource instance.",
+      "sourceType": "com.github.yizzuide.milkomeda.sundial.SundialProperties"
+    },
+    {
+      "name": "milkomeda.sundial.instances.read-only.url",
+      "type": "java.lang.String",
+      "description": "URL for a datasource instance.",
+      "sourceType": "com.github.yizzuide.milkomeda.sundial.SundialProperties"
+    },
+    {
+      "name": "milkomeda.sundial.instances.read-only.driver-class-name",
+      "type": "java.lang.String",
+      "description": "Driver class for a datasource instance.",
+      "sourceType": "com.github.yizzuide.milkomeda.sundial.SundialProperties"
+    },
+    {
+      "name": "milkomeda.sundial.instances.read-only.username",
+      "type": "java.lang.String",
+      "description": "Username for a datasource instance.",
+      "sourceType": "com.github.yizzuide.milkomeda.sundial.SundialProperties"
+    },
+    {
+      "name": "milkomeda.sundial.instances.read-only.password",
+      "type": "java.lang.String",
+      "description": "Password for a datasource instance.",
+      "sourceType": "com.github.yizzuide.milkomeda.sundial.SundialProperties"
     }
   ]
 }
