@@ -66,6 +66,4 @@ public class RedisAtomConfig {
     public Atom atom(RedissonClient redissonClient) {
         return new RedisAtom(redissonClient);
     }
-
-
 }
