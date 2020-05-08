@@ -14,6 +14,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @author yizzuide
  * @since 3.3.0
+ * @version 3.4.0
  * Create at 2020/05/01 12:26
  */
 public class ZkAtom implements Atom {
@@ -58,6 +59,11 @@ public class ZkAtom implements Atom {
     @Override
     public void unlock(Object lock) throws Exception {
         sharedReentrantUnLock(lock);
+    }
+
+    @Override
+    public boolean isLocked(Object lock) {
+        return ((InterProcessMutex)lock).isOwnedByCurrentThread();
     }
 
     // 可重入排它公平锁

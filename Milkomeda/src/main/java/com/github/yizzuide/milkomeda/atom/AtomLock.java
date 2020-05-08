@@ -10,6 +10,7 @@ import java.lang.annotation.Target;
  *
  * @author yizzuide
  * @since 3.3.0
+ * @version 3.4.0
  * Create at 2020/04/30 16:26
  */
 @Target({ElementType.METHOD})
@@ -40,8 +41,22 @@ public @interface AtomLock {
     AtomLockType type() default AtomLockType.FAIR;
 
     /**
-     * 是否只读（仅支持读写锁类型 {@link AtomLockType#READ_WRITE}
+     * 是否只读（仅支持读写锁类型 {@link AtomLockType#READ_WRITE}）
      * @return true只读
      */
     boolean readOnly() default false;
+
+    /**
+     * 锁等待超时处理方案
+     * @return AtomLockWaitTimeoutType
+     * @since 3.4.0
+     */
+    AtomLockWaitTimeoutType waitTimeoutType() default AtomLockWaitTimeoutType.THROW_EXCEPTION;
+
+    /**
+     * 锁等待超时反馈处理
+     * @return Spring EL表达式
+     * @since 3.4.0
+     */
+    String fallback() default "";
 }

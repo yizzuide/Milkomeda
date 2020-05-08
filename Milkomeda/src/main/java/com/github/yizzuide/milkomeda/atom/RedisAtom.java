@@ -14,6 +14,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @author yizzuide
  * @since 3.3.0
+ * @version 3.4.0
  * Create at 2020/04/30 17:09
  */
 @AllArgsConstructor
@@ -47,6 +48,13 @@ public class RedisAtom implements Atom {
     @Override
     public void unlock(Object lock) {
         ((RLock) lock).unlock();
+    }
+
+    @Override
+    public boolean isLocked(Object lock) {
+        // 这个方法只检测了key是否在redis存在，不可靠！
+        // return ((RLock) lock).isLocked();
+        return ((RLock) lock).isHeldByCurrentThread();
     }
 
     // 获取红锁
