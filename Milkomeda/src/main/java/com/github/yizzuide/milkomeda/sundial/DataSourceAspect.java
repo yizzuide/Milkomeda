@@ -16,22 +16,20 @@ import java.lang.reflect.Method;
  * @email: 786063250@qq.com
  * @describe:
  */
-@Order(1)
+@Order(999)
 @Aspect
 @Component
 public class DataSourceAspect {
 
-
-    @Pointcut("@annotation(com.github.yizzuide.milkomeda.sundial.SundialDynamicDataSource)" + "|| @within(com.github.yizzuide.milkomeda.sundial.SundialDynamicDataSource)")
+    @Pointcut("@annotation(com.github.yizzuide.milkomeda.sundial.SundialDynamicDataSource) || @within(com.github.yizzuide.milkomeda.sundial.SundialDynamicDataSource)")
     public void dsPointCut() {
     }
 
     @Around("dsPointCut()")
     public Object around(ProceedingJoinPoint point) throws Throwable {
         SundialDynamicDataSource sundialDynamicDataSource = getDataSource(point);
-
         if (null != sundialDynamicDataSource) {
-            DynamicDataSourceContextHolder.setDataSourceType(sundialDynamicDataSource.value().name());
+            DynamicDataSourceContextHolder.setDataSourceType(sundialDynamicDataSource.value());
         }
         try {
             return point.proceed();
@@ -52,8 +50,7 @@ public class DataSourceAspect {
             return targetSundialDynamicDataSource;
         } else {
             Method method = signature.getMethod();
-            SundialDynamicDataSource sundialDynamicDataSource = method.getAnnotation(SundialDynamicDataSource.class);
-            return sundialDynamicDataSource;
+            return method.getAnnotation(SundialDynamicDataSource.class);
         }
     }
 }

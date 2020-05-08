@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
 import java.sql.Driver;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -23,7 +24,7 @@ public class SundialProperties {
     /**
      * 数据源模版前缀
      */
-    public static final String configPrefix = "spring.datasource";
+    public String configPrefix = "spring.datasource";
 
     /**
      * 数据源类型
@@ -33,7 +34,7 @@ public class SundialProperties {
     /**
      * 数据源实例
      */
-    private Map<String,Datasource> instances;
+    private Map<String,Datasource> instances = new HashMap<>();
 
     /**
      * 数据源配置

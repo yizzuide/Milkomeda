@@ -1,5 +1,7 @@
 package com.github.yizzuide.milkomeda.sundial;
 
+import org.springframework.core.annotation.AliasFor;
+
 import java.lang.annotation.*;
 
 /**
@@ -8,10 +10,21 @@ import java.lang.annotation.*;
  * @email: 786063250@qq.com
  * @describe: 数据源
  */
-@Target({ElementType.METHOD})
+@Target({ElementType.METHOD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface SundialDynamicDataSource {
+    /**
+     * 选择数据源Key
+     * @return String
+     */
+    @AliasFor("key")
+    String value() default DynamicRouteDataSource.MASTER_KEY;
 
-    DataSourceType value() default DataSourceType.MASTER;
+    /**
+     * 监选择数据源Key
+     * @return  String
+     */
+    @AliasFor("value")
+    String key() default DynamicRouteDataSource.MASTER_KEY;
 }

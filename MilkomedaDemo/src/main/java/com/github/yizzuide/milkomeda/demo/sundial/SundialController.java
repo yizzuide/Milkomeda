@@ -1,9 +1,12 @@
 package com.github.yizzuide.milkomeda.demo.sundial;
 
 import com.github.yizzuide.milkomeda.sundial.SundialDynamicDataSource;
-import com.github.yizzuide.milkomeda.sundial.DataSourceType;
-import org.springframework.context.annotation.Configuration;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import javax.sql.DataSource;
 
 /**
  * @date: 2020/5/8
@@ -11,13 +14,18 @@ import org.springframework.web.bind.annotation.RequestMapping;
  * @email: 786063250@qq.com
  * @describe:
  */
-@Configuration
+@Slf4j
+@RestController
+@RequestMapping("sundial")
 public class SundialController {
 
+    @Autowired
+    private DataSource dataSource;
 
-    @SundialDynamicDataSource(DataSourceType.MASTER )
-    @RequestMapping("111")
-    private void test(){
-        System.out.println(111);
+    @SundialDynamicDataSource
+    @RequestMapping("get")
+    private String getData() {
+        log.info("get datasource: {}", dataSource);
+        return "OK";
     }
 }
