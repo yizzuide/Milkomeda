@@ -7,7 +7,7 @@ import java.time.Duration;
  *
  * @author yizzuide
  * @since 3.3.0
- * @version 3.4.0
+ * @version 3.3.1
  * Create at 2020/04/30 16:10
  */
 public interface Atom {
@@ -56,7 +56,7 @@ public interface Atom {
      * 当前线程是否加锁
      * @param lock  线程绑定的锁对象
      * @return  true已加锁
-     * @since 3.4.0
+     * @since 3.3.1
      */
     boolean isLocked(Object lock);
 }

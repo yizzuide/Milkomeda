@@ -24,7 +24,6 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 @ConditionalOnProperty(prefix = "milkomeda.hydrogen.interceptor", name = "enable", havingValue = "true")
 public class InterceptorConfig {
 
-    @SuppressWarnings("all")
     @Bean
     @ConditionalOnClass(name = "org.springframework.web.servlet.HandlerInterceptor")
     public InterceptorLoader interceptorHandler(InterceptorProperties interceptorProperties, RequestMappingHandlerMapping requestMappingHandlerMapping) {

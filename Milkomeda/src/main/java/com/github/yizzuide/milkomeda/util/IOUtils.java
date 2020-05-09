@@ -12,7 +12,7 @@ import java.nio.charset.StandardCharsets;
  * IOUtils
  *
  * @author yizzuide
- * @since 3.4.0
+ * @since 3.3.1
  * Create at 2020/05/07 14:17
  */
 public class IOUtils {
@@ -23,7 +23,7 @@ public class IOUtils {
      * @param filename  文件名（包含扩展名）
      * @return          lua脚本文本
      * @throws IOException 读取异常
-     * @since 3.4.0
+     * @since 3.3.1
      */
     public static String loadLua(String path, String filename) throws IOException {
         if (path == null || filename == null) {

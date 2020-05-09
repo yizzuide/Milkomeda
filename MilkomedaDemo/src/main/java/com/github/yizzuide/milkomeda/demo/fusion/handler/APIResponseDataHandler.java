@@ -15,7 +15,7 @@ import com.github.yizzuide.milkomeda.fusion.FusionMetaData;
 @FusionHandler
 public class APIResponseDataHandler {
 
-    @FusionAction("api")
+    @FusionAction
     public Object apiAction(FusionMetaData<Product> metaData) {
         // 返回错误类型响应数据
         if (metaData.isError()) {

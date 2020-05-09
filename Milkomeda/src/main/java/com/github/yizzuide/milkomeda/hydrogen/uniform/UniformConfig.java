@@ -39,7 +39,6 @@ public class UniformConfig {
     }
 
     @Autowired
-    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     public void configParamResolve(HandlerExceptionResolver handlerExceptionResolver) {
         SpringMvcPolyfill.addDynamicExceptionAdvice(handlerExceptionResolver, ApplicationContextHolder.get(),  "uniformHandler");
     }

@@ -10,7 +10,6 @@ import org.springframework.aop.framework.AopContext;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.ReflectionUtils;
-import org.springframework.util.StringUtils;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -25,7 +24,7 @@ import java.util.function.BiFunction;
  *
  * @author yizzuide
  * @since 1.13.4
- * @version 3.3.0
+ * @version 3.3.2
  * Create at 2019/10/24 21:17
  */
 public class AopContextHolder {
@@ -98,8 +97,8 @@ public class AopContextHolder {
                 if (name.startsWith("'") || name.startsWith("@") || name.startsWith("#") || name.startsWith("T(") || name.startsWith("args[")) {
                     name = ELContext.getValue(target, new Object[]{}, target.getClass(), method, name, String.class);
                 }
-                if (StringUtils.isEmpty(name)) {
-                    throw new IllegalArgumentException("Please specify the [value] of "+ executeAnnotation +" !");
+                if (name == null) {
+                    throw new IllegalArgumentException("Please specify the [tag] of "+ executeAnnotation +" !");
                 }
                 metaData.setName(name);
                 metaData.setTarget(target);
