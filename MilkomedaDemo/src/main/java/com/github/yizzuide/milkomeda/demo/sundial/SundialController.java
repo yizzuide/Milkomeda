@@ -33,9 +33,9 @@ public class SundialController {
     @Autowired
     private TOrderMapper tOrderMapper;
 
-    
-    @Fusion
+
     @RequestMapping("get")
+    @SundialDynamicDataSource
     public Object getData() {
         log.info("get datasource: {}", dataSource.getClass());
 //        TOrder tOrder = new TOrder();
@@ -50,6 +50,7 @@ public class SundialController {
 
 
     @RequestMapping("slave")
+    @SundialDynamicDataSource("read-only")
     public Object slave() {
         log.info("get datasource: {}", dataSource.getClass());
 //        TOrder tOrder = new TOrder();
