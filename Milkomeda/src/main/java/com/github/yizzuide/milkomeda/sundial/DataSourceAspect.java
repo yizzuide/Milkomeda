@@ -7,7 +7,6 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.core.annotation.Order;
-import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
 
@@ -20,16 +19,18 @@ import java.lang.reflect.Method;
 @Slf4j
 @Order(999)
 @Aspect
-        public class DataSourceAspect {
+public class DataSourceAspect {
 
     @Pointcut("@within(com.github.yizzuide.milkomeda.sundial.SundialDynamicDataSource) && execution(public * *(..))")
-    public void classPointCut() {}
+    public void classPointCut() {
+    }
 
 
     @Pointcut("@annotation(SundialDynamicDataSource) && execution(public * *(..))")
-    public void actionPointCut() {}
+    public void actionPointCut() {
+    }
 
-    @Around("actionPointCut()")
+    @Around("actionPointCut() || classPointCut()")
     public Object around(ProceedingJoinPoint point) throws Throwable {
         SundialDynamicDataSource sundialDynamicDataSource = getDataSource(point);
         if (null != sundialDynamicDataSource) {
