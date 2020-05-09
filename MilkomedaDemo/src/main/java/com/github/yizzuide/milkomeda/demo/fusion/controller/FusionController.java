@@ -34,7 +34,7 @@ public class FusionController {
     }
 
     // 修改返回值
-    @Fusion("api")
+    @Fusion
     @RequestMapping("product/pull")
     public Object pull() {
         // 返回成功的数据

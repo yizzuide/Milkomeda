@@ -17,6 +17,7 @@ import java.util.Map;
  *
  * @author yizzuide
  * @since 3.3.0
+ * @version 3.3.2
  * Create at 2020/05/05 16:23
  */
 @Slf4j
@@ -34,19 +35,22 @@ public class FusionRegistration {
             return fusionAction.value();
         }, false);
 
-        fusionAspect.setConverter((tag, returnObj, error) -> {
-            List<HandlerMetaData> handlerMetaDataList = actionMap.get(tag);
-            if (CollectionUtils.isEmpty(handlerMetaDataList)) {
+        if (fusionAspect.getConverter() == null) {
+            fusionAspect.setConverter((tag, returnObj, error) -> {
+                List<HandlerMetaData> handlerMetaDataList = actionMap.get(tag);
+                if (CollectionUtils.isEmpty(handlerMetaDataList)) {
+                    return returnObj;
+                }
+                HandlerMetaData handlerMetaData = handlerMetaDataList.get(0);
+                FusionMetaData<?> fusionMetaData = FusionMetaData.builder().returnData(returnObj).error(returnObj == null).msg(error).build();
+                try {
+                    return handlerMetaData.getMethod().invoke(handlerMetaData.getTarget(), fusionMetaData);
+                } catch (Exception e) {
+                    log.error("Fusion invoke error with msg: {}", e.getMessage(), e);
+                }
                 return returnObj;
-            }
-            HandlerMetaData handlerMetaData = handlerMetaDataList.get(0);
-            FusionMetaData<?> fusionMetaData = FusionMetaData.builder().returnData(returnObj).error(returnObj == null).msg(error).build();
-            try {
-                return handlerMetaData.getMethod().invoke(handlerMetaData.getTarget(), fusionMetaData);
-            } catch (Exception e) {
-                log.error("Fusion invoke error with msg: {}", e.getMessage(), e);
-            }
-            return returnObj;
-        });
+            });
+        }
+
     }
 }
