@@ -1,7 +1,6 @@
 package com.github.yizzuide.milkomeda.sundial;
 
 import com.github.yizzuide.milkomeda.util.DataTypeConvertUtil;
-import com.github.yizzuide.milkomeda.util.ReflectUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.properties.bind.Bindable;
 import org.springframework.boot.context.properties.bind.Binder;
@@ -44,7 +43,6 @@ public class DataSourceFactory implements EnvironmentAware {
     public void init() {
         DEFAULT_DATASOURCE_PREFIX = sundialProperties.getConfigPrefix();
         ALIASES.addAliases("url", "jdbc-url");
-        ALIASES.addAliases("jdbc-url", "url");
         ALIASES.addAliases("username", "user");
     }
 
@@ -58,12 +56,8 @@ public class DataSourceFactory implements EnvironmentAware {
      * @return DataSource
      * @throws Exception    创建异常
      */
-    @SuppressWarnings("rawtypes")
     public DataSource createDataSource() throws Exception {
-        Map dataSourceProperties = binder.bind(DEFAULT_DATASOURCE_PREFIX, Map.class).get();
-        DataSource datasource = sundialProperties.getDatasourceType().newInstance();
-        bind(datasource, dataSourceProperties);
-        return datasource;
+        return createDataSource(null);
     }
 
     /**
@@ -71,15 +65,17 @@ public class DataSourceFactory implements EnvironmentAware {
      * @return DataSource
      * @throws Exception    创建异常
      */
-        public DataSource createDataSource(SundialProperties.Datasource dataSourceConf) throws Exception {
-            //DataSource dataSource = createDataSource();
-            Map dataSourceConfMap = DataTypeConvertUtil.beanToMap(dataSourceConf);
-            Map dataSourceProperties = binder.bind(sundialProperties.getConfigPrefix(), Map.class).get();
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    public DataSource createDataSource(SundialProperties.Datasource dataSourceConf) throws Exception {
+        Map dataSourceProperties = binder.bind(DEFAULT_DATASOURCE_PREFIX, Map.class).get();
+        if (dataSourceConf != null) {
+            Map<String, Object> dataSourceConfMap = DataTypeConvertUtil.beanToMap(dataSourceConf);
             dataSourceProperties.putAll(dataSourceConfMap);
-            DataSource dataSource = sundialProperties.getDatasourceType().newInstance();
-            bind(dataSource, dataSourceProperties);
-            return dataSource;
         }
+        DataSource dataSource = sundialProperties.getDatasourceType().newInstance();
+        bind(dataSource, dataSourceProperties);
+        return dataSource;
+    }
 
     @SuppressWarnings("rawtypes")
     private void bind(DataSource result, Map properties) {
