@@ -57,9 +57,9 @@
 - [x] Wormhole（虫洞）：基于DDD架构模块设计的Event Bus，可用于事件流转、大数据业务事件生产与输出。*3.3.0+*
   * 依赖技术：Spring IoC
   * 设计模式：观察者模式、面向声明式编程
-- [x] Sundial（日晷）：用户动态的添加数据源 可用于读写分离。*3.4.0+*
-    * 依赖技术：Spring EnvironmentAware jdbc
-    * 设计模式：策略模式、动态代理模式
+- [x] Sundial（日晷）：用于实现一主多从的多数据源切换，如：读写分离。*3.4.0+*
+  * 依赖技术：Spring JDBC
+  * 设计模式：策略模式、动态代理模式
     
 ## Requirements
 * Java 8

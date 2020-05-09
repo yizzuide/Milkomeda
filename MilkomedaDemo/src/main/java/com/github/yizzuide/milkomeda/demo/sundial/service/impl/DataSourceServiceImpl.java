@@ -5,7 +5,6 @@ import com.github.yizzuide.milkomeda.demo.halo.mapper.TOrderMapper;
 import com.github.yizzuide.milkomeda.demo.sundial.service.DataSourceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -24,8 +23,7 @@ public class DataSourceServiceImpl implements DataSourceService {
 
     @Override
     public int insert(TOrder tOrder) {
-
-        return     tOrderMapper.insert(tOrder);
+        return tOrderMapper.insert(tOrder);
     }
 
     @Override
