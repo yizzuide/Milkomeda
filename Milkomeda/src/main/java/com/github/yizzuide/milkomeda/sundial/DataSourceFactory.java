@@ -18,11 +18,12 @@ import javax.annotation.Resource;
 import javax.sql.DataSource;
 import java.util.Map;
 
+
 /**
- * @date: 2020/5/8
- * @author: jsq
- * @email: 786063250@qq.com
- * @describe: 动态创建数据源工厂
+ * 动态创建数据源工厂
+ * @date 2020/5/8
+ * @author jsq 786063250@qq.com
+ * @since 3.4.0
  */
 @Slf4j
 public class DataSourceFactory implements EnvironmentAware {
@@ -43,6 +44,7 @@ public class DataSourceFactory implements EnvironmentAware {
     public void init() {
         DEFAULT_DATASOURCE_PREFIX = sundialProperties.getConfigPrefix();
         ALIASES.addAliases("url", "jdbc-url");
+        ALIASES.addAliases("jdbc-url", "url");
         ALIASES.addAliases("username", "user");
     }
 
@@ -69,12 +71,15 @@ public class DataSourceFactory implements EnvironmentAware {
      * @return DataSource
      * @throws Exception    创建异常
      */
-    public DataSource createDataSource(SundialProperties.Datasource dataSourceConf) throws Exception {
-        DataSource dataSource = createDataSource();
-        Map<String, Object> confMap = DataTypeConvertUtil.beanToMap(dataSourceConf);
-        ReflectUtil.setField(dataSource, confMap);
-        return dataSource;
-    }
+        public DataSource createDataSource(SundialProperties.Datasource dataSourceConf) throws Exception {
+            //DataSource dataSource = createDataSource();
+            Map dataSourceConfMap = DataTypeConvertUtil.beanToMap(dataSourceConf);
+            Map dataSourceProperties = binder.bind(sundialProperties.getConfigPrefix(), Map.class).get();
+            dataSourceProperties.putAll(dataSourceConfMap);
+            DataSource dataSource = sundialProperties.getDatasourceType().newInstance();
+            bind(dataSource, dataSourceProperties);
+            return dataSource;
+        }
 
     @SuppressWarnings("rawtypes")
     private void bind(DataSource result, Map properties) {

@@ -4,15 +4,17 @@ import org.springframework.core.annotation.AliasFor;
 
 import java.lang.annotation.*;
 
+
 /**
- * @date: 2020/5/7
- * @author: jsq
- * @email: 786063250@qq.com
- * @describe: 数据源
+ * 数据源注解
+ * @date 2020/5/8
+ * @author jsq 786063250@qq.com
+ * @since 3.4.0
  */
-@Target({ElementType.METHOD, ElementType.TYPE})
-@Retention(RetentionPolicy.RUNTIME)
 @Documented
+@Target({ElementType.TYPE, ElementType.METHOD})
+@Retention(RetentionPolicy.RUNTIME)
+@Inherited
 public @interface SundialDynamicDataSource {
     /**
      * 选择数据源Key

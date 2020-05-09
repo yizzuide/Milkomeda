@@ -7,10 +7,13 @@ import javax.sql.DataSource;
 import java.util.HashMap;
 import java.util.Map;
 
+
+
 /**
- * 动态数据源
- * 
- * @author ruoyi
+ * 数据源路由
+ * @date 2020/5/8
+ * @author jsq 786063250@qq.com
+ * @since 3.4.0
  */
 @NoArgsConstructor
 public class DynamicRouteDataSource extends AbstractRoutingDataSource {

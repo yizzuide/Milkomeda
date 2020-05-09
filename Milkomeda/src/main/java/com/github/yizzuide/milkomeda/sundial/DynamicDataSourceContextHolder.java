@@ -3,10 +3,10 @@ package com.github.yizzuide.milkomeda.sundial;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * @date: 2020/5/7
- * @author: jsq
- * @email: 786063250@qq.com
- * @describe: 数据源处理
+ * 数据源处理
+ * @date 2020/5/8
+ * @author jsq 786063250@qq.com
+ * @since 3.4.0
  */
 @Slf4j
 public class DynamicDataSourceContextHolder {

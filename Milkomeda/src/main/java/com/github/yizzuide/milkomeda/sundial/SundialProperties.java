@@ -10,11 +10,12 @@ import java.sql.Driver;
 import java.util.HashMap;
 import java.util.Map;
 
+
 /**
- * @date: 2020/5/8
- * @author: jsq
- * @email: 786063250@qq.com
- * @describe: 配置信息
+ * 自定义数据源属性配置
+ * @date 2020/5/8
+ * @author jsq 786063250@qq.com
+ * @since 3.4.0
  */
 @Data
 @Component

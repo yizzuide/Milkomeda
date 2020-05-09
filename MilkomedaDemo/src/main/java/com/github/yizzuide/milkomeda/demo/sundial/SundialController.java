@@ -1,5 +1,6 @@
 package com.github.yizzuide.milkomeda.demo.sundial;
 
+import com.github.yizzuide.milkomeda.fusion.Fusion;
 import com.github.yizzuide.milkomeda.sundial.SundialDynamicDataSource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,9 +24,17 @@ public class SundialController {
     private DataSource dataSource;
 
     @SundialDynamicDataSource
+    @Fusion
     @RequestMapping("get")
     private String getData() {
-        log.info("get datasource: {}", dataSource);
+        log.info("get datasource: {}", dataSource.getClass());
+        return "OK";
+    }
+
+    @SundialDynamicDataSource(value = "read-only")
+    @RequestMapping("slave")
+    private String slave() {
+        log.info("get datasource: {}", dataSource.getClass());
         return "OK";
     }
 }

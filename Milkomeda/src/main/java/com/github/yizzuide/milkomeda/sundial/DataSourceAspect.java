@@ -1,5 +1,6 @@
 package com.github.yizzuide.milkomeda.sundial;
 
+import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -11,21 +12,24 @@ import org.springframework.stereotype.Component;
 import java.lang.reflect.Method;
 
 /**
- * @date: 2020/5/7
- * @author: jsq
- * @email: 786063250@qq.com
- * @describe:
+ * @SundialDynamicDataSource 注解切面
+ * @date 2020/5/8
+ * @author jsq 786063250@qq.com
+ * @since 3.4.0
  */
+@Slf4j
 @Order(999)
 @Aspect
-@Component
-public class DataSourceAspect {
+        public class DataSourceAspect {
 
-    @Pointcut("@annotation(com.github.yizzuide.milkomeda.sundial.SundialDynamicDataSource) || @within(com.github.yizzuide.milkomeda.sundial.SundialDynamicDataSource)")
-    public void dsPointCut() {
-    }
+    @Pointcut("@within(com.github.yizzuide.milkomeda.sundial.SundialDynamicDataSource) && execution(public * *(..))")
+    public void classPointCut() {}
 
-    @Around("dsPointCut()")
+
+    @Pointcut("@annotation(SundialDynamicDataSource) && execution(public * *(..))")
+    public void actionPointCut() {}
+
+    @Around("actionPointCut()")
     public Object around(ProceedingJoinPoint point) throws Throwable {
         SundialDynamicDataSource sundialDynamicDataSource = getDataSource(point);
         if (null != sundialDynamicDataSource) {
