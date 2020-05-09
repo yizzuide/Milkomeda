@@ -1,9 +1,10 @@
 name: Java CI
 
-on:
+on: 
   push:
-    branches:    
+    branches: 
       - master
+      - release/*
 
 jobs:
   build:
