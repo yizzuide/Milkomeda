@@ -38,7 +38,7 @@ public interface TOrderMapper {
      * @param tOrder 实例对象
      * @return 对象列表
      */
-    @SundialDynamicDataSource(value = "read-only")
+    //@SundialDynamicDataSource(value = "read-only")
     List<TOrder> queryAll(TOrder tOrder);
 
     /**
