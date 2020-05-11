@@ -35,7 +35,7 @@ public class DataSourceFactory implements EnvironmentAware {
     private static final ConfigurationPropertyNameAliases ALIASES = new ConfigurationPropertyNameAliases();
 
     /**
-     * 参数绑定
+     * 配置绑定
      */
     private Binder binder;
 

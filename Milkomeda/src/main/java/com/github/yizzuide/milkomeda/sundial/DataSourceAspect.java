@@ -31,12 +31,12 @@ public class DataSourceAspect {
     @Around("actionPointCut() || classPointCut()")
     public Object around(ProceedingJoinPoint point) throws Throwable {
         Sundial sundial = ReflectUtil.getAnnotation(point, Sundial.class);
-        DynamicDataSourceContextHolder.setDataSourceType(sundial.value());
+        SundialHolder.setDataSourceType(sundial.value());
         try {
             return point.proceed();
         } finally {
             // 销毁数据源 在执行方法之后
-            DynamicDataSourceContextHolder.clearDataSourceType();
+            SundialHolder.clearDataSourceType();
         }
     }
 }

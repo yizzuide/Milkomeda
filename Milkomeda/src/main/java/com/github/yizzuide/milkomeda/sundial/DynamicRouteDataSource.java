@@ -29,9 +29,8 @@ public class DynamicRouteDataSource extends AbstractRoutingDataSource {
     }
 
     @Override
-    protected Object determineCurrentLookupKey()
-    {
-        return DynamicDataSourceContextHolder.getDataSourceType();
+    protected Object determineCurrentLookupKey() {
+        return SundialHolder.getDataSourceType();
     }
 
     /**

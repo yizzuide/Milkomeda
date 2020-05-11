@@ -12,7 +12,6 @@ import java.util.List;
  * @author jsq 786063250@qq.com
  * Create at 2020/5/9
  */
-//@Sundial
 @Service
 public class DataSourceServiceImpl implements DataSourceService {
 

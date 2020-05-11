@@ -4,7 +4,6 @@ import com.github.yizzuide.milkomeda.comet.collector.CometCollectorProperties;
 import com.github.yizzuide.milkomeda.comet.collector.CometCollectorResponseBodyAdvice;
 import com.github.yizzuide.milkomeda.comet.collector.TagCollector;
 import com.github.yizzuide.milkomeda.comet.logger.CometLoggerProperties;
-import com.github.yizzuide.milkomeda.pulsar.PulsarHolder;
 import com.github.yizzuide.milkomeda.universe.metadata.BeanIds;
 import com.github.yizzuide.milkomeda.universe.parser.url.URLPathMatcher;
 import com.github.yizzuide.milkomeda.universe.parser.url.URLPlaceholderParser;
@@ -44,7 +43,7 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 3.0.0
- * @version 3.0.5
+ * @version 3.4.0
  * Create at 2020/03/28 01:08
  */
 @Slf4j
@@ -132,7 +131,7 @@ public class CometInterceptor extends HandlerInterceptorAdapter implements Appli
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         if (this.cometLoggerProperties != null) {
-            PulsarHolder.getPulsar().post(() -> printLog(request));
+            printLog(request);
         }
 
         if (cometCollectorProperties != null && cometCollectorProperties.isEnableTag() && !CollectionUtils.isEmpty(this.tagCollectorMap)) {

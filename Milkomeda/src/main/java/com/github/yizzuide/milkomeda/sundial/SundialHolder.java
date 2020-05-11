@@ -9,7 +9,7 @@ import lombok.extern.slf4j.Slf4j;
  * Create at 2020/5/8
  */
 @Slf4j
-public class DynamicDataSourceContextHolder {
+public class SundialHolder {
 
     /**
      * 使用ThreadLocal维护变量，ThreadLocal为每个使用该变量的线程提供独立的变量副本，
@@ -18,7 +18,7 @@ public class DynamicDataSourceContextHolder {
     private static final ThreadLocal<String> CONTEXT_HOLDER = new ThreadLocal<>();
 
     /**
-     * 设置数据源的变量
+     * 设置数据源key
      * @param dsType 数据源key
      */
     public static void setDataSourceType(String dsType) {
@@ -27,7 +27,7 @@ public class DynamicDataSourceContextHolder {
     }
 
     /**
-     * 获得数据源的变量
+     * 获得数据源key
      * @return 数据源key
      */
     public static String getDataSourceType()
@@ -36,10 +36,9 @@ public class DynamicDataSourceContextHolder {
     }
 
     /**
-     * 清空数据源变量
+     * 清空数据源key
      */
-    public static void clearDataSourceType()
-    {
+    public static void clearDataSourceType() {
         CONTEXT_HOLDER.remove();
     }
 }

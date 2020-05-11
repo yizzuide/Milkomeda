@@ -7,6 +7,7 @@ import org.springframework.boot.autoconfigure.transaction.TransactionAutoConfigu
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.util.CollectionUtils;
 
 import javax.sql.DataSource;
@@ -23,6 +24,7 @@ import java.util.Set;
  */
 @Slf4j
 @Configuration
+@Import(DelegatingBeanDefinitionRegistrar.class)
 @EnableConfigurationProperties(SundialProperties.class)
 @AutoConfigureBefore(TransactionAutoConfiguration.class)
 public class SundialConfig {

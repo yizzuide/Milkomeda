@@ -3,7 +3,6 @@ package com.github.yizzuide.milkomeda.demo.sundial;
 import com.github.yizzuide.milkomeda.demo.halo.domain.TOrder;
 import com.github.yizzuide.milkomeda.demo.halo.mapper.TOrderMapper;
 import com.github.yizzuide.milkomeda.demo.sundial.service.DataSourceService;
-import com.github.yizzuide.milkomeda.sundial.Sundial;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -37,7 +36,7 @@ public class SundialController {
         return  dataSourceService.queryAll(new TOrder());
     }
 
-    @Sundial("read-only")
+//    @Sundial("read-only")
     @RequestMapping("get/readOnly")
     public Object slave() {
         log.info("get datasource: {}", dataSource.getClass());

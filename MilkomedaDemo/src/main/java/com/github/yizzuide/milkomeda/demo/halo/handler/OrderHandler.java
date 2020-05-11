@@ -25,11 +25,18 @@ public class OrderHandler {
         log.info("监听到【t_order】表操作：{}，参数：{}", commandType, param);
     }
 
-    // 后置监听
     // 默认监听所有的表
+    // async：使用异步（默认 true）
+    @HaloListener(type = HaloType.PRE, async = false)
+    public void handlePreAll(HaloMeta haloMeta) {
+        log.info("监听到【{}】表操作：{}，参数：{}", haloMeta.getTableName(), haloMeta.getSqlCommandType(),
+                haloMeta.getParam());
+    }
+
+    // 后置监听
     // 默认type = HaloType.POST
-    @HaloListener
-    public void handle(HaloMeta haloMeta) { // 推荐使用封装的参数类型
+    @HaloListener(async = false)
+    public void handlePostAll(HaloMeta haloMeta) { // 推荐使用封装的参数类型
         log.info("监听到【{}】表操作：{}，参数：{}, 结果:{}", haloMeta.getTableName(), haloMeta.getSqlCommandType(),
                 haloMeta.getParam(), haloMeta.getResult());
     }

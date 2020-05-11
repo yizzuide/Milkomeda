@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import javax.sql.DataSource;
 import java.sql.Driver;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
@@ -19,8 +20,10 @@ import java.util.Map;
  */
 @Data
 @Component
-@ConfigurationProperties(prefix = "milkomeda.sundial")
+@ConfigurationProperties(prefix = SundialProperties.PREFIX)
 public class SundialProperties {
+    // 配置前缀
+    static final String PREFIX = "milkomeda.sundial";
 
     /**
      * 数据源模版前缀
@@ -35,7 +38,25 @@ public class SundialProperties {
     /**
      * 数据源实例
      */
-    private Map<String,Datasource> instances = new HashMap<>();
+    private Map<String, Datasource> instances = new HashMap<>();
+
+    /**
+     * 数据切换策略
+     */
+    private List<Strategy> strategy;
+
+    @Data
+    public static class Strategy {
+        /**
+         * 数据源key名
+         */
+        private String keyName;
+
+        /**
+         * 切点表达式，如应用给Mapper的query方法：execution(* com..mapper.*.query*(..))
+         */
+        private String pointcutExpression;
+    }
 
     /**
      * 数据源配置
