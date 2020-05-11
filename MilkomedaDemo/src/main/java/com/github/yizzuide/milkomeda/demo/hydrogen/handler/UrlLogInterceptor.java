@@ -28,7 +28,7 @@ public class UrlLogInterceptor extends HandlerInterceptorAdapter implements Init
         if (open) {
             log.info("当前请求：{}", request.getRequestURI());
         }
-        return super.preHandle(request, response, handler);
+        return true;
     }
 
     @Override

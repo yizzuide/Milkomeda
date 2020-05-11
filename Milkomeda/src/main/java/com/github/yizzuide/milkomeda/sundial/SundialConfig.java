@@ -2,7 +2,6 @@ package com.github.yizzuide.milkomeda.sundial;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.transaction.TransactionAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -18,9 +17,9 @@ import java.util.Set;
 
 /**
  * 自定义数据源配置
- * @date 2020/5/8
  * @author jsq 786063250@qq.com
  * @since 3.4.0
+ * Create at 2020/5/8
  */
 @Slf4j
 @Configuration

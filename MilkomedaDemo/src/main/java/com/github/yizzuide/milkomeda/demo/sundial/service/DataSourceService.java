@@ -5,18 +5,11 @@ import com.github.yizzuide.milkomeda.demo.halo.domain.TOrder;
 import java.util.List;
 
 /**
- * @date: 2020/5/9
- * @author: jsq
- * @email: 786063250@qq.com
- * @describe:
+ * @author jsq 786063250@qq.com
+ * Create at 2020/5/9
  */
 public interface DataSourceService {
 
-    /**
-     * 新增数据
-     * @param tOrder
-     * @return
-     */
     int insert(TOrder tOrder);
 
     List<TOrder> queryAll(TOrder tOrder);

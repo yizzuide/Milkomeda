@@ -15,8 +15,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.github.yizzuide.milkomeda.util.ReflectUtil.getAnnotation;
-
 /**
  * FusionAspect
  *
@@ -49,18 +47,11 @@ public class FusionAspect {
 
     @Around("classPointCut() || actionPointCut() || classGroupPointCut() || actionGroupPointCut()")
     public Object doAround(ProceedingJoinPoint joinPoint) throws Throwable {
-        Fusion fusion = getAnnotation(joinPoint, Fusion.class);
-        // 从类上查找
-        if (fusion == null) {
-            fusion = joinPoint.getTarget().getClass().getDeclaredAnnotation(Fusion.class);
-        }
+        Fusion fusion = ReflectUtil.getAnnotation(joinPoint, Fusion.class);
         if (fusion != null) {
             return fusionAroundApply(joinPoint, fusion);
         }
-        FusionGroup fusionGroup = getAnnotation(joinPoint, FusionGroup.class);
-        if (fusionGroup == null) {
-            fusionGroup = joinPoint.getTarget().getClass().getDeclaredAnnotation(FusionGroup.class);
-        }
+        FusionGroup fusionGroup = ReflectUtil.getAnnotation(joinPoint, FusionGroup.class);
         return fusionGroupAroundApply(joinPoint, fusionGroup);
     }
 

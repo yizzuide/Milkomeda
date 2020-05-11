@@ -4,9 +4,9 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * 数据源处理
- * @date 2020/5/8
  * @author jsq 786063250@qq.com
  * @since 3.4.0
+ * Create at 2020/5/8
  */
 @Slf4j
 public class DynamicDataSourceContextHolder {
@@ -19,14 +19,16 @@ public class DynamicDataSourceContextHolder {
 
     /**
      * 设置数据源的变量
+     * @param dsType 数据源key
      */
     public static void setDataSourceType(String dsType) {
-        log.info("切换到{}数据源", dsType);
         CONTEXT_HOLDER.set(dsType);
+        log.info("Sundial selected datasource key: {}", dsType);
     }
 
     /**
      * 获得数据源的变量
+     * @return 数据源key
      */
     public static String getDataSourceType()
     {

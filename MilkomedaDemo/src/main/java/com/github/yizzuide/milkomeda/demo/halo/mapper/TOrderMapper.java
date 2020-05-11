@@ -1,7 +1,6 @@
 package com.github.yizzuide.milkomeda.demo.halo.mapper;
 
 import com.github.yizzuide.milkomeda.demo.halo.domain.TOrder;
-import com.github.yizzuide.milkomeda.sundial.SundialDynamicDataSource;
 import org.apache.ibatis.annotations.Param;
 import java.util.List;
 
@@ -38,7 +37,6 @@ public interface TOrderMapper {
      * @param tOrder 实例对象
      * @return 对象列表
      */
-    //@SundialDynamicDataSource(value = "read-only")
     List<TOrder> queryAll(TOrder tOrder);
 
     /**

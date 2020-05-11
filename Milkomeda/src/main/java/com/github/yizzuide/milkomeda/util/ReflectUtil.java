@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 0.2.0
- * @version 3.0.9
+ * @version 3.4.0
  * Create at 2019/04/11 19:55
  */
 @Slf4j
@@ -53,15 +53,19 @@ public class ReflectUtil {
     /**
      * 获得方法上的注解
      * @param joinPoint 切点连接点
-     * @param annotationClass 注解类型
+     * @param annotationClazz 注解类型
      * @param <T> 注解类型
      * @return 注解实现
      */
-    public static <T extends Annotation> T getAnnotation(JoinPoint joinPoint, Class<T> annotationClass) {
-        // 方法签名
-        MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
-        // 获得方法上注解类与相关信息
-        return methodSignature.getMethod().getAnnotation(annotationClass);
+    public static  <T extends Annotation> T getAnnotation(JoinPoint joinPoint, Class<T> annotationClazz) {
+        MethodSignature signature = (MethodSignature) joinPoint.getSignature();
+        Method method = signature.getMethod();
+        T annotation = method.getAnnotation(annotationClazz);
+        if (null != annotation) {
+            return annotation;
+        }
+        Class<?> targetClass = joinPoint.getTarget().getClass();
+        return targetClass.getDeclaredAnnotation(annotationClazz);
     }
 
     /**

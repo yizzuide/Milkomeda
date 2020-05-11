@@ -20,9 +20,9 @@ import java.util.Map;
 
 /**
  * 动态创建数据源工厂
- * @date 2020/5/8
  * @author jsq 786063250@qq.com
  * @since 3.4.0
+ * Create at 2020/5/8
  */
 @Slf4j
 public class DataSourceFactory implements EnvironmentAware {

@@ -1,5 +1,7 @@
 -- 创建数据库
 create schema milkomeda;
+create schema milkomeda_r;
+
 -- 创建表
 create table t_order
 (

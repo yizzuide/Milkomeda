@@ -13,9 +13,9 @@ import java.util.Map;
 
 /**
  * 自定义数据源属性配置
- * @date 2020/5/8
  * @author jsq 786063250@qq.com
  * @since 3.4.0
+ * Create at 2020/5/8
  */
 @Data
 @Component
