@@ -1,6 +1,7 @@
 package com.github.yizzuide.milkomeda.crust;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -10,6 +11,7 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.BeanIds;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -17,12 +19,15 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.*;
 import java.util.function.Supplier;
 
 /**
@@ -31,7 +36,7 @@ import java.util.function.Supplier;
  *
  * @author yizzuide
  * @since 1.14.0
- * @version 3.3.0
+ * @version 3.4.1
  * @see org.springframework.security.web.session.SessionManagementFilter
  * @see org.springframework.security.config.annotation.web.configurers.SessionManagementConfigurer
  * Create at 2019/11/11 18:25
@@ -43,6 +48,9 @@ public class CrustConfigurerAdapter extends WebSecurityConfigurerAdapter {
 
     @Autowired(required = false)
     private BCryptPasswordEncoder passwordEncoder;
+
+    @Autowired
+    private ApplicationContext applicationContext;
 
     @Override
     public void configure(AuthenticationManagerBuilder auth) {
@@ -59,7 +67,12 @@ public class CrustConfigurerAdapter extends WebSecurityConfigurerAdapter {
                 SessionCreationPolicy.STATELESS : SessionCreationPolicy.IF_REQUIRED).and()
             .formLogin().disable()
             // 支持跨域，从CorsConfigurationSource中取跨域配置
-            .cors().and();
+            .cors()
+                .and()
+                // 禁用iframe跨域
+                .headers()
+                .frameOptions()
+                .disable();
 
         // 配置预设置
         presetConfigure(http);
@@ -86,6 +99,26 @@ public class CrustConfigurerAdapter extends WebSecurityConfigurerAdapter {
                     .addLogoutHandler((req, res, auth) -> CrustContext.invalidate())
                     .logoutSuccessUrl(props.getLoginUrl())
                     .invalidateHttpSession(true);
+        }
+    }
+
+    /**
+     * 配置Web资源，资源根路径需要配置静态资源映射：
+     * <pre>
+     *  public class WebMvcConfig implements WebMvcConfigurer {
+     *     public void addResourceHandlers(ResourceHandlerRegistry registry) {
+     *         // 设置静态资源，用于Spring Security配置
+     *         registry.addResourceHandler("/**").addResourceLocations("classpath:/static/");
+     *     }
+     *  }
+     * </pre>
+     * @param web   WebSecurity
+     */
+    @Override
+    public void configure(WebSecurity web) {
+        // 放开静态资源的限制
+        if (!CollectionUtils.isEmpty(props.getAllowStaticURLs())) {
+            web.ignoring().antMatchers(HttpMethod.GET, props.getAllowStaticURLs().toArray(new String[0]));
         }
     }
 
@@ -118,15 +151,24 @@ public class CrustConfigurerAdapter extends WebSecurityConfigurerAdapter {
                         .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         // 登录
                         .antMatchers(props.getLoginUrl()).permitAll()
-                        // web jars、druid
-                        .antMatchers("/webjars/**").permitAll()
-                        .antMatchers("/druid/**").permitAll()
-                        // swagger
-                        .antMatchers("/swagger-ui.html").permitAll()
-                        .antMatchers("/swagger-resources").permitAll()
-                        .antMatchers("/webjars/springfox-swagger-ui/**").permitAll()
-                        // 服务监控
-                        .antMatchers("/actuator/**").permitAll();
+                        .antMatchers(props.getPermitURLs().toArray(new String[0])).permitAll();
+        if (!CollectionUtils.isEmpty(props.getAdditionPermitURLs())) {
+            urlRegistry.antMatchers(props.getAdditionPermitURLs().toArray(new String[0])).permitAll();
+        }
+        // 标记匿名访问
+        Map<RequestMappingInfo, HandlerMethod> handlerMethodMap = applicationContext.getBean(RequestMappingHandlerMapping.class).getHandlerMethods();
+        Set<String> anonUrls = new HashSet<>();
+        for (Map.Entry<RequestMappingInfo, HandlerMethod> infoEntry : handlerMethodMap.entrySet()) {
+            HandlerMethod handlerMethod = infoEntry.getValue();
+            CrustAnon crustAnon = handlerMethod.getMethodAnnotation(CrustAnon.class);
+            if (null != crustAnon) {
+                anonUrls.addAll(infoEntry.getKey().getPatternsCondition().getPatterns());
+            }
+        }
+        if (!CollectionUtils.isEmpty(anonUrls)) {
+            urlRegistry.antMatchers(anonUrls.toArray(new String[0])).permitAll();
+        }
+
         // 自定义额外允许路径
         additionalConfigure(urlRegistry, http);
         // 其他所有请求需要身份认证

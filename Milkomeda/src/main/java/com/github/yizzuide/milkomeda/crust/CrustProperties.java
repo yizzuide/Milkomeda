@@ -7,13 +7,15 @@ import org.springframework.boot.convert.DurationUnit;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * CrustProperties
  *
  * @author yizzuide
  * @since 1.14.0
- * @version 2.0.4
+ * @version 3.4.1
  * Create at 2019/11/11 15:51
  */
 @Data
@@ -97,4 +99,22 @@ public class CrustProperties {
      * 登出路径（默认/logout）
      */
     private String logoutUrl = "/logout";
+
+    /**
+     * 默认允许访问的URL
+     * @since 3.4.1
+     */
+    private List<String> permitURLs = Arrays.asList("/webjars/**", "/druid/**", "/swagger-ui.html", "/swagger-resources/**");
+
+    /**
+     * 添加允许访问的URL
+     * @since 3.4.1
+     */
+    private List<String> additionPermitURLs;
+
+    /**
+     * 允许的静态资源
+     * @since 3.4.1
+     */
+    private List<String> allowStaticURLs;
 }

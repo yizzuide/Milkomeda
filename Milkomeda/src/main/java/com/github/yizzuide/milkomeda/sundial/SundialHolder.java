@@ -23,7 +23,7 @@ public class SundialHolder {
      */
     public static void setDataSourceType(String dsType) {
         CONTEXT_HOLDER.set(dsType);
-        log.info("Sundial selected datasource key: {}", dsType);
+        log.debug("Sundial selected datasource key: {}", dsType);
     }
 
     /**

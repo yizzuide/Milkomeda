@@ -26,9 +26,21 @@ public class CrustUserDetails implements UserDetails {
     private String uid;
     private String username;
     private String password;
+    /**
+     * 可选自定义加密盐数据列
+     */
     private String salt;
+    /**
+     * 权限列表，角色权限必需"ROLE_"前缀，操作权限名随意
+     */
     private Collection<? extends GrantedAuthority> authorities;
+    /**
+     * 角色id列表
+     */
     private List<Long> roleIds;
+    /**
+     * 数据实体
+     */
     private Serializable entity;
 
     CrustUserDetails(String uid, String username, Collection<? extends GrantedAuthority> authorities, List<Long> roleIds) {

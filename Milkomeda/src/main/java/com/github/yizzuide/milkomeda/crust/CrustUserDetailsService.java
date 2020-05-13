@@ -45,16 +45,7 @@ public abstract class CrustUserDetailsService implements UserDetailsService {
     }
 
     /**
-     * 根据用户id查找实体（用于配置stateless=true时查询实体）
-     *
-     * @param uid   用户id
-     * @return  CrustEntity
-     */
-    @Nullable
-    protected Serializable findEntityById(String uid) {return null;}
-
-    /**
-     * 根据用户名查找实体
+     * 登录时根据用户名查找实体
      *
      * @param username  用户名
      * @return  CrustEntity
@@ -63,7 +54,7 @@ public abstract class CrustUserDetailsService implements UserDetailsService {
     protected abstract CrustEntity findEntityByUsername(String username);
 
     /**
-     * 根据用户名查找权限列表
+     * 登录时根据用户名查找权限列表（Session方式查询角色ID和权限，Token方式查询角色ID）
      *
      * @param uid  用户id
      * @param username 用户名
@@ -71,4 +62,23 @@ public abstract class CrustUserDetailsService implements UserDetailsService {
      */
     @Nullable
     protected abstract CrustPerm findPermissionsById(String uid, String username);
+
+    /**
+     * 解析Token时根据用户id查找实体
+     *
+     * @param uid   用户id
+     * @return  CrustEntity
+     */
+    @Nullable
+    protected Serializable findEntityById(String uid) {return null;}
+
+    /**
+     * 解析Token时根据用户id查找权限列表
+     * @param uid   用户id
+     * @return  权限数据
+     */
+    @Nullable
+    protected List<String> findAuthorities(String uid) {
+        return null;
+    }
 }

@@ -8,6 +8,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.io.Serializable;
 import java.util.Collections;
+import java.util.List;
 
 /**
  * UserDetailsService
@@ -16,11 +17,6 @@ import java.util.Collections;
  * Create at 2019/11/11 23:44
  */
 public class UserDetailsService extends CrustUserDetailsService {
-
-    @Override
-    protected Serializable findEntityById(String uid) {
-        return new User("1000", "yiz", new BCryptPasswordEncoder().encode("123456"), null);
-    }
 
     @Override
     protected CrustEntity findEntityByUsername(String username) {
@@ -34,8 +30,16 @@ public class UserDetailsService extends CrustUserDetailsService {
     @Override
     protected CrustPerm findPermissionsById(String uid, String username) {
         // 实际情况下通过Dao查询
-        CrustPerm crustPerm = new CrustPerm();
-        crustPerm.setPermNames(Collections.singletonList("ROLE_USER"));
-        return crustPerm;
+        return CrustPerm.builder().permNames(Collections.singletonList("ROLE_USER")).build();
+    }
+
+    @Override
+    protected Serializable findEntityById(String uid) {
+        return new User("1000", "yiz", new BCryptPasswordEncoder().encode("123456"), null);
+    }
+
+    @Override
+    protected List<String> findAuthorities(String uid) {
+        return Collections.singletonList("ROLE_USER");
     }
 }

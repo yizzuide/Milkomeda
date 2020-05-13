@@ -12,9 +12,9 @@ spring:
     name: milkomeda
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/milkomeda?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&useSSL=false&rewriteBatchedStatements=true&allowMultiQueries=true&allowPublicKeyRetrieval=true
-    username: root
-    password: ${MYSQL_PWD}
+    #url: jdbc:mysql://localhost:3306/milkomeda?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&useSSL=false&rewriteBatchedStatements=true&allowMultiQueries=true&allowPublicKeyRetrieval=true
+    #username: root
+    #password: ${MYSQL_PWD}
     druid:
       url: jdbc:mysql://localhost:3306/milkomeda?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&useSSL=false&rewriteBatchedStatements=true&allowMultiQueries=true&allowPublicKeyRetrieval=true
       username: root
@@ -25,7 +25,7 @@ spring:
   mvc:
     # Pulsar模块异步超时
     async:
-      request-timeout: 1s
+      request-timeout: 20s
     # 404抛出NoHandlerFoundException异常
     throw-exception-if-no-handler-found: true
   # 资源不生成mapping映射
@@ -163,13 +163,16 @@ milkomeda:
     read-timeout: 10s
 
   crust:
+    # 默认为token方式
 #    stateless: false
-  # 使用对称密钥生成token
+    # token方式不缓存
+    enable-cache: false
+    # 使用对称密钥生成token
     secure-key: crust_secure_key
     # 自定义token头，默认为token
     token-name: Authorization
     # 不使用BCrypt（如果用户表有salt字段的情况）
-  #    use-bcrypt: false
+#    use-bcrypt: false
 
   ice:
     # 开启Job作业（作为消费端使用时，设置为false）

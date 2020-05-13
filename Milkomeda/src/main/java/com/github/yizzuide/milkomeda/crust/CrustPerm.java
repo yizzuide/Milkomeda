@@ -1,6 +1,7 @@
 package com.github.yizzuide.milkomeda.crust;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -8,12 +9,13 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * CrustRole
+ * CrustPerm
  *
  * @author yizzuide
  * @since 1.17.2
  * Create at 2019/12/06 17:17
  */
+@Builder
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
