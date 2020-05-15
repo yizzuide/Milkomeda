@@ -13,7 +13,7 @@ import java.util.List;
  *
  * @author yizzuide
  * @since 2.2.0
- * @version 3.1.2
+ * @version 3.5.0
  * Create at 2019/12/31 18:13
  */
 @Data
@@ -124,12 +124,12 @@ public class Moon<T> {
     }
 
     /**
-     * 根据key获取当前左手指月（由于用于分布式，所以仅缓存到L2，自定义缓存配置通过 <code>setCacheName(String)</code>）
+     * 根据key获取当前左手指月（分布式环境下应该仅缓存到L2，自定义缓存配置通过 <code>setCacheName(String)</code>）
      * @param key 缓存key
      * @return LeftHandPointer
      */
     @SuppressWarnings("unused")
-    @LightCacheable(value = "#target.cacheName", keyPrefix = "moon:lhp-", key = "#key", onlyCacheL2 = true)
+    @LightCacheable(value = "#target.cacheName", keyPrefix = "moon:lhp-", key = "#key")
     protected LeftHandPointer getLeftHandPointer(String key) {
         // 无法从缓存中获取时，创建新的左手指月
         return new LeftHandPointer();

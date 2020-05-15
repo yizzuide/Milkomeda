@@ -7,7 +7,7 @@ import java.lang.annotation.*;
  *
  * @author yizzuide
  * @since 2.0.0
- * @version 2.3.0
+ * @version 3.5.0
  * Create at 2019/12/18 14:35
  */
 @Documented
@@ -38,34 +38,4 @@ public @interface LightCacheable {
      * @return String
      */
     String condition() default "";
-
-    /**
-     * 缓存策略
-     * @return LightDiscardStrategy
-     */
-    LightDiscardStrategy discardStrategy() default LightDiscardStrategy.DEFAULT;
-
-    /**
-     * 新的缓存总是拷贝内置的配置（如果想针对业务定制实例配置，设置为false）
-     * @return bool
-     */
-    boolean copyDefaultConfig() default true;
-
-    /**
-     * 过期时间
-     * @return  long 单位：s，默认不过期（不设置则走全局配置文件里的配置，默认也是不过期）
-     */
-    long expire() default -1;
-
-    /**
-     * 只缓存到一级缓存
-     * @return 默认为false
-     */
-    boolean onlyCacheL1() default false;
-
-    /**
-     * 只缓存到二级缓存
-     * @return 默认为false
-     */
-    boolean onlyCacheL2() default false;
 }

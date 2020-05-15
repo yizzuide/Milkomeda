@@ -23,13 +23,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.github.yizzuide.milkomeda.particle.ParticleProperties.Limiter.RESPONSE_CONTENT;
+import static com.github.yizzuide.milkomeda.particle.ParticleProperties.Limiter.RESPONSE_CONTENT_TYPE;
+
 /**
  * ParticleFilter
  * 限制器过滤器
  *
  * @author yizzuide
  * @since 3.0.0
- * @version 3.1.2
+ * @version 3.5.0
  * Create at 2020/04/08 11:41
  */
 public class ParticleFilter implements Filter {
@@ -92,8 +95,19 @@ public class ParticleFilter implements Filter {
             Map<String, Object> returnData = limiter.getLimitHandler().limit(key, limiter.getKeyExpire().getSeconds(), particle -> {
                 if (particle.isLimited()) {
                     Map<String, Object> result = new HashMap<>(8);
-                    Map<String, Object> responseInfo = limiter.getResponse();
-                    // 查找全局的响应
+                    Map<String, Object> responseInfo;
+                    ParticleProperties.Limiter selectedLimiter = limiter;
+                    // 如果是组合类型，查找具体类型
+                    if (limiter.getType() == LimiterType.BARRIER) {
+                        BarrierLimiter barrierLimitHandler = (BarrierLimiter) limiter.getLimitHandler();
+                        selectedLimiter = LimiterConfigSelector.barrierSelect(particle.getType(), barrierLimitHandler.getChain(), particleProperties);
+                        // 如里子类型没提供响应，那就指定自己
+                        if (selectedLimiter == null || selectedLimiter.getResponse() == null) {
+                            selectedLimiter  = limiter;
+                        }
+                    }
+                    responseInfo = selectedLimiter.getResponse();
+                    // 如果具体类型没有提供，查找全局的响应
                     if (responseInfo == null) {
                         responseInfo = particleProperties.getResponse();
                     }
@@ -104,7 +118,12 @@ public class ParticleFilter implements Filter {
                     }
                     int status = Integer.parseInt(responseInfo.get(YmlResponseOutput.STATUS).toString());
                     result.put(YmlResponseOutput.STATUS, status);
-                    YmlResponseOutput.output(responseInfo, result, null, null, false);
+                    if (MediaType.APPLICATION_JSON_VALUE.equals(selectedLimiter.getResponseContentType())) {
+                        YmlResponseOutput.output(responseInfo, result, null, null, false);
+                    } else {
+                        result.put(RESPONSE_CONTENT, responseInfo.get(RESPONSE_CONTENT));
+                    }
+                    result.put(RESPONSE_CONTENT_TYPE, selectedLimiter.getResponseContentType());
                     return result;
                 }
                 chain.doFilter(request, response);
@@ -116,9 +135,17 @@ public class ParticleFilter implements Filter {
                 httpServletResponse.setStatus(Integer.parseInt(returnData.get(YmlResponseOutput.STATUS).toString()));
                 returnData.remove(YmlResponseOutput.STATUS);
                 httpServletResponse.setCharacterEncoding("UTF-8");
-                httpServletResponse.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                String contentType = String.valueOf(returnData.get(RESPONSE_CONTENT_TYPE));
+                String data;
+                if (MediaType.APPLICATION_JSON_VALUE.equals(contentType)) {
+                    returnData.remove(RESPONSE_CONTENT_TYPE);
+                    data = JSONUtil.serialize(returnData);
+                } else {
+                    data = String.valueOf(returnData.get(RESPONSE_CONTENT));
+                }
+                httpServletResponse.setContentType(contentType);
                 PrintWriter writer = httpServletResponse.getWriter();
-                writer.println(JSONUtil.serialize(returnData));
+                writer.println(data);
                 writer.flush();
                 return;
             }

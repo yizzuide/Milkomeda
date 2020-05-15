@@ -35,7 +35,6 @@ public class DataSourceAspect {
         try {
             return point.proceed();
         } finally {
-            // 销毁数据源 在执行方法之后
             SundialHolder.clearDataSourceType();
         }
     }

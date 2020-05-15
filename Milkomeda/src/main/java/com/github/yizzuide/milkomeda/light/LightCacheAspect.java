@@ -30,7 +30,7 @@ import static com.github.yizzuide.milkomeda.util.ReflectUtil.extractValue;
  *
  * @author yizzuide
  * @since 2.0.0
- * @version 2.7.0
+ * @version 3.5.0
  * Create at 2019/12/18 14:45
  */
 @Order(98)
@@ -62,6 +62,7 @@ public class LightCacheAspect {
         if (!StringUtils.isEmpty(condition) && !Boolean.parseBoolean(ELContext.getValue(joinPoint, condition))) {
             return joinPoint.proceed();
         }
+
         if (StringUtils.isEmpty(key)) {
             throw new IllegalArgumentException(String.format("You must set key before use %s.", annotation.annotationType().getSimpleName()));
         }
@@ -72,42 +73,21 @@ public class LightCacheAspect {
         // 解析表达式
         String viewId = extractValue(joinPoint, key);
         LightCache cache;
-        // 记录是否自定义缓存标识
-        boolean customCacheFlag = false;
         if (ApplicationContextHolder.get().containsBean(cacheBeanName)) {
             cache = ApplicationContextHolder.get().getBean(cacheBeanName, LightCache.class);
-            customCacheFlag = true;
         } else {
+            String originCacheBeanName = cacheBeanName;
             // 修改Bean name，防止与开发者项目里重复
             cacheBeanName = innerCacheBeanName(cacheBeanName);
             cache = WebContext.registerBean((ConfigurableApplicationContext) ApplicationContextHolder.get(), cacheBeanName, LightCache.class);
-        }
-        // 针对LightCacheable类型的处理
-        if (annotation.annotationType() == LightCacheable.class && cache.getL1MaxCount() == null) {
-            LightCacheable cacheable = (LightCacheable) annotation;
-            // 如果允许拷贝默认配置，并且没有找到自定义的缓存配置
-            if (cacheable.copyDefaultConfig() && !customCacheFlag) {
+            // 自定义缓存实例配置
+            if (props.getInstances().containsKey(originCacheBeanName)) {
+                cache.configFrom(props.getInstances().get(originCacheBeanName));
+            } else {
+                // 否则拷贝默认的配置
                 LightCache defaultBean = ApplicationContextHolder.get().getBean(DEFAULT_BEAN_NAME, LightCache.class);
-                // 拷贝默认的配置
                 cache.copyFrom(defaultBean);
-                cache.setStrategy(cacheable.discardStrategy());
-                cache.setOnlyCacheL1(cacheable.onlyCacheL1());
-                cache.setOnlyCacheL2(cacheable.onlyCacheL2());
-                // 如果当前有设定过期时间（默认走配置文件）
-                if (cacheable.expire() != -1) {
-                    // 如果 discardStrategy 为 LazyExpire 策略，设置l1Expire并自动同步配置到l2Expire过期
-                    if (cacheable.discardStrategy() == LightDiscardStrategy.LazyExpire) {
-                        cache.setL1Expire(cacheable.expire());
-                    }
-                    // 排行类型策略，设置到二级缓存（该策略一级缓存使用排行丢弃方案）
-                    cache.setL2Expire(cacheable.expire());
-                }
             }
-        }
-
-        // 缓存实例配置（优先级最高）
-        if (props.getInstances().containsKey(originCacheBeanName(cacheBeanName))) {
-            cache.configFrom(props.getInstances().get(originCacheBeanName(cacheBeanName)));
         }
 
         // key生成器
@@ -125,6 +105,7 @@ public class LightCacheAspect {
         if (annotation.annotationType() == LightCachePut.class) {
             return CacheHelper.put(cache, viewId, keyGenerator, id -> joinPoint.proceed());
         }
+        // 获取类型
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         return CacheHelper.get(cache, signature.getReturnType(), viewId, keyGenerator, id -> joinPoint.proceed());
     }

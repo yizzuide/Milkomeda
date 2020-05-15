@@ -46,7 +46,7 @@ public class LightProperties {
     /** 只缓存在二级缓存上 */
     private boolean onlyCacheL2 = false;
     /**
-     * 自定义实例名配置
+     * 自定义实例名配置（实例的注册方式为首次使用时）
      */
     private Map<String, LightProperties> instances = new HashMap<>();
 }

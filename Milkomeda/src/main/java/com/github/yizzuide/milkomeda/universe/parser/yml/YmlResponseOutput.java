@@ -49,7 +49,7 @@ public class YmlResponseOutput {
                     .forEach(k ->  YmlParser.parseAliasMapPath(nodeMap, result, k, null, exMap));
         } else { // 非自定义异常基本信息写出，支持默认值源
             YmlParser.parseAliasMapPath(nodeMap, result, CODE, defValMap == null ? -1 : defValMap.get(CODE), null);
-            YmlParser.parseAliasMapPath(nodeMap, result, MESSAGE, defValMap == null ? "服务器繁忙，请稍后再试！" : defValMap.get(MESSAGE), null);
+            YmlParser.parseAliasMapPath(nodeMap, result, MESSAGE, defValMap == null ? "Server busy，try again！" : defValMap.get(MESSAGE), null);
         }
         // 内部异常详情写出
         if (e != null && !customException) {

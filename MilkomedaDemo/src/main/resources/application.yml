@@ -84,7 +84,7 @@ milkomeda:
   #show-log: true
 
   comet:
-    # 志收集器读取Response直接写出的内容时需要开启
+    # 日志收集器读取Response直接写出的内容时需要开启
     enable-read-response-body: true
     # 统一请求日志打印
     logger:
@@ -124,14 +124,15 @@ milkomeda:
           message: 请求太频繁，请稍后再试！
       -
         name: timesLimiter
-        order: -1
         type: TIMES
         props:
           timesType: MIN
           limitTimes: 3
         include-urls: ["/particle/pay"]
+#        response-content-type: text/plain # 修改响应类型，默认为application/json
         response:
           status: 200
+#          content: success # 非application/json类型的响应内容
           code: -1
           message: 请求超过次数，请稍后再试！
           addition:
@@ -141,6 +142,7 @@ milkomeda:
         type: BARRIER
         props:
           chain: ["noRepeatLimiter", "timesLimiter"]
+        order: -1
         include-urls: ["/particle/pay"]
     exclude-urls: ["/favicon.ico"]
 
@@ -153,7 +155,11 @@ milkomeda:
     # 全局使用时间线丢弃策略
     strategy: TIMELINE
     instances:
-      # 缓存实例配置（没有配置的使用默认值），优先级比注解高
+      # 缓存实例配置（没有配置的使用默认值）
+      order:
+        strategy: LazyExpire
+        l1-expire: 1m
+        l2-expire: 1m
       ab-test:
         l2-expire: -1
         only-cache-l2: true
@@ -202,9 +208,12 @@ milkomeda:
     instances:
       -
         name: smsMoon
+        # 设置缓存实例名
+        cacheName: ab-test
         phases: ["七牛云短信", "阿里云短信", "容联云短信"]
       -
         name: abTestMoon
+        # 设置缓存实例名
         cacheName: ab-test
         # 使用百分比分配策略
         type: PERCENT

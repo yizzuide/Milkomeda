@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 1.14.0
- * @since 3.1.2
+ * @since 3.5.0
  * Create at 2019/11/11 11:26
  */
 @Slf4j
@@ -49,7 +49,7 @@ public class ParticleConfig implements ApplicationContextAware {
     /**
      * 缓存创建的LimitHandler
      */
-    private Map<String, LimitHandler> cacheHandlerBeans = new HashMap<>();
+    private static final Map<String, LimitHandler> cacheHandlerBeans = new HashMap<>();
 
 
     @Bean
@@ -85,6 +85,7 @@ public class ParticleConfig implements ApplicationContextAware {
     public void setApplicationContext(@NonNull ApplicationContext applicationContext) throws BeansException {
         List<ParticleProperties.Limiter> limiters = particleProperties.getLimiters();
         List<ParticleProperties.Limiter> barrierLimiters = new ArrayList<>();
+        Map<String, LimitHandler> shareLimitHandlerMap = new HashMap<>();
         for (ParticleProperties.Limiter limiter : limiters) {
             String limiterName = limiter.getName();
             // 使用枚举类型填充处理器clazz
@@ -101,7 +102,15 @@ public class ParticleConfig implements ApplicationContextAware {
                         break;
                 }
             }
-            LimitHandler limitHandler = WebContext.registerBean((ConfigurableApplicationContext) applicationContext, limiterName, limiter.getHandlerClazz());
+            LimitHandler limitHandler;
+            String handlerKey = limiter.getHandlerClazz().getSimpleName();
+            // 共享同类型模式
+            if (limiter.isShareMode() && shareLimitHandlerMap.containsKey(handlerKey)) {
+                limitHandler = shareLimitHandlerMap.get(handlerKey);
+            } else {
+                limitHandler = WebContext.registerBean((ConfigurableApplicationContext) applicationContext, limiterName, limiter.getHandlerClazz());
+                shareLimitHandlerMap.put(handlerKey, limitHandler);
+            }
             cacheHandlerBeans.put(limiterName, limitHandler);
             if (!CollectionUtils.isEmpty(limiter.getProps())) {
                 ReflectUtil.setField(limitHandler, limiter.getProps());
@@ -111,6 +120,8 @@ public class ParticleConfig implements ApplicationContextAware {
                 barrierLimiters.add(limiter);
             }
         }
+        shareLimitHandlerMap.clear();
+
         // 创建barrierLimiter类型限制器链
         for (ParticleProperties.Limiter limiter : barrierLimiters) {
             BarrierLimiter barrierLimiter = (BarrierLimiter) limiter.getLimitHandler();
@@ -134,5 +145,9 @@ public class ParticleConfig implements ApplicationContextAware {
         // 读取lua脚本
         String luaScript = IOUtils.loadLua("/META-INF/scripts", "particle_times_limiter.lua");
         TimesLimiter.setLuaScript(luaScript);
+    }
+
+    static Map<String, LimitHandler> getCacheHandlerBeans() {
+        return cacheHandlerBeans;
     }
 }

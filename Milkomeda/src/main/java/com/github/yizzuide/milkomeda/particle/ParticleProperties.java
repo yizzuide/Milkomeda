@@ -4,6 +4,7 @@ import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.convert.DurationUnit;
 import org.springframework.core.Ordered;
+import org.springframework.http.MediaType;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
@@ -16,7 +17,7 @@ import java.util.Map;
  *
  * @author yizzuide
  * @since 3.0.0
- * @version 3.1.2
+ * @version 3.5.0
  * Create at 2020/04/08 11:12
  */
 @Data
@@ -50,6 +51,13 @@ public class ParticleProperties {
 
     @Data
     public static class Limiter implements Ordered {
+
+        // 响应数据格式类型
+        static final String RESPONSE_CONTENT_TYPE = "response_content_type";
+
+        // 文本类型响应字段，用于在response里添加
+        static final String RESPONSE_CONTENT = "content";
+
         /**
          * 限制处理器Bean名（用于注解方式或lazy注入，Bean名不可重复）
          */
@@ -76,6 +84,12 @@ public class ParticleProperties {
         private Map<String, Object> props;
 
         /**
+         * 共享同类型限制器实例模式（注意：如果该限制器在组合链中，保持默认）
+         * @since 3.5.0
+         */
+        private boolean shareMode = false;
+
+        /**
          * 分布式key模板（固定占位符：uri、method、params；请求参数域/自定义解析参数：$params.name；请求头域：$header.name；cookie域：$cookie.name）
          */
         private String keyTpl = "limit_{method}_{uri}_{$header.token}";
@@ -95,6 +109,12 @@ public class ParticleProperties {
          * 包含的URL
          */
         private List<String> includeUrls = Collections.singletonList("/**");
+
+        /**
+         * 响应类型
+         * @since 3.5.0
+         */
+        private String responseContentType = MediaType.APPLICATION_JSON_VALUE;
 
         /**
          * 限制后的响应

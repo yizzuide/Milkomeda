@@ -96,12 +96,12 @@ public class LightCache implements Cache {
      * 超级缓存（每个Cache都有自己的超级缓存，互不影响）
      */
     @Getter
-    private LightContext superCache = new LightContext();
+    private final LightContext superCache = new LightContext();
 
     /**
      * 一级缓存容器（内存池）
      */
-    private Map<String, Spot<Serializable, Object>> cacheMap = new ConcurrentSkipListMap<>();
+    private final Map<String, Spot<Serializable, Object>> cacheMap = new ConcurrentSkipListMap<>();
 
     /**
      * 二级缓存容器

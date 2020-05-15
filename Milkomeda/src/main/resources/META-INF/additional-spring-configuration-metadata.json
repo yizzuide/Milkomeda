@@ -30,7 +30,7 @@
       "name": "milkomeda.particle.response.message",
       "type": "java.lang.String",
       "description": "Business hint info returned After limited.",
-      "defaultValue": "服务器繁忙，请稍后再试！"
+      "defaultValue": "Server busy，try again！"
     },
     {
       "name": "milkomeda.particle.response.addition",
@@ -58,7 +58,7 @@
       "name": "milkomeda.hydrogen.uniform.response.message",
       "type": "java.lang.String",
       "description": "Business hint info returned After server error.",
-      "defaultValue": "服务器繁忙，请稍后再试！"
+      "defaultValue": "Server busy，try again！"
     },
     {
       "name": "milkomeda.hydrogen.uniform.response.addition",

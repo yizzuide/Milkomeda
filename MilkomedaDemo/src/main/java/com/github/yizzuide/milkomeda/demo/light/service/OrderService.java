@@ -4,7 +4,6 @@ import com.github.yizzuide.milkomeda.demo.light.pojo.Order;
 import com.github.yizzuide.milkomeda.light.LightCacheEvict;
 import com.github.yizzuide.milkomeda.light.LightCachePut;
 import com.github.yizzuide.milkomeda.light.LightCacheable;
-import com.github.yizzuide.milkomeda.light.LightDiscardStrategy;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -21,7 +20,6 @@ import java.util.*;
 public class OrderService {
 
     private static final String G_KEY = "order_list";
-    private static final long DEF_EXPIRE_SECONDS = 60;
 
     @LightCacheable(value = "orders", key = G_KEY)
     public List<Map<String, Object>> findList() {
@@ -40,9 +38,9 @@ public class OrderService {
      * @param orderId  订单id
      */
     // 参数采集方式生成缓存key
-    @LightCacheable(value = "order", key = "'order:' + #orderId", condition = "#orderId!=null", discardStrategy = LightDiscardStrategy.LazyExpire)
+    @LightCacheable(value = "order", key = "'order:' + #orderId", condition = "#orderId!=null")
     // 静态方法生成缓存key
-//    @LightCacheable(value = "order", key = "T(com.github.yizzuide.milkomeda.demo.light.pref.CacheKeys).ORDER.key", condition = "#orderId!=null", discardStrategy = LightDiscardStrategy.LazyExpire, expire = DEF_EXPIRE_SECONDS)
+//    @LightCacheable(value = "order", key = "T(com.github.yizzuide.milkomeda.demo.light.pref.CacheKeys).ORDER.key", condition = "#orderId!=null")
     public Order findById(String orderId) {
         log.info("正在从数据库查询：{}", orderId);
         return new Order(orderId, "小明", "1200", new Date());

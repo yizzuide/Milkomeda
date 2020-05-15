@@ -15,7 +15,7 @@ import java.util.List;
  *
  * @author yizzuide
  * @since 1.14.0
- * @version 3.4.1
+ * @version 3.5.0
  * Create at 2019/11/11 15:51
  */
 @Data
@@ -102,19 +102,19 @@ public class CrustProperties {
 
     /**
      * 默认允许访问的URL
-     * @since 3.4.1
+     * @since 3.5.0
      */
     private List<String> permitURLs = Arrays.asList("/webjars/**", "/druid/**", "/swagger-ui.html", "/swagger-resources/**");
 
     /**
      * 添加允许访问的URL
-     * @since 3.4.1
+     * @since 3.5.0
      */
     private List<String> additionPermitURLs;
 
     /**
      * 允许的静态资源
-     * @since 3.4.1
+     * @since 3.5.0
      */
     private List<String> allowStaticURLs;
 }

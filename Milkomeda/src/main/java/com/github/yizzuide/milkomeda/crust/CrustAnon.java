@@ -7,7 +7,7 @@ import java.lang.annotation.*;
  * 标记匿名访问URL
  *
  * @author yizzuide
- * @since 3.4.1
+ * @since 3.5.0
  * Create at 2020/05/13 11:31
  */
 @Documented
