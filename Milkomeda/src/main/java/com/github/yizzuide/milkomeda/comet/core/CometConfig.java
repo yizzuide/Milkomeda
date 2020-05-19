@@ -6,7 +6,6 @@ import com.github.yizzuide.milkomeda.universe.polyfill.SpringMvcPolyfill;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.autoconfigure.web.servlet.ConditionalOnMissingFilterBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
@@ -26,7 +25,7 @@ import java.util.Objects;
  *
  * @author yizzuide
  * @since 2.0.0
- * @version 3.0.1
+ * @version 3.5.0
  * Create at 2019/12/12 18:10
  */
 @Configuration
@@ -50,8 +49,7 @@ public class CometConfig {
     //@ConditionalOnMissingBean // 识别类型：FilterRegistrationBean，会导致永远无法加载
     // 下面两方式在版本2.1.0推出，用于识别泛型类型：FilterRegistrationBean<CometRequestFilter>
     // @ConditionalOnMissingBean(parameterizedContainer = FilterRegistrationBean.class)
-    @ConditionalOnMissingFilterBean
-    @ConditionalOnProperty(prefix = "milkomeda.comet", name = "enable-read-request-body", havingValue = "true", matchIfMissing = true)
+    @ConditionalOnProperty(prefix = "milkomeda.comet", name = "enable-read-request-body", havingValue = "true")
     public FilterRegistrationBean<CometRequestFilter> cometRequestFilter() {
         FilterRegistrationBean<CometRequestFilter> cometRequestFilter = new FilterRegistrationBean<>();
         cometRequestFilter.setFilter(new CometRequestFilter());

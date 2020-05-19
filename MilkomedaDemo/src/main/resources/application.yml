@@ -84,6 +84,8 @@ milkomeda:
   #show-log: true
 
   comet:
+    # 记录body里的json数据需要开启（默认不开启）
+    enable-read-request-body: true
     # 日志收集器读取Response直接写出的内容时需要开启
     enable-read-response-body: true
     # 统一请求日志打印

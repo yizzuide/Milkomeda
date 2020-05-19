@@ -21,7 +21,7 @@ import java.nio.charset.Charset;
  *
  * @author yizzuide
  * @since 2.0.0
- * @version 3.0.3
+ * @version 3.5.0
  * @see org.springframework.web.util.ContentCachingRequestWrapper
  * Create at 2019/12/12 17:37
  */
@@ -103,7 +103,7 @@ public class CometRequestWrapper extends HttpServletRequestWrapper {
         BufferedReader reader = null;
         try {
             // 如果消息体没有数据
-            if (inputStream == null || inputStream.available() == 0) {
+            if (inputStream == null) {
                 return null;
             }
             reader = new BufferedReader(new InputStreamReader(inputStream, Charset.defaultCharset()));

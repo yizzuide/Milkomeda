@@ -9,7 +9,6 @@ import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.nio.charset.Charset;
 
 /**
  * CometRequestFilter
@@ -17,7 +16,7 @@ import java.nio.charset.Charset;
  *
  * @author yizzuide
  * @since 2.0.0
- * @version 3.0.0
+ * @version 3.5.0
  * @see org.apache.coyote.Response#isCommitted()
  * Create at 2019/12/12 17:48
  */
@@ -31,7 +30,7 @@ public class CometRequestFilter implements Filter {
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         // 设置编码，防止Spring MVC注册Filter顺序问题导致乱码问题
-        servletRequest.setCharacterEncoding(Charset.defaultCharset().toString());
+        // servletRequest.setCharacterEncoding(Charset.defaultCharset().toString());
         ServletRequest requestWrapper = servletRequest;
         // 如果有Form表单数据则不读取body，交给SpringMVC框架处理（但@CometParam功能仍然有效）
         if (CollectionUtils.isEmpty(servletRequest.getParameterMap())) {
