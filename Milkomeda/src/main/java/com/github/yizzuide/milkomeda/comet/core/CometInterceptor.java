@@ -129,7 +129,7 @@ public class CometInterceptor extends HandlerInterceptorAdapter implements Appli
     }
 
     @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+    public boolean preHandle(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull Object handler) throws Exception {
         if (this.cometLoggerProperties != null) {
             printLog(request);
         }
@@ -141,7 +141,7 @@ public class CometInterceptor extends HandlerInterceptorAdapter implements Appli
     }
 
     @Override
-    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+    public void afterCompletion(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull Object handler, Exception ex) throws Exception {
         if (cometCollectorProperties == null || !cometCollectorProperties.isEnableTag() ||
                 CollectionUtils.isEmpty(this.tagCollectorMap) || threadLocal.get() == null) {
             return;

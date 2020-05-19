@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 3.0.0
- * @version 3.1.0
+ * @version 3.5.0
  * Create at 2020/04/09 15:07
  */
 @Data
@@ -44,10 +44,12 @@ public class URLPlaceholderParser {
     private static final String headerStartToken = "$header.";
     private static final String cookieStartToken = "$cookie.";
     private static final String paramsStartToken = "$params.";
+    private static final String attrStartToken = "$attr.";
 
     public static final String KEY_HEAD = "header";
     public static final String KEY_COOKIE = "cookie";
     public static final String KEY_PARAMS = "params";
+    public static final String KEY_ATTR = "attr";
 
     public URLPlaceholderParser() {
         this("{", "}");
@@ -65,7 +67,7 @@ public class URLPlaceholderParser {
     }
 
     /**
-     * 获取请求头和参数占位符
+     * 获取占位符
      * @param tpl   模板
      * @return  Map
      */
@@ -75,6 +77,7 @@ public class URLPlaceholderParser {
         keyMap.put(KEY_HEAD, placeHolders.stream().filter(s -> s.startsWith(headerStartToken)).collect(Collectors.toList()));
         keyMap.put(KEY_COOKIE, placeHolders.stream().filter(s -> s.startsWith(cookieStartToken)).collect(Collectors.toList()));
         keyMap.put(KEY_PARAMS, placeHolders.stream().filter(s -> s.startsWith(paramsStartToken)).collect(Collectors.toList()));
+        keyMap.put(KEY_ATTR, placeHolders.stream().filter(s -> s.startsWith(attrStartToken)).collect(Collectors.toList()));
         return keyMap;
     }
 
@@ -100,7 +103,7 @@ public class URLPlaceholderParser {
             paramsMap = JSONUtil.parseMap(params, String.class, Object.class);
         }
 
-        // 参数占位替换
+        // 请求参数占位替换
         for (String placeHolder : placeHolders.get(KEY_PARAMS)) {
             if (ignorePlaceHolders.contains(placeHolder)) continue;
             String actualPlaceHolder = placeHolder.substring(paramsStartToken.length());
@@ -108,6 +111,16 @@ public class URLPlaceholderParser {
                     DataTypeConvertUtil.extractPath(actualPlaceHolder, paramsMap, "");
             placeholderResultMap.put(placeHolder, paramValue == null ? (this.customURLPlaceholderResolver == null ? "" :
                     String.valueOf(this.customURLPlaceholderResolver.resolver(actualPlaceHolder, request))) : paramValue);
+        }
+
+        // attr占位替换
+        for (String placeHolder : placeHolders.get(KEY_ATTR)) {
+            String actualPlaceHolder = placeHolder.substring(attrStartToken.length());
+            String attrKey = actualPlaceHolder.substring(0, actualPlaceHolder.indexOf("."));
+            String subKeyPath = actualPlaceHolder.substring(actualPlaceHolder.indexOf(".") + 1);
+            Object attrValue = DataTypeConvertUtil.extractPath(subKeyPath, request.getAttribute(attrKey), "");
+            placeholderResultMap.put(placeHolder, attrValue == null ? (this.customURLPlaceholderResolver == null ? "" :
+                    String.valueOf(this.customURLPlaceholderResolver.resolver(actualPlaceHolder, request))) : attrValue);
         }
 
         // 请求头占位替换

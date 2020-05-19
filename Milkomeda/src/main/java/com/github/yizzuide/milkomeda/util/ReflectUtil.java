@@ -7,8 +7,6 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.core.ResolvableType;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
@@ -23,11 +21,13 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 0.2.0
- * @version 3.4.0
+ * @version 3.5.0
  * Create at 2019/04/11 19:55
  */
 @Slf4j
 public class ReflectUtil {
+    // EL表达式识别标识
+    private static final List<String> EL_START_TOKENS = Arrays.asList("'", "@", "#", "T(", "args[", "true", "false");
 
     /**
      * 获取父类或接口上泛型对应的Class
@@ -99,21 +99,11 @@ public class ReflectUtil {
      * @return 解析的值
      */
     public static String extractValue(JoinPoint joinPoint, String express) {
-        // 解析Http请求头
-        if (express.startsWith(":")) {
-            ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-            assert attributes != null;
-            String headerName = express.substring(1);
-            String value = attributes.getRequest().getHeader(headerName);
-            if (StringUtils.isEmpty(headerName) || StringUtils.isEmpty(value)) {
-                throw new IllegalArgumentException("Can't find " + headerName + " from HTTP header.");
-            }
-            return value;
-        }
-
         // 解析EL表达式
-        if (express.startsWith("'") || express.startsWith("@") || express.startsWith("#") || express.startsWith("T(") || express.startsWith("args[")) {
-            return ELContext.getValue(joinPoint, express);
+        for (String elStartToken : EL_START_TOKENS) {
+            if (express.startsWith(elStartToken)) {
+                return ELContext.getValue(joinPoint, express);
+            }
         }
         return express;
     }

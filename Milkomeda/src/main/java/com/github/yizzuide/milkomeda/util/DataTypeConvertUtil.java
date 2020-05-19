@@ -18,7 +18,7 @@ import java.util.regex.Pattern;
  *
  * @author yizzuide
  * @since 1.13.0
- * @version 3.0.6
+ * @version 3.5.0
  * Create at 2019/09/21 17:23
  */
 public class DataTypeConvertUtil {
@@ -239,6 +239,16 @@ public class DataTypeConvertUtil {
     }
 
     /**
+     * 从源对象采集key的值
+     * @param key       采集key
+     * @param source    源Map
+     * @return 采集到的字符串
+     */
+    public static String extractValue(String key, Object source) {
+        return extractValue(key, beanToMap(source), null);
+    }
+
+    /**
      * 从源Map采集key的值
      * @param key       采集key
      * @param source    源Map
@@ -263,6 +273,18 @@ public class DataTypeConvertUtil {
         Object value = source.get(key);
         if (value == null) return defaultValue;
         return value.toString();
+    }
+
+    /**
+     * 从源对象采集key路径的值
+     * @param keyPath       采集key
+     * @param source        源Map
+     * @param defaultValue  默认值
+     * @return 采集到的字符串
+     * @since 3.0.3
+     */
+    public static String extractPath(String keyPath, Object source, String defaultValue) {
+        return extractPath(keyPath, beanToMap(source), defaultValue);
     }
 
     /**
