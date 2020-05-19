@@ -1,5 +1,7 @@
 package com.github.yizzuide.milkomeda.jupiter;
 
+import java.util.List;
+
 /**
  * JupiterRuleEngine
  *
@@ -9,11 +11,15 @@ package com.github.yizzuide.milkomeda.jupiter;
  */
 public interface JupiterRuleEngine {
 
-    String DEFAULT_SYNTAX = "el";
-
     /**
-     * 检查规则
+     * 运行规则
      * @return 是否通过，false拦截
      */
-    boolean inspect();
+    boolean run();
+
+    /**
+     * 配置规则列表
+     * @param ruleItemList  规则列表
+     */
+    void configRuleItems(List<JupiterRuleItem> ruleItemList);
 }

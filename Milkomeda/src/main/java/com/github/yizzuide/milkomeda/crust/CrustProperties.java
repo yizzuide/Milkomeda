@@ -110,11 +110,11 @@ public class CrustProperties {
      * 添加允许访问的URL
      * @since 3.5.0
      */
-    private List<String> additionPermitURLs;
+    private List<String> additionPermitUrls;
 
     /**
      * 允许的静态资源
      * @since 3.5.0
      */
-    private List<String> allowStaticURLs;
+    private List<String> allowStaticUrls;
 }

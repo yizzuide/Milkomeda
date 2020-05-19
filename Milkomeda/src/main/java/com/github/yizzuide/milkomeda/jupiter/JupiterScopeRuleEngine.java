@@ -1,60 +1,60 @@
 package com.github.yizzuide.milkomeda.jupiter;
 
 import com.github.yizzuide.milkomeda.universe.context.WebContext;
+import com.github.yizzuide.milkomeda.universe.exception.NotImplementException;
 import com.github.yizzuide.milkomeda.universe.parser.url.URLPlaceholderParser;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.expression.Expression;
-import org.springframework.expression.ExpressionParser;
-import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import javax.annotation.PostConstruct;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 /**
- * JupiterRuleELEngine
+ * JupiterScopeRuleEngine
+ * 具有请求领域上下文的规则引擎
  *
  * @author yizzuide
  * @since 3.5.0
  * Create at 2020/05/19 14:39
  */
 @Slf4j
-public class JupiterRuleELEngine implements JupiterRuleEngine {
-
-    private final ExpressionParser parser = new SpelExpressionParser();
+public class JupiterScopeRuleEngine implements JupiterRuleEngine {
 
     private final URLPlaceholderParser urlPlaceholderParser = new URLPlaceholderParser();
 
-    private final List<JupiterRuleItem> ruleItemList = new ArrayList<>();
+    private List<JupiterRuleItem> ruleItemList;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    @PostConstruct
-    public void init() {
-        refreshRules();
-    }
-
     @SuppressWarnings("rawtypes")
     @Override
-    public boolean inspect() {
+    public boolean run() {
         try {
             for (JupiterRuleItem ruleItem : ruleItemList) {
-                Expression exp = parser.parseExpression(ruleItem.getMatch());
+                JupiterExpressCompiler compiler = JupiterCompilerPool.get(ruleItem.getSyntax());
+                if (compiler == null) {
+                    throw new NotImplementException("Can't find type implement with JupiterCompilerType." + ruleItem.getSyntax());
+                }
                 Boolean pass;
                 if (ruleItem.getDomain() == null) {
-                    pass = exp.getValue(Boolean.TYPE);
+                    pass = compiler.compile(ruleItem.getMatch(), null, Boolean.TYPE);
                     assert pass != null;
                     if (!pass) {
                         return false;
                     }
                     continue;
                 }
-                StringBuilder sqlBuilder = new StringBuilder("select " + ruleItem.getFields() + " from " + ruleItem.getDomain());
                 String filter = ruleItem.getFilter();
+                // 解析条件表达式
+                if (filter != null && filter.contains("{$")) {
+                    Map<String, List<String>> placeHolders = urlPlaceholderParser.grabPlaceHolders(filter);
+                    filter = urlPlaceholderParser.parse(filter, WebContext.getRequest(), null, placeHolders);
+                }
+
+                // 解析SQL
+                StringBuilder sqlBuilder = new StringBuilder("select " + ruleItem.getFields() + " from " + ruleItem.getDomain());
                 if (filter != null) {
                     sqlBuilder.append(" where ");
                     String[] condList = filter.split("&");
@@ -70,10 +70,10 @@ public class JupiterRuleELEngine implements JupiterRuleEngine {
                 String sql = sqlBuilder.toString();
                 if (ruleItem.isMulti()) {
                     List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql);
-                    pass = exp.getValue(rows, Boolean.TYPE);
+                    pass = compiler.compile(ruleItem.getMatch(), rows, Boolean.TYPE);
                 } else {
                     Map row = jdbcTemplate.queryForMap(sql);
-                    pass = exp.getValue(row, Boolean.TYPE);
+                    pass = compiler.compile(ruleItem.getMatch(), row, Boolean.TYPE);
                 }
                 assert pass != null;
                 if (!pass) {
@@ -81,27 +81,18 @@ public class JupiterRuleELEngine implements JupiterRuleEngine {
                 }
             }
         } catch (Exception e) {
-            log.info("Jupiter rule engine execute error with msg: {}", e.getMessage(), e);
+            log.error("Jupiter rule engine execute error with msg: {}", e.getMessage(), e);
         }
         return true;
     }
 
-    /**
-     * 添加规则配置
-     * @param ruleItem  JupiterRuleItem
-     */
-    public void addRuleItem(JupiterRuleItem ruleItem) {
-        ruleItemList.add(ruleItem);
-    }
-
-    /**
-     * 刷新规则配置
-     */
-    public void refreshRules() {
-        // 预解析条件表达式
+    public void configRuleItems(List<JupiterRuleItem> ruleItemList) {
+        this.ruleItemList = ruleItemList;
+        int incr = 0;
         for (JupiterRuleItem ruleItem : ruleItemList) {
-            Map<String, List<String>> placeHolders = urlPlaceholderParser.grabPlaceHolders(ruleItem.getFilter());
-            ruleItem.setFilter(urlPlaceholderParser.parse(ruleItem.getFilter(), WebContext.getRequest(), null, placeHolders));
+            if (ruleItem.getId() == null) {
+                ruleItem.setId(++incr);
+            }
         }
     }
 }

@@ -244,7 +244,11 @@ public class DataTypeConvertUtil {
      * @param source    源Map
      * @return 采集到的字符串
      */
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public static String extractValue(String key, Object source) {
+        if (source instanceof Map) {
+            return extractValue(key, (Map) source, null);
+        }
         return extractValue(key, beanToMap(source), null);
     }
 
@@ -283,7 +287,14 @@ public class DataTypeConvertUtil {
      * @return 采集到的字符串
      * @since 3.0.3
      */
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public static String extractPath(String keyPath, Object source, String defaultValue) {
+        if (source == null) {
+            return defaultValue;
+        }
+        if (source instanceof Map) {
+            return extractPath(keyPath, (Map) source, defaultValue);
+        }
         return extractPath(keyPath, beanToMap(source), defaultValue);
     }
 
@@ -297,6 +308,9 @@ public class DataTypeConvertUtil {
      */
     @SuppressWarnings({"rawtypes", "unchecked"})
     public static String extractPath(String keyPath, Map<String, Object> source, String defaultValue) {
+        if (source == null) {
+            return defaultValue;
+        }
         if (StringUtils.isEmpty(keyPath)) {
             return defaultValue;
         }

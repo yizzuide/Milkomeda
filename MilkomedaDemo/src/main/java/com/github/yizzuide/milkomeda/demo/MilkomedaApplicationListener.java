@@ -14,6 +14,10 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class MilkomedaApplicationListener implements ApplicationListener<ContextRefreshedEvent> {
+//    @Lazy
+//    @Resource
+//    private JupiterRuleEngine payRuleEngine;
+
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
         // 设置延迟队列实例名
@@ -23,5 +27,9 @@ public class MilkomedaApplicationListener implements ApplicationListener<Context
 
         // 调用环境变量，给Spring EL表达 #env 提供数据源
         ApplicationContextHolder.getEnvironment().put("product",  "milkomeda");
+
+        // 从json配置加载覆盖yml配置
+//        String ruleItems = "[{\"match\":\"true\"},{\"domain\":\"t_order\",\"fields\":\"id\",\"filter\":\"user_id={$attr.userInfo.uid}\",\"match\":\"size()==0\"}]";
+//        payRuleEngine.configRuleItems(JSONUtil.parseList(ruleItems, JupiterRuleItem.class));
     }
 }

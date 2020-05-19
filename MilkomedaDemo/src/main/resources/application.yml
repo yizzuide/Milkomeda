@@ -180,7 +180,10 @@ milkomeda:
     # 自定义token头，默认为token
     token-name: Authorization
     # 不使用BCrypt（如果用户表有salt字段的情况）
-#    use-bcrypt: false
+  #    use-bcrypt: false
+    # 添加到无认证许可
+    addition-permit-urls:
+      - /jupiter/**
 
   ice:
     # 开启Job作业（作为消费端使用时，设置为false）
@@ -333,4 +336,26 @@ milkomeda:
     strategy:
       - key-name: read-only
         pointcut-expression: execution(* com..mapper.*.query*(..))
+
+  # 风控规则引擎
+  jupiter:
+    instances:
+      # 规则引擎实例名（一般一个业务一个实例），用于注册bean，名字不要在IoC里重复就行
+      payRuleEngine:
+        # 规则列表
+        rule-items:
+          # 规则项名随意取，global只是添加到提示默认名
+          global:
+            # 结果匹配表达式
+            match: true
+          new-user-pay-rule:
+            # 查询领域（表名）
+            domain: t_order
+            # 包含字段
+            fields: id
+            # 查询过滤，支持$params、$attr(Request Attribute域)、$header、$cookie
+            filter: user_id={$attr.userInfo.uid}
+            # 结果匹配表达式
+            match: size() == 0
+
 

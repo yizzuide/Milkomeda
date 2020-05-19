@@ -8,6 +8,7 @@ import java.lang.annotation.*;
  * EnableJupiter
  *
  * @author yizzuide
+ * @since 3.5.0
  * Create at 2020/05/19 16:57
  */
 @Documented

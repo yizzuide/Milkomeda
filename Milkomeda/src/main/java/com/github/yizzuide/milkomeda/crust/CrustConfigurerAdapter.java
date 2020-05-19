@@ -117,8 +117,8 @@ public class CrustConfigurerAdapter extends WebSecurityConfigurerAdapter {
     @Override
     public void configure(WebSecurity web) {
         // 放开静态资源的限制
-        if (!CollectionUtils.isEmpty(props.getAllowStaticURLs())) {
-            web.ignoring().antMatchers(HttpMethod.GET, props.getAllowStaticURLs().toArray(new String[0]));
+        if (!CollectionUtils.isEmpty(props.getAllowStaticUrls())) {
+            web.ignoring().antMatchers(HttpMethod.GET, props.getAllowStaticUrls().toArray(new String[0]));
         }
     }
 
@@ -152,8 +152,8 @@ public class CrustConfigurerAdapter extends WebSecurityConfigurerAdapter {
                         // 登录
                         .antMatchers(props.getLoginUrl()).permitAll()
                         .antMatchers(props.getPermitURLs().toArray(new String[0])).permitAll();
-        if (!CollectionUtils.isEmpty(props.getAdditionPermitURLs())) {
-            urlRegistry.antMatchers(props.getAdditionPermitURLs().toArray(new String[0])).permitAll();
+        if (!CollectionUtils.isEmpty(props.getAdditionPermitUrls())) {
+            urlRegistry.antMatchers(props.getAdditionPermitUrls().toArray(new String[0])).permitAll();
         }
         // 标记匿名访问
         Map<RequestMappingInfo, HandlerMethod> handlerMethodMap = applicationContext.getBean(RequestMappingHandlerMapping.class).getHandlerMethods();

@@ -116,9 +116,14 @@ public class URLPlaceholderParser {
         // attr占位替换
         for (String placeHolder : placeHolders.get(KEY_ATTR)) {
             String actualPlaceHolder = placeHolder.substring(attrStartToken.length());
-            String attrKey = actualPlaceHolder.substring(0, actualPlaceHolder.indexOf("."));
-            String subKeyPath = actualPlaceHolder.substring(actualPlaceHolder.indexOf(".") + 1);
-            Object attrValue = DataTypeConvertUtil.extractPath(subKeyPath, request.getAttribute(attrKey), "");
+            Object attrValue;
+            if (actualPlaceHolder.contains(".")) { // 复合对象
+                String attrKey = actualPlaceHolder.substring(0, actualPlaceHolder.indexOf("."));
+                String subKeyPath = actualPlaceHolder.substring(actualPlaceHolder.indexOf(".") + 1);
+                attrValue = DataTypeConvertUtil.extractPath(subKeyPath, request.getAttribute(attrKey), "");
+            } else { // 普通值
+                attrValue = request.getAttribute(actualPlaceHolder);
+            }
             placeholderResultMap.put(placeHolder, attrValue == null ? (this.customURLPlaceholderResolver == null ? "" :
                     String.valueOf(this.customURLPlaceholderResolver.resolver(actualPlaceHolder, request))) : attrValue);
         }
