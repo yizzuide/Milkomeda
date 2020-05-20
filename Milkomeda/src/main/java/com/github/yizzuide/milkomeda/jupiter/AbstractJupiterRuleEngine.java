@@ -9,6 +9,7 @@ import java.util.Map;
  *
  * @author yizzuide
  * @since 3.5.0
+ * @version 3.5.1
  * Create at 2020/05/20 10:54
  */
 public abstract class AbstractJupiterRuleEngine implements JupiterRuleEngine {
@@ -27,6 +28,7 @@ public abstract class AbstractJupiterRuleEngine implements JupiterRuleEngine {
             if (ruleItem.getId() == null) {
                 ruleItem.setId(++incr);
             }
+            ruleItem.setSyntax(ruleItem.getSyntax().toUpperCase());
         }
         ruleCacheMap.put(ruleName, ruleItemList);
     }

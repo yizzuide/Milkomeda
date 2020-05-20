@@ -30,7 +30,7 @@ public class MilkomedaApplicationListener implements ApplicationListener<Context
         ApplicationContextHolder.getEnvironment().put("product",  "milkomeda");
 
         // 从json配置加载覆盖yml配置
-//        String ruleItems = "[{\"match\":\"true\"},{\"domain\":\"t_order\",\"fields\":\"id\",\"filter\":\"user_id={$attr.userInfo.uid}\",\"match\":\"size()==0\"}]";
+//        String ruleItems = "[{\"match\":\"true\"},{\"domain\":\"t_order\",\"fields\":\"id\",\"filter\":\"user_id={$attr.userInfo.uid}\",\"match\":\"size()==0\",\"syntax\":\"el\"}]";
 //        jupiterRuleEngine.resetRule("payRule", JSONUtil.parseList(ruleItems, JupiterRuleItem.class));
     }
 }
