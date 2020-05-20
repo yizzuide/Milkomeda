@@ -30,7 +30,7 @@ import static com.github.yizzuide.milkomeda.util.ReflectUtil.extractValue;
  *
  * @author yizzuide
  * @since 2.0.0
- * @version 3.5.0
+ * @version 3.5.1
  * Create at 2019/12/18 14:45
  */
 @Order(98)
@@ -73,12 +73,12 @@ public class LightCacheAspect {
         // 解析表达式
         String viewId = extractValue(joinPoint, key);
         LightCache cache;
+        String originCacheBeanName = cacheBeanName;
+        // 修改Bean name，防止与开发者项目里重复
+        cacheBeanName = innerCacheBeanName(cacheBeanName);
         if (ApplicationContextHolder.get().containsBean(cacheBeanName)) {
             cache = ApplicationContextHolder.get().getBean(cacheBeanName, LightCache.class);
         } else {
-            String originCacheBeanName = cacheBeanName;
-            // 修改Bean name，防止与开发者项目里重复
-            cacheBeanName = innerCacheBeanName(cacheBeanName);
             cache = WebContext.registerBean((ConfigurableApplicationContext) ApplicationContextHolder.get(), cacheBeanName, LightCache.class);
             // 自定义缓存实例配置
             if (props.getInstances().containsKey(originCacheBeanName)) {

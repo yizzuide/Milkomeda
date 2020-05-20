@@ -7,9 +7,15 @@ import java.util.List;
  *
  * @author yizzuide
  * @since 3.5.0
+ * @since 3.5.1
  * Create at 2020/05/19 14:35
  */
 public interface JupiterRuleEngine {
+
+    /**
+     * 注册Bean名
+     */
+    String BEAN_ID = "jupiterRuleEngine";
 
     /**
      * 运行规则
