@@ -13,6 +13,7 @@ public interface JupiterExpressionCompiler {
      * 解析表达式
      * @param expression    表达式
      * @param root          根对象
+     * @param resultType    返回类型
      * @param <T>           值类型
      * @return  解析结果
      */

@@ -62,6 +62,7 @@ public class DataSourceFactory implements EnvironmentAware {
 
     /**
      * 创建数据源实例
+     * @param dataSourceConf    数据源配置
      * @return DataSource
      * @throws Exception    创建异常
      */
