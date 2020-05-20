@@ -60,6 +60,9 @@
 - [x] Sundial（日晷）：用于实现一主多从的多数据源切换，如：读写分离。*3.4.0+*
   * 依赖技术：Spring JDBC
   * 设计模式：策略模式、动态代理模式
+- [x] Jupiter（木星）：基于数据源查询的轻量级规则引擎，查询过滤支持请求域（如：`$params`、`$attr`、`$header`）获取表达式，结果匹配支持EL、OGNL表达式解析。*3.5.0+*
+  * 依赖技术：Spring JDBC、Spring EL、OGNL
+  * 设计模式：策略模式、享元模式、模板方法模式
     
 ## Requirements
 * Java 8
