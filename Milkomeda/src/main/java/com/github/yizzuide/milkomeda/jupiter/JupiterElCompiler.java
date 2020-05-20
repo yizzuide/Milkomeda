@@ -12,16 +12,16 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
  * @since 3.5.0
  * Create at 2020/05/19 21:45
  */
-public class JupiterElCompiler implements JupiterExpressCompiler {
+public class JupiterElCompiler implements JupiterExpressionCompiler {
 
-    private final ExpressionParser parser = new SpelExpressionParser();
+    private final ExpressionParser EL_PARSER = new SpelExpressionParser();
 
     @Override
-    public <T> T compile(String express, Object context, Class<T> resultType) {
-        Expression expression = parser.parseExpression(express);
-        if (context == null) {
-            return expression.getValue(resultType);
+    public <T> T compile(String expression, Object root, Class<T> resultType) {
+        Expression expressionWrapper = EL_PARSER.parseExpression(expression);
+        if (root == null) {
+            return expressionWrapper.getValue(resultType);
         }
-        return expression.getValue(context, resultType);
+        return expressionWrapper.getValue(root, resultType);
     }
 }

@@ -337,25 +337,29 @@ milkomeda:
       - key-name: read-only
         pointcut-expression: execution(* com..mapper.*.query*(..))
 
-  # 风控规则引擎
+  # 规则引擎
   jupiter:
-    instances:
-      # 规则引擎实例名（一般一个业务一个实例），用于注册bean，名字不要在IoC里重复就行
-      payRuleEngine:
-        # 规则列表
+    # 匹配表达里的结果对象下划线转驼峰
+    match-camel-case: true
+    rules:
+      # 规则名随意取，但不能重复
+      payRule:
         rule-items:
-          # 规则项名随意取，global只是添加到提示默认名
+          # 规则项名随意取，让规则项知其名明其意
           global:
             # 结果匹配表达式
             match: true
+          # 下面的规则是新客才能下单成功
           new-user-pay-rule:
             # 查询领域（表名）
             domain: t_order
             # 包含字段
             fields: id
-            # 查询过滤，支持$params、$attr(Request Attribute域)、$header、$cookie
+            # 查询过滤，支持$params（Request Parameter域）、$attr（Request Attribute域）、$header（Request Header域）、$cookie（Request Cookie域）
             filter: user_id={$attr.userInfo.uid}
-            # 结果匹配表达式
-            match: size() == 0
+            # 结果匹配表达式，默认使用EL表达式，EL和OGNL都支持使用`#root`来访问根对象，如：#root != null
+            #match: size() == 0
+            match: size == 0
+            syntax: OGNL
 
 

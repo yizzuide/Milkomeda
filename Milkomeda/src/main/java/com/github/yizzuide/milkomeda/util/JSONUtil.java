@@ -147,7 +147,7 @@ public class JSONUtil {
                 }
                 v = mapList;
             }
-            tmpMap.put(DataTypeConvertUtil.lineToSnakeStyle((String) k), v);
+            tmpMap.put(DataTypeConvertUtil.toCamelCase((String) k), v);
         }
         return tmpMap;
     }

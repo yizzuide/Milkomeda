@@ -5,20 +5,20 @@ import java.util.Map;
 
 /**
  * JupiterCompilerPool
- * 解析器共享池
+ * 表达式解析器共享池
  *
  * @author yizzuide
  * @since 3.5.0
  * Create at 2020/05/20 00:59
  */
 public class JupiterCompilerPool {
-    private static final Map<String, JupiterExpressCompiler> sharedCompiler = new HashMap<>();
+    private static final Map<String, JupiterExpressionCompiler> sharedCompiler = new HashMap<>();
 
-    static void put(String key, JupiterExpressCompiler compiler) {
+    static void put(String key, JupiterExpressionCompiler compiler) {
         sharedCompiler.put(key, compiler);
     }
 
-    static JupiterExpressCompiler get(String key) {
+    static JupiterExpressionCompiler get(String key) {
         return sharedCompiler.get(key);
     }
 }

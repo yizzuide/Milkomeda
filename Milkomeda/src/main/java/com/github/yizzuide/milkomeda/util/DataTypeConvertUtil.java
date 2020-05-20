@@ -30,7 +30,7 @@ public class DataTypeConvertUtil {
      * @param str 源字符串
      * @return 驼峰风格字符串
      */
-    public static String lineToSnakeStyle(String str) {
+    public static String toCamelCase(String str) {
         str = str.toLowerCase();
         Matcher matcher = linePattern.matcher(str);
         StringBuffer sb = new StringBuffer();

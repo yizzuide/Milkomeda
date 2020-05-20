@@ -23,7 +23,7 @@ public class JupiterController {
     // yml配置的实体需要使用@Lazy!!!
     @Lazy
     @Resource
-    private JupiterRuleEngine payRuleEngine;
+    private JupiterRuleEngine jupiterRuleEngine;
 
     @RequestMapping("pay")
     public String pay() {
@@ -33,7 +33,7 @@ public class JupiterController {
         WebContext.getRequest().setAttribute("userInfo", userInfo);
 
         // 运行放款风控规则引擎
-        if (!payRuleEngine.run()) {
+        if (!jupiterRuleEngine.run("payRule")) {
             return "Fail";
         }
         // 放款操作。。

@@ -14,9 +14,10 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class MilkomedaApplicationListener implements ApplicationListener<ContextRefreshedEvent> {
+    // yml配置的实体需要使用@Lazy!!!
 //    @Lazy
 //    @Resource
-//    private JupiterRuleEngine payRuleEngine;
+//    private JupiterRuleEngine jupiterRuleEngine;
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
@@ -30,6 +31,6 @@ public class MilkomedaApplicationListener implements ApplicationListener<Context
 
         // 从json配置加载覆盖yml配置
 //        String ruleItems = "[{\"match\":\"true\"},{\"domain\":\"t_order\",\"fields\":\"id\",\"filter\":\"user_id={$attr.userInfo.uid}\",\"match\":\"size()==0\"}]";
-//        payRuleEngine.configRuleItems(JSONUtil.parseList(ruleItems, JupiterRuleItem.class));
+//        jupiterRuleEngine.resetRule("payRule", JSONUtil.parseList(ruleItems, JupiterRuleItem.class));
     }
 }

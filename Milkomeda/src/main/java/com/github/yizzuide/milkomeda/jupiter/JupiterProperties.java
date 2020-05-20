@@ -15,17 +15,31 @@ import java.util.Map;
 @Data
 @ConfigurationProperties("milkomeda.jupiter")
 public class JupiterProperties {
-
     /**
-     * 规则引擎实例
+     * 规则引擎类型
      */
-    private Map<String, RuleEngine> instances;
+    private JupiterRuleEngineType type = JupiterRuleEngineType.SCOPE;
 
     /**
-     * 规则引擎
+     * 自定义规则引擎
+     */
+    private Class<? extends JupiterRuleEngine> ruleEngineClazz;
+
+    /**
+     * 是否将匹配表达式里的结果字段下划线转驼峰
+     */
+    private boolean matchCamelCase = false;
+
+    /**
+     * 规则实例列表
+     */
+    private Map<String, Rule> rules;
+
+    /**
+     * 规则实例
      */
     @Data
-    public static class RuleEngine {
+    public static class Rule {
         /**
          * 规则列表
          */
@@ -33,7 +47,7 @@ public class JupiterProperties {
     }
 
     /**
-     * 规则项
+     * 规则子项
      */
     @Data
     public static class RuleItem {

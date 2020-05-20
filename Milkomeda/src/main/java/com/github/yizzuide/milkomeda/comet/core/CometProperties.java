@@ -16,7 +16,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class CometProperties {
 
     /**
-     * 允许开启请求包装类读取请求消息体（使用 {@link CometParam } 时必须开启）
+     * 允许开启请求包装类读取请求消息体（收集application/json类型消息体请求日志，或使用 {@link CometParam } 时必须开启）
      */
     private boolean enableReadRequestBody = false;
 

@@ -13,7 +13,7 @@ public enum JupiterCompilerType {
      */
     EL,
     /**
-     * ONGL表达式（当前不支持）
+     * OGNL表达式
      */
-    ONGL
+    OGNL
 }

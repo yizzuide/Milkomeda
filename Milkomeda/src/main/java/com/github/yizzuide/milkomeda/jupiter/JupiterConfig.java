@@ -29,22 +29,31 @@ public class JupiterConfig implements ApplicationContextAware {
 
     @Override
     public void setApplicationContext(@NonNull ApplicationContext applicationContext) throws BeansException {
-        Map<String, JupiterProperties.RuleEngine> instances = props.getInstances();
-        if (CollectionUtils.isEmpty(instances)) {
+        Map<String, JupiterProperties.Rule> rules = props.getRules();
+        if (CollectionUtils.isEmpty(rules)) {
             return;
         }
         JupiterCompilerPool.put(JupiterCompilerType.EL.toString(), new JupiterElCompiler());
-        for (Map.Entry<String, JupiterProperties.RuleEngine> ruleEngineEntry : instances.entrySet()) {
-            String beanName = ruleEngineEntry.getKey();
-            JupiterScopeRuleEngine jupiterRuleEngine = WebContext.registerBean((ConfigurableApplicationContext) applicationContext, beanName, JupiterScopeRuleEngine.class);
-            applicationContext.getAutowireCapableBeanFactory().autowireBean(jupiterRuleEngine);
+        JupiterCompilerPool.put(JupiterCompilerType.OGNL.toString(), new JupiterOnglCompiler());
+        String beanName = "jupiterRuleEngine";
+        Class<? extends JupiterRuleEngine> ruleEngineClass = null;
+        if (props.getRuleEngineClazz() != null) {
+            ruleEngineClass = props.getRuleEngineClazz();
+        } else {
+            if (props.getType() == JupiterRuleEngineType.SCOPE) {
+                ruleEngineClass = JupiterScopeRuleEngine.class;
+            }
+        }
+        JupiterRuleEngine jupiterRuleEngine = WebContext.registerBean((ConfigurableApplicationContext) applicationContext, beanName, ruleEngineClass);
+        applicationContext.getAutowireCapableBeanFactory().autowireBean(jupiterRuleEngine);
 
+        for (Map.Entry<String, JupiterProperties.Rule> ruleEntry : rules.entrySet()) {
             List<JupiterRuleItem> jupiterRuleItemList = new ArrayList<>();
-            for (Map.Entry<String, JupiterProperties.RuleItem> ruleItemEntry : ruleEngineEntry.getValue().getRuleItems().entrySet()) {
+            for (Map.Entry<String, JupiterProperties.RuleItem> ruleItemEntry : ruleEntry.getValue().getRuleItems().entrySet()) {
                 JupiterProperties.RuleItem ruleItem = ruleItemEntry.getValue();
                 jupiterRuleItemList.add(JupiterRuleItem.copyFrom(ruleItem));
             }
-            jupiterRuleEngine.configRuleItems(jupiterRuleItemList);
+            jupiterRuleEngine.addRule(ruleEntry.getKey(), jupiterRuleItemList);
         }
     }
 }

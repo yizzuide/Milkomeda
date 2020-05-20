@@ -121,40 +121,40 @@
       "sourceType": "com.github.yizzuide.milkomeda.sundial.SundialProperties"
     },
     {
-      "name": "milkomeda.jupiter.instances.defaultRuleEngine.rule-items.global.syntax",
+      "name": "milkomeda.jupiter.rules.defaultRule.rule-items.global.syntax",
       "type": "com.github.yizzuide.milkomeda.jupiter.JupiterCompilerType",
       "description": "Set match expression syntax with rule engine.",
       "sourceType": "com.github.yizzuide.milkomeda.jupiter.JupiterProperties",
       "defaultValue": "EL"
     },
     {
-      "name": "milkomeda.jupiter.instances.defaultRuleEngine.rule-items.global.domain",
+      "name": "milkomeda.jupiter.rules.defaultRule.rule-items.global.domain",
       "type": "java.lang.String",
       "description": "Check source with rule engine, e.g. table name.",
       "sourceType": "com.github.yizzuide.milkomeda.jupiter.JupiterProperties"
     },
     {
-      "name": "milkomeda.jupiter.instances.defaultRuleEngine.rule-items.global.fields",
+      "name": "milkomeda.jupiter.rules.defaultRule.rule-items.global.fields",
       "type": "java.lang.String",
       "description": "Field for compile with compiler.",
       "sourceType": "com.github.yizzuide.milkomeda.jupiter.JupiterProperties",
       "defaultValue": "*"
     },
     {
-      "name": "milkomeda.jupiter.instances.defaultRuleEngine.rule-items.global.multi",
+      "name": "milkomeda.jupiter.rules.defaultRule.rule-items.global.multi",
       "type": "java.lang.Boolean",
       "description": "Query result is more rows.",
       "sourceType": "com.github.yizzuide.milkomeda.jupiter.JupiterProperties",
       "defaultValue": true
     },
     {
-      "name": "milkomeda.jupiter.instances.defaultRuleEngine.rule-items.global.filter",
+      "name": "milkomeda.jupiter.rules.defaultRule.rule-items.global.filter",
       "type": "java.lang.String",
       "description": "Add filter expression before execute query.",
       "sourceType": "com.github.yizzuide.milkomeda.jupiter.JupiterProperties"
     },
     {
-      "name": "milkomeda.jupiter.instances.defaultRuleEngine.rule-items.global.match",
+      "name": "milkomeda.jupiter.rules.defaultRule.rule-items.global.match",
       "type": "java.lang.String",
       "description": "Match expression with rule engine.",
       "sourceType": "com.github.yizzuide.milkomeda.jupiter.JupiterProperties"
