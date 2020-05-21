@@ -10,6 +10,7 @@ import org.springframework.util.StringUtils;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
@@ -21,11 +22,12 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 0.2.0
- * @version 3.5.0
+ * @version 3.6.0
  * Create at 2019/04/11 19:55
  */
 @Slf4j
 public class ReflectUtil {
+
     // EL表达式识别标识
     private static final List<String> EL_START_TOKENS = Arrays.asList("'", "@", "#", "T(", "args[", "true", "false");
 
@@ -332,10 +334,54 @@ public class ReflectUtil {
      */
     public static Object setTypeField(Field field, String value) {
         Class<?> type = field.getType();
+        if (String.class.equals(type)) {
+            return value;
+        }
         if (Byte.class.equals(type)) {
             return Byte.valueOf(value);
         }
-        // TODO other...
-        return null;
+        if (Boolean.class.equals(type)) {
+            if ("0".equals(value)) {
+                return false;
+            }
+            if ("1".equals(value)) {
+                return true;
+            }
+            return Boolean.valueOf(value);
+        }
+        if (Short.class.equals(type)) {
+            return Short.valueOf(value);
+        }
+        if (Integer.class.equals(type)) {
+            return Integer.valueOf(value);
+        }
+        if (Long.class.equals(type)) {
+            return Long.valueOf(value);
+        }
+        if (Float.class.equals(type)) {
+            return Float.valueOf(value);
+        }
+        if (Double.class.equals(type)) {
+            return Double.valueOf(value);
+        }
+        if (BigDecimal.class.equals(type)) {
+            return new BigDecimal(value);
+        }
+        ResolvableType resolvableType = ResolvableType.forField(field);
+        if (Map.class.equals(type)) {
+            ResolvableType[] wrapperGenerics = resolvableType.getGenerics();
+            Class<?> firstGenericType = wrapperGenerics.length > 0 ? wrapperGenerics[0].resolve() : String.class;
+            Class<?> secondGenericType = wrapperGenerics.length > 1 ? wrapperGenerics[1].resolve() : Object.class;
+            return JSONUtil.parseMap(value, firstGenericType, secondGenericType);
+        }
+        if (List.class.equals(type)) {
+            ResolvableType[] wrapperGenerics = resolvableType.getGenerics();
+            if (wrapperGenerics.length > 0 && wrapperGenerics[0].resolve() == Map.class) {
+                return JSONUtil.parseList(value, Map.class);
+            }
+            return JSONUtil.parseList(value, type);
+        }
+        // Entity
+        return JSONUtil.parse(value, type);
     }
 }

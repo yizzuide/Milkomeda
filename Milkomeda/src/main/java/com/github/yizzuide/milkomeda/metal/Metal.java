@@ -6,6 +6,7 @@ import java.lang.annotation.*;
 
 /**
  * Metal
+ * 配置属性注入注解
  *
  * @author yizzuide
  * @since 3.6.0

@@ -5,12 +5,13 @@ import java.util.Map;
 
 /**
  * MetalConfigSource
+ * 配置源
  *
  * @author yizzuide
  * @since 3.6.0
  * Create at 2020/05/21 18:26
  */
-public class MetalConfigSource {
+public class MetalSource {
 
     private Map<String, String> sourceMap = new HashMap<>();
 
@@ -23,6 +24,6 @@ public class MetalConfigSource {
     }
 
     public String get(String key) {
-        return key;
+        return this.sourceMap.get(key);
     }
 }

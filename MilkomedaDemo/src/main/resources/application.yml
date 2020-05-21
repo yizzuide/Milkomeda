@@ -179,6 +179,7 @@ milkomeda:
     # 添加到无认证许可
     addition-permit-urls:
       - /jupiter/**
+      - /metal/**
 
   ice:
     # 开启Job作业（作为消费端使用时，设置为false）
