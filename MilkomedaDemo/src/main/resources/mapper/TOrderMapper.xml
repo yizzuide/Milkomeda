@@ -21,6 +21,13 @@
         where id = #{id}
     </select>
 
+    <select id="queryByIdAndTime" resultMap="TOrderMap">
+        select
+            id, user_id, order_no, product_id, product_name, price, create_time, update_time
+        from t_order
+        where id = #{id} and create_time &lt; #{date}
+    </select>
+
     <!--查询指定行数据-->
     <select id="queryAllByLimit" resultMap="TOrderMap">
         select

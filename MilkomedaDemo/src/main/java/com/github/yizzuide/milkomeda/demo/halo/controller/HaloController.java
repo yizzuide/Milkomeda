@@ -2,11 +2,11 @@ package com.github.yizzuide.milkomeda.demo.halo.controller;
 
 import com.github.yizzuide.milkomeda.demo.halo.domain.TOrder;
 import com.github.yizzuide.milkomeda.demo.halo.mapper.TOrderMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.annotation.Resource;
 import java.util.Date;
 import java.util.List;
 
@@ -20,12 +20,12 @@ import java.util.List;
 @RestController
 public class HaloController {
 
-    @Autowired
+    @Resource
     private TOrderMapper tOrderMapper;
 
     @RequestMapping("order/{id}")
     public TOrder getOrder(@PathVariable("id") Long id) {
-        return tOrderMapper.queryById(id);
+        return tOrderMapper.queryByIdAndTime(id, new Date());
     }
 
     @RequestMapping("order/all")

@@ -4,18 +4,32 @@ import com.github.yizzuide.milkomeda.pulsar.PulsarHolder;
 import com.github.yizzuide.milkomeda.universe.metadata.HandlerMetaData;
 import com.github.yizzuide.milkomeda.util.MybatisUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.cache.CacheKey;
 import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
+import org.apache.ibatis.mapping.ParameterMapping;
 import org.apache.ibatis.mapping.SqlCommandType;
 import org.apache.ibatis.plugin.*;
+import org.apache.ibatis.reflection.MetaObject;
+import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
+import org.apache.ibatis.type.TypeHandlerRegistry;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
 
 import java.lang.reflect.Method;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Properties;
+import java.util.regex.Pattern;
 
 /**
  * HaloInterceptor
@@ -23,7 +37,7 @@ import java.util.List;
  *
  * @author yizzuide
  * @since 2.5.0
- * @version 2.7.5
+ * @version 3.5.2
  * Create at 2020/01/30 20:38
  */
 @Slf4j
@@ -33,19 +47,84 @@ import java.util.List;
         @Signature(type = Executor.class, method = "query", args = {MappedStatement.class, Object.class, RowBounds.class, ResultHandler.class, CacheKey.class, BoundSql.class})
 })
 public class HaloInterceptor implements Interceptor {
+
+    private static final Pattern WHITE_SPACE_BLOCK_PATTERN = Pattern.compile("([\\s]{2,}|[\\t\\r\\n])");
+
+    @Autowired
+    private HaloProperties props;
+
     @Override
     public Object intercept(Invocation invocation) throws Throwable {
-        // 如果处理器为空，直接返回
-        if (CollectionUtils.isEmpty(HaloContext.getTableNameMap())) {
-            return invocation.proceed();
-        }
-
         Object[] args = invocation.getArgs();
         // 获取第一个参数，MappedStatement
         MappedStatement mappedStatement = (MappedStatement) args[0];
         // 获取第二个参数，该参数类型根据Mapper方法的参数决定，如果是一个参数，则为实体或简单数据类型；如果是多个参数，则为Map。
         Object param = args.length > 1 ? args[1] : null;
-        String sql = mappedStatement.getSqlSource().getBoundSql(param).getSql();
+        BoundSql boundSql = mappedStatement.getSqlSource().getBoundSql(param);
+        String sql = boundSql.getSql();
+        if (!props.isShowSlowLog()) {
+            return warpIntercept(invocation, mappedStatement, sql, param);
+        }
+        long start = System.currentTimeMillis();
+        Object result = warpIntercept(invocation, mappedStatement, sql, param);
+        long end = System.currentTimeMillis();
+        long time = end - start;
+        if (time > props.getSlowThreshold().toMillis()) {
+            logSqlInfo(mappedStatement.getConfiguration(), boundSql, mappedStatement.getId(), time);
+        }
+        return result;
+    }
+
+    // 打印Sql日志
+    private void logSqlInfo(Configuration configuration, BoundSql boundSql, String sqlId, long time) {
+        Object parameterObject = boundSql.getParameterObject();
+        List<ParameterMapping> parameterMappings = boundSql.getParameterMappings();
+        String sql = WHITE_SPACE_BLOCK_PATTERN.matcher(boundSql.getSql()).replaceAll(" ");
+        List<String> params = new ArrayList<>();
+        if (parameterMappings.size() > 0 && parameterObject != null) {
+            TypeHandlerRegistry typeHandlerRegistry = configuration.getTypeHandlerRegistry();
+            if (typeHandlerRegistry.hasTypeHandler(parameterObject.getClass())) {
+                params.add(getParameterValue(parameterObject));
+            } else {
+                MetaObject metaObject = configuration.newMetaObject(parameterObject);
+                for (ParameterMapping parameterMapping : parameterMappings) {
+                    String propertyName = parameterMapping.getProperty();
+                    if (metaObject.hasGetter(propertyName)) {
+                        Object obj = metaObject.getValue(propertyName);
+                        params.add(getParameterValue(obj));
+                    } else if (boundSql.hasAdditionalParameter(propertyName)) {
+                        Object obj = boundSql.getAdditionalParameter(propertyName);
+                        params.add(getParameterValue(obj));
+                    }
+                }
+            }
+        }
+        log.warn("Hao found slow sql[{}]: {} params:[{}], take time: {}ms", sqlId, sql, StringUtils.join(params, ','), time);
+    }
+
+    private String getParameterValue(Object obj) {
+        String value;
+        if (obj instanceof String) {
+            value = "'" + obj.toString() + "'";
+        } else if (obj instanceof Date) {
+            Instant instant = ((Date) obj).toInstant();
+            String format = LocalDateTime.ofInstant(instant, ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+            value = "'" + format + "'";
+        } else {
+            if (obj != null) {
+                value = obj.toString();
+            } else {
+                value = "";
+            }
+        }
+        return value;
+    }
+
+    private Object warpIntercept(Invocation invocation,  MappedStatement mappedStatement, String sql, Object param) throws Throwable {
+        // 如果处理器为空，直接返回
+        if (CollectionUtils.isEmpty(HaloContext.getTableNameMap())) {
+            return invocation.proceed();
+        }
         List<String> tableNames = null;
         try {
             tableNames = MybatisUtil.getTableNames(sql);
@@ -71,6 +150,7 @@ public class HaloInterceptor implements Interceptor {
     @Override
     public Object plugin(Object target) {
         if (target instanceof Executor) {
+            // 为当前target创建动态代理
             return Plugin.wrap(target, this);
         }
         return target;
@@ -123,5 +203,10 @@ public class HaloInterceptor implements Interceptor {
         } catch (Exception e) {
             log.error("Halo invoke handler [{}] error: {}, with stmt id: {}", handlerMetaData.getTarget(), e.getMessage(), mappedStatement.getId(), e);
         }
+    }
+
+    @Override
+    public void setProperties(Properties properties) {
+        // 插件注册的属性处理
     }
 }

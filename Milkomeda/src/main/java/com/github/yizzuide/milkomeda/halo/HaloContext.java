@@ -4,6 +4,7 @@ import com.github.yizzuide.milkomeda.universe.context.AopContextHolder;
 import com.github.yizzuide.milkomeda.universe.metadata.HandlerMetaData;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.lang.NonNull;
 
 import java.util.HashMap;
 import java.util.List;
@@ -30,7 +31,7 @@ public class HaloContext implements ApplicationListener<ContextRefreshedEvent> {
     private static Map<String, List<HandlerMetaData>> tableNameMap = new HashMap<>();
 
     @Override
-    public void onApplicationEvent(ContextRefreshedEvent event) {
+    public void onApplicationEvent(@NonNull ContextRefreshedEvent event) {
         tableNameMap = AopContextHolder.getHandlerMetaData(HaloHandler.class, HaloListener.class, (annotation, metaData) -> {
             HaloListener haloListener = (HaloListener) annotation;
             // 设置其它属性方法的值

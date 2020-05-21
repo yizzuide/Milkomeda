@@ -2,6 +2,8 @@ package com.github.yizzuide.milkomeda.demo.halo.mapper;
 
 import com.github.yizzuide.milkomeda.demo.halo.domain.TOrder;
 import org.apache.ibatis.annotations.Param;
+
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -20,6 +22,8 @@ public interface TOrderMapper {
      * @return 实例对象
      */
     TOrder queryById(Long id);
+
+    TOrder queryByIdAndTime(@Param("id") Long id, @Param("date") Date date);
 
     /**
      * 查询指定行数据
