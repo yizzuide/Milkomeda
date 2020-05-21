@@ -11,7 +11,7 @@ import java.time.temporal.ChronoUnit;
  * HaloProperties
  *
  * @author yizzuide
- * @since 3.5.2
+ * @since 3.6.0
  * Create at 2020/05/21 14:04
  */
 @Data

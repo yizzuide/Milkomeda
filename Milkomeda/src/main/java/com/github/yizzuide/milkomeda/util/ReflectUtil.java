@@ -322,4 +322,20 @@ public class ReflectUtil {
         ReflectionUtils.makeAccessible(method);
         return (T) ReflectionUtils.invokeMethod(method, target, args);
     }
+
+    /**
+     * 根据属性类型转换值
+     * @param field 属性
+     * @param value 字符串
+     * @return  目标值
+     * @since 3.6.0
+     */
+    public static Object setTypeField(Field field, String value) {
+        Class<?> type = field.getType();
+        if (Byte.class.equals(type)) {
+            return Byte.valueOf(value);
+        }
+        // TODO other...
+        return null;
+    }
 }

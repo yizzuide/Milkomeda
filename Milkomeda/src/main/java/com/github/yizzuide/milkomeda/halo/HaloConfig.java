@@ -11,7 +11,7 @@ import org.springframework.core.annotation.Order;
  *
  * @author yizzuide
  * @since 2.5.0
- * @version 3.5.2
+ * @version 3.6.0
  * Create at 2020/01/30 18:43
  */
 @Configuration
