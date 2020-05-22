@@ -10,13 +10,23 @@ import java.util.Map;
  * Create at 2020/05/21 23:19
  */
 public class MetalHolder {
+
     /**
      * 容器
      */
     private static MetalContainer metalContainer;
 
+    /**
+     * 分布式配置同步消息处理器
+     */
+    private static MetalMessageHandler metalMessageHandler;
+
     static void setMetalContainer(MetalContainer metalContainer) {
         MetalHolder.metalContainer = metalContainer;
+    }
+
+    static void setMetalMessageHandler(MetalMessageHandler metalMessageHandler) {
+        MetalHolder.metalMessageHandler = metalMessageHandler;
     }
 
     /**
@@ -37,11 +47,24 @@ public class MetalHolder {
     }
 
     /**
-     * 更新配置项（在数据库配置更新成功后调用）
+     * 本地更新配置项（在数据库配置更新成功后调用）
      * @param key   配置key
      * @param value 新值
      */
-    public static synchronized void updateProperty(String key, String value) {
-        metalContainer.updateVNode(key, value);
+    public static void updateProperty(String key, String value) {
+        synchronized(MetalHolder.class) {
+            metalContainer.updateVNode(key, value);
+        }
+    }
+
+    /**
+     * 分布式远程更新配置项（在数据库配置更新成功后调用）
+     * @param key   配置key
+     * @param value 新值
+     */
+    public static void remoteUpdateProperty(String key, String value) {
+        if (metalMessageHandler != null) {
+            metalMessageHandler.buildAndSendMessage(key, value);
+        }
     }
 }

@@ -36,9 +36,12 @@ public class MetalController {
     }
 
     @RequestMapping("platform/update")
-    public void update(String name) {
+    public String update(String name) {
         // 更新数据库里配置...
-        // 更新缓存配置
-        MetalHolder.updateProperty("platform", name);
+        // 更新本地缓存配置
+//        MetalHolder.updateProperty("platform", name);
+        // 更新分布式服务配置
+        MetalHolder.remoteUpdateProperty("platform", name);
+        return "OK";
     }
 }

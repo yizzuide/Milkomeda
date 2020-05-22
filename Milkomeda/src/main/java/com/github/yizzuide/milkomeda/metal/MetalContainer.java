@@ -15,7 +15,7 @@ import java.util.Set;
 
 /**
  * MetalContainer
- * 配置容器，不推荐直接使用该类API，因为有线程安全问题，该使用 {@link MetalHolder}
+ * 配置容器，不推荐直接使用该类API，因为有线程安全问题，应该使用 {@link MetalHolder}
  *
  * @author yizzuide
  * @since 3.6.0
@@ -84,7 +84,7 @@ public class MetalContainer {
         for (VirtualNode vNode : cacheSet) {
             vNode.update(newVal);
             metalSource.put(key, newVal);
-            log.debug("Metal update vnode {} with key {} from old value {} to {}", vNode.getSignature(), key, oldVal, newVal);
+            log.info("Metal update vnode '{}' with key '{}' from old value '{}' to '{}'", vNode.getSignature(), key, oldVal, newVal);
         }
     }
 

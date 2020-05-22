@@ -2,7 +2,6 @@ package com.github.yizzuide.milkomeda.metal;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
 /**
  * MetalConfig
@@ -11,7 +10,6 @@ import org.springframework.context.annotation.Configuration;
  * @since 3.6.0
  * Create at 2020/05/21 23:26
  */
-@Configuration
 public class MetalConfig {
 
     @Bean
@@ -33,4 +31,5 @@ public class MetalConfig {
     public void config(MetalContainer metalContainer) {
         MetalHolder.setMetalContainer(metalContainer);
     }
+
 }

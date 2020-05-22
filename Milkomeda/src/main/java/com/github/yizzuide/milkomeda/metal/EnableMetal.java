@@ -15,6 +15,6 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE})
 @Inherited
-@Import(MetalConfig.class)
+@Import({MetalConfig.class, RedisMetalConfig.class})
 public @interface EnableMetal {
 }
