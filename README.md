@@ -63,6 +63,9 @@
 - [x] Jupiter（木星）：基于数据源查询的轻量级规则引擎，查询过滤支持请求域（如：`$params`、`$attr`、`$header`）获取表达式，结果匹配支持EL、OGNL表达式解析。*3.5.0+*
   * 依赖技术：Spring JDBC、Spring EL、OGNL
   * 设计模式：策略模式、享元模式、模板方法模式
+- [x] Metal（金属）：用于实现分布式动态配置刷新。*3.6.0+*
+  * 依赖技术：Spring IoC、SpringBoot Data Redis
+  * 设计模式：观察者模式、门面模式
     
 ## Requirements
 * Java 8
