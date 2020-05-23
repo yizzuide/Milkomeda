@@ -1,5 +1,6 @@
 package com.github.yizzuide.milkomeda.metal;
 
+import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.StringUtils;
@@ -10,11 +11,14 @@ import org.springframework.util.StringUtils;
  *
  * @author yizzuide
  * @since 3.6.0
+ * @version 3.6.1
  * Create at 2020/05/22 15:59
  */
 public class MetalMessageHandler {
-    public static final String METAL_CHANGE_TOPIC = "MK_METAL_TOPIC";
-    public static final String METAL_MSG_KV_SEPARATOR= " -> ";
+
+    private static String METAL_CHANGE_TOPIC;
+
+    private static final String METAL_MSG_KV_SEPARATOR= " -> ";
 
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
@@ -33,5 +37,27 @@ public class MetalMessageHandler {
      */
     public void buildAndSendMessage(String key,  String value) {
         stringRedisTemplate.convertAndSend(METAL_CHANGE_TOPIC, key + METAL_MSG_KV_SEPARATOR + value);
+    }
+
+    /**
+     * 获取Topic名
+     * @param applicationName 应用服务名
+     * @return  topic
+     */
+    public static String getTopic(String applicationName) {
+        if (METAL_CHANGE_TOPIC != null) {
+            return METAL_CHANGE_TOPIC;
+        }
+        if (applicationName == null) {
+            String appName = ApplicationContextHolder.getEnvironment().get("spring.application.name");
+            if (StringUtils.isEmpty(appName)) {
+                METAL_CHANGE_TOPIC = "MK_METAL_TOPIC";
+                return METAL_CHANGE_TOPIC;
+            }
+            METAL_CHANGE_TOPIC = String.format("MK_METAL_%s_TOPIC", appName);
+            return METAL_CHANGE_TOPIC;
+        }
+        METAL_CHANGE_TOPIC = String.format("MK_METAL_%s_TOPIC", applicationName);
+        return METAL_CHANGE_TOPIC;
     }
 }

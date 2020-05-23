@@ -21,7 +21,7 @@ public class Environment {
     private ConfigurableEnvironment configurableEnvironment;
 
     // 附加配置源
-    private Properties properties = new Properties();
+    private final Properties properties = new Properties();
 
     public void setConfigurableEnvironment(ConfigurableEnvironment configurableEnvironment) {
         this.configurableEnvironment = configurableEnvironment;
