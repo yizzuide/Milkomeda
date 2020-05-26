@@ -332,7 +332,7 @@ public class ReflectUtil {
      * @return  目标值
      * @since 3.6.0
      */
-    public static Object setTypeField(Field field, String value) {
+    public static Object getTypeValue(Field field, String value) {
         Class<?> type = field.getType();
         if (String.class.equals(type)) {
             return value;

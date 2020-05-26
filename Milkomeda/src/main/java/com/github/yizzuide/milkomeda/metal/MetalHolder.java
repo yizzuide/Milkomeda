@@ -1,5 +1,7 @@
 package com.github.yizzuide.milkomeda.metal;
 
+import org.springframework.util.CollectionUtils;
+
 import java.util.Map;
 
 /**
@@ -44,6 +46,27 @@ public class MetalHolder {
      */
     public static String getProperty(String key) {
         return metalContainer.getProperty(key);
+    }
+
+    /**
+     * 合并配置源
+     * @param source    配置源
+     * @since 3.6.1
+     */
+    public static void merge(Map<String, String> source) {
+        if (CollectionUtils.isEmpty(source)) {
+            return;
+        }
+        for (Map.Entry<String, String> entry : source.entrySet()) {
+            String key = entry.getKey();
+            String value = entry.getValue();
+            String oldVal = getProperty(key);
+            // 相同的不更新
+            if (oldVal != null && oldVal.equals(value)) {
+                continue;
+            }
+            updateProperty(key, value);
+        }
     }
 
     /**

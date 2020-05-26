@@ -77,13 +77,13 @@ public class MetalContainer {
      */
     public void updateVNode(String key, String newVal) {
         String oldVal = metalSource.get(key);
+        metalSource.put(key, newVal);
         Set<VirtualNode> cacheSet = vNodeCache.get(key);
         if (CollectionUtils.isEmpty(cacheSet)) {
             return;
         }
         for (VirtualNode vNode : cacheSet) {
             vNode.update(newVal);
-            metalSource.put(key, newVal);
             log.info("Metal update vnode '{}' with key '{}' from old value '{}' to '{}'", vNode.getSignature(), key, oldVal, newVal);
         }
     }
@@ -105,7 +105,7 @@ public class MetalContainer {
         }
 
         public void update(String value) {
-            this.value = ReflectUtil.setTypeField(field, value);
+            this.value = ReflectUtil.getTypeValue(field, value);
             ReflectionUtils.setField(field, target, this.value);
         }
     }
