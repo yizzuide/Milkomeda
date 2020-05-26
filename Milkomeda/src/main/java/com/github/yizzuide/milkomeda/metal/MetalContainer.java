@@ -19,7 +19,7 @@ import java.util.Set;
  *
  * @author yizzuide
  * @since 3.6.0
- * @version 3.6.1
+ * @version 3.6.2
  * Create at 2020/05/21 18:36
  */
 @Slf4j
@@ -40,7 +40,7 @@ public class MetalContainer {
     public void init(Map<String, String> source) {
         metalSource.putAll(source);
         for (Map.Entry<String, String> entry : source.entrySet()) {
-            updateVNode(entry.getKey(), entry.getValue());
+            updateVNode(entry.getKey(), null, entry.getValue());
         }
     }
 
@@ -76,8 +76,7 @@ public class MetalContainer {
      * @param key       绑定key
      * @param newVal    新值
      */
-    public void updateVNode(String key, String newVal) {
-        String oldVal = metalSource.get(key);
+    public void updateVNode(String key, String oldVal, String newVal) {
         metalSource.put(key, newVal);
         Set<VirtualNode> cacheSet = vNodeCache.get(key);
         if (CollectionUtils.isEmpty(cacheSet)) {
@@ -87,6 +86,14 @@ public class MetalContainer {
             vNode.update(newVal);
             log.info("Metal update vnode '{}' with key '{}' from old value '{}' to '{}'", vNode.getSignature(), key, oldVal, newVal);
         }
+    }
+
+    /**
+     * 获取配置源
+     * @return MetalSource
+     */
+    public MetalSource getSource() {
+        return metalSource;
     }
 
     @Data

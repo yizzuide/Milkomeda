@@ -1,8 +1,10 @@
 package com.github.yizzuide.milkomeda.demo.metal;
 
 import com.github.yizzuide.milkomeda.metal.Metal;
+import com.github.yizzuide.milkomeda.metal.MetalChangeEvent;
 import com.github.yizzuide.milkomeda.metal.MetalHolder;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.event.EventListener;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -43,5 +45,11 @@ public class MetalController {
         // 更新分布式服务配置
         MetalHolder.remoteUpdateProperty("platform", name);
         return "OK";
+    }
+
+    // 监听平台名修改
+    @EventListener(condition = "event.key == 'platform'")
+    public void handlePlatformChange(MetalChangeEvent event) {
+        log.info("handlePlatformChange: {}", event);
     }
 }

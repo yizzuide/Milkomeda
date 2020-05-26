@@ -1,5 +1,6 @@
 package com.github.yizzuide.milkomeda.metal;
 
+import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import org.springframework.util.CollectionUtils;
 
 import java.util.Map;
@@ -9,7 +10,7 @@ import java.util.Map;
  *
  * @author yizzuide
  * @since 3.6.0
- * @version 3.6.1
+ * @version 3.6.2
  * Create at 2020/05/21 23:19
  */
 public class MetalHolder {
@@ -49,12 +50,23 @@ public class MetalHolder {
         return metalContainer.getProperty(key);
     }
 
+
     /**
      * 合并配置源
-     * @param source    配置源
+     * @param source        配置源
      * @since 3.6.1
      */
     public static void merge(Map<String, String> source) {
+        merge(source, false);
+    }
+
+    /**
+     * 合并配置源
+     * @param source        配置源
+     * @param syncRemote    远程同步更新
+     * @since 3.6.2
+     */
+    public static void merge(Map<String, String> source, boolean syncRemote) {
         if (CollectionUtils.isEmpty(source)) {
             return;
         }
@@ -64,6 +76,10 @@ public class MetalHolder {
             String oldVal = getProperty(key);
             // 相同的不更新
             if (oldVal != null && oldVal.equals(value)) {
+                continue;
+            }
+            if (syncRemote) {
+                remoteUpdateProperty(key, value);
                 continue;
             }
             updateProperty(key, value);
@@ -76,8 +92,12 @@ public class MetalHolder {
      * @param value 新值
      */
     public static void updateProperty(String key, String value) {
+        String oldVal = metalContainer.getProperty(key);
+        if (oldVal != null && !oldVal.equals(value)) {
+            ApplicationContextHolder.get().publishEvent(new MetalChangeEvent(metalContainer.getSource(), key, oldVal, value));
+        }
         synchronized(MetalHolder.class) {
-            metalContainer.updateVNode(key, value);
+            metalContainer.updateVNode(key, oldVal, value);
         }
     }
 

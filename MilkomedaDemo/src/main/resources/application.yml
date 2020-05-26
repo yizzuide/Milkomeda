@@ -358,4 +358,8 @@ milkomeda:
             match: size == 0
             syntax: OGNL
 
+  # 分布式应用名配置（默认取当前应用名）
+  metal:
+    application-name: demo
+
 
