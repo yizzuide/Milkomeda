@@ -9,6 +9,7 @@ import java.util.Map;
  *
  * @author yizzuide
  * @since 3.6.0
+ * @version 3.6.1
  * Create at 2020/05/21 23:19
  */
 public class MetalHolder {
