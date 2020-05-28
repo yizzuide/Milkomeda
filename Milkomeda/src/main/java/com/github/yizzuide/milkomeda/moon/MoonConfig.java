@@ -1,7 +1,6 @@
 package com.github.yizzuide.milkomeda.moon;
 
 import com.github.yizzuide.milkomeda.universe.context.WebContext;
-import com.github.yizzuide.milkomeda.util.IOUtils;
 import com.github.yizzuide.milkomeda.util.ReflectUtil;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +21,7 @@ import java.util.List;
  *
  * @author yizzuide
  * @since 3.0.0
- * @version 3.1.2
+ * @version 3.7.0
  * Create at 2020/03/28 17:40
  */
 @Slf4j
@@ -63,6 +62,12 @@ public class MoonConfig implements ApplicationContextAware {
                 if (!CollectionUtils.isEmpty(instance.getProps())) {
                     ReflectUtil.setField(moonStrategy, instance.getProps());
                 }
+                if (moonStrategy instanceof AbstractLuaMoonStrategy) {
+                    // 读取lua脚本
+                    AbstractLuaMoonStrategy luaMoonStrategy = (AbstractLuaMoonStrategy) moonStrategy;
+                    String luaScript = luaMoonStrategy.loadLuaScript();
+                    luaMoonStrategy.setLuaScript(luaScript);
+                }
             } catch (Exception e) {
                 log.error("Moon invoke error with msg: {}", e.getMessage(), e);
             }
@@ -72,8 +77,7 @@ public class MoonConfig implements ApplicationContextAware {
             moon.add(instance.getPhases().toArray(new Object[0]));
         }
 
-        // 读取lua脚本
-        String luaScript = IOUtils.loadLua("/META-INF/scripts", "moon_periodic.lua");
-        PeriodicMoonStrategy.setLuaScript(luaScript);
+
+
     }
 }

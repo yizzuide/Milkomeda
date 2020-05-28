@@ -6,7 +6,6 @@ import com.github.yizzuide.milkomeda.light.LightCachePut;
 import com.github.yizzuide.milkomeda.light.LightCacheable;
 import com.github.yizzuide.milkomeda.universe.context.AopContextHolder;
 import lombok.Data;
-import org.springframework.aop.support.AopUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -106,11 +105,12 @@ public class Moon<T> {
      * @return  当前轮的当前阶段值
      */
     public static <T> T getPhase(String key, Moon<T> prototype) {
-        T current = prototype.getMoonStrategy().getPhaseFast(key, prototype);
-        if (current == null) {
+        T phase = prototype.getMoonStrategy().getPhaseFast(key, prototype);
+        // 该策略未实现lua脚本方式，走分布锁方式
+        if (phase == null) {
             return prototype.getPhase(key);
         } else {
-            return current;
+            return phase;
         }
     }
 
@@ -121,7 +121,7 @@ public class Moon<T> {
      */
     @AtomLock(key = "#target.cacheName + '_' + #key", type = AtomLockType.NON_FAIR, waitTime = 60000)
     public T getPhase(String key) {
-        Moon<?> target = AopUtils.isAopProxy(this) ? AopContextHolder.self(this.getClass()) : this;
+        Moon<?> target = AopContextHolder.self(this.getClass());
         // 获取左手指月
         LeftHandPointer leftHandPointer = target.getLeftHandPointer(key);
         Integer p = leftHandPointer.getCurrent();

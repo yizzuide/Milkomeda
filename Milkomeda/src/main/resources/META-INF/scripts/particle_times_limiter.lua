@@ -4,11 +4,11 @@ local key = KEYS[1]
 local limit = tonumber(ARGV[1])
 -- second arg: expire with second unit
 local expire = tonumber(ARGV[2])
-local curentLimit = tonumber(redis.call('get', key) or "0")
-if curentLimit + 1 > limit then
-    return curentLimit + 1
+local currentLimit = tonumber(redis.call('get', key) or '0')
+if currentLimit + 1 > limit then
+    return currentLimit + 1
 else
-    local count = redis.call("INCRBY", key, 1)
-    redis.call("EXPIRE", key, expire)
+    local count = redis.call('incrby', key, 1)
+    redis.call('expire', key, expire)
     return count
 end

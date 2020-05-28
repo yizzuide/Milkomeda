@@ -1,10 +1,12 @@
 package com.github.yizzuide.milkomeda.moon;
 
-import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
+import com.github.yizzuide.milkomeda.util.IOUtils;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.data.redis.core.script.RedisScript;
 
+import java.io.IOException;
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -14,15 +16,13 @@ import java.util.concurrent.locks.ReentrantLock;
  *
  * @author yizzuide
  * @since 2.6.0
+ * @version 3.7.0
  * Create at 2020/03/13 21:20
  */
-public class PeriodicMoonStrategy implements MoonStrategy {
+public class PeriodicMoonStrategy extends AbstractLuaMoonStrategy {
 
     // 并发指针锁
     private final ReentrantLock reentrantLock = new ReentrantLock(false);
-
-    // lua脚本
-    private static String luaScript;
 
     @Override
     public <T> T getCurrentPhase(Moon<T> moon) {
@@ -55,15 +55,17 @@ public class PeriodicMoonStrategy implements MoonStrategy {
         return leftHandPointer;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public <T> T getPhaseFast(String key, Moon<T> prototype) {
-        RedisScript<Integer> redisScript = new DefaultRedisScript<>(luaScript, Integer.class);
-        RedisTemplate<String, Object> redisTemplate = ApplicationContextHolder.get().getBean("redisTemplate", RedisTemplate.class);
-        return (T) redisTemplate.execute(redisScript, Collections.singletonList("moon:lhp-" + key), prototype.getPhaseNames().size());
+        RedisTemplate<String, Serializable> redisTemplate = getJsonRedisTemplate();
+        RedisScript<Long> redisScript = new DefaultRedisScript<>(getLuaScript(), Long.class);
+        Long phase = redisTemplate.execute(redisScript, Collections.singletonList("moon:lhp-" + key), prototype.getPhaseNames().size());
+        assert phase != null;
+        return prototype.getPhaseNames().get(Math.toIntExact(phase));
     }
 
-    static void setLuaScript(String luaScript) {
-        PeriodicMoonStrategy.luaScript = luaScript;
+    @Override
+    public String loadLuaScript() throws IOException {
+        return IOUtils.loadLua("/META-INF/scripts", "moon_periodic.lua");
     }
 }

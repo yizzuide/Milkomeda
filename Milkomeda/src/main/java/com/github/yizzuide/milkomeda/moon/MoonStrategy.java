@@ -5,6 +5,7 @@ package com.github.yizzuide.milkomeda.moon;
  *
  * @author yizzuide
  * @since 2.6.0
+ * @version 3.7.0
  * Create at 2020/03/13 21:16
  */
 public interface MoonStrategy {
@@ -41,6 +42,7 @@ public interface MoonStrategy {
      * @param prototype Moon实例原型
      * @param <T>       阶段的类型
      * @return  当前环的当前阶段值
+     * @since 3.7.0
      */
     <T> T getPhaseFast(String key, Moon<T> prototype);
 }

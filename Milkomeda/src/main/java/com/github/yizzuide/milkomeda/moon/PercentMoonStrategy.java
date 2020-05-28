@@ -1,6 +1,17 @@
 package com.github.yizzuide.milkomeda.moon;
 
+import com.github.yizzuide.milkomeda.util.IOUtils;
 import lombok.Data;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
+import org.springframework.data.redis.core.script.RedisScript;
+
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * PercentMoonStrategy
@@ -16,7 +27,7 @@ import lombok.Data;
  * Create at 2020/03/13 21:42
  */
 @Data
-public class PercentMoonStrategy implements MoonStrategy {
+public class PercentMoonStrategy extends AbstractLuaMoonStrategy {
     /**
      * 默认总占百分
      */
@@ -60,9 +71,24 @@ public class PercentMoonStrategy implements MoonStrategy {
         return leftHandPointer;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public <T> T getPhaseFast(String key, Moon<T> prototype) {
-        return null;
+        RedisTemplate<String, Serializable> redisTemplate = getJsonRedisTemplate();
+        RedisScript<Long> redisScript = new DefaultRedisScript<>(getLuaScript(), Long.class);
+        Map<String, Integer> phaseMap = new HashMap<>();
+        List<T> phaseNames = prototype.getPhaseNames();
+        for (int i = 0; i < phaseNames.size(); i++) {
+            phaseMap.put("p" + (i + 1), (Integer)phaseNames.get(i));
+        }
+        Long phase = redisTemplate.execute(redisScript, Collections.singletonList("moon:lhp-" + key), phaseMap, percent);
+        assert phase != null;
+        return (T) ((Integer)phase.intValue());
+    }
+
+    @Override
+    public String loadLuaScript() throws IOException {
+        return IOUtils.loadLua("/META-INF/scripts", "moon_percent.lua");
     }
 
     /**
