@@ -18,20 +18,29 @@ public interface MoonStrategy {
     <T> T getCurrentPhase(Moon<T> moon);
 
     /**
-     * 根据key获取当前轮的当前阶段的数据值（分布式方式）
-     * @param key          缓存key，一个轮对应一个key
+     * 获得环值（分布式并发安全）
+     * @param key          缓存key，一个环对应一个key
      * @param p            当前阶段值
      * @param prototype    Moon实例原型
      * @param <T>          阶段的类型
-     * @return  当前轮的当前阶段的类型值
+     * @return  当前环的当前阶段值
      */
     <T> T getPhase(String key, Integer p, Moon<T> prototype);
 
     /**
-     * 拔动月相
+     * 拔动月环
      * @param moon Moon
      * @param leftHandPointer LeftHandPointer
      * @return LeftHandPointer
      */
     LeftHandPointer pluck(Moon<?> moon, LeftHandPointer leftHandPointer);
+
+    /**
+     * 执行lua流程脚本获得环值
+     * @param key       缓存key，一个环对应一个key  
+     * @param prototype Moon实例原型
+     * @param <T>       阶段的类型
+     * @return  当前环的当前阶段值
+     */
+    <T> T getPhaseFast(String key, Moon<T> prototype);
 }

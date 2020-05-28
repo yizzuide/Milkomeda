@@ -163,7 +163,7 @@ public class CacheHelper {
         Spot<Serializable, E> spot = cache.get(key, new TypeReference<Serializable>() {}, eTypeRef);
         if (spot != null) {
             data = spot.getData();
-            // 设置到超级缓存
+            // 设置到超级缓存（如果有内存缓存的情况）
             fastSpot.setData(data);
             return data;
         }

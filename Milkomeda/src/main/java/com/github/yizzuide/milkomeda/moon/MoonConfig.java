@@ -1,7 +1,9 @@
 package com.github.yizzuide.milkomeda.moon;
 
 import com.github.yizzuide.milkomeda.universe.context.WebContext;
+import com.github.yizzuide.milkomeda.util.IOUtils;
 import com.github.yizzuide.milkomeda.util.ReflectUtil;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +33,7 @@ public class MoonConfig implements ApplicationContextAware {
     @Autowired
     private MoonProperties moonProperties;
 
+    @SneakyThrows
     @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
     public void setApplicationContext(@NonNull ApplicationContext applicationContext) throws BeansException {
@@ -68,5 +71,9 @@ public class MoonConfig implements ApplicationContextAware {
             }
             moon.add(instance.getPhases().toArray(new Object[0]));
         }
+
+        // 读取lua脚本
+        String luaScript = IOUtils.loadLua("/META-INF/scripts", "moon_periodic.lua");
+        PeriodicMoonStrategy.setLuaScript(luaScript);
     }
 }

@@ -1,5 +1,6 @@
 package com.github.yizzuide.milkomeda.metal;
 
+import com.github.yizzuide.milkomeda.util.DataTypeConvertUtil;
 import com.github.yizzuide.milkomeda.util.ReflectUtil;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +20,7 @@ import java.util.Set;
  *
  * @author yizzuide
  * @since 3.6.0
- * @version 3.6.2
+ * @version 3.7.0
  * Create at 2020/05/21 18:36
  */
 @Slf4j
@@ -64,11 +65,15 @@ public class MetalContainer {
         if (StringUtils.isEmpty(key)) {
             key = field.getName();
         }
-        if (!vNodeCache.containsKey(key)) {
-            vNodeCache.put(key, new HashSet<>());
+        String vNodeKey = key;
+        if (vNodeKey.contains("_")) {
+            vNodeKey = DataTypeConvertUtil.toCamelCase(vNodeKey);
+        }
+        if (!vNodeCache.containsKey(vNodeKey)) {
+            vNodeCache.put(vNodeKey, new HashSet<>());
         }
         // key与虚拟节点绑定
-        vNodeCache.get(key).add(new VirtualNode(metal, target, field));
+        vNodeCache.get(vNodeKey).add(new VirtualNode(metal, target, field));
     }
 
     /**
@@ -78,7 +83,11 @@ public class MetalContainer {
      */
     public void updateVNode(String key, String oldVal, String newVal) {
         metalSource.put(key, newVal);
-        Set<VirtualNode> cacheSet = vNodeCache.get(key);
+        String vNodeKey = key;
+        if (vNodeKey.contains("_")) {
+            vNodeKey = DataTypeConvertUtil.toCamelCase(vNodeKey);
+        }
+        Set<VirtualNode> cacheSet = vNodeCache.get(vNodeKey);
         if (CollectionUtils.isEmpty(cacheSet)) {
             return;
         }

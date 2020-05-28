@@ -60,6 +60,11 @@ public class PercentMoonStrategy implements MoonStrategy {
         return leftHandPointer;
     }
 
+    @Override
+    public <T> T getPhaseFast(String key, Moon<T> prototype) {
+        return null;
+    }
+
     /**
      * 百分比表达式解析 <br>
      * <pre>

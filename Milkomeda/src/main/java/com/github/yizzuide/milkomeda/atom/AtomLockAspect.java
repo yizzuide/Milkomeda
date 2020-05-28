@@ -16,7 +16,7 @@ import java.time.Duration;
  *
  * @author yizzuide
  * @since 3.3.0
- * @version 3.3.1
+ * @version 3.7.0
  * Create at 2020/04/30 16:26
  */
 @Slf4j
@@ -51,10 +51,11 @@ public class AtomLockAspect {
                     String fallback = atomLock.fallback();
                     return ELContext.getActualValue(joinPoint, fallback, ReflectUtil.getMethodReturnType(joinPoint));
                 }
-                // AtomLockWaitTimeoutType.WAIT_INFINITE
+                // here is AtomLockWaitTimeoutType.WAIT_INFINITE
             }
             AtomLockInfo lockInfo = atom.lock(keyPath, Duration.ofMillis(atomLock.leaseTime()), atomLock.type(), atomLock.readOnly());
             lock = lockInfo.getLock();
+            isLocked = lockInfo.isLocked();
             return joinPoint.proceed();
         } catch (InterruptedException e) {
             log.error("Atom try lock error with msg: {}", e.getMessage(), e);

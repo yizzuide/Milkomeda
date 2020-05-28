@@ -1,5 +1,11 @@
 package com.github.yizzuide.milkomeda.moon;
 
+import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
+import org.springframework.data.redis.core.script.RedisScript;
+
+import java.util.Collections;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -13,7 +19,10 @@ import java.util.concurrent.locks.ReentrantLock;
 public class PeriodicMoonStrategy implements MoonStrategy {
 
     // 并发指针锁
-    private ReentrantLock reentrantLock = new ReentrantLock(false);
+    private final ReentrantLock reentrantLock = new ReentrantLock(false);
+
+    // lua脚本
+    private static String luaScript;
 
     @Override
     public <T> T getCurrentPhase(Moon<T> moon) {
@@ -44,5 +53,17 @@ public class PeriodicMoonStrategy implements MoonStrategy {
         p = (p + 1) % moon.getLen();
         leftHandPointer.setCurrent(p);
         return leftHandPointer;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T> T getPhaseFast(String key, Moon<T> prototype) {
+        RedisScript<Integer> redisScript = new DefaultRedisScript<>(luaScript, Integer.class);
+        RedisTemplate<String, Object> redisTemplate = ApplicationContextHolder.get().getBean("redisTemplate", RedisTemplate.class);
+        return (T) redisTemplate.execute(redisScript, Collections.singletonList("moon:lhp-" + key), prototype.getPhaseNames().size());
+    }
+
+    static void setLuaScript(String luaScript) {
+        PeriodicMoonStrategy.luaScript = luaScript;
     }
 }

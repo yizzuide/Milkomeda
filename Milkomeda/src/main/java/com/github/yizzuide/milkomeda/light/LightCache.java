@@ -4,8 +4,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.github.yizzuide.milkomeda.pulsar.PulsarHolder;
-import com.github.yizzuide.milkomeda.util.JSONUtil;
 import com.github.yizzuide.milkomeda.universe.polyfill.RedisPolyfill;
+import com.github.yizzuide.milkomeda.util.JSONUtil;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit;
  * E：缓存业务数据
  *
  * @since 1.8.0
- * @version 2.7.0
+ * @version 3.7.0
  * @author yizzuide
  * Create at 2019/06/28 13:33
  */
@@ -183,15 +183,21 @@ public class LightCache implements Cache {
      * @param spot  缓存数据
      */
     private void cache(String key, Spot<Serializable, Object> spot) {
-        // 一级缓存
-        boolean success = true;
-        if (!onlyCacheL2) {
-            success = cacheL1(key, spot);
+        // 仅存入二级缓存
+        if (onlyCacheL2) {
+            cacheL2(key, spot);
+            return;
         }
+
+        // 一级缓存
+        boolean success = cacheL1(key, spot);
 
         // 二级缓存
         if (!onlyCacheL1 && success) {
-            cacheL2(key, spot);
+            // 有内存缓存的，异步写入到redis
+            PulsarHolder.getPulsar().post(() -> {
+                cacheL2(key, spot);
+            });
         }
     }
 
@@ -201,15 +207,12 @@ public class LightCache implements Cache {
      * @param spot  缓存数据
      */
     private void cacheL2(String key, Spot<Serializable, Object> spot) {
-        // 异步添加到Redis（由于序列化稍微耗时）
-        PulsarHolder.getPulsar().post(() -> {
-            String json = JSONUtil.serialize(spot);
-            if (l2Expire > 0) {
-                stringRedisTemplate.opsForValue().set(key, json, l2Expire, TimeUnit.SECONDS);
-            } else {
-                stringRedisTemplate.opsForValue().set(key, json);
-            }
-        });
+        String json = JSONUtil.serialize(spot);
+        if (l2Expire > 0) {
+            stringRedisTemplate.opsForValue().set(key, json, l2Expire, TimeUnit.SECONDS);
+        } else {
+            stringRedisTemplate.opsForValue().set(key, json);
+        }
     }
 
     /**

@@ -25,7 +25,7 @@ public class MoonProperties {
     @Data
     public static class Instance {
         /**
-         * 实例名（不能与现有bean有重名)
+         * 实例名（不能与Spring IoC里的bean有重名)
          */
         private String name;
 

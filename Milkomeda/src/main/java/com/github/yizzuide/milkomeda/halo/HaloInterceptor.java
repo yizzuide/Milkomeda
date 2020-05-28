@@ -37,7 +37,7 @@ import java.util.regex.Pattern;
  *
  * @author yizzuide
  * @since 2.5.0
- * @version 3.6.0
+ * @version 3.7.0
  * Create at 2020/01/30 20:38
  */
 @Slf4j
@@ -61,7 +61,7 @@ public class HaloInterceptor implements Interceptor {
         // 获取第二个参数，该参数类型根据Mapper方法的参数决定，如果是一个参数，则为实体或简单数据类型；如果是多个参数，则为Map。
         Object param = args.length > 1 ? args[1] : null;
         BoundSql boundSql = mappedStatement.getSqlSource().getBoundSql(param);
-        String sql = boundSql.getSql();
+        String sql = WHITE_SPACE_BLOCK_PATTERN.matcher(boundSql.getSql()).replaceAll(" ");
         if (!props.isShowSlowLog()) {
             return warpIntercept(invocation, mappedStatement, sql, param);
         }
@@ -70,16 +70,15 @@ public class HaloInterceptor implements Interceptor {
         long end = System.currentTimeMillis();
         long time = end - start;
         if (time > props.getSlowThreshold().toMillis()) {
-            logSqlInfo(mappedStatement.getConfiguration(), boundSql, mappedStatement.getId(), time);
+            logSqlInfo(mappedStatement.getConfiguration(), boundSql, sql, mappedStatement.getId(), time);
         }
         return result;
     }
 
     // 打印Sql日志
-    private void logSqlInfo(Configuration configuration, BoundSql boundSql, String sqlId, long time) {
+    private void logSqlInfo(Configuration configuration, BoundSql boundSql, String sql, String sqlId, long time) {
         Object parameterObject = boundSql.getParameterObject();
         List<ParameterMapping> parameterMappings = boundSql.getParameterMappings();
-        String sql = WHITE_SPACE_BLOCK_PATTERN.matcher(boundSql.getSql()).replaceAll(" ");
         List<String> params = new ArrayList<>();
         if (parameterMappings.size() > 0 && parameterObject != null) {
             TypeHandlerRegistry typeHandlerRegistry = configuration.getTypeHandlerRegistry();
@@ -125,25 +124,19 @@ public class HaloInterceptor implements Interceptor {
         if (CollectionUtils.isEmpty(HaloContext.getTableNameMap())) {
             return invocation.proceed();
         }
-        List<String> tableNames = null;
-        try {
-            tableNames = MybatisUtil.getTableNames(sql);
-        } catch (Exception e) {
-            log.warn("Halo parse sql error: {}, msg: {}", sql, e.getMessage(), e);
-        }
-        if (CollectionUtils.isEmpty(tableNames)) {
+        String tableName = MybatisUtil.getFirstTableName(sql);
+        if (StringUtils.isEmpty(tableName)) {
             return invocation.proceed();
         }
-        String tableName = tableNames.get(0);
         // 匹配所有
-        invokeWithTable(tableName,"*", mappedStatement, param, null, HaloType.PRE);
+        invokeWithTable(tableName,"*", sql, mappedStatement, param, null, HaloType.PRE);
         // 完全匹配
-        invokeWithTable(tableName, tableName, mappedStatement, param, null, HaloType.PRE);
+        invokeWithTable(tableName, tableName, sql, mappedStatement, param, null, HaloType.PRE);
         Object result = invocation.proceed();
         // 匹配所有
-        invokeWithTable(tableName, "*", mappedStatement, param, result, HaloType.POST);
+        invokeWithTable(tableName, "*", sql, mappedStatement, param, result, HaloType.POST);
         // 完全匹配
-        invokeWithTable(tableName, tableName, mappedStatement, param, result, HaloType.POST);
+        invokeWithTable(tableName, tableName, sql, mappedStatement, param, result, HaloType.POST);
         return result;
     }
 
@@ -156,7 +149,7 @@ public class HaloInterceptor implements Interceptor {
         return target;
     }
 
-    private void invokeWithTable(String tableName, String matchTableName, MappedStatement mappedStatement, Object param, Object result, HaloType type) {
+    private void invokeWithTable(String tableName, String matchTableName, String sql, MappedStatement mappedStatement, Object param, Object result, HaloType type) {
         if (!HaloContext.getTableNameMap().containsKey(matchTableName)) {
             return;
         }
@@ -164,14 +157,14 @@ public class HaloInterceptor implements Interceptor {
                 .filter(metaData -> metaData.getAttributes().get(HaloContext.ATTR_TYPE) == type)
                 .forEach(handlerMetaData -> {
                     if ((boolean) handlerMetaData.getAttributes().get(HaloContext.ATTR_ASYNC)) {
-                        PulsarHolder.getPulsar().post(() -> invokeHandler(tableName, handlerMetaData, mappedStatement, param, result));
+                        PulsarHolder.getPulsar().post(() -> invokeHandler(tableName, handlerMetaData, sql, mappedStatement, param, result));
                     } else {
-                        invokeHandler(tableName, handlerMetaData, mappedStatement, param, result);
+                        invokeHandler(tableName, handlerMetaData, sql, mappedStatement, param, result);
                     }
                 });
     }
 
-    private void invokeHandler(String tableName, HandlerMetaData handlerMetaData, MappedStatement mappedStatement, Object param, Object result) {
+    private void invokeHandler(String tableName, HandlerMetaData handlerMetaData, String sql, MappedStatement mappedStatement, Object param, Object result) {
         try {
             // INSERT/UPDATE/DELETE/SELECT
             SqlCommandType sqlCommandType = mappedStatement.getSqlCommandType();
@@ -201,7 +194,7 @@ public class HaloInterceptor implements Interceptor {
                 method.invoke(target, param);
             }
         } catch (Exception e) {
-            log.error("Halo invoke handler [{}] error: {}, with stmt id: {}", handlerMetaData.getTarget(), e.getMessage(), mappedStatement.getId(), e);
+            log.error("Halo invoke handler [{}] error: {}, with stmt id: {} and sql: {}", handlerMetaData.getTarget(), e.getMessage(), mappedStatement.getId(), sql, e);
         }
     }
 

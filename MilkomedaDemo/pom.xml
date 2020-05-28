@@ -20,11 +20,12 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>1.8</java.version>
         <spring-cloud.version>Hoxton.RELEASE</spring-cloud.version>
-        <milkomeda.version>3.6.2-SNAPSHOT</milkomeda.version>
+        <milkomeda.version>3.7.0-SNAPSHOT</milkomeda.version>
         <mybatis.starter>2.1.1</mybatis.starter>
         <redission.version>3.12.5</redission.version>
         <zookeeper.version>3.4.14</zookeeper.version>
         <druid.version>1.1.21</druid.version>
+        <contiperf.version>2.3.4</contiperf.version>
     </properties>
 
     <dependencies>
@@ -117,6 +118,12 @@
             <groupId>com.alibaba</groupId>
             <artifactId>druid-spring-boot-starter</artifactId>
             <version>${druid.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.databene</groupId>
+            <artifactId>contiperf</artifactId>
+            <version>${contiperf.version}</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

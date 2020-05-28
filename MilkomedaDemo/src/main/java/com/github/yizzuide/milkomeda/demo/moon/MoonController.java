@@ -26,11 +26,16 @@ public class MoonController {
 
     @RequestMapping("sms")
     public String sms() {
-        return Moon.getPhase("sms-123", smsMoon);
+        // 不同的key所属自己的环
+        String phase1 = Moon.getPhase("sms-123", smsMoon);
+        String phase2 = Moon.getPhase("sms-456", smsMoon);
+        return String.format("%s-%s", phase1, phase2);
     }
 
     @RequestMapping("abTest")
-    public Integer abTest() {
-        return Moon.getPhase("ab-123", abTestMoon);
+    public String abTest() {
+        Integer phase1 = Moon.getPhase("ab-123", abTestMoon);
+        Integer phase2 = Moon.getPhase("ab-456", abTestMoon);
+        return String.format("%s-%s", phase1, phase2);
     }
 }

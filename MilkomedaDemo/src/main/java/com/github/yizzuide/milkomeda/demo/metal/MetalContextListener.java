@@ -27,7 +27,7 @@ public class MetalContextListener implements ApplicationListener<ContextRefreshe
         source.put("env", "dev");
         source.put("version", "1.0");
         source.put("platform", "mk");
-        source.put("feeRateConfig", "{\"service\":0.53, \"inst\": 0.3}");
+        source.put("fee_rate_config", "{\"service\":0.53, \"inst\": 0.3}");
         MetalHolder.init(source);
     }
 }

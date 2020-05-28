@@ -31,8 +31,8 @@ public class DelegatingBeanDefinitionRegistrar implements EnvironmentAware, Impo
     private Binder binder;
 
     @Override
-    public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata,
-                                        BeanDefinitionRegistry registry) {
+    public void registerBeanDefinitions(@NonNull AnnotationMetadata importingClassMetadata,
+                                        @NonNull BeanDefinitionRegistry registry) {
         SundialProperties props = binder.bind("milkomeda.sundial", SundialProperties.class).get();
         List<SundialProperties.Strategy> strategyList = props.getStrategy();
         if (CollectionUtils.isEmpty(strategyList)) {

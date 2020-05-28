@@ -1,8 +1,12 @@
 package com.github.yizzuide.milkomeda.moon;
 
+import com.github.yizzuide.milkomeda.atom.AtomLock;
+import com.github.yizzuide.milkomeda.atom.AtomLockType;
 import com.github.yizzuide.milkomeda.light.LightCachePut;
 import com.github.yizzuide.milkomeda.light.LightCacheable;
+import com.github.yizzuide.milkomeda.universe.context.AopContextHolder;
 import lombok.Data;
+import org.springframework.aop.support.AopUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,7 +17,7 @@ import java.util.List;
  *
  * @author yizzuide
  * @since 2.2.0
- * @version 3.5.0
+ * @version 3.7.0
  * Create at 2019/12/31 18:13
  */
 @Data
@@ -88,26 +92,42 @@ public class Moon<T> {
 
     /**
      * 无序并发获得当前阶段类型（不支持分布式）
-     * @return 阶段类型值
+     * @return 阶段值
      */
     public T getCurrentPhase() {
         return this.getMoonStrategy().getCurrentPhase(this);
     }
 
     /**
-     * 根据key获取当前轮的当前阶段的数据值（并发线程安全）
+     * 基于高性能lua获取（分布式并发安全）
      * @param key          缓存key，一个轮对应一个key
      * @param prototype    Moon实例原型
      * @param <T>          阶段的类型
-     * @return  当前轮的当前阶段的类型值
+     * @return  当前轮的当前阶段值
      */
     public static <T> T getPhase(String key, Moon<T> prototype) {
+        T current = prototype.getMoonStrategy().getPhaseFast(key, prototype);
+        if (current == null) {
+            return prototype.getPhase(key);
+        } else {
+            return current;
+        }
+    }
+
+    /**
+     * 基于分布式锁获取，需要添加 <code>@EnableAspectJAutoProxy(exposeProxy=true)</code>（分布式并发安全）
+     * @param key   缓存key，一个轮对应一个key
+     * @return  当前轮的当前阶段值
+     */
+    @AtomLock(key = "#target.cacheName + '_' + #key", type = AtomLockType.NON_FAIR, waitTime = 60000)
+    public T getPhase(String key) {
+        Moon<?> target = AopUtils.isAopProxy(this) ? AopContextHolder.self(this.getClass()) : this;
         // 获取左手指月
-        LeftHandPointer leftHandPointer = prototype.getLeftHandPointer(key);
+        LeftHandPointer leftHandPointer = target.getLeftHandPointer(key);
         Integer p = leftHandPointer.getCurrent();
-        T phase = prototype.getMoonStrategy().getPhase(key, p, prototype);
+        T phase = this.getMoonStrategy().getPhase(key, p, this);
         // 开始左手指月，拔动月相
-        prototype.pluckLeftHandPointer(key, leftHandPointer);
+        target.pluckLeftHandPointer(key, leftHandPointer);
         return phase;
     }
 
