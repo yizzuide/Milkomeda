@@ -11,12 +11,18 @@ import java.util.Map;
  *
  * @author yizzuide
  * @since 3.0.0
- * @version 3.1.2
+ * @version 3.7.0
  * Create at 2020/03/28 17:24
  */
 @Data
 @ConfigurationProperties("milkomeda.moon")
 public class MoonProperties {
+    /**
+     * 是否使用Light+Atom方案，否则使用高性能lua脚本方式（如无扩展环形策略需求，保持默认即可）
+     * @since 3.7.0
+     */
+    private boolean mixinMode = false;
+
     /**
      * 实例配置
      */
@@ -30,7 +36,7 @@ public class MoonProperties {
         private String name;
 
         /**
-         * Light L2缓存实例名
+         * Light L2缓存实例名（{@link MoonProperties#mixinMode} 为true时有效）
          */
         private String cacheName = Moon.CACHE_NAME;
 

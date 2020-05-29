@@ -2,6 +2,7 @@ package com.github.yizzuide.milkomeda.moon;
 
 import com.github.yizzuide.milkomeda.util.IOUtils;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.data.redis.core.script.RedisScript;
@@ -9,9 +10,7 @@ import org.springframework.data.redis.core.script.RedisScript;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * PercentMoonStrategy
@@ -23,15 +22,20 @@ import java.util.Map;
  *
  * @author yizzuide
  * @since 2.6.0
- * @version 2.7.5
+ * @version 3.7.0
  * Create at 2020/03/13 21:42
  */
+@EqualsAndHashCode(callSuper = false)
 @Data
 public class PercentMoonStrategy extends AbstractLuaMoonStrategy {
     /**
-     * 默认总占百分
+     * 分布式key前缀
      */
-    public static final int DEFAULT_PERCENT = 100;
+    private static final String PREFIX = "moon:percent-";
+    /**
+     * 默认总占百分（-1为自动根据百分比计算）
+     */
+    public static final int DEFAULT_PERCENT = -1;
     /**
      * 百分比
      */
@@ -74,16 +78,23 @@ public class PercentMoonStrategy extends AbstractLuaMoonStrategy {
     @SuppressWarnings("unchecked")
     @Override
     public <T> T getPhaseFast(String key, Moon<T> prototype) {
+        //  自动计算百分总份
+        if (percent == -1) {
+            percent = prototype.getPhaseNames().stream().map(p -> (Integer) p).reduce(0, Integer::sum);
+        }
         RedisTemplate<String, Serializable> redisTemplate = getJsonRedisTemplate();
         RedisScript<Long> redisScript = new DefaultRedisScript<>(getLuaScript(), Long.class);
-        Map<String, Integer> phaseMap = new HashMap<>();
         List<T> phaseNames = prototype.getPhaseNames();
+        // map -> table
+        /*Map<String, Integer> phaseMap = new HashMap<>();
         for (int i = 0; i < phaseNames.size(); i++) {
             phaseMap.put("p" + (i + 1), (Integer)phaseNames.get(i));
         }
-        Long phase = redisTemplate.execute(redisScript, Collections.singletonList("moon:lhp-" + key), phaseMap, percent);
+        Long phase = redisTemplate.execute(redisScript, Collections.singletonList(PREFIX + key), phaseMap, phaseMap.size(), percent);*/
+        // list -> table
+        Long phase = redisTemplate.execute(redisScript, Collections.singletonList(PREFIX + key), phaseNames, percent);
         assert phase != null;
-        return (T) ((Integer)phase.intValue());
+        return (T) ((Integer) phase.intValue());
     }
 
     @Override

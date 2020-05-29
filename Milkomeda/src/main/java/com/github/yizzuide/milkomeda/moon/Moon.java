@@ -55,6 +55,11 @@ public class Moon<T> {
     private MoonStrategy moonStrategy;
 
     /**
+     * 策略运行模式
+     */
+    private boolean mixinMode;
+
+    /**
      * 设置并替换阶段
      * @param phaseNames    阶段列表
      */
@@ -99,28 +104,25 @@ public class Moon<T> {
 
     /**
      * 基于高性能lua获取（分布式并发安全）
-     * @param key          缓存key，一个轮对应一个key
+     * @param key          缓存key，一个环对应一个key
      * @param prototype    Moon实例原型
      * @param <T>          阶段的类型
-     * @return  当前轮的当前阶段值
+     * @return  当前环的当前阶段值
      */
     public static <T> T getPhase(String key, Moon<T> prototype) {
-        T phase = prototype.getMoonStrategy().getPhaseFast(key, prototype);
-        // 该策略未实现lua脚本方式，走分布锁方式
-        if (phase == null) {
+        if (prototype.isMixinMode()) {
             return prototype.getPhase(key);
-        } else {
-            return phase;
         }
+        return prototype.getMoonStrategy().getPhaseFast(key, prototype);
     }
 
     /**
      * 基于分布式锁获取，需要添加 <code>@EnableAspectJAutoProxy(exposeProxy=true)</code>（分布式并发安全）
-     * @param key   缓存key，一个轮对应一个key
-     * @return  当前轮的当前阶段值
+     * @param key   缓存key，一个环对应一个key
+     * @return  当前环的当前阶段值
      */
     @AtomLock(key = "#target.cacheName + '_' + #key", type = AtomLockType.NON_FAIR, waitTime = 60000)
-    public T getPhase(String key) {
+    protected T getPhase(String key) {
         Moon<?> target = AopContextHolder.self(this.getClass());
         // 获取左手指月
         LeftHandPointer leftHandPointer = target.getLeftHandPointer(key);

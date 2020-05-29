@@ -1,7 +1,5 @@
 package com.github.yizzuide.milkomeda.moon;
 
-import com.github.yizzuide.milkomeda.atom.EnableAtom;
-import com.github.yizzuide.milkomeda.light.EnableLight;
 import org.springframework.context.annotation.Import;
 
 import java.lang.annotation.*;
@@ -18,8 +16,6 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Inherited
-@EnableLight
-@EnableAtom
-@Import(MoonConfig.class)
+@Import({MoonConfig.class, MixinMoonConfig.class})
 public @interface EnableMoon {
 }

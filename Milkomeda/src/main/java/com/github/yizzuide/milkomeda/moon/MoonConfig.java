@@ -59,6 +59,7 @@ public class MoonConfig implements ApplicationContextAware {
             try {
                 MoonStrategy moonStrategy = moonStrategyClazz.newInstance();
                 moon.setMoonStrategy(moonStrategy);
+                moon.setMixinMode(moonProperties.isMixinMode());
                 if (!CollectionUtils.isEmpty(instance.getProps())) {
                     ReflectUtil.setField(moonStrategy, instance.getProps());
                 }
@@ -76,8 +77,5 @@ public class MoonConfig implements ApplicationContextAware {
             }
             moon.add(instance.getPhases().toArray(new Object[0]));
         }
-
-
-
     }
 }

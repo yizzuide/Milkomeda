@@ -36,13 +36,9 @@ public class MoonTest {
     @PerfTest(invocations = 10, threads = 10)
     @Test
     public void testAbTest() {
-        // 方式一
-//        Integer phase1 = abTestMoon.getPhase("ab-123");
-
-        // 方式二
         Integer phase1 = Moon.getPhase("ab-123", abTestMoon);
         log.info("ab-123: {}",  phase1);
-        // 更换key来进入第二个环
+        // 更换key来进入第二个环（环与环相互隔离）
         Integer phase2 = Moon.getPhase("ab-456", abTestMoon);
         log.info("ab-456: {}",  phase2);
     }

@@ -20,7 +20,10 @@ import java.util.concurrent.locks.ReentrantLock;
  * Create at 2020/03/13 21:20
  */
 public class PeriodicMoonStrategy extends AbstractLuaMoonStrategy {
-
+    /**
+     * 分布式key前缀
+     */
+    private static final String PREFIX = "moon:periodic-";
     // 并发指针锁
     private final ReentrantLock reentrantLock = new ReentrantLock(false);
 
@@ -59,7 +62,7 @@ public class PeriodicMoonStrategy extends AbstractLuaMoonStrategy {
     public <T> T getPhaseFast(String key, Moon<T> prototype) {
         RedisTemplate<String, Serializable> redisTemplate = getJsonRedisTemplate();
         RedisScript<Long> redisScript = new DefaultRedisScript<>(getLuaScript(), Long.class);
-        Long phase = redisTemplate.execute(redisScript, Collections.singletonList("moon:lhp-" + key), prototype.getPhaseNames().size());
+        Long phase = redisTemplate.execute(redisScript, Collections.singletonList(PREFIX + key), prototype.getPhaseNames().size());
         assert phase != null;
         return prototype.getPhaseNames().get(Math.toIntExact(phase));
     }

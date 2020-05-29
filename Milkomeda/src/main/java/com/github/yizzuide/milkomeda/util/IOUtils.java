@@ -13,6 +13,7 @@ import java.nio.charset.StandardCharsets;
  *
  * @author yizzuide
  * @since 3.3.1
+ * @version 3.7.0
  * Create at 2020/05/07 14:17
  */
 public class IOUtils {
@@ -37,17 +38,29 @@ public class IOUtils {
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
         String line;
         while ((line = reader.readLine()) != null) {
-            if (line.startsWith("--")) {
+            // 去注释
+            if (line.matches("\\s*-{2,}.*")) {
                 continue;
             }
+            // 去空行
+            if (line.matches("\\s+")) {
+                continue;
+            }
+            // 代码缩减空白
             line = StringUtils.trimLeadingWhitespace(line);
             line = StringUtils.trimLeadingWhitespace(line);
             line = line.replaceAll("[\n\r\t]", "");
             out.append(line);
+            // 忽略有分号的行，说明已有结束符
+            if (line.endsWith(";")) {
+                continue;
+            }
+            // 指令行，添加空格
             if (line.startsWith("if") || line.startsWith("then") || line.endsWith("else") || line.startsWith("for") || line.startsWith("do")
                 || line.startsWith("while") || line.startsWith("function")) {
                 out.append(" ");
             } else {
+                // 语句行，添加结束符
                 out.append("; ");
             }
         }

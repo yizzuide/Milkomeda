@@ -157,9 +157,6 @@ milkomeda:
         strategy: LazyExpire
         l1-expire: 1m
         l2-expire: 1m
-      ab-test:
-        l2-expire: -1
-        only-cache-l2: true
 
   echo:
     # 设置请求读取超时
@@ -209,21 +206,17 @@ milkomeda:
     instances:
       -
         name: smsMoon
-        # 设置缓存实例名
-        cacheName: ab-test
         phases: ["七牛云短信", "阿里云短信", "容联云短信"]
       -
         name: abTestMoon
-        # 设置缓存实例名
-        cacheName: ab-test
         # 使用百分比分配策略
         type: PERCENT
-        props:
-          # 缩小总占百分比，使分配更均匀
-          percent: 10
         # 20%的0，80%的1
         #phases: [20, 80]
-        phases: [2, 8]
+        # 同上
+        #phases: [2, 8]
+        # 50%的0，50%的1
+        phases: [1, 1]
 
   hydrogen:
     transaction:
