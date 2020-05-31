@@ -6,7 +6,7 @@ import lombok.extern.slf4j.Slf4j;
  * 数据源处理
  * @author jsq 786063250@qq.com
  * @since 3.4.0
- * @since 3.5.0
+ * @since 3.7.1
  * Create at 2020/5/8
  */
 @Slf4j
@@ -31,9 +31,12 @@ public class SundialHolder {
      * 获得数据源key
      * @return 数据源key
      */
-    public static String getDataSourceType()
-    {
-        return CONTEXT_HOLDER.get();
+    public static String getDataSourceType() {
+        String type = CONTEXT_HOLDER.get();
+        if (type == null) {
+            return DynamicRouteDataSource.MASTER_KEY;
+        }
+        return type;
     }
 
     /**

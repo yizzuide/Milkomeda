@@ -22,7 +22,10 @@ public class DataSourceServiceImpl implements DataSourceService {
 
     @Override
     public int insert(TOrder tOrder) {
-        return tOrderMapper.insert(tOrder);
+        int effectCount = tOrderMapper.insert(tOrder);
+        List<TOrder> tOrders = queryAll(new TOrder());
+        log.info("query list: {}", tOrders);
+        return effectCount;
     }
 
     @Override

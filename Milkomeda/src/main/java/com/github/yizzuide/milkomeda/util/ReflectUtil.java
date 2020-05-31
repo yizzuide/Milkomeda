@@ -2,6 +2,7 @@ package com.github.yizzuide.milkomeda.util;
 
 import com.github.yizzuide.milkomeda.universe.el.ELContext;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.tuple.Pair;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.core.ResolvableType;
@@ -261,6 +262,28 @@ public class ReflectUtil {
     }
 
     /**
+     * 获取Field和值
+     * @param target    目标对象
+     * @param fieldPath 属性路径
+     * @return  Field和值
+     * @since 3.7.1
+     */
+    public static Pair<Field, Object> getFieldBundlePath(Object target, String fieldPath) {
+        if (target == null || StringUtils.isEmpty(fieldPath)) {
+            return null;
+        }
+        String[] fieldNames = StringUtils.delimitedListToStringArray(fieldPath, ".");
+        Field field = null;
+        for (String fieldName : fieldNames) {
+            field = ReflectionUtils.findField(Objects.requireNonNull(target).getClass(), fieldName);
+            if (field == null) return null;
+            ReflectionUtils.makeAccessible(field);
+            target = ReflectionUtils.getField(field, target);
+        }
+        return Pair.of(field, target);
+    }
+
+    /**
      * 获取属性路径值
      * @param target    目标对象
      * @param fieldPath 属性路径
@@ -269,17 +292,26 @@ public class ReflectUtil {
      */
     @SuppressWarnings("unchecked")
     public static <T> T invokeFieldPath(Object target, String fieldPath) {
-        if (target == null || StringUtils.isEmpty(fieldPath)) {
+        Pair<Field, Object> fieldBundle = getFieldBundlePath(target, fieldPath);
+        if (fieldBundle == null) {
             return null;
         }
-        String[] fieldNames = StringUtils.delimitedListToStringArray(fieldPath, ".");
-        for (String fieldName : fieldNames) {
-            Field field = ReflectionUtils.findField(Objects.requireNonNull(target).getClass(), fieldName);
-            if (field == null) return null;
-            ReflectionUtils.makeAccessible(field);
-            target = ReflectionUtils.getField(field, target);
+        return (T) fieldBundle.getValue();
+    }
+
+    /**
+     * 设置属性路径值
+     * @param target    目标对象
+     * @param fieldPath 属性路径
+     * @param value     值
+     * @since 3.7.1
+     */
+    public static void invokeSetFieldPath(Object target, String fieldPath, Object value) {
+        Pair<Field, Object> fieldBundle = getFieldBundlePath(target, fieldPath);
+        if (fieldBundle == null) {
+            return;
         }
-        return (T) target;
+        ReflectionUtils.setField(fieldBundle.getKey(), fieldBundle.getValue(), value);
     }
 
     /**

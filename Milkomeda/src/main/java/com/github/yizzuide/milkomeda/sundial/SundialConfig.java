@@ -3,11 +3,13 @@ package com.github.yizzuide.milkomeda.sundial;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.transaction.TransactionAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Primary;
 import org.springframework.util.CollectionUtils;
 
 import javax.sql.DataSource;
@@ -23,10 +25,10 @@ import java.util.Set;
  * Create at 2020/5/8
  */
 @Slf4j
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @Import(DelegatingBeanDefinitionRegistrar.class)
 @EnableConfigurationProperties(SundialProperties.class)
-@AutoConfigureBefore(TransactionAutoConfiguration.class)
+@AutoConfigureBefore({DataSourceAutoConfiguration.class, TransactionAutoConfiguration.class})
 public class SundialConfig {
 
     @Autowired
@@ -42,8 +44,9 @@ public class SundialConfig {
         return new DataSourceFactory();
     }
 
+    @Primary
     @Bean
-    public DynamicRouteDataSource dynamicRouteDataSource(DataSourceFactory dataSourceFactory) {
+    public DataSource dynamicRouteDataSource(DataSourceFactory dataSourceFactory) {
         DataSource defaultDataSource = null;
         Map<Object, Object> targetDataSources = new HashMap<>();
         try {

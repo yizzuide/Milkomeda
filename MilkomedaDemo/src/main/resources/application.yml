@@ -221,8 +221,8 @@ milkomeda:
   hydrogen:
     transaction:
       enable: true
-      # 事务5秒超时回滚（支持自定义时间单位，不指定单位默认单位：s）
-      rollback-when-timeout: 5s
+      # 事务60秒超时回滚（支持自定义时间单位，不指定单位默认单位：s）
+      rollback-when-timeout: 60s
       read-only-append-prefix:
         - fetch*
 

@@ -16,7 +16,7 @@ import java.util.List;
  *
  * @author yizzuide
  * @since 2.5.0
- * @version 3.7.0
+ * @version 3.7.1
  * Create at 2020/01/30 20:34
  */
 public class MybatisUtil {
@@ -75,7 +75,7 @@ public class MybatisUtil {
         }
         int fromEnd = fromStart + from.length();
         int tableEnd = sql.indexOf(" ", fromEnd);
-        String tableName = sql.substring(fromEnd, tableEnd);
+        String tableName = tableEnd == -1 ? sql.substring(fromEnd) : sql.substring(fromEnd, tableEnd);
         if (from.equals(" into ") && tableName.contains("(")) {
             tableName = tableName.substring(0, tableName.indexOf("("));
             if (tableName.endsWith(" ")) {

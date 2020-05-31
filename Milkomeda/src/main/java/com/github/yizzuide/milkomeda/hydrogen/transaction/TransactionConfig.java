@@ -40,7 +40,6 @@ public class TransactionConfig {
     private TransactionProperties props;
 
     @Bean
-    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     public TransactionInterceptor txAdvice(PlatformTransactionManager transactionManager) {
         RuleBasedTransactionAttribute txAttr_REQUIRED = new RuleBasedTransactionAttribute();
         // 设置传播行为：若当前存在事务，则加入该事务；如果当前没有事务，则创建一个新的事务。这是默认值。
