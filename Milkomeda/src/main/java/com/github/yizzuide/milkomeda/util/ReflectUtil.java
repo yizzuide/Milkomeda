@@ -306,7 +306,7 @@ public class ReflectUtil {
      * @param value     值
      * @since 3.7.1
      */
-    public static void invokeSetFieldPath(Object target, String fieldPath, Object value) {
+    public static void setFieldPath(Object target, String fieldPath, Object value) {
         Pair<Field, Object> fieldBundle = getFieldBundlePath(target, fieldPath);
         if (fieldBundle == null) {
             return;
