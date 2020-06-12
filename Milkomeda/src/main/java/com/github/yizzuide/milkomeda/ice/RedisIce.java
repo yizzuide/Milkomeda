@@ -38,7 +38,7 @@ public class RedisIce implements Ice, ApplicationListener<IceInstanceChangeEvent
     @Autowired
     private StringRedisTemplate redisTemplate;
 
-    private IceProperties props;
+    private final IceProperties props;
 
     private String lockKey = "ice:range_pop_lock";
 

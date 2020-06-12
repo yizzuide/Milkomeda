@@ -1,7 +1,6 @@
 package com.github.yizzuide.milkomeda.ice;
 
 import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
-import com.github.yizzuide.milkomeda.util.JSONUtil;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationListener;
 import org.springframework.data.redis.core.BoundListOperations;
@@ -34,7 +33,7 @@ public class RedisReadyQueue implements ReadyQueue, InitializingBean, Applicatio
     @Override
     public void push(DelayJob delayJob) {
         BoundListOperations<String, String> listOperations = getQueue(delayJob.getTopic());
-        listOperations.rightPush(JSONUtil.serialize(delayJob));
+        listOperations.rightPush(delayJob.toSimple());
     }
 
     @Override
@@ -42,7 +41,7 @@ public class RedisReadyQueue implements ReadyQueue, InitializingBean, Applicatio
         BoundListOperations<String, String> listOperations = getQueue(topic);
         String delayJob = listOperations.leftPop();
         if (null == delayJob) return null;
-        return JSONUtil.parse(delayJob, DelayJob.class);
+        return DelayJob.compatibleDecode(delayJob, null);
     }
 
     @Override
@@ -55,7 +54,7 @@ public class RedisReadyQueue implements ReadyQueue, InitializingBean, Applicatio
         // 删除区间
         getQueue(topic).trim(count + 1, -1);
         return delayJobOrigList.stream()
-                .map(delayJob -> JSONUtil.parse(delayJob, DelayJob.class))
+                .map(delayJob -> DelayJob.compatibleDecode(delayJob, null))
                 .collect(Collectors.toList());
     }
 

@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.lang.NonNull;
 
 import java.util.HashMap;
 import java.util.List;
@@ -33,7 +34,7 @@ public class IceContext implements ApplicationListener<ContextRefreshedEvent> {
     private IceProperties props;
 
     @Override
-    public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
+    public void onApplicationEvent(@NonNull ContextRefreshedEvent contextRefreshedEvent) {
         topicMap = AopContextHolder.getHandlerMetaData(IceHandler.class, IceListener.class, (annotation, metaData) -> {
                     IceListener iceListener = (IceListener) annotation;
                     return iceListener.value();

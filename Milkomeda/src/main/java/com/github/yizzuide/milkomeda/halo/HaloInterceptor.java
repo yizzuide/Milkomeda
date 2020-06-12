@@ -16,6 +16,7 @@ import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
+import org.apache.ibatis.session.defaults.DefaultSqlSession;
 import org.apache.ibatis.type.TypeHandlerRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
@@ -25,10 +26,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 import java.util.regex.Pattern;
 
 /**
@@ -37,7 +35,7 @@ import java.util.regex.Pattern;
  *
  * @author yizzuide
  * @since 2.5.0
- * @version 3.7.0
+ * @version 3.7.2
  * Create at 2020/01/30 20:38
  */
 @Slf4j
@@ -98,7 +96,7 @@ public class HaloInterceptor implements Interceptor {
                 }
             }
         }
-        log.warn("Hao found slow sql[{}]: {} params:[{}], take time: {}ms", sqlId, sql, StringUtils.join(params, ','), time);
+        log.warn("Halo found slow sql[{}]: {} params:[{}], take time: {}ms", sqlId, sql, StringUtils.join(params, ','), time);
     }
 
     private String getParameterValue(Object obj) {
@@ -119,7 +117,8 @@ public class HaloInterceptor implements Interceptor {
         return value;
     }
 
-    private Object warpIntercept(Invocation invocation,  MappedStatement mappedStatement, String sql, Object param) throws Throwable {
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private Object warpIntercept(Invocation invocation, MappedStatement mappedStatement, String sql, Object param) throws Throwable {
         // 如果处理器为空，直接返回
         if (CollectionUtils.isEmpty(HaloContext.getTableNameMap())) {
             return invocation.proceed();
@@ -128,6 +127,12 @@ public class HaloInterceptor implements Interceptor {
         if (StringUtils.isEmpty(tableName)) {
             return invocation.proceed();
         }
+
+        // Mybatis map参数获取不存在时会抛异常，转为普通map
+        if (param instanceof DefaultSqlSession.StrictMap) {
+            param = new HashMap((Map) param);
+        }
+
         // 匹配所有
         invokeWithTable(tableName,"*", sql, mappedStatement, param, null, HaloType.PRE);
         // 完全匹配

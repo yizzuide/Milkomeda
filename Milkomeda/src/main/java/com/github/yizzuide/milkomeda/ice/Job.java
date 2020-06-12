@@ -20,7 +20,7 @@ import java.io.Serializable;
 public class Job<T> implements Serializable {
     private static final long serialVersionUID = -3823440541412673211L;
     /**
-     * 全局唯一ID（内部会将topic拼接进来：topic-id，以保证唯一性）
+     * 全局唯一ID，仅限使用[0-9a-zA-Z]（内部会将topic拼接进来以保证唯一性（topic-id)，长度最好<=62(存储重试次数多占了两位)，用于Redis的 ziplist 内存存储优化）
      */
     @JsonSerialize(using = ToStringSerializer.class)
     private String id;

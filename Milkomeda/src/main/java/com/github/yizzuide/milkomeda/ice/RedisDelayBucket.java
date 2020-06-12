@@ -18,11 +18,11 @@ import java.util.stream.Collectors;
 
 /**
  * RedisDelayBucket
- * 当前采用的一个队列任务对应一个Bucket，如果在集群下，需要使用分布式锁（Redis SetNX)保证一个Bucket只在一个线程中处理
+ * 延迟桶
  *
  * @author yizzuide
  * @since 1.15.0
- * @version 3.0.7
+ * @version 3.7.2
  * Create at 2019/11/16 16:17
  */
 public class RedisDelayBucket implements DelayBucket, InitializingBean, ApplicationListener<IceInstanceChangeEvent> {
@@ -53,7 +53,7 @@ public class RedisDelayBucket implements DelayBucket, InitializingBean, Applicat
     public void add(DelayJob delayJob) {
         String bucketName = getCurrentBucketName();
         BoundZSetOperations<String, String> bucket = getBucket(bucketName);
-        bucket.add(JSONUtil.serialize(delayJob), delayJob.getDelayTime());
+        bucket.add(delayJob.toSimple(), delayJob.getDelayTime());
     }
 
     @Override
@@ -61,7 +61,7 @@ public class RedisDelayBucket implements DelayBucket, InitializingBean, Applicat
         String bucketName = getCurrentBucketName();
         BoundZSetOperations<String, String> bucket = getBucket(bucketName);
         Set<ZSetOperations.TypedTuple<String>> delayJobSet = delayJobs.stream()
-                .map(delayJob -> new DefaultTypedTuple<>(JSONUtil.serialize(delayJob), (double) delayJob.getDelayTime()))
+                .map(delayJob -> new DefaultTypedTuple<>(delayJob.toSimple(), (double) delayJob.getDelayTime()))
                 .collect(Collectors.toSet());
         bucket.add(delayJobSet);
     }
@@ -77,13 +77,22 @@ public class RedisDelayBucket implements DelayBucket, InitializingBean, Applicat
             return null;
         }
         ZSetOperations.TypedTuple<String> typedTuple = set.toArray(new ZSetOperations.TypedTuple[]{})[0];
-        return JSONUtil.parse(typedTuple.getValue(), DelayJob.class);
+        if (typedTuple.getValue() == null) {
+            return null;
+        }
+        return DelayJob.compatibleDecode(typedTuple.getValue(), typedTuple.getScore());
     }
 
     @Override
     public void remove(Integer index, DelayJob delayJob) {
         String name = bucketNames.get(index);
         BoundZSetOperations<String, String> bucket = getBucket(name);
+        // 优化后的方式删除
+        if (delayJob.isUsedSimple()) {
+            bucket.remove(delayJob.toSimple());
+            return;
+        }
+        // 兼容旧方式序列化删除
         bucket.remove(JSONUtil.serialize(delayJob));
     }
 

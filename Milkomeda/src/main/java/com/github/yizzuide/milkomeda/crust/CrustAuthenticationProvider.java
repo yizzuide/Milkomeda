@@ -18,7 +18,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
  */
 public class CrustAuthenticationProvider extends DaoAuthenticationProvider {
 
-    private CrustProperties props;
+    private final CrustProperties props;
 
     public CrustAuthenticationProvider(CrustProperties props, BCryptPasswordEncoder passwordEncoder) {
         this.props = props;

@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
  *
  * @author yizzuide
  * @since 1.15.0
- * @version 2.0.0
+ * @version 3.7.2
  * Create at 2019/11/16 17:19
  */
 @Configuration
@@ -18,6 +18,12 @@ public class IceConfig extends IceBasicConfig {
     @ConditionalOnProperty(prefix = "milkomeda.ice", name = "enable-task", havingValue = "true")
     public IceContext iceContext() {
         return new IceContext();
+    }
+
+    @Bean
+    @ConditionalOnProperty(prefix = "milkomeda.ice", name = "enable-job-timer", havingValue = "true", matchIfMissing = true)
+    public DelegatingDelayJobHandler delegatingDelayJobHandler() {
+        return new DelegatingDelayJobHandler();
     }
 
     @Bean
