@@ -26,8 +26,11 @@ public class WormholeRegistration {
     @Autowired
     private WormholeEventBus eventBus;
 
-    @EventListener(ContextRefreshedEvent.class)
-    public void onApplicationEvent() {
+    @EventListener
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        if (event.getApplicationContext().getParent() == null) {
+            return;
+        }
         actionMap = AopContextHolder.getHandlerMetaData(WormholeEventHandler.class, WormholeAction.class, (annotation, metaData) -> {
             WormholeAction wormholeAction = (WormholeAction) annotation;
             return wormholeAction.value();

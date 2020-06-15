@@ -17,6 +17,7 @@ import java.util.Map;
  * @author yizzuide
  * @since 2.5.0
  * Create at 2020/01/30 22:40
+ * @see org.springframework.context.support.AbstractApplicationContext#refresh()
  */
 public class HaloContext implements ApplicationListener<ContextRefreshedEvent> {
     /**
@@ -32,6 +33,9 @@ public class HaloContext implements ApplicationListener<ContextRefreshedEvent> {
 
     @Override
     public void onApplicationEvent(@NonNull ContextRefreshedEvent event) {
+        if (event.getApplicationContext().getParent() == null) {
+            return;
+        }
         tableNameMap = AopContextHolder.getHandlerMetaData(HaloHandler.class, HaloListener.class, (annotation, metaData) -> {
             HaloListener haloListener = (HaloListener) annotation;
             // 设置其它属性方法的值

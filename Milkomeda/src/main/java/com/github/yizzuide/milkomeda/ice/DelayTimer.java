@@ -26,7 +26,7 @@ public class DelayTimer implements ApplicationListener<ApplicationStartedEvent> 
     private DelegatingDelayJobHandler delegatingDelayJobHandler;
 
     @Override
-    public void onApplicationEvent(@NonNull ApplicationStartedEvent contextRefreshedEvent) {
+    public void onApplicationEvent(@NonNull ApplicationStartedEvent event) {
         taskScheduler.scheduleWithFixedDelay(delegatingDelayJobHandler, props.getDelayBucketPollRate());
     }
 }

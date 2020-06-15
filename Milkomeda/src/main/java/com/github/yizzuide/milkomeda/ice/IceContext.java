@@ -34,7 +34,10 @@ public class IceContext implements ApplicationListener<ContextRefreshedEvent> {
     private IceProperties props;
 
     @Override
-    public void onApplicationEvent(@NonNull ContextRefreshedEvent contextRefreshedEvent) {
+    public void onApplicationEvent(@NonNull ContextRefreshedEvent event) {
+        if (event.getApplicationContext().getParent() == null) {
+            return;
+        }
         topicMap = AopContextHolder.getHandlerMetaData(IceHandler.class, IceListener.class, (annotation, metaData) -> {
                     IceListener iceListener = (IceListener) annotation;
                     return iceListener.value();

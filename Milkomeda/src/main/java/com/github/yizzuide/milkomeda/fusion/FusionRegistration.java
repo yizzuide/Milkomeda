@@ -28,8 +28,11 @@ public class FusionRegistration {
     @Autowired
     private FusionAspect fusionAspect;
 
-    @EventListener(ContextRefreshedEvent.class)
-    public void onApplicationEvent() {
+    @EventListener
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        if (event.getApplicationContext().getParent() == null) {
+            return;
+        }
         actionMap = AopContextHolder.getHandlerMetaData(FusionHandler.class, FusionAction.class, (annotation, metaData) -> {
             FusionAction fusionAction = (FusionAction) annotation;
             return fusionAction.value();

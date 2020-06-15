@@ -22,6 +22,9 @@ public class MilkomedaApplicationListener implements ApplicationListener<Context
 
     @Override
     public void onApplicationEvent(@NonNull ContextRefreshedEvent event) {
+        if (event.getApplicationContext().getParent() == null) {
+            return;
+        }
         // 设置延迟队列实例名
         IceHolder.setInstanceName("product");
         // 激活Dead queue里的job（重试超过次数的job）
