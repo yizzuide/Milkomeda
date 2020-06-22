@@ -22,7 +22,7 @@ class DelayJob implements Serializable {
     private static final long serialVersionUID = -1408197881231593037L;
 
     /**
-     * 延迟任务的唯一标识（长度最好<=62(存储重试次数多占了两位)，用于Redis的 ziplist 内存存储优化）
+     * 延迟任务的唯一标识（长度最好小于62位，因为存储重试次数多占了两位，用于Redis的 ziplist 内存存储优化）
      */
     private String jodId;
 
