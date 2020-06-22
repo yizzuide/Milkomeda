@@ -3,6 +3,7 @@ package com.github.yizzuide.milkomeda.sundial;
 import com.zaxxer.hikari.HikariDataSource;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
@@ -16,6 +17,7 @@ import java.util.Map;
  * 自定义数据源属性配置
  * @author jsq 786063250@qq.com
  * @since 3.4.0
+ * @version 3.8.0
  * Create at 2020/5/8
  */
 @Data
@@ -45,6 +47,62 @@ public class SundialProperties {
      */
     private List<Strategy> strategy;
 
+    /**
+     * 是否开启分库分表
+     */
+    private boolean enableSharding = false;
+
+    /**
+     * 分库分表
+     */
+    @NestedConfigurationProperty
+    private Sharding sharding;
+
+    /**
+     * 分库分表
+     */
+    @Data
+    public static class Sharding {
+        /**
+         *  只包含名称的作为第一个序号（用于在不需要修改名称下扩容）
+         */
+        private boolean originalNameAsIndexZero;
+
+        /**
+         * 索引连接符
+         */
+        private String indexSeparator = "_";
+
+        /**
+         * 连接节点
+         */
+        private Map<String, DataNode> nodes;
+    }
+
+    /**
+     * 连接节点，一个节点包括一主多从数据源
+     */
+    @Data
+    public static class DataNode {
+        /**
+         * 数据库名（如果数据源key已指定数据库，则不需要设置）
+         */
+        private String schema;
+
+        /**
+         * 主数据源key
+         */
+        private String leader;
+
+        /**
+         * 从数据源key
+         */
+        private List<String> follows;
+    }
+
+    /**
+     * 主从切换策略
+     */
     @Data
     public static class Strategy {
         /**

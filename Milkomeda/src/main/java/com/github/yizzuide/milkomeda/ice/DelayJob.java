@@ -13,7 +13,7 @@ import java.io.Serializable;
  *
  * @author yizzuide
  * @since 1.15.0
- * @version 3.7.2
+ * @version 3.8.0
  * Create at 2019/11/16 15:30
  */
 @Data

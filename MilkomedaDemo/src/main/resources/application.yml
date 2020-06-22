@@ -61,6 +61,9 @@ spring:
     overwrite-existing-jobs: true
     wait-for-jobs-to-complete-on-shutdown: true
 
+logging:
+  level:
+    com.github.yizzuide.milkomeda.demo.sundial.mapper: DEBUG
 
 management:
   endpoint:
@@ -322,9 +325,32 @@ milkomeda:
         username: root
         password: ${MYSQL_PWD}
         url:  jdbc:mysql://localhost:3306/milkomeda_r?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&useSSL=false&rewriteBatchedStatements=true&allowMultiQueries=true&allowPublicKeyRetrieval=true
+      db-01:
+        username: root
+        password: ${MYSQL_PWD}
+        url:  jdbc:mysql://localhost:3306?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&useSSL=false&rewriteBatchedStatements=true&allowMultiQueries=true&allowPublicKeyRetrieval=true
+    # 主从切面策略
     strategy:
       - key-name: read-only
         pointcut-expression: execution(* com..mapper.*.query*(..))
+
+    # 开启分库分表
+    enable-sharding: true
+    sharding:
+      # 忽略索引0后缀，兼容之前的无索引库名、表名
+      original-name-as-index-zero: true
+      # 分库、分库分表需要的节点配置（仅分表不需要配置）
+      nodes:
+        # 一个主、从配置为一个节点，节点名与拆分key相关（从库可选配置）
+        node_0:
+          # spring.datasource配置的默认会生成master数据源实例
+          leader: master
+          follows: ["read-only"]
+        node_1:
+          # 如果数据源实例没有指定数据库，使用schema指定
+          schema: milkomeda_01
+          leader:  db-01
+          #follows: ["xxx"]
 
   # 规则引擎
   jupiter:
@@ -354,4 +380,3 @@ milkomeda:
   # 分布式应用名配置（默认取当前应用名）
   metal:
     application-name: demo
-

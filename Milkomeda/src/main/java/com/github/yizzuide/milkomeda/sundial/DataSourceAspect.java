@@ -7,11 +7,13 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.core.annotation.Order;
+import org.springframework.util.StringUtils;
 
 /**
  * Sundial注解切面
  * @author jsq 786063250@qq.com
  * @since 3.4.0
+ * @version 3.8.0
  * Create at 2020/5/8
  */
 @Slf4j
@@ -29,11 +31,14 @@ public class DataSourceAspect {
     }
 
     @Around("actionPointCut() || classPointCut()")
-    public Object around(ProceedingJoinPoint point) throws Throwable {
-        Sundial sundial = ReflectUtil.getAnnotation(point, Sundial.class);
+    public Object around(ProceedingJoinPoint joinPoint) throws Throwable {
+        Sundial sundial = ReflectUtil.getAnnotation(joinPoint, Sundial.class);
+        if (StringUtils.isEmpty(sundial.value())) {
+            return joinPoint.proceed();
+        }
         SundialHolder.setDataSourceType(sundial.value());
         try {
-            return point.proceed();
+            return joinPoint.proceed();
         } finally {
             SundialHolder.clearDataSourceType();
         }

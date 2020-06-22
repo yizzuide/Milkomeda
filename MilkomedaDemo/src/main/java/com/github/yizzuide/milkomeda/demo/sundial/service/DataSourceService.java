@@ -12,5 +12,7 @@ public interface DataSourceService {
 
     int insert(TOrder tOrder);
 
+    TOrder queryByOrderNo(Long orderNo);
+
     List<TOrder> queryAll(TOrder tOrder);
 }

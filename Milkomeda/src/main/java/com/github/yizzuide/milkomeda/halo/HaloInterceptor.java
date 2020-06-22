@@ -35,7 +35,7 @@ import java.util.regex.Pattern;
  *
  * @author yizzuide
  * @since 2.5.0
- * @version 3.7.2
+ * @version 3.8.0
  * Create at 2020/01/30 20:38
  */
 @Slf4j

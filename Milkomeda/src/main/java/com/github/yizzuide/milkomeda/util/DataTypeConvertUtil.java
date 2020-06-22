@@ -18,7 +18,7 @@ import java.util.regex.Pattern;
  *
  * @author yizzuide
  * @since 1.13.0
- * @version 3.5.0
+ * @version 3.8.0
  * Create at 2019/09/21 17:23
  */
 public class DataTypeConvertUtil {
@@ -90,9 +90,7 @@ public class DataTypeConvertUtil {
      * @return Integer
      */
     public static Integer intVal(Long num) {
-        int n = num.intValue();
-        // 注意：这里不能直接返回num.intValue()，由于编译器类型装箱的原因，会报错: java.lang.Long cannot be cast to java.lang.Integer
-        return n;
+        return num.intValue();
     }
 
     /**
@@ -295,6 +293,9 @@ public class DataTypeConvertUtil {
         if (source instanceof Map) {
             return extractPath(keyPath, (Map) source, defaultValue);
         }
+        if (source instanceof String) {
+            return extractPath(keyPath, JSONUtil.parseMap(source.toString(), String.class, Object.class), defaultValue);
+        }
         return extractPath(keyPath, beanToMap(source), defaultValue);
     }
 
@@ -324,6 +325,10 @@ public class DataTypeConvertUtil {
             if (key.indexOf('[') == -1) {
                 Object value = nodeMap.get(key);
                 Object nextNode = findNextNode(value, defaultValue);
+                // defaultValue为null时，nextNode为空
+                if (nextNode == null || nextNode.equals(defaultValue)) {
+                    return defaultValue;
+                }
                 if (isSugarType(nextNode)) return nextNode.toString();
                 nodeMap = (Map<String, Object>) nextNode;
                 continue;
@@ -349,6 +354,10 @@ public class DataTypeConvertUtil {
             }
             Object value = ((List) node).get(index);
             Object nextNode = findNextNode(value, defaultValue);
+            // defaultValue为null时，nextNode为空
+            if (nextNode == null || nextNode.equals(defaultValue)) {
+                return defaultValue;
+            }
             if (isSugarType(nextNode)) return nextNode.toString();
             nodeMap = (Map<String, Object>) nextNode;
         }

@@ -3,6 +3,8 @@ package com.github.yizzuide.milkomeda.sundial;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.transaction.TransactionAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -22,6 +24,7 @@ import java.util.Set;
  * 自定义数据源配置
  * @author jsq 786063250@qq.com
  * @since 3.4.0
+ * @version 3.8.0
  * Create at 2020/5/8
  */
 @Slf4j
@@ -42,6 +45,19 @@ public class SundialConfig {
     @Bean
     public DataSourceFactory dataSourceFactory(){
         return new DataSourceFactory();
+    }
+
+    @ConditionalOnProperty(prefix = SundialProperties.PREFIX, name = "enable-sharding", havingValue = "true")
+    @Bean(ShardingFunction.BEAN_ID)
+    @ConditionalOnMissingBean
+    public ShardingFunction shardingFunction() {
+        return new ShardingFunction();
+    }
+
+    @ConditionalOnProperty(prefix = SundialProperties.PREFIX, name = "enable-sharding", havingValue = "true")
+    @Bean
+    public SundialInterceptor sundialInterceptor() {
+        return new SundialInterceptor();
     }
 
     @Primary

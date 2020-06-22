@@ -29,4 +29,22 @@ public @interface Sundial {
      */
     @AliasFor("value")
     String key() default DynamicRouteDataSource.MASTER_KEY;
+
+    /**
+     * 拆分类型
+     * @return  ShardingType
+     */
+    ShardingType shardingType() default ShardingType.NONE;
+
+    /**
+     * 数据源节点表达式，用于分库的场景（表达式全局变量：table为表名，p为参数，fn为函数调用，函数库参考{@link com.github.yizzuide.milkomeda.sundial.ShardingFunction}）
+     * @return String
+     */
+    String nodeExp() default "";
+
+    /**
+     * 分表表达式，用于分表（表达式全局变量：table为表名，p为参数，fn为函数调用，函数库参考{@link com.github.yizzuide.milkomeda.sundial.ShardingFunction}）
+     * @return  String
+     */
+    String partExp()  default "";
 }

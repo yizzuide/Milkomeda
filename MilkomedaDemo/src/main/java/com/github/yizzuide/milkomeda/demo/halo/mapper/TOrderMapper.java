@@ -1,6 +1,8 @@
 package com.github.yizzuide.milkomeda.demo.halo.mapper;
 
 import com.github.yizzuide.milkomeda.demo.halo.domain.TOrder;
+import com.github.yizzuide.milkomeda.sundial.ShardingType;
+import com.github.yizzuide.milkomeda.sundial.Sundial;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.Date;
@@ -49,6 +51,8 @@ public interface TOrderMapper {
      * @param tOrder 实例对象
      * @return 影响行数
      */
+    // ShardingType.TABLE：仅分表, partExp：分表表达式（table为表名，p为参数，fn为函数调用）
+    @Sundial(shardingType = ShardingType.TABLE, partExp = "fn.format(table + '_%03d', fn.fnv(p.orderNo, 2, 4))")
     int insert(TOrder tOrder);
 
     /**

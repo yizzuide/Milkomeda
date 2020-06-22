@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.github.yizzuide.milkomeda.demo.sundial.mapper.TOrder2Mapper">
+
+    <resultMap type="com.github.yizzuide.milkomeda.demo.halo.domain.TOrder" id="TOrderMap">
+        <result property="id" column="id" jdbcType="BIGINT"/>
+        <result property="userId" column="user_id" jdbcType="BIGINT"/>
+        <result property="orderNo" column="order_no" jdbcType="BIGINT"/>
+        <result property="productId" column="product_id" jdbcType="BIGINT"/>
+        <result property="productName" column="product_name" jdbcType="VARCHAR"/>
+        <result property="price" column="price" jdbcType="BIGINT"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <insert id="insert" keyProperty="id" useGeneratedKeys="true">
+        insert into t_order(user_id, order_no, product_id, product_name, price, create_time, update_time)
+        values (#{userId}, #{orderNo}, #{productId}, #{productName}, #{price}, #{createTime}, #{updateTime})
+    </insert>
+
+    <select id="findByOrderNo" resultMap="TOrderMap">
+        select
+          id, user_id, order_no, product_id, product_name, price, create_time, update_time
+        from t_order
+        where order_no = #{orderNo}
+    </select>
+
+    <select id="queryAll" resultMap="TOrderMap">
+        select
+          id, user_id, order_no, product_id, product_name, price, create_time, update_time
+        from t_order
+        <where>
+            <if test="id != null">
+                and id = #{id}
+            </if>
+            <if test="userId != null">
+                and user_id = #{userId}
+            </if>
+            <if test="orderNo != null">
+                and order_no = #{orderNo}
+            </if>
+            <if test="productId != null">
+                and product_id = #{productId}
+            </if>
+            <if test="productName != null and productName != ''">
+                and product_name = #{productName}
+            </if>
+            <if test="price != null">
+                and price = #{price}
+            </if>
+            <if test="createTime != null">
+                and create_time = #{createTime}
+            </if>
+            <if test="updateTime != null">
+                and update_time = #{updateTime}
+            </if>
+        </where>
+    </select>
+
+</mapper>

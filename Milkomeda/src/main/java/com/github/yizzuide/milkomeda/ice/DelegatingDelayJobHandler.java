@@ -17,7 +17,7 @@ import java.util.List;
  * 代理对多个延迟桶的调度处理
  *
  * @author yizzuide
- * @since 3.7.2
+ * @since 3.8.0
  * Create at 2020/06/11 11:24
  */
 public class DelegatingDelayJobHandler implements Runnable, InitializingBean {
