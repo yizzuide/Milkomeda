@@ -25,6 +25,11 @@ public class KetamaHash implements ConsistentHashFunc {
 
     @Override
     public long hash(Object key) {
+        return rawHash(key);
+    }
+
+    @Override
+    public long rawHash(Object key) {
         byte[] bKey = computeMd5(key.toString());
         return ((long) (bKey[3] & 0xFF) << 24) |
                 ((long) (bKey[2] & 0xFF) << 16) |

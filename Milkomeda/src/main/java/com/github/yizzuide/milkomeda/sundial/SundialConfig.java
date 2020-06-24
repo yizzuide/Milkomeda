@@ -47,9 +47,9 @@ public class SundialConfig {
         return new DataSourceFactory();
     }
 
-    @ConditionalOnProperty(prefix = SundialProperties.PREFIX, name = "enable-sharding", havingValue = "true")
-    @Bean(ShardingFunction.BEAN_ID)
     @ConditionalOnMissingBean
+    @Bean(ShardingFunction.BEAN_ID)
+    @ConditionalOnProperty(prefix = SundialProperties.PREFIX, name = "enable-sharding", havingValue = "true")
     public ShardingFunction shardingFunction() {
         return new ShardingFunction();
     }
@@ -67,11 +67,13 @@ public class SundialConfig {
         Map<Object, Object> targetDataSources = new HashMap<>();
         try {
             defaultDataSource = dataSourceFactory.createDataSource();
+            // 添加主数据源
             targetDataSources.put(DynamicRouteDataSource.MASTER_KEY, defaultDataSource);
             Set<Map.Entry<String, SundialProperties.Datasource>> datasourceConfigSet = props.getInstances().entrySet();
             if (CollectionUtils.isEmpty(datasourceConfigSet)) {
                 return new DynamicRouteDataSource(defaultDataSource, targetDataSources);
             }
+            // 不回其它数据源节点
             for (Map.Entry<String, SundialProperties.Datasource> entry : datasourceConfigSet) {
                 DataSource dataSource = dataSourceFactory.createDataSource(entry.getValue());
                 targetDataSources.put(entry.getKey(), dataSource);

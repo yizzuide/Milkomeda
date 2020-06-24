@@ -13,6 +13,7 @@ import org.apache.ibatis.plugin.*;
 import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
@@ -26,6 +27,7 @@ import java.util.regex.Pattern;
  *
  * @author yizzuide
  * @since 3.8.0
+ * @version 3.9.0
  * Create at 2020/06/16 11:18
  */
 @Slf4j
@@ -39,6 +41,7 @@ public class SundialInterceptor implements Interceptor {
     @Autowired
     private SundialProperties props;
 
+    @Lazy
     @Resource
     private ShardingFunction shardingFunction;
 

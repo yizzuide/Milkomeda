@@ -22,5 +22,10 @@ public enum LimiterType {
     /**
      * 组合限制器
      */
-    BARRIER
+    BARRIER,
+
+    /**
+     * 布隆限制器
+     */
+    BLOOM
 }

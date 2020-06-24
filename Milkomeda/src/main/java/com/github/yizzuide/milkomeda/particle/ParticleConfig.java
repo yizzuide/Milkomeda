@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 1.14.0
- * @since 3.5.0
+ * @version 3.9.0
  * Create at 2019/11/11 11:26
  */
 @Slf4j
@@ -50,7 +50,6 @@ public class ParticleConfig implements ApplicationContextAware {
      * 缓存创建的LimitHandler
      */
     private static final Map<String, LimitHandler> cacheHandlerBeans = new HashMap<>();
-
 
     @Bean
     public ParticleAspect particleAspect() {
@@ -99,6 +98,9 @@ public class ParticleConfig implements ApplicationContextAware {
                         break;
                     case BARRIER:
                         limiter.setHandlerClazz(BarrierLimiter.class);
+                        break;
+                    case BLOOM:
+                        limiter.setHandlerClazz(BloomLimiter.class);
                         break;
                 }
             }

@@ -13,7 +13,7 @@ import java.io.Serializable;
  *
  * @author yizzuide
  * @since 1.5.0
- * @version 1.14.0
+ * @version 3.9.0
  * Create at 2019/05/31 01:22
  */
 @Data
@@ -40,5 +40,23 @@ public abstract class LimitHandler implements Limiter {
             jsonRedisTemplate = ApplicationContextHolder.get().getBean("jsonRedisTemplate", RedisTemplate.class);
         }
         return jsonRedisTemplate;
+    }
+
+    /**
+     * 限制器链调用
+     * @param particle  状态数据
+     * @param key       键
+     * @param expire    过期时间
+     * @param process   处理方法
+     * @param <R>       返回类型
+     * @return R
+     * @throws Throwable 可抛出异常
+     */
+    protected <R> R next(Particle particle, String key, long expire, Process<R> process) throws Throwable {
+        // 如果未被限制，且有下一个处理器
+        if (!particle.isLimited() && null != getNext()) {
+            return getNext().limit(key, expire, process);
+        }
+        return process.apply(particle);
     }
 }

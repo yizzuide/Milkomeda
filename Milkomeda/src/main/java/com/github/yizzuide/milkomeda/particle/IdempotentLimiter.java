@@ -12,7 +12,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
  *
  * @author yizzuide
  * @since 1.5.0
- * @version 1.14.0
+ * @version 3.9.0
  * Create at 2019/05/30 13:49
  */
 @Slf4j
@@ -29,11 +29,7 @@ public class IdempotentLimiter extends LimitHandler {
         assert hasObtainLock != null;
         Particle particle = new Particle(this.getClass(), !hasObtainLock, hasObtainLock ? null : "1");
         try {
-            // 如果未被限制，且有下一个处理器
-            if (!particle.isLimited() && null != getNext()) {
-                return getNext().limit(key, expire, process);
-            }
-            return process.apply(particle);
+            return next(particle, key, expire, process);
         } finally {
             // 只有第一次设置key的线程有权删除这个key
             if (hasObtainLock) {

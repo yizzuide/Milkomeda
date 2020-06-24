@@ -7,8 +7,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
+import java.util.Collections;
 import java.util.Map;
 
 /**
@@ -30,6 +32,23 @@ public class ParticleController {
 
     @Resource
     private BarrierLimiter barrierLimiter;
+
+    @Resource
+    public BloomLimiter userBloomLimiter;
+
+    @PostConstruct
+    public void init() {
+        // 添加测试数据
+        userBloomLimiter.addAll(Collections.singletonList("15634256549"));
+    }
+
+    // http://localhost:8091/particle/exists?phone=15634256549
+    // 判断用户有没有注册过
+    @RequestMapping("exists")
+    public String exists(String phone) {
+        log.info("查询到用户：{}", phone);
+        return phone;
+    }
 
     @RequestMapping("check")
     public ResponseEntity<String> check(String token) throws Throwable {

@@ -13,6 +13,11 @@ import java.nio.ByteOrder;
 public class MurmurHash implements HashFunc {
     @Override
     public long hash(Object key) {
+        return rawHash(key) & 0xffffffffL;
+    }
+
+    @Override
+    public long rawHash(Object key) {
         ByteBuffer buf = ByteBuffer.wrap(key.toString().getBytes());
         int seed = 0x1234ABCD;
         ByteOrder byteOrder = buf.order();
@@ -41,6 +46,6 @@ public class MurmurHash implements HashFunc {
         h *= m;
         h ^= h >>> r;
         buf.order(byteOrder);
-        return h & 0xffffffffL;
+        return h;
     }
 }

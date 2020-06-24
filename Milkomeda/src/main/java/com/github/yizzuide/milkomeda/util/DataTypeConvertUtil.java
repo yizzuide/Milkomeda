@@ -90,7 +90,7 @@ public class DataTypeConvertUtil {
      * @return Integer
      */
     public static Integer intVal(Long num) {
-        return num.intValue();
+        return Math.toIntExact(num);
     }
 
     /**

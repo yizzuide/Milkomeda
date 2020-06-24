@@ -10,8 +10,14 @@ package com.github.yizzuide.milkomeda.universe.algorithm.hash;
 public class FNV132Hash implements HashFunc {
     private static final long FNV_32_INIT = 2166136261L;
     private static final int FNV_32_PRIME = 16777619;
+
     @Override
     public long hash(Object key) {
+        return Math.abs(rawHash(key));
+    }
+
+    @Override
+    public long rawHash(Object key) {
         String data = key.toString();
         int hash = (int)FNV_32_INIT;
         for (int i = 0; i < data.length(); i++)
@@ -21,7 +27,6 @@ public class FNV132Hash implements HashFunc {
         hash += hash << 3;
         hash ^= hash >> 17;
         hash += hash << 5;
-        hash = Math.abs(hash);
         return hash;
     }
 }

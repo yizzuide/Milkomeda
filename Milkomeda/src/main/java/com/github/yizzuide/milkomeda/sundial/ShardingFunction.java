@@ -1,12 +1,16 @@
 package com.github.yizzuide.milkomeda.sundial;
 
-import com.github.yizzuide.milkomeda.universe.algorithm.hash.HashFunc;
-import com.github.yizzuide.milkomeda.universe.algorithm.hash.ConsistentHashRing;
-import com.github.yizzuide.milkomeda.universe.algorithm.hash.FNV132Hash;
-import com.github.yizzuide.milkomeda.universe.algorithm.hash.KetamaHash;
-import com.github.yizzuide.milkomeda.universe.algorithm.hash.MurmurHash;
+import com.github.yizzuide.milkomeda.universe.algorithm.hash.*;
+import lombok.extern.slf4j.Slf4j;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -17,8 +21,10 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @author yizzuide
  * @since 3.8.0
+ * @version 3.9.0
  * Create at 2020/06/16 10:34
  */
+@Slf4j
 public class ShardingFunction {
 
     public static final String BEAN_ID = "ShardingFunction";
@@ -115,5 +121,53 @@ public class ShardingFunction {
             cachedConsistentHashMap.put(cacheKey, consistentHashRing);
         }
         return consistentHashRing.get(key);
+    }
+
+    /**
+     * 时间窗口滑动（可实现按创建日期拆分）
+     * @param key   时间拆分键
+     * @param startDate 开始时间（格式：yyyy-MM-dd）
+     * @param daySlideWindow 滑动窗口天数（一个滑动窗口分一次）
+     * @param expandWarnPercent 当前分表扩展警告占百分比，如：0.75
+     * @return  拆分号
+     * @since 3.9.0
+     */
+    public long rollDate(Date key, String startDate, long daySlideWindow, double expandWarnPercent) {
+        long current = key.getTime();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        LocalDateTime startDateTime = LocalDateTime.parse(startDate, formatter);
+        long start = startDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+        // 计算当前累计天数
+        long offset = current - start;
+        if (offset < 0)  {
+            throw new IllegalArgumentException("current time is less than the start time");
+        }
+        long days = Duration.ofMillis(offset).toDays();
+        return roll(days, daySlideWindow, expandWarnPercent);
+    }
+
+    /**
+     * 通用窗口滑动（可实现增长类型主键拆分）
+     * @param key           拆分键
+     * @param slideWindow   滑动窗口大小
+     * @param expandWarnPercent 当前分表扩展警告占百分比，如：0.75
+     * @return  拆分号
+     * @since 3.9.0
+     */
+    public long roll(long key,  long slideWindow, double expandWarnPercent) {
+        assert key >= 0 && slideWindow > 0;
+        if (expandWarnPercent > 0) {
+            // 获取系数
+            double factor = (double)key / (double)slideWindow;
+            // 截取小数得当前分配百分比
+            double percent = factor - (long)factor;
+            if (percent > expandWarnPercent) {
+                log.warn("Roll function of sundial sharding up to percent: {}", percent);
+            }
+        }
+        if (key <= slideWindow || key % slideWindow == 0) {
+            return key / slideWindow;
+        }
+        return BigDecimal.valueOf(key).divide(BigDecimal.valueOf(slideWindow), RoundingMode.UP).longValue() - 1;
     }
 }

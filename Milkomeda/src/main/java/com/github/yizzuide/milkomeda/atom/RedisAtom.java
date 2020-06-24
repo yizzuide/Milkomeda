@@ -57,7 +57,6 @@ public class RedisAtom implements Atom {
         return ((RLock) lock).isHeldByCurrentThread();
     }
 
-    // 获取红锁
     private RLock getLock(String keyPath, AtomLockType type, boolean readOnly) {
         switch (type) {
             case FAIR:

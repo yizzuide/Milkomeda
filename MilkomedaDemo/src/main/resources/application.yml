@@ -149,8 +149,21 @@ milkomeda:
           chain: ["noRepeatLimiter", "timesLimiter"]
         order: -1
         include-urls: ["/particle/pay"]
+      -
+        name: userBloomLimiter
+        type: BLOOM
+        props:
+          # bitmap key
+          bitKey: bit_user
+          # 数据量
+          insertions: 2000000
+        key-tpl: limit_{method}_{uri}_{$params.phone}
+        include-urls: ["/particle/exists"]
+        response:
+          status: 200
+          code: -1
+          message: 用户不存在，请先注册
     exclude-urls: ["/favicon.ico"]
-
 
   light:
     instances:

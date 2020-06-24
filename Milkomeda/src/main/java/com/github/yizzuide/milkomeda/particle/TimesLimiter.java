@@ -18,7 +18,7 @@ import java.util.Collections;
  *
  * @author yizzuide
  * @since 1.5.2
- * @version 1.14.0
+ * @version 3.9.0
  * Create at 2019/05/30 17:32
  */
 @Data
@@ -93,11 +93,7 @@ public class TimesLimiter extends LimitHandler {
         // 判断是否超过次数
         boolean isOver = times > limitTimes;
         Particle particle = new Particle(this.getClass(), isOver, times);
-        // 如果未被限制，且有下一个处理器
-        if (!particle.isLimited() && null != getNext()) {
-            return getNext().limit(key, expire, process);
-        }
-        return process.apply(particle);
+        return next(particle, key, expire, process);
     }
 
     static void setLuaScript(String luaScript) {
