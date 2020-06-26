@@ -74,7 +74,7 @@
 * SpringBoot 2.x
 
 ## Version control guidelines
-- 1.16.0+ for Spring Boot 2.1.x - 2.2.x
+- 1.16.0+ for Spring Boot 2.1+
 - Dalston.1.11.0-Dalston.1.12.0 for Spring Boot 1.5.x
 - Others for Spring Boot 2.0.x
 
