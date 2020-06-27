@@ -19,9 +19,9 @@ The inspiration for this project name is the Milky Way and the Andromeda will me
    * Depends on: Spring MVC
 - [x] Pillar: Used for if/else business block splitting. *0.2.0+*
    * Depends on: Spring IoC
-- [x] Particle: Support idempotent, times and Bloom limiter (*3.9.0*) also allow extensible limiter chain of responsibility. *1.5.0+*
+- [x] Particle: Support idempotent, times and Bloom limiter (*3.9.0*), also allow extensible limiter chain of responsibility. *1.5.0+*
    * Depends on: Spring MVC, SpringBoot Data Redis
-- [x] Light: Used for data cache, support super cache (ThreadLocal)L1 cache（RAM)L2 cache (Redis). *1.8.0+*
+- [x] Light: Used for data cache, support super cache (ThreadLocal), L1 cache（RAM), L2 cache (Redis). *1.8.0+*
    * Depends on: SpringBoot Data Redis
 - [x] Fusion: Used for dynamic modify method return value, invoke methods based on conditions (support fallback for disallow). *1.12.0+*
    * Depends on: Spring AOP
@@ -37,7 +37,7 @@ The inspiration for this project name is the Milky Way and the Andromeda will me
   * Depends on: Spring IoC, SpringBoot Data Redis
 - [x] Halo: Used for listen Mybatis CRUD. *2.5.0+*
   * Depends on: Mybatis
-- [x] Hydrogen: Used for aop transactions, unified exception response handling (support for custom exceptions), parameter validation, internationalization, add interceptors and filters dynamically (support for loaded online). *3.0.0+*
+- [x] Hydrogen: Used for aop transactions, unified exception response handling (also support for custom exceptions), parameter validation, internationalization, add interceptors and filters dynamically (support for loaded online). *3.0.0+*
   * Depends on: Spring MVC
 - [x] Atom: Used for distributed lock, support both with Redis, Zookeeper solution. *3.3.0+*
   * Depends on: Redission, Curator-Recipes
