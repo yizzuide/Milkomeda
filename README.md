@@ -1,7 +1,7 @@
 # Milkomeda
 ![tag](https://img.shields.io/github/tag/yizzuide/Milkomeda.svg) [![Maven Central](https://img.shields.io/maven-central/v/com.github.yizzuide/milkomeda-spring-boot-starter)](https://search.maven.org/search?q=g:com.github.yizzuide%20AND%20a:milkomeda-spring-boot-starter) ![Java CI](https://github.com/yizzuide/Milkomeda/workflows/Java%20CI/badge.svg?branch=master) [![Code Coverage](https://codecov.io/gh/yizzuide/Milkomeda/branch/master/graph/badge.svg)](https://codecov.io/gh/yizzuide/Milkomeda/branch/master) [![Production Ready](https://img.shields.io/badge/production-ready-blue.svg)](https://github.com/yizzuide/Milkomeda) ![license](https://img.shields.io/github/license/yizzuide/Milkomeda.svg)
 
-The inspiration for this project name is the Milky Way and the Andromeda will merge in the future, like spring eco-system, this project has many popular modular solution. 
+The inspiration for this project name is the Milky Way and the Andromeda will merge in the future, like spring ecosystem, this project has many popular modular solution. 
 
 > This project is not demo or template, can be called "springboot plus" (sounds like a great project), echo module needs to be enabled with the appropriate annotations.
 
