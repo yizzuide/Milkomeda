@@ -3,7 +3,7 @@
 
 The inspiration for this project name is the Milky Way and the Andromeda will merge in the future, like spring ecosystem, this project has many popular modular solution. 
 
-> This project is not demo or template, can be called "springboot plus" (sounds like a great project), echo module needs to be enabled with the appropriate annotations.
+> This project is not demo or template, can be called "springboot plus" (sounds like a great project), each module needs to be enabled with the appropriate annotations.
 
 [中文文档](https://github.com/yizzuide/Milkomeda/blob/master/README_zh-CN.md)
 
@@ -23,11 +23,11 @@ The inspiration for this project name is the Milky Way and the Andromeda will me
    * Depends on: Spring MVC, SpringBoot Data Redis
 - [x] Light: Used for data cache, support super cache (ThreadLocal), L1 cache（RAM), L2 cache (Redis). *1.8.0+*
    * Depends on: SpringBoot Data Redis
-- [x] Fusion: Used for dynamic modify method return value, invoke methods based on conditions (support fallback for disallow). *1.12.0+*
+- [x] Fusion: Used for dynamic modify method return value, invoke methods based on conditions (support fallback when condition is disallow). *1.12.0+*
    * Depends on: Spring AOP
-- [x] Echo: Integrating the `RestTemplate` with support sign/unsigned with RSA, encryption with AES, uniform response and validation. *1.13.0+*
+- [x] Echo: Integrating the `RestTemplate` with support sign/unsigned with RSA, encryption with AES, uniform response and verification . *1.13.0+*
    * Depends on: Spring MVC
-- [x] Crust: Used for session login and jwt Token stateless login, support config token encryption with RSA and AES. *1.14.0+*
+- [x] Crust: Used for both session login and jwt Token stateless login, support config token encryption with RSA and AES. *1.14.0+*
    * Depends on: Spring Security
 - [x] Ice: Used for delay queue, support delay bucket, TTR, task auto schedule. *1.15.0+*
    * Depends on: Spring IoC, Spring Task, SpringBoot Data Redis
@@ -39,11 +39,11 @@ The inspiration for this project name is the Milky Way and the Andromeda will me
   * Depends on: Mybatis
 - [x] Hydrogen: Used for aop transactions, unified exception response handling (also support for custom exceptions), parameter validation, internationalization, add interceptors and filters dynamically (support for loaded online). *3.0.0+*
   * Depends on: Spring MVC
-- [x] Atom: Used for distributed lock, support both with Redis, Zookeeper solution. *3.3.0+*
+- [x] Atom: Used for distributed lock, support both Redis and Zookeeper solution. *3.3.0+*
   * Depends on: Redission, Curator-Recipes
 - [x] Wormhole: The event bus designed based on DDD architecture module can be used for event flow, big data business event production and output. *3.3.0+*
   * Depends on: Spring IoC
-- [x] Sundial: Used for master-slave data source switching, addition support sub-table (3.8.0+). *3.4.0+*
+- [x] Sundial: Used for master-slave data source switching, addition support sub-table with consistency of the Hash (3.8.0+). *3.4.0+*
   * Depends on: Spring JDBC, Mybatis
 - [x] Jupiter: Lightweight rule engine based on data source queries, query filtering with request domains extract expression (such as `$params`, `$attr`, `$header`)，and result matching with EL/OGNL expression parsing. *3.5.0+*
   * Depends on: Spring JDBC, Spring EL, OGNL
@@ -73,7 +73,7 @@ The inspiration for this project name is the Milky Way and the Andromeda will me
 ### 3.0 Release
 Milkomeda 3.0 is now available（April 2020). 
 
-- YML config promoted to first class of development, allow developers to access quickly.
+- YML config promoted to first-class of development, allow developers to start quickly.
 - Add a new module called `Hydrogen`, the infrastructure functions of Spring and SpringMVC are all taken over, and explored from the source level.
 - The aggregation ability of functional modules has strengthened to achieve the improvement of the small world within the big world.
 
@@ -90,9 +90,10 @@ The *Mikomeda* project needs more developers to work together, join us with some
 
 - If you have a better idea, please submit a new issue with `[feature]` prefix.
 - Fork from `master` branch, checkout a new branch named like `feat_module_yyyyMMdd` for add new module，`fix_module_yyyyMMdd` for fixing issues.
-- The newly added module as universal as possible, provide demo in `MilkomedaDemo` as better.
-- The newly added module must be under package `com.github.yizzuide.milkomeda`, and can be enabled with annotation.
+- The newly added module should be as universal as possible, also provide demo in `MilkomedaDemo` as better.
+- The newly added module must be under package `com.github.yizzuide.milkomeda` with addition module name sub package, and can be enabled with annotation in Spring Boot environment.
 - Don't commit IDE config file and OS temp file, please add to `.gitignore` file.
+- The last thing, pull request for me with `master` branch or `dev-xxx` if there is a recent new version development branch.
 
 ## Author
 yizzuidefu837014586@163.com
