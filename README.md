@@ -96,7 +96,7 @@ The *Mikomeda* project needs more developers to work together, join us with some
 - The last thing, pull request for me with `master` branch or `dev-xxx` if there is a recent new version development branch.
 
 ## Author
-yizzuidefu837014586@163.com
+yizzuide fu837014586@163.com
 
 ## License
 Milkomeda is available under the MIT license. See the LICENSE file for more info.
