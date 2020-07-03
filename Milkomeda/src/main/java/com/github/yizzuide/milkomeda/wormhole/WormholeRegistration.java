@@ -31,7 +31,7 @@ public class WormholeRegistration {
         if (event.getApplicationContext().getParent() == null) {
             return;
         }
-        actionMap = AopContextHolder.getHandlerMetaData(WormholeEventHandler.class, WormholeAction.class, (annotation, metaData) -> {
+        actionMap = AopContextHolder.getHandlerMetaData(WormholeEventHandler.class, WormholeAction.class, (annotation, handlerAnnotation, metaData) -> {
             WormholeAction wormholeAction = (WormholeAction) annotation;
             return wormholeAction.value();
         }, false);

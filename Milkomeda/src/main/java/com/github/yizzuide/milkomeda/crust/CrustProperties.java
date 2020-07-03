@@ -91,7 +91,7 @@ public class CrustProperties {
     private String refreshTokenName = "Authorization";
 
     /**
-     * 登录路径，只有在stateless=false时有效（默认/login）
+     * 登录页面路径（仅在stateless=false时有效，默认/login）
      */
     private String loginUrl = "/login";
 

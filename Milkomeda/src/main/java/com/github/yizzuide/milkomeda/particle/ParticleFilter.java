@@ -32,7 +32,7 @@ import static com.github.yizzuide.milkomeda.particle.ParticleProperties.Limiter.
  *
  * @author yizzuide
  * @since 3.0.0
- * @version 3.5.0
+ * @version 3.10.0
  * Create at 2020/04/08 11:41
  */
 public class ParticleFilter implements Filter {
@@ -78,6 +78,10 @@ public class ParticleFilter implements Filter {
 
         boolean matchFlag = false;
         List<ParticleProperties.Limiter> urlLimiters = particleProperties.getLimiters();
+        if (CollectionUtils.isEmpty(urlLimiters)) {
+            chain.doFilter(request, response);
+            return;
+        }
         for (ParticleProperties.Limiter limiter : urlLimiters) {
             // 忽略需排除的URL
             if (!CollectionUtils.isEmpty(limiter.getExcludeUrls()) && URLPathMatcher.match(limiter.getExcludeUrls(), httpServletRequest.getRequestURI())) {

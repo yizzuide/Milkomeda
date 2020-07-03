@@ -33,7 +33,7 @@ public class FusionRegistration {
         if (event.getApplicationContext().getParent() == null) {
             return;
         }
-        actionMap = AopContextHolder.getHandlerMetaData(FusionHandler.class, FusionAction.class, (annotation, metaData) -> {
+        actionMap = AopContextHolder.getHandlerMetaData(FusionHandler.class, FusionAction.class, (annotation, handlerAnnotation, metaData) -> {
             FusionAction fusionAction = (FusionAction) annotation;
             return fusionAction.value();
         }, false);

@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 1.14.0
- * @version 3.9.0
+ * @version 3.10.0
  * Create at 2019/11/11 11:26
  */
 @Slf4j
@@ -83,6 +83,9 @@ public class ParticleConfig implements ApplicationContextAware {
     @Override
     public void setApplicationContext(@NonNull ApplicationContext applicationContext) throws BeansException {
         List<ParticleProperties.Limiter> limiters = particleProperties.getLimiters();
+        if (CollectionUtils.isEmpty(limiters)) {
+            return;
+        }
         List<ParticleProperties.Limiter> barrierLimiters = new ArrayList<>();
         Map<String, LimitHandler> shareLimitHandlerMap = new HashMap<>();
         for (ParticleProperties.Limiter limiter : limiters) {

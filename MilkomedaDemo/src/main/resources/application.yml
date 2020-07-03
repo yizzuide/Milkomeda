@@ -189,10 +189,28 @@ milkomeda:
     token-name: Authorization
     # 不使用BCrypt（如果用户表有salt字段的情况）
   #    use-bcrypt: false
-    # 添加到无认证许可
+    # 添加到匿名访问许可
     addition-permit-urls:
+      - /collect/**
+      - /echo/**
+      - /test/**
+      - /order/**
+      - /particle/**
+      - /pay/**
+      - /user/**
+      - /ice/**
+      - /job/**
+      - /neutron/**
+      - /moon/**
+      - /fusion/**
+      - /halo/**
+      - /hydrogen/**
+      - /audit/**
+      - /seckill/**
+      - /sundial/**
       - /jupiter/**
       - /metal/**
+      - /pillar/**
 
   ice:
     # 开启Job作业（作为消费端使用时，设置为false）

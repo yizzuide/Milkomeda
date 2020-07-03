@@ -38,15 +38,15 @@ public class IceContext implements ApplicationListener<ContextRefreshedEvent> {
         if (event.getApplicationContext().getParent() == null) {
             return;
         }
-        topicMap = AopContextHolder.getHandlerMetaData(IceHandler.class, IceListener.class, (annotation, metaData) -> {
+        topicMap = AopContextHolder.getHandlerMetaData(IceHandler.class, IceListener.class, (annotation, handlerAnnotation, metaData) -> {
                     IceListener iceListener = (IceListener) annotation;
                     return iceListener.value();
                 }, !props.isMultiTopicListenerPerHandler());
-        topicTtrMap = AopContextHolder.getHandlerMetaData(IceHandler.class, IceTtrListener.class, (annotation, metaData) -> {
+        topicTtrMap = AopContextHolder.getHandlerMetaData(IceHandler.class, IceTtrListener.class, (annotation, handlerAnnotation, metaData) -> {
             IceTtrListener iceTtrListener = (IceTtrListener) annotation;
             return iceTtrListener.value();
         }, !props.isMultiTopicListenerPerHandler());
-        topicTtrOverloadMap = AopContextHolder.getHandlerMetaData(IceHandler.class, IceTtrOverloadListener.class, (annotation, metaData) -> {
+        topicTtrOverloadMap = AopContextHolder.getHandlerMetaData(IceHandler.class, IceTtrOverloadListener.class, (annotation, handlerAnnotation, metaData) -> {
             IceTtrOverloadListener iceTtrOverloadListener = (IceTtrOverloadListener) annotation;
             return iceTtrOverloadListener.value();
         }, !props.isMultiTopicListenerPerHandler());

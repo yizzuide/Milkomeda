@@ -20,6 +20,7 @@ import java.util.Objects;
  *
  * @author yizzuide
  * @since 1.13.0
+ * @version 3.10.0
  * Create at 2019/09/21 19:58
  */
 @Slf4j
@@ -37,6 +38,14 @@ public class EncryptUtil {
      * SHA256
      */
     public static final String SIGN_TYPE_RSA2 = "SHA256WithRSA";
+    /**
+     * DES
+     */
+    public static final String SECURE_TYPE_DES = "DES";
+    /**
+     * AES
+     */
+    public static final String SECURE_TYPE_AES = "AES";
 
     /**
      * base64编码
@@ -59,14 +68,23 @@ public class EncryptUtil {
     }
 
     /**
-     * 生产aes秘钥
+     * 生成aes秘钥
      *
-     * @return aes秘钥串
+     * @return aes对称密钥
      */
     public static String generateKey() {
+        return generateKey(SECURE_TYPE_AES);
+    }
+
+    /**
+     * 生成对称密钥
+     * @param type  类型
+     * @return 对称密钥
+     */
+    public static String generateKey(String type) {
         KeyGenerator keyGenerator;
         try {
-            keyGenerator = KeyGenerator.getInstance("aes");
+            keyGenerator = KeyGenerator.getInstance(type);
         } catch (NoSuchAlgorithmException e) {
             log.info("Encrypt happen exception: {}", e.getMessage(), e);
             throw new RuntimeException(e.getMessage());
@@ -77,7 +95,7 @@ public class EncryptUtil {
     }
 
     /**
-     * AES (默认AES/ECB/PKCS5Padding)加密并 Base64
+     * AES (默认AES/ECB/PKCS5Padding)加密并返回Base64
      * @param aesKey base64密钥
      * @param content 需要加密的文本
      * @return base64编码

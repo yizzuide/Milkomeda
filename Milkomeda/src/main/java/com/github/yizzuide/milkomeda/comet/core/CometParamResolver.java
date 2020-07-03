@@ -3,6 +3,8 @@ package com.github.yizzuide.milkomeda.comet.core;
 import com.github.yizzuide.milkomeda.universe.context.WebContext;
 import com.github.yizzuide.milkomeda.util.JSONUtil;
 import org.springframework.core.MethodParameter;
+import org.springframework.lang.NonNull;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
@@ -20,6 +22,7 @@ import java.util.Map;
  *
  * @author yizzuide
  * @since 2.0.0
+ * @version 3.10.0
  * Create at 2019/12/12 22:08
  */
 public class CometParamResolver implements HandlerMethodArgumentResolver {
@@ -30,18 +33,28 @@ public class CometParamResolver implements HandlerMethodArgumentResolver {
     }
 
     @Override
-    public Object resolveArgument(MethodParameter methodParameter, ModelAndViewContainer modelAndViewContainer, NativeWebRequest nativeWebRequest, WebDataBinderFactory webDataBinderFactory) throws Exception {
+    public Object resolveArgument(@NonNull MethodParameter methodParameter, ModelAndViewContainer modelAndViewContainer,
+                                  @NonNull NativeWebRequest nativeWebRequest, WebDataBinderFactory webDataBinderFactory) throws Exception {
         // methodParameter.getParameterAnnotation(CometParam.class);
         String params = CometRequestWrapper.resolveRequestParams(WebContext.getRequest(),true);
+        if (StringUtils.isEmpty(params)) {
+            return null;
+        }
         CometAspect.resolveThreadLocal.set(params);
         Class<?> parameterType = methodParameter.getParameterType();
-        // Map类型
+        // Is matched String
+        if (String.class.isAssignableFrom(parameterType)) {
+            return params;
+        }
+        // Map
         if (Map.class.isAssignableFrom(parameterType)) {
             return JSONUtil.parseMap(params, String.class, Object.class);
-        } else if (List.class.isAssignableFrom(parameterType)) {
+        }
+        // List
+        if (List.class.isAssignableFrom(parameterType)) {
             return JSONUtil.parseList(params, Map.class);
         }
-        // 自定义对象类型
+        // custom object
         return JSONUtil.parse(params, parameterType);
     }
 }

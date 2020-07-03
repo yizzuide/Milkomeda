@@ -3,7 +3,6 @@ package com.github.yizzuide.milkomeda.sundial;
 import com.zaxxer.hikari.HikariDataSource;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
@@ -55,8 +54,7 @@ public class SundialProperties {
     /**
      * 分库分表
      */
-    @NestedConfigurationProperty
-    private Sharding sharding;
+    private Sharding sharding = new Sharding();
 
     /**
      * 分库分表

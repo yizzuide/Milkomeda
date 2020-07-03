@@ -14,6 +14,7 @@ import com.github.yizzuide.milkomeda.metal.EnableMetal;
 import com.github.yizzuide.milkomeda.moon.EnableMoon;
 import com.github.yizzuide.milkomeda.neutron.EnableNeutron;
 import com.github.yizzuide.milkomeda.particle.EnableParticle;
+import com.github.yizzuide.milkomeda.pillar.EnablePillar;
 import com.github.yizzuide.milkomeda.pulsar.EnablePulsar;
 import com.github.yizzuide.milkomeda.sundial.EnableSundial;
 import com.github.yizzuide.milkomeda.wormhole.EnableWormhole;
@@ -30,6 +31,7 @@ import java.lang.annotation.Target;
  * @author yizzuide
  * Create at 2019/12/13 01:03
  */
+@EnablePillar
 @EnableMetal
 @EnableJupiter
 @EnableSundial

@@ -36,10 +36,10 @@ public class HaloContext implements ApplicationListener<ContextRefreshedEvent> {
         if (event.getApplicationContext().getParent() == null) {
             return;
         }
-        tableNameMap = AopContextHolder.getHandlerMetaData(HaloHandler.class, HaloListener.class, (annotation, metaData) -> {
+        tableNameMap = AopContextHolder.getHandlerMetaData(HaloHandler.class, HaloListener.class, (annotation, handlerAnnotation, metaData) -> {
             HaloListener haloListener = (HaloListener) annotation;
             // 设置其它属性方法的值
-            Map<String, Object> attrs = new HashMap<>(2);
+            Map<String, Object> attrs = new HashMap<>(4);
             attrs.put(ATTR_TYPE, haloListener.type());
             attrs.put(ATTR_ASYNC, haloListener.async());
             metaData.setAttributes(attrs);

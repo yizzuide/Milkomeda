@@ -5,6 +5,7 @@ import com.github.yizzuide.milkomeda.comet.core.CometInterceptor;
 import com.github.yizzuide.milkomeda.comet.core.WebCometData;
 import com.github.yizzuide.milkomeda.comet.core.XCometData;
 import com.github.yizzuide.milkomeda.universe.el.ELContext;
+import com.github.yizzuide.milkomeda.universe.function.TripleFunction;
 import com.github.yizzuide.milkomeda.universe.metadata.HandlerMetaData;
 import org.springframework.aop.framework.AopContext;
 import org.springframework.aop.support.AopUtils;
@@ -17,14 +18,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.BiFunction;
 
 /**
  * AopContextHolder
  *
  * @author yizzuide
  * @since 1.13.4
- * @version 3.3.2
+ * @version 3.10.0
  * Create at 2019/10/24 21:17
  */
 public class AopContextHolder {
@@ -76,7 +76,7 @@ public class AopContextHolder {
     public static Map<String, List<HandlerMetaData>> getHandlerMetaData(
             Class<? extends Annotation> handlerAnnotationClazz,
             Class<? extends Annotation> executeAnnotationClazz,
-            BiFunction<Annotation, HandlerMetaData, String> nameProvider,
+            TripleFunction<Annotation, Annotation, HandlerMetaData, String> nameProvider,
             boolean onlyOneExecutorPerHandler) {
         Map<String, List<HandlerMetaData>> handlerMap = new HashMap<>();
         Map<String, Object> beanMap = ApplicationContextHolder.get().getBeansWithAnnotation(handlerAnnotationClazz);
@@ -85,6 +85,7 @@ public class AopContextHolder {
             // 查找AOP切面（通过Proxy.isProxyClass()判断类是否是代理的接口类，AopUtils.isAopProxy()判断对象是否被代理），可以通过AopUtils.getTargetClass()获取原Class
             Method[] methods = ReflectionUtils.getAllDeclaredMethods(AopUtils.isAopProxy(target) ?
                     AopUtils.getTargetClass(target) : target.getClass());
+            Annotation handlerAnnotation = target.getClass().getAnnotation(handlerAnnotationClazz);
             for (Method method : methods) {
                 // 获取指定方法上的注解的属性
                 final Annotation executeAnnotation = AnnotationUtils.findAnnotation(method, executeAnnotationClazz);
@@ -93,7 +94,7 @@ public class AopContextHolder {
                 }
                 HandlerMetaData metaData = new HandlerMetaData();
                 // 支持SpEL
-                String name = nameProvider.apply(executeAnnotation, metaData);
+                String name = nameProvider.apply(executeAnnotation, handlerAnnotation, metaData);
                 if (name.startsWith("'") || name.startsWith("@") || name.startsWith("#") || name.startsWith("T(") || name.startsWith("args[")) {
                     name = ELContext.getValue(target, new Object[]{}, target.getClass(), method, name, String.class);
                 }
