@@ -307,6 +307,10 @@ milkomeda:
             code:
             message:
             type:
+          - clazz: com.github.yizzuide.milkomeda.hydrogen.uniform.UniformException
+            status: 200
+            code:
+            message:
 
     # 参数校验
     validator:

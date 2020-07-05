@@ -1,6 +1,6 @@
 package com.github.yizzuide.milkomeda.demo.hydrogen.controller;
 
-import com.github.yizzuide.milkomeda.demo.hydrogen.exception.YizException;
+import com.github.yizzuide.milkomeda.demo.hydrogen.exception.ExceptionEnum;
 import com.github.yizzuide.milkomeda.demo.hydrogen.handler.IPLimiterFilter;
 import com.github.yizzuide.milkomeda.demo.hydrogen.handler.WaitTimeInterceptor;
 import com.github.yizzuide.milkomeda.demo.hydrogen.service.TOrderService;
@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.context.refresh.ContextRefresher;
 import org.springframework.http.HttpStatus;
+import org.springframework.util.CollectionUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import javax.validation.Valid;
+import java.util.Map;
 
 /**
  * HydrogenController
@@ -54,9 +56,11 @@ public class HydrogenController {
     }
 
     @RequestMapping("uniform")
-    public void testUniform() {
+    public void testUniform(@RequestParam Map<String, Object> params) {
         // 自定义异常
-        throw new YizException(1001L, "test", "测试异常");
+        //throw new YizException(1001L, "test", "测试异常");
+        // 使用框架提供的断言异常
+        ExceptionEnum.PARAM_IS_NULL.assertBool(CollectionUtils.isEmpty(params), 1001L);
     }
 
     @RequestMapping("valid")
