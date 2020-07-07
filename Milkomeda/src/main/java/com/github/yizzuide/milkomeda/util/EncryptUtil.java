@@ -1,6 +1,7 @@
 package com.github.yizzuide.milkomeda.util;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.codec.binary.Base64;
 import org.springframework.util.StringUtils;
 
 import javax.crypto.Cipher;
@@ -11,8 +12,8 @@ import java.io.ByteArrayOutputStream;
 import java.security.*;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
-import java.util.Base64;
 import java.util.Objects;
+import java.util.function.Function;
 
 /**
  * EncryptUtil
@@ -54,7 +55,7 @@ public class EncryptUtil {
      * @return base64编码
      */
     public static String encode(byte[] data) {
-        return Base64.getEncoder().encodeToString(data);
+        return Base64.encodeBase64String(data);
     }
 
     /**
@@ -64,7 +65,7 @@ public class EncryptUtil {
      * @return base64编码密文
      */
     public static byte[] decode(String data) {
-        return StringUtils.isEmpty(data) ? null : Base64.getDecoder().decode(data);
+        return StringUtils.isEmpty(data) ? null : Base64.decodeBase64(data);
     }
 
     /**
@@ -242,9 +243,10 @@ public class EncryptUtil {
      * @param data      签名数据
      * @param priKey    base64私钥
      * @param signType  签名类型，使用常量：SIGN_TYPE_RSA1、SIGN_TYPE_RSA2
-     * @return 签的base64
+     * @return 签名的字节数组
+     * @since 3.10.0
      */
-    public static String sign(String data, String priKey, String signType) {
+    public static byte[] signRaw(String data, String priKey, String signType) {
         PKCS8EncodedKeySpec pkcs8EncodedKeySpec = new PKCS8EncodedKeySpec(Objects.requireNonNull(decode(priKey)));
         byte[] sign;
         try {
@@ -259,7 +261,47 @@ public class EncryptUtil {
             log.info("Encrypt happen exception: {}", e.getMessage(), e);
             throw new RuntimeException(e.getMessage());
         }
-        return encode(sign);
+        return sign;
+    }
+
+    /**
+     * 生成签名
+     *
+     * @param data      签名数据
+     * @param priKey    base64私钥
+     * @param signType  签名类型，使用常量：SIGN_TYPE_RSA1、SIGN_TYPE_RSA2
+     * @return 签名的base64
+     */
+    public static String sign(String data, String priKey, String signType) {
+        return encode(signRaw(data, priKey, signType));
+    }
+
+    /**
+     * 验签
+     * @param data   签名数据
+     * @param sign   签名base64串
+     * @param pubKey base64公钥
+     * @param signType 签名类型，使用常量：SIGN_TYPE_RSA1、SIGN_TYPE_RSA2
+     * @param decoder   base64解码器
+     * @return 验证签名结果
+     * @since 3.10.0
+     */
+    public static boolean verify(String data, String sign, String pubKey, String signType, Function<String, byte[]> decoder) {
+        X509EncodedKeySpec x509EncodedKeySpec = new X509EncodedKeySpec(Objects.requireNonNull(decode(pubKey)));
+        boolean verify;
+        try {
+            KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+            PublicKey publicKey = keyFactory.generatePublic(x509EncodedKeySpec);
+
+            Signature signature = Signature.getInstance(signType);
+            signature.initVerify(publicKey);
+            signature.update(data.getBytes(CHARSET));
+            verify = signature.verify(decoder.apply(sign));
+        } catch (Exception e) {
+            log.info("Encrypt happen exception: {}", e.getMessage(), e);
+            throw new RuntimeException(e.getMessage());
+        }
+        return verify;
     }
 
     /**
@@ -270,21 +312,7 @@ public class EncryptUtil {
      * @param signType 签名类型，使用常量：SIGN_TYPE_RSA1、SIGN_TYPE_RSA2
      * @return 验证签名结果
      */
-    public static boolean verify(String data, String sign, String pubKey,String signType) {
-        X509EncodedKeySpec x509EncodedKeySpec = new X509EncodedKeySpec(Objects.requireNonNull(decode(pubKey)));
-        boolean verify;
-        try {
-            KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-            PublicKey publicKey = keyFactory.generatePublic(x509EncodedKeySpec);
-
-            Signature signature = Signature.getInstance(signType);
-            signature.initVerify(publicKey);
-            signature.update(data.getBytes(CHARSET));
-            verify = signature.verify(decode(sign));
-        } catch (Exception e) {
-            log.info("Encrypt happen exception: {}", e.getMessage(), e);
-            throw new RuntimeException(e.getMessage());
-        }
-        return verify;
+    public static boolean verify(String data, String sign, String pubKey, String signType) {
+        return verify(data, sign, pubKey, signType, EncryptUtil::decode);
     }
 }
