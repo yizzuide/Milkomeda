@@ -2,7 +2,6 @@ package com.github.yizzuide.milkomeda.crust;
 
 import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -14,12 +13,12 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler;
-import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -37,7 +36,7 @@ import java.util.function.Supplier;
  *
  * @author yizzuide
  * @since 1.14.0
- * @version 3.10.0
+ * @version 3.10.1
  * @see org.springframework.security.web.session.SessionManagementFilter
  * @see org.springframework.security.config.annotation.web.configurers.SessionManagementConfigurer
  * Create at 2019/11/11 18:25
@@ -51,7 +50,7 @@ public class CrustConfigurerAdapter extends WebSecurityConfigurerAdapter {
     private BCryptPasswordEncoder passwordEncoder;
 
     @Autowired
-    private ApplicationContext applicationContext;
+    private ApplicationContextHolder applicationContextHolder;
 
     @Override
     public void configure(AuthenticationManagerBuilder auth) {
@@ -64,15 +63,14 @@ public class CrustConfigurerAdapter extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         List<String> allowURLs = new ArrayList<>(props.getPermitURLs());
-        // 登录、登出
+        // 登录
         allowURLs.add(props.getLoginUrl());
-        allowURLs.add(props.getLogoutUrl());
         // 额外添加的排除项
         if (!CollectionUtils.isEmpty(props.getAdditionPermitUrls())) {
             allowURLs.addAll(props.getAdditionPermitUrls());
         }
         // 标记匿名访问
-        Map<RequestMappingInfo, HandlerMethod> handlerMethodMap = applicationContext.getBean(RequestMappingHandlerMapping.class).getHandlerMethods();
+        Map<RequestMappingInfo, HandlerMethod> handlerMethodMap = applicationContextHolder.getApplicationContext().getBean(RequestMappingHandlerMapping.class).getHandlerMethods();
         Set<String> anonUrls = new HashSet<>();
         for (Map.Entry<RequestMappingInfo, HandlerMethod> infoEntry : handlerMethodMap.entrySet()) {
             HandlerMethod handlerMethod = infoEntry.getValue();
@@ -85,10 +83,8 @@ public class CrustConfigurerAdapter extends WebSecurityConfigurerAdapter {
             allowURLs.addAll(anonUrls);
         }
         String[] permitAllMapping = allowURLs.toArray(new String[0]);
-        String httpOnly = ApplicationContextHolder.getEnvironment().get("server.servlet.session.cookie.http-only");
         http.csrf()
-                .ignoringAntMatchers(permitAllMapping)
-                .csrfTokenRepository(Boolean.parseBoolean(httpOnly) ? new CookieCsrfTokenRepository() : CookieCsrfTokenRepository.withHttpOnlyFalse()).and()
+                .disable()
             .sessionManagement().sessionCreationPolicy(props.isStateless() ?
                 SessionCreationPolicy.STATELESS : SessionCreationPolicy.IF_REQUIRED).and()
             .formLogin().disable()
@@ -108,8 +104,8 @@ public class CrustConfigurerAdapter extends WebSecurityConfigurerAdapter {
                 // 其他所有请求需要身份认证
                 .anyRequest().authenticated();
 
-        // 配置预设置
-        presetConfigure(http);
+        // 添加自定义匿名路径
+        additionalConfigure(http.authorizeRequests(), http);
 
         // 如果是无状态方式
         if (props.isStateless()) {
@@ -157,6 +153,15 @@ public class CrustConfigurerAdapter extends WebSecurityConfigurerAdapter {
     }
 
     /**
+     * 自定义添加允许匿名访问的路径
+     *
+     * @param urlRegistry URL配置对象
+     * @param http        HttpSecurity
+     * @throws Exception 配置异常
+     */
+    protected void additionalConfigure(ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry urlRegistry, HttpSecurity http) throws Exception { }
+
+    /**
      * 自定义配置数据源提供及<code>PasswordEncoder</code>
      * @param provider  DaoAuthenticationProvider
      */
@@ -171,14 +176,6 @@ public class CrustConfigurerAdapter extends WebSecurityConfigurerAdapter {
     protected Supplier<AuthenticationFailureHandler> authFailureHandler() {
         return () -> (request, response, exception) -> response.setStatus(HttpStatus.UNAUTHORIZED.value());
     }
-
-    /**
-     * 预设置添加允许访问路径
-     *
-     * @param http HttpSecurity
-     * @throws Exception 配置异常
-     */
-    protected void presetConfigure(HttpSecurity http) throws Exception { }
 
     @Bean(name = BeanIds.AUTHENTICATION_MANAGER)
     @Override
