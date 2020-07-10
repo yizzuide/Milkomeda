@@ -1,20 +1,28 @@
 package com.github.yizzuide.milkomeda.wormhole;
 
+import com.github.yizzuide.milkomeda.pulsar.PulsarHolder;
 import com.github.yizzuide.milkomeda.universe.metadata.HandlerMetaData;
 import com.github.yizzuide.milkomeda.util.ReflectUtil;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.CollectionUtils;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Future;
 
 /**
  * WormholeEventBus
  *
  * @author yizzuide
  * @since 3.3.0
+ * @version 3.11.0
  * Create at 2020/05/05 14:30
  */
+@Slf4j
 @Data
 public class WormholeEventBus {
     /**
@@ -40,7 +48,7 @@ public class WormholeEventBus {
      * @param <T>       领域事件数据类型
      */
     public <T> void publish(WormholeEvent<T> event, String action,
-                               WormholeCallback callback) {
+                            WormholeCallback callback) {
         if (action == null || event == null) {
             return;
         }
@@ -51,17 +59,39 @@ public class WormholeEventBus {
                 if (!action.equals(handler.getName())) {
                     continue;
                 }
-                Exception e = null;
-                Object result = null;
-                try {
-                    result = ReflectUtil.invokeWithWrapperInject(handler.getTarget(), handler.getMethod(),
-                            Collections.singletonList(event), WormholeEvent.class, WormholeEvent::getData, WormholeEvent::setData);
-                } catch (Exception ex) {
-                    e = ex;
-                }
+                boolean isAsync = handler.getMethod().isAnnotationPresent(Async.class);
+                WormholeAction wormholeAction = handler.getMethod().getAnnotation(WormholeAction.class);
+                // 非事件回调执行
+                if (wormholeAction.transactionHang() == WormholeTransactionHangType.NONE) {
+                    execute(isAsync, handler, event, action, callback);
+                } else {
+                    // 注删事务回调
+                    TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                        @Override
+                        public void beforeCommit(boolean readOnly) {
+                            if (wormholeAction.transactionHang() == WormholeTransactionHangType.BEFORE_COMMIT) {
+                                execute(isAsync, handler, event, action, callback);
+                            }
+                        }
 
-                if (callback != null) {
-                    callback.callback(event, action, result, e);
+                        @Override
+                        public void afterCommit() {
+                            if (wormholeAction.transactionHang() == WormholeTransactionHangType.AFTER_COMMIT) {
+                                execute(isAsync, handler, event, action, callback);
+                            }
+                        }
+
+                        @Override
+                        public void afterCompletion(int status) {
+                            if (status == STATUS_ROLLED_BACK && wormholeAction.transactionHang() == WormholeTransactionHangType.AFTER_ROLLBACK) {
+                                execute(isAsync, handler, event, action, callback);
+                                return;
+                            }
+                            if (wormholeAction.transactionHang() == WormholeTransactionHangType.AFTER_COMPLETION) {
+                                execute(isAsync, handler, event, action, callback);
+                            }
+                        }
+                    });
                 }
             }
         }
@@ -70,6 +100,35 @@ public class WormholeEventBus {
         if (trackers != null) {
             for (WormholeEventTrack tracker : trackers) {
                 tracker.track(event);
+            }
+        }
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private <T> void execute(boolean isAsync, HandlerMetaData handler, WormholeEvent<T> event, String action, WormholeCallback callback) {
+        Object result = null;
+        Exception e = null;
+        try {
+            if (isAsync) {
+                result = PulsarHolder.getPulsar().postForResult(() -> ReflectUtil.invokeWithWrapperInject(handler.getTarget(), handler.getMethod(),
+                        Collections.singletonList(event), WormholeEvent.class, WormholeEvent::getData, WormholeEvent::setData));
+            } else {
+                result = ReflectUtil.invokeWithWrapperInject(handler.getTarget(), handler.getMethod(),
+                        Collections.singletonList(event), WormholeEvent.class, WormholeEvent::getData, WormholeEvent::setData);
+            }
+        } catch (Exception ex) {
+            e = ex;
+        }
+
+        if (callback != null) {
+            if (isAsync && result != null) {
+                try {
+                    callback.callback(event, action, ((Future) result).get(), e);
+                } catch (Exception exception) {
+                    log.error("Wormhole get async result error with msg: {}", exception.getMessage(), exception);
+                }
+            } else {
+                callback.callback(event, action, result, e);
             }
         }
     }

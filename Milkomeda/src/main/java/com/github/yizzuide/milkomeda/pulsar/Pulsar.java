@@ -18,6 +18,7 @@ import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Future;
 
 import static com.github.yizzuide.milkomeda.util.ReflectUtil.*;
 
@@ -29,7 +30,7 @@ import static com.github.yizzuide.milkomeda.util.ReflectUtil.*;
  *
  * @author yizzuide
  * @since 0.1.0
- * @version 3.0.0
+ * @version 3.11.0
  * Create at 2019/03/29 10:36
  */
 @Slf4j
@@ -39,7 +40,7 @@ public class Pulsar {
     /**
      * DeferredResult容器
      */
-    private Map<String, PulsarDeferredResult> deferredResultMap;
+    private final Map<String, PulsarDeferredResult> deferredResultMap;
 
     /**
      * 线程池执行器（从SpringBoot 2.1.0开始默认已经装配）
@@ -190,7 +191,7 @@ public class Pulsar {
         /**
          * 切面连接点
          */
-        private ProceedingJoinPoint joinPoint;
+        private final ProceedingJoinPoint joinPoint;
 
         WebAsyncTaskCallable(ProceedingJoinPoint joinPoint) {
             this.joinPoint = joinPoint;
@@ -224,6 +225,17 @@ public class Pulsar {
      */
     public void post(Runnable runnable) {
         applicationTaskExecutor.execute(runnable);
+    }
+
+    /**
+     * 提交一个异步任务，并返回结果
+     * @param callable  Callable
+     * @param <T>   结果类型
+     * @return  Future
+     * @since 3.11.0
+     */
+    public <T> Future<T> postForResult(Callable<T> callable) {
+        return applicationTaskExecutor.submit(callable);
     }
 
     /**

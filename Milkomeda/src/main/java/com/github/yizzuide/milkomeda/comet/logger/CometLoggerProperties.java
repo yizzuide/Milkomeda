@@ -12,7 +12,7 @@ import java.util.Map;
  *
  * @author yizzuide
  * @since 3.0.0
- * @since 3.1.0
+ * @version 3.11.0
  * Create at 2020/04/05 18:47
  */
 @Data
@@ -22,6 +22,10 @@ public class CometLoggerProperties {
      * 启用请求日志打印
      */
     private boolean enable = false;
+    /**
+     * 是否开启打印响应
+     */
+    private boolean enableResponse = false;
     /**
      * 占位符前缀
      */

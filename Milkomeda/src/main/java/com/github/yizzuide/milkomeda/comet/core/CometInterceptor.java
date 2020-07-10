@@ -43,7 +43,7 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 3.0.0
- * @version 3.4.0
+ * @version 3.11.0
  * Create at 2020/03/28 01:08
  */
 @Slf4j

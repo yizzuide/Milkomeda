@@ -29,4 +29,10 @@ public @interface WormholeAction {
      */
     @AliasFor("value")
     String name() default "";
+
+    /**
+     * 事务回调执行
+     * @return  WormholeTransactionType
+     */
+    WormholeTransactionHangType transactionHang() default WormholeTransactionHangType.NONE;
 }

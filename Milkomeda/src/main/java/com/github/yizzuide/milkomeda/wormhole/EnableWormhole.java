@@ -1,5 +1,6 @@
 package com.github.yizzuide.milkomeda.wormhole;
 
+import com.github.yizzuide.milkomeda.pulsar.EnablePulsar;
 import org.springframework.context.annotation.Import;
 
 import java.lang.annotation.*;
@@ -15,6 +16,7 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Inherited
+@EnablePulsar
 @Import(WormholeConfig.class)
 public @interface EnableWormhole {
 }

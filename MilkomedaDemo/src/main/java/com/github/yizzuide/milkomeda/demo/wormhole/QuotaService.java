@@ -3,7 +3,9 @@ package com.github.yizzuide.milkomeda.demo.wormhole;
 import com.github.yizzuide.milkomeda.wormhole.WormholeAction;
 import com.github.yizzuide.milkomeda.wormhole.WormholeEvent;
 import com.github.yizzuide.milkomeda.wormhole.WormholeEventHandler;
+import com.github.yizzuide.milkomeda.wormhole.WormholeTransactionHangType;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 /**
@@ -18,7 +20,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class QuotaService {
 
-    @WormholeAction(Actions.AUDIT_SUCCESS)
+    @Async
+    @WormholeAction(value = Actions.AUDIT_SUCCESS, transactionHang = WormholeTransactionHangType.AFTER_COMMIT)
     public void onEvent(WormholeEvent<Credit> event) {
         // 更新额度
         event.getData().updateQuota(20000L);

@@ -12,7 +12,7 @@ import java.time.temporal.ChronoUnit;
  *
  * @author yizzuide
  * @since 1.15.0
- * @version 3.1.3
+ * @version 3.11.0
  * Create at 2019/11/16 19:02
  */
 @Data
@@ -25,6 +25,13 @@ class IceProperties {
      * 实例名（用于多产品隔离，否则不要修改）
      */
     private String instanceName = DEFAULT_INSTANCE_NAME;
+
+    /**
+     * 任务过期时间
+     */
+    @DurationUnit(ChronoUnit.SECONDS)
+    private Duration jobExpire = Duration.ofDays(7);
+
     /**
      * 开启作业Timer（仅作为消费端使用时需要设置为false）<br>
      * 注意：使用 {@link EnableIceServer} 时，设置为false无效
