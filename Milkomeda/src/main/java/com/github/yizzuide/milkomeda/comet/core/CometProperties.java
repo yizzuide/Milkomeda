@@ -21,8 +21,7 @@ public class CometProperties {
     private boolean enableReadRequestBody = false;
 
     /**
-     * 允许开启响应包装类读取响应消息体，依赖开启 {@link CometProperties#enableReadRequestBody}
-     * （使用 Collector 时，如果通过注入HttpServletResponse直接写出流则必须开启）
+     * 允许开启响应包装类读取响应消息体（获取通过注入HttpServletResponse直接写出响应数据则必须开启）
      * @see CometProperties#enableReadRequestBody
      */
     private boolean enableReadResponseBody = false;

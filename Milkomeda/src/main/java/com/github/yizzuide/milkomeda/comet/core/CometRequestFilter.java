@@ -32,13 +32,13 @@ public class CometRequestFilter implements Filter {
         // 设置编码，防止Spring MVC注册Filter顺序问题导致乱码问题
         // servletRequest.setCharacterEncoding(Charset.defaultCharset().toString());
         ServletRequest requestWrapper = servletRequest;
-        // 如果有Form表单数据则不读取body，交给SpringMVC框架处理（但@CometParam功能仍然有效）
-        if (CollectionUtils.isEmpty(servletRequest.getParameterMap())) {
-            requestWrapper = new CometRequestWrapper((HttpServletRequest) servletRequest);
+        if (CometHolder.shouldWrapRequest()) {
+            // 如果有Form表单数据则不读取body，交给SpringMVC框架处理（但@CometParam功能仍然有效）
+            if (CollectionUtils.isEmpty(servletRequest.getParameterMap())) {
+                requestWrapper = new CometRequestWrapper((HttpServletRequest) servletRequest);
+            }
         }
-        // 只有Tag Collector开启，并且指定开启`comet.enable-read-response-body`，才会装饰包装类读Response Body
-        boolean enableAddResponseWrapper = CometHolder.getProps().isEnableReadResponseBody() &&
-                CometHolder.getCollectorProps() != null && CometHolder.getCollectorProps().isEnableTag();
+        boolean enableAddResponseWrapper = CometHolder.shouldWrapResponse();
         if (enableAddResponseWrapper) {
             servletResponse = new CometResponseWrapper((HttpServletResponse) servletResponse);
         }

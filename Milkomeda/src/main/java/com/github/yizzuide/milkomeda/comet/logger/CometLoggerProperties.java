@@ -46,6 +46,11 @@ public class CometLoggerProperties {
     @Data
     public static class Strategy {
         /**
+         * 打印日志类型
+         * @since 3.11.0
+         */
+        private CometLoggerType type = CometLoggerType.REQUEST;
+        /**
          * 策略包含路径
          */
         private List<String> paths = Collections.singletonList("/**");

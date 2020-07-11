@@ -1,4 +1,4 @@
-package com.github.yizzuide.milkomeda.comet.collector;
+package com.github.yizzuide.milkomeda.comet.core;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
@@ -27,9 +27,9 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
  * Create at 2020/03/29 11:30
  */
 //@ControllerAdvice // 这种方式默认就会扫描并加载到Ioc，不好动态控制是否加载，但好处是外部API对未来版本的兼容性强
-public class CometCollectorResponseBodyAdvice implements ResponseBodyAdvice<Object> {
+public class CometResponseBodyAdvice implements ResponseBodyAdvice<Object> {
 
-    public static final String REQUEST_ATTRIBUTE_BODY = "comet.collect.body";
+    public static final String REQUEST_ATTRIBUTE_BODY = "comet.response.body";
 
     @Override
     public boolean supports(@NonNull MethodParameter returnType, @NonNull Class<? extends HttpMessageConverter<?>> converterType) {

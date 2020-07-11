@@ -5,13 +5,13 @@ import com.github.yizzuide.milkomeda.universe.config.MilkomedaProperties;
 import com.github.yizzuide.milkomeda.universe.polyfill.SpringMvcPolyfill;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
+import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
@@ -25,7 +25,7 @@ import java.util.Objects;
  *
  * @author yizzuide
  * @since 2.0.0
- * @version 3.5.0
+ * @version 3.11.0
  * Create at 2019/12/12 18:10
  */
 @Configuration
@@ -49,7 +49,6 @@ public class CometConfig {
     //@ConditionalOnMissingBean // 识别类型：FilterRegistrationBean，会导致永远无法加载
     // 下面两方式在版本2.1.0推出，用于识别泛型类型：FilterRegistrationBean<CometRequestFilter>
     // @ConditionalOnMissingBean(parameterizedContainer = FilterRegistrationBean.class)
-    @ConditionalOnProperty(prefix = "milkomeda.comet", name = "enable-read-request-body", havingValue = "true")
     public FilterRegistrationBean<CometRequestFilter> cometRequestFilter() {
         FilterRegistrationBean<CometRequestFilter> cometRequestFilter = new FilterRegistrationBean<>();
         cometRequestFilter.setFilter(new CometRequestFilter());
@@ -61,7 +60,6 @@ public class CometConfig {
 
     // 配置RequestMappingHandlerAdapter实现动态注解SpringMVC处理器组件
     @Autowired
-    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     public void configParamResolve(RequestMappingHandlerAdapter adapter) {
         List<HandlerMethodArgumentResolver> argumentResolvers = new ArrayList<>();
         // 动态添加针对注解 @CometParam 处理的解析器
@@ -71,7 +69,6 @@ public class CometConfig {
     }
 
     @Autowired
-    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     public void configRequestMappingHandlerMapping(RequestMappingHandlerMapping requestMappingHandlerMapping) {
         // 使用内置拦截器
         SpringMvcPolyfill.addDynamicInterceptor(cometInterceptor(),  Ordered.HIGHEST_PRECEDENCE, Collections.singletonList("/**"),
@@ -81,5 +78,17 @@ public class CometConfig {
     @Bean
     public CometInterceptor cometInterceptor() {
         return new CometInterceptor();
+    }
+
+    @Bean
+    public CometResponseBodyAdvice cometResponseBodyAdvice() {
+        return new CometResponseBodyAdvice();
+    }
+
+    @Autowired
+    public void configResponseBodyAdvice(RequestMappingHandlerAdapter adapter, HandlerExceptionResolver handlerExceptionResolver) {
+        CometResponseBodyAdvice collectorResponseBodyAdvice = cometResponseBodyAdvice();
+        // 动态添加到响应处理
+        SpringMvcPolyfill.addDynamicResponseBodyAdvice(adapter.getReturnValueHandlers(), handlerExceptionResolver, collectorResponseBodyAdvice);
     }
 }

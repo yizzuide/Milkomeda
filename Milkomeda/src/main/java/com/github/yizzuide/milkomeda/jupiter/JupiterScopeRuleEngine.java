@@ -55,7 +55,7 @@ public class JupiterScopeRuleEngine extends AbstractJupiterRuleEngine {
                 // 解析过滤表达式
                 if (filter != null && filter.contains("{$")) {
                     Map<String, List<String>> placeHolders = urlPlaceholderParser.grabPlaceHolders(filter);
-                    filter = urlPlaceholderParser.parse(filter, WebContext.getRequest(), null, placeHolders);
+                    filter = urlPlaceholderParser.parse(filter, WebContext.getRequest(), null, null, placeHolders);
                 }
                 // 构建查询
                 String sql = JupiterSqlBuilder.build(ruleItem, filter);

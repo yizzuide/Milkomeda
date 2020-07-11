@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 3.0.0
- * @version 3.5.0
+ * @version 3.11.0
  * Create at 2020/04/09 15:07
  */
 @Data
@@ -38,7 +38,7 @@ public class URLPlaceholderParser {
     private URLPlaceholderResolver customURLPlaceholderResolver;
 
     // 固定参数
-    private static List<String> ignorePlaceHolders = Arrays.asList("uri", "method", "params");
+    private static List<String> ignorePlaceHolders = Arrays.asList("uri", "method", "params", "resp");
 
     // 请求数据域
     private static final String headerStartToken = "$header.";
@@ -85,11 +85,12 @@ public class URLPlaceholderParser {
      * 根据模板解析
      * @param tpl           模板
      * @param request       请求对象
-     * @param params        请求参数
+     * @param params        请求数据
+     * @param resp          响应数据
      * @param placeHolders  占位列表
      * @return  解析后的结果
      */
-    public String parse(String tpl, HttpServletRequest request, String params, Map<String, List<String>> placeHolders) {
+    public String parse(String tpl, HttpServletRequest request, String params, String resp, Map<String, List<String>> placeHolders) {
         if (params == null) {
             params = CometRequestWrapper.resolveRequestParams(request, true);
         }
@@ -97,6 +98,9 @@ public class URLPlaceholderParser {
         placeholderResultMap.put("uri", request.getRequestURI());
         placeholderResultMap.put("method", request.getMethod());
         placeholderResultMap.put(KEY_PARAMS, params);
+        if (resp != null) {
+            placeholderResultMap.put("resp", resp);
+        }
 
         Map<String, Object> paramsMap = null;
         if (StringUtils.isNotEmpty(params)) {

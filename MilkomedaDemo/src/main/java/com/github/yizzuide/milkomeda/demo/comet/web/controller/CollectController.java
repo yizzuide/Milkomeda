@@ -80,9 +80,13 @@ public class CollectController {
 
     @PostMapping("usage")
     // @CometParam注解提供支持接收form表单数据、JSON数据（特别适用于不知道第三方回调的方式下）
-    public ResponseEntity<String> usage(@CometParam Map<String, String> params) {
+    public ResponseEntity<Map<String, String>> usage(@CometParam Map<String, String> params) {
         log.info("请求参数：{}", params);
-        return ResponseEntity.ok("ok");
+        Map<String, String> data = new HashMap<>();
+        data.put("code", "0");
+        data.put("msg", "");
+        data.put("data", null);
+        return ResponseEntity.ok(data);
     }
 
     // 测试无参数读body的问题

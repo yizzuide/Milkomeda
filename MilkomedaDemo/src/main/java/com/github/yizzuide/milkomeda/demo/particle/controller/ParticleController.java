@@ -204,7 +204,7 @@ public class ParticleController {
 
     @RequestMapping("pay")
     public String pay(String orderNo) throws InterruptedException {
-        //Thread.sleep(5000);
+        Thread.sleep(5000);
         return "OK";
     }
 }

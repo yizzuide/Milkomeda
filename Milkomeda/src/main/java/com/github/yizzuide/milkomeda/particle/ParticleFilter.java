@@ -95,7 +95,7 @@ public class ParticleFilter implements Filter {
             }
             // 设置匹配标识
             matchFlag = true;
-            String key = urlPlaceholderParser.parse(limiter.getKeyTpl(), httpServletRequest, null, limiter.getCacheKeys());
+            String key = urlPlaceholderParser.parse(limiter.getKeyTpl(), httpServletRequest, null, null, limiter.getCacheKeys());
             Map<String, Object> returnData = limiter.getLimitHandler().limit(key, limiter.getKeyExpire().getSeconds(), particle -> {
                 if (particle.isLimited()) {
                     Map<String, Object> result = new HashMap<>(8);

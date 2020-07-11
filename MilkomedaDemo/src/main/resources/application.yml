@@ -89,20 +89,26 @@ milkomeda:
   comet:
     # 记录body里的json数据需要开启（默认不开启）
     enable-read-request-body: true
-    # 日志收集器读取Response直接写出的内容时需要开启
+    # 读取Response直接写出的内容时需要开启
     enable-read-response-body: true
     # 统一请求日志打印
     logger:
       enable: true
+      # 开启打印响应数据
+      enable-response: true
       # 根据路径匹配策略
       strategy:
         - paths: ["/**"]
           tpl: url->{uri},userId:{uid},token:{$header.token},method->{method},parameters->{params},dataId->{$params.data.id}
+        - paths: ["/collect/usage"]
+          type: RESPONSE # 设置打印为响应类型（默认为请求类型）
+          tpl: "{\"url\": \"{uri}\", \"resp\": {resp}}"
         - paths: ["/error/**"]
           tpl: url->{uri},method->{method}
     # 日志收集器
     collector:
       enable: true
+      # 开启标签收集
       enable-tag: true
       tags:
         product-tag:

@@ -1,9 +1,9 @@
 package com.github.yizzuide.milkomeda.comet.core;
 
 import com.github.yizzuide.milkomeda.comet.collector.CometCollectorProperties;
-import com.github.yizzuide.milkomeda.comet.collector.CometCollectorResponseBodyAdvice;
 import com.github.yizzuide.milkomeda.comet.collector.TagCollector;
 import com.github.yizzuide.milkomeda.comet.logger.CometLoggerProperties;
+import com.github.yizzuide.milkomeda.comet.logger.CometLoggerType;
 import com.github.yizzuide.milkomeda.universe.metadata.BeanIds;
 import com.github.yizzuide.milkomeda.universe.parser.url.URLPathMatcher;
 import com.github.yizzuide.milkomeda.universe.parser.url.URLPlaceholderParser;
@@ -131,7 +131,7 @@ public class CometInterceptor extends HandlerInterceptorAdapter implements Appli
     @Override
     public boolean preHandle(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull Object handler) throws Exception {
         if (this.cometLoggerProperties != null) {
-            printLog(request);
+            printRequestLog(request);
         }
 
         if (cometCollectorProperties != null && cometCollectorProperties.isEnableTag() && !CollectionUtils.isEmpty(this.tagCollectorMap)) {
@@ -142,13 +142,12 @@ public class CometInterceptor extends HandlerInterceptorAdapter implements Appli
 
     @Override
     public void afterCompletion(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull Object handler, Exception ex) throws Exception {
-        if (cometCollectorProperties == null || !cometCollectorProperties.isEnableTag() ||
-                CollectionUtils.isEmpty(this.tagCollectorMap) || threadLocal.get() == null) {
+        if (!CometHolder.isResponseReadable()) {
             return;
         }
         // 获取ResponseEntity返回值
-        Object body = request.getAttribute(CometCollectorResponseBodyAdvice.REQUEST_ATTRIBUTE_BODY);
-        if (body == null) {
+        Object body = request.getAttribute(CometResponseBodyAdvice.REQUEST_ATTRIBUTE_BODY);
+        if (body == null && CometHolder.shouldWrapResponse()) {
             // 从ResponseWrapper获取
             CometResponseWrapper responseWrapper =
                     WebUtils.getNativeResponse(response, CometResponseWrapper.class);
@@ -167,7 +166,16 @@ public class CometInterceptor extends HandlerInterceptorAdapter implements Appli
                 }
             }
         }
-        this.collectPostLog(response.getStatus(), body, ex);
+
+        if (cometLoggerProperties != null && cometLoggerProperties.isEnableResponse()) {
+            this.printResponseLog(request, body);
+        }
+
+        if (cometCollectorProperties != null && cometCollectorProperties.isEnableTag() &&
+                !CollectionUtils.isEmpty(this.tagCollectorMap) && threadLocal.get() != null) {
+            this.collectPostLog(response.getStatus(), body, ex);
+        }
+
     }
 
     @SuppressWarnings("all")
@@ -305,26 +313,47 @@ public class CometInterceptor extends HandlerInterceptorAdapter implements Appli
         threadLocal.set(cometData);
     }
 
-    private void printLog(HttpServletRequest request) {
+    private void printRequestLog(HttpServletRequest request) {
+        printLog(request, null, CometLoggerType.REQUEST);
+    }
+
+    private void printResponseLog(HttpServletRequest request, Object body) {
+        printLog(request, body, CometLoggerType.RESPONSE);
+    }
+
+    private void printLog(HttpServletRequest request, Object body, CometLoggerType type) {
+        // 排除不需要打印的URL
         CometLoggerProperties logger = this.cometLoggerProperties;
         List<String> exclude = logger.getExclude();
         String requestURI = request.getRequestURI();
         if (!CollectionUtils.isEmpty(exclude)) {
-            if (exclude.contains(requestURI)) {
+            if (URLPathMatcher.match(exclude, requestURI)) {
                 return;
             }
         }
-        List<CometLoggerProperties.Strategy> strategyList = this.strategyList;
+
+        // 过滤打印策略类型
+        List<CometLoggerProperties.Strategy> strategyList = this.strategyList.stream()
+                .filter(s -> s.getType() == type).collect(Collectors.toList());
         if (CollectionUtils.isEmpty(strategyList)) {
             return;
         }
+
         String requestParams = CometAspect.resolveThreadLocal.get();
         for (CometLoggerProperties.Strategy strategy : strategyList) {
             if (CollectionUtils.isEmpty(strategy.getPaths()) ||
                     !URLPathMatcher.match(strategy.getPaths(), requestURI)) {
                 continue;
             }
-            log.info(urlPlaceholderParser.parse(strategy.getTpl(), request, requestParams, strategy.getCacheKeys()));
+            String resp;
+            if (body == null) {
+                resp = null;
+            } else if (body instanceof Map) {
+                resp = JSONUtil.serialize(body);
+            } else {
+                resp = body.toString();
+            }
+            log.info(urlPlaceholderParser.parse(strategy.getTpl(), request, requestParams, resp, strategy.getCacheKeys()));
             break;
         }
     }
