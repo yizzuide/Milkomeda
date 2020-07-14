@@ -24,7 +24,7 @@ import java.util.Map;
  *
  * @author yizzuide
  * @since 1.13.4
- * @version 3.10.0
+ * @version 3.11.1
  * Create at 2019/10/24 21:17
  */
 public class AopContextHolder {
@@ -93,6 +93,8 @@ public class AopContextHolder {
                     continue;
                 }
                 HandlerMetaData metaData = new HandlerMetaData();
+                metaData.setTarget(target);
+                metaData.setMethod(method);
                 // 支持SpEL
                 String name = nameProvider.apply(executeAnnotation, handlerAnnotation, metaData);
                 if (name.startsWith("'") || name.startsWith("@") || name.startsWith("#") || name.startsWith("T(") || name.startsWith("args[")) {
@@ -102,8 +104,6 @@ public class AopContextHolder {
                     throw new IllegalArgumentException("Please specify the [tag] of "+ executeAnnotation +" !");
                 }
                 metaData.setName(name);
-                metaData.setTarget(target);
-                metaData.setMethod(method);
                 if (handlerMap.containsKey(name)) {
                     handlerMap.get(name).add(metaData);
                 } else {

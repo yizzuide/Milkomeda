@@ -5,7 +5,6 @@ import com.github.yizzuide.milkomeda.universe.metadata.HandlerMetaData;
 import com.github.yizzuide.milkomeda.util.ReflectUtil;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.CollectionUtils;
@@ -19,7 +18,7 @@ import java.util.concurrent.Future;
  *
  * @author yizzuide
  * @since 3.3.0
- * @version 3.11.0
+ * @version 3.11.1
  * Create at 2020/05/05 14:30
  */
 @Slf4j
@@ -59,35 +58,35 @@ public class WormholeEventBus {
                 if (!action.equals(handler.getName())) {
                     continue;
                 }
-                boolean isAsync = handler.getMethod().isAnnotationPresent(Async.class);
-                WormholeAction wormholeAction = handler.getMethod().getAnnotation(WormholeAction.class);
+                boolean isAsync = (boolean) handler.getAttributes().get(WormholeRegistration.ATTR_ASYNC);
+                WormholeTransactionHangType hangType = (WormholeTransactionHangType) handler.getAttributes().get(WormholeRegistration.ATTR_HANG_TYPE);
                 // 非事件回调执行
-                if (wormholeAction.transactionHang() == WormholeTransactionHangType.NONE) {
+                if (hangType == WormholeTransactionHangType.NONE) {
                     execute(isAsync, handler, event, action, callback);
                 } else {
                     // 注删事务回调
                     TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
                         @Override
                         public void beforeCommit(boolean readOnly) {
-                            if (wormholeAction.transactionHang() == WormholeTransactionHangType.BEFORE_COMMIT) {
+                            if (hangType == WormholeTransactionHangType.BEFORE_COMMIT) {
                                 execute(isAsync, handler, event, action, callback);
                             }
                         }
 
                         @Override
                         public void afterCommit() {
-                            if (wormholeAction.transactionHang() == WormholeTransactionHangType.AFTER_COMMIT) {
+                            if (hangType == WormholeTransactionHangType.AFTER_COMMIT) {
                                 execute(isAsync, handler, event, action, callback);
                             }
                         }
 
                         @Override
                         public void afterCompletion(int status) {
-                            if (status == STATUS_ROLLED_BACK && wormholeAction.transactionHang() == WormholeTransactionHangType.AFTER_ROLLBACK) {
+                            if (status == STATUS_ROLLED_BACK && hangType == WormholeTransactionHangType.AFTER_ROLLBACK) {
                                 execute(isAsync, handler, event, action, callback);
                                 return;
                             }
-                            if (wormholeAction.transactionHang() == WormholeTransactionHangType.AFTER_COMPLETION) {
+                            if (hangType == WormholeTransactionHangType.AFTER_COMPLETION) {
                                 execute(isAsync, handler, event, action, callback);
                             }
                         }

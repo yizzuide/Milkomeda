@@ -1,5 +1,6 @@
 package com.github.yizzuide.milkomeda.demo.wormhole;
 
+import com.github.yizzuide.milkomeda.demo.wormhole.service.CreditAuditApplicationService;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 

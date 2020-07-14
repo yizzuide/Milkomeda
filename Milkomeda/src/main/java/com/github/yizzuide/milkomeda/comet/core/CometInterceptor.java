@@ -43,7 +43,7 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 3.0.0
- * @version 3.11.0
+ * @version 3.11.1
  * Create at 2020/03/28 01:08
  */
 @Slf4j
@@ -348,10 +348,10 @@ public class CometInterceptor extends HandlerInterceptorAdapter implements Appli
             String resp;
             if (body == null) {
                 resp = null;
-            } else if (body instanceof Map) {
-                resp = JSONUtil.serialize(body);
-            } else {
+            } else if (body instanceof String) {
                 resp = body.toString();
+            } else {
+                resp = JSONUtil.serialize(body);
             }
             log.info(urlPlaceholderParser.parse(strategy.getTpl(), request, requestParams, resp, strategy.getCacheKeys()));
             break;

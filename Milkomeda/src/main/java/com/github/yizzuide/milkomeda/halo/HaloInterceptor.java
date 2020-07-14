@@ -35,7 +35,7 @@ import java.util.regex.Pattern;
  *
  * @author yizzuide
  * @since 2.5.0
- * @version 3.8.0
+ * @version 3.11.1
  * Create at 2020/01/30 20:38
  */
 @Slf4j
@@ -158,9 +158,13 @@ public class HaloInterceptor implements Interceptor {
         if (!HaloContext.getTableNameMap().containsKey(matchTableName)) {
             return;
         }
-        HaloContext.getTableNameMap().get(matchTableName).stream()
-                .filter(metaData -> metaData.getAttributes().get(HaloContext.ATTR_TYPE) == type)
-                .forEach(handlerMetaData -> {
+        Map<String, List<HandlerMetaData>> tableNameMap = (type == HaloType.PRE) ?
+                HaloContext.getPreTableNameMap() : HaloContext.getPostTableNameMap();
+        List<HandlerMetaData> metaDataList = tableNameMap.get(matchTableName);
+        if (CollectionUtils.isEmpty(metaDataList)) {
+            return;
+        }
+        metaDataList.forEach(handlerMetaData -> {
                     if ((boolean) handlerMetaData.getAttributes().get(HaloContext.ATTR_ASYNC)) {
                         PulsarHolder.getPulsar().post(() -> invokeHandler(tableName, handlerMetaData, sql, mappedStatement, param, result));
                     } else {

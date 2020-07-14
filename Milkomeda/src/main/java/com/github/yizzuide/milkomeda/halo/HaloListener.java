@@ -1,6 +1,7 @@
 package com.github.yizzuide.milkomeda.halo;
 
 import org.springframework.core.annotation.AliasFor;
+import org.springframework.scheduling.annotation.Async;
 
 import java.lang.annotation.*;
 
@@ -19,7 +20,7 @@ import java.lang.annotation.*;
  *
  * @author yizzuide
  * @since 2.5.0
- * @version 2.7.5
+ * @version 3.11.1
  * Create at 2020/01/30 22:36
  */
 @Documented
@@ -47,8 +48,10 @@ public @interface HaloListener {
     HaloType type() default HaloType.POST;
 
     /**
-     * 支持异步处理
-     * @return 默认使用异步处理
+     * 是否异步处理
+     * @return 默认同步处理
+     * @deprecated since 3.11.1, using {@link Async} for instead.
      */
-    boolean async() default true;
+    @Deprecated
+    boolean async() default false;
 }
