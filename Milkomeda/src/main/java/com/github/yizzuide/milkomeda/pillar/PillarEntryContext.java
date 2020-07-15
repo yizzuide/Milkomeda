@@ -4,6 +4,7 @@ import com.github.yizzuide.milkomeda.universe.context.AopContextHolder;
 import com.github.yizzuide.milkomeda.universe.metadata.HandlerMetaData;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.lang.NonNull;
 import org.springframework.util.StringUtils;
 
 import java.util.HashMap;
@@ -24,10 +25,7 @@ public class PillarEntryContext implements ApplicationListener<ContextRefreshedE
     private static Map<String, List<HandlerMetaData>> pillarEntryMap = new HashMap<>();
 
     @Override
-    public void onApplicationEvent(ContextRefreshedEvent event) {
-        if (event.getApplicationContext().getParent() == null) {
-            return;
-        }
+    public void onApplicationEvent(@NonNull ContextRefreshedEvent event) {
         pillarEntryMap = AopContextHolder.getHandlerMetaData(PillarEntryHandler.class, PillarEntryPoint.class, (annotation, handlerAnnotation, metaData) -> {
             PillarEntryHandler pillarEntryHandler = (PillarEntryHandler) handlerAnnotation;
             PillarEntryPoint pillarEntryPoint = (PillarEntryPoint) annotation;

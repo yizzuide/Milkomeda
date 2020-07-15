@@ -21,9 +21,6 @@ import java.util.Map;
 public class MetalContextListener implements ApplicationListener<ContextRefreshedEvent> {
     @Override
     public void onApplicationEvent(@NonNull ContextRefreshedEvent event) {
-        if (event.getApplicationContext().getParent() == null) {
-            return;
-        }
         log.info("正加载配置源...");
         // 模拟配置源
         Map<String, String> source = new HashMap<>();

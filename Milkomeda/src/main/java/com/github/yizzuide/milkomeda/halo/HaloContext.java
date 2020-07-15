@@ -40,9 +40,6 @@ public class HaloContext implements ApplicationListener<ContextRefreshedEvent> {
 
     @Override
     public void onApplicationEvent(@NonNull ContextRefreshedEvent event) {
-        if (event.getApplicationContext().getParent() == null) {
-            return;
-        }
         tableNameMap = AopContextHolder.getHandlerMetaData(HaloHandler.class, HaloListener.class, (annotation, handlerAnnotation, metaData) -> {
             HaloListener haloListener = (HaloListener) annotation;
             boolean isAsyncPresentOn = metaData.getMethod().isAnnotationPresent(Async.class);

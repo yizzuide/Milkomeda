@@ -8,6 +8,7 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.core.Ordered;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.StandardEnvironment;
+import org.springframework.lang.NonNull;
 
 /**
  * ParticleApplicationListener
@@ -22,7 +23,7 @@ import org.springframework.core.env.StandardEnvironment;
 public class SourcesLogApplicationListener implements ApplicationListener<ApplicationEnvironmentPreparedEvent>, Ordered {
 
     @Override
-    public void onApplicationEvent(ApplicationEnvironmentPreparedEvent event) {
+    public void onApplicationEvent(@NonNull ApplicationEnvironmentPreparedEvent event) {
         ConfigurableEnvironment environment = event.getEnvironment();
         if (environment.getClass() == StandardEnvironment.class) {
             return;

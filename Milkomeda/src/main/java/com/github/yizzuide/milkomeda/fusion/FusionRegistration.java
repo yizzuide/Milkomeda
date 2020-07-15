@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
+import org.springframework.lang.NonNull;
 import org.springframework.util.CollectionUtils;
 
 import java.util.HashMap;
@@ -29,10 +30,7 @@ public class FusionRegistration {
     private FusionAspect fusionAspect;
 
     @EventListener
-    public void onApplicationEvent(ContextRefreshedEvent event) {
-        if (event.getApplicationContext().getParent() == null) {
-            return;
-        }
+    public void onApplicationEvent(@NonNull ContextRefreshedEvent event) {
         actionMap = AopContextHolder.getHandlerMetaData(FusionHandler.class, FusionAction.class, (annotation, handlerAnnotation, metaData) -> {
             FusionAction fusionAction = (FusionAction) annotation;
             return fusionAction.value();

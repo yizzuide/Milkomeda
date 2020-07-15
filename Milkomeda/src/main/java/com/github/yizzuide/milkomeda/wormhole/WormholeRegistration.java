@@ -5,6 +5,7 @@ import com.github.yizzuide.milkomeda.universe.metadata.HandlerMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
+import org.springframework.lang.NonNull;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.util.CollectionUtils;
 
@@ -39,10 +40,7 @@ public class WormholeRegistration {
     private WormholeEventBus eventBus;
 
     @EventListener
-    public void onApplicationEvent(ContextRefreshedEvent event) {
-        if (event.getApplicationContext().getParent() == null) {
-            return;
-        }
+    public void onApplicationEvent(@NonNull ContextRefreshedEvent event) {
         actionMap = AopContextHolder.getHandlerMetaData(WormholeEventHandler.class, WormholeAction.class, (annotation, handlerAnnotation, metaData) -> {
             WormholeAction wormholeAction = (WormholeAction) annotation;
             boolean isAsyncPresentOn = metaData.getMethod().isAnnotationPresent(Async.class);
