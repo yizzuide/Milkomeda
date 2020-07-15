@@ -36,7 +36,7 @@ import java.util.function.Supplier;
  *
  * @author yizzuide
  * @since 1.14.0
- * @version 3.10.1
+ * @version 3.11.2
  * @see org.springframework.security.web.session.SessionManagementFilter
  * @see org.springframework.security.config.annotation.web.configurers.SessionManagementConfigurer
  * Create at 2019/11/11 18:25
@@ -83,6 +83,8 @@ public class CrustConfigurerAdapter extends WebSecurityConfigurerAdapter {
             allowURLs.addAll(anonUrls);
         }
         String[] permitAllMapping = allowURLs.toArray(new String[0]);
+        // 添加自定义匿名路径
+        additionalConfigure(http.authorizeRequests(), http);
         http.csrf()
                 .disable()
             .sessionManagement().sessionCreationPolicy(props.isStateless() ?
@@ -103,9 +105,6 @@ public class CrustConfigurerAdapter extends WebSecurityConfigurerAdapter {
                 .antMatchers(permitAllMapping).permitAll()
                 // 其他所有请求需要身份认证
                 .anyRequest().authenticated();
-
-        // 添加自定义匿名路径
-        additionalConfigure(http.authorizeRequests(), http);
 
         // 如果是无状态方式
         if (props.isStateless()) {
