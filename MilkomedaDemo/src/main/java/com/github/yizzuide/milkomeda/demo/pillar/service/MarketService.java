@@ -1,32 +1,14 @@
 package com.github.yizzuide.milkomeda.demo.pillar.service;
 
-import com.github.yizzuide.milkomeda.pillar.PillarEntryHandler;
-import com.github.yizzuide.milkomeda.pillar.PillarEntryPoint;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
-
 import java.util.Map;
 
 /**
  * MarketService
  *
  * @author yizzuide
- * Create at 2020/07/02 18:13
+ * Create at 2020/07/17 17:32
  */
-@Slf4j
-@PillarEntryHandler(tag = "market")
-@Component
-public class MarketService {
-
-    @PillarEntryPoint(code = "api.v1.check")
-    public String check(Map<String, Object> params) {
-        log.info("check: {}", params);
-        return "OK";
-    }
-
-    @PillarEntryPoint(code = "api.v1.push")
-    public String push(Map<String, Object> params) {
-        log.info("push: {}", params);
-        return "OK";
-    }
+public interface MarketService {
+    String check(Map<String, Object> params);
+    String push(Map<String, Object> params);
 }

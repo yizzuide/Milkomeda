@@ -24,7 +24,7 @@ import java.util.Map;
  *
  * @author yizzuide
  * @since 1.13.4
- * @version 3.11.4
+ * @version 3.11.5
  * Create at 2019/10/24 21:17
  */
 public class AopContextHolder {
@@ -86,6 +86,10 @@ public class AopContextHolder {
             Class<?> targetClass = AopUtils.isAopProxy(target) ?
                     AopUtils.getTargetClass(target) : target.getClass();
             Method[] methods = ReflectionUtils.getAllDeclaredMethods(targetClass);
+            Method[] wrapMethods = null;
+            if (AopUtils.isAopProxy(target)) {
+                wrapMethods = ReflectionUtils.getAllDeclaredMethods(target.getClass());
+            }
             Annotation handlerAnnotation = targetClass.getAnnotation(handlerAnnotationClazz);
             for (Method method : methods) {
                 // 获取指定方法上的注解的属性
@@ -95,7 +99,16 @@ public class AopContextHolder {
                 }
                 HandlerMetaData metaData = new HandlerMetaData();
                 metaData.setTarget(target);
-                metaData.setMethod(method);
+                if (wrapMethods == null) {
+                    metaData.setMethod(method);
+                } else {
+                    for (Method wrapMethod : wrapMethods) {
+                        if (method.getName().equals(wrapMethod.getName())) {
+                            metaData.setMethod(wrapMethod);
+                            break;
+                        }
+                    }
+                }
                 // 支持SpEL
                 String name = nameProvider.apply(executeAnnotation, handlerAnnotation, metaData);
                 if (name.startsWith("'") || name.startsWith("@") || name.startsWith("#") || name.startsWith("T(") || name.startsWith("args[")) {
