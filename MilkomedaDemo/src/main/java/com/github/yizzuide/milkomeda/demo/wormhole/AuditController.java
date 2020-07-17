@@ -20,6 +20,7 @@ public class AuditController {
     @Resource
     private CreditAuditApplicationService creditAuditApplicationService;
 
+    // http://localhost:8091/audit/callback?callbackId=123&orderId=12432434&state=0
     @RequestMapping("callback")
     public Object audit(AuditCommand auditCommand) {
         creditAuditApplicationService.audit(auditCommand);

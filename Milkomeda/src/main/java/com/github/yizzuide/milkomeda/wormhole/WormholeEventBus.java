@@ -1,6 +1,5 @@
 package com.github.yizzuide.milkomeda.wormhole;
 
-import com.github.yizzuide.milkomeda.pulsar.PulsarHolder;
 import com.github.yizzuide.milkomeda.universe.metadata.HandlerMetaData;
 import com.github.yizzuide.milkomeda.util.ReflectUtil;
 import lombok.Data;
@@ -18,7 +17,7 @@ import java.util.concurrent.Future;
  *
  * @author yizzuide
  * @since 3.3.0
- * @version 3.11.1
+ * @version 3.11.4
  * Create at 2020/05/05 14:30
  */
 @Slf4j
@@ -60,7 +59,7 @@ public class WormholeEventBus {
                 }
                 boolean isAsync = (boolean) handler.getAttributes().get(WormholeRegistration.ATTR_ASYNC);
                 WormholeTransactionHangType hangType = (WormholeTransactionHangType) handler.getAttributes().get(WormholeRegistration.ATTR_HANG_TYPE);
-                // 非事件回调执行
+                // 非事务回调执行
                 if (hangType == WormholeTransactionHangType.NONE) {
                     execute(isAsync, handler, event, action, callback);
                 } else {
@@ -108,19 +107,14 @@ public class WormholeEventBus {
         Object result = null;
         Exception e = null;
         try {
-            if (isAsync) {
-                result = PulsarHolder.getPulsar().postForResult(() -> ReflectUtil.invokeWithWrapperInject(handler.getTarget(), handler.getMethod(),
-                        Collections.singletonList(event), WormholeEvent.class, WormholeEvent::getData, WormholeEvent::setData));
-            } else {
-                result = ReflectUtil.invokeWithWrapperInject(handler.getTarget(), handler.getMethod(),
-                        Collections.singletonList(event), WormholeEvent.class, WormholeEvent::getData, WormholeEvent::setData);
-            }
+            result = ReflectUtil.invokeWithWrapperInject(handler.getTarget(), handler.getMethod(),
+                    Collections.singletonList(event), WormholeEvent.class, WormholeEvent::getData, WormholeEvent::setData);
         } catch (Exception ex) {
             e = ex;
         }
 
         if (callback != null) {
-            if (isAsync && result != null) {
+            if (isAsync && result instanceof Future) {
                 try {
                     callback.callback(event, action, ((Future) result).get(), e);
                 } catch (Exception exception) {

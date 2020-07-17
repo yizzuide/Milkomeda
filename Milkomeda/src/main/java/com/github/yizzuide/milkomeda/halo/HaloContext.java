@@ -5,7 +5,6 @@ import com.github.yizzuide.milkomeda.universe.metadata.HandlerMetaData;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.lang.NonNull;
-import org.springframework.scheduling.annotation.Async;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,10 +26,6 @@ public class HaloContext implements ApplicationListener<ContextRefreshedEvent> {
      * 监听类型的方法属性名
      */
     public static final String ATTR_TYPE = "type";
-    /**
-     * 调用处理异步方式的方法属性名
-     */
-    public static final String ATTR_ASYNC = "async";
 
     private static Map<String, List<HandlerMetaData>> tableNameMap = new HashMap<>();
 
@@ -42,11 +37,9 @@ public class HaloContext implements ApplicationListener<ContextRefreshedEvent> {
     public void onApplicationEvent(@NonNull ContextRefreshedEvent event) {
         tableNameMap = AopContextHolder.getHandlerMetaData(HaloHandler.class, HaloListener.class, (annotation, handlerAnnotation, metaData) -> {
             HaloListener haloListener = (HaloListener) annotation;
-            boolean isAsyncPresentOn = metaData.getMethod().isAnnotationPresent(Async.class);
             // 设置其它属性方法的值
             Map<String, Object> attrs = new HashMap<>(4);
             attrs.put(ATTR_TYPE, haloListener.type());
-            attrs.put(ATTR_ASYNC, isAsyncPresentOn || haloListener.async());
             metaData.setAttributes(attrs);
             String value = haloListener.value();
             cacheWithType(haloListener.type() == HaloType.PRE ? preTableNameMap : postTableNameMap, value, metaData);

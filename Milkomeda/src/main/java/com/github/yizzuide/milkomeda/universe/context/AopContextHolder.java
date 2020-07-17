@@ -24,7 +24,7 @@ import java.util.Map;
  *
  * @author yizzuide
  * @since 1.13.4
- * @version 3.11.1
+ * @version 3.11.4
  * Create at 2019/10/24 21:17
  */
 public class AopContextHolder {
@@ -83,9 +83,10 @@ public class AopContextHolder {
         for (String key : beanMap.keySet()) {
             Object target = beanMap.get(key);
             // 查找AOP切面（通过Proxy.isProxyClass()判断类是否是代理的接口类，AopUtils.isAopProxy()判断对象是否被代理），可以通过AopUtils.getTargetClass()获取原Class
-            Method[] methods = ReflectionUtils.getAllDeclaredMethods(AopUtils.isAopProxy(target) ?
-                    AopUtils.getTargetClass(target) : target.getClass());
-            Annotation handlerAnnotation = target.getClass().getAnnotation(handlerAnnotationClazz);
+            Class<?> targetClass = AopUtils.isAopProxy(target) ?
+                    AopUtils.getTargetClass(target) : target.getClass();
+            Method[] methods = ReflectionUtils.getAllDeclaredMethods(targetClass);
+            Annotation handlerAnnotation = targetClass.getAnnotation(handlerAnnotationClazz);
             for (Method method : methods) {
                 // 获取指定方法上的注解的属性
                 final Annotation executeAnnotation = AnnotationUtils.findAnnotation(method, executeAnnotationClazz);
