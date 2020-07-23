@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 3.0.0
+ * @version 3.11.6
  * Create at 2019/11/25 10:56
  */
 @Aspect
@@ -50,22 +51,21 @@ public class TransactionConfig {
         // 设置超时
         txAttr_REQUIRED.setTimeout((int) props.getRollbackWhenTimeout().getSeconds());
 
-        RuleBasedTransactionAttribute txAttr_READONLY = new RuleBasedTransactionAttribute();
-        // 设置传播行为：以非事务运行，如果当前存在事务，则把当前事务挂起
-        txAttr_READONLY.setPropagationBehavior(TransactionDefinition.PROPAGATION_NOT_SUPPORTED);
-        txAttr_READONLY.setReadOnly(true);
+        RuleBasedTransactionAttribute txAttr_REQUIRED_READONLY = new RuleBasedTransactionAttribute();
+        txAttr_REQUIRED_READONLY.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
+        txAttr_REQUIRED_READONLY.setReadOnly(true);
 
         NameMatchTransactionAttributeSource source = new NameMatchTransactionAttributeSource();
-        // 开启只读,提高数据库访问性能
+        // 开启只读, 提高数据库访问性能
         if (!CollectionUtils.isEmpty(props.getReadOnlyPrefix())) {
             for (String prefix : props.getReadOnlyPrefix()) {
-                source.addTransactionalMethod(prefix, txAttr_READONLY);
+                source.addTransactionalMethod(prefix, txAttr_REQUIRED_READONLY);
             }
         }
 
         if (!CollectionUtils.isEmpty(props.getReadOnlyAppendPrefix())) {
             for (String prefix : props.getReadOnlyAppendPrefix()) {
-                source.addTransactionalMethod(prefix, txAttr_READONLY);
+                source.addTransactionalMethod(prefix, txAttr_REQUIRED_READONLY);
             }
         }
 

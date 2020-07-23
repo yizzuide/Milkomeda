@@ -11,6 +11,7 @@ import java.util.List;
  *
  * @author yizzuide
  * @since 3.10.0
+ * @version 3.11.6
  * Create at 2020/07/02 17:59
  */
 @Slf4j
@@ -32,6 +33,7 @@ public class PillarEntryDispatcher {
                     return (T) handlerMetaData.getMethod().invoke(handlerMetaData.getTarget(), args);
                 } catch (Exception e) {
                     log.error("Pillar entry dispatch error with msg: {}", e.getMessage(), e);
+                    return null;
                 }
             }
         }
