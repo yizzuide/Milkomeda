@@ -1,5 +1,7 @@
 package com.github.yizzuide.milkomeda.ice;
 
+import org.springframework.data.redis.core.RedisOperations;
+
 import java.time.Duration;
 import java.util.List;
 
@@ -9,7 +11,7 @@ import java.util.List;
  *
  * @author yizzuide
  * @since 1.15.0
- * @version 3.0.9
+ * @version 3.11.7
  * Create at 2019/11/16 15:11
  */
 public interface Ice {
@@ -94,15 +96,31 @@ public interface Ice {
     /**
      * 完成任务
      * @param jobs    任务列表
-     * @param <T>   业务数据
      */
     <T> void finish(List<Job<T>> jobs);
+
+    /**
+     * 完成任务
+     * @param operations Pipelined操作
+     * @param jobs    任务列表
+     * @param <T>   业务数据
+     * @since 3.11.7
+     */
+    <T> void finish(RedisOperations<String, String> operations, List<Job<T>> jobs);
 
     /**
      * 完成任务
      * @param jobIds    任务id列表
      */
     void finish(Object... jobIds);
+
+    /**
+     * 完成任务
+     * @param operations Pipelined操作
+     * @param jobIds    任务id列表
+     * @since 3.11.7
+     */
+    void finish(RedisOperations<String, String> operations, Object... jobIds);
 
     /**
      * 删除任务
@@ -113,7 +131,24 @@ public interface Ice {
 
     /**
      * 删除任务
+     * @param operations Pipelined操作
+     * @param jobs    任务列表
+     * @param <T>   业务数据
+     * @since 3.11.7
+     */
+    <T> void delete(RedisOperations<String, String> operations, List<Job<T>> jobs);
+
+    /**
+     * 删除任务
      * @param jobIds    任务id列表
      */
     void delete(Object... jobIds);
+
+    /**
+     * 删除任务
+     * @param operations Pipelined操作
+     * @param jobIds    任务id列表
+     * @since 3.11.7
+     */
+    void delete(RedisOperations<String, String> operations, Object... jobIds);
 }

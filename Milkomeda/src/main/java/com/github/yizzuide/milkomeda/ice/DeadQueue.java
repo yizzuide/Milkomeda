@@ -1,5 +1,7 @@
 package com.github.yizzuide.milkomeda.ice;
 
+import org.springframework.data.redis.core.RedisOperations;
+
 import java.util.List;
 
 /**
@@ -7,16 +9,18 @@ import java.util.List;
  *
  * @author yizzuide
  * @since 3.0.8
+ * @version 3.11.7
  * Create at 2020/04/17 00:40
  */
 public interface DeadQueue {
 
     /**
      * 放入Dead Queue
-     *
+     * @param operations Pipelined操作
      * @param delayJob DelayJob
+     * @since 3.11.7
      */
-    void add(DelayJob delayJob);
+    void add(RedisOperations<String, String> operations, DelayJob delayJob);
 
     /**
      * 获取TTR Overload的DelayJob

@@ -18,7 +18,7 @@ import java.util.List;
  *
  * @author yizzuide
  * @since 1.15.0
- * @version 3.2.0
+ * @version 3.11.7
  * Create at 2019/11/16 17:30
  */
 @Slf4j
@@ -152,6 +152,7 @@ public class DelayJobHandler implements Runnable, ApplicationListener<IceInstanc
                 }
             }
         }
+
         if (overload) {
             log.error("Ice检测到 Job {} 的TTR超过预设的{}次!", job.getId(), job.getRetryCount());
             // 调用TTR Overload监听器
@@ -166,52 +167,56 @@ public class DelayJobHandler implements Runnable, ApplicationListener<IceInstanc
                     }
                 }
             }
-            // 如果调用TTR Overload监听成功
-            if (handleFlag) {
-                // 移除delayBucket中的任务
-                delayBucket.remove(index, delayJob);
-                // 没有开启Dead queue就移除原数据
-                if (!props.isEnableRetainToDeadQueueWhenTtrOverload()) {
-                    IceHolder.getIce().finish(job.getId());
+            boolean finalHandleFlag = handleFlag;
+            RedisUtil.batchOps((operations) -> {
+                // 如果调用TTR Overload监听成功
+                if (finalHandleFlag) {
+                    // 移除delayBucket中的任务
+                    delayBucket.remove(operations, index, delayJob);
+                    // 没有开启Dead queue就移除原数据
+                    if (!props.isEnableRetainToDeadQueueWhenTtrOverload()) {
+                        IceHolder.getIce().finish(operations, job.getId());
+                    }
                 }
-            }
-            if (props.isEnableRetainToDeadQueueWhenTtrOverload()) {
-                // 没有TTR Overload处理器时，从延迟队列移除
-                if (!handleFlag) {
-                    delayBucket.remove(index, delayJob);
+                if (props.isEnableRetainToDeadQueueWhenTtrOverload()) {
+                    // 没有TTR Overload处理器时，从延迟队列移除
+                    if (!finalHandleFlag) {
+                        delayBucket.remove(operations, index, delayJob);
+                    }
+                    // 修改池中状态
+                    job.setStatus(JobStatus.DELAY);
+                    jobPool.push(operations, job);
+                    // 重置延迟作业状态
+                    delayJob.setDelayTime(job.getDelay());
+                    delayJob.setRetryCount(0);
+                    // 添加dead queue
+                    deadQueue.add(operations, delayJob);
+                    log.warn("Ice处理TTR Overload的 Job {} 进入Dead queue", job.getId());
                 }
-                // 修改池中状态
-                job.setStatus(JobStatus.DELAY);
-                jobPool.push(job);
-                // 重置延迟作业状态
-                delayJob.setDelayTime(job.getDelay());
-                delayJob.setRetryCount(0);
-                // 添加dead queue
-                deadQueue.add(delayJob);
-                log.warn("Ice处理TTR Overload的 Job {} 进入Dead queue", job.getId());
-            }
+            }, redisTemplate);
+
             // 如果有处理方案，不再重试
             if (handleFlag || props.isEnableRetainToDeadQueueWhenTtrOverload()) {
                 return;
             }
         }
 
-        RedisUtil.batchOps(() -> {
+        // 重置到当前延迟
+        long delayDate = System.currentTimeMillis() +
+                (props.isEnableDelayMultiRetryCount() ?
+                        job.getDelay() * (currentRetryCount) * props.getRetryDelayMultiFactor() :
+                        job.getDelay());
+        RedisUtil.batchOps((operations) -> {
             // 还原到延迟状态
             job.setStatus(JobStatus.DELAY);
-            jobPool.push(job);
+            jobPool.push(operations, job);
             // 移除delayBucket中的任务
-            delayBucket.remove(index, delayJob);
+            delayBucket.remove(operations, index, delayJob);
             // 设置当前重试次数
             delayJob.setRetryCount(currentRetryCount);
-            // 重置到当前延迟
-            long delayDate = System.currentTimeMillis() +
-                    (props.isEnableDelayMultiRetryCount() ?
-                            job.getDelay() * (currentRetryCount) * props.getRetryDelayMultiFactor() :
-                            job.getDelay());
             delayJob.setDelayTime(delayDate);
             // 再次添加到任务中
-            delayBucket.add(delayJob);
+            delayBucket.add(operations, delayJob);
         }, redisTemplate);
     }
 
@@ -220,14 +225,14 @@ public class DelayJobHandler implements Runnable, ApplicationListener<IceInstanc
      */
     private void processDelayJob(DelayJob delayJob, Job<?> job) {
         log.info("Ice正在处理延迟的Job {}，当前状态为：{}", delayJob.getJodId(), job.getStatus());
-        RedisUtil.batchOps(() -> {
+        RedisUtil.batchOps((operations) -> {
             // 修改任务池状态
             job.setStatus(JobStatus.READY);
-            jobPool.push(job);
+            jobPool.push(operations, job);
             // 设置到待处理任务
-            readyQueue.push(delayJob);
+            readyQueue.push(operations, delayJob);
             // 移除delayBucket中的任务
-            delayBucket.remove(index, delayJob);
+            delayBucket.remove(operations, index, delayJob);
         }, redisTemplate);
     }
 

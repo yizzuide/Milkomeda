@@ -7,6 +7,7 @@ import com.github.yizzuide.milkomeda.universe.context.WebContext;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.event.EventListener;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
 import java.util.ArrayList;
@@ -18,6 +19,7 @@ import java.util.List;
  *
  * @author yizzuide
  * @since 3.8.0
+ * @version 3.11.7
  * Create at 2020/06/11 11:24
  */
 public class DelegatingDelayJobHandler implements Runnable, InitializingBean {
@@ -43,15 +45,20 @@ public class DelegatingDelayJobHandler implements Runnable, InitializingBean {
     // 使用Moon来轮询延迟桶
     private Moon<DelayJobHandler> iceDelayBucketMoon;
 
+    private String delayBucketKey = "ice-delay-bucket";
+
     @Override
     public void run() {
-        DelayJobHandler delayJobHandler = Moon.getPhase("ice-delay-bucket", iceDelayBucketMoon);
+        DelayJobHandler delayJobHandler = Moon.getPhase(delayBucketKey, iceDelayBucketMoon);
         delayJobHandler.run();
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public void afterPropertiesSet() throws Exception {
+        if (!IceProperties.DEFAULT_INSTANCE_NAME.equals(props.getInstanceName())) {
+            this.delayBucketKey = "ice-delay-bucket:" + props.getInstanceName();
+        }
         // 延迟桶处理器
         List<DelayJobHandler> delayJobHandlers = new ArrayList<>();
         for (int i = 0; i < props.getDelayBucketCount(); i++) {
@@ -69,5 +76,11 @@ public class DelegatingDelayJobHandler implements Runnable, InitializingBean {
         moon.setMoonStrategy(strategy);
         moon.add(delayJobHandlers.toArray(new DelayJobHandler[0]));
         iceDelayBucketMoon = moon;
+    }
+
+    @EventListener
+    public void onApplicationEvent(IceInstanceChangeEvent event) {
+        String instanceName = event.getSource().toString();
+        this.delayBucketKey = "ice-delay-bucket:" + instanceName;
     }
 }

@@ -23,7 +23,7 @@ public class ProductCheckHandler {
     public Job<Product> handle(Job<Product> productJob) {
         log.info("接收到Job: {}", productJob);
         // 测试处理失败
-//        int i = 1 / 0;
+        //int i = 1 / 0;
         // 重新入队到新topic
         Product product = productJob.getBody();
         product.setDesc("再次审核");

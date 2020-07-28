@@ -4,6 +4,7 @@ import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationListener;
 import org.springframework.data.redis.core.BoundListOperations;
+import org.springframework.data.redis.core.RedisOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.CollectionUtils;
 
@@ -15,7 +16,7 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 1.15.0
- * @version 3.0.7
+ * @version 3.11.7
  * Create at 2019/11/16 17:07
  */
 public class RedisReadyQueue implements ReadyQueue, InitializingBean, ApplicationListener<IceInstanceChangeEvent> {
@@ -31,9 +32,8 @@ public class RedisReadyQueue implements ReadyQueue, InitializingBean, Applicatio
     }
 
     @Override
-    public void push(DelayJob delayJob) {
-        BoundListOperations<String, String> listOperations = getQueue(delayJob.getTopic());
-        listOperations.rightPush(delayJob.toSimple());
+    public void push(RedisOperations<String, String> operations, DelayJob delayJob) {
+        operations.boundListOps(getKey(delayJob.getTopic())).rightPush(delayJob.toSimple());
     }
 
     @Override

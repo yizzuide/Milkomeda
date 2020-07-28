@@ -5,18 +5,14 @@ import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import com.github.yizzuide.milkomeda.util.JSONUtil;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationListener;
-import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.core.BoundHashOperations;
 import org.springframework.data.redis.core.RedisOperations;
-import org.springframework.data.redis.core.SessionCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.lang.NonNull;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -24,14 +20,12 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 1.15.0
- * @version 3.11.0
+ * @version 3.11.7
  * Create at 2019/11/16 15:45
  */
 public class RedisJobPool implements JobPool, InitializingBean, ApplicationListener<IceInstanceChangeEvent> {
 
     private StringRedisTemplate redisTemplate;
-
-    private IceProperties props;
 
     private String jobPoolKey = "ice:job_pool";
 
@@ -47,29 +41,13 @@ public class RedisJobPool implements JobPool, InitializingBean, ApplicationListe
 
     @SuppressWarnings("rawtypes")
     @Override
-    public void push(Job job) {
-        redisTemplate.executePipelined(new SessionCallback<Object>() {
-            @SuppressWarnings("unchecked")
-            @Override
-            public <K, V> Object execute(@NonNull RedisOperations<K, V> operations) throws DataAccessException {
-                operations.boundHashOps((K) jobPoolKey).expire(props.getJobExpire().getSeconds(), TimeUnit.SECONDS);
-                operations.boundHashOps((K) jobPoolKey).put(job.getId(), JSONUtil.serialize(job));
-                return null;
-            }
-        });
+    public void push(RedisOperations<String, String> operations, Job job) {
+        operations.boundHashOps(jobPoolKey).put(job.getId(), JSONUtil.serialize(job));
     }
 
     @Override
-    public <T> void push(List<Job<T>> jobs) {
-        redisTemplate.executePipelined(new SessionCallback<Object>() {
-            @SuppressWarnings("unchecked")
-            @Override
-            public <K, V> Object execute(@NonNull RedisOperations<K, V> operations) throws DataAccessException {
-                operations.boundHashOps((K) jobPoolKey).expire(props.getJobExpire().getSeconds(), TimeUnit.SECONDS);
-                operations.boundHashOps((K) jobPoolKey).putAll(jobs.stream().collect(Collectors.toMap(Job::getId, JSONUtil::serialize)));
-                return null;
-            }
-        });
+    public <T> void push(RedisOperations<String, String> operations, List<Job<T>> jobs) {
+        operations.boundHashOps(jobPoolKey).putAll(jobs.stream().collect(Collectors.toMap(Job::getId, JSONUtil::serialize)));
     }
 
     @Override
@@ -121,9 +99,13 @@ public class RedisJobPool implements JobPool, InitializingBean, ApplicationListe
     }
 
     @Override
+    public void remove(RedisOperations<String, String> operations, Object... jobIds) {
+        operations.boundHashOps(jobPoolKey).delete(jobIds);
+    }
+
+    @Override
     public void afterPropertiesSet() {
         redisTemplate = ApplicationContextHolder.get().getBean(StringRedisTemplate.class);
-        props =  ApplicationContextHolder.get().getBean(IceProperties.class);
     }
 
     @Override

@@ -1,5 +1,7 @@
 package com.github.yizzuide.milkomeda.ice;
 
+import org.springframework.data.redis.core.RedisOperations;
+
 import java.util.List;
 
 /**
@@ -7,15 +9,17 @@ import java.util.List;
  *
  * @author yizzuide
  * @since 1.15.0
- * @version 1.15.2
+ * @version 3.11.7
  * Create at 2019/11/16 17:04
  */
 public interface ReadyQueue {
     /**
      * 添加待处理延迟任务
+     * @param operations Pipelined操作
      * @param delayJob  DelayJob
+     * @since 3.11.7
      */
-    void push(DelayJob delayJob);
+    void push(RedisOperations<String, String> operations, DelayJob delayJob);
 
     /**
      * 取出待处理延迟任务

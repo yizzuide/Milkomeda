@@ -6,6 +6,7 @@ import com.github.yizzuide.milkomeda.util.RedisUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
+import org.springframework.data.redis.core.RedisOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.CollectionUtils;
 
@@ -20,7 +21,7 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 1.15.0
- * @version 3.0.9
+ * @version 3.11.7
  * Create at 2019/11/16 15:20
  */
 @Slf4j
@@ -65,9 +66,9 @@ public class RedisIce implements Ice, ApplicationListener<IceInstanceChangeEvent
             return;
         }
         job.setStatus(JobStatus.DELAY);
-        RedisUtil.batchOps(() -> {
-            jobPool.push(job);
-            delayBucket.add(new DelayJob(job));
+        RedisUtil.batchOps((operations) -> {
+            jobPool.push(operations, job);
+            delayBucket.add(operations, new DelayJob(job));
         }, redisTemplate);
     }
 
@@ -105,13 +106,13 @@ public class RedisIce implements Ice, ApplicationListener<IceInstanceChangeEvent
         }
 
         Job<T> mJob = job;
-        RedisUtil.batchOps(() -> {
-            // 设置为处理中状态
-            mJob.setStatus(JobStatus.RESERVED);
-            // 更新延迟时间为TTR
-            delayJob.setDelayTime(System.currentTimeMillis() + mJob.getTtr());
-            jobPool.push(mJob);
-            delayBucket.add(delayJob);
+        // 设置为处理中状态
+        mJob.setStatus(JobStatus.RESERVED);
+        // 更新延迟时间为TTR
+        delayJob.setDelayTime(System.currentTimeMillis() + mJob.getTtr());
+        RedisUtil.batchOps((operations) -> {
+            jobPool.push(operations, mJob);
+            delayBucket.add(operations, delayJob);
         }, redisTemplate);
         return mJob;
     }
@@ -141,17 +142,17 @@ public class RedisIce implements Ice, ApplicationListener<IceInstanceChangeEvent
                 return jobList;
             }
             List<Job<T>> mJobList = jobList;
-            RedisUtil.batchOps(() -> {
-                for (int i = 0; i < mJobList.size(); i++) {
-                    Job<T> mJob = mJobList.get(i);
-                    // 设置为处理中状态
-                    mJob.setStatus(JobStatus.RESERVED);
-                    // 更新延迟时间为TTR
-                    DelayJob delayJob = delayJobList.get(i);
-                    delayJob.setDelayTime(System.currentTimeMillis() + mJob.getTtr());
-                }
-                jobPool.push(mJobList);
-                delayBucket.add(delayJobList);
+            for (int i = 0; i < mJobList.size(); i++) {
+                Job<T> mJob = mJobList.get(i);
+                // 设置为处理中状态
+                mJob.setStatus(JobStatus.RESERVED);
+                // 更新延迟时间为TTR
+                DelayJob delayJob = delayJobList.get(i);
+                delayJob.setDelayTime(System.currentTimeMillis() + mJob.getTtr());
+            }
+            RedisUtil.batchOps((operations) -> {
+                jobPool.push(operations, mJobList);
+                delayBucket.add(operations, delayJobList);
             }, redisTemplate);
         } finally {
             // 删除Lock
@@ -166,8 +167,18 @@ public class RedisIce implements Ice, ApplicationListener<IceInstanceChangeEvent
     }
 
     @Override
+    public <T> void finish(RedisOperations<String, String> operations, List<Job<T>> jobs) {
+        delete(operations, jobs);
+    }
+
+    @Override
     public void finish(Object... jobIds) {
         delete(jobIds);
+    }
+
+    @Override
+    public void finish(RedisOperations<String, String> operations, Object... jobIds) {
+        delete(operations, jobIds);
     }
 
     @Override
@@ -177,8 +188,19 @@ public class RedisIce implements Ice, ApplicationListener<IceInstanceChangeEvent
     }
 
     @Override
+    public <T> void delete(RedisOperations<String, String> operations, List<Job<T>> jobs) {
+        List<String> jobIds = jobs.stream().map(Job::getId).collect(Collectors.toList());
+        delete(operations, jobIds.toArray(new Object[]{}));
+    }
+
+    @Override
     public void delete(Object... jobIds) {
         jobPool.remove(jobIds);
+    }
+
+    @Override
+    public void delete(RedisOperations<String, String> operations, Object... jobIds) {
+        jobPool.remove(operations, jobIds);
     }
 
     @Override

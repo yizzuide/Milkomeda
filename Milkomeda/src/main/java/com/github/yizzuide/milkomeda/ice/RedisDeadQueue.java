@@ -5,6 +5,7 @@ import com.github.yizzuide.milkomeda.util.JSONUtil;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.event.EventListener;
 import org.springframework.data.redis.core.BoundSetOperations;
+import org.springframework.data.redis.core.RedisOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.CollectionUtils;
 
@@ -17,6 +18,7 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 3.0.8
+ * @version 3.11.7
  * Create at 2020/04/17 00:51
  */
 public class RedisDeadQueue implements DeadQueue, InitializingBean {
@@ -32,8 +34,8 @@ public class RedisDeadQueue implements DeadQueue, InitializingBean {
     }
 
     @Override
-    public void add(DelayJob delayJob) {
-        getDeadQueue(this.deadQueueKey).add(JSONUtil.serialize(delayJob));
+    public void add(RedisOperations<String, String> operations, DelayJob delayJob) {
+        operations.boundSetOps(this.deadQueueKey).add(JSONUtil.serialize(delayJob));
     }
 
     @Override

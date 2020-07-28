@@ -70,14 +70,15 @@ public class RedisUtil {
 
     /**
      * 批量操作
-     * @param runnable      业务体
+     * @param callback      业务回调
      * @param redisTemplate RedisTemplate
      */
-    public static void batchOps(Runnable runnable, RedisTemplate<String, String> redisTemplate) {
+    @SuppressWarnings("unchecked")
+    public static void batchOps(Consumer<RedisOperations<String, String>> callback, RedisTemplate<String, String> redisTemplate) {
         redisTemplate.executePipelined(new SessionCallback<Object>() {
             @Override
             public <K, V> Object execute(@NonNull RedisOperations<K, V> operations) throws DataAccessException {
-                runnable.run();
+                callback.accept((RedisOperations<String, String>) operations);
                 return null;
             }
         });
@@ -90,7 +91,6 @@ public class RedisUtil {
      */
     public static void batchConn(Consumer<RedisConnection> callback, RedisTemplate<String, String> redisTemplate) {
         redisTemplate.executePipelined((RedisCallback<Long>) (connection) -> {
-            connection.openPipeline();
             callback.accept(connection);
             return null;
         });

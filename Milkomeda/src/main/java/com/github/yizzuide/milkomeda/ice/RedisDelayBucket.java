@@ -2,12 +2,10 @@ package com.github.yizzuide.milkomeda.ice;
 
 import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import com.github.yizzuide.milkomeda.util.JSONUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationListener;
-import org.springframework.data.redis.core.BoundZSetOperations;
-import org.springframework.data.redis.core.DefaultTypedTuple;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.data.redis.core.ZSetOperations;
+import org.springframework.data.redis.core.*;
 import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
@@ -23,8 +21,10 @@ import java.util.stream.Collectors;
  * @author yizzuide
  * @since 1.15.0
  * @version 3.8.0
+ * @version 3.11.7
  * Create at 2019/11/16 16:17
  */
+@Slf4j
 public class RedisDelayBucket implements DelayBucket, InitializingBean, ApplicationListener<IceInstanceChangeEvent> {
 
     private final IceProperties props;
@@ -50,26 +50,34 @@ public class RedisDelayBucket implements DelayBucket, InitializingBean, Applicat
     }
 
     @Override
-    public void add(DelayJob delayJob) {
+    public void add(RedisOperations<String, String> operations, DelayJob delayJob) {
         String bucketName = getCurrentBucketName();
-        BoundZSetOperations<String, String> bucket = getBucket(bucketName);
-        bucket.add(delayJob.toSimple(), delayJob.getDelayTime());
+        operations.boundZSetOps(bucketName).add(delayJob.toSimple(), delayJob.getDelayTime());
     }
 
     @Override
     public void add(List<DelayJob> delayJobs) {
         String bucketName = getCurrentBucketName();
-        BoundZSetOperations<String, String> bucket = getBucket(bucketName);
         Set<ZSetOperations.TypedTuple<String>> delayJobSet = delayJobs.stream()
                 .map(delayJob -> new DefaultTypedTuple<>(delayJob.toSimple(), (double) delayJob.getDelayTime()))
                 .collect(Collectors.toSet());
-        bucket.add(delayJobSet);
+        getBucket(bucketName).add(delayJobSet);
+    }
+
+    @Override
+    public void add(RedisOperations<String, String> operations, List<DelayJob> delayJobs) {
+        String bucketName = getCurrentBucketName();
+        Set<ZSetOperations.TypedTuple<String>> delayJobSet = delayJobs.stream()
+                .map(delayJob -> new DefaultTypedTuple<>(delayJob.toSimple(), (double) delayJob.getDelayTime()))
+                .collect(Collectors.toSet());
+        operations.boundZSetOps(bucketName).add(delayJobSet);
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public DelayJob poll(Integer index) {
         String name = bucketNames.get(index);
+        //log.info("Ice正在处理第{}个延迟分桶: {}", index, name);
         BoundZSetOperations<String, String> bucket = getBucket(name);
         // 升序查第一个（最上面的是延迟/TTR过期的）
         Set<ZSetOperations.TypedTuple<String>> set = bucket.rangeWithScores(0, 1);
@@ -94,6 +102,18 @@ public class RedisDelayBucket implements DelayBucket, InitializingBean, Applicat
         }
         // 兼容旧方式序列化删除
         bucket.remove(JSONUtil.serialize(delayJob));
+    }
+
+    @Override
+    public void remove(RedisOperations<String, String> operations, Integer index, DelayJob delayJob) {
+        String name = bucketNames.get(index);
+        // 优化后的方式删除
+        if (delayJob.isUsedSimple()) {
+            operations.boundZSetOps(name).remove(delayJob.toSimple());
+            return;
+        }
+        // 兼容旧方式序列化删除
+        operations.boundZSetOps(name).remove(JSONUtil.serialize(delayJob));
     }
 
     /**

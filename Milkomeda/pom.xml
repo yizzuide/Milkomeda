@@ -11,7 +11,7 @@
 
     <properties>
         <java.version>1.8</java.version>
-        <project.release.version>3.11.6-SNAPSHOT</project.release.version>
+        <project.release.version>3.11.7-SNAPSHOT</project.release.version>
         <spring-boot.version>2.2.4</spring-boot.version>
         <spring-cloud.version>Hoxton.RELEASE</spring-cloud.version>
         <mybatis.starter.version>2.1.1</mybatis.starter.version>
@@ -67,7 +67,7 @@
         <profile>
             <id>sonatype-oss-release</id>
             <properties>
-                <project.release.version>3.11.6</project.release.version>
+                <project.release.version>3.11.7</project.release.version>
             </properties>
             <build>
                 <plugins>

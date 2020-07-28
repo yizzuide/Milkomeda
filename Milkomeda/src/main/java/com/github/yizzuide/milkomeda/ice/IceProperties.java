@@ -12,7 +12,7 @@ import java.time.temporal.ChronoUnit;
  *
  * @author yizzuide
  * @since 1.15.0
- * @version 3.11.0
+ * @version 3.11.7
  * Create at 2019/11/16 19:02
  */
 @Data
@@ -28,6 +28,7 @@ class IceProperties {
 
     /**
      * 任务过期时间
+     * @deprecated redis hash field key can not support set expire.
      */
     @DurationUnit(ChronoUnit.SECONDS)
     private Duration jobExpire = Duration.ofDays(7);
