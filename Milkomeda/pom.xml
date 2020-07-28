@@ -11,7 +11,7 @@
 
     <properties>
         <java.version>1.8</java.version>
-        <project.release.version>3.11.7-SNAPSHOT</project.release.version>
+        <project.release.version>3.12.0-SNAPSHOT</project.release.version>
         <spring-boot.version>2.2.4</spring-boot.version>
         <spring-cloud.version>Hoxton.RELEASE</spring-cloud.version>
         <mybatis.starter.version>2.1.1</mybatis.starter.version>
@@ -67,7 +67,7 @@
         <profile>
             <id>sonatype-oss-release</id>
             <properties>
-                <project.release.version>3.11.7</project.release.version>
+                <project.release.version>3.12.0</project.release.version>
             </properties>
             <build>
                 <plugins>
@@ -242,7 +242,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
-                <version>2.2.1</version>
+                <version>3.2.1</version>
                 <executions>
                     <execution>
                         <id>attach-sources</id>
@@ -255,7 +255,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.10.1</version>
+                <version>3.2.0</version>
                 <executions>
                     <execution>
                         <id>attach-javadocs</id>

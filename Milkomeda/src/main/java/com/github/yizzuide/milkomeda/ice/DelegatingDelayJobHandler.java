@@ -19,7 +19,7 @@ import java.util.List;
  *
  * @author yizzuide
  * @since 3.8.0
- * @version 3.11.7
+ * @version 3.12.0
  * Create at 2020/06/11 11:24
  */
 public class DelegatingDelayJobHandler implements Runnable, InitializingBean {

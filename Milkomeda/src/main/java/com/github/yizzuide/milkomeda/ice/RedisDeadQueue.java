@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 3.0.8
- * @version 3.11.7
+ * @version 3.12.0
  * Create at 2020/04/17 00:51
  */
 public class RedisDeadQueue implements DeadQueue, InitializingBean {

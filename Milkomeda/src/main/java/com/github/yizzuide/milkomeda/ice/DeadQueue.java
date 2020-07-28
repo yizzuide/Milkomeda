@@ -9,7 +9,7 @@ import java.util.List;
  *
  * @author yizzuide
  * @since 3.0.8
- * @version 3.11.7
+ * @version 3.12.0
  * Create at 2020/04/17 00:40
  */
 public interface DeadQueue {
@@ -18,7 +18,7 @@ public interface DeadQueue {
      * 放入Dead Queue
      * @param operations Pipelined操作
      * @param delayJob DelayJob
-     * @since 3.11.7
+     * @since 3.12.0
      */
     void add(RedisOperations<String, String> operations, DelayJob delayJob);
 

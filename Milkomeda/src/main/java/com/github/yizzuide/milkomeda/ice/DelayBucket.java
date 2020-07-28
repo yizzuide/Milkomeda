@@ -9,7 +9,7 @@ import java.util.List;
  *
  * @author yizzuide
  * @since 1.15.0
- * @version 3.11.7
+ * @version 3.12.0
  * Create at 2019/11/16 16:03
  */
 public interface DelayBucket {
@@ -18,7 +18,7 @@ public interface DelayBucket {
      * 放入延时任务
      * @param operations Pipelined操作
      * @param delayJob DelayJob
-     * @since 3.11.7
+     * @since 3.12.0
      */
     void add(RedisOperations<String, String> operations, DelayJob delayJob);
 
@@ -32,7 +32,7 @@ public interface DelayBucket {
      * 批量放入延时任务
      * @param operations Pipelined操作
      * @param delayJobs List
-     * @since 3.11.7
+     * @since 3.12.0
      */
     void add(RedisOperations<String, String> operations, List<DelayJob> delayJobs);
 
@@ -55,7 +55,7 @@ public interface DelayBucket {
      * @param operations Pipelined操作
      * @param index     指定的桶
      * @param delayJob  DelayJob
-     * @since 3.11.7
+     * @since 3.12.0
      */
     void remove(RedisOperations<String, String> operations, Integer index, DelayJob delayJob);
 }

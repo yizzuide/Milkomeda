@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 1.15.0
- * @version 3.11.7
+ * @version 3.12.0
  * Create at 2019/11/16 15:45
  */
 public class RedisJobPool implements JobPool, InitializingBean, ApplicationListener<IceInstanceChangeEvent> {

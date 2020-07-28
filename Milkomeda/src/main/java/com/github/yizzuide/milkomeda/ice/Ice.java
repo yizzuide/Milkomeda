@@ -11,7 +11,7 @@ import java.util.List;
  *
  * @author yizzuide
  * @since 1.15.0
- * @version 3.11.7
+ * @version 3.12.0
  * Create at 2019/11/16 15:11
  */
 public interface Ice {
@@ -104,7 +104,7 @@ public interface Ice {
      * @param operations Pipelined操作
      * @param jobs    任务列表
      * @param <T>   业务数据
-     * @since 3.11.7
+     * @since 3.12.0
      */
     <T> void finish(RedisOperations<String, String> operations, List<Job<T>> jobs);
 
@@ -118,7 +118,7 @@ public interface Ice {
      * 完成任务
      * @param operations Pipelined操作
      * @param jobIds    任务id列表
-     * @since 3.11.7
+     * @since 3.12.0
      */
     void finish(RedisOperations<String, String> operations, Object... jobIds);
 
@@ -134,7 +134,7 @@ public interface Ice {
      * @param operations Pipelined操作
      * @param jobs    任务列表
      * @param <T>   业务数据
-     * @since 3.11.7
+     * @since 3.12.0
      */
     <T> void delete(RedisOperations<String, String> operations, List<Job<T>> jobs);
 
@@ -148,7 +148,7 @@ public interface Ice {
      * 删除任务
      * @param operations Pipelined操作
      * @param jobIds    任务id列表
-     * @since 3.11.7
+     * @since 3.12.0
      */
     void delete(RedisOperations<String, String> operations, Object... jobIds);
 }
