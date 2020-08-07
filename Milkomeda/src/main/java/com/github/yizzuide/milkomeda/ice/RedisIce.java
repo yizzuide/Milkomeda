@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 1.15.0
- * @version 3.12.0
+ * @version 3.12.1
  * Create at 2019/11/16 15:20
  */
 @Slf4j
@@ -53,20 +53,21 @@ public class RedisIce implements Ice, ApplicationListener<IceInstanceChangeEvent
     @SuppressWarnings("rawtypes")
     @Override
     public void add(Job job) {
-        add(job, true);
+        add(job, true, true);
     }
 
     @SuppressWarnings("rawtypes")
     @Override
-    public void add(Job job, boolean mergeIdWithTopic) {
+    public void add(Job job, boolean mergeIdWithTopic, boolean replaceWhenExists) {
         if (mergeIdWithTopic) {
             job.setId(job.getTopic() + "-" + job.getId());
         }
-        if (jobPool.exists(job.getId())) {
+        if (!replaceWhenExists && jobPool.exists(job.getId())) {
             return;
         }
         job.setStatus(JobStatus.DELAY);
         RedisUtil.batchOps((operations) -> {
+            jobPool.remove(operations, job.getId());
             jobPool.push(operations, job);
             delayBucket.add(operations, new DelayJob(job));
         }, redisTemplate);

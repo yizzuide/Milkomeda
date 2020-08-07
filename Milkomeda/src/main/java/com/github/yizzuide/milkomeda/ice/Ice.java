@@ -11,7 +11,7 @@ import java.util.List;
  *
  * @author yizzuide
  * @since 1.15.0
- * @version 3.12.0
+ * @version 3.12.1
  * Create at 2019/11/16 15:11
  */
 public interface Ice {
@@ -26,10 +26,11 @@ public interface Ice {
      * 添加延迟任务
      * @param job               Job
      * @param mergeIdWithTopic  是否把Job的topic合并进id（一般是建议合并，因为延迟任务会有topic流转再入队的情况）
+     * @param replaceWhenExists 当存在时替换
      * @since 3.0.9
      */
     @SuppressWarnings("rawtypes")
-    void add(Job job, boolean mergeIdWithTopic);
+    void add(Job job, boolean mergeIdWithTopic, boolean replaceWhenExists);
 
     /**
      * 添加延迟任务（job的id会与topic合并）

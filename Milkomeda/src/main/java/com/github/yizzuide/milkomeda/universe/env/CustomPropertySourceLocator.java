@@ -6,6 +6,7 @@ import org.springframework.core.env.ConfigurableEnvironment;
 
 /**
  * CustomPropertySourceLocator
+ * 自定义属性源
  *
  * @author yizzuide
  * @since 3.0.1
@@ -23,6 +24,7 @@ public class CustomPropertySourceLocator implements /*PropertySourceLocator,*/ E
     }*/
 
     // 添加自定义属性来源方式二：实现EnvironmentPostProcessor接口，把CollectionsPropertySourceLocator注册到spring.factories
+    // Spring启动时发出ApplicationEnvironmentPreparedEvent事件，通过ConfigFileApplicationListener加载SPI配置的所有排好序的EnvironmentPostProcessor实例
     @Override
     public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
         CollectionsPropertySource.addToEnvironment(environment);
