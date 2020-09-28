@@ -25,7 +25,7 @@ import java.util.Map;
  *
  * @author yizzuide
  * @since 1.13.0
- * @version 1.13.12
+ * @version 3.12.2
  * Create at 2019/09/21 16:48
  */
 @Slf4j
@@ -167,7 +167,7 @@ public abstract class AbstractRequest {
             }
         }
         if (showLog) {
-            log.info("abstractRequest:- response with url: {}, params: {}, reqParams:{}, data: {}", url, params, reqParams, body);
+            log.info("abstractRequest:- response with url: {}, data: {}", url, body);
         }
 
         Object responseEntity = null;

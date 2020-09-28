@@ -1,6 +1,7 @@
 package com.github.yizzuide.milkomeda.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.json.JsonReadFeature;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JavaType;
@@ -16,7 +17,7 @@ import java.util.*;
  *
  * @author yizzuide
  * @since 0.2.0
- * @version 3.0.0
+ * @version 3.12.2
  * Create at 2019/04/11 22:07
  */
 @Slf4j
@@ -31,6 +32,8 @@ public class JSONUtil {
         mapper.setTimeZone(china);
         mapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
         // mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+        // 允许特殊字符
+        mapper.configure(JsonReadFeature.ALLOW_UNESCAPED_CONTROL_CHARS.mappedFeature(),true);
     }
 
     public static String serialize(Object obj) {

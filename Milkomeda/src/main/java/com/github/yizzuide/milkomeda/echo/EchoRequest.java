@@ -19,7 +19,7 @@ import java.util.Map;
  *
  * @author yizzuide
  * @since 1.13.0
- * @version 3.2.1
+ * @version 3.12.2
  * Create at 2019/09/21 19:00
  */
 @Slf4j
@@ -33,6 +33,7 @@ public abstract class EchoRequest extends AbstractRequest {
         }
         // 指定的类型
         Class<?> specClazz = TypeUtil.type2Class(specType);
+        boolean isStringType = String.class == specClazz;
         boolean isMapType = Map.class == specClazz;
         boolean isListType = List.class == specClazz;
 
@@ -97,6 +98,11 @@ public abstract class EchoRequest extends AbstractRequest {
                 return responseData;
             }
 
+            // 字符串类型直接返回
+            if (isStringType && responseData.getData() instanceof String) {
+                return responseData;
+            }
+
             // 指定类型为非Map的处理
             if (!isMapType) {
                 // 如果指定是List
@@ -116,7 +122,11 @@ public abstract class EchoRequest extends AbstractRequest {
                         return responseData;
                     }
                 }
-                responseData.setData(JSONUtil.nativeRead(JSONUtil.serialize(responseData.getData()), specType));
+                if (responseData.getData() instanceof String) {
+                    responseData.setData(JSONUtil.nativeRead((String) responseData.getData(), specType));
+                } else {
+                    responseData.setData(JSONUtil.nativeRead(JSONUtil.serialize(responseData.getData()), specType));
+                }
             }
         } catch (Exception e) {
             log.error("EchoRequest:- create return Data error: {}", e.getMessage(), e);

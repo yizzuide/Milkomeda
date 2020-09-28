@@ -22,8 +22,8 @@ public enum TradeType implements PillarType {
     WITHDRAW(3, "WITHDRAW"),
     ;
 
-    private Integer type;
-    private String typeName;
+    private final Integer type;
+    private final String typeName;
 
 
     @Override

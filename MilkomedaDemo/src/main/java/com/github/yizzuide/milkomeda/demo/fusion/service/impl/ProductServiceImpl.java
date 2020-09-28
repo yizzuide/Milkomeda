@@ -22,7 +22,7 @@ public class ProductServiceImpl implements ProductService {
             @Fusion(tag = "product-push"),
             // 根据条件是否调用业务方法 allowed：判断条件；fallback：条件判断结果为false时调用的反馈方法
 //            @Fusion(allowed = Platform.EL_CHECK_ACTIVE, fallback = "#target.pushNotCheck(#product, #delay)"),
-            @Fusion(allowed = "false", fallback = "@productService.pushNotCheck(#product, #delay)"),
+            @Fusion(allowed = "false", fallback = "@env.get('spring.profiles.active') == 'prod'"),
             // allowedType：逻辑条件类型，默认为AND
             @Fusion(allowedType = FusionAllowedType.OR, allowed = Platform.EL_IS_TEST)
     })

@@ -203,7 +203,7 @@ public class CometInterceptor extends HandlerInterceptorAdapter implements Appli
             return;
         }
 
-        // 如果有标识异常，按失败处理
+        // 如果有标识异常，按失败处理（对于有被try...catch包装的处理）
         Object failure = cometData.getFailure();
         if (failure != null && failure instanceof Exception) {
             cometData.setStatus(cometProperties.getStatusFailCode());
@@ -218,7 +218,7 @@ public class CometInterceptor extends HandlerInterceptorAdapter implements Appli
             return;
         }
 
-        // 响应状态码错误
+        // 错误的http协议响应状态码
         if (status >= 400) {
             cometData.setStatus(cometProperties.getStatusFailCode());
             cometData.setResponseData(body == null ? null : JSONUtil.serialize(body));
@@ -236,7 +236,7 @@ public class CometInterceptor extends HandlerInterceptorAdapter implements Appli
             return;
         }
 
-        // 检测Body返回code
+        // 检测Body返回code来确定是不是一个业务型异常返回
         Map<String, Object> bodyMap = null;
         boolean isResponseOk = true;
         // 检测响应码是否有成功
