@@ -17,7 +17,7 @@ import java.util.*;
  *
  * @author yizzuide
  * @since 0.2.0
- * @version 3.12.2
+ * @version 3.12.3
  * Create at 2019/04/11 22:07
  */
 @Slf4j
@@ -109,12 +109,26 @@ public class JSONUtil {
     public static <T> T toCamel(Object data, TypeReference<T> clazz) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         Object result = data;
-        if (data instanceof Map) {
+        boolean isMap = false;
+        boolean isList = false;
+        if (data instanceof String) {
+            isMap = data.toString().matches("^\\s*\\{.+");
+            isList = data.toString().matches("^\\s*\\[.+");
+            if (isMap) {
+                data = JSONUtil.parseMap((String) data, String.class, Object.class);
+            } else {
+                data = JSONUtil.parseList((String) data, Map.class);
+            }
+            if (data == null) {
+                return null;
+            }
+        }
+        if (isMap || data instanceof Map) {
             result = toCamel((Map) data);
             if (Map.class == TypeUtil.type2Class(clazz)) {
                 return (T) result;
             }
-        } else if (data instanceof List) {
+        } else if (isList || data instanceof List) {
             List<Map> list = (List) data;
             List<Map> targetList = new ArrayList<>();
             for (Map m : list) {

@@ -19,7 +19,7 @@ import java.util.Map;
  *
  * @author yizzuide
  * @since 1.13.0
- * @version 3.12.2
+ * @version 3.12.3
  * Create at 2019/09/21 19:00
  */
 @Slf4j
@@ -27,7 +27,7 @@ public abstract class EchoRequest extends AbstractRequest {
 
     @Override
     @SuppressWarnings({"unchecked", "rawtypes"})
-    protected <T> EchoResponseData<T> createReturnData(Object respData, TypeReference<T> specType, boolean useStandardHTTP) throws EchoException {
+    protected <T> EchoResponseData<T> createReturnData(Object respData, TypeReference<T> specType, boolean useStandardHTTP, boolean forceCamel) throws EchoException {
         if (null == respData) {
             return responseData();
         }
@@ -98,8 +98,17 @@ public abstract class EchoRequest extends AbstractRequest {
                 return responseData;
             }
 
-            // 字符串类型直接返回
-            if (isStringType && responseData.getData() instanceof String) {
+            // data内容识别转换
+            if (responseData.getData() instanceof String) {
+                // 指定的为字符串类型直接返回
+                if (isStringType) {
+                    return responseData;
+                }
+                if (forceCamel) {
+                    responseData.setData(JSONUtil.toCamel(responseData.getData(), specType));
+                    return responseData;
+                }
+                responseData.setData(JSONUtil.nativeRead((String) responseData.getData(), specType));
                 return responseData;
             }
 

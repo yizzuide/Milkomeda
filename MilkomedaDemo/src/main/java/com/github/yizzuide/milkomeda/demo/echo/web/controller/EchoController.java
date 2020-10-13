@@ -3,6 +3,7 @@ package com.github.yizzuide.milkomeda.demo.echo.web.controller;
 import com.github.yizzuide.milkomeda.echo.EchoException;
 import com.github.yizzuide.milkomeda.echo.EchoRequest;
 import com.github.yizzuide.milkomeda.echo.EchoResponseData;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -43,12 +44,7 @@ public class EchoController {
         } else {
             data.put("code", "200");
             data.put("error_msg", "成功");
-            data.put("data", new HashMap<String, Object>(){
-                private static final long serialVersionUID = -7494033976315538458L;
-                {
-                    put("order_id", "12343243434324324");
-                }});
-
+            data.put("data", "{\"order_id\":\"12343243434324324\"}");
         }
         return ResponseEntity.ok(data);
     }
@@ -66,6 +62,7 @@ public class EchoController {
             // TypeReference比用xxx.class在泛型的支持上要强得多，IDE也会智能检测匹配成功
             // 如果第三方的data是一个json数组，可以传new TypeReference<List<Map<String, Object>>>() {}，返回结果用EchoResponseData<List<Map<String, Object>>>接收
 //            EchoResponseData<Map<String, Object>> responseData = simpleEchoRequest.sendPostForResult("http://localhost:8091/echo/account/open", reqParams, new TypeReference<Map<String, Object>>() {}, true);
+            //EchoResponseData<PayVo> responseData = simpleEchoRequest.sendRequest(HttpMethod.POST, "http://localhost:8091/echo/account/open", null, reqParams, new TypeReference<PayVo>(){}, true);
             EchoResponseData<Map<String, Object>> responseData = simpleEchoRequest.fetch(HttpMethod.POST, "http://localhost:8091/echo/account/open", reqParams);
             log.info("responseData: {}", responseData);
         } catch (EchoException e) {
@@ -77,5 +74,10 @@ public class EchoController {
         data.put("code", "200");
         data.put("error_msg", "");
         return ResponseEntity.ok(data);
+    }
+
+    @Data
+    static class PayVo {
+        private String orderId;
     }
 }

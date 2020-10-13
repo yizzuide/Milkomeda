@@ -25,7 +25,7 @@ import java.util.Map;
  *
  * @author yizzuide
  * @since 1.13.0
- * @version 3.12.2
+ * @version 3.12.3
  * Create at 2019/09/21 16:48
  */
 @Slf4j
@@ -195,7 +195,7 @@ public abstract class AbstractRequest {
             }
         }
 
-        EchoResponseData<T> responseData = createReturnData(responseEntity, specType, useStandardHTTP);
+        EchoResponseData<T> responseData = createReturnData(responseEntity, specType, useStandardHTTP, forceCamel);
         if (useStandardHTTP) {
             responseData.setCode(String.valueOf(request.getStatusCodeValue()));
         }
@@ -312,14 +312,15 @@ public abstract class AbstractRequest {
     /**
      * 返回数据类型的模板方法
      *
+     * @param <T>      EchoResponseData的data字段类型
      * @param respData 第三方方响应的数据，Map或List
      * @param specType ResponseData的data字段类型
-     * @param <T>      EchoResponseData的data字段类型
      * @param useStandardHTTP 是否使用标准的HTTP标准码
+     * @param forceCamel data里的字段是否强制下划线转驼峰
      * @return 统一响应数据类
      * @throws EchoException 请求异常
      */
-    protected abstract <T> EchoResponseData<T> createReturnData(Object respData, TypeReference<T> specType, boolean useStandardHTTP) throws EchoException;
+    protected abstract <T> EchoResponseData<T> createReturnData(Object respData, TypeReference<T> specType, boolean useStandardHTTP, boolean forceCamel) throws EchoException;
 
     /**
      * 子类需要实现的参数签名（默认不应用签名）
