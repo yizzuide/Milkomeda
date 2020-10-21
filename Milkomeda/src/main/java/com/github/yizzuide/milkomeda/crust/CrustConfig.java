@@ -19,7 +19,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
  *
  * @author yizzuide
  * @since 1.14.0
- * @version 3.3.0
+ * @version 3.12.4
  * Create at 2019/11/11 14:56
  */
 @Configuration
@@ -69,6 +69,7 @@ public class CrustConfig {
         lightCache.setOnlyCacheL1(!crustProps.isEnableCacheL2());
         lightCache.setL2Expire(lightProps.getL2Expire().getSeconds());
         lightCache.setOnlyCacheL2(false);
+        lightCache.setEnableSuperCache(lightProps.isEnableSuperCache());
         return lightCache;
     }
 }

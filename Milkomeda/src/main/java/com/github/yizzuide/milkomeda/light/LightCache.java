@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit;
  * E：缓存业务数据
  *
  * @since 1.8.0
- * @version 3.7.0
+ * @version 3.12.4
  * @author yizzuide
  * Create at 2019/06/28 13:33
  */
@@ -91,6 +91,13 @@ public class LightCache implements Cache {
     @Setter
     @Getter
     private Boolean onlyCacheL2;
+
+    /**
+     * 开启超缓存
+     */
+    @Setter
+    @Getter
+    private boolean enableSuperCache;
 
     /**
      * 超级缓存（每个Cache都有自己的超级缓存，互不影响）
@@ -379,6 +386,7 @@ public class LightCache implements Cache {
         this.setOnlyCacheL1(other.getOnlyCacheL1());
         this.setL2Expire(other.getL2Expire());
         this.setOnlyCacheL2(other.getOnlyCacheL2());
+        this.setEnableSuperCache(other.isEnableSuperCache());
     }
 
     /**
@@ -394,5 +402,6 @@ public class LightCache implements Cache {
         this.setOnlyCacheL1(props.isOnlyCacheL1());
         this.setL2Expire(props.getL2Expire().getSeconds());
         this.setOnlyCacheL2(props.isOnlyCacheL2());
+        this.setEnableSuperCache(props.isEnableSuperCache());
     }
 }

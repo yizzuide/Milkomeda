@@ -14,7 +14,7 @@ import java.util.Map;
  *
  * @author yizzuide
  * @since 1.17.0
- * @version 3.0.0
+ * @version 3.12.4
  * Create at 2019/12/03 16:24
  */
 @Data
@@ -49,4 +49,10 @@ public class LightProperties {
      * 自定义实例名配置（实例的注册方式为首次使用时）
      */
     private Map<String, LightProperties> instances = new HashMap<>();
+
+    /**
+     * 是否开启超缓存
+     * @since 3.12.4
+     */
+    private boolean enableSuperCache = true;
 }

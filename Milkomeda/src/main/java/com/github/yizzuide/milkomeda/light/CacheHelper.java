@@ -14,7 +14,7 @@ import java.util.function.Function;
  * 缓存外层API，集超级缓存、一级缓存、二级缓存于一体的方法
  *
  * @since 1.10.0
- * @version 3.2.1
+ * @version 3.12.4
  * @author yizzuide
  * Create at 2019/07/02 11:36
  */
@@ -136,7 +136,7 @@ public class CacheHelper {
         Spot<Serializable, E> fastSpot = null;
         if (cache instanceof LightCache) {
             LightCache lightCache = (LightCache) cache;
-            if (!lightCache.getOnlyCacheL2()) {
+            if (lightCache.isEnableSuperCache() && !lightCache.getOnlyCacheL2()) {
                 // 方案一：从超级缓存中获取，内存指针引用即可返回（耗时为O(1)）
                 fastSpot = get(cache);
                 if (fastSpot != null) {
@@ -217,7 +217,7 @@ public class CacheHelper {
         Spot<Serializable, E> fastSpot = null;
         if (cache instanceof LightCache) {
             LightCache lightCache = (LightCache) cache;
-            if (!lightCache.getOnlyCacheL2()) {
+            if (lightCache.isEnableSuperCache() && !lightCache.getOnlyCacheL2()) {
                 fastSpot = get(cache);
                 if (fastSpot == null) {
                     // 设置超级缓存

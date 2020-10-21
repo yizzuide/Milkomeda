@@ -13,7 +13,7 @@ import java.util.Map;
  * 超级缓存清理
  *
  * @author yizzuide
- * @since 3.3.0
+ * @since 3.12.4
  * Create at 2020/05/06 14:13
  */
 public class LightCacheCleanAstrolabeHandler implements AstrolabeHandler {
@@ -21,9 +21,11 @@ public class LightCacheCleanAstrolabeHandler implements AstrolabeHandler {
     @Override
     public void postHandle(ServletRequest request, ServletResponse response) {
         // 清除请求线程的所有Cache子实例的超级缓存
-        Map<String, Cache> cacheMap = ApplicationContextHolder.get().getBeansOfType(Cache.class);
-        for (Cache cache : cacheMap.values()) {
-            CacheHelper.remove(cache);
+        Map<String, LightCache> cacheMap = ApplicationContextHolder.get().getBeansOfType(LightCache.class);
+        for (LightCache cache : cacheMap.values()) {
+            if (cache.isEnableSuperCache()) {
+                CacheHelper.remove(cache);
+            }
         }
     }
 
