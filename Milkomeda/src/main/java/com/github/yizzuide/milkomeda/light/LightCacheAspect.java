@@ -30,7 +30,7 @@ import static com.github.yizzuide.milkomeda.util.ReflectUtil.extractValue;
  *
  * @author yizzuide
  * @since 2.0.0
- * @version 3.5.1
+ * @version 3.12.4
  * Create at 2019/12/18 14:45
  */
 @Order(98)
@@ -115,15 +115,7 @@ public class LightCacheAspect {
      * @param cacheBeanName 原bean名
      * @return  内部缓存Bean名
      */
-    private String innerCacheBeanName(String cacheBeanName) {
+    String innerCacheBeanName(String cacheBeanName) {
         return DEFAULT_BEAN_NAME + "_" + cacheBeanName;
-    }
-
-    private String originCacheBeanName(String innerCacheBeanName) {
-        String prefix = DEFAULT_BEAN_NAME + "_";
-        if (innerCacheBeanName.startsWith(prefix)) {
-            return innerCacheBeanName.substring(prefix.length());
-        }
-        return innerCacheBeanName;
     }
 }

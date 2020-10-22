@@ -9,11 +9,11 @@ import javax.servlet.ServletResponse;
 import java.util.Map;
 
 /**
- * CrustSessionCleanAstrolabeHandler
+ * LightCacheCleanAstrolabeHandler
  * 超级缓存清理
  *
  * @author yizzuide
- * @since 3.12.4
+ * @since 3.12.5
  * Create at 2020/05/06 14:13
  */
 public class LightCacheCleanAstrolabeHandler implements AstrolabeHandler {
@@ -21,9 +21,9 @@ public class LightCacheCleanAstrolabeHandler implements AstrolabeHandler {
     @Override
     public void postHandle(ServletRequest request, ServletResponse response) {
         // 清除请求线程的所有Cache子实例的超级缓存
-        Map<String, LightCache> cacheMap = ApplicationContextHolder.get().getBeansOfType(LightCache.class);
-        for (LightCache cache : cacheMap.values()) {
-            if (cache.isEnableSuperCache()) {
+        Map<String, Cache> cacheMap = ApplicationContextHolder.get().getBeansOfType(Cache.class);
+        for (Cache cache : cacheMap.values()) {
+            if (cache instanceof LightCache && ((LightCache)cache).isEnableSuperCache()) {
                 CacheHelper.remove(cache);
             }
         }

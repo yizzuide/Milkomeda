@@ -163,7 +163,7 @@ public class CacheHelper {
         Spot<Serializable, E> spot = cache.get(key, new TypeReference<Serializable>() {}, eTypeRef);
         if (spot != null) {
             data = spot.getData();
-            // 设置到超级缓存（如果有内存缓存的情况）
+            // 设置缓存数据
             fastSpot.setData(data);
             return data;
         }
@@ -174,7 +174,7 @@ public class CacheHelper {
         if (data == null) {
             return data;
         }
-        // 设置到超级缓存
+        // 设置缓存数据
         fastSpot.setData(data);
         // 一级缓存（内存，默认缓存64个，超出时使用热点旧数据丢弃策略） -> 二级缓存（Redis）
         cache.set(key, fastSpot);
@@ -230,6 +230,7 @@ public class CacheHelper {
             }
         }
         assert fastSpot != null;
+        // 设置缓存数据
         fastSpot.setData(data);
         // 设置一级缓存 -> 二级缓存
         cache.set(key, fastSpot);
