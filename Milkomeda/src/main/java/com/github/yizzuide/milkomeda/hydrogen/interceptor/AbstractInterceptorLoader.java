@@ -10,5 +10,5 @@ import com.github.yizzuide.milkomeda.hydrogen.core.AbstractHydrogenLoader;
  * Create at 2020/04/03 11:02
  */
 public abstract class AbstractInterceptorLoader<T> extends AbstractHydrogenLoader<T> implements InterceptorLoader {
-    // Keep empty, prepare extend later.
+    // Keep empty, prepare extend later
 }

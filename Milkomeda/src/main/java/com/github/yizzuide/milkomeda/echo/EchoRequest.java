@@ -19,7 +19,7 @@ import java.util.Map;
  *
  * @author yizzuide
  * @since 1.13.0
- * @version 3.12.3
+ * @version 3.12.7
  * Create at 2019/09/21 19:00
  */
 @Slf4j
@@ -104,11 +104,18 @@ public abstract class EchoRequest extends AbstractRequest {
                 if (isStringType) {
                     return responseData;
                 }
+                String dataStr = (String) responseData.getData();
+                if (dataStr.startsWith("\"")) {
+                    dataStr = dataStr.substring(1);
+                }
+                if (dataStr.endsWith("\"")) {
+                    dataStr = dataStr.substring(0, dataStr.length() - 1);
+                }
                 if (forceCamel) {
-                    responseData.setData(JSONUtil.toCamel(responseData.getData(), specType));
+                    responseData.setData(JSONUtil.toCamel(dataStr, specType));
                     return responseData;
                 }
-                responseData.setData(JSONUtil.nativeRead((String) responseData.getData(), specType));
+                responseData.setData(JSONUtil.nativeRead(dataStr, specType));
                 return responseData;
             }
 

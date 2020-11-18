@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
@@ -20,7 +21,6 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import javax.annotation.PostConstruct;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -79,7 +79,7 @@ public class UniformHandler extends ResponseEntityExceptionHandler {
 
     // 4xx异常处理
     @Override
-    protected ResponseEntity<Object> handleExceptionInternal(Exception ex, @Nullable Object body, HttpHeaders headers, HttpStatus status, WebRequest request) {
+    protected @NonNull ResponseEntity<Object> handleExceptionInternal(@NonNull Exception ex, @Nullable Object body, @NonNull HttpHeaders headers, HttpStatus status, @NonNull WebRequest request) {
         ResponseEntity<Object> responseEntity = handleExceptionResponse(ex, status.value(), ex.getMessage());
         if (responseEntity == null) {
             return super.handleExceptionInternal(ex, body, headers, status, request);
@@ -101,14 +101,14 @@ public class UniformHandler extends ResponseEntityExceptionHandler {
 
     // 对方法上@RequestBody的Bean参数校验的处理
     @Override
-    protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
+    protected @NonNull ResponseEntity<Object> handleMethodArgumentNotValid(@NonNull MethodArgumentNotValidException ex, @NonNull HttpHeaders headers, @NonNull HttpStatus status, @NonNull WebRequest request) {
         ResponseEntity<Object> responseEntity = handleValidBeanExceptionResponse(ex, ex.getBindingResult());
         return responseEntity == null ? super.handleMethodArgumentNotValid(ex, headers, status, request) : responseEntity;
     }
 
     // 对方法的Form提交参数绑定校验的处理
     @Override
-    protected ResponseEntity<Object> handleBindException(BindException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
+    protected @NonNull ResponseEntity<Object> handleBindException(@NonNull BindException ex, @NonNull HttpHeaders headers, @NonNull HttpStatus status, @NonNull WebRequest request) {
         ResponseEntity<Object> responseEntity = handleValidBeanExceptionResponse(ex, ex.getBindingResult());
         return responseEntity == null ? super.handleBindException(ex, headers, status, request) : responseEntity;
     }
@@ -116,7 +116,7 @@ public class UniformHandler extends ResponseEntityExceptionHandler {
     // 其它内部异常处理
     @SuppressWarnings("unchecked")
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Object> handleException(Exception e) throws IOException {
+    public ResponseEntity<Object> handleException(Exception e) {
         Map<String, Object> response = props.getResponse();
         Object status = response.get(YmlResponseOutput.STATUS);
         status = status == null ?  500 : status;
@@ -164,7 +164,7 @@ public class UniformHandler extends ResponseEntityExceptionHandler {
      * @return  ResponseEntity
      */
     @SuppressWarnings("unchecked")
-    private ResponseEntity<Object> handleExceptionResponse(Exception ex, Object presetStatusCode, String presetMessage) {
+    private @Nullable ResponseEntity<Object> handleExceptionResponse(Exception ex, Object presetStatusCode, String presetMessage) {
         Map<String, Object> response = props.getResponse();
         Map<String, Object> result = new HashMap<>();
         Object exp4xx = response.get(presetStatusCode.toString());
