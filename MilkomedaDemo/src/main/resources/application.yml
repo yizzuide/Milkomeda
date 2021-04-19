@@ -5,6 +5,7 @@ server:
       timeout: 120m
       cookie:
         http-only: true
+        # 自定义sessionId，用于后台登录唯一标识，防止被第三方平台覆盖
         name: mk-sessionid
 
 spring:
@@ -217,6 +218,10 @@ milkomeda:
       - /jupiter/**
       - /metal/**
       - /pillar/**
+    # 放开static资源访问
+    allow-static-urls:
+      - /build/*
+      - /error/*
 
   ice:
     # 开启Job作业（作为消费端使用时，设置为false）
@@ -325,7 +330,7 @@ milkomeda:
     # 国际化：需配置spring.messages.basename
     i18n:
       enable: true
-      # 语言设置参数名，默认为lang，如：zh_CN (language_country)
+      # 语言设置参数名，默认为lang，如：zh_CN
       query: lang
 
 
@@ -372,7 +377,7 @@ milkomeda:
         url:  jdbc:mysql://localhost:3306?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&useSSL=false&rewriteBatchedStatements=true&allowMultiQueries=true&allowPublicKeyRetrieval=true
     # 主从切面策略
     strategy:
-      - key-name: read-only
+      - key-name: read-only # 这里上面instances里配置的key
         pointcut-expression: execution(* com..mapper.*.query*(..))
 
     # 开启分库分表

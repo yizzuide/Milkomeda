@@ -16,6 +16,9 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 3.3.1
+ * @version 3.12.9
+ * @see org.springframework.web.filter.RequestContextFilter
+ * @see org.springframework.boot.web.servlet.filter.OrderedRequestContextFilter
  * Create at 2020/05/06 11:12
  */
 public class DelegatingContextFilter implements Filter {
@@ -25,6 +28,7 @@ public class DelegatingContextFilter implements Filter {
 
     @PostConstruct
     public void init() {
+        // 排序
         astrolabeHandlers = astrolabeHandlers.stream()
                 .sorted(OrderComparator.INSTANCE.withSourceProvider(ha -> ha)).collect(Collectors.toList());
     }
@@ -34,9 +38,12 @@ public class DelegatingContextFilter implements Filter {
         for (AstrolabeHandler astrolabeHandler : astrolabeHandlers) {
             astrolabeHandler.preHandle(request);
         }
-        chain.doFilter(request, response);
-        for (AstrolabeHandler astrolabeHandler : astrolabeHandlers) {
-            astrolabeHandler.postHandle(request, response);
+        try {
+            chain.doFilter(request, response);
+        } finally {
+            for (AstrolabeHandler astrolabeHandler : astrolabeHandlers) {
+                astrolabeHandler.postHandle(request, response);
+            }
         }
     }
 }

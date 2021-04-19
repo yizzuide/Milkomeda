@@ -10,9 +10,9 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
+import org.springframework.boot.web.servlet.filter.OrderedFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.Ordered;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
@@ -29,7 +29,7 @@ import java.util.Collections;
  *
  * @author yizzuide
  * @since 2.0.0
- * @version 3.3.1
+ * @version 3.12.9
  * Create at 2019/12/13 19:09
  */
 @Configuration
@@ -70,7 +70,10 @@ public class MilkomedaContextConfig {
         delegatingFilterRegistrationBean.setFilter(new DelegatingFilterProxy("delegatingContextFilter"));
         delegatingFilterRegistrationBean.setName("delegatingContextFilter");
         delegatingFilterRegistrationBean.setUrlPatterns(Collections.singleton("/*"));
-        delegatingFilterRegistrationBean.setOrder(Ordered.HIGHEST_PRECEDENCE + 40);
+        // Order defaults to after OrderedRequestContextFilter
+        // 解决无法从RequestContext获取信息的问题
+        int order = OrderedFilter.REQUEST_WRAPPER_FILTER_MAX_ORDER - 104;
+        delegatingFilterRegistrationBean.setOrder(order);
         return delegatingFilterRegistrationBean;
     }
 

@@ -16,6 +16,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler;
@@ -54,7 +55,9 @@ public class CrustConfigurerAdapter extends WebSecurityConfigurerAdapter {
 
     @Override
     public void configure(AuthenticationManagerBuilder auth) {
+        // 使用继承自DaoAuthenticationProvider
         CrustAuthenticationProvider authenticationProvider = new CrustAuthenticationProvider(props, passwordEncoder);
+        // 扩展配置
         configureProvider(authenticationProvider);
         // 添加自定义身份验证组件
         auth.authenticationProvider(authenticationProvider);
@@ -70,10 +73,12 @@ public class CrustConfigurerAdapter extends WebSecurityConfigurerAdapter {
             allowURLs.addAll(props.getAdditionPermitUrls());
         }
         // 标记匿名访问
+        // Find URL method map
         Map<RequestMappingInfo, HandlerMethod> handlerMethodMap = applicationContextHolder.getApplicationContext().getBean(RequestMappingHandlerMapping.class).getHandlerMethods();
         Set<String> anonUrls = new HashSet<>();
         for (Map.Entry<RequestMappingInfo, HandlerMethod> infoEntry : handlerMethodMap.entrySet()) {
             HandlerMethod handlerMethod = infoEntry.getValue();
+            // Has `CrustAnon` annotation on Method？
             CrustAnon crustAnon = handlerMethod.getMethodAnnotation(CrustAnon.class);
             if (null != crustAnon) {
                 anonUrls.addAll(infoEntry.getKey().getPatternsCondition().getPatterns());
@@ -132,8 +137,10 @@ public class CrustConfigurerAdapter extends WebSecurityConfigurerAdapter {
     }
 
     /**
-     * 配置Web资源，资源根路径需要配置静态资源映射：
+     * 配置Web资源，资源根路径需要配置静态资源映射<br>
+     * 如果配置了<code>spring.resources.add-mappings=false</code>，则需要添加下面的配置：
      * <pre>
+     *  &#64;Configuration
      *  public class WebMvcConfig implements WebMvcConfigurer {
      *     public void addResourceHandlers(ResourceHandlerRegistry registry) {
      *         // 设置静态资源，用于Spring Security配置
@@ -163,8 +170,11 @@ public class CrustConfigurerAdapter extends WebSecurityConfigurerAdapter {
     /**
      * 自定义配置数据源提供及<code>PasswordEncoder</code>
      * @param provider  DaoAuthenticationProvider
+     * @see DaoAuthenticationProvider#setPasswordEncoder(PasswordEncoder)
      */
-    protected void configureProvider(DaoAuthenticationProvider provider) { }
+    protected void configureProvider(DaoAuthenticationProvider provider) {
+        provider.setUserDetailsService(userDetailsService());
+    }
 
     /**
      * 认证失败处理器

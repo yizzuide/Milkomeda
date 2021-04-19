@@ -1,5 +1,6 @@
 package com.github.yizzuide.milkomeda.hydrogen.i18n;
 
+import org.springframework.lang.NonNull;
 import org.springframework.web.servlet.i18n.AbstractLocaleResolver;
 
 import javax.servlet.http.HttpServletRequest;
@@ -54,8 +55,9 @@ public class I18nLocaleResolver extends AbstractLocaleResolver {
         return locale;
     }*/
 
+    @NonNull
     @Override
-    public Locale resolveLocale(HttpServletRequest request) {
+    public Locale resolveLocale(@NonNull HttpServletRequest request) {
         // 是否有固定的设置
         Locale defaultLocale = getDefaultLocale();
         if (defaultLocale != null) {
@@ -67,7 +69,7 @@ public class I18nLocaleResolver extends AbstractLocaleResolver {
     }
 
     @Override
-    public void setLocale(HttpServletRequest request, HttpServletResponse response, Locale locale) {
+    public void setLocale(@NonNull HttpServletRequest request, HttpServletResponse response, Locale locale) {
         setDefaultLocale(locale);
     }
 }

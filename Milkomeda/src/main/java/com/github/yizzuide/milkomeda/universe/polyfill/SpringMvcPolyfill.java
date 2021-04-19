@@ -198,7 +198,7 @@ public class SpringMvcPolyfill {
      */
     private static void findAdaptedInterceptorsField(AbstractHandlerMapping handlerMapping) throws NoSuchFieldException {
         if (adaptedInterceptorsField == null) {
-            // 虽然用了反射，但这些代码在只在启动时加载
+            // 虽然用了反射，但这些代码只在启动时加载
             // 查找继承链
             // RequestMappingHandlerMapping -> RequestMappingInfoHandlerMapping -> AbstractHandlerMethodMapping -> AbstractHandlerMapping
             // WelcomePageHandlerMapping -> AbstractUrlHandlerMapping -> AbstractHandlerMapping

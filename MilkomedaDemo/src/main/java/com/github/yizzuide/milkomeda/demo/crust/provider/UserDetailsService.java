@@ -23,7 +23,7 @@ public class UserDetailsService extends CrustUserDetailsService {
         // 实际情况下通过Dao查询，未找到，直接返回null
         // 模拟自定义salt方式
 //        return new User("1000", username, new PasswordEncoder("111222").encode("123456"), "111222");
-        // 模拟BCrypt方式
+        // 模拟BCrypt方式（BCrypt会把salt隐藏在密码里面）
         return new User("1000", username, new BCryptPasswordEncoder().encode("123456"), null);
     }
 

@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 1.14.0
- * @version 2.0.5
+ * @version 3.12.9
  * Create at 2019/11/11 15:48
  */
 public class Crust {
@@ -178,11 +178,14 @@ public class Crust {
      * 使登录信息失效
      */
     public void invalidate() {
-        // Token方式下开启缓存时清空
-        if (getProps().isEnableCache() && getProps().isStateless()) {
-            CacheHelper.erase(lightCacheCrust, getUserInfo(Serializable.class).getUid(), id -> Crust.CATCH_KEY_PREFIX + id);
+        try {
+            // Token方式下开启缓存时清空
+            if (getProps().isEnableCache() && getProps().isStateless()) {
+                CacheHelper.erase(lightCacheCrust, getUserInfo(Serializable.class).getUid(), id -> Crust.CATCH_KEY_PREFIX + id);
+            }
+        } finally {
+            SecurityContextHolder.clearContext();
         }
-        SecurityContextHolder.clearContext();
     }
 
     /**

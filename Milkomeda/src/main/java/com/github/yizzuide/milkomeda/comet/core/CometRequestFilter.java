@@ -17,6 +17,7 @@ import java.io.IOException;
  * @author yizzuide
  * @since 2.0.0
  * @version 3.5.0
+ * @see org.springframework.web.filter.CharacterEncodingFilter
  * @see org.apache.coyote.Response#isCommitted()
  * Create at 2019/12/12 17:48
  */
@@ -29,7 +30,7 @@ public class CometRequestFilter implements Filter {
 
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
-        // 设置编码，防止Spring MVC注册Filter顺序问题导致乱码问题
+        // 设置编码，防止Spring MVC注册Filter顺序问题导致乱码问题（目前已经保证Spring Web MVC的CharacterEncodingFilter优先设置）
         // servletRequest.setCharacterEncoding(Charset.defaultCharset().toString());
         ServletRequest requestWrapper = servletRequest;
         if (CometHolder.shouldWrapRequest()) {

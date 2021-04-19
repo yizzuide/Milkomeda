@@ -30,7 +30,7 @@ public class Environment {
     }
 
     /**
-     * 添加Spring环境变量
+     * 添加自定义数据源配置
      * @param key   键
      * @param value 值
      */

@@ -27,7 +27,13 @@ public @interface Limit {
     String name() default "";
 
     /**
-     * 唯一标识键，用于组成redis的key，支持Spring EL表达式，如：#id、#request.getHeader('token')、#env['title']、@env.get('spring.application.name')
+     * 唯一标识键，用于组成redis的key，支持Spring EL表达式，如：
+     * <ul>
+     *     <li> 参数采集: #id </li>
+     *     <li> 请求域: #request.getHeader('token') </li>
+     *     <li> 自定义配置: #env['title'] </li>
+     *     <li> Spring配置: @env.get('spring.application.name') </li>
+     * </ul>
      * @return String
      */
     String key() default "";

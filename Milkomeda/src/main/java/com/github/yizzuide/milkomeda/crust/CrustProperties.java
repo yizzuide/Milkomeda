@@ -69,7 +69,7 @@ public class CrustProperties {
     private String tokenName = "token";
 
     /**
-     * 是否使用Bcrypt，实现直接在密码里加salt（默认为true）
+     * 是否使用Bcrypt，实现直接在密码里加salt（默认为true）<br>
      * 什么是Bcrypt？Bcrypt能够将salt添加到加密的密码中，解密时可以将salt提取出来
      */
     private boolean useBcrypt = true;

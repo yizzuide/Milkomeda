@@ -15,7 +15,7 @@ import org.springframework.core.env.ConfigurableEnvironment;
  */
 public class CustomPropertySourceLocator implements /*PropertySourceLocator,*/ EnvironmentPostProcessor {
 
-    // 添加自定义属性来源方式一：实现PropertySourceLocator接口，把CollectionsPropertySourceLocator注册为Bean
+    // 添加自定义属性来源方式一：实现PropertySourceLocator接口，把CustomPropertySourceLocator注册为Bean
     /*@Override
     public PropertySource<?> locate(Environment environment) {
         Map<String, Object> mapResource = new HashMap<>();

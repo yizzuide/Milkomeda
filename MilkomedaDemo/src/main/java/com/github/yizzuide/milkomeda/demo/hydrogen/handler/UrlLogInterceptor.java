@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
+import org.springframework.lang.NonNull;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 import javax.servlet.http.HttpServletRequest;
@@ -20,11 +21,11 @@ public class UrlLogInterceptor extends HandlerInterceptorAdapter implements Init
     // 动态注册的拦截器，不需要在提前类上添加@Component注解也可以注入
     @Autowired
     private MessageSource messageSource;
-    // 日志开关
+    // 可设置属性（日志开关）
     private boolean open;
 
     @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+    public boolean preHandle(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull Object handler) throws Exception {
         if (open) {
             log.info("当前请求：{}", request.getRequestURI());
         }

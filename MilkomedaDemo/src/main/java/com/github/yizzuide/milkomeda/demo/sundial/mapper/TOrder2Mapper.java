@@ -16,14 +16,14 @@ public interface TOrder2Mapper {
 
     // ShardingType.TABLE：仅分表
     // partExp：分表表达式
-    //  - table为表名
+    //  - table: 内部会解析表名
     //  - p为参数:
     //      - 当只一个参数，p为这个对象的引用
     //      - 当为多个参数时，p为一个Map，通过p['key']来获到值
     //  - fn为函数调用（相关函数在ShardingFunction类，可注入bean名为ShardingFunction的ShardingFunction子类型来扩展函数库）
     //      - 取模函数：mod
     //      - 自定义序列号截取：seq
-    //      - 定制序列号截取: id（需要通过ShardingId生成）
+    //      - 定制序列号截取: id（需要通过ShardingId类生成）
     //      - 一致性Hash函数：ketama、fnv、murmur
 //    @Sundial(shardingType = ShardingType.TABLE, partExp = "fn.format(table + '_%03d', fn.ketama(p.orderNo, 2, 4))")
     // ShardingType.SCHEMA：仅分库

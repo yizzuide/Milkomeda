@@ -23,7 +23,7 @@ import java.util.Locale;
 @AllArgsConstructor
 public class I18nMessages {
 
-    private MessageSource messageSource;
+    private final MessageSource messageSource;
 
     /**
      * 获取国际化值
