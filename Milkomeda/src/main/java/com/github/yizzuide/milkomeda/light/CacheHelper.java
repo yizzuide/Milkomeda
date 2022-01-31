@@ -35,7 +35,7 @@ import java.util.function.Function;
  * 缓存外层API，集超级缓存、一级缓存、二级缓存于一体的方法
  *
  * @since 1.10.0
- * @version 3.12.4
+ * @version 3.12.10
  * @author yizzuide
  * Create at 2019/07/02 11:36
  */
@@ -82,6 +82,32 @@ public class CacheHelper {
     }
 
     /**
+     * 设置并获取超级缓存数据
+     * @param cache             缓存实例
+     * @param dataGenerator     数据产生器
+     * @param <E>               实体类型
+     * @return                  缓存数据
+     * @since 3.12.10
+     */
+    public static <E> E getFastLevel(Cache cache, Function<Spot<Serializable, E>, E> dataGenerator) {
+        E data = null;
+        Spot<Serializable, E> fastSpot;
+        if (cache instanceof LightCache && ((LightCache) cache).isEnableSuperCache()) {
+            fastSpot = CacheHelper.get(cache);
+            if (fastSpot != null && fastSpot.getData() != null) {
+                return fastSpot.getData();
+            }
+            if (fastSpot == null) {
+                fastSpot = new Spot<>();
+            }
+            data = dataGenerator.apply(fastSpot);
+            fastSpot.setData(data);
+            set(cache, fastSpot);
+        }
+        return data;
+    }
+
+    /**
      * 从缓存获取数据，支持超级缓存（需要手动设置上id标识）、一级缓存、二级缓存（如果使用默认配置的话）
      * <br>
      * 注意：超级缓存需要提前设置标识数据
@@ -90,7 +116,7 @@ public class CacheHelper {
      * @param eClazz            数据Class
      * @param keyGenerator      缓存key产生器
      * @param dataGenerator     数据产生器
-     * @param <E> 实体类型
+     * @param <E>               实体类型
      * @return                  缓存数据
      * @deprecated Deprecated sine 1.18.3
      * @see #get(Cache, Class, Serializable, Function, ThrowableFunction)

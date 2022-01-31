@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 yizzuide All rights Reserved.
+ * Copyright (c) 2022 yizzuide All rights Reserved.
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -19,26 +19,17 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.pulsar;
-
-import org.springframework.context.annotation.Import;
-import org.springframework.scheduling.annotation.EnableAsync;
-
-import java.lang.annotation.*;
+package com.github.yizzuide.milkomeda.crust;
 
 /**
- * EnablePulsar
- * 开启Pulsar将自动开启<code>@EnableAsync</code>
+ * CrustException
  *
  * @author yizzuide
- * @since 1.16.0
- * Create at 2019/11/23 00:18
+ * @since 3.12.10
+ * Create at 2022/01/31 17:30
  */
-@Target({ElementType.TYPE})
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
-@Inherited
-@EnableAsync
-@Import(PulsarConfig.class)
-public @interface EnablePulsar {
+public class CrustException extends RuntimeException {
+    public CrustException(String message) {
+        super(message);
+    }
 }

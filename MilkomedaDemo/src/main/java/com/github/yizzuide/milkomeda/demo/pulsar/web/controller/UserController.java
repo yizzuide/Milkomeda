@@ -67,9 +67,7 @@ public class UserController {
     @GetMapping("notice/{id:\\d+}")
     public Object /* 这里的返回值必需为Object */ sendNotice(@PathVariable("id") Long id) {
         log.info("sendNotice：" + id);
-
         log.info("pulsarHolder: {}", PulsarHolder.getPulsar());
-        log.info("errorCallback: {}", PulsarHolder.getErrorCallback());
 
         // 直接返回响应
 //        return ResponseEntity.ok("OK");

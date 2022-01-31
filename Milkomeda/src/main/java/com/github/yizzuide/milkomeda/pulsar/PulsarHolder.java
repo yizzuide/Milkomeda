@@ -24,7 +24,6 @@ package com.github.yizzuide.milkomeda.pulsar;
 import org.springframework.web.context.request.async.DeferredResult;
 
 import java.util.concurrent.Callable;
-import java.util.function.Function;
 
 /**
  * PulsarHolder
@@ -32,28 +31,14 @@ import java.util.function.Function;
  *
  * @author yizzuide
  * @since 1.0.0
- * @version 1.5.0
+ * @version 3.12.10
  * Create at 2019/04/30 15:47
  */
 public class PulsarHolder {
 
-    private static Function<Throwable, Object> errorCallback;
-
     private static Pulsar pulsar;
 
-    static void setErrorCallback(Function<Throwable, Object> errorCallback) {
-        PulsarHolder.errorCallback = errorCallback;
-    }
-
     static void setPulsar(Pulsar pulsar) { PulsarHolder.pulsar = pulsar; }
-
-    /**
-     * 可抛出异常回调，外部可直接调用来触发设置的回调执行
-     * @return 异常回调
-     */
-    public static Function<Throwable, Object> getErrorCallback() {
-        return errorCallback;
-    }
 
     /**
      * 获取Pulsar

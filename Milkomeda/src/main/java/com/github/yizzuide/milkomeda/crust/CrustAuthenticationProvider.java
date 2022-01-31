@@ -36,6 +36,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
  * @since 1.14.0
  * @version 1.16.4
  * Create at 2019/11/11 18:02
+ * @see org.springframework.security.authentication.dao.AbstractUserDetailsAuthenticationProvider
  */
 public class CrustAuthenticationProvider extends DaoAuthenticationProvider {
 
@@ -43,7 +44,7 @@ public class CrustAuthenticationProvider extends DaoAuthenticationProvider {
 
     public CrustAuthenticationProvider(CrustProperties props, BCryptPasswordEncoder passwordEncoder) {
         this.props = props;
-        // 设置BCrypt密码加密器
+        // 设置BCrypt加密器
         if (props.isUseBcrypt() && passwordEncoder != null) {
             setPasswordEncoder(passwordEncoder);
         }
@@ -71,7 +72,7 @@ public class CrustAuthenticationProvider extends DaoAuthenticationProvider {
         if (getPasswordEncoder() != null) {
             isMatched = getPasswordEncoder().matches(presentedPassword, userDetails.getPassword());
         } else {
-            // 否则使用内置加密器
+            // 否则使用内置加密器（数据表密码列+盐列）
             String salt = ((CrustUserDetails) userDetails).getSalt();
             isMatched = new PasswordEncoder(salt).matches(presentedPassword, userDetails.getPassword());
         }

@@ -33,6 +33,7 @@ import org.springframework.lang.NonNull;
 
 /**
  * SourcesLogApplicationListener
+ * 属性源配置日志监听器
  *
  * @author yizzuide
  * @since 3.0.1
@@ -51,7 +52,7 @@ public class SourcesLogApplicationListener implements ApplicationListener<Applic
         }
 
         // StandardServletEnvironment or StandardReactiveEnvironment
-        // 绑定类型
+        // 获取配置属性值
         boolean logEnable = Binder.get(environment).bind("milkomeda.show-log", Boolean.class).orElseGet(() -> false);
         log.info("milkomeda log is {}", logEnable ? "enable" : "disable");
         log.info("Load sources: {}", environment.getPropertySources());

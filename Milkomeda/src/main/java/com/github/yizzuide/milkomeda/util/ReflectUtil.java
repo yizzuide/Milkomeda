@@ -88,6 +88,7 @@ public class ReflectUtil {
         if (null != annotation) {
             return annotation;
         }
+        // 从方法类上获到注解
         Class<?> targetClass = joinPoint.getTarget().getClass();
         return targetClass.getDeclaredAnnotation(annotationClazz);
     }

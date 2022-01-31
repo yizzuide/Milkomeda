@@ -51,7 +51,7 @@ import static com.github.yizzuide.milkomeda.util.ReflectUtil.*;
  *
  * @author yizzuide
  * @since 0.1.0
- * @version 3.11.0
+ * @version 3.12.10
  * Create at 2019/03/29 10:36
  */
 @Slf4j
@@ -65,6 +65,7 @@ public class Pulsar {
 
     /**
      * 线程池执行器（从SpringBoot 2.1.0开始默认已经装配）
+     * @see org.springframework.boot.autoconfigure.task.TaskExecutionAutoConfiguration
      */
     @Autowired
     private ThreadPoolTaskExecutor applicationTaskExecutor;
@@ -116,6 +117,56 @@ public class Pulsar {
      */
     private void removeDeferredResult(String id) {
         deferredResultMap.remove(id);
+    }
+
+    /**
+     * 提交一个异步运行任务
+     *
+     * @since 1.1.0
+     * @param runnable Runnable
+     */
+    public void post(Runnable runnable) {
+        applicationTaskExecutor.execute(runnable);
+    }
+
+    /**
+     * 提交一个异步任务，并返回结果
+     * @param callable  Callable
+     * @param <T>   结果类型
+     * @return  Future
+     * @since 3.11.0
+     */
+    public <T> Future<T> postForResult(Callable<T> callable) {
+        return applicationTaskExecutor.submit(callable);
+    }
+
+    /**
+     * 配置默认的Spring MVC异步支持
+     *
+     * @param configurer 配置对象
+     * @param timeout    超时时间，ms
+     * @deprecated since 1.16.0，因为SpringBoot 2.1.0版本开始默认已装配
+     */
+    public void configure(AsyncSupportConfigurer configurer, long timeout) {
+        configure(configurer, 5, 10, 200, 100, timeout);
+    }
+
+    /**
+     * 自定义配置的异步支持
+     *
+     * @param configurer       配置对象
+     * @param corePoolSize     核心池大小
+     * @param maxPoolSize      最大线程池数
+     * @param queueCapacity    队列容量
+     * @param keepAliveSeconds 线程保存存活时间
+     * @param timeout          超时时间，ms
+     * @deprecated since 1.16.0，因为SpringBoot 2.1.0版本开始默认已装配
+     */
+    public void configure(AsyncSupportConfigurer configurer, int corePoolSize, int maxPoolSize, int queueCapacity, int keepAliveSeconds, long timeout) {
+        // 默认超时时间
+        configurer.setDefaultTimeout(timeout);
+        ThreadUtil.configTaskExecutor(applicationTaskExecutor, "pulsar-", corePoolSize, maxPoolSize, queueCapacity, keepAliveSeconds);
+        configurer.setTaskExecutor(applicationTaskExecutor);
     }
 
     /**
@@ -180,7 +231,7 @@ public class Pulsar {
 
         // 方法有返回值且不是DeferredResult，则不作DeferredResult处理
         if (null != returnObj && !(returnObj instanceof DeferredResult)) {
-            // 通过注解存放过，则删除
+            // 通过注解存放过，则删除脏数据
             if (null != idValue) {
                 removeDeferredResult(idValue);
             }
@@ -229,7 +280,7 @@ public class Pulsar {
                 if (t instanceof Exception) {
                     throw (Exception) t;
                 } else { // Error类型
-                    // 错误处理（交给统一异常处理响应）
+                    // 错误处理（已经交给了统一异常模块来处理响应）
                     /*if (null != errorCallback) {
                         return errorCallback.apply(t);
                     }*/
@@ -237,54 +288,5 @@ public class Pulsar {
                 }
             }
         }
-    }
-
-    /**
-     * 提交一个基于Spring的ThreadPoolTaskExecutor任务运行
-     *
-     * @param runnable Runnable
-     */
-    public void post(Runnable runnable) {
-        applicationTaskExecutor.execute(runnable);
-    }
-
-    /**
-     * 提交一个异步任务，并返回结果
-     * @param callable  Callable
-     * @param <T>   结果类型
-     * @return  Future
-     * @since 3.11.0
-     */
-    public <T> Future<T> postForResult(Callable<T> callable) {
-        return applicationTaskExecutor.submit(callable);
-    }
-
-    /**
-     * 配置默认的Spring MVC异步支持
-     *
-     * @param configurer 配置对象
-     * @param timeout    超时时间，ms
-     * @deprecated since 1.16.0，因为SpringBoot 2.1.0版本开始默认已装配
-     */
-    public void configure(AsyncSupportConfigurer configurer, long timeout) {
-        configure(configurer, 5, 10, 200, 100, timeout);
-    }
-
-    /**
-     * 自定义配置的异步支持
-     *
-     * @param configurer       配置对象
-     * @param corePoolSize     核心池大小
-     * @param maxPoolSize      最大线程池数
-     * @param queueCapacity    队列容量
-     * @param keepAliveSeconds 线程保存存活时间
-     * @param timeout          超时时间，ms
-     * @deprecated since 1.16.0，因为SpringBoot 2.1.0版本开始默认已装配
-     */
-    public void configure(AsyncSupportConfigurer configurer, int corePoolSize, int maxPoolSize, int queueCapacity, int keepAliveSeconds, long timeout) {
-        // 默认超时时间
-        configurer.setDefaultTimeout(timeout);
-        ThreadUtil.configTaskExecutor(applicationTaskExecutor, "pulsar-", corePoolSize, maxPoolSize, queueCapacity, keepAliveSeconds);
-        configurer.setTaskExecutor(applicationTaskExecutor);
     }
 }

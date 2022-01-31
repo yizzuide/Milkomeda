@@ -27,7 +27,10 @@ spring:
     # Pulsar模块异步超时
     async:
       request-timeout: 20s
-    # 404抛出NoHandlerFoundException异常
+    # 请求方法路径允许添加后缀匹配: xx/user -> xx/user.html
+#    pathmatch:
+#        use-suffix-pattern: true
+    # 让404错误抛出NoHandlerFoundException异常
     throw-exception-if-no-handler-found: true
   # 资源不生成mapping映射
   resources:
@@ -100,6 +103,7 @@ milkomeda:
       # 根据路径匹配策略
       strategy:
         - paths: ["/**"]
+          # $params为对象导航，支持数组索引，如：$params.list[0].id
           tpl: url->{uri},userId:{uid},token:{$header.token},method->{method},parameters->{params},dataId->{$params.data.id}
         - paths: ["/collect/usage"]
           type: RESPONSE # 设置打印为响应类型（默认为请求类型）
@@ -186,18 +190,24 @@ milkomeda:
     read-timeout: 10s
 
   crust:
-    # 默认为token方式
-#    stateless: false
+    # -- 设置token方式 --
+    stateless: true
     # token方式不缓存
     enable-cache: false
     # 使用对称密钥生成token
     secure-key: crust_secure_key
     # 自定义token头，默认为token
     token-name: Authorization
+
+    # -- 设置session方式 --
+#    stateless: false
+#    login-url: /build/login.html
+
     # 不使用BCrypt（如果用户表有salt字段的情况）
-  #    use-bcrypt: false
+    #    use-bcrypt: false
     # 添加到匿名访问许可
     addition-permit-urls:
+      - /s_login
       - /collect/**
       - /echo/**
       - /test/**

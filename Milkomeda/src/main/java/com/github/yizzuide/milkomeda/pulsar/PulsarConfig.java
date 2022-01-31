@@ -48,6 +48,11 @@ import java.util.concurrent.Executor;
 @AutoConfigureAfter(TaskExecutionAutoConfiguration.class)
 public class PulsarConfig {
 
+    /**
+     * 创建线程任务执行器
+     * @deprecated since 1.16.0，因为SpringBoot 2.1.0版本开始默认已装配
+     * @return ThreadPoolTaskExecutor
+     */
     @Bean
     @ConditionalOnMissingBean({Executor.class})
     public ThreadPoolTaskExecutor taskExecutor() {

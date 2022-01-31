@@ -35,7 +35,7 @@ import java.util.concurrent.Callable;
  * 基于Runnable的装饰运行器，可自动捕获 Throwable，并给出相应的错误反馈
  *
  * @since 1.1.0
- * @version 1.16.0
+ * @version 3.12.10
  * @author yizzuide
  * Create at 2019/05/03 23:53
  */
@@ -62,10 +62,8 @@ public class PulsarRunner implements Runnable {
             deferredResult.setResult(Optional.ofNullable(value)
                     .orElse(ResponseEntity.status(HttpStatus.OK).build()));
         } catch (Exception e) {
-            log.error("pulsar:- PulsarRunner catch a error with message: {} ", e.getMessage(), e);
-            if (null != deferredResult && null != PulsarHolder.getErrorCallback()) {
-                deferredResult.setErrorResult(PulsarHolder.getErrorCallback().apply(e));
-            }
+            log.error("pulsar:- PulsarRunner catch a error with message: {}", e.getMessage(), e);
+            throw new PulsarDeferException(e.getMessage());
         }
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 yizzuide All rights Reserved.
+ * Copyright (c) 2022 yizzuide All rights Reserved.
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -19,26 +19,28 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.pulsar;
+package com.github.yizzuide.milkomeda.demo.crust.controller;
 
-import org.springframework.context.annotation.Import;
-import org.springframework.scheduling.annotation.EnableAsync;
-
-import java.lang.annotation.*;
+import com.github.yizzuide.milkomeda.crust.CrustContext;
+import com.github.yizzuide.milkomeda.demo.crust.pojo.User;
+import lombok.extern.slf4j.Slf4j;
+import lombok.val;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PostMapping;
 
 /**
- * EnablePulsar
- * 开启Pulsar将自动开启<code>@EnableAsync</code>
+ * SLoginController
  *
  * @author yizzuide
- * @since 1.16.0
- * Create at 2019/11/23 00:18
+ * Create at 2022/01/31 16:45
  */
-@Target({ElementType.TYPE})
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
-@Inherited
-@EnableAsync
-@Import(PulsarConfig.class)
-public @interface EnablePulsar {
+@Slf4j
+@Controller
+public class SLoginController {
+    @PostMapping("s_login")
+    public String sLogin(String username, String password) {
+        val userInfo = CrustContext.get().login(username, password, User.class);
+        log.info("user: {}", userInfo.getUid());
+        return "redirect:/build/index.html";
+    }
 }

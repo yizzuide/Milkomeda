@@ -74,12 +74,20 @@ public class CrustAuthenticationConfigurer<T extends CrustAuthenticationConfigur
         http.addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class);
     }
 
+    /**
+     * 设置忽略的URL
+     * @param urls  请求URL列表
+     * @return CrustAuthenticationConfigurer
+     */
     CrustAuthenticationConfigurer<T, B> permissiveRequestUrls(String... urls) {
         authFilter.setPermissiveUrl(urls);
         return this;
     }
 }
 
+/**
+ * 授权成功处理器 --转向--> 刷新Token处理器
+ */
 class RefreshSuccessHandler implements AuthenticationSuccessHandler {
     // token刷新间隔
     private final long tokenRefreshInterval;

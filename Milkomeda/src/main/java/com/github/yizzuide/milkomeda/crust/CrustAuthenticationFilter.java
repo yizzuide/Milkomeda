@@ -85,7 +85,7 @@ public class CrustAuthenticationFilter extends OncePerRequestFilter {
         String token = crust.getToken();
         try {
             if (StringUtils.isNotBlank(token)) {
-                authResult = crust.getAuthenticationFromToken();
+                authResult = crust.getAuthenticationFromToken(token);
             } else {
                 failed = new InsufficientAuthenticationException("Require Token is not set");
             }

@@ -54,6 +54,7 @@ public class ApplicationContextHolder implements ApplicationContextAware {
     @Override
     public void setApplicationContext(@NonNull ApplicationContext applicationContext) {
         this.applicationContext = applicationContext;
+        // 设置应用上下文到EL解析环境
         ELContext.setApplicationContext(applicationContext);
         if (applicationContext instanceof ConfigurableApplicationContext) {
             ApplicationContextHolder.environment.setConfigurableEnvironment(((ConfigurableApplicationContext) applicationContext).getEnvironment());
