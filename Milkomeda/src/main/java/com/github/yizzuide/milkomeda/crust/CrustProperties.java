@@ -138,4 +138,17 @@ public class CrustProperties {
      * @since 3.5.0
      */
     private List<String> allowStaticUrls;
+
+    /**
+     * 根路径跳转
+     * @since 3.12.10
+     */
+    private String rootRedirect;
+
+    /**
+     * 静态资源路径
+     * 需要配置<code>spring.resources.add-mappings=false</code>
+     * @since 3.12.10
+     */
+    private String staticLocation = CrustConfig.CrustURLMappingConfigurer.staticLocation;
 }

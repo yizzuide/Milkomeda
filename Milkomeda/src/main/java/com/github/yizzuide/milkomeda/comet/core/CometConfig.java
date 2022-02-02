@@ -26,6 +26,7 @@ import com.github.yizzuide.milkomeda.universe.config.MilkomedaProperties;
 import com.github.yizzuide.milkomeda.universe.polyfill.SpringMvcPolyfill;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
+import org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
@@ -46,11 +47,11 @@ import java.util.Objects;
  *
  * @author yizzuide
  * @since 2.0.0
- * @version 3.11.0
+ * @version 3.12.10
  * Create at 2019/12/12 18:10
  */
 @Configuration
-@AutoConfigureAfter(PulsarConfig.class)
+@AutoConfigureAfter({WebMvcAutoConfiguration.class, PulsarConfig.class})
 @EnableConfigurationProperties({MilkomedaProperties.class, CometProperties.class})
 public class CometConfig {
 

@@ -25,6 +25,7 @@ import com.github.yizzuide.milkomeda.light.Cache;
 import com.github.yizzuide.milkomeda.light.LightCache;
 import com.github.yizzuide.milkomeda.light.LightCacheAspect;
 import com.github.yizzuide.milkomeda.light.LightProperties;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -32,15 +33,20 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
+import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
  * CrustConfig
  *
  * @author yizzuide
  * @since 1.14.0
- * @version 3.12.4
+ * @version 3.12.10
  * Create at 2019/11/11 14:56
  */
 @Configuration
@@ -92,5 +98,33 @@ public class CrustConfig {
         lightCache.setOnlyCacheL2(false);
         lightCache.setEnableSuperCache(lightProps.isEnableSuperCache());
         return lightCache;
+    }
+
+    @Configuration(proxyBeanMethods = false)
+    @EnableConfigurationProperties(CrustProperties.class)
+    public static class CrustURLMappingConfigurer implements WebMvcConfigurer {
+        @Autowired
+        private CrustProperties crustProps;
+
+        public static final String staticLocation = "classpath:/static/";
+
+        @Override
+        public void addViewControllers(@NonNull ViewControllerRegistry registry) {
+            if (StringUtils.isEmpty(crustProps.getRootRedirect())) {
+                return;
+            }
+            // 添加根路径跳转
+            registry.addRedirectViewController("/", crustProps.getRootRedirect());
+            registry.setOrder(Ordered.HIGHEST_PRECEDENCE);
+        }
+
+        @Override
+        public void addResourceHandlers(@NonNull ResourceHandlerRegistry registry) {
+            if (StringUtils.isEmpty(crustProps.getStaticLocation())) {
+                return;
+            }
+            // 设置静态资源，用于Spring Security配置
+            registry.addResourceHandler("/**").addResourceLocations(crustProps.getStaticLocation());
+        }
     }
 }

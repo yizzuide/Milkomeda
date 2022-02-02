@@ -159,16 +159,6 @@ public class CrustConfigurerAdapter extends WebSecurityConfigurerAdapter {
 
     /**
      * 配置Web资源，资源根路径需要配置静态资源映射<br>
-     * 如果配置了<code>spring.resources.add-mappings=false</code>，则需要添加下面的配置：
-     * <pre>
-     *  &#64;Configuration
-     *  public class WebMvcConfig implements WebMvcConfigurer {
-     *     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-     *         // 设置静态资源，用于Spring Security配置
-     *         registry.addResourceHandler("/**").addResourceLocations("classpath:/static/");
-     *     }
-     *  }
-     * </pre>
      * @param web   WebSecurity
      */
     @Override

@@ -27,7 +27,7 @@ spring:
     # Pulsar模块异步超时
     async:
       request-timeout: 20s
-    # 请求方法路径允许添加后缀匹配: xx/user -> xx/user.html
+    # 请求映射方法允许添加后缀匹配: xx/user -> xx/user.html
 #    pathmatch:
 #        use-suffix-pattern: true
     # 让404错误抛出NoHandlerFoundException异常
@@ -201,7 +201,8 @@ milkomeda:
 
     # -- 设置session方式 --
 #    stateless: false
-#    login-url: /build/login.html
+#    login-url: ${url.login}
+#    root-redirect: ${url.index}
 
     # 不使用BCrypt（如果用户表有salt字段的情况）
     #    use-bcrypt: false

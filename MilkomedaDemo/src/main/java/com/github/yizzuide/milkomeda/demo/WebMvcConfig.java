@@ -1,10 +1,6 @@
 package com.github.yizzuide.milkomeda.demo;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.Ordered;
-import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
-import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
@@ -24,20 +20,4 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 // 总结：在Spring Boot 2.0不添加@EnableWebMvc，会配置的更多更全面，拥有添加@EnableWebMvc的所有配置
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
-    @Value("${index}")
-    private String indexURL;
-
-    @Override
-    public void addViewControllers(ViewControllerRegistry registry) {
-        // 设置跳转主页
-        registry.addRedirectViewController("/", indexURL);
-        registry.setOrder(Ordered.HIGHEST_PRECEDENCE);
-    }
-
-    // spring.resources.add-mappings=false，默认的静态资源映射被禁用后，需要手动开启
-    @Override
-    public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // 设置静态资源，用于Spring Security配置
-        registry.addResourceHandler("/**").addResourceLocations("classpath:/static/");
-    }
 }
