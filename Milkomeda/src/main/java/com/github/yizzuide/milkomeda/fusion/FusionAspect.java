@@ -22,6 +22,7 @@
 package com.github.yizzuide.milkomeda.fusion;
 
 import com.github.yizzuide.milkomeda.universe.el.ELContext;
+import com.github.yizzuide.milkomeda.universe.lang.Tuple;
 import com.github.yizzuide.milkomeda.util.ReflectUtil;
 import lombok.Getter;
 import lombok.Setter;
@@ -41,7 +42,7 @@ import java.util.stream.Stream;
  *
  * @author yizzuide
  * @since 1.12.0
- * @version 3.1.3
+ * @version 3.12.10
  * Create at 2019/08/09 11:09
  */
 @Order(99)
@@ -57,7 +58,7 @@ public class FusionAspect {
     @Pointcut("@within(com.github.yizzuide.milkomeda.fusion.Fusion) && execution(public * *(..))")
     public void classPointCut() {}
 
-    @Pointcut("@within(com.github.yizzuide.milkomeda.fusion.Fusion) && execution(public * *(..))")
+    @Pointcut("@within(com.github.yizzuide.milkomeda.fusion.FusionGroup) && execution(public * *(..))")
     public void classGroupPointCut() {}
 
     @Pointcut("@annotation(com.github.yizzuide.milkomeda.fusion.Fusion) && execution(public * *(..))")
@@ -77,6 +78,7 @@ public class FusionAspect {
     }
 
     private Object fusionGroupAroundApply(ProceedingJoinPoint joinPoint, FusionGroup fusionGroup) throws Throwable {
+        // 将allowed为空的排在后面
         List<Fusion> fusions = Stream.of(fusionGroup.value()).sorted((f1, f2) -> {
             if (StringUtils.isEmpty(f1.allowed())) return 1;
             if (StringUtils.isEmpty(f2.allowed())) return -1;
@@ -97,6 +99,7 @@ public class FusionAspect {
                 continue;
             }
             // 拼接Spring EL执行语句
+            // 忽略第一个的逻辑关系处理
             if (StringUtils.isEmpty(allowedExpress.toString())) {
                 allowedExpress.append(fusion.allowed());
                 fallback = fusion.fallback();
@@ -113,8 +116,11 @@ public class FusionAspect {
             }
             fallback = fusion.fallback();
         }
-        Object originReturnObj = checkAllow(joinPoint, allowedExpress.toString(), fallback);
-        if (resultTagFusion == null) {
+        Tuple<Boolean, Object> tuple = checkAllow(joinPoint, allowedExpress.toString(), fallback);
+        boolean isAllowed = tuple.getT1();
+        Object originReturnObj = tuple.getT2();
+        // 不存在修改返回值功能，或者不允许执行
+        if (resultTagFusion == null || !isAllowed) {
             return originReturnObj;
         }
         return modifyReturn(resultTagFusion, joinPoint, originReturnObj);
@@ -123,7 +129,13 @@ public class FusionAspect {
     private Object fusionAroundApply(ProceedingJoinPoint joinPoint, Fusion fusion) throws Throwable {
         String allowed = fusion.allowed();
         if (!StringUtils.isEmpty(allowed)) {
-            return checkAllow(joinPoint, allowed, fusion.fallback());
+            Tuple<Boolean, Object> tuple = checkAllow(joinPoint, allowed, fusion.fallback());
+            boolean isAllowed = tuple.getT1();
+            Object originReturnObj = tuple.getT2();
+            // 允许执行，才能修改返回值
+            if (isAllowed) {
+                return modifyReturn(fusion, joinPoint, originReturnObj);
+            }
         }
         return modifyReturn(fusion, joinPoint, null);
     }
@@ -133,21 +145,21 @@ public class FusionAspect {
      * @param joinPoint 切面连接点
      * @param allowed   放行EL表达式
      * @param fallback  反馈EL表达式
-     * @return  方法体返回值
+     * @return （是否允许执行，返回结果）
      * @throws Throwable 方法体异常
      */
-    private Object checkAllow(ProceedingJoinPoint joinPoint, String allowed, String fallback) throws Throwable {
+    private Tuple<Boolean, Object> checkAllow(ProceedingJoinPoint joinPoint, String allowed, String fallback) throws Throwable {
         // 如果允许执行方法体
         if (Boolean.parseBoolean(ELContext.getValue(joinPoint, allowed))) {
-            return joinPoint.proceed();
+            return Tuple.build(true, joinPoint.proceed());
         }
         // 没有设置反馈
         if (StringUtils.isEmpty(fallback)) {
             // 获取方法默认返回值
-            return ReflectUtil.getMethodDefaultReturnVal(joinPoint);
+            return Tuple.build(false, ReflectUtil.getMethodDefaultReturnVal(joinPoint));
         }
         // 否则调用反馈方法
-        return ELContext.getActualValue(joinPoint, fallback, ReflectUtil.getMethodReturnType(joinPoint));
+        return Tuple.build(false, ELContext.getActualValue(joinPoint, fallback, ReflectUtil.getMethodReturnType(joinPoint)));
     }
 
     /**

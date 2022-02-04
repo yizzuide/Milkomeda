@@ -139,6 +139,7 @@ public class AopContextHolder {
                     throw new IllegalArgumentException("Please specify the [tag] of "+ executeAnnotation +" !");
                 }
                 metaData.setName(name);
+                // 设计一个topic对应多个监听器，用于处理不同的业务
                 if (handlerMap.containsKey(name)) {
                     handlerMap.get(name).add(metaData);
                 } else {

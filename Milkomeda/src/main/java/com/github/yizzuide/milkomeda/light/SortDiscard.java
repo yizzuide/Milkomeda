@@ -25,6 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.Serializable;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -35,7 +36,7 @@ import java.util.stream.Collectors;
  * 抽象的字段排序方案
  *
  * @since 1.8.0
- * @version 2.0.3
+ * @version 3.12.10
  * @author yizzuide
  * Create at 2019/06/28 16:32
  */
@@ -70,18 +71,22 @@ public abstract class SortDiscard implements Discard {
                 .map(spot -> (SortSpot<Serializable, Object>)spot)
                 .sorted((Comparator<? super SortSpot<Serializable, Object>>) comparator)
                 .collect(Collectors.toList());
-        int discardCount = Math.round(list.size() * l1DiscardPercent);
+        int size = list.size();
+        int discardCount = Math.round(size * l1DiscardPercent);
         // 一级缓存百分比太小，直接返回
         if (discardCount == 0) {
             return;
         }
-        if (discardCount == list.size()) {
-            discardCount--;
+        if (discardCount >= size) {
+            discardCount = size - 1;
         }
-        for (int i = 0; i <= discardCount; i++) {
+        Map<String, Spot<Serializable, Object>> newCacheMap = new HashMap<>(size);
+        for (int i = discardCount; i < size; i++) {
             String key = list.get(i).getKey();
-            cacheMap.remove(key);
+            newCacheMap.put(key, cacheMap.get(key));
         }
+        cacheMap.clear();
+        cacheMap.putAll(newCacheMap);
     }
 
     /**

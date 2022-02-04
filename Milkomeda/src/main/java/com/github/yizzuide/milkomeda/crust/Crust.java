@@ -176,7 +176,7 @@ public class Crust {
 
         // Session方式开启超级缓存
         if (getProps().isEnableCache()) {
-            return CacheHelper.getFastLevel(lightCacheCrust, (spot) -> getLoginUserInfo(authentication, entityClazz));
+            return CacheHelper.getFastLevel(lightCacheCrust, spot -> getLoginUserInfo(authentication, entityClazz));
         }
         // Session方式无超级缓存
         return getLoginUserInfo(authentication, entityClazz);

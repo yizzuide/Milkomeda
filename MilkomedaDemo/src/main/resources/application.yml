@@ -182,6 +182,8 @@ milkomeda:
       order:
         # 缓存策略
         strategy: LazyExpire
+        # 不需要ThreadLocal缓存
+        enable-super-cache: false
         l1-expire: 1m
         l2-expire: 1m
 

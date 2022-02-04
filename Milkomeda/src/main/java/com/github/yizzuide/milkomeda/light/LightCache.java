@@ -95,7 +95,7 @@ public class LightCache implements Cache {
     private Class<Discard> strategyClass;
 
     /**
-     * 一级缓存丢弃策略
+     * 记录当前一级缓存的丢弃策略
      */
     private Discard discardStrategy;
 

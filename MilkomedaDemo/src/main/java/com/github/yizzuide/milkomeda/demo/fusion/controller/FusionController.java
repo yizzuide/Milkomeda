@@ -36,7 +36,7 @@ public class FusionController {
     // 修改返回值
     @Fusion(tag = "api")
     @RequestMapping("product/pull")
-    public Object pull() {
+    public Object/*修改返回值的方法返回类型必需为Object（由于Spring调用的检查机制限制问题）*/ pull() {
         // 返回成功的数据
 //        return productService.pull();
         // 模拟返回错误
