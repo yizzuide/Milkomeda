@@ -58,7 +58,7 @@ public abstract class EchoRequest extends AbstractRequest {
         boolean isMapType = Map.class == specClazz;
         boolean isListType = List.class == specClazz;
 
-        // 标准HTTP标准码处理方式
+        // 标准HTTP标准码响应处理方式（国内少，国外多）
         if (useStandardHTTP) {
             // 指定类型判断
             if ((isListType && respData instanceof Map) || (isMapType && respData instanceof List)) {
@@ -74,14 +74,14 @@ public abstract class EchoRequest extends AbstractRequest {
 
             // List类型
             if (respData instanceof List && isListType) {
-                // 如果没有参数子类型
+                // 如果没有参数泛型
                 if (specType.getType() instanceof Class) {
                     EchoResponseData<List> responseData = responseData();
                     responseData.setData((List) respData);
                     return (EchoResponseData<T>) responseData;
                 }
 
-                // 有参数类型
+                // 有参数泛型
                 ParameterizedType parameterizedType = (ParameterizedType) specType.getType();
                 Type paramType = parameterizedType.getActualTypeArguments()[0];
                 if (TypeUtil.type2Class(paramType) == Map.class) {
@@ -136,7 +136,7 @@ public abstract class EchoRequest extends AbstractRequest {
                 if (dataStr.contains("\\")) {
                     dataStr = dataStr.replaceAll("\\\\", "");
                 }
-                // 驼峰转换
+                // 业务字段驼峰转换
                 if (forceCamel) {
                     responseData.setData(JSONUtil.toCamel(dataStr, specType));
                     return responseData;
@@ -153,11 +153,11 @@ public abstract class EchoRequest extends AbstractRequest {
                         log.error("EchoRequest:- 响应类型匹配错误，当前响应类型为：{}，指定类型为：{}", responseData.getData().getClass(), specClazz);
                         throw new EchoException(ErrorCode.ANALYSIS_DATA_FAIL, "响应类型匹配错误");
                     }
-                    // 没有参数类型，不处理
+                    // 没有参数泛型，不处理
                     if (specType.getType() instanceof Class) {
                         return responseData;
                     }
-                    // 参数类型是Map，不处理
+                    // 参数泛型是Map，不处理
                     ParameterizedType parameterizedType = (ParameterizedType) specType.getType();
                     Type paramType = parameterizedType.getActualTypeArguments()[0];
                     if (TypeUtil.type2Class(paramType) == Map.class) {

@@ -39,13 +39,15 @@ public class SimpleEchoRequest extends EchoRequest {
         }
     }
 
-    // 默认使用application/json，如果对接的第三方就是json通信这个方法不用覆盖
+
     @Override
     protected void appendHeaders(HttpHeaders headers) {
-        // 如果使用application/x-www-form-urlencoded，注解下面这行
+        // 默认使用application/json
         super.appendHeaders(headers);
-        // 可以设置为application/x-www-form-urlencoded
+
+        // 如果使用application/x-www-form-urlencoded
 //        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
         // 自定义请求头
 //        headers.add("Authorization", "Basic c2tfdGVzdF9PWUNFZkw1eGdMTCtsOFp2SzdRYVNHR1ZNTjczb05FcGszeXorUnhuLzJiUy9MQ2dDUVorZ3c9PTo=");
     }

@@ -1,12 +1,12 @@
 package com.github.yizzuide.milkomeda.demo.halo.controller;
 
 import com.github.yizzuide.milkomeda.demo.halo.domain.TOrder;
-import com.github.yizzuide.milkomeda.demo.halo.mapper.TOrderMapper;
+import com.github.yizzuide.milkomeda.demo.halo.service.TOrderService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.annotation.Resource;
 import java.util.Date;
 import java.util.List;
 
@@ -20,31 +20,22 @@ import java.util.List;
 @RestController
 public class HaloController {
 
-    @Resource
-    private TOrderMapper tOrderMapper;
+    @Autowired
+    private TOrderService orderService;
 
-    @RequestMapping("order/{id}")
+    @RequestMapping("order/{id:\\d+}")
     public TOrder getOrder(@PathVariable("id") Long id) {
-        return tOrderMapper.queryByIdAndTime(id, new Date());
+        return orderService.queryByIdAndTime(id, new Date());
     }
 
     @RequestMapping("order/all")
     public List<TOrder> getAllOrder() {
-        return tOrderMapper.queryAll(null);
+        return orderService.queryAll(null);
     }
 
     @RequestMapping("order/offer")
     public String getOrder() {
-        TOrder tOrder = new TOrder();
-        tOrder.setUserId(2L);
-        tOrder.setOrderNo(1435436546556098L);
-        tOrder.setProductId(2L);
-        tOrder.setProductName("产品x");
-        tOrder.setPrice(100000L);
-        Date now = new Date();
-        tOrder.setCreateTime(now);
-        tOrder.setUpdateTime(now);
-        tOrderMapper.insert(tOrder);
+        orderService.save();
          return "OK";
     }
 }

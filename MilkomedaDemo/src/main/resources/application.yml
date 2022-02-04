@@ -24,7 +24,7 @@ spring:
     host: 127.0.0.1
 
   mvc:
-    # Pulsar模块异步超时
+    # 异步超时
     async:
       request-timeout: 20s
     # 请求映射方法允许添加后缀匹配: xx/user -> xx/user.html
@@ -87,7 +87,7 @@ mybatis:
   config-location: classpath:config/mybatis-config.xml
 
 milkomeda:
-  # 配置是否显示跟踪日志信息（线上环境应该关闭）
+  # 配置是否显示跟踪日志信息，包含debug,info（线上环境应该关闭）
   #show-log: true
 
   comet:

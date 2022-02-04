@@ -19,19 +19,18 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.crust;
+package com.github.yizzuide.milkomeda.demo.halo.event;
+
+import com.github.yizzuide.milkomeda.demo.halo.domain.TOrder;
+import lombok.Data;
 
 /**
- * CrustException
+ * OrdderCreatedEvent
  *
  * @author yizzuide
- * @since 3.12.10
- * Create at 2022/01/31 17:30
+ * Create at 2022/02/04 23:05
  */
-public class CrustException extends RuntimeException {
-    private static final long serialVersionUID = 7913213972981313630L;
-
-    public CrustException(String message) {
-        super(message);
-    }
+@Data
+public class OrderCreatedEvent {
+    private TOrder order;
 }

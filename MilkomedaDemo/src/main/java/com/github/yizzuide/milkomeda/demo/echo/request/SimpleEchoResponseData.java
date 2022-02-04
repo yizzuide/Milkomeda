@@ -12,7 +12,7 @@ import lombok.Data;
  */
 @Data
 public class SimpleEchoResponseData<T> implements EchoResponseData<T> {
-    // 以下字段对接作为对接一个第三方平台的例子，不一定适用你的情况
+    // 以下字段作为对接一个第三方平台的例子，不一定适用你的情况
     private String code;
     private String errorMsg;
     private T data;

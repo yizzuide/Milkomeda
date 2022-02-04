@@ -38,7 +38,7 @@ import java.nio.charset.Charset;
 
 /**
  * CometRequestWrapper
- * 请求包装
+ * 请求包装，用于重复读取请求消息体内容
  *
  * @author yizzuide
  * @since 2.0.0

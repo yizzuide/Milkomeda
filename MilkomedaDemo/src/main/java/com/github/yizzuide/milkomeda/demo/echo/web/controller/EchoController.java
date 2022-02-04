@@ -62,8 +62,9 @@ public class EchoController {
             // TypeReference比用xxx.class在泛型的支持上要强得多，IDE也会智能检测匹配成功
             // 如果第三方的data是一个json数组，可以传new TypeReference<List<Map<String, Object>>>() {}，返回结果用EchoResponseData<List<Map<String, Object>>>接收
 //            EchoResponseData<Map<String, Object>> responseData = simpleEchoRequest.sendPostForResult("http://localhost:8091/echo/account/open", reqParams, new TypeReference<Map<String, Object>>() {}, true);
+            EchoResponseData<Map<String, Object>> responseData = simpleEchoRequest.fetch(HttpMethod.POST, "http://localhost:8091/echo/account/open", null, reqParams, true);
+            // 支持自定义业务类
             //EchoResponseData<PayVo> responseData = simpleEchoRequest.sendRequest(HttpMethod.POST, "http://localhost:8091/echo/account/open", null, reqParams, new TypeReference<PayVo>(){}, true);
-            EchoResponseData<Map<String, Object>> responseData = simpleEchoRequest.fetch(HttpMethod.POST, "http://localhost:8091/echo/account/open", reqParams);
             log.info("responseData: {}", responseData);
         } catch (EchoException e) {
             log.error("请求第三方开户接口出错：{}", e.getMessage());

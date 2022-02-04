@@ -21,6 +21,7 @@
 
 package com.github.yizzuide.milkomeda.echo;
 
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.web.client.DefaultResponseErrorHandler;
@@ -41,10 +42,10 @@ import java.io.IOException;
 @Slf4j
 public class EchoResponseErrorHandler implements ResponseErrorHandler {
 
-    private ResponseErrorHandler errorHandler = new DefaultResponseErrorHandler();
+    private final ResponseErrorHandler errorHandler = new DefaultResponseErrorHandler();
 
     @Override
-    public void handleError(ClientHttpResponse response) throws IOException {
+    public void handleError(@NonNull ClientHttpResponse response) throws IOException {
         try {
             errorHandler.handleError(response);
         } catch (RestClientException e) {

@@ -160,7 +160,7 @@ public abstract class AbstractRequest {
      * 发送REST请求
      * @param method        请求方式
      * @param url           请求URL
-     * @param headerMap       当前需要添加的请求头
+     * @param headerMap     当前需要添加的请求头
      * @param params        请求参数，GET 和 DELETE 方式将会拼接在URL后面
      * @param specType      EchoResponseData的data字段类型
      * @param forceCamel    是否强制驼峰字段，支持深度转换
@@ -273,7 +273,7 @@ public abstract class AbstractRequest {
      * @param <T>   响应类型
      * @return ResponseEntity
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     private <T> ResponseEntity<T> performRequest(HttpMethod method, String url, Map<String, Object> params, Map<String, String> headerMap, Map reqParams, HttpHeaders headers, boolean hasBody, boolean showLog, Class<T> respType) {
         // 添加头数据
         appendHeaders(headers);
@@ -323,7 +323,7 @@ public abstract class AbstractRequest {
     }
 
     /**
-     * 是否使用标准的HTTP标准码（消息体中只有业务数据，不包code、msg这些）
+     * 是否使用标准的HTTP标准码（国外用得多，消息体中只有业务数据，不包code、msg这些）
      * @return 默认为false
      */
     protected boolean useStandardHTTP() {
@@ -357,9 +357,7 @@ public abstract class AbstractRequest {
                 multiValueMap.add(inEntry.getKey(), inEntry.getValue());
             }
         } else {
-            for (Map.Entry<String, Object> inEntry : inParams.entrySet()) {
-                outParams.put(inEntry.getKey(), inEntry.getValue());
-            }
+            outParams.putAll(inParams);
         }
     }
 
