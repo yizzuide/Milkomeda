@@ -136,8 +136,8 @@ public abstract class EchoRequest extends AbstractRequest {
                 if (dataStr.contains("\\")) {
                     dataStr = dataStr.replaceAll("\\\\", "");
                 }
-                // 业务字段驼峰转换
-                if (forceCamel) {
+                // 业务字段驼峰转换（仅在自定义类时）
+                if (forceCamel && !isMapType && !isListType) {
                     responseData.setData(JSONUtil.toCamel(dataStr, specType));
                     return responseData;
                 }
@@ -163,6 +163,13 @@ public abstract class EchoRequest extends AbstractRequest {
                     if (TypeUtil.type2Class(paramType) == Map.class) {
                         return responseData;
                     }
+                }
+
+                // 指定的是自定义类型
+                // 强制转驼峰
+                if (forceCamel) {
+                    responseData.setData(JSONUtil.toCamel(responseData.getData(), specType));
+                    return responseData;
                 }
                 if (responseData.getData() instanceof String) {
                     responseData.setData(JSONUtil.nativeRead((String) responseData.getData(), specType));
