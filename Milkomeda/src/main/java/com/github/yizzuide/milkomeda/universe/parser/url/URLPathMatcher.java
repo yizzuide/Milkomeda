@@ -71,7 +71,7 @@ public class URLPathMatcher {
                 path = path.substring(0, path.length() - 1);
             }
 
-            // 多路径匹配
+            // 多路径匹配（以/**结尾）
             boolean subPathWild = path.length() > 2 && "/**".equals(path.substring(path.length() - 3));
             if (subPathWild) {
                 String pathPrefix = path.substring(0, path.length() - 3);
@@ -81,7 +81,7 @@ public class URLPathMatcher {
                 }
             }
 
-            // 一个子路径匹配
+            // 一个子路径匹配（以/*结尾）
             boolean wordWild = "*".equals(lastChar);
             if (wordWild) {
                 String pathPrefix = path.substring(0, path.length() - 2);

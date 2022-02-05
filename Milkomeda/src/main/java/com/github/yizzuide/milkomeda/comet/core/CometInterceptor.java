@@ -94,7 +94,7 @@ public class CometInterceptor extends HandlerInterceptorAdapter implements Appli
     // tag收集器
     private Map<String, TagCollector> tagCollectorMap;
 
-    // 异常body识别节点
+    // 异常body识别节点：(key, (alias_key, value))
     private Map<String, Map<String, YmlAliasNode>> aliasNodesMap;
 
     @PostConstruct
@@ -112,9 +112,11 @@ public class CometInterceptor extends HandlerInterceptorAdapter implements Appli
 
         // make pref
         this.strategyList = strategyList.stream().peek(s -> {
+            // 设置正确的/**路径
             if (CollectionUtils.containsAny(s.getPaths(), URLPathMatcher.getMatchWildSymbols())) {
                 s.setPaths(URLPathMatcher.getWildSymbols());
             }
+            // 缓存作用域占位
             Map<String, List<String>> placeHolders = s.getCacheKeys() == null ?
                     urlPlaceholderParser.grabPlaceHolders(s.getTpl()) : s.getCacheKeys();
             s.setCacheKeys(placeHolders);
@@ -136,7 +138,7 @@ public class CometInterceptor extends HandlerInterceptorAdapter implements Appli
         Map<String, CometCollectorProperties.Tag> tagMap = cometCollectorProperties.getTags();
         this.tagCollectorMap = tagMap.keySet().stream()
                 .collect(Collectors.toMap(Object::toString, tagName -> applicationContext.getBean(tagName, TagCollector.class)));
-
+        // 别名绑定
         aliasNodesMap = new HashMap<>();
         for (Map.Entry<String, CometCollectorProperties.Tag> tagCollectorEntry : cometCollectorProperties.getTags().entrySet()) {
             Map<String, Object> exceptionMonitor = tagCollectorEntry.getValue().getExceptionMonitor();
