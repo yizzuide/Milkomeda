@@ -46,7 +46,7 @@ public @interface Comet {
 
     /**
      * 日志描述
-     * @deprecated deprecated at 1.12.0，use <code>name</code>.
+     * @deprecated deprecated at 1.12.0，use `name`.
      * @return String
      */
     String description() default "";
@@ -73,7 +73,7 @@ public @interface Comet {
      * 设置记录数据 prototype（原型）
      * 注意：
      * 1. CometData类型应该是一个 pojo，需要提供无参构造器
-     * 2. 原则上一个记录数据原型对应指定一个 tag
+     * 2. 原则上，一个记录数据原型对应指定一个 tag
      *
      * @return WebCometData子类型
      */

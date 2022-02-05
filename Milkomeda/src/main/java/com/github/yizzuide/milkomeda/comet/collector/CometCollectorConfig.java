@@ -67,7 +67,9 @@ public class CometCollectorConfig implements ApplicationContextAware {
         PillarExecutor<CometData, Object> pillarExecutor = new PillarExecutor<>();
         // 排除tag-collector
         if (!CollectionUtils.isEmpty(collectors)) {
-            pillarExecutor.addPillarList(collectors.stream().filter(c -> StringUtils.hasLength(c.supportType())).collect(Collectors.toList()));
+            pillarExecutor.addPillarList(collectors.stream()
+                    .filter(c -> StringUtils.hasLength(c.supportType()))
+                    .collect(Collectors.toList()));
         }
         return new CollectorFactory(pillarExecutor);
     }

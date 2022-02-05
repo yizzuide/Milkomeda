@@ -45,7 +45,7 @@ import java.util.Map;
  *
  * @author yizzuide
  * @since 1.13.4
- * @version 3.11.5
+ * @version 3.12.10
  * Create at 2019/10/24 21:17
  */
 public class AopContextHolder {
@@ -68,10 +68,25 @@ public class AopContextHolder {
      * @return WebCometData
      */
     public static WebCometData getWebCometData() {
-        // Filter层采集
+        return getWebCometData(true);
+    }
+
+    /**
+     * 获取控制层采集数据
+     * @param useTag    是否采用的TagCollector方式
+     * @return  WebCometData
+     * @since 3.12.10
+     */
+    public static WebCometData getWebCometData(boolean useTag) {
+        // 方法注解采集（注解方式）
+        if (!useTag) {
+            return CometAspect.getCurrentWebCometData();
+        }
+        // 下面保留之前的逻辑
+        // 拦截器层采集（用于TagCollector)
         WebCometData webCometData = CometInterceptor.getWebCometData();
         if (webCometData == null) {
-            // 方法注解采集
+            // 方法注解采集（注解方式）
             return CometAspect.getCurrentWebCometData();
         }
         return webCometData;

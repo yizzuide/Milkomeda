@@ -51,7 +51,6 @@ import org.springframework.web.util.WebUtils;
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.HashMap;
@@ -61,6 +60,7 @@ import java.util.stream.Collectors;
 
 /**
  * CometInterceptor
+ * 处理TagCollector和Logger
  *
  * @author yizzuide
  * @since 3.0.0
@@ -174,9 +174,7 @@ public class CometInterceptor extends HandlerInterceptorAdapter implements Appli
                     WebUtils.getNativeResponse(response, CometResponseWrapper.class);
             if (responseWrapper != null) {
                 String content = new String(responseWrapper.getContentAsByteArray(), StandardCharsets.UTF_8);
-                if (StringUtils.isEmpty(content)) {
-                    body = null;
-                } else {
+                if (!StringUtils.isEmpty(content)) {
                     String contentType = responseWrapper.getResponse().getContentType();
                     // JSON -> Map
                     if (contentType.startsWith(MediaType.APPLICATION_JSON_VALUE)) {
@@ -209,7 +207,7 @@ public class CometInterceptor extends HandlerInterceptorAdapter implements Appli
         String tag = cometData.getTag();
         TagCollector tagCollector = tagCollectorMap.get(tag);
 
-        // 如果有异常（说明没有统一异常拦截响应处理）
+        // 如果有异常（说明这是没有经过统一异常拦截响应处理的异常）
         if (ex != null) {
             cometData.setStatus(cometProperties.getStatusFailCode());
             cometData.setResponseData(null);
@@ -324,11 +322,8 @@ public class CometInterceptor extends HandlerInterceptorAdapter implements Appli
                 tagMap.get(selectTag).getPrototype(), cometProperties.isEnableReadRequestBody());
         cometData.setRequest(request);
         cometData.setRequestTime(requestTime);
-        try {
-            String host = NetworkUtil.getHost();
-            cometData.setHost(host);
-        } catch (UnknownHostException ignored) {
-        }
+        String host = NetworkUtil.getHost();
+        cometData.setHost(host);
         cometData.setTag(selectTag);
         this.tagCollectorMap.get(selectTag).prepare(cometData);
         threadLocal.set(cometData);

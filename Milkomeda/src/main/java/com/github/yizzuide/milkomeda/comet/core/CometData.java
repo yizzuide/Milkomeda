@@ -38,7 +38,7 @@ import java.util.Date;
  * Create at 2019/09/21 00:48
  */
 @Data
-@ToString(exclude = {"attachment", "request"})
+@ToString(exclude = {"attachment", "request", "intentData", "failure"})
 public class CometData implements Serializable {
     private static final long serialVersionUID = -8296355140769902642L;
     /**

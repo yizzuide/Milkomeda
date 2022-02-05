@@ -23,7 +23,7 @@ package com.github.yizzuide.milkomeda.comet.collector;
 
 /**
  * TagCollector
- * 标签收集器
+ * 声明式标签收集器，去掉侵入式注解，与yml配置联合使用
  *
  * @author yizzuide
  * @since 3.0.0

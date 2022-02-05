@@ -68,7 +68,7 @@ public class CometRequestFilter implements Filter {
         if (enableAddResponseWrapper) {
             updateResponse((HttpServletResponse) servletResponse);
         }
-        // 清空数据
+        // 清空线程数据
         CometAspect.resolveThreadLocal.remove();
     }
 

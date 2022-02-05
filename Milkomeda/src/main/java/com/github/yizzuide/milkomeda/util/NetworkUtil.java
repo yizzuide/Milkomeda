@@ -21,28 +21,50 @@
 
 package com.github.yizzuide.milkomeda.util;
 
+import lombok.extern.slf4j.Slf4j;
+
 import javax.servlet.http.HttpServletRequest;
+import java.net.Inet4Address;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
+import java.net.NetworkInterface;
+import java.util.Enumeration;
 
 /**
  * NetworkUtil
  *
  * @author yizzuide
  * @since 0.2.0
- * @version 1.15.0
+ * @version 3.12.10
  * Create at 2019/04/11 20:13
  */
+@Slf4j
 public class NetworkUtil {
     /**
      * 获取服务器IP地址
      *
      * @return 服务器IP地址
-     * @throws UnknownHostException 抛出网络异常
      */
-    public static String getHost() throws UnknownHostException {
-        InetAddress addr = InetAddress.getLocalHost();
-        return addr.getHostAddress();
+    public static String getHost() {
+        try {
+            Enumeration<NetworkInterface> allNetInterfaces = NetworkInterface.getNetworkInterfaces();
+            InetAddress ip;
+            while (allNetInterfaces.hasMoreElements()) {
+                NetworkInterface netInterface = allNetInterfaces.nextElement();
+                if (netInterface.isLoopback() || netInterface.isVirtual() || !netInterface.isUp()) {
+                    continue;
+                }
+                Enumeration<InetAddress> addresses = netInterface.getInetAddresses();
+                while (addresses.hasMoreElements()) {
+                    ip = addresses.nextElement();
+                    if (ip instanceof Inet4Address) {
+                        return ip.getHostAddress();
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.error("Get host IP error with msg: {}", e.getMessage(), e);
+        }
+        return "";
     }
 
     /**

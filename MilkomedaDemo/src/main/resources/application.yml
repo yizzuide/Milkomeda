@@ -91,7 +91,7 @@ milkomeda:
   #show-log: true
 
   comet:
-    # 记录body里的json数据需要开启（默认不开启）
+    # 读取请求body里的json数据需要开启（默认不开启）
     enable-read-request-body: true
     # 读取Response直接写出的内容时需要开启
     enable-read-response-body: true
@@ -120,9 +120,9 @@ milkomeda:
           include: ["/collect/product/*"]
           # 异常监控：由于异常可能被 @ControllerAdvice 吞没，拦截器就获取不到异常
           exception-monitor:
-            # 忽略正常的响应
+            # 忽略正常的响应，业务标识字段为code
             ignore-code[code]: 1
-            # 错误信息记录
+            # 错误信息记录，业务标识字段为innerErrInfo和innerErrInfoDesc
             error-stack-msg[innerErrInfo]:
             error-stack[innerErrInfoDesc]:
 
@@ -207,7 +207,7 @@ milkomeda:
 #    root-redirect: ${url.index}
 
     # 不使用BCrypt（如果用户表有salt字段的情况）
-    #    use-bcrypt: false
+#    use-bcrypt: false
     # 添加到匿名访问许可
     addition-permit-urls:
       - /s_login

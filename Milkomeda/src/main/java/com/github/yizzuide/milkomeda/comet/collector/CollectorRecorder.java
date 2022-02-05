@@ -41,7 +41,7 @@ public class CollectorRecorder implements CometRecorder {
     /**
      * 收集器工厂
      */
-    private CollectorFactory collectorFactory;
+    private final CollectorFactory collectorFactory;
 
     public CollectorRecorder(CollectorFactory collectorFactory) {
         this.collectorFactory = collectorFactory;

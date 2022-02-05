@@ -80,7 +80,7 @@ public class WebCometData extends CometData {
      */
     private String requestIP;
     /**
-     * 请求设备信息
+     * 请求客户端信息（请求头：user-agent）
      */
     private String deviceInfo;
 
@@ -96,7 +96,7 @@ public class WebCometData extends CometData {
         try {
             cometData = prototype == null ? new WebCometData() : prototype.newInstance();
         } catch (Exception e) {
-            log.info("Comet create WebCometData error with msg: {}", e.getMessage(), e);
+            log.error("Comet create WebCometData error with msg: {}", e.getMessage(), e);
             throw new IllegalArgumentException("Comet create WebCometData from prototype: " + prototype + " error");
         }
         cometData.setRequestURL(request.getRequestURL().toString());

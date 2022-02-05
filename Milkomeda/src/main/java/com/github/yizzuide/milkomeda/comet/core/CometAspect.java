@@ -49,7 +49,6 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.Function;
@@ -75,9 +74,9 @@ public class CometAspect {
     private CometProperties cometProperties;
 
     /**
-     * 请求参数解析本地线程存储
+     * 存储请求参数解析
      */
-    static ThreadLocal<String> resolveThreadLocal = new ThreadLocal<>();
+    static final ThreadLocal<String> resolveThreadLocal = new ThreadLocal<>();
     /**
      * 控制器层本地线程存储
      */
@@ -185,7 +184,7 @@ public class CometAspect {
         cometData.setClazzName(signature.getDeclaringTypeName());
         cometData.setExecMethod(signature.getName());
         Map<String, Object> params = new HashMap<>();
-        // 获取参数名
+        // 获取参数名和参数值
         String[] parameterNames = signature.getParameterNames();
         Object[] args = joinPoint.getArgs();
         if (args !=  null && args.length > 0) {
@@ -199,11 +198,8 @@ public class CometAspect {
             }
             cometData.setRequestData(JSONUtil.serialize(params));
         }
-        try {
-            String host = NetworkUtil.getHost();
-            cometData.setHost(host);
-        } catch (UnknownHostException ignored) {
-        }
+        String host = NetworkUtil.getHost();
+        cometData.setHost(host);
         if (milkomedaProperties.isShowLog()) {
             log.info("Comet:- before: {}", JSONUtil.serialize(cometData));
         }
@@ -214,10 +210,11 @@ public class CometAspect {
         // 执行方法体
         Object returnData = joinPoint.proceed();
 
-        long duration = new Date().getTime() - cometData.getRequestTime().getTime();
+        Date responseDate = new Date();
+        long duration = responseDate.getTime() - cometData.getRequestTime().getTime();
         cometData.setDuration(String.valueOf(duration));
         cometData.setStatus(cometProperties.getStatusSuccessCode());
-        cometData.setResponseTime(new Date());
+        cometData.setResponseTime(responseDate);
         if (returnData != null) {
             // returnData应用map转换类型
             if (mapReturnData != null) {
@@ -232,7 +229,7 @@ public class CometAspect {
                 cometData.setResponseData(returnData instanceof String ? (String) returnData : JSONUtil.serialize(returnData));
             }
         } else {
-            // 读取Response
+            // 通过HttpServletResponse写出的，需要读取包装的Response消息体
             if (CometHolder.getCollectorProps() != null && CometHolder.getCollectorProps().isEnable()) {
                 CometResponseWrapper responseWrapper =
                         WebUtils.getNativeResponse(WebContext.getResponse(), CometResponseWrapper.class);
@@ -246,7 +243,7 @@ public class CometAspect {
 
         // 开始回调
         Object returnObj = recorder.onReturn(cometData, returnData);
-        // 修正返回值
+        // 是否有修改返回值
         returnObj = returnObj == null ? returnData : returnObj;
         if (milkomedaProperties.isShowLog()) {
             log.info("Comet:- afterReturn: {}", JSONUtil.serialize(cometData));
