@@ -183,20 +183,9 @@ public class CometAspect {
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         cometData.setClazzName(signature.getDeclaringTypeName());
         cometData.setExecMethod(signature.getName());
-        Map<String, Object> params = new HashMap<>();
-        // 获取参数名和参数值
-        String[] parameterNames = signature.getParameterNames();
-        Object[] args = joinPoint.getArgs();
-        if (args !=  null && args.length > 0) {
-            for (int i = 0; i < args.length; i++) {
-                String argName = parameterNames[i];
-                Object argValue = args[i];
-                if (hasFilter(argValue)) {
-                    continue;
-                }
-                params.put(argName, argValue);
-            }
-            cometData.setRequestData(JSONUtil.serialize(params));
+        Map<String, Object> methodParams = ReflectUtil.getMethodParams(joinPoint, ignoreParams);
+        if (methodParams != null) {
+            cometData.setRequestData(JSONUtil.serialize(methodParams));
         }
         String host = NetworkUtil.getHost();
         cometData.setHost(host);
@@ -204,7 +193,7 @@ public class CometAspect {
             log.info("Comet:- before: {}", JSONUtil.serialize(cometData));
         }
         // 外部可以扩展记录自定义数据
-        recorder.onRequest(cometData, cometData.getTag(), request, args);
+        recorder.onRequest(cometData, cometData.getTag(), request, joinPoint.getArgs());
         threadLocal.set(cometData);
 
         // 执行方法体
@@ -250,20 +239,6 @@ public class CometAspect {
         }
         threadLocal.remove();
         return returnObj;
-    }
-
-    /**
-     * 参数过滤
-     * @param arg 参数
-     * @return true为过滤
-     */
-    private boolean hasFilter(Object arg) {
-        for (Class<?> ignoreParam : ignoreParams) {
-            if (ignoreParam.isInstance(arg)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     /**

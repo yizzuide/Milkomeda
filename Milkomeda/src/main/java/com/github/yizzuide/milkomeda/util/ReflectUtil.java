@@ -44,7 +44,7 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 0.2.0
- * @version 3.6.0
+ * @version 3.12.10
  * Create at 2019/04/11 19:55
  */
 @Slf4j
@@ -70,6 +70,38 @@ public class ReflectUtil {
                 classes[i] = clazz;
             }
             return classes;
+        }
+        return null;
+    }
+
+    /**
+     * 获取方法参数列表
+     * @param joinPoint     切点连接点
+     * @param ignoreParams  忽略的参数列表
+     * @return  方法参数列表
+     * @since 3.12.10
+     */
+    public static Map<String, Object> getMethodParams(JoinPoint joinPoint, List<Class<?>> ignoreParams) {
+        MethodSignature signature = (MethodSignature) joinPoint.getSignature();
+        Map<String, Object> params = new HashMap<>();
+        // 获取参数名和参数值
+        String[] parameterNames = signature.getParameterNames();
+        Object[] args = joinPoint.getArgs();
+        if (args !=  null && args.length > 0) {
+            for (int i = 0; i < args.length; i++) {
+                String argName = parameterNames[i];
+                Object argValue = args[i];
+                // 参数过滤
+                if (ignoreParams != null) {
+                    if (ignoreParams.stream().anyMatch(p -> p.isInstance(argValue))) {
+                        continue;
+                    }
+                }
+                params.put(argName, argValue);
+            }
+        }
+        if (params.size() > 0) {
+            return params;
         }
         return null;
     }

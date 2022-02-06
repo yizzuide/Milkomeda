@@ -114,16 +114,16 @@ public class CometData implements Serializable {
     private transient HttpServletRequest request;
 
     /**
-     * 传递给日志收集器的意图数据
+     * 业务端传递给日志收集器的意图数据
      * @since 3.0.5
      */
     @JsonIgnore
     private transient Object intentData;
 
     /**
-     * 标识失败并设置异常，日志收集器将走失败没流程
+     * 业务端有异常时设置失败，日志收集器将走失败没流程
      * @since 3.0.5
      */
     @JsonIgnore
-    private transient Object failure;
+    private transient Exception failure;
 }

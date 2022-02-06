@@ -225,11 +225,11 @@ public class CometInterceptor extends HandlerInterceptorAdapter implements Appli
         }
 
         // 如果有标识异常，按失败处理（对于有被try...catch包装的处理）
-        Object failure = cometData.getFailure();
-        if (failure != null && failure instanceof Exception) {
+        Exception failure = cometData.getFailure();
+        if (failure != null) {
             cometData.setStatus(cometProperties.getStatusFailCode());
             cometData.setResponseData(body == null ? null : JSONUtil.serialize(body));
-            ex = (Exception) failure;
+            ex = failure;
             cometData.setErrorInfo(ex.getMessage());
             StackTraceElement[] stackTrace = ex.getStackTrace();
             String errorStack = String.format("exception happened: %s \n invoke root: %s", stackTrace[0], stackTrace[stackTrace.length - 1]);
