@@ -28,6 +28,7 @@ public class OrderService {
         map.put("orderId", "1111111");
         map.put("name", "小明");
         map.put("amount", "12000");
+        map.put("state", 0);
         map.put("createTime", new Date());
         list.add(map);
         return list;
@@ -43,7 +44,7 @@ public class OrderService {
 //    @LightCacheable(value = "order", key = "T(com.github.yizzuide.milkomeda.demo.light.pref.CacheKeys).ORDER.key", condition = "#orderId!=null")
     public Order findById(String orderId) {
         log.info("正在从数据库查询：{}", orderId);
-        return new Order(orderId, "小明", "1200", new Date());
+        return new Order(orderId, "小明", "1200", 0,  new Date());
     }
 
     @LightCacheEvict(value = "order", key = "'order:' + #orderId")
@@ -53,6 +54,6 @@ public class OrderService {
 
     @LightCachePut(value = "order", key = "'order:' + #orderId", condition = "#orderId!=null")
     public Order updateById(String orderId) {
-        return new Order(orderId, "小红", "2000", new Date());
+        return new Order(orderId, "小红", "2000", 0, new Date());
     }
 }

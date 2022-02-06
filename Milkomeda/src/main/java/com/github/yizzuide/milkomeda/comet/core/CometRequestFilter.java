@@ -65,6 +65,7 @@ public class CometRequestFilter implements Filter {
             servletResponse = new CometResponseWrapper((HttpServletResponse) servletResponse);
         }
         filterChain.doFilter(requestWrapper, servletResponse);
+        // 更新响应消息体
         if (enableAddResponseWrapper) {
             updateResponse((HttpServletResponse) servletResponse);
         }

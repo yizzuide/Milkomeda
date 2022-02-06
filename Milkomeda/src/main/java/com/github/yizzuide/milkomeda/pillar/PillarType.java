@@ -31,13 +31,13 @@ package com.github.yizzuide.milkomeda.pillar;
  */
 public interface PillarType {
     /**
-     * 识别标识符，如：记录ID、序列号
+     * 识别标识符，由调用端传进，如：记录ID、序列号
      * @return Object
      */
     Object identifier();
 
     /**
-     * pillar类型名
+     * pillar类型名，用于分流识别
      * @return String
      */
     String pillarType();

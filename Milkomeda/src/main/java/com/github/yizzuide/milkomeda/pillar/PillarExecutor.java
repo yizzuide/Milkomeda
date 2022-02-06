@@ -47,7 +47,7 @@ public class PillarExecutor<P, R> {
     /**
      * 分流柱集合
      */
-    private Set<Pillar<P, R>> pillars = new HashSet<>();
+    private final Set<Pillar<P, R>> pillars = new HashSet<>();
 
     /**
      * 执行分流柱

@@ -20,5 +20,6 @@ public class Order {
     String orderId;
     String name;
     String amount;
+    Integer state;
     Date createTime;
 }
