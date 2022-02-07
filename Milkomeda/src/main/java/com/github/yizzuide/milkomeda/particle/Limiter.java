@@ -27,18 +27,18 @@ package com.github.yizzuide.milkomeda.particle;
  *
  * @author yizzuide
  * @since 1.5.0
+ * @version 3.12.10
  * Create at 2019/05/30 13:41
  */
 public interface Limiter {
 
     /**
-     * 检测限制情况，结果通过Process参数 particle.isLimited() 判断
+     * 检测限制情况，结果通过`Process`参数 <code>particle.isLimited()</code> 判断
      * @param key       键
-     * @param expire    过期时间
-     * @param process   处理方法
+     * @param process   业务处理方法
      * @param <R>       返回类型
      * @return R
      * @throws Throwable 可抛出异常
      */
-    <R> R limit(String key, long expire, Process<R> process) throws Throwable;
+    <R> R limit(String key, Process<R> process) throws Throwable;
 }

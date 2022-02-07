@@ -39,7 +39,7 @@ import java.util.Collections;
  *
  * @author yizzuide
  * @since 1.5.2
- * @version 3.9.0
+ * @version 3.12.10
  * Create at 2019/05/30 17:32
  */
 @Data
@@ -75,20 +75,8 @@ public class TimesLimiter extends LimitHandler {
         this.limitTimes = limitTimes;
     }
 
-    /**
-     * 次数限制方法
-     * @param key       键
-     * @param process   处理方法回调
-     * @param <R>       返回数据类型
-     * @return          返回回调里的结果
-     * @throws Throwable 可抛出异常
-     */
-    public <R> R limit(String key, Process<R> process) throws Throwable {
-        return limit(key, 0, process);
-    }
-
     @Override
-    public <R> R limit(String key, long expire, Process<R> process) throws Throwable {
+    public <R> R limit(String key, Process<R> process) throws Throwable {
         String decoratedKey = key + POSTFIX;
         RedisTemplate<String, Serializable> redisTemplate = getJsonRedisTemplate();
         long expireSeconds;
@@ -114,7 +102,7 @@ public class TimesLimiter extends LimitHandler {
         // 判断是否超过次数
         boolean isOver = times > limitTimes;
         Particle particle = new Particle(this.getClass(), isOver, times);
-        return next(particle, key, expire, process);
+        return next(particle, key, process);
     }
 
     static void setLuaScript(String luaScript) {

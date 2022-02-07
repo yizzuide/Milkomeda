@@ -32,6 +32,8 @@ import org.springframework.context.annotation.Import;
  * @author yizzuide
  * @since 0.2.1
  * @version 2.0.0
+ * @see org.springframework.core.io.support.SpringFactoriesLoader
+ * @see org.springframework.boot.SpringApplication
  * Create at 2019/04/12 11:29
  */
 @Slf4j

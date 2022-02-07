@@ -35,7 +35,7 @@ import java.lang.annotation.Target;
  *
  * @author yizzuide
  * @since 1.5.0
- * @version 3.1.0
+ * @version 3.12.10
  * Create at 2019/05/30 22:22
  */
 @Target({ElementType.PARAMETER, ElementType.METHOD})
@@ -58,12 +58,6 @@ public @interface Limit {
      * @return String
      */
     String key() default "";
-
-    /**
-     * 过期时间。单位：秒
-     * @return long
-     */
-    long expire() default -1L;
 
     /**
      * 限制器组件名，优先级比limiterBeanClass高

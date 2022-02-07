@@ -38,7 +38,7 @@ public class ParticleController {
 
     @PostConstruct
     public void init() {
-        // 添加测试数据
+        // 添加注册用户测试数据
         userBloomLimiter.addAll(Collections.singletonList("15634256549"));
     }
 
@@ -53,7 +53,7 @@ public class ParticleController {
     @RequestMapping("check")
     public ResponseEntity<String> check(String token) throws Throwable {
         // 使用内置的方法限制一次请求的重复调用
-        return idempotentLimiter.limit(token, 60L, (particle) -> {
+        return idempotentLimiter.limit(token, (particle) -> {
             // 判断是否被限制
             if (particle.isLimited()) {
                 return ResponseEntity.status(406).body("请求勿重复请求");
@@ -67,7 +67,7 @@ public class ParticleController {
     @RequestMapping("check2")
     // 注解的方式限制一次请求的重复调用（注：'#'为Spring EL表达式）
     // 注意：由于配置了限制器链，就有了两个去重限制器，由于框架内部根据类型查找，这里需要通过limiterBeanName指定
-    @Limit(name = "user:check", key = "#token", expire = 60L, limiterBeanName = "idempotentLimiter")
+    @Limit(name = "user:check", key = "#token", limiterBeanName = "idempotentLimiter")
     public ResponseEntity<String> check2(String token, Particle particle/*这个状态值自动注入*/) throws Throwable {
         log.info("check2: token={}", token);
         // 判断是否被限制
@@ -82,7 +82,7 @@ public class ParticleController {
     @RequestMapping("check3")
     // 注解的方式限制一次请求的重复调用（#env获取自定义环境变量，#request获取请求对象）
     // 注意：由于配置了限制器链，就有了两个去重限制器，由于框架内部根据类型查找，这里需要通过limiterBeanName指定
-    @Limit(name = "user:check", key = "#env['product'] + #request.getHeader('token')", expire = 60L, limiterBeanName = "idempotentLimiter")
+    @Limit(name = "user:check", key = "#env['product'] + #request.getHeader('token')", limiterBeanName = "idempotentLimiter")
     public ResponseEntity<String> check3(Particle particle/*这个状态值自动注入*/) throws Throwable {
         // 判断是否被限制
         log.info("limited: {}", particle.isLimited());
@@ -123,7 +123,7 @@ public class ParticleController {
     @RequestMapping("verify")
     public ResponseEntity<String> verify(String phone) throws Throwable {
         // 先请求重复检查
-        return idempotentLimiter.limit(phone, 60L, (particle) -> {
+        return idempotentLimiter.limit(phone, (particle) -> {
             // 判断是否被限制
             if (particle.isLimited()) {
                 return ResponseEntity.status(406).body("请求勿重复请求");
@@ -146,7 +146,7 @@ public class ParticleController {
     @RequestMapping("verify3")
     public ResponseEntity<String> verify3(String phone) throws Throwable {
         // 先请求重复检查
-        return barrierLimiter.limit(phone, 60L, (particle) -> {
+        return barrierLimiter.limit(phone, (particle) -> {
             // 判断是否被限制
             if (particle.isLimited()) {
                 // 如果是去重限制类型
@@ -165,7 +165,7 @@ public class ParticleController {
 
     // 基于注解的拦截链组合方式
     @RequestMapping("verify2")
-    @Limit(name = "user:send", key = "#phone", expire = 60L, limiterBeanClass = BarrierLimiter.class)
+    @Limit(name = "user:send", key = "#phone", limiterBeanClass = BarrierLimiter.class)
     public ResponseEntity<String> verify2(String phone, Particle particle/*这个状态值自动注入*/) throws Throwable {
         log.info("verify2: phone={}", phone);
         // 判断是否被限制
@@ -186,7 +186,7 @@ public class ParticleController {
 
     // 第三方一次请求多次调用限制（唯一约束：订单号+状态值）
     @RequestMapping("notify")
-    @Limit(name = "notify:order", key = "#params['orderId']+'-'+#params['state']", expire = 60L, limiterBeanName = "idempotentLimiter")
+    @Limit(name = "notify:order", key = "#params['orderId']+'-'+#params['state']", limiterBeanName = "idempotentLimiter")
     public void notify(@RequestBody Map<String, Object> params, Particle particle, HttpServletResponse resp) throws Exception {
         log.info("params: {}", params);
         if (particle.isLimited()) {

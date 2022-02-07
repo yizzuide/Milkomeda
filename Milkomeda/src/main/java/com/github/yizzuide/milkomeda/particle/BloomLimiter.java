@@ -35,6 +35,7 @@ import java.util.List;
  *
  * @author yizzuide
  * @since 3.9.0
+ * @version 3.12.10
  * Create at 2020/06/23 16:03
  */
 public class BloomLimiter extends LimitHandler {
@@ -65,13 +66,10 @@ public class BloomLimiter extends LimitHandler {
      */
     private volatile BloomHashWrapper<String> bloomHashWrapper;
 
-    public <R> R limit(String key, Process<R> process) throws Throwable {
-        return limit(key, -1, process);
-    }
-
     @Override
-    public <R> R limit(String key, long expire, Process<R> process) throws Throwable {
+    public <R> R limit(String key, Process<R> process) throws Throwable {
         int splitIndex = key.lastIndexOf(valueSeparator);
+        // 如果没有设置bitKey，自动设置redis的key前辍
         if (StringUtils.isEmpty(bitKey)) {
             bitKey = key.substring(0, splitIndex);
         }
@@ -90,7 +88,7 @@ public class BloomLimiter extends LimitHandler {
         if (particle == null) {
             particle = new Particle(this.getClass(), false, 1);
         }
-        return next(particle, key, expire, process);
+        return next(particle, key, process);
     }
 
     /**

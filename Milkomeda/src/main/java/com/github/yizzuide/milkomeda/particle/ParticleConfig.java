@@ -54,7 +54,7 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 1.14.0
- * @version 3.10.0
+ * @version 3.12.10
  * Create at 2019/11/11 11:26
  */
 @Slf4j
@@ -79,7 +79,9 @@ public class ParticleConfig implements ApplicationContextAware {
 
     @Bean
     public IdempotentLimiter idempotentLimiter() {
-        return new IdempotentLimiter();
+        IdempotentLimiter idempotentLimiter = new IdempotentLimiter();
+        idempotentLimiter.setExpire(60L);
+        return idempotentLimiter;
     }
 
     @Bean
@@ -137,7 +139,9 @@ public class ParticleConfig implements ApplicationContextAware {
                 limitHandler = WebContext.registerBean((ConfigurableApplicationContext) applicationContext, limiterName, limiter.getHandlerClazz());
                 shareLimitHandlerMap.put(handlerKey, limitHandler);
             }
+            // 缓存并设置属性
             cacheHandlerBeans.put(limiterName, limitHandler);
+            limitHandler.setExpire(limiter.getKeyExpire().getSeconds());
             if (!CollectionUtils.isEmpty(limiter.getProps())) {
                 ReflectUtil.setField(limitHandler, limiter.getProps());
             }

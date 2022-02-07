@@ -53,7 +53,7 @@ import static com.github.yizzuide.milkomeda.particle.ParticleProperties.Limiter.
  *
  * @author yizzuide
  * @since 3.0.0
- * @version 3.10.0
+ * @version 3.12.10
  * Create at 2020/04/08 11:41
  */
 public class ParticleFilter implements Filter {
@@ -117,7 +117,7 @@ public class ParticleFilter implements Filter {
             // 设置匹配标识
             matchFlag = true;
             String key = urlPlaceholderParser.parse(limiter.getKeyTpl(), httpServletRequest, null, null, limiter.getCacheKeys());
-            Map<String, Object> returnData = limiter.getLimitHandler().limit(key, limiter.getKeyExpire().getSeconds(), particle -> {
+            Map<String, Object> returnData = limiter.getLimitHandler().limit(key, particle -> {
                 if (particle.isLimited()) {
                     Map<String, Object> result = new HashMap<>(8);
                     Map<String, Object> responseInfo;

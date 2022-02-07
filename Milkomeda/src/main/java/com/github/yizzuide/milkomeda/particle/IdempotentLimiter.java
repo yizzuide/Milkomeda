@@ -33,7 +33,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
  *
  * @author yizzuide
  * @since 1.5.0
- * @version 3.9.0
+ * @version 3.12.10
  * Create at 2019/05/30 13:49
  */
 @Slf4j
@@ -43,14 +43,14 @@ public class IdempotentLimiter extends LimitHandler {
     private static final String POSTFIX = ":repeat";
 
     @Override
-    public <R> R limit(String key, long expire, Process<R> process) throws Throwable {
+    public <R> R limit(String key, Process<R> process) throws Throwable {
         String decoratedKey = key + POSTFIX;
         StringRedisTemplate redisTemplate = getRedisTemplate();
         Boolean hasObtainLock = RedisUtil.setIfAbsent(decoratedKey, expire, redisTemplate);
         assert hasObtainLock != null;
         Particle particle = new Particle(this.getClass(), !hasObtainLock, hasObtainLock ? null : "1");
         try {
-            return next(particle, key, expire, process);
+            return next(particle, key, process);
         } finally {
             // 只有第一次设置key的线程有权删除这个key
             if (hasObtainLock) {

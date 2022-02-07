@@ -66,7 +66,7 @@ public class BarrierLimiter extends LimitHandler {
     }
 
     @Override
-    public <R> R limit(String key, long expire, Process<R> process) throws Throwable {
-        return head.limit(key, expire, process);
+    public <R> R limit(String key, Process<R> process) throws Throwable {
+        return head.limit(key, process);
     }
 }

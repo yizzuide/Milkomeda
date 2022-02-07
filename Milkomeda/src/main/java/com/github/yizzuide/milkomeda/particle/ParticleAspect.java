@@ -38,7 +38,7 @@ import static com.github.yizzuide.milkomeda.util.ReflectUtil.*;
  *
  * @author yizzuide
  * @since 1.5.0
- * @version 3.1.0
+ * @version 3.12.10
  * Create at 2019/05/30 22:29
  */
 @Slf4j
@@ -61,11 +61,10 @@ public class ParticleAspect {
         }
         // 解析表达式
         key = extractValue(joinPoint, key);
-        long expire = limit.expire();
         Limiter limiter = !StringUtils.isEmpty(beanName) ? ApplicationContextHolder.get().getBean(beanName, Limiter.class)
                 : ApplicationContextHolder.get().getBean(limit.limiterBeanClass());
         String decorateKey = StringUtils.isEmpty(prefix) ? key : prefix + ":" + key;
-        return limiter.limit(decorateKey, expire, (particle ->
+        return limiter.limit(decorateKey, (particle ->
                 joinPoint.proceed(injectParam(joinPoint, particle, limit, true))));
     }
 }

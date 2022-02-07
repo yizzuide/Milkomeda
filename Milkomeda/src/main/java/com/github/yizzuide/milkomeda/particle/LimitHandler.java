@@ -34,11 +34,16 @@ import java.io.Serializable;
  *
  * @author yizzuide
  * @since 1.5.0
- * @version 3.9.0
+ * @version 3.12.10
  * Create at 2019/05/31 01:22
  */
 @Data
 public abstract class LimitHandler implements Limiter {
+    /**
+     * 过期时间
+     * @since 3.12.10
+     */
+    protected Long expire;
     /**
      * 拦截链串，用于记录链条数据
      */
@@ -67,16 +72,15 @@ public abstract class LimitHandler implements Limiter {
      * 限制器链调用
      * @param particle  状态数据
      * @param key       键
-     * @param expire    过期时间
-     * @param process   处理方法
+     * @param process   业务处理方法
      * @param <R>       返回类型
      * @return R
      * @throws Throwable 可抛出异常
      */
-    protected <R> R next(Particle particle, String key, long expire, Process<R> process) throws Throwable {
+    protected <R> R next(Particle particle, String key, Process<R> process) throws Throwable {
         // 如果未被限制，且有下一个处理器
         if (!particle.isLimited() && null != getNext()) {
-            return getNext().limit(key, expire, process);
+            return getNext().limit(key, process);
         }
         return process.apply(particle);
     }

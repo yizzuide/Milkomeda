@@ -133,11 +133,12 @@ milkomeda:
       -
         # 新配置一个去重限制器（内部配置了idempotentLimiter），用来添加到BarrierLimiter组合链，防止污染限制器链
         name: noRepeatLimiter
+        key-expire: 20s
         include-urls: ["/particle/pay"]
         response:
           status: 200
           code: -1
-          message: 请求太频繁，请稍后再试！
+          message[msg]: 请求太频繁，请稍后再试！
       -
         name: timesLimiter
         type: TIMES
@@ -150,7 +151,7 @@ milkomeda:
           status: 200
 #          content: success # 非application/json类型的响应内容
           code: -1
-          message: 请求超过次数，请稍后再试！
+          message[msg]: 请求超过次数，请稍后再试！
           addition:
             data: ${collections.emptyMap}
       -
@@ -168,12 +169,15 @@ milkomeda:
           bitKey: bit_user
           # 数据量
           insertions: 2000000
+          # 取值分隔器，默认为`_`
+          #valueSeparator: _
+        # 这里的匹配数据：$params.phone，默认前面必须用`_`分隔，可通过上面valueSeparator配置
         key-tpl: limit_{method}_{uri}_{$params.phone}
         include-urls: ["/particle/exists"]
         response:
           status: 200
           code: -1
-          message: 用户不存在，请先注册
+          message[msg]: 用户不存在，请先注册
     exclude-urls: ["/favicon.ico"]
 
   light:
