@@ -57,9 +57,11 @@ public class DelegatingDelayJobHandler implements Runnable, InitializingBean {
     @Autowired
     private DeadQueue deadQueue;
 
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
     private IceProperties props;
 
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
     private StringRedisTemplate redisTemplate;
 

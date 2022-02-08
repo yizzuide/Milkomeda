@@ -90,6 +90,6 @@ public class PeriodicMoonStrategy extends AbstractLuaMoonStrategy {
 
     @Override
     public String loadLuaScript() throws IOException {
-        return IOUtils.loadLua("/META-INF/scripts", "moon_periodic.lua");
+        return IOUtils.loadLua(IOUtils.LUA_PATH, "moon_periodic.lua");
     }
 }

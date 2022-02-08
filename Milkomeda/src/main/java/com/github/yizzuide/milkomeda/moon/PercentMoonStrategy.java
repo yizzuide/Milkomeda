@@ -120,7 +120,7 @@ public class PercentMoonStrategy extends AbstractLuaMoonStrategy {
 
     @Override
     public String loadLuaScript() throws IOException {
-        return IOUtils.loadLua("/META-INF/scripts", "moon_percent.lua");
+        return IOUtils.loadLua(IOUtils.LUA_PATH, "moon_percent.lua");
     }
 
     /**

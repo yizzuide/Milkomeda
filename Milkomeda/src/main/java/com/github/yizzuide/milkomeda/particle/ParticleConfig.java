@@ -173,7 +173,7 @@ public class ParticleConfig implements ApplicationContextAware {
         particleProperties.setLimiters(orderLimiters);
 
         // 读取lua脚本
-        String luaScript = IOUtils.loadLua("/META-INF/scripts", "particle_times_limiter.lua");
+        String luaScript = IOUtils.loadLua(IOUtils.LUA_PATH, "particle_times_limiter.lua");
         TimesLimiter.setLuaScript(luaScript);
     }
 

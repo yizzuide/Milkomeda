@@ -38,6 +38,7 @@ import java.nio.charset.StandardCharsets;
  * Create at 2020/05/07 14:17
  */
 public class IOUtils {
+    public static final String LUA_PATH = "/META-INF/scripts";
 
     /**
      * 加载lua脚本
@@ -69,7 +70,7 @@ public class IOUtils {
             }
             // 代码缩减空白
             line = StringUtils.trimLeadingWhitespace(line);
-            line = StringUtils.trimLeadingWhitespace(line);
+            line = StringUtils.trimTrailingWhitespace(line);
             line = line.replaceAll("[\n\r\t]", "");
             out.append(line);
             // 忽略有分号的行，说明已有结束符

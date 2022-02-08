@@ -9,6 +9,8 @@ if currentLimit + 1 > limit then
     return currentLimit + 1
 else
     local count = redis.call('incrby', key, 1)
-    redis.call('expire', key, expire)
+    if count == 1 then
+        redis.call('expire', key, expire)
+    end
     return count
 end
