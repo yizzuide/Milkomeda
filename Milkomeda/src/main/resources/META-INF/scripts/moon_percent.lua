@@ -16,9 +16,11 @@ for i = 1, #phases, 1 do
         p = p + tonumber(phases[i - 1])
     end
     if current < p then
+        -- because of lua index begin at 1
         index = i - 1
         break
     end
 end
+-- set pointer index
 redis.call('set', key, current)
 return index

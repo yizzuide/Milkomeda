@@ -88,7 +88,7 @@ mybatis:
 
 milkomeda:
   # 配置是否显示跟踪日志信息，包含debug,info（线上环境应该关闭）
-  #show-log: true
+  show-log: true
 
   comet:
     # 读取请求body里的json数据需要开启（默认不开启）
@@ -190,6 +190,10 @@ milkomeda:
         enable-super-cache: false
         l1-expire: 1m
         l2-expire: 1m
+      #smsMoonCache:
+        #only-cache-l2: true
+      #abTestMoonCache:
+        #only-cache-l2: true
 
   echo:
     # 设置请求读取超时
@@ -241,6 +245,8 @@ milkomeda:
       - /error/*
 
   ice:
+    # 在分布式布署时，需要设置实例名
+    instance-name: @spring.application.name@
     # 开启Job作业（作为消费端使用时，设置为false）
 #    enable-job-timer: false
     # 是否用于分布式job作业
@@ -268,9 +274,12 @@ milkomeda:
     instances:
       -
         name: smsMoon
+        # 默认采用lua高性能方式，不需要设置缓存名
+        #cache-name: smsMoonCache
         phases: ["七牛云短信", "阿里云短信", "容联云短信"]
       -
         name: abTestMoon
+        #cache-name: abTestMoonCache
         # 使用百分比分配策略
         type: PERCENT
         # 20%的0，80%的1

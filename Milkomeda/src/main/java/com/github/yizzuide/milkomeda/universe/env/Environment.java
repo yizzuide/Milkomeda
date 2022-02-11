@@ -21,6 +21,7 @@
 
 package com.github.yizzuide.milkomeda.universe.env;
 
+import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertiesPropertySource;
@@ -77,5 +78,13 @@ public class Environment {
      */
     public @NonNull Properties getProperties() {
         return this.properties;
+    }
+
+    /**
+     * 获取日志显示配置
+     * @return 是否显示日志
+     */
+    public static boolean isShowLog() {
+        return Boolean.parseBoolean(ApplicationContextHolder.getEnvironment().get("milkomeda.show-log"));
     }
 }

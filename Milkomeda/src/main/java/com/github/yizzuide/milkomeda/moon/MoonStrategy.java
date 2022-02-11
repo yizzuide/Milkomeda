@@ -51,9 +51,9 @@ public interface MoonStrategy {
 
     /**
      * 拔动月环
-     * @param moon Moon
-     * @param leftHandPointer LeftHandPointer
-     * @return LeftHandPointer
+     * @param moon Moon实例
+     * @param leftHandPointer 月相指针
+     * @return 修改后月相指针
      */
     LeftHandPointer pluck(Moon<?> moon, LeftHandPointer leftHandPointer);
 

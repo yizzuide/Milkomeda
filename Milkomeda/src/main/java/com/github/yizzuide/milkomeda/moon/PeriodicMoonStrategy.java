@@ -40,7 +40,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * @version 3.7.0
  * Create at 2020/03/13 21:20
  */
-public class PeriodicMoonStrategy extends AbstractLuaMoonStrategy {
+public class PeriodicMoonStrategy extends AbstractMoonStrategy {
     /**
      * 分布式key前缀
      */
@@ -71,12 +71,8 @@ public class PeriodicMoonStrategy extends AbstractLuaMoonStrategy {
     }
 
     @Override
-    public LeftHandPointer pluck(Moon<?> moon, LeftHandPointer leftHandPointer) {
-        int p = leftHandPointer.getCurrent();
-        // 保持指针下标在所有月相范围内
-        p = (p + 1) % moon.getLen();
-        leftHandPointer.setCurrent(p);
-        return leftHandPointer;
+    protected int calcBounds(Moon<?> moon) {
+        return moon.getLen();
     }
 
     @Override

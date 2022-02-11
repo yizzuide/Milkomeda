@@ -39,7 +39,7 @@ import java.util.Map;
 @ConfigurationProperties("milkomeda.moon")
 public class MoonProperties {
     /**
-     * 是否使用Light+Atom方案，否则使用高性能lua脚本方式（如无扩展环形策略需求，保持默认即可）
+     * 是否使用Light+Atom混和方案，否则使用高性能lua脚本方式（如无扩展环形策略需求，保持默认即可）
      * @since 3.7.0
      */
     private boolean mixinMode = false;

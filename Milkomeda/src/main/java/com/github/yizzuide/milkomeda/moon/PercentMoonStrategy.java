@@ -48,7 +48,7 @@ import java.util.List;
  */
 @EqualsAndHashCode(callSuper = false)
 @Data
-public class PercentMoonStrategy extends AbstractLuaMoonStrategy {
+public class PercentMoonStrategy extends AbstractMoonStrategy {
     /**
      * 分布式key前缀
      */
@@ -89,20 +89,16 @@ public class PercentMoonStrategy extends AbstractLuaMoonStrategy {
     }
 
     @Override
-    public LeftHandPointer pluck(Moon<?> moon, LeftHandPointer leftHandPointer) {
-        int p = leftHandPointer.getCurrent();
-        p = (p + 1) % this.getPercent();
-        leftHandPointer.setCurrent(p);
-        return leftHandPointer;
+    protected int calcBounds(Moon<?> moon) {
+        fixPercent(moon);
+        return percent;
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public <T> T getPhaseFast(String key, Moon<T> prototype) {
         //  自动计算百分总份
-        if (percent == -1) {
-            percent = prototype.getPhaseNames().stream().map(p -> (Integer) p).reduce(0, Integer::sum);
-        }
+        fixPercent(prototype);
         RedisTemplate<String, Serializable> redisTemplate = getJsonRedisTemplate();
         RedisScript<Long> redisScript = new DefaultRedisScript<>(getLuaScript(), Long.class);
         List<T> phaseNames = prototype.getPhaseNames();
@@ -143,5 +139,11 @@ public class PercentMoonStrategy extends AbstractLuaMoonStrategy {
             percentArray[i] = Integer.valueOf(percentComps[i]);
         }
         return percentArray;
+    }
+
+    private <T> void fixPercent(Moon<T> prototype) {
+        if (percent == -1) {
+            percent = prototype.getPhaseNames().stream().map(p -> (Integer) p).reduce(0, Integer::sum);
+        }
     }
 }

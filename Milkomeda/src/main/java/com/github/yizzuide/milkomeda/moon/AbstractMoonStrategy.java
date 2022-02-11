@@ -28,13 +28,13 @@ import java.io.IOException;
 import java.io.Serializable;
 
 /**
- * AbstractLuaMoonStrategy
+ * AbstractMoonStrategy
  *
  * @author yizzuide
  * @since 3.7.0
  * Create at 2020/05/28 23:59
  */
-public abstract class AbstractLuaMoonStrategy implements MoonStrategy {
+public abstract class AbstractMoonStrategy implements MoonStrategy {
 
     private String luaScript;
 
@@ -47,6 +47,21 @@ public abstract class AbstractLuaMoonStrategy implements MoonStrategy {
         }
         return jsonRedisTemplate;
     }
+
+    @Override
+    public LeftHandPointer pluck(Moon<?> moon, LeftHandPointer leftHandPointer) {
+        int p = leftHandPointer.getCurrent();
+        p = (p + 1) % calcBounds(moon);
+        leftHandPointer.setCurrent(p);
+        return leftHandPointer;
+    }
+
+    /**
+     * 计算轮动范围
+     * @param moon  月相
+     * @return  轮动范围
+     */
+    protected abstract int calcBounds(Moon<?> moon);
 
     /**
      * 加载lua脚本

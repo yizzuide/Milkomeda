@@ -26,7 +26,9 @@ import com.github.yizzuide.milkomeda.atom.AtomLockType;
 import com.github.yizzuide.milkomeda.light.LightCachePut;
 import com.github.yizzuide.milkomeda.light.LightCacheable;
 import com.github.yizzuide.milkomeda.universe.context.AopContextHolder;
+import com.github.yizzuide.milkomeda.universe.env.Environment;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,6 +42,7 @@ import java.util.List;
  * @version 3.7.0
  * Create at 2019/12/31 18:13
  */
+@Slf4j
 @Data
 public class Moon<T> {
     public static final String CACHE_NAME = "lightCacheMoon";
@@ -95,9 +98,13 @@ public class Moon<T> {
      */
     @SafeVarargs
     public final void add(T... phaseNames) {
+        int len = phaseNames.length;
+        if (len < 2) {
+            throw new IllegalArgumentException("The phaseNames parameter must be greater than 2");
+        }
         this.setPhaseNames(new ArrayList<>(Arrays.asList(phaseNames)));
-        this.setLen(phaseNames.length);
-        for (int i = 0; i < this.getLen(); i++) {
+        this.setLen(len);
+        for (int i = 0; i < len; i++) {
             if (i == 0) {
                 this.setHeader(new MoonNode<>());
                 this.getHeader().setData(phaseNames[i]);
@@ -113,6 +120,15 @@ public class Moon<T> {
         this.getNext().setNext(this.getHeader());
         // 指向首
         this.setPointer(this.getHeader());
+        StringBuilder link = new StringBuilder();
+        if (Environment.isShowLog()) {
+            MoonNode<T> next = this.getHeader();
+            do {
+                link.append(" -> ");
+                link.append(next.getData().toString());
+            } while ((next = next.getNext()) != this.getHeader());
+            log.info("load phases: {} <-", link);
+        }
     }
 
     /**

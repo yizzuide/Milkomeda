@@ -84,9 +84,9 @@ public class MoonConfig implements ApplicationContextAware {
                 if (!CollectionUtils.isEmpty(instance.getProps())) {
                     ReflectUtil.setField(moonStrategy, instance.getProps());
                 }
-                if (moonStrategy instanceof AbstractLuaMoonStrategy) {
+                if (moonStrategy instanceof AbstractMoonStrategy) {
                     // 读取lua脚本
-                    AbstractLuaMoonStrategy luaMoonStrategy = (AbstractLuaMoonStrategy) moonStrategy;
+                    AbstractMoonStrategy luaMoonStrategy = (AbstractMoonStrategy) moonStrategy;
                     String luaScript = luaMoonStrategy.loadLuaScript();
                     luaMoonStrategy.setLuaScript(luaScript);
                 }
