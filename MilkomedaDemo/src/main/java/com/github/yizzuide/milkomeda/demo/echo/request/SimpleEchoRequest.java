@@ -1,5 +1,6 @@
 package com.github.yizzuide.milkomeda.demo.echo.request;
 
+import com.github.yizzuide.milkomeda.demo.echo.props.ThirdKey;
 import com.github.yizzuide.milkomeda.echo.EchoException;
 import com.github.yizzuide.milkomeda.echo.EchoRequest;
 import com.github.yizzuide.milkomeda.echo.EchoResponseData;
@@ -8,6 +9,7 @@ import com.github.yizzuide.milkomeda.util.DataTypeConvertUtil;
 import com.github.yizzuide.milkomeda.util.EncryptUtil;
 import com.github.yizzuide.milkomeda.util.JSONUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 
@@ -23,6 +25,9 @@ import java.util.Map;
 @Slf4j
 @Component
 public class SimpleEchoRequest extends EchoRequest {
+
+    @Autowired
+    private ThirdKey thirdKey;
 
     @Override
     protected <T> EchoResponseData<T> responseData() {
@@ -78,7 +83,7 @@ public class SimpleEchoRequest extends EchoRequest {
         String signStr = DataTypeConvertUtil.map2FormData(outParams, false);
         log.info("SimpleEchoRequest:- 原签名串：{}", signStr);
 
-        String sign = EncryptUtil.sign(signStr, getPriKey(), EncryptUtil.SIGN_TYPE_RSA2);
+        String sign = EncryptUtil.sign(signStr, thirdKey.getPriKey(), EncryptUtil.SIGN_TYPE_RSA2);
         outParams.put("sign", sign);
     }
 
@@ -87,7 +92,7 @@ public class SimpleEchoRequest extends EchoRequest {
         String sign = (String) inParams.remove("sign");
         String signStr = DataTypeConvertUtil.map2FormData(inParams, false);
         log.info("SimpleEchoRequest:- 原验签串：{}", signStr);
-        boolean isVerified = EncryptUtil.verify(signStr, sign, getParPubKey(), EncryptUtil.SIGN_TYPE_RSA2);
+        boolean isVerified = EncryptUtil.verify(signStr, sign, thirdKey.getParPubKey(), EncryptUtil.SIGN_TYPE_RSA2);
         if (!isVerified) {
             log.error("SimpleEchoRequest:- 验签失败，params：{}", inParams);
             return null;
@@ -95,19 +100,8 @@ public class SimpleEchoRequest extends EchoRequest {
         return inParams;
     }
 
-    private String getParPubKey() {
-        return "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCa9bXW/GTqseFLWxBfnECbxaNcMTAGDojSnmwtUcPd9mwnevRguOIDbOxbSsIwDtN9bw3o16V5N+Y7iuluEHsrWhrhC9RQx6LA9h8nuTE6c1HSstgq7y+DSPvZrbou5zZnDbgP45M2LT2MXd3HaApq+Ocvg5gp11WhKRa4AgXerQIDAQAB";
-    }
-
-    private String getPriKey() {
-        return "MIICdwIBADANBgkqhkiG9w0BAQEFAASCAmEwggJdAgEAAoGBAJr1tdb8ZOqx4UtbEF+cQJvFo1wxMAYOiNKebC1Rw932bCd69GC44gNs7FtKwjAO031vDejXpXk35juK6W4QeytaGuEL1FDHosD2Hye5MTpzUdKy2CrvL4NI+9mtui7nNmcNuA/jkzYtPYxd3cdoCmr45y+DmCnXVaEpFrgCBd6tAgMBAAECgYBuFRGZ6XFTnQw8uTN3iIwJXSzBCJxiIR8n6K1WwJhRbYbFwT4sHAtLfaym6gPrmgy6NhN+jvuZkpF3SSatLv4f3vwu3ToZcmi6A0LlVzFT7cMHBzMP/Ev09aa0N/j9+ykPlJH06ehkvwz/504GEDwLt2791MxWqtZJjuDNWloWQQJBAOaQ+jgUmjIkKX09/x0a8P13JezBP14UV5cZLvoRWW8XzTkfZx/rpC7irpijvcwBhi45kIg8JrIngYm5/QSkLDECQQCsDakrLtIJLenTSHmFi2KfI2EHYT0deFrK92+VDY15iE7gBQBvbiZiAKwjV33gcrtS6JTZWtxKeOAUUPTiUgc9AkEA1Gb+e6dPHZ3+sqfoWxG0rGuU/nRQQgUPY90JT8mn0BXnMxZg1CEqkR62pVtCv6svx2m0Yiy3oSuPxCcYlawAIQJAW5lORjJAGij6gsTkBagmkkjYoIAxdF4eIE7JdhZoCpr6OyQOjkSbZLOs8Yfj+Tm75zDyBiHshC2ERuyu40r+lQJBAJ+SImDYm9NLqo6hq1+FTI1apKyq8rsuQYL8IRsYAHmOGCNmHN1b/AFitHaptZXYOtiZyuEP8xP86Np8vrTUKSg=";
-    }
-
     public static void main(String[] args) {
         // RSA签名可以通过EncryptUtil.genKeyPair()生成
         EncryptUtil.genKeyPair();
-        // 当前生成如下：
-        // priKey: MIICdwIBADANBgkqhkiG9w0BAQEFAASCAmEwggJdAgEAAoGBAJr1tdb8ZOqx4UtbEF+cQJvFo1wxMAYOiNKebC1Rw932bCd69GC44gNs7FtKwjAO031vDejXpXk35juK6W4QeytaGuEL1FDHosD2Hye5MTpzUdKy2CrvL4NI+9mtui7nNmcNuA/jkzYtPYxd3cdoCmr45y+DmCnXVaEpFrgCBd6tAgMBAAECgYBuFRGZ6XFTnQw8uTN3iIwJXSzBCJxiIR8n6K1WwJhRbYbFwT4sHAtLfaym6gPrmgy6NhN+jvuZkpF3SSatLv4f3vwu3ToZcmi6A0LlVzFT7cMHBzMP/Ev09aa0N/j9+ykPlJH06ehkvwz/504GEDwLt2791MxWqtZJjuDNWloWQQJBAOaQ+jgUmjIkKX09/x0a8P13JezBP14UV5cZLvoRWW8XzTkfZx/rpC7irpijvcwBhi45kIg8JrIngYm5/QSkLDECQQCsDakrLtIJLenTSHmFi2KfI2EHYT0deFrK92+VDY15iE7gBQBvbiZiAKwjV33gcrtS6JTZWtxKeOAUUPTiUgc9AkEA1Gb+e6dPHZ3+sqfoWxG0rGuU/nRQQgUPY90JT8mn0BXnMxZg1CEqkR62pVtCv6svx2m0Yiy3oSuPxCcYlawAIQJAW5lORjJAGij6gsTkBagmkkjYoIAxdF4eIE7JdhZoCpr6OyQOjkSbZLOs8Yfj+Tm75zDyBiHshC2ERuyu40r+lQJBAJ+SImDYm9NLqo6hq1+FTI1apKyq8rsuQYL8IRsYAHmOGCNmHN1b/AFitHaptZXYOtiZyuEP8xP86Np8vrTUKSg=
-        // pubKey: MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCa9bXW/GTqseFLWxBfnECbxaNcMTAGDojSnmwtUcPd9mwnevRguOIDbOxbSsIwDtN9bw3o16V5N+Y7iuluEHsrWhrhC9RQx6LA9h8nuTE6c1HSstgq7y+DSPvZrbou5zZnDbgP45M2LT2MXd3HaApq+Ocvg5gp11WhKRa4AgXerQIDAQAB
     }
 }

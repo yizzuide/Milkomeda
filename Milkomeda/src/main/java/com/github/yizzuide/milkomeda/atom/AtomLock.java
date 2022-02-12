@@ -62,7 +62,7 @@ public @interface AtomLock {
     AtomLockType type() default AtomLockType.FAIR;
 
     /**
-     * 是否只读（仅支持读写锁类型 {@link AtomLockType#READ_WRITE}）
+     * 操作是否只读（仅支持读写锁类型 {@link AtomLockType#READ_WRITE}）
      * @return true只读
      */
     boolean readOnly() default false;

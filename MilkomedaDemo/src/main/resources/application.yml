@@ -7,17 +7,35 @@ server:
         http-only: true
         # 自定义sessionId，用于后台登录唯一标识，防止被第三方平台覆盖
         name: mk-sessionid
+  # springboot 2.3设置服务器编码
+    encoding:
+      charset: UTF-8
+  # springboot 2.3设置服务器工作线程
+  tomcat:
+    threads:
+      max: 120
+  # springboot 2.3优雅关机：拒绝新请求，等正在执行的请求完成
+  shutdown: graceful
+
+  # springboot 2.3不再响应默认的错误信息
+  error:
+    include-binding-errors: never
+    include-message: never
+    include-stacktrace: never
 
 spring:
   application:
     name: milkomeda
+  # springboot 2.3优雅关机等待时间
+  lifecycle:
+    timeout-per-shutdown-phase: 20s
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    #url: jdbc:mysql://localhost:3306/milkomeda?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&useSSL=false&rewriteBatchedStatements=true&allowMultiQueries=true&allowPublicKeyRetrieval=true
+    #url: jdbc:mysql://localhost:3306/milkomeda?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&useSSL=false&rewriteBatchedStatements=true&allowMultiQueries=true&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
     #username: root
     #password: ${MYSQL_PWD}
     druid:
-      url: jdbc:mysql://localhost:3306/milkomeda?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&useSSL=false&rewriteBatchedStatements=true&allowMultiQueries=true&allowPublicKeyRetrieval=true
+      url: jdbc:mysql://localhost:3306/milkomeda?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&useSSL=false&rewriteBatchedStatements=true&allowMultiQueries=true&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
       username: root
       password: ${MYSQL_PWD}
   redis:
@@ -39,6 +57,11 @@ spring:
   # 国际化资源位置
   messages:
     basename: i18n/messages
+
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    locale: zh_CN
+    time-zone: GMT+8
 
 
   # Pulsar模块异步线程池（Async异步任务线程池，SpringBoot 2.1.0+在这里配置）

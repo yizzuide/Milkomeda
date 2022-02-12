@@ -11,15 +11,15 @@
 
     <properties>
         <java.version>1.8</java.version>
-        <project.release.version>3.12.9-SNAPSHOT</project.release.version>
-        <spring-boot.version>2.2.4</spring-boot.version>
+        <project.release.version>3.12.10-SNAPSHOT</project.release.version>
+        <spring-boot.version>2.3.12.RELEASE</spring-boot.version>
         <spring-cloud.version>Hoxton.RELEASE</spring-cloud.version>
-        <mybatis.starter.version>2.1.1</mybatis.starter.version>
-        <jsqlparser.version>3.1</jsqlparser.version>
+        <mybatis.starter.version>2.1.4</mybatis.starter.version>
+        <jsqlparser.version>4.1</jsqlparser.version>
         <jwt.version>0.9.1</jwt.version>
         <commons-beanutils.version>1.9.4</commons-beanutils.version>
-        <redission.version>3.12.5</redission.version>
-        <ognl.version>3.2.14</ognl.version>
+        <redission.version>3.16.8</redission.version>
+        <ognl.version>3.3.2</ognl.version>
     </properties>
 
     <parent>
@@ -67,7 +67,7 @@
         <profile>
             <id>sonatype-oss-release</id>
             <properties>
-                <project.release.version>3.12.9</project.release.version>
+                <project.release.version>3.12.10</project.release.version>
             </properties>
             <build>
                 <plugins>
@@ -116,6 +116,17 @@
             <artifactId>spring-boot-starter-web</artifactId>
             <optional>true</optional>
         </dependency>
+        <!-- no longer included in web starters at springboot 2.3.x -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+        <!-- springboot 2.3.x: A number of properties have been renamed or deprecated. You can use the spring-boot-properties-migrator module to identify those properties.  -->
+        <!--<dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-properties-migrator</artifactId>
+            <scope>runtime</scope>
+        </dependency>-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-redis</artifactId>
@@ -214,7 +225,7 @@
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
-                <version>2.2.4.RELEASE</version>
+                <version>${spring-boot.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
