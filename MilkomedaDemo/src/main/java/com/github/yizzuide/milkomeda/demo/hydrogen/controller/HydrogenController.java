@@ -57,6 +57,8 @@ public class HydrogenController {
 
     @RequestMapping("uniform")
     public void testUniform(@RequestParam Map<String, Object> params) {
+        // 系统异常
+        //int i = 1/0;
         // 自定义异常
         //throw new YizException(1001L, "test", "测试异常");
         // 使用框架提供的断言异常

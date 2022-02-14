@@ -185,6 +185,7 @@ public class RedisIce implements Ice, ApplicationListener<IceInstanceChangeEvent
 
     @Override
     public <T> void finish(List<Job<T>> jobs) {
+        // 仅删除jobPool原数据，不会删除DelayBucket里的记录，因为有TTR检测
         delete(jobs);
     }
 

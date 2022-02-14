@@ -3,6 +3,7 @@ package com.github.yizzuide.milkomeda.demo.ice.controller;
 import com.github.yizzuide.milkomeda.ice.Ice;
 import com.github.yizzuide.milkomeda.ice.Job;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -40,10 +41,23 @@ public class JobController {
      * @return List
      */
     @RequestMapping("pop")
-    public List<Job<Map<String, String>>> pop(String topic, Integer count) {
-        if (count == null) {
-            return Collections.singletonList(ice.pop(topic));
+    public List<Job<Map<String, Object>>> pop(String topic, Integer count) {
+        List<Job<Map<String, Object>>> jobs = Collections.emptyList();
+        try {
+            if (count == null || count < 2) {
+                Job<Map<String, Object>> job = ice.pop(topic);
+                if (job != null) {
+                    jobs = Collections.singletonList(job);
+                }
+                return jobs;
+            }
+            jobs = ice.pop(topic, count);
+            return jobs;
+        } finally {
+            // 标记完成，清除元数据
+            if (!CollectionUtils.isEmpty(jobs)) {
+                ice.finish(jobs);
+            }
         }
-        return ice.pop(topic, count);
     }
 }

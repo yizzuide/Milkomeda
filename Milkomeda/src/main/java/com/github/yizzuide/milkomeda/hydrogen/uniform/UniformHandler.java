@@ -42,16 +42,14 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import javax.annotation.PostConstruct;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * UniformHandler
  *
  * @author yizzuide
  * @since 3.0.0
+ * @version 3.12.10
  * @see org.springframework.boot.SpringApplication#run(java.lang.String...)
  * #see org.springframework.boot.SpringApplication#registerLoggedException(java.lang.Throwable)
  * #see org.springframework.boot.SpringBootExceptionHandler.LoggedExceptionHandlerThreadLocal#initialValue()
@@ -155,9 +153,7 @@ public class UniformHandler extends ResponseEntityExceptionHandler {
         }
 
         // 500异常
-        log.error("Hydrogen uniform response exception with msg: {}", e.getMessage(), e);
-        YmlResponseOutput.output(response, result, null, e, false);
-        return ResponseEntity.status(Integer.parseInt(status.toString())).body(result);
+       return handleInnerErrorExceptionResponse(e, response, status.toString());
     }
 
     /**
@@ -188,7 +184,14 @@ public class UniformHandler extends ResponseEntityExceptionHandler {
     private @Nullable ResponseEntity<Object> handleExceptionResponse(Exception ex, Object presetStatusCode, String presetMessage) {
         Map<String, Object> response = props.getResponse();
         Map<String, Object> result = new HashMap<>();
-        Object exp4xx = response.get(presetStatusCode.toString());
+        String code = presetStatusCode.toString();
+
+        // 返回参数类型错误，这里会走500
+        if (Objects.equals(code, "500")) {
+            return handleInnerErrorExceptionResponse(ex, response, code);
+        }
+
+        Object exp4xx = response.get(code);
         if (!(exp4xx instanceof Map)) {
             log.warn("Hydrogen uniform can't find {} code response.", presetStatusCode);
             // 调用方判断，按框架默认处理
@@ -206,4 +209,13 @@ public class UniformHandler extends ResponseEntityExceptionHandler {
         YmlResponseOutput.output(exp4xxResponse, result, defValMap, null, false);
         return ResponseEntity.status(Integer.parseInt(statusCode4xx.toString())).body(result);
     }
+
+    // 500异常
+    private ResponseEntity<Object> handleInnerErrorExceptionResponse(Exception ex, Map<String, Object> response,  String presetStatusCode) {
+        Map<String, Object> result = new HashMap<>();
+        log.error("Hydrogen uniform response exception with msg: {}", ex.getMessage(), ex);
+        YmlResponseOutput.output(response, result, null, ex, false);
+        return ResponseEntity.status(Integer.parseInt(presetStatusCode)).body(result);
+    }
+
 }
