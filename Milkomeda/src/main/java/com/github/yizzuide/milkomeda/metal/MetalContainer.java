@@ -93,7 +93,7 @@ public class MetalContainer {
         if (!vNodeCache.containsKey(vNodeKey)) {
             vNodeCache.put(vNodeKey, new HashSet<>());
         }
-        // key与虚拟节点绑定
+        // key与虚拟节点绑定，一个key对应多个节点
         vNodeCache.get(vNodeKey).add(new VirtualNode(metal, target, field));
     }
 

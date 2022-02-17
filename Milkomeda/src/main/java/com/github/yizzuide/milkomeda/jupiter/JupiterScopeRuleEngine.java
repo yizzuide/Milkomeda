@@ -63,6 +63,7 @@ public class JupiterScopeRuleEngine extends AbstractJupiterRuleEngine {
                 if (compiler == null) {
                     throw new NotImplementException("Can't find type implement with JupiterCompilerType." + ruleItem.getSyntax());
                 }
+                // 非领域查询
                 Boolean pass;
                 if (ruleItem.getDomain() == null) {
                     pass = compiler.compile(ruleItem.getMatch(), null, Boolean.TYPE);

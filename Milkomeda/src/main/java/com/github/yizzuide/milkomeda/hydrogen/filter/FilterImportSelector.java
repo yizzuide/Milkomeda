@@ -23,6 +23,7 @@ package com.github.yizzuide.milkomeda.hydrogen.filter;
 
 import org.springframework.context.annotation.ImportSelector;
 import org.springframework.core.type.AnnotationMetadata;
+import org.springframework.lang.NonNull;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -35,7 +36,8 @@ import org.springframework.util.ClassUtils;
  */
 public class FilterImportSelector implements ImportSelector {
     @Override
-    public String[] selectImports(AnnotationMetadata importingClassMetadata) {
+    @NonNull
+    public String[] selectImports(@NonNull AnnotationMetadata importingClassMetadata) {
         boolean tomcatPresent = ClassUtils.isPresent("org.apache.catalina.core.StandardContext", getClass().getClassLoader());
         return tomcatPresent ? new String[] {"com.github.yizzuide.milkomeda.hydrogen.filter.TomcatFilterConfig"}
                 : new String[] {};

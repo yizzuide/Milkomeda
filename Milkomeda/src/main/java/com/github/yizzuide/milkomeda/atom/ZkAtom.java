@@ -39,9 +39,9 @@ import java.util.concurrent.TimeUnit;
  * Create at 2020/05/01 12:26
  */
 public class ZkAtom implements Atom {
-
+    // 节点分隔符
     private final static String SEPARATOR = "/";
-
+    // 根节点
     private static String ROOT_LOCK_NODE;
 
     @Autowired

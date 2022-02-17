@@ -25,6 +25,7 @@ import com.github.yizzuide.milkomeda.universe.metadata.HandlerMetaData;
 import com.github.yizzuide.milkomeda.util.MybatisUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.ibatis.binding.MapperMethod;
 import org.apache.ibatis.cache.CacheKey;
 import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.mapping.BoundSql;
@@ -95,20 +96,27 @@ public class HaloInterceptor implements Interceptor {
 
     // 打印Sql日志
     private void logSqlInfo(Configuration configuration, BoundSql boundSql, String sql, String sqlId, long time) {
+        // 参数值对象
         Object parameterObject = boundSql.getParameterObject();
+        // 参数名映射列表
         List<ParameterMapping> parameterMappings = boundSql.getParameterMappings();
         List<String> params = new ArrayList<>();
         if (parameterMappings.size() > 0 && parameterObject != null) {
+            // 类型注册查看 {@link org.apache.ibatis.type.TypeHandlerRegistry.TypeHandlerRegistry(org.apache.ibatis.session.Configuration)}
             TypeHandlerRegistry typeHandlerRegistry = configuration.getTypeHandlerRegistry();
+            // 当前为简单类型值
             if (typeHandlerRegistry.hasTypeHandler(parameterObject.getClass())) {
                 params.add(getParameterValue(parameterObject));
             } else {
+                // 当前为复合类型值
                 MetaObject metaObject = configuration.newMetaObject(parameterObject);
                 for (ParameterMapping parameterMapping : parameterMappings) {
                     String propertyName = parameterMapping.getProperty();
+                    // 从对象获取属性值
                     if (metaObject.hasGetter(propertyName)) {
                         Object obj = metaObject.getValue(propertyName);
                         params.add(getParameterValue(obj));
+                        // 内部的转化：configuration.newMetaObject(additionalParameters);
                     } else if (boundSql.hasAdditionalParameter(propertyName)) {
                         Object obj = boundSql.getAdditionalParameter(propertyName);
                         params.add(getParameterValue(obj));
@@ -116,13 +124,13 @@ public class HaloInterceptor implements Interceptor {
                 }
             }
         }
-        log.warn("Halo found slow sql[{}]: {} params:[{}], take time: {}ms", sqlId, sql, StringUtils.join(params, ','), time);
+        log.warn("Halo found slow sql[{}]: {} params:({}), take time: {}ms", sqlId, sql, StringUtils.join(params, ','), time);
     }
 
     private String getParameterValue(Object obj) {
         String value;
         if (obj instanceof String) {
-            value = "'" + obj.toString() + "'";
+            value = "'" + obj + "'";
         } else if (obj instanceof Date) {
             Instant instant = ((Date) obj).toInstant();
             String format = LocalDateTime.ofInstant(instant, ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
@@ -149,7 +157,7 @@ public class HaloInterceptor implements Interceptor {
         }
 
         // Mybatis map参数获取不存在时会抛异常，转为普通map
-        if (param instanceof DefaultSqlSession.StrictMap) {
+        if (param instanceof DefaultSqlSession.StrictMap || param instanceof MapperMethod.ParamMap) {
             param = new HashMap((Map) param);
         }
 

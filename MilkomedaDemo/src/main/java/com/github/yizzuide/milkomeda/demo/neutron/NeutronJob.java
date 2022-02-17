@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
+//@DisallowConcurrentExecution // 不允许并发执行
 public class NeutronJob implements Job {
 
     @Override

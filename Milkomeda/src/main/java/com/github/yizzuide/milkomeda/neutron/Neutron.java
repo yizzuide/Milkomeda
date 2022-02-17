@@ -38,8 +38,8 @@ import java.text.ParseException;
  */
 @Slf4j
 public class Neutron {
-    private static String JOB_GROUP_NAME = "NEUTRON_JOB_GROUP_NAME";
-    private static String TRIGGER_GROUP_NAME = "NEUTRON_TRIGGER_GROUP_NAME";
+    private static final String JOB_GROUP_NAME = "NEUTRON_JOB_GROUP_NAME";
+    private static final String TRIGGER_GROUP_NAME = "NEUTRON_TRIGGER_GROUP_NAME";
 
     /**
      * 验证cron表达式

@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("neutron")
 public class NeutronController {
 
-    private static String jobName = "neutron_rotation";
+    private static final String jobName = "neutron_rotation";
 
     @RequestMapping("add")
     public ResponseEntity<?> add() {

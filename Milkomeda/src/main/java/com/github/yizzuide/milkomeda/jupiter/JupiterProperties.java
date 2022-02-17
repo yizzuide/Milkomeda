@@ -37,7 +37,7 @@ import java.util.Map;
 @ConfigurationProperties("milkomeda.jupiter")
 public class JupiterProperties {
     /**
-     * 规则引擎类型
+     * 规则引擎类型（目前仅支持SCOPE）
      */
     private JupiterRuleEngineType type = JupiterRuleEngineType.SCOPE;
 

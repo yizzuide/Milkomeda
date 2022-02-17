@@ -44,6 +44,7 @@ public class MetalMessageHandler {
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
 
+    // 这个方法会在接受到消息时自动调用
     public void handleMessage(String message) {
         String[] kv =  StringUtils.delimitedListToStringArray(message, METAL_MSG_KV_SEPARATOR);
         String key = kv[0];
@@ -56,7 +57,7 @@ public class MetalMessageHandler {
      * @param key   配置key
      * @param value 值
      */
-    public void buildAndSendMessage(String key,  String value) {
+    public void buildAndSendMessage(String key, String value) {
         stringRedisTemplate.convertAndSend(METAL_CHANGE_TOPIC, key + METAL_MSG_KV_SEPARATOR + value);
     }
 

@@ -23,7 +23,7 @@ public class OrderHandler {
     @Async // 异步执行
     @HaloListener(tableName = "t_order", type = HaloType.PRE)
     public void handlePre(Object param, SqlCommandType commandType) {// 散装参数方式
-        // param可能是实体类型、简单数据类型、Map
+        // param可能是实体类型、简单数据类型或Map
         log.info("监听到【t_order】表操作：{}，参数：{}", commandType, param);
     }
 

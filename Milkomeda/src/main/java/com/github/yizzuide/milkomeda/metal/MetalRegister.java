@@ -30,6 +30,7 @@ import java.lang.reflect.Field;
 
 /**
  * MetalRegister
+ * 注册虚拟节点
  *
  * @author yizzuide
  * @since 3.6.0

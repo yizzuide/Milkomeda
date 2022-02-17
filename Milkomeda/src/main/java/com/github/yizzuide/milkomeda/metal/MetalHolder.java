@@ -73,7 +73,7 @@ public class MetalHolder {
 
 
     /**
-     * 合并配置源
+     * 合并配置源（用于重新加载配置数据时）
      * @param source        配置源
      * @since 3.6.1
      */
@@ -82,7 +82,7 @@ public class MetalHolder {
     }
 
     /**
-     * 合并配置源
+     * 合并配置源（用于重新加载配置数据时）
      * @param source        配置源
      * @param syncRemote    远程同步更新
      * @since 3.6.2

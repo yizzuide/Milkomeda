@@ -353,7 +353,7 @@ milkomeda:
         400:
           status: 200
           code: -1
-          # 使用内部异常信息，不需要指定
+          # 如果需要Exception异常信息，不需要配置message
           #message: 参数异常
           addition:
             data: ${collections.emptyMap}
@@ -466,6 +466,7 @@ milkomeda:
             # 包含字段
             fields: id
             # 查询过滤，支持$params（Request Parameter域）、$attr（Request Attribute域）、$header（Request Header域）、$cookie（Request Cookie域）
+            # 关系逻辑使用符：&&、||
             filter: user_id={$attr.userInfo.uid}
             # 结果匹配表达式，默认使用EL表达式，EL和OGNL都支持使用`#root`来访问根对象，如：#root != null
             #match: size() == 0
