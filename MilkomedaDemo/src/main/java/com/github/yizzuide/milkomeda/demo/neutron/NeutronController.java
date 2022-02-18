@@ -46,4 +46,16 @@ public class NeutronController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
+    @RequestMapping("startAll")
+    public ResponseEntity<?> startAll() {
+        Neutron.startJobs();
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    @RequestMapping("shutdown")
+    public ResponseEntity<?> shutdown() {
+        Neutron.shutdownJobs();
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
 }

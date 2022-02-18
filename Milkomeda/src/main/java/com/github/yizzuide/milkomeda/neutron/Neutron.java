@@ -33,7 +33,7 @@ import java.text.ParseException;
  *
  * @author yizzuide
  * @since 1.18.0
- * @version 1.18.1
+ * @version 3.12.10
  * Create at 2019/12/09 22:39
  */
 @Slf4j
@@ -62,7 +62,7 @@ public class Neutron {
      * @param jobClass  job类
      * @return  jobDetail
      */
-    public static JobDetail createJobDetail(String jobName, String group, Class<? extends Job> jobClass/*, String description*/) {
+    public static JobDetail createJobDetail(String jobName, String group, Class<? extends Job> jobClass) {
         return createJobDetail(jobName, group, jobClass, "");
     }
 
@@ -114,9 +114,6 @@ public class Neutron {
             JobDetail jobDetail = createJobDetail(jobName, JOB_GROUP_NAME, clazz);
             CronTrigger trigger = createCronTrigger(jobName, TRIGGER_GROUP_NAME, cron);
             scheduler.scheduleJob(jobDetail, trigger);
-            if (!scheduler.isShutdown()) {
-                scheduler.start();
-            }
         } catch (SchedulerException | ParseException e) {
             log.error(e.getMessage(), e);
         }
@@ -219,7 +216,7 @@ public class Neutron {
     }
 
     /**
-     * 立即执行任务(使用默认的任务组名，触发器名，触发器组名)
+     * 立即执行任务(用于手动触发一次，使用默认的任务组名)
      *
      * @param jobName job name
      */
@@ -234,7 +231,7 @@ public class Neutron {
     }
 
     /**
-     * 立即执行任务
+     * 立即执行任务（用于手动触发一次）
      *
      * @param jobName       job name
      * @param jobGroupName  job组名
@@ -249,12 +246,16 @@ public class Neutron {
     }
 
     /**
-     * 启动所有定时任务
+     * 重启所有定时任务
      */
     public static void startJobs() {
         try {
             Scheduler scheduler = NeutronHolder.getScheduler();
-            scheduler.start();
+            // 如果调度器调用过shutdown()，再调用start()会抛异常
+            // 调度器默认为stand-by模式，激活调度器，使之能触发trigger
+            if (!scheduler.isShutdown() && scheduler.isInStandbyMode()) {
+                scheduler.start();
+            }
         } catch (SchedulerException e) {
             log.error(e.getMessage(),e);
         }
@@ -266,8 +267,8 @@ public class Neutron {
     public static void shutdownJobs() {
         try {
             Scheduler scheduler = NeutronHolder.getScheduler();
-            if (!scheduler.isShutdown()) {
-                scheduler.shutdown();
+            if (!scheduler.isInStandbyMode()) {
+                scheduler.standby();
             }
         } catch (SchedulerException e) {
             log.error(e.getMessage(),e);
