@@ -35,6 +35,7 @@ import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
@@ -48,7 +49,7 @@ import java.util.regex.Pattern;
  *
  * @author yizzuide
  * @since 3.8.0
- * @version 3.9.0
+ * @version 3.12.10
  * Create at 2020/06/16 11:18
  */
 @Slf4j
@@ -104,10 +105,11 @@ public class SundialInterceptor implements Interceptor {
         root.setP(params);
         root.setFn(shardingFunction);
         String schema = null;
-        // 分库、分库分表
+        // 包含分库的处理
         if (sundial.shardingType() != ShardingType.TABLE && !StringUtils.isEmpty(nodeExp)) {
             String node = SimpleElParser.parse(nodeExp, root, String.class);
             SundialProperties.DataNode dataNode = props.getSharding().getNodes().get(node);
+            // node_001 --转--> node_1
             if (dataNode == null) {
                 int separatorIndex = node.lastIndexOf(props.getSharding().getIndexSeparator());
                 String index = node.substring(separatorIndex + 1);
@@ -117,9 +119,12 @@ public class SundialInterceptor implements Interceptor {
             // 是否使用主连接
             if (sundial.key().equals(DynamicRouteDataSource.MASTER_KEY)) {
                 SundialHolder.setDataSourceType(dataNode.getLeader());
+            } else if(sundial.key().equals("follows")) { // 从库任选
+                if (!CollectionUtils.isEmpty(dataNode.getFollows())) {
+                    SundialHolder.setDataSourceType(dataNode.getFollows().stream().findAny().orElse(DynamicRouteDataSource.MASTER_KEY));
+                }
             } else {
-                // 暂时使用第一个从连接
-                SundialHolder.setDataSourceType(dataNode.getFollows().get(0));
+                SundialHolder.setDataSourceType(sundial.key());
             }
             // 需要添加的数据库名
             if (!StringUtils.isEmpty(dataNode.getSchema())) {
@@ -156,7 +161,7 @@ public class SundialInterceptor implements Interceptor {
             sql = sql.replace(tableName, schema == null ? part : schema + "." + part);
             updateSql(sql, invocation, ms, args, boundSql);
         }
-       return invocation.proceed();
+        return invocation.proceed();
     }
 
     @Override

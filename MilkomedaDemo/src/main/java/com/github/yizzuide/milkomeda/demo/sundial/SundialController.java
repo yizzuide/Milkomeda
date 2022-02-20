@@ -32,9 +32,9 @@ public class SundialController {
         TOrder tOrder = new TOrder();
         tOrder.setOrderNo(orderNo);
         tOrder.setCreateTime(new Date());
-        tOrder.setProductId(1L);
-        tOrder.setProductName("测试");
-        tOrder.setUserId(122L);
+        tOrder.setProductId(180L);
+        tOrder.setProductName("小爱");
+        tOrder.setUserId(12L);
         dataSourceService.insert(tOrder);
         return tOrder;
     }

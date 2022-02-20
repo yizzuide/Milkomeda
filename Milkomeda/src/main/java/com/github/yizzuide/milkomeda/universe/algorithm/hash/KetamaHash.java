@@ -21,12 +21,12 @@
 
 package com.github.yizzuide.milkomeda.universe.algorithm.hash;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+import org.springframework.util.DigestUtils;
+
 import java.util.function.Consumer;
 
 /**
- * KetamaHash算法：区别于其它Hash算法，针对高效的一致性哈希算法方式，超高负载平衡性，高不变流量
+ * KetamaHash算法：区别于其它Hash算法，针对高效的一致性哈希算法方式，超高负载平衡性，高不变流量，高分散性
  *
  * @author yizzuide
  * @since 3.8.0
@@ -34,15 +34,7 @@ import java.util.function.Consumer;
  */
 public class KetamaHash implements ConsistentHashFunc {
 
-    private static final MessageDigest md5Digest;
-
-    static {
-        try {
-            md5Digest = MessageDigest.getInstance("MD5");
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("MD5 not supported", e);
-        }
-    }
+    public static final int DEFAULT_BALANCE_FACTOR = 4;
 
     @Override
     public long hash(Object key) {
@@ -51,7 +43,7 @@ public class KetamaHash implements ConsistentHashFunc {
 
     @Override
     public long rawHash(Object key) {
-        byte[] bKey = computeMd5(key.toString());
+        byte[] bKey = DigestUtils.md5Digest(key.toString().getBytes());
         return ((long) (bKey[3] & 0xFF) << 24) |
                 ((long) (bKey[2] & 0xFF) << 16) |
                 ((long) (bKey[1] & 0xFF) << 8) |
@@ -60,12 +52,12 @@ public class KetamaHash implements ConsistentHashFunc {
 
     @Override
     public int balanceFactor() {
-        return 4;
+        return DEFAULT_BALANCE_FACTOR;
     }
 
     @Override
     public void balanceHash(Object key, Consumer<Long> generator) {
-        byte[] digest = computeMd5(key.toString());
+        byte[] digest = DigestUtils.md5Digest(key.toString().getBytes());
         int factor = balanceFactor();
         for (int h = 0; h < factor; h++) {
             long hk = ((long) (digest[3 + h * factor] & 0xFF) << 24) |
@@ -74,16 +66,5 @@ public class KetamaHash implements ConsistentHashFunc {
                     (digest[h * factor] & 0xFF);
             generator.accept(hk);
         }
-    }
-
-    private static byte[] computeMd5(String k) {
-        MessageDigest md5;
-        try {
-            md5 = (MessageDigest) md5Digest.clone();
-        } catch (CloneNotSupportedException e) {
-            throw new RuntimeException("clone of MD5 not supported", e);
-        }
-        md5.update(k.getBytes());
-        return md5.digest();
     }
 }

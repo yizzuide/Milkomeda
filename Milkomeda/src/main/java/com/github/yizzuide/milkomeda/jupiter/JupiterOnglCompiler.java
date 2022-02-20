@@ -57,6 +57,7 @@ public class JupiterOnglCompiler implements JupiterExpressionCompiler {
         return null;
     }
 
+    // 缓存表达式解析抽象树对象
     private Object parseExpression(String expression) throws OgnlException {
         Object node = expressionCache.get(expression);
         if (node == null) {

@@ -31,10 +31,11 @@ import java.util.TreeMap;
  *
  * @author yizzuide
  * @since 3.8.0
+ * @version 3.12.10
  * Create at 2020/06/18 14:43
  */
 public class ConsistentHashRing<T> {
-    // 虚拟节点个数
+    // 默认虚拟节点个数
     private final static int V_NODE_SIZE = 4;
     // 虚拟节点后缀
     private final static String V_NODE_SUFFIX = "#";
@@ -67,40 +68,44 @@ public class ConsistentHashRing<T> {
     }
 
     /**
-     * 根据设置的虚拟节点来拷贝
+     * 每添加一个实体节点，生成多个映射的虚拟节点
      * @param node 节点
      */
     public void add(T node) {
+        // 如果是平衡一致性hash的实现
         if (hashFunc instanceof ConsistentHashFunc) {
             ConsistentHashFunc consistentHashFunc = (ConsistentHashFunc) this.hashFunc;
             int balanceFactor = consistentHashFunc.balanceFactor();
-            int count = V_NODE_SIZE / balanceFactor;
+            int count = replicas / balanceFactor;
             for (int i = 0; i < count; i++) {
-                consistentHashFunc.balanceHash(node.toString() + V_NODE_SUFFIX + i, (hk) -> hashRing.put(hk, node));
+                consistentHashFunc.balanceHash(genVirtualKey(node, i), (hk) -> hashRing.put(hk, node));
             }
             return;
         }
+        // 其它hash实现
         for (int i = 0; i < replicas; i++) {
-            hashRing.put(hashFunc.hash(node.toString() + V_NODE_SUFFIX + i), node);
+            hashRing.put(hashFunc.hash(genVirtualKey(node, i)), node);
         }
     }
 
     /**
-     * 移除一点节点的所有虚拟节点
+     * 移除一个节点的所有虚拟节点
      * @param node  节点
      */
     public void remove(T node) {
+        // 如果是平衡一致性hash的实现
         if (hashFunc instanceof ConsistentHashFunc) {
             ConsistentHashFunc consistentHashFunc = (ConsistentHashFunc) this.hashFunc;
             int balanceFactor = consistentHashFunc.balanceFactor();
-            int count = V_NODE_SIZE / balanceFactor;
+            int count = replicas / balanceFactor;
             for (int i = 0; i < count; i++) {
-                consistentHashFunc.balanceHash(node.toString() + V_NODE_SUFFIX + i, hashRing::remove);
+                consistentHashFunc.balanceHash(genVirtualKey(node, i), hashRing::remove);
             }
             return;
         }
+        // 其它hash实现
         for (int i = 0; i < replicas; i++) {
-            hashRing.remove(hashFunc.hash(node.toString() + V_NODE_SUFFIX + i));
+            hashRing.remove(hashFunc.hash(genVirtualKey(node, i)));
         }
     }
 
@@ -121,5 +126,16 @@ public class ConsistentHashRing<T> {
             return hashRing.firstEntry().getValue();
         }
         return locateEntry.getValue();
+    }
+
+    /**
+     * 生成虚拟节点key
+     * @param node  实体节点
+     * @param seq   序号
+     * @return  虚拟节点key
+     * @since 3.12.10
+     */
+    private String genVirtualKey(Object node, int seq) {
+        return node.toString() + V_NODE_SUFFIX + seq;
     }
 }

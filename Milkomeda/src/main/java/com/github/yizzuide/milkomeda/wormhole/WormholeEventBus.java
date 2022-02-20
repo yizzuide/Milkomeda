@@ -35,6 +35,7 @@ import java.util.concurrent.Future;
 
 /**
  * WormholeEventBus
+ * 事件总线
  *
  * @author yizzuide
  * @since 3.3.0
@@ -63,7 +64,7 @@ public class WormholeEventBus {
      * 发布领域事件
      * @param event     领域事件
      * @param action    动作名
-     * @param callback  回调
+     * @param callback  通知事件方执行完成回调
      * @param <T>       领域事件数据类型
      */
     public <T> void publish(WormholeEvent<T> event, String action,

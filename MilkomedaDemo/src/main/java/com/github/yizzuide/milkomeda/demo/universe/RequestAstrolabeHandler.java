@@ -18,7 +18,7 @@ import javax.servlet.ServletRequest;
 public class RequestAstrolabeHandler implements AstrolabeHandler {
     @Override
     public void preHandle(ServletRequest request) {
-//        log.info("AstrolabeHandler请求前：{}", ((HttpServletRequest)request).getRequestURI());
+        // ((HttpServletRequest)request).getRequestURI()
         log.info("AstrolabeHandler请求前：{}", WebContext.getRequest().getRequestURI());
     }
 }

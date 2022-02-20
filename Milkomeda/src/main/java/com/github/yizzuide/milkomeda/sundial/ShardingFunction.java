@@ -21,7 +21,7 @@
 
 package com.github.yizzuide.milkomeda.sundial;
 
-import com.github.yizzuide.milkomeda.universe.algorithm.hash.*;
+import com.github.yizzuide.milkomeda.universe.algorithm.hash.CachedConsistentHashRing;
 import lombok.extern.slf4j.Slf4j;
 
 import java.math.BigDecimal;
@@ -30,11 +30,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * ShardingFunction
@@ -49,8 +45,6 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ShardingFunction {
 
     public static final String BEAN_ID = "ShardingFunction";
-
-    private final Map<String, ConsistentHashRing<Long>> cachedConsistentHashMap = new ConcurrentHashMap<>();
 
     /**
      * 格式化函数
@@ -101,7 +95,7 @@ public class ShardingFunction {
      * @return  目标节点
      */
     public long fnv(String key, long nodeCount, int replicas) {
-        return hash(key, nodeCount, replicas, new FNV132Hash());
+        return hash("fnv", key, nodeCount, replicas);
     }
 
     /**
@@ -112,7 +106,7 @@ public class ShardingFunction {
      * @return  目标节点
      */
     public long murmur(String key, long nodeCount, int replicas) {
-        return hash(key, nodeCount, replicas, new MurmurHash());
+        return hash("murmur", key, nodeCount, replicas);
     }
 
     /**
@@ -123,25 +117,20 @@ public class ShardingFunction {
      * @return  目标节点
      */
     public long ketama(String key, long nodeCount, int replicas) {
-        return hash(key, nodeCount, replicas, new KetamaHash());
+        return hash("ketama", key, nodeCount, replicas);
     }
 
-    private long hash(String key, long nodeCount, int replicas, HashFunc hashFunc) {
-        String cacheKey = nodeCount + "_" + replicas;
-        // 缓存哈希环
-        ConsistentHashRing<Long> consistentHashRing = cachedConsistentHashMap.get(cacheKey);
-        if (consistentHashRing == null) {
-            // 生成节点
-            List<Long> nodes = new ArrayList<>();
-            for (long i = 0; i < nodeCount; i++) {
-                nodes.add(i);
-            }
-            // 创建哈希环
-            consistentHashRing = new ConsistentHashRing<>(hashFunc, replicas, nodes);
-            // 添加到缓存
-            cachedConsistentHashMap.put(cacheKey, consistentHashRing);
-        }
-        return consistentHashRing.get(key);
+    /**
+     * 自定义算法一致性哈希实现
+     * @param hashName      哈希算法名
+     * @param key           拆分键
+     * @param nodeCount     节点数
+     * @param replicas      每个节点复制的虚拟节点数，推荐设置4的倍数
+     * @return  目标节点
+     * @since 3.12.10
+     */
+    public long hash(String hashName, String key, long nodeCount, int replicas) {
+        return CachedConsistentHashRing.getInstance().lookForHashNode(key, nodeCount, replicas, hashName);
     }
 
     /**
@@ -179,9 +168,9 @@ public class ShardingFunction {
         assert key >= 0 && slideWindow > 0;
         if (expandWarnPercent > 0) {
             // 获取系数
-            double factor = (double)key / (double)slideWindow;
+            BigDecimal factor = BigDecimal.valueOf(key).divide(BigDecimal.valueOf(slideWindow), 2, RoundingMode.DOWN);
             // 截取小数得当前分配百分比
-            double percent = factor - (long)factor;
+            double percent = factor.subtract(new BigDecimal(factor.longValue())).doubleValue();
             if (percent > expandWarnPercent) {
                 log.warn("Roll function of sundial sharding up to percent: {}", percent);
             }

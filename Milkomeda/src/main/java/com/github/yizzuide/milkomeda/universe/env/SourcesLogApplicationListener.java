@@ -41,6 +41,7 @@ import org.springframework.lang.NonNull;
  * @see org.springframework.boot.context.config.AnsiOutputApplicationListener
  * Create at 2020/04/11 11:56
  */
+// ApplicationEnvironmentPreparedEvent：环境配置准备好了，可以查看或修改
 @Slf4j
 public class SourcesLogApplicationListener implements ApplicationListener<ApplicationEnvironmentPreparedEvent>, Ordered {
 

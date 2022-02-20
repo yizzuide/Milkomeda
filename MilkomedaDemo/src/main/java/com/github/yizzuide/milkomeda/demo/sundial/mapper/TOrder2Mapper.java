@@ -25,6 +25,9 @@ public interface TOrder2Mapper {
     //      - 自定义序列号截取：seq
     //      - 定制序列号截取: id（需要通过ShardingId类生成）
     //      - 一致性Hash函数：ketama、fnv、murmur
+    //      - 自定义Hash函数：hash
+    //          1. 调用前注册：CachedConsistentHashRing.getInstance().register("hashName", HashFunc实现);
+    //          2. 表达式调用：fn.hash("hashName", key, nodeCount, replicas)
 //    @Sundial(shardingType = ShardingType.TABLE, partExp = "fn.format(table + '_%03d', fn.ketama(p.orderNo, 2, 4))")
     // ShardingType.SCHEMA：仅分库
     @Sundial(shardingType = ShardingType.SCHEMA, nodeExp = "fn.format('node_%03d', fn.ketama(p.orderNo, 2, 4))")

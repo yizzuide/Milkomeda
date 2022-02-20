@@ -62,7 +62,9 @@ public class DataSourceFactory implements EnvironmentAware {
 
     @PostConstruct
     public void init() {
+        // 设置数据源模板前缀
         DEFAULT_DATASOURCE_PREFIX = sundialProperties.getConfigPrefix();
+        // DataSource匿名属性匹配
         ALIASES.addAliases("url", "jdbc-url");
         ALIASES.addAliases("username", "user");
     }
@@ -90,11 +92,14 @@ public class DataSourceFactory implements EnvironmentAware {
     @SuppressWarnings({"rawtypes", "unchecked"})
     public DataSource createDataSource(SundialProperties.Datasource dataSourceConf) throws Exception {
         Map dataSourceProperties = binder.bind(DEFAULT_DATASOURCE_PREFIX, Map.class).get();
+        // 新的配置项覆盖spring.datasource原有配置来创建新的DataSource
         if (dataSourceConf != null) {
             Map<String, Object> dataSourceConfMap = DataTypeConvertUtil.beanToMap(dataSourceConf);
             dataSourceProperties.putAll(dataSourceConfMap);
         }
+        // 根据数据源类型创建实例
         DataSource dataSource = sundialProperties.getDatasourceType().newInstance();
+        // 绑定数据源配置值
         bind(dataSource, dataSourceProperties);
         return dataSource;
     }
@@ -102,6 +107,7 @@ public class DataSourceFactory implements EnvironmentAware {
     @SuppressWarnings("rawtypes")
     private void bind(DataSource result, Map properties) {
         ConfigurationPropertySource source = new MapConfigurationPropertySource(properties);
+        // 创建绑定对象，拷贝并添加匿名key的值
         Binder binder = new Binder(source.withAliases(ALIASES));
         binder.bind(ConfigurationPropertyName.EMPTY, Bindable.ofInstance(result));
     }

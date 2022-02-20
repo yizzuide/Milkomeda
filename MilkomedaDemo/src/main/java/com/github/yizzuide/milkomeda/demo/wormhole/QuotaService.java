@@ -16,8 +16,8 @@ import org.springframework.stereotype.Service;
  * Create at 2020/05/05 15:39
  */
 @Slf4j
-@WormholeEventHandler
 @Service
+@WormholeEventHandler
 public class QuotaService {
 
     @Async

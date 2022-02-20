@@ -94,7 +94,7 @@ public class SundialConfig {
             if (CollectionUtils.isEmpty(datasourceConfigSet)) {
                 return new DynamicRouteDataSource(defaultDataSource, targetDataSources);
             }
-            // 不回其它数据源节点
+            // 添加其它数据源节点
             for (Map.Entry<String, SundialProperties.Datasource> entry : datasourceConfigSet) {
                 DataSource dataSource = dataSourceFactory.createDataSource(entry.getValue());
                 targetDataSources.put(entry.getKey(), dataSource);

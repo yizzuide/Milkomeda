@@ -33,6 +33,7 @@ public class ShardingId {
     // 开始时间 2020-01-01
     private static final long EPOCH = 1577808000000L;
     // 时间位（可用69年，也就是2089-01-01）
+    // 计算可用年数：BigDecimal.valueOf(Math.pow(2, 41)).divide(BigDecimal.valueOf(31536000000L/*1年的毫秒数*/), RoundingMode.DOWN)
     public static final long TIME_BITS = 41L;
     // 机器位（集群8台，满足一定量的并发需求）
     private final static long WORKER_ID_BITS = 3L;
@@ -80,8 +81,8 @@ public class ShardingId {
             }
             if (preTime == timestamp) {
                 seqStart = (seqStart + 1) & MAX_SN;
-                // 如果序列号处于起点，获取比上次更新的时间
-                if (seqStart == 0) {
+                // 如果序列号处于最大，循环到超过1毫秒
+                if (seqStart == MAX_SN) {
                     timestamp = nextTime(preTime);
                 }
             } else {
@@ -94,6 +95,16 @@ public class ShardingId {
                     | sharding << SN_BITS
                     | seqStart;
         }
+    }
+
+    /**
+     * 从id获取存储的时间戳
+     * @param id    id值
+     * @return  时间戳
+     * @since 3.12.10
+     */
+    public static long extractEpochMill(long id) {
+        return (id >> (SN_BITS + SHARD_BITS + BUSINESS_ID_BITS + WORKER_ID_BITS)) + EPOCH;
     }
 
     private static long currentTime() {

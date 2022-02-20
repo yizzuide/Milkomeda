@@ -45,10 +45,12 @@ public class DelegatingDataSourceAdvice implements MethodInterceptor {
 
     @Override
     public Object invoke(MethodInvocation methodInvocation) throws Throwable {
+        // 获取Method对象
         // ProxyMethodInvocation pmi = (ProxyMethodInvocation) methodInvocation;
         // ProceedingJoinPoint pjp = new MethodInvocationProceedingJoinPoint(pmi);
         // Method method = methodInvocation.getMethod();
         try {
+            // 调用方法前，选择数据源
             SundialHolder.setDataSourceType(getKeyName());
             return methodInvocation.proceed();
         } finally {

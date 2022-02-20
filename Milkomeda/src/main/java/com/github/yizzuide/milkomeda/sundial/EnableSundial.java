@@ -26,7 +26,7 @@ import org.springframework.context.annotation.Import;
 import java.lang.annotation.*;
 
 /**
- * Enable 模块
+ * EnableSundial
  * @author jsq 786063250@qq.com
  * @since 3.4.0
  * @version 3.7.1

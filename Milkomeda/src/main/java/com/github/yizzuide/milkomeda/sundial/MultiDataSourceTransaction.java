@@ -21,6 +21,7 @@
 
 package com.github.yizzuide.milkomeda.sundial;
 
+import com.github.yizzuide.milkomeda.universe.env.Environment;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.transaction.Transaction;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
@@ -37,31 +38,31 @@ import java.util.concurrent.ConcurrentMap;
 
 /**
  * MultiDataSourceTransaction
- * 多数据源事务
+ * 主从多数据源事务
  *
  * @author yizzuide
  * @since 3.7.1
+ * @version 3.12.10
  * Create at 2020/05/31 11:48
  */
 @Slf4j
 public class MultiDataSourceTransaction implements Transaction {
-
+    // 数据源
     private final DataSource dataSource;
-
+    // 主连接
     private Connection mainConnection;
-
-    private final String mainDataSourceType;
-
-    private final ConcurrentMap<String, Connection> otherConnectionMap;
-
+    // 连接是否有事务
     private boolean isConnectionTransactional;
-
+    // 自动提交
     private boolean autoCommit;
+    // 其它连接
+    private final ConcurrentMap<String, Connection> otherConnectionMap;
+    // 只读从库识别key
+    private static final String readOnlyType = "read-only";
 
     public MultiDataSourceTransaction(DataSource dataSource) {
         Assert.notNull(dataSource, "No DataSource specified");
         this.dataSource = dataSource;
-        mainDataSourceType = SundialHolder.getDataSourceType();
         otherConnectionMap = new ConcurrentHashMap<>();
     }
 
@@ -69,7 +70,8 @@ public class MultiDataSourceTransaction implements Transaction {
     public Connection getConnection() throws SQLException {
         // 动态的根据DatabaseType获取不同的Connection
         String dataSourceType = SundialHolder.getDataSourceType();
-        if (dataSourceType.equals(mainDataSourceType)) {
+        // 如果当前为主连接
+        if (!dataSourceType.startsWith(readOnlyType)) {
             if (mainConnection == null) {
                 openMainConnection();
             }
@@ -77,6 +79,7 @@ public class MultiDataSourceTransaction implements Transaction {
         } else {
             if (!otherConnectionMap.containsKey(dataSourceType)) {
                 try {
+                    // 从连接不支持事务（用于只读）
                     Connection conn = dataSource.getConnection();
                     otherConnectionMap.put(dataSourceType, conn);
                     return conn;
@@ -89,10 +92,11 @@ public class MultiDataSourceTransaction implements Transaction {
     }
 
     private void openMainConnection() throws SQLException {
+        // 将主连接交由Spring事务管理
         this.mainConnection = DataSourceUtils.getConnection(this.dataSource);
         this.autoCommit = this.mainConnection.getAutoCommit();
         this.isConnectionTransactional = DataSourceUtils.isConnectionTransactional(this.mainConnection, this.dataSource);
-        if (log.isDebugEnabled()) {
+        if (Environment.isShowLog()) {
             log.debug("Sundial JDBC Connection [" + this.mainConnection + "] will" +
                     (this.isConnectionTransactional ? " " : " not ") + "be managed by Spring");
         }
@@ -102,7 +106,7 @@ public class MultiDataSourceTransaction implements Transaction {
     public void commit() throws SQLException {
         // 非Spring事务管理的提交处理
         if (this.mainConnection != null && !this.isConnectionTransactional && !this.autoCommit) {
-            if (log.isDebugEnabled()) {
+            if (Environment.isShowLog()) {
                 log.debug("Sundial Committing JDBC Connection [" + this.mainConnection + "]");
             }
             this.mainConnection.commit();
@@ -116,7 +120,7 @@ public class MultiDataSourceTransaction implements Transaction {
     public void rollback() throws SQLException {
         // 非Spring事务管理的回滚处理
         if (this.mainConnection != null && !this.isConnectionTransactional && !this.autoCommit) {
-            if (log.isDebugEnabled()) {
+            if (Environment.isShowLog()) {
                 log.debug("Sundial Rolling back JDBC Connection [" + this.mainConnection + "]");
             }
             this.mainConnection.rollback();

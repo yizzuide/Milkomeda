@@ -44,8 +44,8 @@ public class CustomPropertySourceLocator implements /*PropertySourceLocator,*/ E
         return new MapPropertySource("milkomeda", mapResource);
     }*/
 
-    // 添加自定义属性来源方式二：实现EnvironmentPostProcessor接口，把CollectionsPropertySourceLocator注册到spring.factories
-    // Spring启动时发出ApplicationEnvironmentPreparedEvent事件，通过ConfigFileApplicationListener加载SPI配置的所有排好序的EnvironmentPostProcessor实例
+    // 添加自定义属性来源方式二：实现EnvironmentPostProcessor接口，把CustomPropertySourceLocator注册到spring.factories
+    // Spring启动时发出ApplicationEnvironmentPreparedEvent事件，通过ConfigFileApplicationListener.onApplicationEnvironmentPreparedEvent(...)加载SPI配置的所有排好序的EnvironmentPostProcessor实例
     @Override
     public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
         CollectionsPropertySource.addToEnvironment(environment);
