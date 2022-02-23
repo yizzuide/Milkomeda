@@ -23,7 +23,7 @@ public class DataSourceServiceImpl implements DataSourceService {
     @Override
     public int insert(TOrder tOrder) {
         int effectCount = tOrder2Mapper.insert(tOrder);
-        // 支持多数据源事务
+        // 测试多数据源事务
         List<TOrder> tOrders = queryAll(new TOrder());
         log.info("query list: {}", tOrders);
         return effectCount;

@@ -171,10 +171,10 @@ milkomeda:
           timesType: MIN
           limitTimes: 3
         include-urls: ["/particle/pay"]
-#        response-content-type: text/plain # 修改响应类型，默认为application/json
+        #response-content-type: text/plain # 修改响应类型，默认为application/json
         response:
           status: 200
-#          content: success # 非application/json类型的响应内容
+          #content: success # 非application/json类型的响应内容
           code: -1
           message[msg]: 请求超过次数，请稍后再试！
           addition:
@@ -235,12 +235,12 @@ milkomeda:
     token-name: Authorization
 
     # -- 设置session方式 --
-#    stateless: false
-#    login-url: ${url.login}
-#    root-redirect: ${url.index}
+    #stateless: false
+    #login-url: ${url.login}
+    #root-redirect: ${url.index}
 
     # 不使用BCrypt（如果用户表有salt字段的情况）
-#    use-bcrypt: false
+    #use-bcrypt: false
     # 添加到匿名访问许可
     addition-permit-urls:
       - /s_login
@@ -264,6 +264,7 @@ milkomeda:
       - /jupiter/**
       - /metal/**
       - /pillar/**
+      - /orbit/**
     # 放开static资源访问
     allow-static-urls:
       - /build/*
@@ -273,9 +274,9 @@ milkomeda:
     # 在分布式布署时，需要设置实例名
     instance-name: ${spring.application.name}
     # 开启Job作业（作为消费端使用时，设置为false）
-#    enable-job-timer: false
+    #enable-job-timer: false
     # 是否用于分布式job作业
-#    enable-job-timer-distributed: true
+    #enable-job-timer-distributed: true
     # Job作业频率（默认5s）
     delay-bucket-poll-rate: 2s
     # 延迟队列分桶数量（默认为3）
@@ -283,7 +284,7 @@ milkomeda:
     # 消费执行超时时间（默认30s）
     ttr: 20s
     # 重试时添加延迟增长因子（默认为1，计算公式：delay * (retryCount++) * factor）
-#    retry-delay-multi-factor: 2
+    #retry-delay-multi-factor: 2
     # 开启Task功能（使用@EnableIce时消费端需要配置为true）
     enable-task: true
     # 最大消费个数（默认为10）
@@ -428,7 +429,7 @@ milkomeda:
         username: root
         password: ${MYSQL_PWD}
         url:  jdbc:mysql://localhost:3306?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&useSSL=false&rewriteBatchedStatements=true&allowMultiQueries=true&allowPublicKeyRetrieval=true
-    # 主从切面策略
+    # 主从切面策略（内部通过桥接Orbit模块功能实现）
     strategy:
       - key-name: read-only # 这里用上面instances里配置的key
         pointcut-expression: execution(* com..mapper.*.query*(..))
@@ -480,3 +481,10 @@ milkomeda:
   # 分布式应用名配置（默认取当前应用名）
   metal:
     application-name: demo
+
+  # 环绕切面
+  orbit:
+    instances:
+      - key-name: pre-log
+        pointcut-expression: execution(* com..orbit.*API.fetch*(..))
+        advice-class-name: com.github.yizzuide.milkomeda.demo.orbit.PreLogAdvice

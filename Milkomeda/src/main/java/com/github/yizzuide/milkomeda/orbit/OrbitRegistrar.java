@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 yizzuide All rights Reserved.
+ * Copyright (c) 2022 yizzuide All rights Reserved.
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -19,15 +19,16 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.sundial;
+package com.github.yizzuide.milkomeda.orbit;
 
+import com.github.yizzuide.milkomeda.sundial.OrbitAdaptor;
+import com.github.yizzuide.milkomeda.util.ReflectUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.aopalliance.aop.Advice;
 import org.springframework.aop.aspectj.AspectJExpressionPointcutAdvisor;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.boot.context.properties.bind.Binder;
-import org.springframework.context.EnvironmentAware;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.core.env.Environment;
 import org.springframework.core.type.AnnotationMetadata;
@@ -37,49 +38,47 @@ import org.springframework.util.CollectionUtils;
 import java.util.List;
 
 /**
- * DelegatingBeanDefinitionRegistrar
- * 动态注册数据选择策略切面
- *
+ * OrbitRegistrar
+ * 环绕切面注册
  * <br><br>
  * ImportBeanDefinitionRegistrar是Bean定义阶段注册器，适用于动态注册一个AspectJExpressionPointcutAdvisor <br>
- * BeanPostProcessor是Bean的创建后置处理器，然后给它包装一个代理，但这里不适用
+ * BeanPostProcessor是Bean的创建完成后置处理器，然后给它包装一个代理，但这里不适用
  *
  * @author yizzuide
- * @since 3.4.0
+ * @since 3.13.0
  * @see org.springframework.aop.aspectj.AspectJExpressionPointcutAdvisor
  * @see org.springframework.aop.support.AbstractExpressionPointcut
  * @see org.springframework.beans.factory.config.BeanPostProcessor
- * Create at 2020/05/11 17:31
+ * Create at 2022/02/21 01:14
  */
-public class DelegatingBeanDefinitionRegistrar implements EnvironmentAware, ImportBeanDefinitionRegistrar {
+@Slf4j
+public class OrbitRegistrar implements ImportBeanDefinitionRegistrar {
 
-    /**
-     * 配置绑定
-     */
-    private Binder binder;
+    OrbitRegistrar(Environment ignore) {}
 
     @Override
-    public void registerBeanDefinitions(@NonNull AnnotationMetadata importingClassMetadata,
-                                        @NonNull BeanDefinitionRegistry registry) {
-        SundialProperties props = binder.bind("milkomeda.sundial", SundialProperties.class).get();
-        List<SundialProperties.Strategy> strategyList = props.getStrategy();
-        if (CollectionUtils.isEmpty(strategyList)) {
+    public void registerBeanDefinitions(@NonNull AnnotationMetadata importingClassMetadata, @NonNull BeanDefinitionRegistry registry) {
+        OrbitProperties orbitProperties = OrbitAdaptor.getOrbitProperties();
+        List<OrbitProperties.Item> instances = orbitProperties.getInstances();
+        if (CollectionUtils.isEmpty(instances)) {
             return;
         }
-        for (SundialProperties.Strategy strategy : strategyList) {
-            String beanName = "mk_sundial_advisor_" + strategy.getKeyName();
-            Advice advice = new DelegatingDataSourceAdvice(strategy.getKeyName());
-            BeanDefinition aspectJBean = BeanDefinitionBuilder.genericBeanDefinition(AspectJExpressionPointcutAdvisor.class)
-                    .addPropertyValue("location", "$$aspectJAdvisor##") // Set the location for debugging.
-                    .addPropertyValue("expression", strategy.getPointcutExpression())
-                    .addPropertyValue("advice", advice)
-                    .getBeanDefinition();
-            registry.registerBeanDefinition(beanName, aspectJBean);
+        for (OrbitProperties.Item item : instances) {
+            String beanName = "mk_sundial_advisor_" + item.getKeyName();
+            Advice advice;
+            try {
+                advice = item.getAdviceClassName().newInstance();
+                // set custom props
+                ReflectUtil.setField(advice, item.getProps());
+                BeanDefinition aspectJBean = BeanDefinitionBuilder.genericBeanDefinition(AspectJExpressionPointcutAdvisor.class)
+                        .addPropertyValue("location", String.format("$$%s##", item.getKeyName())) // Set the location for debugging.
+                        .addPropertyValue("expression", item.getPointcutExpression())
+                        .addPropertyValue("advice", advice)
+                        .getBeanDefinition();
+                registry.registerBeanDefinition(beanName, aspectJBean);
+            } catch (Exception e) {
+                log.error("Create instance error with msg: {}", e.getMessage(), e);
+            }
         }
-    }
-
-    @Override
-    public void setEnvironment(@NonNull Environment environment) {
-        binder = Binder.get(environment);
     }
 }

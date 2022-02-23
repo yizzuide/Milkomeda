@@ -21,6 +21,7 @@
 
 package com.github.yizzuide.milkomeda.sundial;
 
+import com.github.yizzuide.milkomeda.orbit.OrbitConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
@@ -45,12 +46,12 @@ import java.util.Set;
  * 自定义数据源配置
  * @author jsq 786063250@qq.com
  * @since 3.4.0
- * @version 3.8.0
+ * @version 3.13.10
  * Create at 2020/5/8
  */
 @Slf4j
 @Configuration(proxyBeanMethods = false)
-@Import(DelegatingBeanDefinitionRegistrar.class)
+@Import(OrbitConfig.class)
 @EnableConfigurationProperties(SundialProperties.class)
 @AutoConfigureBefore({DataSourceAutoConfiguration.class, TransactionAutoConfiguration.class})
 public class SundialConfig {
@@ -68,15 +69,15 @@ public class SundialConfig {
         return new DataSourceFactory();
     }
 
-    @ConditionalOnMissingBean
     @Bean(ShardingFunction.BEAN_ID)
+    @ConditionalOnMissingBean
     @ConditionalOnProperty(prefix = SundialProperties.PREFIX, name = "enable-sharding", havingValue = "true")
     public ShardingFunction shardingFunction() {
         return new ShardingFunction();
     }
 
-    @ConditionalOnProperty(prefix = SundialProperties.PREFIX, name = "enable-sharding", havingValue = "true")
     @Bean
+    @ConditionalOnProperty(prefix = SundialProperties.PREFIX, name = "enable-sharding", havingValue = "true")
     public SundialInterceptor sundialInterceptor() {
         return new SundialInterceptor();
     }

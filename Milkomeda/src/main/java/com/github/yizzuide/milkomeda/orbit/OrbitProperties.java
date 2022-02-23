@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 yizzuide All rights Reserved.
+ * Copyright (c) 2022 yizzuide All rights Reserved.
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -19,42 +19,54 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.sundial;
+package com.github.yizzuide.milkomeda.orbit;
 
-
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.aopalliance.intercept.MethodInterceptor;
-import org.aopalliance.intercept.MethodInvocation;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
- * DelegatingDataSourceAdvice
- * 数据源切面代理
+ * OrbitProperties
  *
  * @author yizzuide
- * @since 3.4.0
- * Create at 2020/05/11 16:29
+ * @since 3.13.0
+ * Create at 2022/02/21 01:27
  */
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
-public class DelegatingDataSourceAdvice implements MethodInterceptor {
+@ConfigurationProperties(prefix = OrbitProperties.PREFIX)
+public class OrbitProperties {
+    // 当前配置前缀
+    public static final String PREFIX = "milkomeda.orbit";
+    /**
+     * 实例列表
+     */
+    private List<Item> instances = new ArrayList<>();
 
-    private String keyName = DynamicRouteDataSource.MASTER_KEY;
+    @Data
+    public static class Item {
+        /**
+         * 唯一id名
+         */
+        private String keyName;
 
-    @Override
-    public Object invoke(MethodInvocation methodInvocation) throws Throwable {
-        // 获取Method对象
-        // ProxyMethodInvocation pmi = (ProxyMethodInvocation) methodInvocation;
-        // ProceedingJoinPoint pjp = new MethodInvocationProceedingJoinPoint(pmi);
-        // Method method = methodInvocation.getMethod();
-        try {
-            // 调用方法前，选择数据源
-            SundialHolder.setDataSourceType(getKeyName());
-            return methodInvocation.proceed();
-        } finally {
-            SundialHolder.clearDataSourceType();
-        }
+        /**
+         * 切点表达式，如应用给Mapper的query方法：execution(* com..mapper.*.query*(..))
+         */
+        private String pointcutExpression;
+
+        /**
+         * 方法切面实现类
+         */
+        private Class<? extends OrbitAdvice> adviceClassName;
+
+        /**
+         * 切面实现属性注入
+         */
+        private Map<String, Object> props = new HashMap<>();
     }
+
 }

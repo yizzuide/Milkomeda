@@ -124,6 +124,7 @@ public class SundialProperties {
      */
     @Data
     public static class Strategy {
+        public static final String KEY_NAME = "keyName";
         /**
          * 数据源key名
          */

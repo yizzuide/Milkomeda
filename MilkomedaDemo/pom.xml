@@ -20,7 +20,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>1.8</java.version>
         <spring-cloud.version>Hoxton.RELEASE</spring-cloud.version>
-        <milkomeda.version>3.12.10-SNAPSHOT</milkomeda.version>
+        <milkomeda.version>3.13.0-SNAPSHOT</milkomeda.version>
         <mybatis.starter>2.1.4</mybatis.starter>
         <redission.version>3.16.8</redission.version>
         <zookeeper.version>3.4.14</zookeeper.version>
