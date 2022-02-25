@@ -56,7 +56,6 @@ public class SourcesLogApplicationListener implements ApplicationListener<Applic
         // 获取配置属性值
         boolean logEnable = Binder.get(environment).bind("milkomeda.show-log", Boolean.class).orElseGet(() -> false);
         log.info("milkomeda log is {}", logEnable ? "enable" : "disable");
-        log.info("Load sources: {}", environment.getPropertySources());
     }
 
     @Override

@@ -19,60 +19,68 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.sundial;
+package com.github.yizzuide.milkomeda.orbit;
 
-import com.github.yizzuide.milkomeda.orbit.OrbitProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.boot.env.EnvironmentPostProcessor;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.StandardEnvironment;
+import org.springframework.util.CollectionUtils;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 /**
- * OrbitAdaptor
- * Orbit配置桥接器
+ * AbstractOrbitSource
+ * 抽象的切面配置源扩展，其它模块实现需要添加到`spring.factories`里的`Environment Post Processors`
  *
  * @author yizzuide
  * @since 3.13.0
- * Create at 2022/02/23 02:11
+ * Create at 2022/02/26 01:04
  */
-public class OrbitAdaptor implements EnvironmentPostProcessor {
-
+public abstract class AbstractOrbitSource implements OrbitSource, EnvironmentPostProcessor {
+    /**
+     * 所有实现共享的配置源
+     */
     private static OrbitProperties orbitProperties;
+
+
+    static OrbitProperties getOrbitProperties() {
+        return orbitProperties;
+    }
 
     @Override
     public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
         if (environment.getClass() == StandardEnvironment.class) {
             return;
         }
-        SundialProperties sundialProperties = null;
-        try {
-            sundialProperties = Binder.get(environment).bind(SundialProperties.PREFIX, SundialProperties.class).get();
-            orbitProperties  = Binder.get(environment).bind(OrbitProperties.PREFIX, OrbitProperties.class).get();
-        } catch (Exception e) {
-            // 如果没有sundial模块配置，直接返回
-            if (sundialProperties == null) {
-                return;
+        // 只初始化一次
+        if (orbitProperties == null) {
+            try {
+                orbitProperties = Binder.get(environment).bind(OrbitProperties.PREFIX, OrbitProperties.class).get();
+            } catch (Exception e) {
+                // 没用配置过Orbit，创建适用于Sundial使用的配置
+                orbitProperties = new OrbitProperties();
             }
-            // 没用配置过Orbit，创建适用于Sundial使用的配置
-            orbitProperties = new OrbitProperties();
         }
-        for (SundialProperties.Strategy strategy : sundialProperties.getStrategy()) {
-            OrbitProperties.Item item = new OrbitProperties.Item();
-            item.setKeyName(strategy.getKeyName());
-            item.setPointcutExpression(strategy.getPointcutExpression());
-            item.setAdviceClassName(OrbitDataSourceAdvice.class);
-            Map<String, Object> props = new HashMap<>();
-            props.put(SundialProperties.Strategy.KEY_NAME, strategy.getKeyName());
-            item.setProps(props);
-            orbitProperties.getInstances().add(item);
+        // 调用扩展配置
+        List<OrbitNode> orbitNodes = createNodes(environment);
+        if (CollectionUtils.isEmpty(orbitNodes)) {
+            return;
         }
+        orbitNodes.forEach(this::addNode);
     }
 
-    public static OrbitProperties getOrbitProperties() {
-        return orbitProperties;
+    /**
+     * 添加切面节点
+     * @param orbitNode OrbitNode
+     */
+    private void addNode(OrbitNode orbitNode) {
+        OrbitProperties.Item item = new OrbitProperties.Item();
+        item.setKeyName(orbitNode.getId());
+        item.setPointcutExpression(orbitNode.getPointcutExpression());
+        item.setAdviceClassName(orbitNode.getAdviceClass());
+        item.setProps(orbitNode.getProps());
+        getOrbitProperties().getInstances().add(item);
     }
 }

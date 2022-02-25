@@ -21,7 +21,6 @@
 
 package com.github.yizzuide.milkomeda.orbit;
 
-import com.github.yizzuide.milkomeda.sundial.OrbitAdaptor;
 import com.github.yizzuide.milkomeda.util.ReflectUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.aopalliance.aop.Advice;
@@ -58,7 +57,7 @@ public class OrbitRegistrar implements ImportBeanDefinitionRegistrar {
 
     @Override
     public void registerBeanDefinitions(@NonNull AnnotationMetadata importingClassMetadata, @NonNull BeanDefinitionRegistry registry) {
-        OrbitProperties orbitProperties = OrbitAdaptor.getOrbitProperties();
+        OrbitProperties orbitProperties = AbstractOrbitSource.getOrbitProperties();
         List<OrbitProperties.Item> instances = orbitProperties.getInstances();
         if (CollectionUtils.isEmpty(instances)) {
             return;

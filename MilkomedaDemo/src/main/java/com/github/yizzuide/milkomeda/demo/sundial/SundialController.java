@@ -27,6 +27,11 @@ public class SundialController {
         return  dataSourceService.queryByOrderNo(orderNo);
     }
 
+    @RequestMapping("getAll")
+    public Object getData() {
+        return  dataSourceService.queryAll(new TOrder());
+    }
+
     @RequestMapping("add/{orderNo}")
     public Object add(@PathVariable("orderNo") Long orderNo) {
         TOrder tOrder = new TOrder();
