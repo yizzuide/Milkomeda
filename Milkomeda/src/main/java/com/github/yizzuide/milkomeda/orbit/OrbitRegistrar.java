@@ -26,11 +26,14 @@ import com.github.yizzuide.milkomeda.util.ReflectUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.aopalliance.aop.Advice;
 import org.springframework.aop.aspectj.AspectJExpressionPointcutAdvisor;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.env.Environment;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.lang.NonNull;
@@ -38,6 +41,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 /**
  * OrbitRegistrar
@@ -67,20 +71,33 @@ public class OrbitRegistrar implements ImportBeanDefinitionRegistrar {
         this.environment = environment;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public void registerBeanDefinitions(@NonNull AnnotationMetadata importingClassMetadata, @NonNull BeanDefinitionRegistry registry) {
         // 切面配置绑定
         try {
+            // YAML配置方式
             this.orbitProperties = Binder.get(this.environment).bind(OrbitProperties.PREFIX, OrbitProperties.class).get();
         } catch (Exception e) {
             // 没用配置过Orbit，创建默认配置
             this.orbitProperties = new OrbitProperties();
         }
 
-        // 扫描切面源提供者
+        // 框架其它模块桥接切面源提供者
         Collection<OrbitSource> orbitSources = WebContext.scanBeans(registry, OrbitSourceProvider.class, ORBIT_SOURCE_PROVIDER_SCAN_BASE_PACKAGES);
-        // 添加切面节点
         orbitSources.forEach(orbitSource -> orbitSource.createNodes(this.environment).forEach(this::addNode));
+
+        // 注解注册方式
+        ConfigurableListableBeanFactory beanFactory = (ConfigurableListableBeanFactory) registry;
+        Map<String, Object> orbits = beanFactory.getBeansWithAnnotation(Orbit.class);
+        orbits.forEach((id, value) -> {
+            Class<? extends OrbitAdvice> adviceClass = (Class<? extends OrbitAdvice>) value.getClass();
+            Orbit orbit = AnnotationUtils.findAnnotation(adviceClass, Orbit.class);
+            assert orbit != null;
+            String pointcutExpression = orbit.pointcutExpression();
+            OrbitNode orbitNode = OrbitNode.builder().id(id).adviceClass(adviceClass).pointcutExpression(pointcutExpression).build();
+            this.addNode(orbitNode);
+        });
 
         // 注册切面
         List<OrbitProperties.Item> instances = this.orbitProperties.getInstances();
@@ -89,10 +106,20 @@ public class OrbitRegistrar implements ImportBeanDefinitionRegistrar {
         }
         for (OrbitProperties.Item item : instances) {
             String beanName = "mk_sundial_advisor_" + item.getKeyName();
+            Advice advice = null;
             try {
-                Advice advice = item.getAdviceClassName().newInstance();
+                // 如果从IoC里找到这个Bean，不再重复创建
+                advice = beanFactory.getBean(item.getAdviceClassName());
+            } catch (BeansException ignore) {}
+            try {
+                // 如果为空，这种是YAML方式配置的class
+                if (advice == null) {
+                    advice = item.getAdviceClassName().newInstance();
+                }
                 // set custom props
-                ReflectUtil.setField(advice, item.getProps());
+                if (item.getProps() != null) {
+                    ReflectUtil.setField(advice, item.getProps());
+                }
                 BeanDefinition aspectJBean = BeanDefinitionBuilder.genericBeanDefinition(AspectJExpressionPointcutAdvisor.class)
                         .addPropertyValue("location", String.format("$$%s##", item.getKeyName())) // Set the location for debugging.
                         .addPropertyValue("expression", item.getPointcutExpression())

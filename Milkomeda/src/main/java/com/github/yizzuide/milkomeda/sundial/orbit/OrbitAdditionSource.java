@@ -41,6 +41,8 @@ import java.util.stream.Collectors;
  * @since 3.13.0
  * Create at 2022/02/23 02:11
  */
+// 虽然@OrbitSourceProvider有添加`@Component`注解，但由于默认的用户业务应用并不扫描这个路径，所以不会被Spring IoC所识别。
+// 但是Orbit模块在BeanDefinition阶段注册了回调，通过手动依赖查找扫描的方式找到*.orbit路径下的这个注解。
 @OrbitSourceProvider
 public class OrbitAdditionSource implements OrbitSource {
 

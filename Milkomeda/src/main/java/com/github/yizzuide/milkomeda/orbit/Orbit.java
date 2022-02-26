@@ -27,20 +27,30 @@ import org.springframework.stereotype.Component;
 import java.lang.annotation.*;
 
 /**
- * OrbitSourceProvider
- * 切面源提供者<br>
- * 这种方式仅为框架其它模块桥接使用，用户业务应用开发使用的两种方式：YAML配置或{@link Orbit}
+ * Orbit
+ * 切面绑定注册
  *
  * @author yizzuide
  * @since 3.13.0
- * Create at 2022/02/26 12:50
+ * Create at 2022/02/27 01:34
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE})
 @Inherited
 @Component
-public @interface OrbitSourceProvider {
+public @interface Orbit {
+    /**
+     * 等同YAML方式的key-name
+     * @return  key-name
+     */
     @AliasFor(annotation = Component.class)
     String value() default "";
+
+    /**
+     * 切点表达式，如应用给Mapper的query方法：execution(* com..mapper.*.query*(..))
+     * @return  切点表达式
+     */
+    String pointcutExpression();
+
 }
