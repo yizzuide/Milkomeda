@@ -21,6 +21,7 @@
 
 package com.github.yizzuide.milkomeda.orbit;
 
+import com.github.yizzuide.milkomeda.universe.context.WebContext;
 import com.github.yizzuide.milkomeda.util.ReflectUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.aopalliance.aop.Advice;
@@ -28,12 +29,14 @@ import org.springframework.aop.aspectj.AspectJExpressionPointcutAdvisor;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.core.env.Environment;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.lang.NonNull;
 import org.springframework.util.CollectionUtils;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -52,13 +55,35 @@ import java.util.List;
  */
 @Slf4j
 public class OrbitRegistrar implements ImportBeanDefinitionRegistrar {
+    // 切面提供者包扫描路径
+    public static final String ORBIT_SOURCE_PROVIDER_SCAN_BASE_PACKAGES = "com.github.yizzuide.milkomeda.*.orbit";
 
-    OrbitRegistrar(Environment ignore) {}
+    private OrbitProperties orbitProperties;
+
+    private final Environment environment;
+
+    // Spring会自动传入Environment参数，调用这个构造器
+    OrbitRegistrar(Environment environment) {
+        this.environment = environment;
+    }
 
     @Override
     public void registerBeanDefinitions(@NonNull AnnotationMetadata importingClassMetadata, @NonNull BeanDefinitionRegistry registry) {
-        OrbitProperties orbitProperties = AbstractOrbitSource.getOrbitProperties();
-        List<OrbitProperties.Item> instances = orbitProperties.getInstances();
+        // 切面配置绑定
+        try {
+            this.orbitProperties = Binder.get(this.environment).bind(OrbitProperties.PREFIX, OrbitProperties.class).get();
+        } catch (Exception e) {
+            // 没用配置过Orbit，创建默认配置
+            this.orbitProperties = new OrbitProperties();
+        }
+
+        // 扫描切面源提供者
+        Collection<OrbitSource> orbitSources = WebContext.scanBeans(registry, OrbitSourceProvider.class, ORBIT_SOURCE_PROVIDER_SCAN_BASE_PACKAGES);
+        // 添加切面节点
+        orbitSources.forEach(orbitSource -> orbitSource.createNodes(this.environment).forEach(this::addNode));
+
+        // 注册切面
+        List<OrbitProperties.Item> instances = this.orbitProperties.getInstances();
         if (CollectionUtils.isEmpty(instances)) {
             return;
         }
@@ -78,5 +103,18 @@ public class OrbitRegistrar implements ImportBeanDefinitionRegistrar {
                 log.error("Create instance error with msg: {}", e.getMessage(), e);
             }
         }
+    }
+
+    /**
+     * 添加切面节点
+     * @param orbitNode OrbitNode
+     */
+    private void addNode(OrbitNode orbitNode) {
+        OrbitProperties.Item item = new OrbitProperties.Item();
+        item.setKeyName(orbitNode.getId());
+        item.setPointcutExpression(orbitNode.getPointcutExpression());
+        item.setAdviceClassName(orbitNode.getAdviceClass());
+        item.setProps(orbitNode.getProps());
+        this.orbitProperties.getInstances().add(item);
     }
 }

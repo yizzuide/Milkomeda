@@ -45,7 +45,7 @@ import java.util.Map;
 @ConfigurationProperties(prefix = SundialProperties.PREFIX)
 public class SundialProperties {
     // 当前配置前缀
-    static final String PREFIX = "milkomeda.sundial";
+    public static final String PREFIX = "milkomeda.sundial";
 
     /**
      * 数据源模版前缀

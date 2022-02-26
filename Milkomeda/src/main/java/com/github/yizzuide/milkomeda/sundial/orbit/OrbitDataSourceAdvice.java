@@ -19,25 +19,41 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.orbit;
+package com.github.yizzuide.milkomeda.sundial.orbit;
 
-import org.springframework.core.env.Environment;
 
-import java.util.List;
+import com.github.yizzuide.milkomeda.orbit.OrbitAdvice;
+import com.github.yizzuide.milkomeda.orbit.OrbitInvocation;
+import com.github.yizzuide.milkomeda.sundial.DynamicRouteDataSource;
+import com.github.yizzuide.milkomeda.sundial.SundialHolder;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
- * OrbitSource
- * 切面节点来源扩展接口
+ * OrbitDataSourceAdvice
+ * 数据源切面实现
  *
  * @author yizzuide
- * @since 3.13.0
- * Create at 2022/02/26 00:50
+ * @since 3.4.0
+ * @version 3.13.0
+ * Create at 2020/05/11 16:29
  */
-@FunctionalInterface
-public interface OrbitSource {
-    /**
-     * 初始化配置
-     * @param environment   Environment
-     */
-    List<OrbitNode> createNodes(Environment environment);
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class OrbitDataSourceAdvice implements OrbitAdvice {
+
+    private String keyName = DynamicRouteDataSource.MASTER_KEY;
+
+    @Override
+    public Object invoke(OrbitInvocation invocation) throws Throwable {
+        try {
+            // 调用方法前，选择数据源
+            SundialHolder.setDataSourceType(getKeyName());
+            return invocation.proceed();
+        } finally {
+            SundialHolder.clearDataSourceType();
+        }
+    }
 }

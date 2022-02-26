@@ -3,8 +3,7 @@ org.springframework.boot.autoconfigure.EnableAutoConfiguration=com.github.yizzui
 
 # Environment Post Processors
 org.springframework.boot.env.EnvironmentPostProcessor=\
-com.github.yizzuide.milkomeda.universe.env.CustomPropertySourceLocator,\
-  com.github.yizzuide.milkomeda.sundial.OrbitAdditionSource
+com.github.yizzuide.milkomeda.universe.env.CustomPropertySourceLocator
 
 # Application Listeners
 org.springframework.context.ApplicationListener=\

@@ -19,13 +19,17 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.sundial;
+package com.github.yizzuide.milkomeda.sundial.orbit;
 
-import com.github.yizzuide.milkomeda.orbit.AbstractOrbitSource;
 import com.github.yizzuide.milkomeda.orbit.OrbitNode;
+import com.github.yizzuide.milkomeda.orbit.OrbitSource;
+import com.github.yizzuide.milkomeda.orbit.OrbitSourceProvider;
+import com.github.yizzuide.milkomeda.sundial.SundialProperties;
 import org.springframework.boot.context.properties.bind.Binder;
-import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.Environment;
+import org.springframework.util.CollectionUtils;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -37,16 +41,20 @@ import java.util.stream.Collectors;
  * @since 3.13.0
  * Create at 2022/02/23 02:11
  */
-public class OrbitAdditionSource extends AbstractOrbitSource {
+@OrbitSourceProvider
+public class OrbitAdditionSource implements OrbitSource {
 
     @Override
-    public List<OrbitNode> createNodes(ConfigurableEnvironment environment) {
+    public List<OrbitNode> createNodes(Environment environment) {
         SundialProperties sundialProperties;
         try {
             sundialProperties = Binder.get(environment).bind(SundialProperties.PREFIX, SundialProperties.class).get();
         } catch (Exception ignore) {
             // 获取当前模块没有配置，直接返回
-            return null;
+            return Collections.emptyList();
+        }
+        if (CollectionUtils.isEmpty(sundialProperties.getStrategy())) {
+            return Collections.emptyList();
         }
         // 构建配置源
         return sundialProperties.getStrategy().stream()

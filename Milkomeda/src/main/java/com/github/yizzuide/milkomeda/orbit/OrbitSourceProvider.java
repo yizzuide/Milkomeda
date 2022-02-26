@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 yizzuide All rights Reserved.
+ * Copyright (c) 2022 yizzuide All rights Reserved.
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -19,39 +19,27 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.sundial;
+package com.github.yizzuide.milkomeda.orbit;
 
+import org.springframework.core.annotation.AliasFor;
+import org.springframework.stereotype.Component;
 
-import com.github.yizzuide.milkomeda.orbit.OrbitAdvice;
-import com.github.yizzuide.milkomeda.orbit.OrbitInvocation;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import java.lang.annotation.*;
 
 /**
- * OrbitDataSourceAdvice
- * 数据源切面实现
+ * OrbitSourceProvider
+ * 切面源提供者
  *
  * @author yizzuide
- * @since 3.4.0
- * @version 3.13.0
- * Create at 2020/05/11 16:29
+ * @since 3.13.0
+ * Create at 2022/02/26 12:50
  */
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-public class OrbitDataSourceAdvice implements OrbitAdvice {
-
-    private String keyName = DynamicRouteDataSource.MASTER_KEY;
-
-    @Override
-    public Object invoke(OrbitInvocation invocation) throws Throwable {
-        try {
-            // 调用方法前，选择数据源
-            SundialHolder.setDataSourceType(getKeyName());
-            return invocation.proceed();
-        } finally {
-            SundialHolder.clearDataSourceType();
-        }
-    }
+@Documented
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.TYPE})
+@Inherited
+@Component
+public @interface OrbitSourceProvider {
+    @AliasFor(annotation = Component.class)
+    String value( ) default "";
 }

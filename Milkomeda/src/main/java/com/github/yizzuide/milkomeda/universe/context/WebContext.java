@@ -22,9 +22,12 @@
 package com.github.yizzuide.milkomeda.universe.context;
 
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.ClassPathBeanDefinitionScanner;
+import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.util.PathMatcher;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -33,6 +36,10 @@ import org.springframework.web.util.UrlPathHelper;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import java.lang.annotation.Annotation;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.stream.Collectors;
 
 /**
  * WebContext
@@ -154,5 +161,26 @@ public class WebContext {
         BeanDefinitionRegistry beanFactory = (BeanDefinitionRegistry) applicationContext.getBeanFactory();
         beanFactory.registerBeanDefinition(name, beanDefinition);
         return applicationContext.getBean(name, clazz);
+    }
+
+    /**
+     * 根据类上的注解扫描bean
+     * @param registry                  BeanDefinitionRegistry
+     * @param presentAnnotationClass    类上的注解
+     * @param basePackages              扫描的包
+     * @param <T>                       返回bean的类型
+     * @return  bean集合
+     * @since 3.13.0
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> Collection<T> scanBeans(BeanDefinitionRegistry registry, Class<? extends Annotation> presentAnnotationClass, String... basePackages) {
+        ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(registry);
+        scanner.addIncludeFilter(new AnnotationTypeFilter(presentAnnotationClass));
+        int count = scanner.scan(basePackages);
+        if (count == 0) {
+            return Collections.emptyList();
+        }
+        return ((ConfigurableListableBeanFactory) registry).getBeansWithAnnotation(presentAnnotationClass)
+                .values().stream().map(o -> (T)o).collect(Collectors.toList());
     }
 }
