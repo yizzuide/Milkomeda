@@ -26,7 +26,7 @@ import com.github.yizzuide.milkomeda.util.ReflectUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.aopalliance.aop.Advice;
 import org.springframework.aop.aspectj.AspectJExpressionPointcutAdvisor;
-import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
@@ -91,7 +91,7 @@ public class OrbitRegistrar implements ImportBeanDefinitionRegistrar {
         ConfigurableListableBeanFactory beanFactory = (ConfigurableListableBeanFactory) registry;
         Map<String, Object> orbits = beanFactory.getBeansWithAnnotation(Orbit.class);
         orbits.forEach((id, value) -> {
-            Class<? extends OrbitAdvice> adviceClass = (Class<? extends OrbitAdvice>) value.getClass();
+            Class<OrbitAdvice> adviceClass = (Class<OrbitAdvice>) value.getClass();
             Orbit orbit = AnnotationUtils.findAnnotation(adviceClass, Orbit.class);
             assert orbit != null;
             String pointcutExpression = orbit.pointcutExpression();
@@ -105,30 +105,25 @@ public class OrbitRegistrar implements ImportBeanDefinitionRegistrar {
             return;
         }
         for (OrbitProperties.Item item : instances) {
-            String beanName = "mk_sundial_advisor_" + item.getKeyName();
-            Advice advice = null;
-            try {
-                // 如果从IoC里找到这个Bean，不再重复创建
-                advice = beanFactory.getBean(item.getAdviceClassName());
-            } catch (BeansException ignore) {}
-            try {
-                // 如果为空，这种是YAML方式配置的class
-                if (advice == null) {
-                    advice = item.getAdviceClassName().newInstance();
-                }
-                // set custom props
-                if (item.getProps() != null) {
-                    ReflectUtil.setField(advice, item.getProps());
-                }
-                BeanDefinition aspectJBean = BeanDefinitionBuilder.genericBeanDefinition(AspectJExpressionPointcutAdvisor.class)
-                        .addPropertyValue("location", String.format("$$%s##", item.getKeyName())) // Set the location for debugging.
-                        .addPropertyValue("expression", item.getPointcutExpression())
-                        .addPropertyValue("advice", advice)
-                        .getBeanDefinition();
-                registry.registerBeanDefinition(beanName, aspectJBean);
-            } catch (Exception e) {
-                log.error("Create instance error with msg: {}", e.getMessage(), e);
+            // 生成advice的beanName
+            // AbstractBeanDefinition beanDefinition = BeanDefinitionBuilder.genericBeanDefinition(item.getAdviceClassName()).getBeanDefinition();
+            // String adviceBeanName = AnnotationBeanNameGenerator.INSTANCE.generateBeanName(beanDefinition, registry);
+
+            // 使用ObjectProvider的延迟查找代替getBean()的立即查找，因为getBean()找不到会有异常
+            ObjectProvider<OrbitAdvice> adviceProvider = (ObjectProvider<OrbitAdvice>) beanFactory.getBeanProvider(item.getAdviceClassName());
+            // 只有XML配置方式需要手动创建实例
+            Advice advice = adviceProvider.getIfAvailable(() -> ReflectUtil.newInstance(item.getAdviceClassName()));
+            // set custom props
+            if (item.getProps() != null) {
+                ReflectUtil.setField(advice, item.getProps());
             }
+            String beanName = "mk_sundial_advisor_" + item.getKeyName();
+            BeanDefinition aspectJBean = BeanDefinitionBuilder.genericBeanDefinition(AspectJExpressionPointcutAdvisor.class)
+                    .addPropertyValue("location", String.format("$$%s##", item.getKeyName())) // Set the location for debugging.
+                    .addPropertyValue("expression", item.getPointcutExpression())
+                    .addPropertyValue("advice", advice)
+                    .getBeanDefinition();
+            registry.registerBeanDefinition(beanName, aspectJBean);
         }
     }
 

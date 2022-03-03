@@ -470,4 +470,19 @@ public class ReflectUtil {
         // Entity
         return JSONUtil.parse(value, type);
     }
+
+    /**
+     * 创建类实例
+     * @param clazz 类
+     * @param <T>   类的类型
+     * @return  实例
+     */
+    public static <T> T newInstance(Class<T> clazz) {
+        try {
+            return clazz.newInstance();
+        } catch (Exception e) {
+            log.error("create instance error with msg: {}", e.getMessage(), e);
+        }
+        return null;
+    }
 }

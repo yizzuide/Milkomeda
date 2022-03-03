@@ -22,6 +22,8 @@
 package com.github.yizzuide.milkomeda.util;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
+import org.springframework.util.PropertyPlaceholderHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +33,8 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 /**
- * 占位符解析器
+ * 占位符解析器<br>
+ * 重构参考 {@link PropertyPlaceholderHelper} 和 {@link PropertyPlaceholderConfigurer}
  *
  * @author yizzuide
  * @since 3.0.0
