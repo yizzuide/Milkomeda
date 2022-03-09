@@ -21,7 +21,10 @@
 
 package com.github.yizzuide.milkomeda.light;
 
+import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
+import com.github.yizzuide.milkomeda.universe.context.WebContext;
 import lombok.Data;
+import org.springframework.context.ConfigurableApplicationContext;
 
 import java.io.Serializable;
 
@@ -34,12 +37,13 @@ import java.io.Serializable;
  * E：上下文数据
  *
  * @since 1.9.0
- * @version 2.0.6
+ * @version 3.13.0
  * @author yizzuide
  * Create at 2019/06/30 18:57
  */
 @Data
 public class LightContext {
+    // 每个Thread对应ThreadLocalMap<ThreadLocal, value>
     // 每个缓存实例都有自己的超级缓存
     private final ThreadLocal<Spot<Serializable, ?>> context = new ThreadLocal<>();
 
@@ -76,5 +80,33 @@ public class LightContext {
      */
     public void remove() {
         context.remove();
+    }
+
+
+    /**
+     * 设置线程数据（用于注册的LightContext Bean）
+     * @param value 任意对象
+     * @param identifier 唯一标识
+     * @param <E>   对象类型
+     * @since 3.13.0
+     */
+    public static <E> void setValue(E value, String identifier) {
+        LightContext lightContext = WebContext.registerBean((ConfigurableApplicationContext) ApplicationContextHolder.get(), identifier, LightContext.class);
+        Spot<Serializable, E> spot = new Spot<>();
+        spot.setData(value);
+        lightContext.set(spot);
+    }
+
+
+    /**
+     * 获取线程数据（用于注册的LightContext Bean）
+     * @param identifier 唯一标识
+     * @param <E>   对象类型
+     * @since 3.13.0
+     */
+    public static  <E> E getValue(String identifier) {
+        LightContext lightContext = WebContext.registerBean((ConfigurableApplicationContext) ApplicationContextHolder.get(), identifier, LightContext.class);
+        Spot<Serializable, E> spot = lightContext.get();
+        return spot.getData();
     }
 }

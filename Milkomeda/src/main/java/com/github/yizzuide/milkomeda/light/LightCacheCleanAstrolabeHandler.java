@@ -35,7 +35,7 @@ import java.util.Map;
  *
  * @author yizzuide
  * @since 3.3.0
- * @version 3.12.6
+ * @version 3.13.0
  * Create at 2020/05/06 14:13
  */
 public class LightCacheCleanAstrolabeHandler implements AstrolabeHandler {
@@ -49,6 +49,9 @@ public class LightCacheCleanAstrolabeHandler implements AstrolabeHandler {
                 CacheHelper.remove(cache);
             }
         }
+        // 用户注册的LightContext bean
+        Map<String, LightContext> lightContextMap = ApplicationContextHolder.get().getBeansOfType(LightContext.class);
+        lightContextMap.forEach((k, v) -> v.remove());
     }
 
     @Override

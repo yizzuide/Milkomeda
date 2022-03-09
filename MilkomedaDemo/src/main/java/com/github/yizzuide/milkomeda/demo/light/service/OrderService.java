@@ -4,6 +4,7 @@ import com.github.yizzuide.milkomeda.demo.light.pojo.Order;
 import com.github.yizzuide.milkomeda.light.LightCacheEvict;
 import com.github.yizzuide.milkomeda.light.LightCachePut;
 import com.github.yizzuide.milkomeda.light.LightCacheable;
+import com.github.yizzuide.milkomeda.light.LightContext;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +24,9 @@ public class OrderService {
 
     @LightCacheable(value = "orders", key = G_KEY)
     public List<Map<String, Object>> findList() {
+        String value = LightContext.getValue("test-id");
+        log.info("lightContext: {}", value);
+
         List<Map<String, Object>> list = new ArrayList<>();
         Map<String, Object> map = new HashMap<>();
         map.put("orderId", "1111111");

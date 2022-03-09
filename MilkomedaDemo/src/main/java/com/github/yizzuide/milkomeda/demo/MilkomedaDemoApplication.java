@@ -15,7 +15,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  */
 @EnableMilkomeda
 // 导入配置类
-@PropertySource("classpath:conf.properties")
+@PropertySource(value = "classpath:conf.properties", encoding = "UTF-8")
 @MapperScan(basePackages = "com.github.yizzuide.milkomeda.demo.*.mapper")
 @EnableTransactionManagement
 @EnableAspectJAutoProxy(proxyTargetClass = true, exposeProxy = true)
