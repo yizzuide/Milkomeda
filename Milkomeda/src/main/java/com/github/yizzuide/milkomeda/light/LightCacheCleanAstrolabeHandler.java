@@ -40,6 +40,13 @@ import java.util.Map;
  */
 public class LightCacheCleanAstrolabeHandler implements AstrolabeHandler {
 
+    private final LightThreadLocalScope scope;
+
+    public LightCacheCleanAstrolabeHandler(LightThreadLocalScope scope) {
+        this.scope = scope;
+    }
+
+    @SuppressWarnings("rawtypes")
     @Override
     public void postHandle(ServletRequest request, ServletResponse response) {
         // 清除请求线程的所有Cache子实例的超级缓存
@@ -52,6 +59,11 @@ public class LightCacheCleanAstrolabeHandler implements AstrolabeHandler {
         // 用户注册的LightContext bean
         Map<String, LightContext> lightContextMap = ApplicationContextHolder.get().getBeansOfType(LightContext.class);
         lightContextMap.forEach((k, v) -> v.remove());
+
+        // 清空ThreadLocalScope
+        if (this.scope != null) {
+            this.scope.destroy();
+        }
     }
 
     @Override

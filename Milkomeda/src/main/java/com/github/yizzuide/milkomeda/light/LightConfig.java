@@ -23,6 +23,7 @@ package com.github.yizzuide.milkomeda.light;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -32,15 +33,12 @@ import org.springframework.context.annotation.Configuration;
  *
  * @author yizzuide
  * @since 1.17.0
- * @version 3.3.0
+ * @version 3.13.0
  * Create at 2019/12/03 16:22
  */
 @Configuration
 @EnableConfigurationProperties(LightProperties.class)
 public class LightConfig {
-
-    @Autowired
-    private LightProperties props;
 
     @Bean
     @ConditionalOnMissingBean
@@ -49,14 +47,20 @@ public class LightConfig {
     }
 
     @Bean(LightCacheAspect.DEFAULT_BEAN_NAME)
-    public Cache lightCache() {
+    public Cache lightCache(LightProperties props) {
         LightCache lightCache = new LightCache();
         lightCache.configFrom(props);
         return lightCache;
     }
 
     @Bean
-    public LightCacheCleanAstrolabeHandler lightCacheCleanAstrolabeHandler() {
-        return new LightCacheCleanAstrolabeHandler();
+    public LightCacheCleanAstrolabeHandler lightCacheCleanAstrolabeHandler(@Autowired(required = false) LightThreadLocalScope scope) {
+        return new LightCacheCleanAstrolabeHandler(scope);
+    }
+
+    @Bean
+    @ConditionalOnProperty(prefix = "milkomeda.light", name = "enable-light-thread-local-scope", havingValue = "true")
+    public LightThreadLocalScope lightThreadLocalScope() {
+        return new LightThreadLocalScope("lightThreadLocal");
     }
 }

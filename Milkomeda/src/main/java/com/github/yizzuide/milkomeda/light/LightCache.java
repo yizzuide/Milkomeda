@@ -124,7 +124,7 @@ public class LightCache implements Cache {
      * 超级缓存（每个Cache都有自己的超级缓存，互不影响）
      */
     @Getter
-    private final LightContext superCache = new LightContext();
+    private final LightContext<Serializable, Object> superCache = new LightContext<>();
 
     /**
      * 一级缓存容器（内存池）
@@ -150,7 +150,7 @@ public class LightCache implements Cache {
         if (null == id) return;
         // 如果一级缓存没有数据，创建新的缓存数据对象
         if (cacheMap.size() == 0) {
-            superCache.set(id);
+            superCache.setId(id);
             return;
         }
 
@@ -161,7 +161,7 @@ public class LightCache implements Cache {
                 .findFirst();
         // 没找到，创建新的缓存数据对象
         if (!viableSpot.isPresent()) {
-            superCache.set(id);
+            superCache.setId(id);
             return;
         }
 
@@ -170,16 +170,17 @@ public class LightCache implements Cache {
         boolean isAbandon = discardStrategy.ascend(spot);
         // 丢弃缓存，重新设置数据
         if (isAbandon) {
-            superCache.set(id);
+            superCache.setId(id);
             return;
         }
         // 设置到超级缓存，保存相同缓存数据对象只有一份
         superCache.set(spot);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public <E> Spot<Serializable, E> get() {
-        return superCache.get();
+        return (Spot<Serializable, E>) superCache.get();
     }
 
     @Override
@@ -223,9 +224,7 @@ public class LightCache implements Cache {
         // 二级缓存
         if (!onlyCacheL1 && success) {
             // 有内存缓存的，异步写入到redis
-            PulsarHolder.getPulsar().post(() -> {
-                cacheL2(key, spot);
-            });
+            PulsarHolder.getPulsar().post(() -> cacheL2(key, spot));
         }
     }
 

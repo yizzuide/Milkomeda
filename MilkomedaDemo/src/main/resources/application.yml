@@ -206,6 +206,8 @@ milkomeda:
     exclude-urls: ["/favicon.ico"]
 
   light:
+    # 这个ThreadLocalScope是独立的功能，和下面缓存没有关联
+    enable-light-thread-local-scope: true
     instances:
       # 缓存实例配置（没有配置的使用默认值）
       order:

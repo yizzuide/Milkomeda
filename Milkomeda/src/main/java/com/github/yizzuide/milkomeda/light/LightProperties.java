@@ -76,4 +76,10 @@ public class LightProperties {
      * @since 3.12.4
      */
     private boolean enableSuperCache = true;
+
+    /**
+     * 是否开启ThreadLocalScope
+     * @since 3.13.0
+     */
+    private boolean enableLightThreadLocalScope = false;
 }

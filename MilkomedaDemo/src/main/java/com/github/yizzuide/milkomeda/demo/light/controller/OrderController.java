@@ -3,6 +3,7 @@ package com.github.yizzuide.milkomeda.demo.light.controller;
 import com.github.yizzuide.milkomeda.demo.light.pojo.Order;
 import com.github.yizzuide.milkomeda.demo.light.service.OrderService;
 import com.github.yizzuide.milkomeda.light.LightContext;
+import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -44,6 +45,11 @@ public class OrderController {
     public List<Map<String, Object>> list() {
         // 测试设置线程数据
         LightContext.setValue("TestData", "test-id");
+        // 测试线程Scope
+        Order order = ApplicationContextHolder.get().getBean(Order.class);
+        Order order2 = ApplicationContextHolder.get().getBean(Order.class);
+        System.out.println(order);
+        System.out.println(order2);
         return orderService.findList();
     }
 }

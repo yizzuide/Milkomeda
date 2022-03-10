@@ -56,7 +56,7 @@ public class CacheHelper {
      * @param cache     缓存实例
      * @param spot      缓存数据
      */
-    public static void set(Cache cache, Spot<Serializable, ?> spot) {
+    public static void set(Cache cache, Spot<Serializable, Object> spot) {
         if (cache instanceof LightCache) {
             LightCache lightCache = (LightCache) cache;
             lightCache.getSuperCache().set(spot);
@@ -89,6 +89,7 @@ public class CacheHelper {
      * @return                  缓存数据
      * @since 3.12.10
      */
+    @SuppressWarnings("unchecked")
     public static <E> E getFastLevel(Cache cache, Function<Spot<Serializable, E>, E> dataGenerator) {
         E data = null;
         Spot<Serializable, E> fastSpot;
@@ -102,7 +103,7 @@ public class CacheHelper {
             }
             data = dataGenerator.apply(fastSpot);
             fastSpot.setData(data);
-            set(cache, fastSpot);
+            set(cache, (Spot<Serializable, Object>)fastSpot);
         }
         return data;
     }

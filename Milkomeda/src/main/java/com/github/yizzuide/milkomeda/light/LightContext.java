@@ -42,17 +42,25 @@ import java.io.Serializable;
  * Create at 2019/06/30 18:57
  */
 @Data
-public class LightContext {
+public class LightContext<ID, V> {
     // 每个Thread对应ThreadLocalMap<ThreadLocal, value>
     // 每个缓存实例都有自己的超级缓存
-    private final ThreadLocal<Spot<Serializable, ?>> context = new ThreadLocal<>();
+    private final ThreadLocal<Spot<ID, V>> context;
+
+    public LightContext() {
+        context = new ThreadLocal<>();
+    }
+
+    public LightContext(ThreadLocal<Spot<ID, V>> threadLocal) {
+        this.context = threadLocal;
+    }
 
     /**
      * 设置上下文id
      * @param id    上下文id
      */
-    public void set(Serializable id) {
-        Spot<Serializable, ?> spot = new Spot<>();
+    public void setId(ID id) {
+        Spot<ID, V> spot = new Spot<>();
         spot.setView(id);
         set(spot);
     }
@@ -61,18 +69,16 @@ public class LightContext {
      * 设置上下文数据
      * @param spot  Spot
      */
-    public void set(Spot<Serializable, ?> spot) {
+    public void set(Spot<ID, V> spot) {
         context.set(spot);
     }
 
     /***
      * 获取上下文数据
-     * @param <E> 实体类型
      * @return  Spot
      */
-    @SuppressWarnings("unchecked")
-    public <E> Spot<Serializable, E> get() {
-        return (Spot<Serializable, E>) context.get();
+    public Spot<ID, V> get() {
+        return context.get();
     }
 
     /**
@@ -87,12 +93,13 @@ public class LightContext {
      * 设置线程数据（用于注册的LightContext Bean）
      * @param value 任意对象
      * @param identifier 唯一标识
-     * @param <E>   对象类型
+     * @param <V>   对象类型
      * @since 3.13.0
      */
-    public static <E> void setValue(E value, String identifier) {
-        LightContext lightContext = WebContext.registerBean((ConfigurableApplicationContext) ApplicationContextHolder.get(), identifier, LightContext.class);
-        Spot<Serializable, E> spot = new Spot<>();
+    @SuppressWarnings("unchecked")
+    public static <V> void setValue(V value, String identifier) {
+        LightContext<Serializable, V> lightContext = WebContext.registerBean((ConfigurableApplicationContext) ApplicationContextHolder.get(), identifier, LightContext.class);
+        Spot<Serializable, V> spot = new Spot<>();
         spot.setData(value);
         lightContext.set(spot);
     }
@@ -101,12 +108,13 @@ public class LightContext {
     /**
      * 获取线程数据（用于注册的LightContext Bean）
      * @param identifier 唯一标识
-     * @param <E>   对象类型
+     * @param <V>   对象类型
      * @since 3.13.0
      */
-    public static  <E> E getValue(String identifier) {
-        LightContext lightContext = WebContext.registerBean((ConfigurableApplicationContext) ApplicationContextHolder.get(), identifier, LightContext.class);
-        Spot<Serializable, E> spot = lightContext.get();
+    @SuppressWarnings("unchecked")
+    public static  <V> V getValue(String identifier) {
+        LightContext<Serializable, V> lightContext = WebContext.registerBean((ConfigurableApplicationContext) ApplicationContextHolder.get(), identifier, LightContext.class);
+        Spot<Serializable, V> spot = lightContext.get();
         return spot.getData();
     }
 }
