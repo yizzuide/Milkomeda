@@ -74,6 +74,8 @@ public class TomcatFilterLoader extends AbstractFilterLoader<FilterProperties.Fi
             return true;
         }
         // 动态加载
+        // 这个API无法unload
+        //getServletContext().addFilter()
         return TomcatPolyfill.addDynamicFilter(getServletContext(), (ConfigurableApplicationContext) getApplicationContext(), name, clazz, urlPatterns);
     }
 

@@ -20,9 +20,9 @@ import java.util.Map;
 @Component
 public class MilkomedaStartListener implements ApplicationListener<ApplicationStartedEvent> {
 
-//    @Lazy
-//    @Resource
-//	private Moon<String> smsMoon;
+    //@Lazy
+    //@Resource
+	//private Moon<String> smsMoon;
 
     @Override
     public void onApplicationEvent(@NonNull ApplicationStartedEvent event) {

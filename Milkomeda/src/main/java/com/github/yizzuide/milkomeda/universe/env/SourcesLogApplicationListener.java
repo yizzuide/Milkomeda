@@ -22,7 +22,7 @@
 package com.github.yizzuide.milkomeda.universe.env;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.context.config.ConfigFileApplicationListener;
+import org.springframework.boot.context.config.ConfigDataEnvironmentPostProcessor;
 import org.springframework.boot.context.event.ApplicationEnvironmentPreparedEvent;
 import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.context.ApplicationListener;
@@ -37,7 +37,8 @@ import org.springframework.lang.NonNull;
  *
  * @author yizzuide
  * @since 3.0.1
- * @see org.springframework.boot.context.config.ConfigFileApplicationListener
+ * @version 3.13.0
+ * @see org.springframework.boot.context.config.ConfigDataEnvironmentPostProcessor
  * @see org.springframework.boot.context.config.AnsiOutputApplicationListener
  * Create at 2020/04/11 11:56
  */
@@ -55,12 +56,12 @@ public class SourcesLogApplicationListener implements ApplicationListener<Applic
         // StandardServletEnvironment or StandardReactiveEnvironment
         // 获取配置属性值
         boolean logEnable = Binder.get(environment).bind("milkomeda.show-log", Boolean.class).orElseGet(() -> false);
-        log.info("milkomeda log is {}", logEnable ? "enable" : "disable");
+        log.info("milkomeda log: {}", logEnable ? "enable" : "disable");
     }
 
     @Override
     public int getOrder() {
-        // Apply after ConfigFileApplicationListener has called EnvironmentPostProcessors
-        return ConfigFileApplicationListener.DEFAULT_ORDER + 10;
+        // Apply after ConfigDataEnvironmentPostProcessor has called EnvironmentPostProcessors
+        return ConfigDataEnvironmentPostProcessor.ORDER + 10;
     }
 }

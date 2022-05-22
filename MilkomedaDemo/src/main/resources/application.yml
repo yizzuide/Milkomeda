@@ -7,17 +7,23 @@ server:
         http-only: true
         # 自定义sessionId，用于后台登录唯一标识，防止被第三方平台覆盖
         name: mk-sessionid
-  # springboot 2.3设置服务器编码
+    # Spring Boot 2.4: No longer register the DefaultServlet provided by your servlet container.
+    register-default-servlet: true
+    # Springboot 2.3: 设置服务器编码
     encoding:
       charset: UTF-8
-  # springboot 2.3设置服务器工作线程
   tomcat:
+    # Springboot 2.3: 设置服务器工作线程
     threads:
       max: 120
-  # springboot 2.3优雅关机：拒绝新请求，等正在执行的请求完成
+    # Springboot 2.4: Configure how long Tomcat will wait for another request before closing a keep-alive connection.
+    keep-alive-timeout: 30s
+    # Springboot 2.4: Control the maximum number of requests that can be made on a keep-alive connection before it is closed
+    max-keep-alive-requests: 120
+  # Springboot 2.3优雅关机：拒绝新请求，等正在执行的请求完成
   shutdown: graceful
 
-  # springboot 2.3不再响应默认的错误信息
+  # Springboot 2.3不再响应默认的错误信息
   error:
     include-binding-errors: never
     include-message: never
@@ -28,7 +34,10 @@ spring:
     name: @spring.application.name@
   profiles:
     active: @spring.profiles.active@
-  # springboot 2.3优雅关机等待时间
+  # Springboot 2.4使用了新配置文件合并机制，这里配置为2.3以上的方式
+  config:
+    use-legacy-processing: true
+  # Springboot 2.3优雅关机等待时间
   lifecycle:
     timeout-per-shutdown-phase: 20s
   datasource:
@@ -40,21 +49,26 @@ spring:
       url: jdbc:mysql://localhost:3306/milkomeda?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&useSSL=false&rewriteBatchedStatements=true&allowMultiQueries=true&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
       username: root
       password: ${MYSQL_PWD}
+
   redis:
     host: 127.0.0.1
+
+  web:
+    # 资源不生成mapping映射
+    resources:
+      add-mappings: false
 
   mvc:
     # 异步超时
     async:
       request-timeout: 20s
-    # 请求映射方法允许添加后缀匹配: xx/user -> xx/user.html
-#    pathmatch:
-#        use-suffix-pattern: true
+
     # 让404错误抛出NoHandlerFoundException异常
     throw-exception-if-no-handler-found: true
-  # 资源不生成mapping映射
-  resources:
-    add-mappings: false
+
+  # 资源不生成mapping映射（Springboot2.4 迁移到web里）
+  #resources:
+    #add-mappings: false
 
   # 国际化资源位置
   messages:
@@ -93,6 +107,10 @@ spring:
 logging:
   level:
     com.github.yizzuide.milkomeda.demo.sundial.mapper: DEBUG
+  # Springboot 2.4: The charsets used to by Logback and Log4j logging can now be configured
+  charset:
+    console: UTF-8
+    file: UTF-8
 
 management:
   endpoint:
@@ -100,10 +118,17 @@ management:
       enabled: false
     health:
       show-details: always
+    # Springboot 2.4: A new startup actuator endpoint is now available that shows information about your application startup.
+    startup:
+      enabled: true
   endpoints:
     web:
       exposure:
         include: '*'
+  # Springboot 2.4: HTTP traces no longer include cookie headers by default
+  trace:
+    http:
+      include: cookies, errors, request-headers, response-headers
 
 mybatis:
   type-aliases-package: com.github.yizzuide.milkomeda.demo.halo.domain
