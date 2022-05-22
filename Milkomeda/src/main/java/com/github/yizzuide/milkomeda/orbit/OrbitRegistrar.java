@@ -117,7 +117,7 @@ public class OrbitRegistrar implements ImportBeanDefinitionRegistrar {
             if (item.getProps() != null) {
                 ReflectUtil.setField(advice, item.getProps());
             }
-            String beanName = "mk_sundial_advisor_" + item.getKeyName();
+            String beanName = "mk_orbit_advisor_" + item.getKeyName();
             BeanDefinition aspectJBean = BeanDefinitionBuilder.genericBeanDefinition(AspectJExpressionPointcutAdvisor.class)
                     .addPropertyValue("location", String.format("$$%s##", item.getKeyName())) // Set the location for debugging.
                     .addPropertyValue("expression", item.getPointcutExpression())

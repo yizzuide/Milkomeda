@@ -42,9 +42,10 @@ import java.util.Map;
 public class LightThreadLocalScope extends GenericScope implements Ordered {
 
     public LightThreadLocalScope(String name) {
+        // 设置自定义Scope名
         super.setName(name);
+        // 设置自定义Scope缓存
         super.setScopeCache(new LightScopeCache());
-        this.destroy();
     }
 
     @Override
@@ -66,6 +67,8 @@ public class LightThreadLocalScope extends GenericScope implements Ordered {
     static class LightScopeCache implements ScopeCache {
 
         private final LightContext<String, Map<String, Object>> lightContext = new LightContext<>(new NamedThreadLocal<Spot<String, Map<String, Object>>>("light-scope-thread-local"){
+
+            // 覆盖初始化，防止获了为空
             @Override
             protected Spot<String, Map<String, Object>> initialValue() {
                 Spot<String, Map<String, Object>> spot = new Spot<>();
@@ -94,6 +97,7 @@ public class LightThreadLocalScope extends GenericScope implements Ordered {
         @Override
         public Object put(String name, Object value) {
             Object result = lightContext.get().getData().putIfAbsent(name, value);
+            // 如果ThreadLocal里有，就用这里面的
             if (result != null) {
                 return result;
             }
