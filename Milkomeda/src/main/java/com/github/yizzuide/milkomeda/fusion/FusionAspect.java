@@ -72,8 +72,9 @@ public class FusionAspect {
         Method method = ((MethodSignature) joinPoint.getSignature()).getMethod();
         // 获取可重复注解
         Set<Fusion> fusions = AnnotatedElementUtils.getMergedRepeatableAnnotations(method, Fusion.class, Fusions.class);
-        if (fusions.size() == 1) {
-            Fusion fusion = fusions.stream().findFirst().get();
+        if (fusions.size() <= 1) {
+            Fusion fusion = fusions.size() == 0 ? ReflectUtil.getAnnotation(joinPoint, Fusion.class)
+                    : fusions.stream().findFirst().get();
             return fusionAroundApply(joinPoint, fusion);
         }
         return fusionGroupAroundApply(joinPoint, fusions);
@@ -174,11 +175,15 @@ public class FusionAspect {
      */
     private Object modifyReturn(Fusion resultTagFusion, ProceedingJoinPoint joinPoint, Object originReturnObj) throws Throwable {
         String condition = resultTagFusion.condition();
-        // 检查修改条件
+        // 检查修改条件，条件不通过直接返回
         if (StringUtils.hasLength(condition) && !Boolean.parseBoolean(ELContext.getValue(joinPoint, condition))) {
             return originReturnObj == null ? joinPoint.proceed() : originReturnObj;
         }
+        // 通过标签匹配修改返回值
         String tagName = !StringUtils.hasLength(resultTagFusion.value()) ? resultTagFusion.tag() : resultTagFusion.value();
+        if (!StringUtils.hasLength(tagName)) {
+            return originReturnObj;
+        }
         // 执行方法体
         Object returnData = originReturnObj == null ? joinPoint.proceed() : originReturnObj;
         if (null ==  converter) {
