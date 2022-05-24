@@ -24,16 +24,16 @@ package com.github.yizzuide.milkomeda.fusion;
 import java.lang.annotation.*;
 
 /**
- * FusionGroup
+ * Fusions
  *
  * @author yizzuide
- * @since 3.0.0
+ * @since 3.13.0
  * Create at 2020/04/01 00:51
  */
 @Documented
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
-public @interface FusionGroup {
+public @interface Fusions {
     Fusion[] value();
 }

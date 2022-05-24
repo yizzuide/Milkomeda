@@ -80,11 +80,11 @@ public class LightCacheAspect {
     @SuppressWarnings("unchecked")
     private Object applyAround(ProceedingJoinPoint joinPoint, Annotation annotation, String condition, String cacheBeanName, String prefix, String key) throws Throwable {
         // 检查缓存条件
-        if (!StringUtils.isEmpty(condition) && !Boolean.parseBoolean(ELContext.getValue(joinPoint, condition))) {
+        if (StringUtils.hasLength(condition) && !Boolean.parseBoolean(ELContext.getValue(joinPoint, condition))) {
             return joinPoint.proceed();
         }
 
-        if (StringUtils.isEmpty(key)) {
+        if (!StringUtils.hasLength(key)) {
             throw new IllegalArgumentException(String.format("You must set key before use %s.", annotation.annotationType().getSimpleName()));
         }
 

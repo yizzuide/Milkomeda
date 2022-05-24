@@ -34,17 +34,14 @@ spring:
     name: @spring.application.name@
   profiles:
     active: @spring.profiles.active@
-  # Springboot 2.4使用了新配置文件合并机制，这里配置为2.3以上的方式
+  # Springboot 2.4：使用了新配置文件合并机制，这里配置为2.3以前的方式
   config:
     use-legacy-processing: true
-  # Springboot 2.3优雅关机等待时间
+  # Springboot 2.3：优雅关机等待时间
   lifecycle:
     timeout-per-shutdown-phase: 20s
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    #url: jdbc:mysql://localhost:3306/milkomeda?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&useSSL=false&rewriteBatchedStatements=true&allowMultiQueries=true&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
-    #username: root
-    #password: ${MYSQL_PWD}
     druid:
       url: jdbc:mysql://localhost:3306/milkomeda?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&useSSL=false&rewriteBatchedStatements=true&allowMultiQueries=true&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
       username: root
@@ -54,7 +51,7 @@ spring:
     host: 127.0.0.1
 
   web:
-    # 资源不生成mapping映射
+    # Springboot 2.4：资源不生成mapping映射
     resources:
       add-mappings: false
 
