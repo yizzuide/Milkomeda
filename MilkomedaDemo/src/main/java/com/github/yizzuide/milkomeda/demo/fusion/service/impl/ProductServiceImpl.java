@@ -30,7 +30,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public long push(Product product, boolean delay) {
         log.info("正在推送新产品：{}, 是否延迟：{}", product.getName(), delay);
-        messageService.send(product.getId());
+        messageService.send(product.getName());
         return 1;
     }
 

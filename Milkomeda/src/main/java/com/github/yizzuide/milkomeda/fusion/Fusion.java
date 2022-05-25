@@ -55,7 +55,7 @@ public @interface Fusion {
     String value() default "";
 
     /**
-     * 根据条件是否修改返回值，`allowed`为false时设置有效，需使用SpEL（默认执行修改操作，如果条件不成功，则不修改）
+     * 根据条件是否修改返回值，`allowed`非false时设置有效，需使用SpEL（默认执行修改操作，如果条件不成功，则不修改）
      * @see #tag()
      * @return  String
      */

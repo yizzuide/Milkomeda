@@ -46,7 +46,7 @@ import java.util.function.BiConsumer;
  * Create at 2020/03/31 00:12
  */
 @Slf4j
-public class WebMvcInterceptorLoader extends AbstractInterceptorLoader<InterceptorProperties.Interceptors> {
+public class WebMvcInterceptorLoader extends AbstractInterceptorLoader<InterceptorProperties.Interceptor> {
     
     /**
      * 请求映射处理器
@@ -64,23 +64,23 @@ public class WebMvcInterceptorLoader extends AbstractInterceptorLoader<Intercept
     
     @Override
     public void load(@NonNull Class<?> clazz, List<String> include, List<String> exclude, int order, Map<String, Object> props) {
-        InterceptorProperties.Interceptors hInterceptor = new InterceptorProperties.Interceptors();
+        InterceptorProperties.Interceptor hInterceptor = new InterceptorProperties.Interceptor();
         hInterceptor.setClazz(clazz);
         if (include != null) {
-            hInterceptor.setIncludeURLs(include);
+            hInterceptor.setIncludeUrls(include);
         }
-        hInterceptor.setExcludeURLs(exclude);
+        hInterceptor.setExcludeUrls(exclude);
         hInterceptor.setOrder(order);
         if (props != null) {
             hInterceptor.setProps(props);
         }
         transform(Collections.singletonList(hInterceptor), (hi, handlerInterceptor)  -> SpringMvcPolyfill.addDynamicInterceptor(handlerInterceptor,
-                hInterceptor.getOrder(), hi.getIncludeURLs(), hi.getExcludeURLs(), this.requestMappingHandlerMapping));
+                hInterceptor.getOrder(), hi.getIncludeUrls(), hi.getExcludeUrls(), this.requestMappingHandlerMapping));
     }
     
     @Override
     public void unLoad(@NonNull Class<?> clazz) {
-        InterceptorProperties.Interceptors hInterceptor = new InterceptorProperties.Interceptors();
+        InterceptorProperties.Interceptor hInterceptor = new InterceptorProperties.Interceptor();
         hInterceptor.setClazz(clazz);
         transform(Collections.singletonList(hInterceptor), (hi, handlerInterceptor)  ->
                 SpringMvcPolyfill.removeDynamicInterceptor(handlerInterceptor, this.requestMappingHandlerMapping));
@@ -94,12 +94,12 @@ public class WebMvcInterceptorLoader extends AbstractInterceptorLoader<Intercept
     @Override
     public void refresh() {
         // 刷新配置后的拦截器列表
-        List<InterceptorProperties.Interceptors> afterInterceptors = this.props.getInterceptors();
+        List<InterceptorProperties.Interceptor> afterInterceptors = this.props.getInterceptors();
         merge(afterInterceptors, i -> this.unLoad(i.getClazz()), i ->
-                this.load(i.getClazz(), i.getIncludeURLs(), i.getExcludeURLs(), i.getOrder(), i.getProps()));
+                this.load(i.getClazz(), i.getIncludeUrls(), i.getExcludeUrls(), i.getOrder(), i.getProps()));
     }
 
-    private void transform(List<InterceptorProperties.Interceptors> hydrogenInterceptors, @NonNull BiConsumer<InterceptorProperties.Interceptors, HandlerInterceptor> performAction) {
+    private void transform(List<InterceptorProperties.Interceptor> hydrogenInterceptors, @NonNull BiConsumer<InterceptorProperties.Interceptor, HandlerInterceptor> performAction) {
         if (CollectionUtils.isEmpty(hydrogenInterceptors)) {
             return;
         }

@@ -108,11 +108,7 @@ public class FusionAspect {
                 fallback = fusion.fallback();
                 continue;
             }
-            if (fusion.allowedType() == FusionAllowedType.AND) {
-                allowedExpress.append(" && ");
-            } else {
-                allowedExpress.append(" || ");
-            }
+            allowedExpress.append(fusion.allowedType() == FusionAllowedType.AND ? " && " : " || ");
             allowedExpress.append(fusion.allowed());
             if (!StringUtils.hasLength(fusion.fallback())) {
                 continue;

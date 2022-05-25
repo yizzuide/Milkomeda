@@ -46,10 +46,10 @@ public class InterceptorProperties {
     /**
      * 拦截器列表
      */
-    private List<Interceptors> interceptors;
+    private List<Interceptor> interceptors;
 
     @Data
-    public static class Interceptors {
+    public static class Interceptor {
         /**
          * 拦截器类
          */
@@ -58,12 +58,12 @@ public class InterceptorProperties {
         /**
          * 包括拦截的URL
          */
-        private List<String> includeURLs;
+        private List<String> includeUrls;
 
         /**
          * 排除拦截的URL
          */
-        private List<String> excludeURLs;
+        private List<String> excludeUrls;
 
         /**
          * 拦截器执行顺序
@@ -79,7 +79,7 @@ public class InterceptorProperties {
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            Interceptors that = (Interceptors) o;
+            Interceptor that = (Interceptor) o;
             return clazz.equals(that.clazz);
         }
 

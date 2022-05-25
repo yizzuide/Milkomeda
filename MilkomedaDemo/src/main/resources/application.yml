@@ -6,7 +6,7 @@ server:
       cookie:
         http-only: true
         # 自定义sessionId，用于后台登录唯一标识，防止被第三方平台覆盖
-        name: mk-sessionid
+        name: mk-sessionId
     # Spring Boot 2.4: No longer register the DefaultServlet provided by your servlet container.
     register-default-servlet: true
     # Springboot 2.3: 设置服务器编码
@@ -123,9 +123,9 @@ management:
       exposure:
         include: '*'
   # Springboot 2.4: HTTP traces no longer include cookie headers by default
-  trace:
-    http:
-      include: cookies, errors, request-headers, response-headers
+  #trace:
+    #http:
+      #include: cookies, errors, request-headers, response-headers
 
 mybatis:
   type-aliases-package: com.github.yizzuide.milkomeda.demo.halo.domain
@@ -177,22 +177,20 @@ milkomeda:
   particle:
     enable-filter: true
     limiters:
-      -
-        # 新配置一个去重限制器（内部配置了idempotentLimiter），用来添加到BarrierLimiter组合链，防止污染限制器链
-        name: noRepeatLimiter
+      # 新配置一个去重限制器（内部配置了idempotentLimiter），用来添加到BarrierLimiter组合链，防止污染限制器链
+      - name: noRepeatLimiter
         key-expire: 20s
-        include-urls: ["/particle/pay"]
+        include-urls: [ "/particle/pay" ]
         response:
           status: 200
           code: -1
           message[msg]: 请求太频繁，请稍后再试！
-      -
-        name: timesLimiter
+      - name: timesLimiter
         type: TIMES
         props:
           timesType: MIN
           limitTimes: 3
-        include-urls: ["/particle/pay"]
+        include-urls: [ "/particle/pay" ]
         #response-content-type: text/plain # 修改响应类型，默认为application/json
         response:
           status: 200
@@ -201,15 +199,13 @@ milkomeda:
           message[msg]: 请求超过次数，请稍后再试！
           addition:
             data: ${collections.emptyMap}
-      -
-        name: barrierLimiter
+      - name: barrierLimiter
         type: BARRIER
         props:
-          chain: ["noRepeatLimiter", "timesLimiter"]
+          chain: [ "noRepeatLimiter", "timesLimiter" ]
         order: -1
-        include-urls: ["/particle/pay"]
-      -
-        name: userBloomLimiter
+        include-urls: [ "/particle/pay" ]
+      - name: userBloomLimiter
         type: BLOOM
         props:
           # bitmap key
@@ -220,7 +216,7 @@ milkomeda:
           #valueSeparator: _
         # 这里的匹配数据：$params.phone，默认前面必须用`_`分隔，可通过上面valueSeparator配置
         key-tpl: limit_{method}_{uri}_{$params.phone}
-        include-urls: ["/particle/exists"]
+        include-urls: [ "/particle/exists" ]
         response:
           status: 200
           code: -1
@@ -322,13 +318,11 @@ milkomeda:
 
   moon:
     instances:
-      -
-        name: smsMoon
+      - name: smsMoon
         # 默认采用lua高性能方式，不需要设置缓存名
         #cache-name: smsMoonCache
-        phases: ["七牛云短信", "阿里云短信", "容联云短信"]
-      -
-        name: abTestMoon
+        phases: [ "七牛云短信", "阿里云短信", "容联云短信" ]
+      - name: abTestMoon
         #cache-name: abTestMoonCache
         # 使用百分比分配策略
         type: PERCENT
@@ -337,7 +331,8 @@ milkomeda:
         # 同上
         #phases: [2, 8]
         # 50%的0，50%的1
-        phases: [1, 1]
+        phases: [ 1, 1 ]
+
 
   hydrogen:
     transaction:
@@ -387,8 +382,7 @@ milkomeda:
 
         # 自定义异常列表处理
         customs:
-          -
-            clazz: com.github.yizzuide.milkomeda.demo.hydrogen.exception.YizException
+          - clazz: com.github.yizzuide.milkomeda.demo.hydrogen.exception.YizException
             status: 200
             # 下面不需要指定值，只需要列出来需要返回，内部将从YizException获取
             code:
@@ -414,13 +408,13 @@ milkomeda:
     interceptor:
       enable: true
       interceptors:
-        -
-          clazz: com.github.yizzuide.milkomeda.demo.hydrogen.handler.UrlLogInterceptor
+        - clazz: com.github.yizzuide.milkomeda.demo.hydrogen.handler.UrlLogInterceptor
           order: 1
           exclude-urls:
             - /error
           props:
             open: true
+
 
     # 过滤器
     filter:
@@ -428,11 +422,11 @@ milkomeda:
       # 测试表达式计算
       enable: ${condition.equals(${spring.application.name}, milkomeda-demo)}
       filters:
-        -
-          name: ipLimiterFilter
+        - name: ipLimiterFilter
           clazz: com.github.yizzuide.milkomeda.demo.hydrogen.handler.IPLimiterFilter
           url-patterns:
             - /*
+
 
   # 分布式锁
   atom:

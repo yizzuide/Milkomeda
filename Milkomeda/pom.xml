@@ -116,7 +116,7 @@
             <artifactId>spring-boot-starter-web</artifactId>
             <optional>true</optional>
         </dependency>
-        <!-- no longer included in web starters at springboot 2.3.x -->
+        <!-- springboot 2.3.x: No longer included in web starters -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
