@@ -21,6 +21,7 @@
 
 package com.github.yizzuide.milkomeda.universe.el;
 
+import com.github.yizzuide.milkomeda.metal.MetalHolder;
 import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import com.github.yizzuide.milkomeda.universe.context.WebContext;
 import com.github.yizzuide.milkomeda.universe.env.Environment;
@@ -45,7 +46,7 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @author yizzuide
  * @since 1.5.0
- * @version 3.1.0
+ * @version 3.13.0
  * Create at 2019/05/30 22:24
  */
 public class ExpressionEvaluator<T> extends CachedExpressionEvaluator {
@@ -79,6 +80,11 @@ public class ExpressionEvaluator<T> extends CachedExpressionEvaluator {
         Environment env = ApplicationContextHolder.getEnvironment();
         if (env != null) {
             evaluationContext.setVariable("env", env.getProperties());
+        }
+        // 添加Metal配置
+        Map<String, String> metalSourceMap = MetalHolder.getSourceMap();
+        if (metalSourceMap != null) {
+            evaluationContext.setVariable("metal", metalSourceMap);
         }
         evaluationContext.setVariable("target", object);
         ServletRequestAttributes requestAttributes = WebContext.getRequestAttributes();

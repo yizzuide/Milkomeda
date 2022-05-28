@@ -57,10 +57,15 @@ import java.util.Collections;
 @AutoConfigureAfter(WebMvcAutoConfiguration.class)
 public class MilkomedaContextConfig {
 
+    @Autowired
+    private MilkomedaProperties properties;
+
     @Bean
     @ConditionalOnMissingBean
     public Environment env() {
-        return new Environment();
+        Environment environment = new Environment();
+        environment.putAll(properties.getEnv());
+        return environment;
     }
 
     @Bean
@@ -72,7 +77,6 @@ public class MilkomedaContextConfig {
     }
 
     @Autowired
-    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     public void config(PathMatcher mvcPathMatcher, UrlPathHelper mvcUrlPathHelper) {
         WebContext.setMvcPathMatcher(mvcPathMatcher);
         WebContext.setUrlPathHelper(mvcUrlPathHelper);
@@ -100,7 +104,6 @@ public class MilkomedaContextConfig {
 
     @Bean
     @ConditionalOnClass(name = "org.springframework.data.redis.core.RedisTemplate")
-    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     public RedisTemplate<String, Serializable> jsonRedisTemplate(LettuceConnectionFactory redisConnectionFactory) {
         RedisTemplate<String, Serializable> template = new RedisTemplate<>();
         template.setKeySerializer(new StringRedisSerializer());

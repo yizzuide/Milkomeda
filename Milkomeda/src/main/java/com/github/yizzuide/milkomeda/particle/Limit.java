@@ -48,11 +48,12 @@ public @interface Limit {
     String name() default "";
 
     /**
-     * 唯一标识键，用于组成redis的key，支持Spring EL表达式，如：
+     * 唯一标识键，用于组成redis的key，支持SpEl的多种获取方式，如：
      * <ul>
      *     <li> 参数采集: #id </li>
      *     <li> 请求域: #request.getHeader('token') </li>
-     *     <li> 自定义配置: #env['title'] </li>
+     *     <li> 自定义配置: #env['key'] </li>
+     *     <li> Metal动态配置（依赖Metal模块的配置加载）：#metal['key']</li>
      *     <li> Spring配置: @env.get('spring.application.name') </li>
      * </ul>
      * @return String

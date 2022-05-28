@@ -31,7 +31,7 @@ import java.util.Map;
  *
  * @author yizzuide
  * @since 3.6.0
- * @version 3.6.2
+ * @version 3.13.0
  * Create at 2020/05/21 23:19
  */
 public class MetalHolder {
@@ -71,6 +71,17 @@ public class MetalHolder {
         return metalContainer.getProperty(key);
     }
 
+    /**
+     * 获取配置Map
+     * @return Map
+     * @since 3.13.0
+     */
+    public static Map<String, String> getSourceMap() {
+        if (metalContainer == null) {
+            return null;
+        }
+        return metalContainer.getSource().getSource();
+    }
 
     /**
      * 合并配置源（用于重新加载配置数据时）

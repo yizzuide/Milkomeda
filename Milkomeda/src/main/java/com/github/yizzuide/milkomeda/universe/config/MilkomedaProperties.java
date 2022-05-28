@@ -24,6 +24,8 @@ package com.github.yizzuide.milkomeda.universe.config;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+import java.util.Map;
+
 /**
  * EchoProperties
  *
@@ -38,4 +40,9 @@ public class MilkomedaProperties {
      * 是否显示日志，默认为false
      */
     private boolean showLog = false;
+
+    /**
+     * 自定义参数配置，用于SpEl的<code>#env</code>读取
+     */
+    private Map<String, String> env;
 }

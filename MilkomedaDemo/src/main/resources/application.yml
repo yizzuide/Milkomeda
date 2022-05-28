@@ -20,10 +20,10 @@ server:
     keep-alive-timeout: 30s
     # Springboot 2.4: Control the maximum number of requests that can be made on a keep-alive connection before it is closed
     max-keep-alive-requests: 120
-  # Springboot 2.3优雅关机：拒绝新请求，等正在执行的请求完成
+  # Springboot 2.3: 优雅关机，拒绝新请求，等正在执行的请求完成
   shutdown: graceful
 
-  # Springboot 2.3不再响应默认的错误信息
+  # Springboot 2.3: 不再响应默认的错误信息
   error:
     include-binding-errors: never
     include-message: never
@@ -34,10 +34,10 @@ spring:
     name: @spring.application.name@
   profiles:
     active: @spring.profiles.active@
-  # Springboot 2.4：使用了新配置文件合并机制，这里配置为2.3以前的方式
+  # Springboot 2.4: 使用了新配置文件合并机制，这里配置为2.3以前的方式
   config:
     use-legacy-processing: true
-  # Springboot 2.3：优雅关机等待时间
+  # Springboot 2.3: 优雅关机等待时间
   lifecycle:
     timeout-per-shutdown-phase: 20s
   datasource:
@@ -51,7 +51,7 @@ spring:
     host: 127.0.0.1
 
   web:
-    # Springboot 2.4：资源不生成mapping映射
+    # Springboot 2.4: 资源不生成mapping映射
     resources:
       add-mappings: false
 
@@ -134,8 +134,11 @@ mybatis:
   config-location: classpath:config/mybatis-config.xml
 
 milkomeda:
-  # 配置是否显示跟踪日志信息，包含debug,info（线上环境应该关闭）
+  # 配置是否显示详细日志信息，包含debug,info（线上环境应该关闭）
   show-log: true
+  # 自定义业务参数配置（可选，非框架使用）
+  env:
+    version: 1.0
 
   comet:
     # 读取请求body里的json数据需要开启（默认不开启）
@@ -346,8 +349,8 @@ milkomeda:
       enable: true
       response:
         # 500异常处理
-        status: 200
-        code[code]: -1 # 支持改字段名：[别名]，返回的是这个别名
+        status: 200 # 这个是HTTP标准响应码，不是业务返回字段
+        code[errCode]: -1 # 支持改字段名：[别名]，返回的是这个别名
         message[errMsg]: 服务器繁忙，请稍后再试！
         # 下面字段内部会获取异常栈信息，外面不需要添加值，列出需要的字段即可
         error-stack-msg[innerErrInfo]:

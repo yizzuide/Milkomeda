@@ -27,7 +27,9 @@ import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertiesPropertySource;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
+import org.springframework.util.CollectionUtils;
 
+import java.util.Map;
 import java.util.Properties;
 
 /**
@@ -58,6 +60,17 @@ public class Environment {
      */
     public void put(String key, String value) {
         this.properties.setProperty(key, value);
+    }
+
+    /**
+     * 批量添加自定义数据源配置
+     * @param map   数据源
+     * @since 3.13.0
+     */
+    public void putAll(Map<String, String> map) {
+        if (!CollectionUtils.isEmpty(map)) {
+            this.properties.putAll(map);
+        }
     }
 
     /**

@@ -30,7 +30,7 @@ import java.util.Map;
  *
  * @author yizzuide
  * @since 3.6.0
- * @version 3.6.2
+ * @version 3.13.0
  * Create at 2020/05/21 18:26
  */
 public class MetalSource {
@@ -51,5 +51,9 @@ public class MetalSource {
 
     public boolean isEmpty() {
         return this.sourceMap.size() == 0;
+    }
+
+    public Map<String, String> getSource() {
+        return sourceMap;
     }
 }
