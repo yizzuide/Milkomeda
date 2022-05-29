@@ -156,7 +156,7 @@ milkomeda:
           # $params为对象导航，支持数组索引，如：$params.list[0].id
           tpl: url->{uri},userId:{uid},token:{$header.token},method->{method},parameters->{params},dataId->{$params.data.id}
         - paths: ["/collect/usage"]
-          type: RESPONSE # 设置打印为响应类型（默认为请求类型）
+          type: response # 设置打印为响应类型（默认为请求类型）
           tpl: "{\"url\": \"{uri}\", \"resp\": {resp}}"
         - paths: ["/error/**"]
           tpl: url->{uri},method->{method}
@@ -189,7 +189,7 @@ milkomeda:
           code: -1
           message[msg]: 请求太频繁，请稍后再试！
       - name: timesLimiter
-        type: TIMES
+        type: times
         props:
           timesType: MIN
           limitTimes: 3
@@ -203,13 +203,13 @@ milkomeda:
           addition:
             data: ${collections.emptyMap}
       - name: barrierLimiter
-        type: BARRIER
+        type: barrier
         props:
           chain: [ "noRepeatLimiter", "timesLimiter" ]
         order: -1
         include-urls: [ "/particle/pay" ]
       - name: userBloomLimiter
-        type: BLOOM
+        type: bloom
         props:
           # bitmap key
           bitKey: bit_user
@@ -328,7 +328,7 @@ milkomeda:
       - name: abTestMoon
         #cache-name: abTestMoonCache
         # 使用百分比分配策略
-        type: PERCENT
+        type: percent
         # 20%的0，80%的1
         #phases: [20, 80]
         # 同上
@@ -348,7 +348,7 @@ milkomeda:
     uniform:
       enable: true
       response:
-        # 500异常处理
+        # 通用异常处理，如：500、403
         status: 200 # 这个是HTTP标准响应码，不是业务返回字段
         code[errCode]: -1 # 支持改字段名：[别名]，返回的是这个别名
         message[errMsg]: 服务器繁忙，请稍后再试！
@@ -497,7 +497,7 @@ milkomeda:
             # 结果匹配表达式，默认使用EL表达式，EL和OGNL都支持使用`#root`来访问根对象，如：#root != null
             #match: size() == 0
             match: size == 0
-            syntax: OGNL
+            syntax: ognl
 
   # 分布式应用名配置（默认取当前应用名）
   metal:

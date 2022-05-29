@@ -45,7 +45,7 @@ import org.springframework.http.MediaType;
 import org.springframework.lang.NonNull;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
+import org.springframework.web.servlet.AsyncHandlerInterceptor;
 import org.springframework.web.util.WebUtils;
 
 import javax.annotation.PostConstruct;
@@ -68,7 +68,7 @@ import java.util.stream.Collectors;
  * Create at 2020/03/28 01:08
  */
 @Slf4j
-public class CometInterceptor extends HandlerInterceptorAdapter implements ApplicationContextAware {
+public class CometInterceptor implements AsyncHandlerInterceptor, ApplicationContextAware {
 
     @Autowired
     private CometProperties cometProperties;
@@ -160,7 +160,7 @@ public class CometInterceptor extends HandlerInterceptorAdapter implements Appli
         if (cometCollectorProperties != null && cometCollectorProperties.isEnableTag() && !CollectionUtils.isEmpty(this.tagCollectorMap)) {
             collectPreLog(request);
         }
-        return super.preHandle(request, response, handler);
+        return AsyncHandlerInterceptor.super.preHandle(request, response, handler);
     }
 
     @Override

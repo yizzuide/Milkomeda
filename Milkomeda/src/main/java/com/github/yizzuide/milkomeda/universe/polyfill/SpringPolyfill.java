@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 yizzuide All rights Reserved.
+ * Copyright (c) 2022 yizzuide All rights Reserved.
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -19,34 +19,25 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.particle;
+package com.github.yizzuide.milkomeda.universe.polyfill;
+
+import org.springframework.lang.Nullable;
 
 /**
- * LimiterType
- * 限制器类型
+ * SpringPolyfill
+ * 填补Spring可能会删除的API
  *
  * @author yizzuide
- * @since 3.1.2
- * Create at 2020/04/22 14:14
+ * @since 3.13.0
+ * Create at 2022/05/29 01:29
  */
-public enum LimiterType {
+public class SpringPolyfill {
     /**
-     * 幂等去重限制器
+     * 检测字符串是否为空（"" 或 null）
+     * @param str   检测的对象
+     * @return  检测结果
      */
-    IDEMPOTENT,
-
-    /**
-     * 次数限制器
-     */
-    TIMES,
-
-    /**
-     * 布隆限制器
-     */
-    BLOOM,
-
-    /**
-     * 组合限制器
-     */
-    BARRIER
+    public static boolean isEmpty(@Nullable Object str) {
+        return (str == null || "".equals(str));
+    }
 }
