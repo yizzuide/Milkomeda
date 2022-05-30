@@ -32,6 +32,7 @@ import java.util.Map;
  *
  * @author yizzuide
  * @since 3.0.0
+ * @version 3.13.0
  * Create at 2020/03/29 19:24
  */
 public class YmlParser {
@@ -115,6 +116,8 @@ public class YmlParser {
     public static void parseAliasNodePath(Map<String, Object> nodeMap, Map<String, YmlAliasNode> aliasNodeMap, String ownerAliasKey, Object defaultValue, Object replaceData) {
         String key = ownerAliasKey;
         Object value = nodeMap.get(ownerAliasKey);
+        // 判定别名节点flag
+        boolean hasAliasNode = false;
         // 未指定的配置字段，如果有默认值
         if (value == null && defaultValue != null) {
             value = defaultValue;
@@ -122,6 +125,7 @@ public class YmlParser {
             Map<String, Object> valueMap = (Map<String, Object>) value;
             key = String.valueOf(valueMap.keySet().toArray()[0]);
             value = valueMap.get(key);
+            hasAliasNode = true;
         }
         // 配置中未指定返回的字段，直接返回
         if (value == null) {
@@ -133,10 +137,10 @@ public class YmlParser {
         ymlAliasNode.setKey(key);
         ymlAliasNode.setValue(value);
 
-        // 替换是数据来源
+        // 替换数据来源
         if (replaceData instanceof Map) {
             Map<String, Object> replaceMap = (Map<String, Object>) replaceData;
-            ymlAliasNode.setValue(replaceMap.get(ymlAliasNode.getKey()));
+            ymlAliasNode.setValue(hasAliasNode ? replaceMap.get(ownerAliasKey) : replaceMap.get(key));
             aliasNodeMap.put(ownerAliasKey, ymlAliasNode);
             return;
         }

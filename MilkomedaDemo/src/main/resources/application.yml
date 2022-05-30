@@ -393,7 +393,7 @@ milkomeda:
             type:
           - clazz: com.github.yizzuide.milkomeda.hydrogen.uniform.UniformException
             status: 200
-            code:
+            code[errCode]:
             message:
 
     # 参数校验
