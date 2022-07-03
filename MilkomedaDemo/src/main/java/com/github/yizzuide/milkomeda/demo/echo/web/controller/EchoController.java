@@ -1,5 +1,7 @@
 package com.github.yizzuide.milkomeda.demo.echo.web.controller;
 
+import com.github.yizzuide.milkomeda.comet.core.CometParam;
+import com.github.yizzuide.milkomeda.demo.echo.request.SimpleEchoRequest;
 import com.github.yizzuide.milkomeda.echo.EchoException;
 import com.github.yizzuide.milkomeda.echo.EchoRequest;
 import com.github.yizzuide.milkomeda.echo.EchoResponseData;
@@ -7,7 +9,6 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -31,13 +32,17 @@ public class EchoController {
 
     // 模拟一个第三方平台开户接口
     @RequestMapping("/echo/account/open")
-    public ResponseEntity<Map<String, Object>> openAccount(@RequestBody Map<String, Object> params, HttpServletRequest request) {
+    public ResponseEntity<Map<String, Object>> openAccount(
+            @CometParam(decrypt = SimpleEchoRequest.class) Map<String, Object> params, HttpServletRequest request) {
         log.info("header: {}", request.getHeader("Authorization"));
         log.info("接收调用方参数：{}", params);
-        Map<String, Object> data = new HashMap<>();
+
         // 第三方平台根据我们提供的公钥验签（如果是第三方平台回调我们的接口验签需要使用第三方提供的公钥，验签方式相同）
-        Map<String, Object> map = simpleEchoRequest.verifyParam(params);
-        if (map == null) {
+        // 当前验签功能由@CometParam(decrypt = SimpleEchoRequest.class)代替
+        //Map<String, Object> map = simpleEchoRequest.verifyParam(params);
+
+        Map<String, Object> data = new HashMap<>();
+        if (params == null) {
             data.put("code", "403");
             data.put("error_msg", "验签失败");
             data.put("data", null);

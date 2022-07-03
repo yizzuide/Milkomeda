@@ -22,6 +22,7 @@
 package com.github.yizzuide.milkomeda.echo;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.github.yizzuide.milkomeda.comet.core.CometParamDecrypt;
 import com.github.yizzuide.milkomeda.util.JSONUtil;
 import com.github.yizzuide.milkomeda.util.TypeUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -40,11 +41,11 @@ import java.util.Map;
  *
  * @author yizzuide
  * @since 1.13.0
- * @version 3.12.8
+ * @version 3.13.0
  * Create at 2019/09/21 19:00
  */
 @Slf4j
-public abstract class EchoRequest extends AbstractRequest {
+public abstract class EchoRequest extends AbstractRequest implements CometParamDecrypt {
 
     @Override
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -182,6 +183,11 @@ public abstract class EchoRequest extends AbstractRequest {
             throw new EchoException(e.getMessage());
         }
         return responseData;
+    }
+
+    @Override
+    public Map<String, Object> decrypt(Map<String, Object> params) {
+        return verifyParam(params);
     }
 
     /**

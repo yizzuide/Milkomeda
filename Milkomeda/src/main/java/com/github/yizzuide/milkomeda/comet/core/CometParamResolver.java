@@ -21,6 +21,7 @@
 
 package com.github.yizzuide.milkomeda.comet.core;
 
+import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import com.github.yizzuide.milkomeda.universe.context.WebContext;
 import com.github.yizzuide.milkomeda.util.JSONUtil;
 import org.springframework.core.MethodParameter;
@@ -58,7 +59,7 @@ public class CometParamResolver implements HandlerMethodArgumentResolver {
                                   @NonNull NativeWebRequest nativeWebRequest, WebDataBinderFactory webDataBinderFactory) throws Exception {
         // methodParameter.getParameterAnnotation(CometParam.class);
         String params = CometRequestWrapper.resolveRequestParams(WebContext.getRequest(),true);
-        if (StringUtils.isEmpty(params)) {
+        if (!StringUtils.hasLength(params)) {
             return null;
         }
         CometAspect.resolveThreadLocal.set(params);
@@ -69,7 +70,15 @@ public class CometParamResolver implements HandlerMethodArgumentResolver {
         }
         // Map
         if (Map.class.isAssignableFrom(parameterType)) {
-            return JSONUtil.parseMap(params, String.class, Object.class);
+            Map<String, Object> map = JSONUtil.parseMap(params, String.class, Object.class);
+            // 检测是否需要验签
+            CometParam cometParam = methodParameter.getParameterAnnotation(CometParam.class);
+            if (cometParam == null || cometParam.decrypt() == CometParamDecrypt.class
+                    || !CometParamDecrypt.class.isAssignableFrom(cometParam.decrypt())) {
+                return map;
+            }
+            CometParamDecrypt cometParamDecrypt = ApplicationContextHolder.get().getBean(cometParam.decrypt());
+            return cometParamDecrypt.decrypt(map);
         }
         // List
         if (List.class.isAssignableFrom(parameterType)) {

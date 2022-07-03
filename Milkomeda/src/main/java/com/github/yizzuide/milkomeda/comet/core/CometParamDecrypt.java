@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 yizzuide All rights Reserved.
+ * Copyright (c) 2022 yizzuide All rights Reserved.
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -21,25 +21,21 @@
 
 package com.github.yizzuide.milkomeda.comet.core;
 
-import java.lang.annotation.*;
+import java.util.Map;
 
 /**
- * CometParam
- * API接口同时支持form表单数据和自定义消息体数据
+ * CometParamDecrypt
+ * 用于Echo验签功能
  *
  * @author yizzuide
- * @since 2.0.0
- * @version 3.13.0
- * Create at 2019/12/12 18:42
+ * @since 3.13.0
+ * Create at 2022/07/03 17:12
  */
-@Target({ElementType.PARAMETER})
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
-@Inherited
-public @interface CometParam {
+public interface CometParamDecrypt {
     /**
-     * 解码器（用于与Echo联合验签使用）
-     * @return  CometParamDecrypt实现
+     * 请求参数解密方法
+     * @param params    请求参数
+     * @return  解密后的参数
      */
-    Class<? extends CometParamDecrypt> decrypt() default CometParamDecrypt.class;
+    Map<String, Object> decrypt(Map<String, Object> params);
 }
