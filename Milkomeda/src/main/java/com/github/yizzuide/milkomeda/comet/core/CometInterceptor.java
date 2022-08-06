@@ -44,7 +44,7 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.http.MediaType;
 import org.springframework.lang.NonNull;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
+import com.github.yizzuide.milkomeda.util.Strings;
 import org.springframework.web.servlet.AsyncHandlerInterceptor;
 import org.springframework.web.util.WebUtils;
 
@@ -176,7 +176,7 @@ public class CometInterceptor implements AsyncHandlerInterceptor, ApplicationCon
                     WebUtils.getNativeResponse(response, CometResponseWrapper.class);
             if (responseWrapper != null) {
                 String content = new String(responseWrapper.getContentAsByteArray(), StandardCharsets.UTF_8);
-                if (!StringUtils.isEmpty(content)) {
+                if (!Strings.isEmpty(content)) {
                     String contentType = responseWrapper.getResponse().getContentType();
                     // JSON -> Map
                     if (contentType.startsWith(MediaType.APPLICATION_JSON_VALUE)) {

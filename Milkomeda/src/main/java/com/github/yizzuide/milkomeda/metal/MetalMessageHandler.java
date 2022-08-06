@@ -22,6 +22,7 @@
 package com.github.yizzuide.milkomeda.metal;
 
 import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
+import com.github.yizzuide.milkomeda.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.StringUtils;
@@ -72,7 +73,7 @@ public class MetalMessageHandler {
         }
         if (applicationName == null) {
             String appName = ApplicationContextHolder.getEnvironment().get("spring.application.name");
-            if (StringUtils.isEmpty(appName)) {
+            if (Strings.isEmpty(appName)) {
                 METAL_CHANGE_TOPIC = "MK_METAL_TOPIC";
                 return METAL_CHANGE_TOPIC;
             }

@@ -323,7 +323,7 @@ public class ReflectUtil {
      * @since 3.7.1
      */
     public static Pair<Field, Object> getFieldBundlePath(Object target, String fieldPath) {
-        if (target == null || StringUtils.isEmpty(fieldPath)) {
+        if (target == null || Strings.isEmpty(fieldPath)) {
             return null;
         }
         String[] fieldNames = StringUtils.delimitedListToStringArray(fieldPath, ".");

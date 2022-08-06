@@ -21,7 +21,7 @@
 
 package com.github.yizzuide.milkomeda.universe.parser.url;
 
-import org.springframework.util.StringUtils;
+import com.github.yizzuide.milkomeda.util.Strings;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -64,7 +64,7 @@ public class URLPathMatcher {
     public static boolean match(List<String> sourcePaths, String targetPath) {
         boolean matched = false;
         for (String path : sourcePaths) {
-            if (StringUtils.isEmpty(path)) continue;
+            if (Strings.isEmpty(path)) continue;
             // 去除最后一个/
             String lastChar = path.substring(path.length() - 1);
             if (path.length() > 1 && "/".equals(lastChar)) {

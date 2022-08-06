@@ -28,6 +28,7 @@ import com.github.yizzuide.milkomeda.universe.context.AopContextHolder;
 import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import com.github.yizzuide.milkomeda.universe.context.WebContext;
 import com.github.yizzuide.milkomeda.util.JwtUtil;
+import com.github.yizzuide.milkomeda.util.Strings;
 import io.jsonwebtoken.Claims;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -289,7 +290,7 @@ public class Crust {
     @NonNull
     private Boolean validateToken(@NonNull String token, @NonNull String username) {
         String userName = tokenMetaDataThreadLocal.get().getUsername();
-        if (StringUtils.isEmpty(userName)) { return false; }
+        if (Strings.isEmpty(userName)) { return false; }
         return (userName.equals(username) && !JwtUtil.isTokenExpired(token, getUnSignKey()));
     }
 
@@ -386,7 +387,7 @@ public class Crust {
     public String getToken() {
         if (!props.isStateless()) { return null; }
         String token = WebContext.getRequest().getHeader(props.getTokenName());
-        if (StringUtils.isEmpty(token)) { return null; }
+        if (Strings.isEmpty(token)) { return null; }
         // 一般请求头Authorization的值会添加Bearer
         String tokenHead = "Bearer ";
         if (token.contains(tokenHead)) {

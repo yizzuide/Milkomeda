@@ -28,7 +28,7 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.core.annotation.Order;
-import org.springframework.util.StringUtils;
+import com.github.yizzuide.milkomeda.util.Strings;
 
 /**
  * Sundial注解切面
@@ -54,7 +54,7 @@ public class DataSourceAspect {
     @Around("actionPointCut() || classPointCut()")
     public Object around(ProceedingJoinPoint joinPoint) throws Throwable {
         Sundial sundial = ReflectUtil.getAnnotation(joinPoint, Sundial.class);
-        if (StringUtils.isEmpty(sundial.value())) {
+        if (Strings.isEmpty(sundial.value())) {
             return joinPoint.proceed();
         }
         SundialHolder.setDataSourceType(sundial.value());

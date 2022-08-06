@@ -26,6 +26,7 @@ import com.github.yizzuide.milkomeda.universe.context.WebContext;
 import com.github.yizzuide.milkomeda.util.JSONUtil;
 import com.github.yizzuide.milkomeda.util.NetworkUtil;
 import com.github.yizzuide.milkomeda.util.ReflectUtil;
+import com.github.yizzuide.milkomeda.util.Strings;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -39,7 +40,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.context.request.async.WebAsyncTask;
 import org.springframework.web.util.WebUtils;
@@ -118,7 +118,7 @@ public class CometAspect {
         HttpServletRequest request = WebContext.getRequest();
         WebCometData cometData = WebCometData.createFormRequest(request, comet.prototype(), cometProperties.isEnableReadRequestBody());
         cometData.setApiCode(comet.apiCode());
-        cometData.setDescription(StringUtils.isEmpty(comet.name()) ? comet.description() : comet.name());
+        cometData.setDescription(Strings.isEmpty(comet.name()) ? comet.description() : comet.name());
         cometData.setRequestType(comet.requestType());
         return applyAround(cometData, threadLocal, joinPoint, request, requestTime, comet.name(), comet.tag(), (returnData) -> {
             if (returnData.getClass() == DeferredResult.class) {

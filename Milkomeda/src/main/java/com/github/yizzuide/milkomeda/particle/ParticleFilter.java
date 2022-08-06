@@ -32,7 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
+import com.github.yizzuide.milkomeda.util.Strings;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.*;
@@ -80,7 +80,7 @@ public class ParticleFilter implements Filter {
         urlPlaceholderParser = new URLPlaceholderParser();
         urlPlaceholderParser.setCustomURLPlaceholderResolver(particleURLPlaceholderResolver);
         for (ParticleProperties.Limiter limiter : limiters) {
-            if (StringUtils.isEmpty(limiter.getKeyTpl())) {
+            if (Strings.isEmpty(limiter.getKeyTpl())) {
                 continue;
             }
             limiter.setCacheKeys(urlPlaceholderParser.grabPlaceHolders(limiter.getKeyTpl()));

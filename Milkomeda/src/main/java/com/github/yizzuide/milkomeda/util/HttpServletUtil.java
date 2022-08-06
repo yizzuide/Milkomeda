@@ -59,4 +59,8 @@ public class HttpServletUtil {
         }
         return JSONUtil.serialize(inputs);
     }
+
+    public static void main(String[] args) {
+        System.out.println(Strings.isEmpty(""));
+    }
 }

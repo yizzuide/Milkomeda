@@ -23,7 +23,7 @@ package com.github.yizzuide.milkomeda.util;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.binary.Base64;
-import org.springframework.util.StringUtils;
+import com.github.yizzuide.milkomeda.util.Strings;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
@@ -86,7 +86,7 @@ public class EncryptUtil {
      * @return base64编码密文
      */
     public static byte[] decode(String data) {
-        return StringUtils.isEmpty(data) ? null : Base64.decodeBase64(data);
+        return Strings.isEmpty(data) ? null : Base64.decodeBase64(data);
     }
 
     /**

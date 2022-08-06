@@ -36,7 +36,7 @@ import org.apache.ibatis.session.RowBounds;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
+import com.github.yizzuide.milkomeda.util.Strings;
 
 import javax.annotation.Resource;
 import java.lang.reflect.Method;
@@ -86,7 +86,7 @@ public class SundialInterceptor implements Interceptor {
         String nodeExp = sundial.nodeExp();
         String partExp = sundial.partExp();
         // 未设置节点拆分和表拆分，直接返回
-        if (StringUtils.isEmpty(nodeExp) && StringUtils.isEmpty(partExp)) {
+        if (Strings.isEmpty(nodeExp) && Strings.isEmpty(partExp)) {
             return invocation.proceed();
         }
 
@@ -106,7 +106,7 @@ public class SundialInterceptor implements Interceptor {
         root.setFn(shardingFunction);
         String schema = null;
         // 包含分库的处理
-        if (sundial.shardingType() != ShardingType.TABLE && !StringUtils.isEmpty(nodeExp)) {
+        if (sundial.shardingType() != ShardingType.TABLE && !Strings.isEmpty(nodeExp)) {
             String node = SimpleElParser.parse(nodeExp, root, String.class);
             SundialProperties.DataNode dataNode = props.getSharding().getNodes().get(node);
             // node_001 --转--> node_1
@@ -127,7 +127,7 @@ public class SundialInterceptor implements Interceptor {
                 SundialHolder.setDataSourceType(sundial.key());
             }
             // 需要添加的数据库名
-            if (!StringUtils.isEmpty(dataNode.getSchema())) {
+            if (!Strings.isEmpty(dataNode.getSchema())) {
                 schema = dataNode.getSchema();
             }
             // 如果仅为分库类型
@@ -144,7 +144,7 @@ public class SundialInterceptor implements Interceptor {
         }
 
         // 分库分表 or 分表
-        if (!StringUtils.isEmpty(partExp)) {
+        if (!Strings.isEmpty(partExp)) {
             String part = SimpleElParser.parse(partExp, root, String.class);
             // 如果保留原表名，去掉0索引后缀
             if (props.getSharding().isOriginalNameAsIndexZero()) {

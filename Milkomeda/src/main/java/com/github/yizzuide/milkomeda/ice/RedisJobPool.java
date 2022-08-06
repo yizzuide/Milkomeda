@@ -30,7 +30,7 @@ import org.springframework.data.redis.core.BoundHashOperations;
 import org.springframework.data.redis.core.RedisOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
+import com.github.yizzuide.milkomeda.util.Strings;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -74,7 +74,7 @@ public class RedisJobPool implements JobPool, InitializingBean, ApplicationListe
     @Override
     public boolean exists(String jobId) {
         String job = getPool().get(jobId);
-        return !StringUtils.isEmpty(job);
+        return !Strings.isEmpty(job);
     }
 
     @SuppressWarnings("rawtypes")

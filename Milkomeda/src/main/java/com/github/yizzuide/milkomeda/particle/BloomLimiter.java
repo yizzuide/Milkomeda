@@ -24,7 +24,7 @@ package com.github.yizzuide.milkomeda.particle;
 import com.github.yizzuide.milkomeda.universe.algorithm.hash.BloomHashWrapper;
 import com.github.yizzuide.milkomeda.util.RedisUtil;
 import org.springframework.data.redis.connection.RedisConnection;
-import org.springframework.util.StringUtils;
+import com.github.yizzuide.milkomeda.util.Strings;
 
 import java.util.Collections;
 import java.util.List;
@@ -70,7 +70,7 @@ public class BloomLimiter extends LimitHandler {
     public <R> R limit(String key, Process<R> process) throws Throwable {
         int splitIndex = key.lastIndexOf(valueSeparator);
         // 如果没有设置bitKey，自动设置redis的key前辍
-        if (StringUtils.isEmpty(bitKey)) {
+        if (Strings.isEmpty(bitKey)) {
             bitKey = key.substring(0, splitIndex);
         }
         String value = key.substring(splitIndex + 1);

@@ -26,7 +26,7 @@ import com.github.yizzuide.milkomeda.universe.metadata.HandlerMetaData;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.lang.NonNull;
-import org.springframework.util.StringUtils;
+import com.github.yizzuide.milkomeda.util.Strings;
 
 import java.util.HashMap;
 import java.util.List;
@@ -51,7 +51,7 @@ public class PillarEntryContext implements ApplicationListener<ContextRefreshedE
             PillarEntryHandler pillarEntryHandler = (PillarEntryHandler) handlerAnnotation;
             PillarEntryPoint pillarEntryPoint = (PillarEntryPoint) annotation;
             String tag = pillarEntryHandler.tag();
-            if (StringUtils.isEmpty(tag)) {
+            if (Strings.isEmpty(tag)) {
                 tag = pillarEntryPoint.tag();
             }
             // 设置其它属性方法的值

@@ -11,6 +11,7 @@
 
     <properties>
         <java.version>1.8</java.version>
+        <kotlin.version>1.5.32</kotlin.version>
         <project.release.version>3.13.0-SNAPSHOT</project.release.version>
         <spring-boot.version>2.5.14</spring-boot.version>
         <spring-cloud.version>2020.0.5</spring-cloud.version>
@@ -218,6 +219,17 @@
             <artifactId>spring-boot-starter-jdbc</artifactId>
             <scope>provided</scope>
         </dependency>
+        <!-- kotlin -->
+        <dependency>
+            <groupId>org.jetbrains.kotlin</groupId>
+            <artifactId>kotlin-reflect</artifactId>
+            <version>${kotlin.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains.kotlin</groupId>
+            <artifactId>kotlin-stdlib-jdk8</artifactId>
+            <version>${kotlin.version}</version>
+        </dependency>
     </dependencies>
 
     <dependencyManagement>
@@ -275,6 +287,66 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <!-- Kotlin Maven插件 -->
+            <plugin>
+                <groupId>org.jetbrains.kotlin</groupId>
+                <artifactId>kotlin-maven-plugin</artifactId>
+                <version>${kotlin.version}</version>
+                <executions>
+                    <execution>
+                        <id>compile</id>
+                        <phase>process-sources</phase>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                        <configuration>
+                            <sourceDirs>
+                                <source>src/main/java</source>
+                            </sourceDirs>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>test-compile</id>
+                        <goals>
+                            <goal>test-compile</goal>
+                        </goals>
+                        <configuration>
+                            <sourceDirs>
+                                <source>src/test/java</source>
+                            </sourceDirs>
+                        </configuration>
+                    </execution>
+                </executions>
+                <configuration>
+                    <args>
+                        <arg>-Xjsr305=strict</arg>
+                    </args>
+                    <compilerPlugins>
+                        <plugin>spring</plugin>
+                        <plugin>no-arg</plugin>
+                    </compilerPlugins>
+                    <!-- 默认只对Spring的@Configuration, @Service等生效，其它自定义注解可配置添加
+                    <pluginOptions>
+                        <option>all-open:annotation=com.my.Annotation</option>
+                        <option>no-arg:annotation=com.my.Annotation</option>
+                    </pluginOptions>
+                    -->
+                </configuration>
+                <dependencies>
+                    <!-- 被标注的类去掉final，允许被继承 -->
+                    <dependency>
+                        <groupId>org.jetbrains.kotlin</groupId>
+                        <artifactId>kotlin-maven-allopen</artifactId>
+                        <version>${kotlin.version}</version>
+                    </dependency>
+                    <!-- 生成反射调用无参数构造 -->
+                    <dependency>
+                        <groupId>org.jetbrains.kotlin</groupId>
+                        <artifactId>kotlin-maven-noarg</artifactId>
+                        <version>${kotlin.version}</version>
+                    </dependency>
+                </dependencies>
             </plugin>
         </plugins>
     </build>

@@ -21,7 +21,7 @@
 
 package com.github.yizzuide.milkomeda.universe.parser.yml;
 
-import org.springframework.util.StringUtils;
+import com.github.yizzuide.milkomeda.util.Strings;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -145,7 +145,7 @@ public class YmlParser {
             return;
         }
         // 替换是指定的值
-        if (StringUtils.isEmpty(value) && replaceData != null) {
+        if (Strings.isEmpty(String.valueOf(value)) && replaceData != null) {
             ymlAliasNode.setValue(replaceData);
         }
         aliasNodeMap.put(ownerAliasKey,  ymlAliasNode);

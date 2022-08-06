@@ -31,7 +31,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-import org.springframework.util.StringUtils;
+import com.github.yizzuide.milkomeda.util.Strings;
 import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.context.request.async.WebAsyncTask;
 import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer;
@@ -217,7 +217,7 @@ public class Pulsar {
         // 准备设置DeferredResultID
         String id = pulsarFlow.id();
         String idValue = null;
-        if (!StringUtils.isEmpty(id)) {
+        if (!Strings.isEmpty(id)) {
             // 解析表达式
             idValue = extractValue(joinPoint, id);
             pulsarDeferredResult.setDeferredResultID(idValue);
@@ -227,7 +227,7 @@ public class Pulsar {
 
         // 调用方法实现
         Object returnObj = joinPoint.proceed(injectParam(joinPoint, pulsarDeferredResult, pulsarFlow,
-                StringUtils.isEmpty(idValue)));
+                Strings.isEmpty(idValue)));
 
         // 方法有返回值且不是DeferredResult，则不作DeferredResult处理
         if (null != returnObj && !(returnObj instanceof DeferredResult)) {

@@ -22,7 +22,7 @@
 package com.github.yizzuide.milkomeda.pillar;
 
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
+import com.github.yizzuide.milkomeda.util.Strings;
 
 import java.util.HashSet;
 import java.util.List;
@@ -71,7 +71,7 @@ public class PillarExecutor<P, R> {
      * @return 分流柱集合
      */
     public List<? extends Pillar<P, R>> getPillars(String type) {
-        if (StringUtils.isEmpty(type)) return null;
+        if (Strings.isEmpty(type)) return null;
         return pillars.stream()
                 .filter(processor -> type.equals(processor.supportType()))
                 .collect(Collectors.toList());
