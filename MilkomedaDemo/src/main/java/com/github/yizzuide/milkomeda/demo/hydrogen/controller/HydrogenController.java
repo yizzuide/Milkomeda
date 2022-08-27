@@ -10,6 +10,7 @@ import com.github.yizzuide.milkomeda.hydrogen.filter.FilterLoader;
 import com.github.yizzuide.milkomeda.hydrogen.interceptor.InterceptorLoader;
 import com.github.yizzuide.milkomeda.hydrogen.validator.PhoneConstraint;
 import com.github.yizzuide.milkomeda.pulsar.PulsarHolder;
+import com.github.yizzuide.milkomeda.universe.polyfill.SpringPolyfill;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.context.refresh.ContextRefresher;
@@ -55,6 +56,8 @@ public class HydrogenController {
         return HttpStatus.OK.name();
     }
 
+    // 中国: 127.0.0.1:8091/hydrogen/uniform?lang=zh_CN
+    // 印尼：127.0.0.1:8091/hydrogen/uniform?lang=en_ID
     @RequestMapping("uniform")
     public void testUniform(@RequestParam Map<String, Object> params) {
         // 系统异常
@@ -62,7 +65,8 @@ public class HydrogenController {
         // 自定义异常
         //throw new YizException(1001L, "test", "测试异常");
         // 使用框架提供的断言异常
-        ExceptionEnum.PARAM_IS_NULL.assertBool(CollectionUtils.isEmpty(params), 1001L);
+        //ExceptionEnum.PARAM_IS_NULL.assertBool(CollectionUtils.isEmpty(params) || SpringPolyfill.isEmpty(params.get("name")), 1000L);
+        ExceptionEnum.ID_IS_NULL.assertBool(CollectionUtils.isEmpty(params) || SpringPolyfill.isEmpty(params.get("name")), 1001L);
     }
 
     @RequestMapping("valid")
@@ -77,7 +81,7 @@ public class HydrogenController {
         return HttpStatus.OK.name();
     }
 
-    // 中国: 127.0.0.1:8091/hydrogen/i18n or 127.0.0.1:8091/hydrogen/i18n?lang=zh_CN
+    // 中国: 127.0.0.1:8091/hydrogen/i18n?lang=zh_CN
     // 印尼：127.0.0.1:8091/hydrogen/i18n?lang=en_ID
     @RequestMapping("i18n")
     public String i18n() {

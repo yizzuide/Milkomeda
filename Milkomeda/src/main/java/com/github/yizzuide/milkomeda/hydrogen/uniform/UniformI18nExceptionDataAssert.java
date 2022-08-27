@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 yizzuide All rights Reserved.
+ * Copyright (c) 2022 yizzuide All rights Reserved.
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -21,36 +21,30 @@
 
 package com.github.yizzuide.milkomeda.hydrogen.uniform;
 
-import java.text.MessageFormat;
+import com.github.yizzuide.milkomeda.hydrogen.core.HydrogenHolder;
+import com.github.yizzuide.milkomeda.util.PlaceholderResolver;
 
 /**
- * UniformExceptionAssert
- * 统一异步断言，需要被枚举类实现
+ * Exception message handling implemented in combine with MessageSource. <br>
+ * Before use this class, you must enable {@link com.github.yizzuide.milkomeda.hydrogen.core.EnableHydrogen} and add the following configuration:
+ * <pre>
+ *     milkomeda.hydrogen.i18n.enable = true
+ * </pre>
  *
  * @author yizzuide
- * @since 3.10.0
- * Create at 2020/07/03 17:10
+ * Create at 2022/08/28 00:44
+ * @since 3.13.0
  */
-public interface UniformExceptionDataAssert extends UniformExceptionData, UniformExceptionAssert {
+public interface UniformI18nExceptionDataAssert extends UniformExceptionDataAssert {
+
+    String MESSAGE_SOURCE_TOKEN = "ms.${";
 
     @Override
-    default UniformException newException(Object... args) {
-        return new UniformException(this, formatMessage(this.getMessage(), args));
-    }
-
-    @Override
-    default UniformException newException(Throwable t, Object... args) {
-        return new UniformException(this, formatMessage(this.getMessage(), args), t);
-    }
-
-    /**
-     * Subclasses can override and implement different formatting message, {@link MessageFormat} is used by default
-     * @param msg exception message
-     * @param args  exception args
-     * @return format message
-     * @since 3.13.0
-     */
     default String formatMessage(String msg, Object... args) {
-        return MessageFormat.format(msg, args);
+        if (msg.contains(MESSAGE_SOURCE_TOKEN)) {
+            PlaceholderResolver placeholderResolver = PlaceholderResolver.getResolver(MESSAGE_SOURCE_TOKEN);
+            msg = placeholderResolver.resolveByRule(msg, key -> HydrogenHolder.getI18nMessages().get(key));
+        }
+        return UniformExceptionDataAssert.super.formatMessage(msg, args);
     }
 }

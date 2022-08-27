@@ -38,7 +38,7 @@ import java.util.stream.Stream;
  *
  * @author yizzuide
  * @since 3.0.0
- * @version 3.0.3
+ * @version 3.13.0
  * Creat at 2020/03/28 11:08
  */
 @Slf4j
@@ -84,6 +84,22 @@ public class PlaceholderResolver {
         return defaultResolver;
     }
 
+    /**
+     * Create PlaceholderResolver with placeholderPrefix
+     * @param placeholderPrefix placeholder prefix
+     * @return PlaceholderResolver
+     * @since 3.13.0
+     */
+    public static PlaceholderResolver getResolver(String placeholderPrefix) {
+        return new PlaceholderResolver(placeholderPrefix, DEFAULT_PLACEHOLDER_SUFFIX);
+    }
+
+    /**
+     * Create PlaceholderResolver with placeholderPrefix and placeholderSuffix
+     * @param placeholderPrefix placeholder prefix
+     * @param placeholderSuffix placeholder suffix
+     * @return PlaceholderResolver
+     */
     public static PlaceholderResolver getResolver(String placeholderPrefix, String placeholderSuffix) {
         return new PlaceholderResolver(placeholderPrefix, placeholderSuffix);
     }
