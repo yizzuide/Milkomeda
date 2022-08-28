@@ -37,7 +37,7 @@ public interface URLPlaceholderResolver {
      * 占位符解析
      * @param key       占位符
      * @param request   HttpServletRequest
-     * @return  Object
+     * @return  value object
      */
     Object resolver(String key, HttpServletRequest request);
 }

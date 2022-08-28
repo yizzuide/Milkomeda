@@ -153,8 +153,9 @@ milkomeda:
       # 根据路径匹配策略
       strategy:
         - paths: ["/**"]
+          # 除了uri, method, params, resp常量外，$x.key需要设置自定义请求参数解析器（通过配置URLPlaceholderResolver Bean）
           # $params为对象导航，支持数组索引，如：$params.list[0].id
-          tpl: url->{uri},userId:{uid},token:{$header.token},method->{method},parameters->{params},dataId->{$params.data.id}
+          tpl: url->{uri},userId:{$x.uid},token:{$header.token:0},method->{method},parameters->{params},dataId->{$params.data.id}
         - paths: ["/collect/usage"]
           type: response # 设置打印为响应类型（默认为请求类型）
           tpl: "{\"url\": \"{uri}\", \"resp\": {resp}}"

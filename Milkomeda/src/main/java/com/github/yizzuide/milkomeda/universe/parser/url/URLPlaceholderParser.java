@@ -24,13 +24,12 @@ package com.github.yizzuide.milkomeda.universe.parser.url;
 import com.github.yizzuide.milkomeda.comet.core.CometRequestWrapper;
 import com.github.yizzuide.milkomeda.util.DataTypeConvertUtil;
 import com.github.yizzuide.milkomeda.util.JSONUtil;
-import com.github.yizzuide.milkomeda.util.PlaceholderResolver;
+import com.github.yizzuide.milkomeda.universe.parser.placeholder.PlaceholderExtractor;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,14 +43,14 @@ import java.util.stream.Stream;
  *
  * @author yizzuide
  * @since 3.0.0
- * @version 3.11.0
+ * @version 3.13.0
  * Create at 2020/04/09 15:07
  */
 @Data
 public class URLPlaceholderParser {
 
     // 请求参数解析
-    private PlaceholderResolver placeholderResolver;
+    private PlaceholderExtractor placeholderExtractor;
     private String paramsPrefix;
     private String paramsSuffix;
 
@@ -60,19 +59,18 @@ public class URLPlaceholderParser {
      */
     private URLPlaceholderResolver customURLPlaceholderResolver;
 
-    // 固定参数
-    private static List<String> ignorePlaceHolders = Arrays.asList("uri", "method", "params", "resp");
-
     // 请求数据域
     private static final String headerStartToken = "$header.";
     private static final String cookieStartToken = "$cookie.";
     private static final String paramsStartToken = "$params.";
     private static final String attrStartToken = "$attr.";
+    private static final String xStartToken = "$x.";
 
     public static final String KEY_HEAD = "header";
     public static final String KEY_COOKIE = "cookie";
     public static final String KEY_PARAMS = "params";
     public static final String KEY_ATTR = "attr";
+    public static final String KEY_X = "x";
 
     public URLPlaceholderParser() {
         this("{", "}");
@@ -86,7 +84,7 @@ public class URLPlaceholderParser {
     public URLPlaceholderParser(String paramsPrefix, String paramsSuffix) {
         this.paramsPrefix = paramsPrefix;
         this.paramsSuffix = paramsSuffix;
-        placeholderResolver = PlaceholderResolver.getResolver(paramsPrefix, paramsSuffix);
+        placeholderExtractor = PlaceholderExtractor.create(paramsPrefix, paramsSuffix);
     }
 
     /**
@@ -95,12 +93,13 @@ public class URLPlaceholderParser {
      * @return  Map
      */
     public Map<String, List<String>> grabPlaceHolders(String tpl) {
-        List<String> placeHolders = placeholderResolver.getPlaceHolders(tpl);
+        List<String> placeHolders = placeholderExtractor.getPlaceHolders(tpl);
         Map<String, List<String>> keyMap = new HashMap<>(6);
         keyMap.put(KEY_HEAD, placeHolders.stream().filter(s -> s.startsWith(headerStartToken)).collect(Collectors.toList()));
         keyMap.put(KEY_COOKIE, placeHolders.stream().filter(s -> s.startsWith(cookieStartToken)).collect(Collectors.toList()));
         keyMap.put(KEY_PARAMS, placeHolders.stream().filter(s -> s.startsWith(paramsStartToken)).collect(Collectors.toList()));
         keyMap.put(KEY_ATTR, placeHolders.stream().filter(s -> s.startsWith(attrStartToken)).collect(Collectors.toList()));
+        keyMap.put(KEY_X, placeHolders.stream().filter(s -> s.startsWith(xStartToken)).collect(Collectors.toList()));
         return keyMap;
     }
 
@@ -125,56 +124,63 @@ public class URLPlaceholderParser {
             placeholderResultMap.put("resp", resp);
         }
 
+        // Custom field
+        replaceHolders(placeHolders.get(KEY_X), xStartToken, placeholderResultMap, actualPlaceHolder -> {
+            if (this.customURLPlaceholderResolver == null) {
+                return null;
+            }
+            return String.valueOf(this.customURLPlaceholderResolver.resolver(actualPlaceHolder, request));
+        });
+
+        // Request params
         Map<String, Object> paramsMap = null;
         if (StringUtils.isNotEmpty(params)) {
             paramsMap = JSONUtil.parseMap(params, String.class, Object.class);
         }
-
-        // 请求参数占位替换
         final Map<String, Object> finalParamsMap = paramsMap;
-        replaceHolders(placeHolders.get(KEY_PARAMS), paramsStartToken, request, placeholderResultMap, actualPlaceHolder ->
+        replaceHolders(placeHolders.get(KEY_PARAMS), paramsStartToken, placeholderResultMap, actualPlaceHolder ->
                 finalParamsMap == null ? request.getParameter(actualPlaceHolder) :
-                DataTypeConvertUtil.extractPath(actualPlaceHolder, finalParamsMap, ""));
+                DataTypeConvertUtil.extractPath(actualPlaceHolder, finalParamsMap, null));
 
-        // attr占位替换
-        replaceHolders(placeHolders.get(KEY_ATTR), attrStartToken, request, placeholderResultMap, actualPlaceHolder -> {
+        // Request attr
+        replaceHolders(placeHolders.get(KEY_ATTR), attrStartToken, placeholderResultMap, actualPlaceHolder -> {
             String attrValue;
             if (actualPlaceHolder.contains(".")) { // 复合对象
                 String attrKey = actualPlaceHolder.substring(0, actualPlaceHolder.indexOf("."));
                 String subKeyPath = actualPlaceHolder.substring(actualPlaceHolder.indexOf(".") + 1);
-                attrValue = DataTypeConvertUtil.extractPath(subKeyPath, request.getAttribute(attrKey), "");
+                attrValue = DataTypeConvertUtil.extractPath(subKeyPath, request.getAttribute(attrKey), null);
             } else { // 普通值
                 Object val = request.getAttribute(actualPlaceHolder);
-                attrValue = val == null ? "" : val.toString();
+                if (val == null) {
+                    return null;
+                }
+                attrValue = val.toString();
             }
             return attrValue;
         });
 
-        // 请求头占位替换
-        replaceHolders(placeHolders.get(KEY_HEAD), headerStartToken, request, placeholderResultMap, request::getHeader);
+        // Request Header
+        replaceHolders(placeHolders.get(KEY_HEAD), headerStartToken, placeholderResultMap, request::getHeader);
 
-        // cookie占位替换
-        replaceHolders(placeHolders.get(KEY_COOKIE), cookieStartToken, request, placeholderResultMap, actualPlaceHolder ->
+        // Request cookie
+        replaceHolders(placeHolders.get(KEY_COOKIE), cookieStartToken, placeholderResultMap, actualPlaceHolder ->
                 Stream.of(request.getCookies()).filter(cookie -> cookie.getName().equals(actualPlaceHolder))
                         .findFirst().orElse(new Cookie("_", "")).getValue());
-        return placeholderResolver.resolveByMap(tpl, placeholderResultMap);
+        return placeholderExtractor.replacePlaceholders(tpl, placeholderResultMap);
     }
 
     /**
      * 占位符插值
      * @param placeHolders          占位符列表
      * @param splitToken            类型分隔
-     * @param request               请求对象
      * @param placeholderResultMap  占位结果集
      * @param resolve               根据占位符获取值
      */
-    private void replaceHolders(List<String> placeHolders, String splitToken, HttpServletRequest request, Map<String, Object> placeholderResultMap, Function<String, String> resolve) {
+    private void replaceHolders(List<String> placeHolders, String splitToken, Map<String, Object> placeholderResultMap, Function<String, String> resolve) {
         for (String placeHolder : placeHolders) {
-            if (ignorePlaceHolders.contains(placeHolder)) continue;
             String actualPlaceHolder = placeHolder.substring(splitToken.length());
             String value = resolve.apply(actualPlaceHolder);
-            placeholderResultMap.put(placeHolder, value == null ? (this.customURLPlaceholderResolver == null ? "" :
-                    String.valueOf(this.customURLPlaceholderResolver.resolver(actualPlaceHolder, request))) : value);
+            placeholderResultMap.put(placeHolder, value);
         }
     }
 }

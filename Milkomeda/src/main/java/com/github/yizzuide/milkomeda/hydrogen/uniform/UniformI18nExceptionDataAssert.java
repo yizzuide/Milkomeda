@@ -22,7 +22,7 @@
 package com.github.yizzuide.milkomeda.hydrogen.uniform;
 
 import com.github.yizzuide.milkomeda.hydrogen.core.HydrogenHolder;
-import com.github.yizzuide.milkomeda.util.PlaceholderResolver;
+import com.github.yizzuide.milkomeda.universe.parser.placeholder.PlaceholderExtractor;
 
 /**
  * Exception message handling implemented in combine with MessageSource. <br>
@@ -42,8 +42,8 @@ public interface UniformI18nExceptionDataAssert extends UniformExceptionDataAsse
     @Override
     default String formatMessage(String msg, Object... args) {
         if (msg.contains(MESSAGE_SOURCE_TOKEN)) {
-            PlaceholderResolver placeholderResolver = PlaceholderResolver.getResolver(MESSAGE_SOURCE_TOKEN);
-            msg = placeholderResolver.resolveByRule(msg, key -> HydrogenHolder.getI18nMessages().get(key));
+            PlaceholderExtractor placeholderExtractor = PlaceholderExtractor.create(MESSAGE_SOURCE_TOKEN);
+            msg = placeholderExtractor.replacePlaceholders(msg, key -> HydrogenHolder.getI18nMessages().get(key));
         }
         return UniformExceptionDataAssert.super.formatMessage(msg, args);
     }
