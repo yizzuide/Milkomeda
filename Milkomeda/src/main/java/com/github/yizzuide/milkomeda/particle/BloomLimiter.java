@@ -23,6 +23,7 @@ package com.github.yizzuide.milkomeda.particle;
 
 import com.github.yizzuide.milkomeda.universe.algorithm.hash.BloomHashWrapper;
 import com.github.yizzuide.milkomeda.util.RedisUtil;
+import lombok.Setter;
 import org.springframework.data.redis.connection.RedisConnection;
 import com.github.yizzuide.milkomeda.util.Strings;
 
@@ -42,23 +43,25 @@ public class BloomLimiter extends LimitHandler {
     /**
      * 配置存储bitmap的key
      */
+    @Setter
     private String bitKey;
+
     /**
      * 键值分隔器（limit的key必需包含过滤的值，且通过该分隔器能获取）
      */
-    @SuppressWarnings({"FieldCanBeLocal", "FieldMayBeFinal"})
+    @Setter
     private String valueSeparator = "_";
 
     /**
      * 记录数据量
      */
-    @SuppressWarnings({"FieldCanBeLocal", "FieldMayBeFinal"})
+    @Setter
     private int insertions = 2 << 24; // 33554432 ~= 12M
 
     /**
      * 误差率
      */
-    @SuppressWarnings({"FieldCanBeLocal", "FieldMayBeFinal"})
+    @Setter
     private double fpp = 0.03;
 
     /**

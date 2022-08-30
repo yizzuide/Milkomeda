@@ -64,7 +64,7 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 3.0.0
- * @version 3.11.1
+ * @version 3.13.0
  * Create at 2020/03/28 01:08
  */
 @Slf4j
@@ -179,7 +179,7 @@ public class CometInterceptor implements AsyncHandlerInterceptor, ApplicationCon
                 if (!Strings.isEmpty(content)) {
                     String contentType = responseWrapper.getResponse().getContentType();
                     // JSON -> Map
-                    if (contentType.startsWith(MediaType.APPLICATION_JSON_VALUE)) {
+                    if (contentType != null && contentType.startsWith(MediaType.APPLICATION_JSON_VALUE)) {
                         body = JSONUtil.parseMap(content, String.class, Object.class);
                     } else { // String!
                         body = content;

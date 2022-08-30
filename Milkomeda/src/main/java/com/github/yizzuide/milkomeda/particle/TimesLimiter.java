@@ -48,6 +48,7 @@ public class TimesLimiter extends LimitHandler {
     /**
      * 限制时间类型
      */
+    @Setter
     private TimesType timesType;
 
     /**

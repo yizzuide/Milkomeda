@@ -23,7 +23,6 @@ package com.github.yizzuide.milkomeda.particle;
 
 import com.github.yizzuide.milkomeda.universe.context.WebContext;
 import com.github.yizzuide.milkomeda.util.IOUtils;
-import com.github.yizzuide.milkomeda.util.ReflectUtil;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
@@ -110,7 +109,6 @@ public class ParticleConfig implements ApplicationContextAware {
             return;
         }
         List<ParticleProperties.Limiter> barrierLimiters = new ArrayList<>();
-        Map<String, LimitHandler> shareLimitHandlerMap = new HashMap<>();
         for (ParticleProperties.Limiter limiter : limiters) {
             String limiterName = limiter.getName();
             // 使用枚举类型填充处理器clazz
@@ -130,27 +128,15 @@ public class ParticleConfig implements ApplicationContextAware {
                         break;
                 }
             }
-            LimitHandler limitHandler;
-            String handlerKey = limiter.getHandlerClazz().getSimpleName();
-            // 共享同类型模式
-            if (limiter.isShareMode() && shareLimitHandlerMap.containsKey(handlerKey)) {
-                limitHandler = shareLimitHandlerMap.get(handlerKey);
-            } else {
-                limitHandler = WebContext.registerBean((ConfigurableApplicationContext) applicationContext, limiterName, limiter.getHandlerClazz());
-                shareLimitHandlerMap.put(handlerKey, limitHandler);
-            }
-            // 缓存并设置属性
-            cacheHandlerBeans.put(limiterName, limitHandler);
+            LimitHandler limitHandler = WebContext.registerBean((ConfigurableApplicationContext) applicationContext, limiterName, limiter.getHandlerClazz(), limiter.getProps());
             limitHandler.setExpire(limiter.getKeyExpire().getSeconds());
-            if (!CollectionUtils.isEmpty(limiter.getProps())) {
-                ReflectUtil.setField(limitHandler, limiter.getProps());
-            }
             limiter.setLimitHandler(limitHandler);
             if (limiter.getHandlerClazz() == BarrierLimiter.class) {
                 barrierLimiters.add(limiter);
             }
+            // 缓存并设置属性
+            cacheHandlerBeans.put(limiterName, limitHandler);
         }
-        shareLimitHandlerMap.clear();
 
         // 创建barrierLimiter类型限制器链
         for (ParticleProperties.Limiter limiter : barrierLimiters) {

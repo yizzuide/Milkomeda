@@ -25,7 +25,7 @@ import java.text.MessageFormat;
 
 /**
  * UniformExceptionAssert
- * 统一异步断言，需要被枚举类实现
+ * 统一异步断言，最终需要被枚举类实现
  *
  * @author yizzuide
  * @since 3.10.0

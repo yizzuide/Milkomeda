@@ -53,6 +53,7 @@ import java.util.Collections;
  * @version 3.12.9
  * Create at 2019/12/13 19:09
  */
+@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 @Configuration
 @AutoConfigureAfter(WebMvcAutoConfiguration.class)
 public class MilkomedaContextConfig {

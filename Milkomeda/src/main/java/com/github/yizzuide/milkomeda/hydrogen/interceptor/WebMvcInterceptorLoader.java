@@ -23,7 +23,6 @@ package com.github.yizzuide.milkomeda.hydrogen.interceptor;
 
 import com.github.yizzuide.milkomeda.universe.context.WebContext;
 import com.github.yizzuide.milkomeda.universe.polyfill.SpringMvcPolyfill;
-import com.github.yizzuide.milkomeda.util.ReflectUtil;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
@@ -43,6 +42,7 @@ import java.util.function.BiConsumer;
  *
  * @author yizzuide
  * @since 3.0.0
+ * @version 3.13.0
  * Create at 2020/03/31 00:12
  */
 @Slf4j
@@ -112,13 +112,11 @@ public class WebMvcInterceptorLoader extends AbstractInterceptorLoader<Intercept
             }
             if (handlerInterceptorBean == null) {
                 // 动态注册到IoC
-                handlerInterceptorBean = (HandlerInterceptor) WebContext.registerBean((ConfigurableApplicationContext) getApplicationContext(), hi.getClazz().getSimpleName(), hi.getClazz());
+                handlerInterceptorBean = (HandlerInterceptor) WebContext.registerBean((ConfigurableApplicationContext) getApplicationContext(), hi.getClazz().getSimpleName(), hi.getClazz(), hi.getProps());
                 // 动态注入属性
                 getApplicationContext().getAutowireCapableBeanFactory().autowireBean(handlerInterceptorBean);
             }
             try {
-                // set props
-                ReflectUtil.setField(handlerInterceptorBean, hi.getProps());
                 performAction.accept(hi, handlerInterceptorBean);
             } catch (Exception e) {
                 log.error("Hydrogen interceptor add error with msg: {}", e.getMessage(), e);

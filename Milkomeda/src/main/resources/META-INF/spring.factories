@@ -7,5 +7,5 @@ com.github.yizzuide.milkomeda.universe.env.CustomPropertySourceLocator
 
 # Application Listeners
 org.springframework.context.ApplicationListener=\
-com.github.yizzuide.milkomeda.universe.env.SourcesLogApplicationListener
+com.github.yizzuide.milkomeda.universe.env.EnvironmentApplicationListener
 

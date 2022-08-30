@@ -21,18 +21,19 @@
 
 package com.github.yizzuide.milkomeda.universe.env;
 
+import com.github.yizzuide.milkomeda.universe.extend.converter.MapToCollectionConverter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.config.ConfigDataEnvironmentPostProcessor;
 import org.springframework.boot.context.event.ApplicationEnvironmentPreparedEvent;
 import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.context.ApplicationListener;
 import org.springframework.core.Ordered;
+import org.springframework.core.convert.support.ConfigurableConversionService;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.lang.NonNull;
 
 /**
- * SourcesLogApplicationListener
  * 属性源配置日志监听器
  *
  * @author yizzuide
@@ -44,7 +45,7 @@ import org.springframework.lang.NonNull;
  */
 // ApplicationEnvironmentPreparedEvent：环境配置准备好了，可以查看或修改
 @Slf4j
-public class SourcesLogApplicationListener implements ApplicationListener<ApplicationEnvironmentPreparedEvent>, Ordered {
+public class EnvironmentApplicationListener implements ApplicationListener<ApplicationEnvironmentPreparedEvent>, Ordered {
 
     @Override
     public void onApplicationEvent(@NonNull ApplicationEnvironmentPreparedEvent event) {
@@ -54,6 +55,20 @@ public class SourcesLogApplicationListener implements ApplicationListener<Applic
         }
 
         // StandardServletEnvironment or StandardReactiveEnvironment
+
+        // Register Converter
+        // BeanWrapper绑定ConversionService过程
+        // SpringBoot启动设置ConversionService:
+        // org.springframework.boot.SpringApplication.configureEnvironment
+        //  -> environment.setConversionService(new ApplicationConversionService());
+        //  -> context.getBeanFactory().setConversionService(context.getEnvironment().getConversionService());
+        // SpringBoot创建BeanWrapper设置ConversionService:
+        // org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.instantiateBean()
+        //  -> AbstractBeanFactory.initBeanWrapper()
+        //  -> bw.setConversionService(getConversionService());
+        ConfigurableConversionService conversionService = environment.getConversionService();
+        conversionService.addConverter(new MapToCollectionConverter(conversionService));
+
         // 获取配置属性值
         boolean logEnable = Binder.get(environment).bind("milkomeda.show-log", Boolean.class).orElseGet(() -> false);
         log.info("milkomeda log: {}", logEnable ? "enable" : "disable");

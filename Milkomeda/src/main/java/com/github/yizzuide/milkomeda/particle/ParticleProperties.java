@@ -105,12 +105,6 @@ public class ParticleProperties {
         private Map<String, Object> props;
 
         /**
-         * 共享同类型限制器实例模式（注意：如果该限制器在组合链中，保持默认）
-         * @since 3.5.0
-         */
-        private boolean shareMode = false;
-
-        /**
          * 分布式key模板（固定占位符：uri、method、params；请求参数域/自定义解析参数：$params.name；请求头域：$header.name；cookie域：$cookie.name）
          */
         private String keyTpl = "limit_{method}_{uri}_{$header.token}";

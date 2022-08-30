@@ -25,7 +25,6 @@
 package com.github.yizzuide.milkomeda.util
 
 import com.github.yizzuide.milkomeda.universe.polyfill.SpringPolyfill
-import kotlin.reflect.jvm.internal.impl.load.kotlin.JvmType
 
 /**
  * StringExtent
@@ -35,16 +34,19 @@ import kotlin.reflect.jvm.internal.impl.load.kotlin.JvmType
  * Create at 2022/08/06 17:55
  * @since 3.13.0
  */
-class StringExtent {
-
+class StringExtensionsKt {
 }
 
 /**
  * 判断字符串是否为空
+ * @since 3.13.0
  */
-fun String.isEmpty() = SpringPolyfill.isEmpty(this)
+fun isEmpty(str : String?) = SpringPolyfill.isEmpty(str)
 
 /**
- * Object值转String，null直接返回
+ * Object to String，return self if null
+ * @param obj object value
+ * @return string value
+ * @since 3.13.0
  */
 fun toNullableString(obj : Any?) : String? = obj?.toString()
