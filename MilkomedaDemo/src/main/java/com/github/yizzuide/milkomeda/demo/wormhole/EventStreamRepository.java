@@ -14,7 +14,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 @WormholeEventTracker
-public class EventStreamRepository implements WormholeEventTrack {
+public class EventStreamRepository implements WormholeEventTrack<WormholeEvent<?>> {
     @Override
     public void track(WormholeEvent<?> event) {
       log.info("存储事件到大数据流：{}", event);

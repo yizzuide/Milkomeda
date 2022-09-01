@@ -34,7 +34,7 @@ import org.springframework.core.env.StandardEnvironment;
 import org.springframework.lang.NonNull;
 
 /**
- * 属性源配置日志监听器
+ * Environment Prepared Listener
  *
  * @author yizzuide
  * @since 3.0.1
@@ -43,7 +43,6 @@ import org.springframework.lang.NonNull;
  * @see org.springframework.boot.context.config.AnsiOutputApplicationListener
  * Create at 2020/04/11 11:56
  */
-// ApplicationEnvironmentPreparedEvent：环境配置准备好了，可以查看或修改
 @Slf4j
 public class EnvironmentApplicationListener implements ApplicationListener<ApplicationEnvironmentPreparedEvent>, Ordered {
 
@@ -56,20 +55,21 @@ public class EnvironmentApplicationListener implements ApplicationListener<Appli
 
         // StandardServletEnvironment or StandardReactiveEnvironment
 
-        // Register Converter
-        // BeanWrapper绑定ConversionService过程
-        // SpringBoot启动设置ConversionService:
-        // org.springframework.boot.SpringApplication.configureEnvironment
+        // BeanWrapper binding ConversionService process:
+        // 1.SpringBoot start setting ConversionService
+        // org.springframework.boot.SpringApplication.configureEnvironment()
         //  -> environment.setConversionService(new ApplicationConversionService());
         //  -> context.getBeanFactory().setConversionService(context.getEnvironment().getConversionService());
-        // SpringBoot创建BeanWrapper设置ConversionService:
+        // 2.SpringBoot create BeanWrapper and set ConversionService
         // org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.instantiateBean()
         //  -> AbstractBeanFactory.initBeanWrapper()
-        //  -> bw.setConversionService(getConversionService());
+        //      -> bw.setConversionService(getConversionService());
+
+        // Register Converter
         ConfigurableConversionService conversionService = environment.getConversionService();
         conversionService.addConverter(new MapToCollectionConverter(conversionService));
 
-        // 获取配置属性值
+        // bind property
         boolean logEnable = Binder.get(environment).bind("milkomeda.show-log", Boolean.class).orElseGet(() -> false);
         log.info("milkomeda log: {}", logEnable ? "enable" : "disable");
     }

@@ -27,10 +27,11 @@ package com.github.yizzuide.milkomeda.wormhole;
  *
  * @author yizzuide
  * @since 3.3.0
+ * @version 3.13.0
  * @see WormholeEventTracker
  * Create at 2020/05/05 14:48
  */
 @FunctionalInterface
-public interface WormholeEventTrack {
-    void track(WormholeEvent<?> event);
+public interface WormholeEventTrack<E extends WormholeEvent<?>> {
+    void track(E event);
 }

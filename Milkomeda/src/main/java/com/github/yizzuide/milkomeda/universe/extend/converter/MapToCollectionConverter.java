@@ -36,6 +36,8 @@ import java.util.Set;
 /**
  * Converts a Map to Collection.
  *
+ * For similar implementation, refer to MapToMapConverter or CollectionToCollectionConverter
+ *
  * @author yizzuide
  * @since 3.13.0
  * @see org.springframework.core.convert.support.DefaultConversionService
@@ -85,6 +87,7 @@ public class MapToCollectionConverter implements ConditionalGenericConverter {
         }
 
         for (Object sourceElement : sourceCollection) {
+            // ConversionService.convert support recursive call of compound type
             Object targetElement = this.conversionService.convert(sourceElement,
                     sourceType.elementTypeDescriptor(sourceElement), elementDesc);
             target.add(targetElement);
