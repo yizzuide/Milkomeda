@@ -21,7 +21,7 @@
 
 package com.github.yizzuide.milkomeda.fusion;
 
-import com.github.yizzuide.milkomeda.universe.context.AopContextHolder;
+import com.github.yizzuide.milkomeda.universe.context.SpringContext;
 import com.github.yizzuide.milkomeda.universe.metadata.HandlerMetaData;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,7 +52,7 @@ public class FusionRegistration {
 
     @EventListener
     public void onApplicationEvent(@NonNull ContextRefreshedEvent event) {
-        actionMap = AopContextHolder.getHandlerMetaData(FusionHandler.class, FusionAction.class, (annotation, handlerAnnotation, metaData) -> {
+        actionMap = SpringContext.getHandlerMetaData(FusionHandler.class, FusionAction.class, (annotation, handlerAnnotation, metaData) -> {
             FusionAction fusionAction = (FusionAction) annotation;
             return fusionAction.value();
         }, false);

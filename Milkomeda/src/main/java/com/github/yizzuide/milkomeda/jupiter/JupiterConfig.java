@@ -21,7 +21,7 @@
 
 package com.github.yizzuide.milkomeda.jupiter;
 
-import com.github.yizzuide.milkomeda.universe.context.WebContext;
+import com.github.yizzuide.milkomeda.universe.context.SpringContext;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -61,7 +61,7 @@ public class JupiterConfig implements ApplicationContextAware {
                 ruleEngineClass = JupiterScopeRuleEngine.class;
             }
         }
-        JupiterRuleEngine jupiterRuleEngine = WebContext.registerBean((ConfigurableApplicationContext) applicationContext, JupiterRuleEngine.BEAN_ID, ruleEngineClass);
+        JupiterRuleEngine jupiterRuleEngine = SpringContext.registerBean((ConfigurableApplicationContext) applicationContext, JupiterRuleEngine.BEAN_ID, ruleEngineClass);
         applicationContext.getAutowireCapableBeanFactory().autowireBean(jupiterRuleEngine);
 
         Map<String, JupiterProperties.Rule> rules = props.getRules();

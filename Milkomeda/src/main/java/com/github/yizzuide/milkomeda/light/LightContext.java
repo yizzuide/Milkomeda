@@ -22,7 +22,7 @@
 package com.github.yizzuide.milkomeda.light;
 
 import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
-import com.github.yizzuide.milkomeda.universe.context.WebContext;
+import com.github.yizzuide.milkomeda.universe.context.SpringContext;
 import lombok.Data;
 import org.springframework.context.ConfigurableApplicationContext;
 
@@ -98,7 +98,7 @@ public class LightContext<ID, V> {
      */
     @SuppressWarnings("unchecked")
     public static <V> void setValue(V value, String identifier) {
-        LightContext<Serializable, V> lightContext = WebContext.registerBean((ConfigurableApplicationContext) ApplicationContextHolder.get(), identifier, LightContext.class);
+        LightContext<Serializable, V> lightContext = SpringContext.registerBean((ConfigurableApplicationContext) ApplicationContextHolder.get(), identifier, LightContext.class);
         Spot<Serializable, V> spot = new Spot<>();
         spot.setData(value);
         lightContext.set(spot);
@@ -113,7 +113,7 @@ public class LightContext<ID, V> {
      */
     @SuppressWarnings("unchecked")
     public static  <V> V getValue(String identifier) {
-        LightContext<Serializable, V> lightContext = WebContext.registerBean((ConfigurableApplicationContext) ApplicationContextHolder.get(), identifier, LightContext.class);
+        LightContext<Serializable, V> lightContext = SpringContext.registerBean((ConfigurableApplicationContext) ApplicationContextHolder.get(), identifier, LightContext.class);
         Spot<Serializable, V> spot = lightContext.get();
         return spot.getData();
     }

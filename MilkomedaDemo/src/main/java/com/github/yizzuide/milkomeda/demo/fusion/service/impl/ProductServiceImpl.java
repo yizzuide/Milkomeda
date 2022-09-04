@@ -22,6 +22,7 @@ public class ProductServiceImpl implements ProductService {
     private MessageService messageService;
 
     // 修改返回值，通过APIResponseDataHandler.productAction(...)
+    // 编译器会将多个@Fusion转为@Fusions包装
     @Fusion(tag = "product-push")
     // 根据条件是否调用业务方法 allowed：判断条件；fallback：条件判断结果为false时调用的反馈方法
     @Fusion(allowed = Platform.EL_CHECK_ACTIVE, fallback = "#target.pushNotCheck(#product, #delay)")

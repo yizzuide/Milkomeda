@@ -21,7 +21,7 @@
 
 package com.github.yizzuide.milkomeda.particle;
 
-import com.github.yizzuide.milkomeda.universe.context.WebContext;
+import com.github.yizzuide.milkomeda.universe.context.SpringContext;
 import com.github.yizzuide.milkomeda.util.IOUtils;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -128,7 +128,7 @@ public class ParticleConfig implements ApplicationContextAware {
                         break;
                 }
             }
-            LimitHandler limitHandler = WebContext.registerBean((ConfigurableApplicationContext) applicationContext, limiterName, limiter.getHandlerClazz(), limiter.getProps());
+            LimitHandler limitHandler = SpringContext.registerBean((ConfigurableApplicationContext) applicationContext, limiterName, limiter.getHandlerClazz(), limiter.getProps());
             limitHandler.setExpire(limiter.getKeyExpire().getSeconds());
             limiter.setLimitHandler(limitHandler);
             if (limiter.getHandlerClazz() == BarrierLimiter.class) {

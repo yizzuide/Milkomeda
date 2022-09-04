@@ -68,6 +68,8 @@ public class EnvironmentApplicationListener implements ApplicationListener<Appli
         // Register Converter
         ConfigurableConversionService conversionService = environment.getConversionService();
         conversionService.addConverter(new MapToCollectionConverter(conversionService));
+        // Get and check conversionService
+        // ((ConfigurableApplicationContext)ApplicationContextHolder.get()).getBeanFactory().getConversionService()
 
         // bind property
         boolean logEnable = Binder.get(environment).bind("milkomeda.show-log", Boolean.class).orElseGet(() -> false);

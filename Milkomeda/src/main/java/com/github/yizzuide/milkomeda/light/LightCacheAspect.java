@@ -22,7 +22,7 @@
 package com.github.yizzuide.milkomeda.light;
 
 import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
-import com.github.yizzuide.milkomeda.universe.context.WebContext;
+import com.github.yizzuide.milkomeda.universe.context.SpringContext;
 import com.github.yizzuide.milkomeda.universe.el.ELContext;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -100,7 +100,7 @@ public class LightCacheAspect {
         if (ApplicationContextHolder.get().containsBean(cacheBeanName)) {
             cache = ApplicationContextHolder.get().getBean(cacheBeanName, LightCache.class);
         } else {
-            cache = WebContext.registerBean((ConfigurableApplicationContext) ApplicationContextHolder.get(), cacheBeanName, LightCache.class);
+            cache = SpringContext.registerBean((ConfigurableApplicationContext) ApplicationContextHolder.get(), cacheBeanName, LightCache.class);
             // 自定义缓存实例配置
             if (props.getInstances().containsKey(originCacheBeanName)) {
                 cache.configFrom(props.getInstances().get(originCacheBeanName));

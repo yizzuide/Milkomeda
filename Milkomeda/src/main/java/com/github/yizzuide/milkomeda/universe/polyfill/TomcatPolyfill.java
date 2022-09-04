@@ -21,7 +21,7 @@
 
 package com.github.yizzuide.milkomeda.universe.polyfill;
 
-import com.github.yizzuide.milkomeda.universe.context.WebContext;
+import com.github.yizzuide.milkomeda.universe.context.SpringContext;
 import com.github.yizzuide.milkomeda.util.ReflectUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.catalina.Context;
@@ -58,7 +58,7 @@ public class TomcatPolyfill {
      * @return 添加是否成功
      */
     public static boolean addDynamicFilter(ServletContext servletContext, ConfigurableApplicationContext applicationContext,  String name, Class<? extends Filter> clazz, String... urlPattern) {
-        Filter filterBean = WebContext.registerBean(applicationContext, name, clazz);
+        Filter filterBean = SpringContext.registerBean(applicationContext, name, clazz);
         applicationContext.getAutowireCapableBeanFactory().autowireBean(filterBean);
         Context standContext = ReflectUtil.invokeFieldPath(servletContext, "context.context");
         if (standContext == null) {

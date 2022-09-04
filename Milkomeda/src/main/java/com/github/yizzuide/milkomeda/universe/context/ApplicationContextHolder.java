@@ -62,13 +62,17 @@ public class ApplicationContextHolder implements ApplicationContextAware {
     }
 
     /**
-     * 获取Spring IOC上下文
+     * 获取Spring Ioc上下文
      * @return ApplicationContext
      */
     public static ApplicationContext get() {
         return INSTANCE.getApplicationContext();
     }
 
+    /**
+     * Set current environment
+     * @param environment   Environment
+     */
     public static void setEnvironment(Environment environment) {
         ApplicationContextHolder.environment = environment;
     }

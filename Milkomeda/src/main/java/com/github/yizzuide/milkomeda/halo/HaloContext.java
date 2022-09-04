@@ -21,7 +21,7 @@
 
 package com.github.yizzuide.milkomeda.halo;
 
-import com.github.yizzuide.milkomeda.universe.context.AopContextHolder;
+import com.github.yizzuide.milkomeda.universe.context.SpringContext;
 import com.github.yizzuide.milkomeda.universe.metadata.HandlerMetaData;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -56,7 +56,7 @@ public class HaloContext implements ApplicationListener<ContextRefreshedEvent> {
 
     @Override
     public void onApplicationEvent(@NonNull ContextRefreshedEvent event) {
-        tableNameMap = AopContextHolder.getHandlerMetaData(HaloHandler.class, HaloListener.class, (annotation, handlerAnnotation, metaData) -> {
+        tableNameMap = SpringContext.getHandlerMetaData(HaloHandler.class, HaloListener.class, (annotation, handlerAnnotation, metaData) -> {
             HaloListener haloListener = (HaloListener) annotation;
             // 设置其它属性方法的值
             Map<String, Object> attrs = new HashMap<>(4);

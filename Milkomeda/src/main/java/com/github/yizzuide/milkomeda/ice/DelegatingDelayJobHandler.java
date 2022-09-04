@@ -24,7 +24,7 @@ package com.github.yizzuide.milkomeda.ice;
 import com.github.yizzuide.milkomeda.moon.Moon;
 import com.github.yizzuide.milkomeda.moon.PeriodicMoonStrategy;
 import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
-import com.github.yizzuide.milkomeda.universe.context.WebContext;
+import com.github.yizzuide.milkomeda.universe.context.SpringContext;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -86,11 +86,11 @@ public class DelegatingDelayJobHandler implements Runnable, InitializingBean {
         List<DelayJobHandler> delayJobHandlers = new ArrayList<>();
         for (int i = 0; i < props.getDelayBucketCount(); i++) {
             // 注册为bean，让其可以接收Spring事件
-            DelayJobHandler delayJobHandler = WebContext.registerBean((ConfigurableApplicationContext) ApplicationContextHolder.get(), "delayJobHandler" + i, DelayJobHandler.class);
+            DelayJobHandler delayJobHandler = SpringContext.registerBean((ConfigurableApplicationContext) ApplicationContextHolder.get(), "delayJobHandler" + i, DelayJobHandler.class);
             delayJobHandler.fill(redisTemplate, jobPool, delayBucket, readyQueue, deadQueue, i, props);
             delayJobHandlers.add(delayJobHandler);
         }
-        Moon<DelayJobHandler> moon = WebContext.registerBean((ConfigurableApplicationContext) ApplicationContextHolder.get(), "iceDelayBucketMoon", Moon.class);
+        Moon<DelayJobHandler> moon = SpringContext.registerBean((ConfigurableApplicationContext) ApplicationContextHolder.get(), "iceDelayBucketMoon", Moon.class);
         // 使用lua方式
         moon.setMixinMode(false);
         PeriodicMoonStrategy strategy = new PeriodicMoonStrategy();

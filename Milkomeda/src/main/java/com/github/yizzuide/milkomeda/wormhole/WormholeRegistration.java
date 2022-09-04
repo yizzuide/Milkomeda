@@ -21,7 +21,7 @@
 
 package com.github.yizzuide.milkomeda.wormhole;
 
-import com.github.yizzuide.milkomeda.universe.context.AopContextHolder;
+import com.github.yizzuide.milkomeda.universe.context.SpringContext;
 import com.github.yizzuide.milkomeda.universe.metadata.HandlerMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -62,7 +62,7 @@ public class WormholeRegistration {
 
     @EventListener
     public void onApplicationEvent(@NonNull ContextRefreshedEvent event) {
-        actionMap = AopContextHolder.getHandlerMetaData(WormholeEventHandler.class, WormholeAction.class, (annotation, handlerAnnotation, metaData) -> {
+        actionMap = SpringContext.getHandlerMetaData(WormholeEventHandler.class, WormholeAction.class, (annotation, handlerAnnotation, metaData) -> {
             WormholeAction wormholeAction = (WormholeAction) annotation;
             boolean isAsyncPresentOn = metaData.getMethod().isAnnotationPresent(Async.class);
             Map<String, Object> attrs = new HashMap<>(4);
@@ -73,7 +73,7 @@ public class WormholeRegistration {
         }, false);
 
         // 领域事件跟踪处理器
-        List<WormholeEventTrack> trackers = AopContextHolder.getTypeHandlers(WormholeEventTracker.class);
+        List<WormholeEventTrack<?>> trackers = SpringContext.getTypeHandlers(WormholeEventTracker.class);
         if (!CollectionUtils.isEmpty(trackers)) {
             eventBus.setTrackers(trackers);
         }

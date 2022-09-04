@@ -49,7 +49,9 @@ public class DelegatingContextFilter implements Filter {
 
     @PostConstruct
     public void init() {
-        // 排序
+        // 根据@Order注解排序
+        //AnnotationAwareOrderComparator.sort(astrolabeHandlers);
+        // 根据Order接口排序
         astrolabeHandlers = astrolabeHandlers.stream()
                 .sorted(OrderComparator.INSTANCE.withSourceProvider(ha -> ha)).collect(Collectors.toList());
     }

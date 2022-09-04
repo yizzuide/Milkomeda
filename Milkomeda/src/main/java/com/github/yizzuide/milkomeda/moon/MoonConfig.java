@@ -21,7 +21,7 @@
 
 package com.github.yizzuide.milkomeda.moon;
 
-import com.github.yizzuide.milkomeda.universe.context.WebContext;
+import com.github.yizzuide.milkomeda.universe.context.SpringContext;
 import com.github.yizzuide.milkomeda.util.ReflectUtil;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -75,7 +75,7 @@ public class MoonConfig implements ApplicationContextAware {
                 }
             }
             Class<? extends MoonStrategy> moonStrategyClazz = instance.getMoonStrategyClazz();
-            Moon moon = WebContext.registerBean((ConfigurableApplicationContext) applicationContext, beanName, Moon.class);
+            Moon moon = SpringContext.registerBean((ConfigurableApplicationContext) applicationContext, beanName, Moon.class);
             moon.setCacheName(cacheName);
             try {
                 MoonStrategy moonStrategy = moonStrategyClazz.newInstance();

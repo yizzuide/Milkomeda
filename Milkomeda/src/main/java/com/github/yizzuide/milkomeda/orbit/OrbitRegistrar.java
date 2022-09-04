@@ -21,7 +21,7 @@
 
 package com.github.yizzuide.milkomeda.orbit;
 
-import com.github.yizzuide.milkomeda.universe.context.WebContext;
+import com.github.yizzuide.milkomeda.universe.context.SpringContext;
 import com.github.yizzuide.milkomeda.util.ReflectUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.aopalliance.aop.Advice;
@@ -84,7 +84,7 @@ public class OrbitRegistrar implements ImportBeanDefinitionRegistrar {
         }
 
         // 框架其它模块桥接切面源提供者
-        Collection<OrbitSource> orbitSources = WebContext.scanBeans(registry, OrbitSourceProvider.class, ORBIT_SOURCE_PROVIDER_SCAN_BASE_PACKAGES);
+        Collection<OrbitSource> orbitSources = SpringContext.scanBeans(registry, OrbitSourceProvider.class, ORBIT_SOURCE_PROVIDER_SCAN_BASE_PACKAGES);
         orbitSources.forEach(orbitSource -> orbitSource.createNodes(this.environment).forEach(this::addNode));
 
         // 注解注册方式

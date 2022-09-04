@@ -21,7 +21,7 @@
 
 package com.github.yizzuide.milkomeda.hydrogen.interceptor;
 
-import com.github.yizzuide.milkomeda.universe.context.WebContext;
+import com.github.yizzuide.milkomeda.universe.context.SpringContext;
 import com.github.yizzuide.milkomeda.universe.polyfill.SpringMvcPolyfill;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -112,7 +112,7 @@ public class WebMvcInterceptorLoader extends AbstractInterceptorLoader<Intercept
             }
             if (handlerInterceptorBean == null) {
                 // 动态注册到IoC
-                handlerInterceptorBean = (HandlerInterceptor) WebContext.registerBean((ConfigurableApplicationContext) getApplicationContext(), hi.getClazz().getSimpleName(), hi.getClazz(), hi.getProps());
+                handlerInterceptorBean = (HandlerInterceptor) SpringContext.registerBean((ConfigurableApplicationContext) getApplicationContext(), hi.getClazz().getSimpleName(), hi.getClazz(), hi.getProps());
                 // 动态注入属性
                 getApplicationContext().getAutowireCapableBeanFactory().autowireBean(handlerInterceptorBean);
             }

@@ -29,7 +29,7 @@ public class CreditAuditApplicationService {
             credit.setUserId(1001L);
 
             // 发送审核成功事件
-            WormholeHolder.getEventBus().publish(new WormholeEvent<>("audit", credit), Actions.AUDIT_SUCCESS);
+            WormholeHolder.getEventBus().publish(new WormholeEvent<>(this, "audit", credit), Actions.AUDIT_SUCCESS);
         }
 
     }

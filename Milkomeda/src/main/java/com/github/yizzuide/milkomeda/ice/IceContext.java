@@ -21,7 +21,7 @@
 
 package com.github.yizzuide.milkomeda.ice;
 
-import com.github.yizzuide.milkomeda.universe.context.AopContextHolder;
+import com.github.yizzuide.milkomeda.universe.context.SpringContext;
 import com.github.yizzuide.milkomeda.universe.metadata.HandlerMetaData;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,15 +56,15 @@ public class IceContext implements ApplicationListener<ContextRefreshedEvent> {
 
     @Override
     public void onApplicationEvent(@NonNull ContextRefreshedEvent event) {
-        topicMap = AopContextHolder.getHandlerMetaData(IceHandler.class, IceListener.class, (annotation, handlerAnnotation, metaData) -> {
+        topicMap = SpringContext.getHandlerMetaData(IceHandler.class, IceListener.class, (annotation, handlerAnnotation, metaData) -> {
                     IceListener iceListener = (IceListener) annotation;
                     return iceListener.value();
                 }, !props.isMultiTopicListenerPerHandler());
-        topicTtrMap = AopContextHolder.getHandlerMetaData(IceHandler.class, IceTtrListener.class, (annotation, handlerAnnotation, metaData) -> {
+        topicTtrMap = SpringContext.getHandlerMetaData(IceHandler.class, IceTtrListener.class, (annotation, handlerAnnotation, metaData) -> {
             IceTtrListener iceTtrListener = (IceTtrListener) annotation;
             return iceTtrListener.value();
         }, !props.isMultiTopicListenerPerHandler());
-        topicTtrOverloadMap = AopContextHolder.getHandlerMetaData(IceHandler.class, IceTtrOverloadListener.class, (annotation, handlerAnnotation, metaData) -> {
+        topicTtrOverloadMap = SpringContext.getHandlerMetaData(IceHandler.class, IceTtrOverloadListener.class, (annotation, handlerAnnotation, metaData) -> {
             IceTtrOverloadListener iceTtrOverloadListener = (IceTtrOverloadListener) annotation;
             return iceTtrOverloadListener.value();
         }, !props.isMultiTopicListenerPerHandler());

@@ -21,12 +21,12 @@
 
 package com.github.yizzuide.milkomeda.pillar;
 
-import com.github.yizzuide.milkomeda.universe.context.AopContextHolder;
+import com.github.yizzuide.milkomeda.universe.context.SpringContext;
 import com.github.yizzuide.milkomeda.universe.metadata.HandlerMetaData;
+import com.github.yizzuide.milkomeda.util.Strings;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.lang.NonNull;
-import com.github.yizzuide.milkomeda.util.Strings;
 
 import java.util.HashMap;
 import java.util.List;
@@ -47,7 +47,7 @@ public class PillarEntryContext implements ApplicationListener<ContextRefreshedE
 
     @Override
     public void onApplicationEvent(@NonNull ContextRefreshedEvent event) {
-        pillarEntryMap = AopContextHolder.getHandlerMetaData(PillarEntryHandler.class, PillarEntryPoint.class, (annotation, handlerAnnotation, metaData) -> {
+        pillarEntryMap = SpringContext.getHandlerMetaData(PillarEntryHandler.class, PillarEntryPoint.class, (annotation, handlerAnnotation, metaData) -> {
             PillarEntryHandler pillarEntryHandler = (PillarEntryHandler) handlerAnnotation;
             PillarEntryPoint pillarEntryPoint = (PillarEntryPoint) annotation;
             String tag = pillarEntryHandler.tag();

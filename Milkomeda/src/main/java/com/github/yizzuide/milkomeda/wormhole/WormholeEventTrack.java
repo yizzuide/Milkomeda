@@ -32,6 +32,6 @@ package com.github.yizzuide.milkomeda.wormhole;
  * Create at 2020/05/05 14:48
  */
 @FunctionalInterface
-public interface WormholeEventTrack<E extends WormholeEvent<?>> {
+public interface WormholeEventTrack<E extends WormholeEvent<?>> extends java.util.EventListener {
     void track(E event);
 }
