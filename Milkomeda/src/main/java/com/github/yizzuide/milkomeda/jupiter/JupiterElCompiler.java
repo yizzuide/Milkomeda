@@ -21,7 +21,7 @@
 
 package com.github.yizzuide.milkomeda.jupiter;
 
-import com.github.yizzuide.milkomeda.universe.el.SimpleElParser;
+import com.github.yizzuide.milkomeda.universe.engine.el.SimpleElParser;
 
 /**
  * JupiterElCompiler

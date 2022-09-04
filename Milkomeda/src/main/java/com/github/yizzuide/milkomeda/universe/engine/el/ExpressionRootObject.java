@@ -19,7 +19,7 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.universe.el;
+package com.github.yizzuide.milkomeda.universe.engine.el;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

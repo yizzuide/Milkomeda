@@ -22,7 +22,7 @@
 package com.github.yizzuide.milkomeda.light;
 
 import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
-import com.github.yizzuide.milkomeda.universe.handler.AstrolabeHandler;
+import com.github.yizzuide.milkomeda.universe.extend.web.handler.AstrolabeHandler;
 import org.springframework.core.Ordered;
 
 import javax.servlet.ServletRequest;

@@ -19,7 +19,7 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.universe.env;
+package com.github.yizzuide.milkomeda.universe.extend.env;
 
 import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import org.springframework.core.env.ConfigurableEnvironment;

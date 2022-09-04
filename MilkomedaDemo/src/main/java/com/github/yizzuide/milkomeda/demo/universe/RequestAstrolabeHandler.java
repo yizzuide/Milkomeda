@@ -1,7 +1,7 @@
 package com.github.yizzuide.milkomeda.demo.universe;
 
 import com.github.yizzuide.milkomeda.universe.context.WebContext;
-import com.github.yizzuide.milkomeda.universe.handler.AstrolabeHandler;
+import com.github.yizzuide.milkomeda.universe.extend.web.handler.AstrolabeHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 

@@ -21,7 +21,7 @@
 
 package com.github.yizzuide.milkomeda.sundial;
 
-import com.github.yizzuide.milkomeda.universe.el.SimpleElParser;
+import com.github.yizzuide.milkomeda.universe.engine.el.SimpleElParser;
 import com.github.yizzuide.milkomeda.util.MybatisUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.cache.CacheKey;

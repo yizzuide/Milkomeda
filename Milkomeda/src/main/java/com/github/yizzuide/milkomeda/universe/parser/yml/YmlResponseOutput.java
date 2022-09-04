@@ -21,7 +21,7 @@
 
 package com.github.yizzuide.milkomeda.universe.parser.yml;
 
-import com.github.yizzuide.milkomeda.universe.env.CollectionsPropertySource;
+import com.github.yizzuide.milkomeda.universe.extend.env.CollectionsPropertySource;
 import com.github.yizzuide.milkomeda.util.DataTypeConvertUtil;
 import lombok.NonNull;
 import org.springframework.lang.Nullable;

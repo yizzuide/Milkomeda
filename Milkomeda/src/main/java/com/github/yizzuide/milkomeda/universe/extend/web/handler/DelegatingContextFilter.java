@@ -19,7 +19,7 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.universe.handler;
+package com.github.yizzuide.milkomeda.universe.extend.web.handler;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.OrderComparator;

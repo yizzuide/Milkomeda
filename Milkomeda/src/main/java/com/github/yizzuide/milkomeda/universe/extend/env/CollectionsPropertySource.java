@@ -19,30 +19,37 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.universe.env;
+package com.github.yizzuide.milkomeda.universe.extend.env;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.env.StandardEnvironment;
-import org.springframework.util.StringUtils;
 
 /**
- * ConditionPropertySource
+ * CollectionsPropertySource
  *
  * @author yizzuide
- * @version 3.2.1
- * Create at 2020/04/29 15:30
+ * @since 3.0.1
+ * @see org.springframework.boot.env.RandomValuePropertySource#addToEnvironment(org.springframework.core.env.ConfigurableEnvironment)
+ * @see org.springframework.core.env.AbstractEnvironment#getProperty(java.lang.String)
+ * @see org.springframework.core.env.AbstractPropertyResolver#getProperty(java.lang.String)
+ * @see org.springframework.core.env.PropertySourcesPropertyResolver#getProperty(java.lang.String, java.lang.Class)
+ * Create at 2020/04/11 10:38
  */
 @Slf4j
-public class ConditionPropertySource extends PropertySource<Object> {
+public class CollectionsPropertySource extends PropertySource<Object> {
 
-    public static final String CONDITION_PROPERTY_SOURCE_NAME = "condition";
+    public static final String COLLECTIONS_PROPERTY_SOURCE_NAME = "collections";
 
-    private static final String PREFIX = "condition.";
+    public static final String COLLECTIONS_EMPTY_MAP = "{}";
 
-    public ConditionPropertySource() {
-        super(CONDITION_PROPERTY_SOURCE_NAME);
+    public static final String COLLECTIONS_EMPTY_LIST = "[]";
+
+    private static final String PREFIX = "collections.";
+
+    public CollectionsPropertySource() {
+        super(COLLECTIONS_PROPERTY_SOURCE_NAME);
     }
 
     @Override
@@ -50,43 +57,23 @@ public class ConditionPropertySource extends PropertySource<Object> {
         if (!name.startsWith(PREFIX)) {
             return null;
         }
-        return getConditionValue(name.substring(PREFIX.length()));
+        return getValue(name.substring(PREFIX.length()));
     }
 
-    private Object getConditionValue(String type) {
-        String range = getRange(type, "equals");
-        if (range != null) {
-            return getBoolValue(range);
+    public Object getValue(String type) {
+        if ("emptyMap".equals(type)) {
+            return COLLECTIONS_EMPTY_MAP;
         }
-        range = getRange(type, "diff");
-        if (range != null) {
-            return !getBoolValue(range);
-        }
-        return null;
-    }
-
-    private boolean getBoolValue(String range) {
-        range = StringUtils.trimAllWhitespace(range);
-        String[] parts = StringUtils.commaDelimitedListToStringArray(range);
-        if (parts.length != 2) {
-            throw new IllegalArgumentException("Condition.bool set args error.");
-        }
-        return parts[0].equals(parts[1]);
-    }
-
-    private String getRange(String type, String prefix) {
-        if (type.startsWith(prefix)) {
-            int startIndex = prefix.length() + 1;
-            if (type.length() > startIndex) {
-                return type.substring(startIndex, type.length() - 1);
-            }
+        if ("emptyList".equals(type)) {
+            return COLLECTIONS_EMPTY_LIST;
         }
         return null;
     }
 
     public static void addToEnvironment(ConfigurableEnvironment environment) {
+        // 添加在SystemEnvironmentPropertySource后面，而SpringCloud（bootstrap.yml，比application.yml优化级高）和SpringBoot（application.yml）环境里的配置可以读取
         environment.getPropertySources().addAfter(StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME,
-                new ConditionPropertySource());
+                new CollectionsPropertySource());
         log.trace("CollectionsPropertySource add to Environment");
     }
 }

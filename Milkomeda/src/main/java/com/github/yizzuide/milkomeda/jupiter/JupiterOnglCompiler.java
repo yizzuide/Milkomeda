@@ -21,8 +21,8 @@
 
 package com.github.yizzuide.milkomeda.jupiter;
 
-import com.github.yizzuide.milkomeda.universe.ognl.OgnlClassResolver;
-import com.github.yizzuide.milkomeda.universe.ognl.OgnlMemberAccess;
+import com.github.yizzuide.milkomeda.universe.engine.ognl.OgnlClassResolver;
+import com.github.yizzuide.milkomeda.universe.engine.ognl.OgnlMemberAccess;
 import lombok.extern.slf4j.Slf4j;
 import ognl.ClassResolver;
 import ognl.MemberAccess;

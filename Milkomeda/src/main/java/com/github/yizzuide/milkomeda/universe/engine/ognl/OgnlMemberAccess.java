@@ -19,7 +19,7 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.universe.ognl;
+package com.github.yizzuide.milkomeda.universe.engine.ognl;
 
 import lombok.Data;
 import ognl.MemberAccess;

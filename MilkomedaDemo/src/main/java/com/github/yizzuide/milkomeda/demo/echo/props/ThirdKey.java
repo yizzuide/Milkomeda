@@ -1,6 +1,7 @@
 package com.github.yizzuide.milkomeda.demo.echo.props;
 
 import lombok.Getter;
+import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.ConstructorBinding;
 import org.springframework.boot.context.properties.bind.Name;
@@ -13,10 +14,10 @@ import org.springframework.boot.context.properties.bind.Name;
  */
 @ConfigurationProperties(prefix = "third")
 public class ThirdKey {
-    @Getter
-    private final String parPubKey;
-    @Getter
-    private final String priKey;
+    @Setter @Getter
+    private String parPubKey;
+    @Setter @Getter
+    private String priKey;
 
     public ThirdKey() {
         parPubKey = "";

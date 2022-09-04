@@ -21,8 +21,8 @@
 
 package com.github.yizzuide.milkomeda.universe.context;
 
-import com.github.yizzuide.milkomeda.universe.el.ELContext;
-import com.github.yizzuide.milkomeda.universe.env.Environment;
+import com.github.yizzuide.milkomeda.universe.engine.el.ELContext;
+import com.github.yizzuide.milkomeda.universe.extend.env.Environment;
 import lombok.Getter;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;

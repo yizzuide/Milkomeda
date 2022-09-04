@@ -26,7 +26,7 @@ import com.github.yizzuide.milkomeda.atom.AtomLockType;
 import com.github.yizzuide.milkomeda.light.LightCachePut;
 import com.github.yizzuide.milkomeda.light.LightCacheable;
 import com.github.yizzuide.milkomeda.universe.context.AopContextHolder;
-import com.github.yizzuide.milkomeda.universe.env.Environment;
+import com.github.yizzuide.milkomeda.universe.extend.env.Environment;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 

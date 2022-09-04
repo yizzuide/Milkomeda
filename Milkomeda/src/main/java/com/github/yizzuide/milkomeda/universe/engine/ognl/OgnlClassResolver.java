@@ -19,38 +19,40 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.universe.handler;
+package com.github.yizzuide.milkomeda.universe.engine.ognl;
 
-import org.springframework.core.Ordered;
-
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+import ognl.DefaultClassResolver;
 
 /**
- * AstrolabeHandler
- * 星盘处理器（轻量级请求过滤器，类似线程之上的协程）
+ * OgnlClassResolver
  *
  * @author yizzuide
- * @since 3.3.0
- * @see DelegatingContextFilter
- * Create at 2020/05/06 11:38
+ * @since 3.5.0
+ * Create at 2020/05/20 13:56
  */
-public interface AstrolabeHandler extends Ordered {
-    /**
-     * 请求前置
-     * @param request  ServletRequest
-     */
-    default void preHandle(ServletRequest request) {}
+public class OgnlClassResolver extends DefaultClassResolver {
 
-    /**
-     * 请求后置
-     * @param request   ServletRequest
-     * @param response  ServletResponse
-     */
-    default void postHandle(ServletRequest request, ServletResponse response) {}
-
+    @SuppressWarnings("rawtypes")
     @Override
-    default int getOrder() {
-        return 0;
+    protected Class toClassForName(String className) throws ClassNotFoundException {
+        return classForName(className, getClassLoaders(null));
+    }
+
+    private Class<?> classForName(String name, ClassLoader[] classLoader) throws ClassNotFoundException {
+        for (ClassLoader cl : classLoader) {
+            if (null != cl) {
+                return Class.forName(name, true, cl);
+            }
+        }
+        throw new ClassNotFoundException("Cannot find class: " + name);
+    }
+
+    private ClassLoader[] getClassLoaders(ClassLoader classLoader) {
+        return new ClassLoader[] {
+                classLoader,
+                Thread.currentThread().getContextClassLoader(),
+                getClass().getClassLoader(),
+                ClassLoader.getSystemClassLoader()
+        };
     }
 }

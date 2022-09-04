@@ -19,7 +19,7 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.universe.env;
+package com.github.yizzuide.milkomeda.universe.extend.env;
 
 import com.github.yizzuide.milkomeda.universe.extend.converter.MapToCollectionConverter;
 import lombok.extern.slf4j.Slf4j;
