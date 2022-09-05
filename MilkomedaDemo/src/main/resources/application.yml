@@ -40,6 +40,9 @@ spring:
   # Springboot 2.3: 优雅关机等待时间
   lifecycle:
     timeout-per-shutdown-phase: 20s
+  # Springboot 2.1: Bean重复定义是否覆盖
+  main:
+    allow-bean-definition-overriding: false
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     druid:
