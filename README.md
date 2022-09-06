@@ -49,6 +49,8 @@ The inspiration for this project name is the Milky Way and the Andromeda will me
   * Depends on: Spring JDBC, Spring EL, OGNL
 - [x] Metal: Used for distributed dynamic configuration refresh based on KV data and support property binding injection. *3.6.0+*
   * Depends on: Spring IoC, SpringBoot Data Redis
+- [x] Orbit: Add method interceptor only with yml config or using `@Orbit`. *3.13.0+*
+  * Depends on: Spring AOP
     
 ## Requirements
 * Java 8
