@@ -23,7 +23,7 @@ package com.github.yizzuide.milkomeda.metal;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessorAdapter;
+import org.springframework.beans.factory.config.SmartInstantiationAwareBeanPostProcessor;
 import org.springframework.lang.NonNull;
 
 import java.lang.reflect.Field;
@@ -37,7 +37,7 @@ import java.lang.reflect.Field;
  * Create at 2020/05/21 18:31
  */
 @Slf4j
-public class MetalRegister extends InstantiationAwareBeanPostProcessorAdapter {
+public class MetalRegister implements SmartInstantiationAwareBeanPostProcessor {
     /**
      * 容器
      */
@@ -61,6 +61,6 @@ public class MetalRegister extends InstantiationAwareBeanPostProcessorAdapter {
         } catch (Exception e) {
             log.error("Metal process post bean error with msg: {}", e.getMessage(), e);
         }
-        return super.postProcessAfterInstantiation(bean, beanName);
+        return true;
     }
 }

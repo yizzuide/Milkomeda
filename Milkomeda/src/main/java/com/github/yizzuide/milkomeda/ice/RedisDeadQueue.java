@@ -39,7 +39,7 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 3.0.8
- * @version 3.12.0
+ * @version 3.14.0
  * Create at 2020/04/17 00:51
  */
 public class RedisDeadQueue implements DeadQueue, InitializingBean {
@@ -57,6 +57,10 @@ public class RedisDeadQueue implements DeadQueue, InitializingBean {
     @Override
     public void add(RedisOperations<String, String> operations, DelayJob delayJob) {
         operations.boundSetOps(this.deadQueueKey).add(JSONUtil.serialize(delayJob));
+    }
+
+    public void remove(DelayJob delayJob) {
+        getDeadQueue(this.deadQueueKey).remove(JSONUtil.serialize(delayJob));
     }
 
     @Override

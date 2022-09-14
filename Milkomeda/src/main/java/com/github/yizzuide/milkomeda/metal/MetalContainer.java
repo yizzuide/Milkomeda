@@ -23,11 +23,11 @@ package com.github.yizzuide.milkomeda.metal;
 
 import com.github.yizzuide.milkomeda.util.DataTypeConvertUtil;
 import com.github.yizzuide.milkomeda.util.ReflectUtil;
+import com.github.yizzuide.milkomeda.util.Strings;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ReflectionUtils;
-import com.github.yizzuide.milkomeda.util.Strings;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;

@@ -40,7 +40,7 @@ import java.util.List;
  *
  * @author yizzuide
  * @since 3.8.0
- * @version 3.12.0
+ * @version 3.14.0
  * Create at 2020/06/11 11:24
  */
 public class DelegatingDelayJobHandler implements Runnable, InitializingBean {
@@ -56,6 +56,9 @@ public class DelegatingDelayJobHandler implements Runnable, InitializingBean {
 
     @Autowired
     private DeadQueue deadQueue;
+
+    @Autowired(required = false)
+    private JobInspector jobInspector;
 
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
@@ -87,7 +90,7 @@ public class DelegatingDelayJobHandler implements Runnable, InitializingBean {
         for (int i = 0; i < props.getDelayBucketCount(); i++) {
             // 注册为bean，让其可以接收Spring事件
             DelayJobHandler delayJobHandler = SpringContext.registerBean((ConfigurableApplicationContext) ApplicationContextHolder.get(), "delayJobHandler" + i, DelayJobHandler.class);
-            delayJobHandler.fill(redisTemplate, jobPool, delayBucket, readyQueue, deadQueue, i, props);
+            delayJobHandler.fill(redisTemplate, jobPool, delayBucket, readyQueue, deadQueue, jobInspector, i, props);
             delayJobHandlers.add(delayJobHandler);
         }
         Moon<DelayJobHandler> moon = SpringContext.registerBean((ConfigurableApplicationContext) ApplicationContextHolder.get(), "iceDelayBucketMoon", Moon.class);

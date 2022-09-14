@@ -44,6 +44,13 @@ public interface DeadQueue {
     void add(RedisOperations<String, String> operations, DelayJob delayJob);
 
     /**
+     * remove with delay job.
+     * @param delayJob  DelayJob
+     * @since 3.14.0
+     */
+    void remove(DelayJob delayJob);
+
+    /**
      * 获取TTR Overload的DelayJob
      * @return  DelayJob
      */

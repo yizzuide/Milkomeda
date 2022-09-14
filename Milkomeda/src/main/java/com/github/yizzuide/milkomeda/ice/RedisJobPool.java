@@ -24,16 +24,18 @@ package com.github.yizzuide.milkomeda.ice;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import com.github.yizzuide.milkomeda.util.JSONUtil;
+import com.github.yizzuide.milkomeda.util.Strings;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationListener;
 import org.springframework.data.redis.core.BoundHashOperations;
 import org.springframework.data.redis.core.RedisOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.CollectionUtils;
-import com.github.yizzuide.milkomeda.util.Strings;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -75,6 +77,17 @@ public class RedisJobPool implements JobPool, InitializingBean, ApplicationListe
     public boolean exists(String jobId) {
         String job = getPool().get(jobId);
         return !Strings.isEmpty(job);
+    }
+
+    @Override
+    public Map<String, Job<?>> getAll() {
+        Map<String, String> jobs = getPool().entries();
+        if (CollectionUtils.isEmpty(jobs)) {
+            return null;
+        }
+        return jobs.entrySet().stream().collect(HashMap::new,
+                ((map, entry) -> map.put(entry.getKey(), JSONUtil.parse(entry.getValue(), Job.class))),
+                Map::putAll);
     }
 
     @SuppressWarnings("rawtypes")

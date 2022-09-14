@@ -34,7 +34,7 @@ import java.io.Serializable;
  *
  * @author yizzuide
  * @since 1.15.0
- * @version 3.12.0
+ * @version 3.14.0
  * Create at 2019/11/16 15:30
  */
 @Data
@@ -73,6 +73,14 @@ class DelayJob implements Serializable {
         this.jodId = job.getId();
         this.delayTime = System.currentTimeMillis() + job.getDelay();
         this.topic = job.getTopic();
+    }
+
+    /**
+     * Update delay time from dead queue
+     * @since 3.14.0
+     */
+    public void updateDelayTime() {
+        this.delayTime = System.currentTimeMillis() + this.delayTime;
     }
 
     /**

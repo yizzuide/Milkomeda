@@ -142,4 +142,10 @@ class IceProperties {
      * @see IceTtrOverloadListener
      */
     private boolean enableRetainToDeadQueueWhenTtrOverload = false;
+
+    /**
+     * Enable export job introspection api
+     * @since 3.14.0
+     */
+    private boolean enableIntrospect;
 }

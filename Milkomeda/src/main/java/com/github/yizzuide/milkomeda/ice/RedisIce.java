@@ -42,7 +42,7 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 1.15.0
- * @version 3.12.1
+ * @version 3.14.0
  * Create at 2019/11/16 15:20
  */
 @Slf4j
@@ -56,6 +56,12 @@ public class RedisIce implements Ice, ApplicationListener<IceInstanceChangeEvent
 
     @Autowired
     private ReadyQueue readyQueue;
+
+    @Autowired
+    private DeadQueue deadQueue;
+
+    @Autowired(required = false)
+    private JobInspector jobInspector;
 
     @Autowired
     private StringRedisTemplate redisTemplate;
@@ -83,15 +89,40 @@ public class RedisIce implements Ice, ApplicationListener<IceInstanceChangeEvent
         if (mergeIdWithTopic) {
             job.setId(job.getTopic() + "-" + job.getId());
         }
-        if (!replaceWhenExists && jobPool.exists(job.getId())) {
-            return;
-        }
+
         job.setStatus(JobStatus.DELAY);
+        DelayJob delayJob = new DelayJob(job);
+        JobWrapper jobWrapper = JobWrapper.buildFrom(job);
+        if (replaceWhenExists && jobPool.exists(job.getId())) {
+            // Using old state data to test
+            Job<?> mJob = jobPool.get(job.getId());
+            if (mJob.getStatus() == JobStatus.DELAY ||
+                    mJob.getStatus() == JobStatus.READY ||
+                    mJob.getStatus() == JobStatus.RESERVED) {
+                log.warn("Ice no need to add job which Working normally, jobId: {}", job.getId());
+                return;
+            }
+            if (props.isEnableRetainToDeadQueueWhenTtrOverload() &&
+                    mJob.getStatus() == JobStatus.IDLE) {
+                // 还原延时时间
+                delayJob.setDelayTime(mJob.getDelay());
+                deadQueue.remove(delayJob);
+                // 更新延时时间
+                delayJob.updateDelayTime();
+            }
+        }
         RedisUtil.batchOps((operations) -> {
             jobPool.remove(operations, job.getId());
             jobPool.push(operations, job);
-            delayBucket.add(operations, new DelayJob(job));
+            Integer index = delayBucket.add(operations, delayJob);
+
+            // Record job
+            if (jobInspector != null) {
+                jobInspector.initJobInspection(jobWrapper, index);
+            }
         }, redisTemplate);
+
+
     }
 
     @Override
@@ -114,6 +145,23 @@ public class RedisIce implements Ice, ApplicationListener<IceInstanceChangeEvent
         return new Job<>(id, topic, delay, props.getTtr().toMillis(), props.getRetryCount(), body);
     }
 
+    public void rePushJob(String jobId) {
+        add(jobPool.get(jobId));
+    }
+
+    @Override
+    public List<JobWrapper> getJobInspectPage(int start, int size) {
+        if (jobInspector == null) {
+            return Collections.emptyList();
+        }
+        return jobInspector.getPage(start, size);
+    }
+
+    @Override
+    public Job<?> getJobDetail(String jobId) {
+        return jobPool.get(jobId);
+    }
+
     @Override
     public <T> Job<T> pop(String topic) {
         DelayJob delayJob = readyQueue.pop(topic);
@@ -134,7 +182,12 @@ public class RedisIce implements Ice, ApplicationListener<IceInstanceChangeEvent
         delayJob.setDelayTime(System.currentTimeMillis() + mJob.getTtr());
         RedisUtil.batchOps((operations) -> {
             jobPool.push(operations, mJob);
-            delayBucket.add(operations, delayJob);
+            int index = delayBucket.add(operations, delayJob);
+
+            // Record job
+            if (jobInspector != null) {
+                jobInspector.updateJobInspection(Collections.singletonList(delayJob), index);
+            }
         }, redisTemplate);
         return mJob;
     }
@@ -185,8 +238,12 @@ public class RedisIce implements Ice, ApplicationListener<IceInstanceChangeEvent
 
     @Override
     public <T> void finish(List<Job<T>> jobs) {
-        // 仅删除jobPool原数据，不会删除DelayBucket里的记录，因为有TTR检测
         delete(jobs);
+
+        // Record job
+        if (jobInspector != null) {
+            jobInspector.finish(jobs.stream().map(Job::getId).collect(Collectors.toList()));
+        }
     }
 
     @Override

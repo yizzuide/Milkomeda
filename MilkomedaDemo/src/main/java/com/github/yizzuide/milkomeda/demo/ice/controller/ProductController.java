@@ -30,7 +30,7 @@ public class ProductController {
         // 模拟审核商品。。
         if (product.getPics() == null) {
             log.info("当前商品没有上传图片，加入黑名单");
-            ice.add(product.getId(), "topic_product_check",  product, 20000);
+            ice.add(product.getId(), "topic_product_check",  product, 10000);
         }
         return ResponseEntity.ok("ok");
     }

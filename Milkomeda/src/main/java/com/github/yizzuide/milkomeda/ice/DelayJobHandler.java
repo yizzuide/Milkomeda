@@ -39,7 +39,7 @@ import java.util.List;
  *
  * @author yizzuide
  * @since 1.15.0
- * @version 3.12.0
+ * @version 3.14.0
  * Create at 2019/11/16 17:30
  */
 @Slf4j
@@ -71,6 +71,11 @@ public class DelayJobHandler implements Runnable, ApplicationListener<IceInstanc
     private DeadQueue deadQueue;
 
     /**
+     * Job inspector for update info
+     */
+    private JobInspector jobInspector;
+
+    /**
      * 索引
      */
     private int index;
@@ -78,12 +83,13 @@ public class DelayJobHandler implements Runnable, ApplicationListener<IceInstanc
     // 延迟桶分布式锁Key
     private String lockKey;
 
-    public void fill(StringRedisTemplate redisTemplate, JobPool jobPool, DelayBucket delayBucket, ReadyQueue readyQueue, DeadQueue deadQueue, int i, IceProperties props) {
+    public void fill(StringRedisTemplate redisTemplate, JobPool jobPool, DelayBucket delayBucket, ReadyQueue readyQueue, DeadQueue deadQueue, JobInspector jobInspector, int i, IceProperties props) {
         this.redisTemplate = redisTemplate;
         this.jobPool = jobPool;
         this.delayBucket = delayBucket;
         this.readyQueue = readyQueue;
         this.deadQueue = deadQueue;
+        this.jobInspector = jobInspector;
         this.index = i;
         this.props = props;
         if (IceProperties.DEFAULT_INSTANCE_NAME.equals(props.getInstanceName())) {
@@ -155,8 +161,7 @@ public class DelayJobHandler implements Runnable, ApplicationListener<IceInstanc
         log.warn("Ice处理TTR的Job {}，当前重试次数为{}", delayJob.getJodId(), currentRetryCount);
         // 检测重试次数过载
         boolean overload = delayJob.getRetryCount() >= job.getRetryCount();
-        // 过载处理标识
-        boolean handleFlag = false;
+
         // 调用TTR监听器
         List<HandlerMetaData> ttrMetaDataList = IceContext.getTopicTtrMap().get(job.getTopic());
         if (!CollectionUtils.isEmpty(ttrMetaDataList)) {
@@ -167,7 +172,6 @@ public class DelayJobHandler implements Runnable, ApplicationListener<IceInstanc
                     ttrJob.setRetryCount(currentRetryCount);
                     ttrJob.setJob((Job) job);
                     ReflectUtil.invokeWithWrapperInject(handlerMetaData.getTarget(), handlerMetaData.getMethod(), Collections.singletonList(ttrJob), TtrJob.class, tj -> tj.getJob().getBody(), (tj, body) -> tj.getJob().setBody(body));
-                    handleFlag = true;
                 } catch (Exception e) {
                     log.error("Ice invoke TTR listener error: {}", e.getMessage(), e);
                 }
@@ -182,31 +186,22 @@ public class DelayJobHandler implements Runnable, ApplicationListener<IceInstanc
                 for (HandlerMetaData handlerMetaData : ttrOverloadMetaDataList) {
                     try {
                         ReflectUtil.invokeWithWrapperInject(handlerMetaData.getTarget(), handlerMetaData.getMethod(), Collections.singletonList(job), Job.class, Job::getBody, Job::setBody);
-                        handleFlag = true;
                     } catch (Exception e) {
                         log.error("Ice invoke TTR overload listener error: {}", e.getMessage(), e);
                     }
                 }
             }
-            boolean finalHandleFlag = handleFlag;
+
             RedisUtil.batchOps((operations) -> {
-                // 如果调用TTR Overload监听成功
-                if (finalHandleFlag) {
-                    // 移除delayBucket中的任务
-                    delayBucket.remove(operations, index, delayJob);
-                    // 没有开启Dead queue就移除原数据
-                    if (!props.isEnableRetainToDeadQueueWhenTtrOverload()) {
-                        IceHolder.getIce().finish(operations, job.getId());
-                    }
-                }
+                // 移除delayBucket中的任务
+                delayBucket.remove(operations, index, delayJob);
+                // 修改池中状态
+                job.setStatus(JobStatus.IDLE);
+                // 重回JobPool中
+                jobPool.push(operations, job);
+
+                // 如果有开启DeadQueue
                 if (props.isEnableRetainToDeadQueueWhenTtrOverload()) {
-                    // 没有TTR Overload处理器时，从延迟队列移除
-                    if (!finalHandleFlag) {
-                        delayBucket.remove(operations, index, delayJob);
-                    }
-                    // 修改池中状态
-                    job.setStatus(JobStatus.DELAY);
-                    jobPool.push(operations, job);
                     // 重置延迟作业状态
                     delayJob.setDelayTime(job.getDelay());
                     delayJob.setRetryCount(0);
@@ -214,12 +209,16 @@ public class DelayJobHandler implements Runnable, ApplicationListener<IceInstanc
                     deadQueue.add(operations, delayJob);
                     log.warn("Ice处理TTR Overload的 Job {} 进入Dead queue", job.getId());
                 }
+
+                // Record job
+                if (jobInspector != null) {
+                    jobInspector.updateJobInspection(Collections.singletonList(delayJob), null,
+                            job.getStatus(), jobWrapper -> jobWrapper.setHadRetryCount(currentRetryCount));
+                }
             }, redisTemplate);
 
-            // 如果有处理方案，不再重试
-            if (handleFlag || props.isEnableRetainToDeadQueueWhenTtrOverload()) {
-                return;
-            }
+            // Over!
+            return;
         }
 
         // 重置到当前延迟
@@ -238,6 +237,12 @@ public class DelayJobHandler implements Runnable, ApplicationListener<IceInstanc
             delayJob.setDelayTime(delayDate);
             // 再次添加到任务中
             delayBucket.add(operations, delayJob);
+
+            // Record job
+            if (jobInspector != null) {
+                jobInspector.updateJobInspection(Collections.singletonList(delayJob), null,
+                        job.getStatus(), null);
+            }
         }, redisTemplate);
     }
 
@@ -254,6 +259,12 @@ public class DelayJobHandler implements Runnable, ApplicationListener<IceInstanc
             readyQueue.push(operations, delayJob);
             // 移除delayBucket中的任务
             delayBucket.remove(operations, index, delayJob);
+
+            // Record job
+            if (jobInspector != null) {
+                jobInspector.updateJobInspection(Collections.singletonList(delayJob), null,
+                        job.getStatus(), null);
+            }
         }, redisTemplate);
     }
 

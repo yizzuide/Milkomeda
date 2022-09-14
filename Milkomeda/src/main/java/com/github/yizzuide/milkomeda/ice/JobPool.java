@@ -25,6 +25,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import org.springframework.data.redis.core.RedisOperations;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * JobPool
@@ -61,6 +62,13 @@ public interface JobPool {
      * @since 3.0.0
      */
     boolean exists(String jobId);
+
+    /**
+     *  Get all job in job pool.
+     * @return (jobId, job)
+     * @since 3.14.0
+     */
+    Map<String, Job<?>> getAll();
 
     /**
      * 获取任务

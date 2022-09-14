@@ -2,11 +2,11 @@ package com.github.yizzuide.milkomeda.demo.ice.controller;
 
 import com.github.yizzuide.milkomeda.ice.Ice;
 import com.github.yizzuide.milkomeda.ice.Job;
+import com.github.yizzuide.milkomeda.ice.JobWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
 import java.util.List;
@@ -32,6 +32,38 @@ public class JobController {
     @RequestMapping("push")
     public void push(@RequestBody Job<?> job) {
         ice.add(job);
+    }
+
+    /**
+     * 获取job页数据
+     * @param start page num
+     * @param size  size of pre page
+     * @return  JobWrapper list
+     */
+    @GetMapping("getPage")
+    public List<JobWrapper> getJobPage(int start, int size) {
+        return ice.getJobInspectPage(start, size);
+    }
+
+    /**
+     * 获取当前job的详情信息
+     * @param jobId job id
+     * @return  job
+     */
+    @GetMapping("getDetail")
+    public Job<?> getJobDetail(String jobId) {
+        return ice.getJobDetail(jobId);
+    }
+
+    /**
+     * 重推Job
+     * @param jobId job id
+     * @return null
+     */
+    @GetMapping("rePush")
+    public ResponseEntity<Void> rePushJob(String jobId) {
+        ice.rePushJob(jobId);
+        return ResponseEntity.ok(null);
     }
 
     /**

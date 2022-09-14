@@ -10,7 +10,7 @@ import java.util.List;
 
 /**
  * ProductCheckTask
- * 自定义任务接收处理
+ * 自定义任务接收处理（API调用方式）
  *
  * @author yizzuide
  * Create at 2019/11/16 21:42

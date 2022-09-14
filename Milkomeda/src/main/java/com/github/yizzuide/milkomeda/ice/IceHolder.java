@@ -34,17 +34,32 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 3.0.0
- * @version 3.1.0
+ * @version 3.14.0
  * Create at 2020/04/09 14:03
  */
 @Slf4j
 public class IceHolder {
+
+    private static IceProperties props;
 
     private static Ice ice;
 
     private static DeadQueue deadQueue;
 
     private static DelayBucket delayBucket;
+
+    private static JobInspector jobInspector;
+
+    private static String applicationName;
+
+    static void setProps(IceProperties props) {
+        IceHolder.props = props;
+        setApplicationName(props.getInstanceName());
+    }
+
+    static IceProperties getProps() {
+        return props;
+    }
 
     static void setIce(Ice ice) {
         IceHolder.ice = ice;
@@ -56,6 +71,22 @@ public class IceHolder {
 
     static void setDelayBucket(DelayBucket delayBucket) {
         IceHolder.delayBucket = delayBucket;
+    }
+
+    static void setJobInspector(JobInspector jobInspector) {
+        IceHolder.jobInspector = jobInspector;
+    }
+
+    static JobInspector getJobInspector() {
+        return jobInspector;
+    }
+
+    static void setApplicationName(String applicationName) {
+        IceHolder.applicationName = applicationName;
+    }
+
+    static String getApplicationName() {
+        return applicationName;
     }
 
     /**
@@ -72,6 +103,7 @@ public class IceHolder {
      * @since 3.0.7
      */
     public static void setInstanceName(String instanceName) {
+        setApplicationName(instanceName);
         IceInstanceChangeEvent event = new IceInstanceChangeEvent(instanceName);
         ApplicationContextHolder.get().publishEvent(event);
     }
@@ -89,6 +121,8 @@ public class IceHolder {
         int count = 0;
         while (!CollectionUtils.isEmpty(delayJobs)) {
             log.info("Ice 正在Dead Queue恢复延迟作业Jobs {}", delayJobs.stream().map(DelayJob::getJodId).collect(Collectors.toList()));
+            // 更新当前延迟时间
+            delayJobs.forEach(DelayJob::updateDelayTime);
             delayBucket.add(delayJobs);
             count += delayJobs.size();
             // 如果恢复完成，退出

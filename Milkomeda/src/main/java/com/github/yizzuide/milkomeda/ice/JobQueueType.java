@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 yizzuide All rights Reserved.
+ * Copyright (c) 2022 yizzuide All rights Reserved.
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -22,31 +22,27 @@
 package com.github.yizzuide.milkomeda.ice;
 
 /**
- * JobStatus
+ * Job queue type using for {@link JobWrapper}
  *
  * @author yizzuide
- * @since 1.15.0
- * Create at 2019/11/16 12:53
+ * @since 3.14.0
+ * Create at 2022/09/13 23:04
  */
-public enum JobStatus {
+public enum JobQueueType {
     /**
-     * 延迟中（准备状态）
+     * Wait execution time.
      */
-    DELAY,
+    DelayQueue,
     /**
-     * 准备消费（可执行状态）
+     * Prepare for consumption.
      */
-    READY,
+    ReadyQueue,
     /**
-     * 消费中（已被消费者读取）
+     * The job is executed fail, need to re-push.
      */
-    RESERVED,
+    NoneQueue,
     /**
-     * 闲置中（超过重试次数或进入DeadQueue）
+     * The job consumption error, and over maximum number of retries exceeded.
      */
-    IDLE,
-    /**
-     * 消费完成（由于删除是即时的，所以状态用不上）
-     */
-    DELETED
+    DeadQueue
 }

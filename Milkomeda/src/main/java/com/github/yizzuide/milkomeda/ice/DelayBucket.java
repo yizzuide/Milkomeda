@@ -30,7 +30,7 @@ import java.util.List;
  *
  * @author yizzuide
  * @since 1.15.0
- * @version 3.12.0
+ * @version 3.14.0
  * Create at 2019/11/16 16:03
  */
 public interface DelayBucket {
@@ -39,9 +39,10 @@ public interface DelayBucket {
      * 放入延时任务
      * @param operations Pipelined操作
      * @param delayJob DelayJob
+     * @return bucket index
      * @since 3.12.0
      */
-    void add(RedisOperations<String, String> operations, DelayJob delayJob);
+    Integer add(RedisOperations<String, String> operations, DelayJob delayJob);
 
     /**
      * 批量放入延时任务

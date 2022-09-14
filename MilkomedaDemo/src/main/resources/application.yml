@@ -322,6 +322,8 @@ milkomeda:
     multi-topic-listener-per-handler: true
     # TTR超载任务进入Dead queue
     enable-retain-to-dead-queue-when-ttr-overload: true
+    # 开启job任务监控（如果想通过后台页面查看job状态信息）
+    enable-introspect: true
 
   moon:
     instances:

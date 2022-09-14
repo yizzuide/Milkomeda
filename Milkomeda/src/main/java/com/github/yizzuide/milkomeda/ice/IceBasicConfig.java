@@ -27,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -53,12 +54,14 @@ public class IceBasicConfig {
     @Autowired
     private ApplicationContextHolder applicationContextHolder;
 
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
     private IceProperties props;
 
     @Bean
     @ConditionalOnMissingBean(JobPool.class)
     public JobPool jobPool() {
+        IceHolder.setProps(props);
         return new RedisJobPool(props);
     }
 
@@ -90,5 +93,13 @@ public class IceBasicConfig {
         RedisIce redisIce = new RedisIce(props);
         IceHolder.setIce(redisIce);
         return redisIce;
+    }
+
+    @Bean
+    @ConditionalOnProperty(prefix = "milkomeda.ice", name = "enable-introspect", havingValue = "true")
+    public JobInspector jobInspector() {
+        JobInspector jobInspector = new RedisJobInspector(props);
+        IceHolder.setJobInspector(jobInspector);
+        return jobInspector;
     }
 }

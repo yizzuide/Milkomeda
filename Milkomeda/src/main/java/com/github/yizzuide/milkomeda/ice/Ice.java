@@ -99,6 +99,28 @@ public interface Ice {
     <T> Job<T> build(String id, String topic, T body, long delay);
 
     /**
+     * Re-push job to job pool.
+     * @param jobId job id
+     */
+    void rePushJob(String jobId);
+
+    /**
+     * Get all job inspect info list.
+     * @param start page start index
+     * @param size size of per page
+     * @return JobWrapper list
+     * @since 3.14.0
+     */
+    List<JobWrapper> getJobInspectPage(int start, int size);
+
+    /**
+     * Get job info in job pool.
+     * @return  Job
+     * @since 3.14.0
+     */
+    Job<?> getJobDetail(String jobId);
+
+    /**
      * 取出待处理任务
      * @param topic 任务分组
      * @param <T>   业务数据

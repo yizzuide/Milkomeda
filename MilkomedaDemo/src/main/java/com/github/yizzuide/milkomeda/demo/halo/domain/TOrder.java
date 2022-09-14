@@ -1,9 +1,10 @@
 package com.github.yizzuide.milkomeda.demo.halo.domain;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
-import java.util.Date;
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * 订单表(TOrder)实体类
@@ -36,9 +37,11 @@ public class TOrder implements Serializable {
     * 价格（分）
     */
     private Long price;
-    
+
+    @JsonFormat(shape =JsonFormat.Shape.STRING, pattern ="yyyy-MM-dd HH:mm:ss", timezone ="GMT+8")
     private Date createTime;
-    
+
+    @JsonFormat(shape =JsonFormat.Shape.STRING, pattern ="yyyy-MM-dd HH:mm:ss", timezone ="GMT+8")
     private Date updateTime;
 
 }

@@ -27,6 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationListener;
 import org.springframework.data.redis.core.*;
+import org.springframework.data.util.Pair;
 import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
@@ -71,27 +72,45 @@ public class RedisDelayBucket implements DelayBucket, InitializingBean, Applicat
     }
 
     @Override
-    public void add(RedisOperations<String, String> operations, DelayJob delayJob) {
-        String bucketName = getCurrentBucketName();
+    public Integer add(RedisOperations<String, String> operations, DelayJob delayJob) {
+        Pair<Integer, String> bucketIndexPair = getCurrentBucketName();
+        String bucketName = bucketIndexPair.getSecond();
         operations.boundZSetOps(bucketName).add(delayJob.toSimple(), delayJob.getDelayTime());
+        return bucketIndexPair.getFirst();
     }
 
     @Override
     public void add(List<DelayJob> delayJobs) {
-        String bucketName = getCurrentBucketName();
+        Pair<Integer, String> bucketIndexPair = getCurrentBucketName();
+        String bucketName = bucketIndexPair.getSecond();
         Set<ZSetOperations.TypedTuple<String>> delayJobSet = delayJobs.stream()
-                .map(delayJob -> new DefaultTypedTuple<>(delayJob.toSimple(), (double) delayJob.getDelayTime()))
+                .map(delayJob -> {
+                    delayJob.updateDelayTime();
+                    return new DefaultTypedTuple<>(delayJob.toSimple(), (double) delayJob.getDelayTime());
+                })
                 .collect(Collectors.toSet());
         getBucket(bucketName).add(delayJobSet);
+
+        // Record job
+        if (IceHolder.getJobInspector() != null) {
+            IceHolder.getJobInspector().updateJobInspection(delayJobs, bucketIndexPair.getFirst());
+        }
+
     }
 
     @Override
     public void add(RedisOperations<String, String> operations, List<DelayJob> delayJobs) {
-        String bucketName = getCurrentBucketName();
+        Pair<Integer, String> bucketIndexPair = getCurrentBucketName();
+        String bucketName = bucketIndexPair.getSecond();
         Set<ZSetOperations.TypedTuple<String>> delayJobSet = delayJobs.stream()
                 .map(delayJob -> new DefaultTypedTuple<>(delayJob.toSimple(), (double) delayJob.getDelayTime()))
                 .collect(Collectors.toSet());
         operations.boundZSetOps(bucketName).add(delayJobSet);
+
+        // Record job
+        if (IceHolder.getJobInspector() != null) {
+            IceHolder.getJobInspector().updateJobInspection(delayJobs, bucketIndexPair.getFirst());
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -152,9 +171,10 @@ public class RedisDelayBucket implements DelayBucket, InitializingBean, Applicat
      *
      * @return BucketName
      */
-    private String getCurrentBucketName() {
+    private Pair<Integer, String> getCurrentBucketName() {
         int thisIndex = index.getAndIncrement() % DEFAULT_MAX_BUCKET_SIZE;
-        return bucketNames.get(thisIndex % props.getDelayBucketCount());
+        String bucketName = bucketNames.get(thisIndex % props.getDelayBucketCount());
+        return Pair.of(thisIndex, bucketName);
     }
 
     @Override
