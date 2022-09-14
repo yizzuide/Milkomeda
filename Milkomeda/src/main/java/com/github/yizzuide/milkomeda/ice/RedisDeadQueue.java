@@ -46,11 +46,11 @@ public class RedisDeadQueue implements DeadQueue, InitializingBean {
 
     private StringRedisTemplate redisTemplate;
 
-    private String deadQueueKey = "ice:dead_queue";
+    private String deadQueueKey = IceKeys.DEAD_QUEUE_KEY_PREFIX;
 
     public RedisDeadQueue(IceProperties props) {
         if (!IceProperties.DEFAULT_INSTANCE_NAME.equals(props.getInstanceName())) {
-            this.deadQueueKey = "ice:dead_queue:" + props.getInstanceName();
+            this.deadQueueKey = IceKeys.DEAD_QUEUE_KEY_PREFIX + ":" + props.getInstanceName();
         }
     }
 
@@ -104,6 +104,6 @@ public class RedisDeadQueue implements DeadQueue, InitializingBean {
     @EventListener
     public void onApplicationEvent(IceInstanceChangeEvent event) {
         String instanceName = event.getSource().toString();
-        this.deadQueueKey = "ice:dead_queue:" + instanceName;
+        this.deadQueueKey = IceKeys.DEAD_QUEUE_KEY_PREFIX + ":" + instanceName;
     }
 }

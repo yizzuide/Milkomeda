@@ -44,11 +44,11 @@ public class RedisReadyQueue implements ReadyQueue, InitializingBean, Applicatio
 
     private StringRedisTemplate redisTemplate;
 
-    private String readyQueueKey = "ice:ready_queue";
+    private String readyQueueKey = IceKeys.READY_QUEUE_KEY_PREFIX;
 
     public RedisReadyQueue(IceProperties props) {
         if (!IceProperties.DEFAULT_INSTANCE_NAME.equals(props.getInstanceName())) {
-            this.readyQueueKey = "ice:ready_queue:" + props.getInstanceName();
+            this.readyQueueKey = IceKeys.READY_QUEUE_KEY_PREFIX + ":" + props.getInstanceName();
         }
     }
 
@@ -101,6 +101,6 @@ public class RedisReadyQueue implements ReadyQueue, InitializingBean, Applicatio
     @Override
     public void onApplicationEvent(IceInstanceChangeEvent event) {
         String instanceName = event.getSource().toString();
-        this.readyQueueKey = "ice:ready_queue:" + instanceName;
+        this.readyQueueKey = IceKeys.READY_QUEUE_KEY_PREFIX + ":" + instanceName;
     }
 }

@@ -26,6 +26,7 @@ package com.github.yizzuide.milkomeda.ice;
  *
  * @author yizzuide
  * @since 1.15.0
+ * @version 3.14.0
  * Create at 2019/11/16 12:53
  */
 public enum JobStatus {
@@ -43,6 +44,7 @@ public enum JobStatus {
     RESERVED,
     /**
      * 闲置中（超过重试次数或进入DeadQueue）
+     * @since 3.14.0
      */
     IDLE,
     /**

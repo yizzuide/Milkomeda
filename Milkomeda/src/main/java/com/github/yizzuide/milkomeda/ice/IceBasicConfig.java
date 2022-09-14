@@ -40,7 +40,7 @@ import org.springframework.data.redis.core.RedisTemplate;
  *
  * @author yizzuide
  * @since 1.15.2
- * @since 3.0.8
+ * @since 3.14.0
  * Create at 2019/11/21 11:16
  */
 @Import(MilkomedaContextConfig.class)

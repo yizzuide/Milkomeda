@@ -33,9 +33,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -50,11 +48,11 @@ public class RedisJobPool implements JobPool, InitializingBean, ApplicationListe
 
     private StringRedisTemplate redisTemplate;
 
-    private String jobPoolKey = "ice:job_pool";
+    private String jobPoolKey = IceKeys.JOB_POOL_KEY_PREFIX;
 
     public RedisJobPool(IceProperties props) {
         if (!IceProperties.DEFAULT_INSTANCE_NAME.equals(props.getInstanceName())) {
-            this.jobPoolKey = "ice:job_pool" + ":" + props.getInstanceName();
+            this.jobPoolKey = IceKeys.JOB_POOL_KEY_PREFIX + ":" + props.getInstanceName();
         }
     }
 
@@ -77,17 +75,6 @@ public class RedisJobPool implements JobPool, InitializingBean, ApplicationListe
     public boolean exists(String jobId) {
         String job = getPool().get(jobId);
         return !Strings.isEmpty(job);
-    }
-
-    @Override
-    public Map<String, Job<?>> getAll() {
-        Map<String, String> jobs = getPool().entries();
-        if (CollectionUtils.isEmpty(jobs)) {
-            return null;
-        }
-        return jobs.entrySet().stream().collect(HashMap::new,
-                ((map, entry) -> map.put(entry.getKey(), JSONUtil.parse(entry.getValue(), Job.class))),
-                Map::putAll);
     }
 
     @SuppressWarnings("rawtypes")
@@ -145,6 +132,6 @@ public class RedisJobPool implements JobPool, InitializingBean, ApplicationListe
     @Override
     public void onApplicationEvent(IceInstanceChangeEvent event) {
         String instanceName = event.getSource().toString();
-        jobPoolKey = "ice:job_pool" + ":" + instanceName;
+        jobPoolKey = IceKeys.JOB_POOL_KEY_PREFIX + ":" + instanceName;
     }
 }

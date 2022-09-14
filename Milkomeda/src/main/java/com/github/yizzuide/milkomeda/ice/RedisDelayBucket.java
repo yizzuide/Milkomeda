@@ -43,7 +43,7 @@ import java.util.stream.Collectors;
  * @author yizzuide
  * @since 1.15.0
  * @version 3.8.0
- * @version 3.12.0
+ * @version 3.14.0
  * Create at 2019/11/16 16:17
  */
 @Slf4j
@@ -64,9 +64,9 @@ public class RedisDelayBucket implements DelayBucket, InitializingBean, Applicat
         this.props = props;
         for (int i = 0; i < props.getDelayBucketCount(); i++) {
             if (IceProperties.DEFAULT_INSTANCE_NAME.equals(props.getInstanceName())) {
-                bucketNames.add("ice:bucket" + i);
+                bucketNames.add(IceKeys.DELAY_BUCKET_KEY_PREFIX + i);
             } else {
-                bucketNames.add("ice:bucket" + i + ":" + props.getInstanceName());
+                bucketNames.add(IceKeys.DELAY_BUCKET_KEY_PREFIX + i + ":" + props.getInstanceName());
             }
         }
     }
@@ -187,7 +187,7 @@ public class RedisDelayBucket implements DelayBucket, InitializingBean, Applicat
         String instanceName = event.getSource().toString();
         bucketNames.clear();
         for (int i = 0; i < props.getDelayBucketCount(); i++) {
-            bucketNames.add("ice:bucket" + i + ":" + instanceName);
+            bucketNames.add(IceKeys.DELAY_BUCKET_KEY_PREFIX+ i + ":" + instanceName);
         }
     }
 }

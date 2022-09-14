@@ -25,6 +25,7 @@ import org.springframework.data.redis.core.RedisOperations;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Ice
@@ -32,7 +33,7 @@ import java.util.List;
  *
  * @author yizzuide
  * @since 1.15.0
- * @version 3.12.1
+ * @version 3.14.0
  * Create at 2019/11/16 15:11
  */
 public interface Ice {
@@ -119,6 +120,14 @@ public interface Ice {
      * @since 3.14.0
      */
     Job<?> getJobDetail(String jobId);
+
+    /**
+     * Get cache keys.
+     * @param jobId job id
+     * @return key map
+     * @since 3.14.0
+     */
+    Map<String, String> getCacheKey(String jobId);
 
     /**
      * 取出待处理任务

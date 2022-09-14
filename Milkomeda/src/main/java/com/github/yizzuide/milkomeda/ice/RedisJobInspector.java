@@ -23,6 +23,7 @@ package com.github.yizzuide.milkomeda.ice;
 
 import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import com.github.yizzuide.milkomeda.util.JSONUtil;
+import com.github.yizzuide.milkomeda.util.Strings;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationListener;
 import org.springframework.data.redis.core.BoundHashOperations;
@@ -47,18 +48,13 @@ public class RedisJobInspector implements JobInspector, InitializingBean, Applic
 
     private StringRedisTemplate redisTemplate;
 
-    public static final String JOB_INSPECTOR_CURSOR_KEY_PREFIX = "ice:job_inspect:cursor:";
-
-    public static final String JOB_INSPECTOR_Data_KEY_PREFIX = "ice:job_inspect:data:";
-
-    private String jobInspectorCursorKey;
-
-    private String jobInspectorDataKey;
+    private String jobInspectorCursorKey = IceKeys.JOB_INSPECTOR_CURSOR_KEY_PREFIX;
+    private String jobInspectorDataKey = IceKeys.JOB_INSPECTOR_CURSOR_KEY_PREFIX;
 
     public RedisJobInspector(IceProperties props) {
         if (!IceProperties.DEFAULT_INSTANCE_NAME.equals(props.getInstanceName())) {
-            this.jobInspectorCursorKey = JOB_INSPECTOR_CURSOR_KEY_PREFIX + props.getInstanceName();
-            this.jobInspectorDataKey = JOB_INSPECTOR_Data_KEY_PREFIX + props.getInstanceName();
+            this.jobInspectorCursorKey = IceKeys.JOB_INSPECTOR_CURSOR_KEY_PREFIX + ":" + props.getInstanceName();
+            this.jobInspectorDataKey = IceKeys.JOB_INSPECTOR_Data_KEY_PREFIX + ":" + props.getInstanceName();
         }
     }
 
@@ -74,7 +70,11 @@ public class RedisJobInspector implements JobInspector, InitializingBean, Applic
 
     public JobWrapper get(String jobId) {
         BoundHashOperations<String, String, String> ops = redisTemplate.boundHashOps(jobInspectorDataKey);
-        return JSONUtil.parse(ops.get(jobId), JobWrapper.class);
+        String jsonObject = ops.get(jobId);
+        if (Strings.isEmpty(jsonObject)) {
+            return null;
+        }
+        return JSONUtil.parse(jsonObject, JobWrapper.class);
     }
 
     public List<JobWrapper> getPage(int start, int size) {
@@ -134,7 +134,7 @@ public class RedisJobInspector implements JobInspector, InitializingBean, Applic
     @Override
     public void onApplicationEvent(IceInstanceChangeEvent event) {
         String instanceName = event.getSource().toString();
-        jobInspectorCursorKey = JOB_INSPECTOR_CURSOR_KEY_PREFIX + instanceName;
-        this.jobInspectorDataKey = JOB_INSPECTOR_Data_KEY_PREFIX + instanceName;
+        jobInspectorCursorKey = IceKeys.JOB_INSPECTOR_CURSOR_KEY_PREFIX + ":" + instanceName;
+        this.jobInspectorDataKey = IceKeys.JOB_INSPECTOR_Data_KEY_PREFIX + ":" + instanceName;
     }
 }

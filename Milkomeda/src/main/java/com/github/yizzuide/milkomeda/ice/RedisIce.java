@@ -34,6 +34,7 @@ import org.springframework.util.CollectionUtils;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -160,6 +161,17 @@ public class RedisIce implements Ice, ApplicationListener<IceInstanceChangeEvent
     @Override
     public Job<?> getJobDetail(String jobId) {
         return jobPool.get(jobId);
+    }
+
+    public Map<String, String> getCacheKey(String jobId) {
+        if (jobInspector == null) {
+            return Collections.emptyMap();
+        }
+        JobWrapper jobWrapper = jobInspector.get(jobId);
+        if (jobWrapper == null) {
+            return Collections.emptyMap();
+        }
+        return IceKeys.resolve(jobWrapper);
     }
 
     @Override

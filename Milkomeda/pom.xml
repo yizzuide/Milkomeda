@@ -12,7 +12,7 @@
     <properties>
         <java.version>1.8</java.version>
         <kotlin.version>1.5.32</kotlin.version>
-        <project.release.version>3.13.0-SNAPSHOT</project.release.version>
+        <project.release.version>3.14.0-SNAPSHOT</project.release.version>
         <spring-boot.version>2.5.14</spring-boot.version>
         <spring-cloud.version>2020.0.5</spring-cloud.version>
         <mybatis.starter.version>2.1.4</mybatis.starter.version>
@@ -68,7 +68,7 @@
         <profile>
             <id>sonatype-oss-release</id>
             <properties>
-                <project.release.version>3.13.0</project.release.version>
+                <project.release.version>3.14.0</project.release.version>
             </properties>
             <build>
                 <plugins>

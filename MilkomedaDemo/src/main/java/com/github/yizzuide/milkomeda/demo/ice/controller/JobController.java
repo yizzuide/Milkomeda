@@ -56,6 +56,16 @@ public class JobController {
     }
 
     /**
+     * 获取缓存key
+     * @param jobId job id
+     * @return  key map
+     */
+    @GetMapping("getJobCacheKeys")
+    public Map<String, String> getJobCacheKeys(String jobId) {
+        return ice.getCacheKey(jobId);
+    }
+
+    /**
      * 重推Job
      * @param jobId job id
      * @return null
