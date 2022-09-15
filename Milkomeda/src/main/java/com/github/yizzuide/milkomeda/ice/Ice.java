@@ -109,10 +109,11 @@ public interface Ice {
      * Get all job inspect info list.
      * @param start page start index
      * @param size size of per page
+     * @param order sorting of corresponding column, 1 is asc and -1 is desc
      * @return JobWrapper list
      * @since 3.14.0
      */
-    List<JobWrapper> getJobInspectPage(int start, int size);
+    List<JobWrapper> getJobInspectPage(int start, int size, int order);
 
     /**
      * Get job info in job pool.

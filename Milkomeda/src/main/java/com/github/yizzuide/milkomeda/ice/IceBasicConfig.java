@@ -96,7 +96,7 @@ public class IceBasicConfig {
     }
 
     @Bean
-    @ConditionalOnProperty(prefix = "milkomeda.ice", name = "enable-introspect", havingValue = "true")
+    @ConditionalOnProperty(prefix = "milkomeda.ice.introspect", name = "enable", havingValue = "true")
     public JobInspector jobInspector() {
         JobInspector jobInspector = new RedisJobInspector(props);
         IceHolder.setJobInspector(jobInspector);

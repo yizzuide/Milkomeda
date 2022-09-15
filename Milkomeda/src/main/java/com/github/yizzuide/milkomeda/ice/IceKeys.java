@@ -25,7 +25,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * IceKeys
+ * Manage cache keys.
  *
  * @author yizzuide
  * @since 3.14.0

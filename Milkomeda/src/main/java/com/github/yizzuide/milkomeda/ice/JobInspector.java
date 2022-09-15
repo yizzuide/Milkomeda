@@ -34,6 +34,13 @@ import java.util.function.Consumer;
 public interface JobInspector {
 
     /**
+     * Selectable index type.
+     */
+    enum IndexType {
+        UPDATE_TIME, PUSH_TIME
+    }
+
+    /**
      * Add job wrapper while add job.
      * @param jobWrapper    JobWrapper
      * @param update        Is for update stage
@@ -51,9 +58,10 @@ public interface JobInspector {
      * Get job wrapper list from cache.
      * @param start page start index
      * @param size size of pre page
+     * @param order sorting of corresponding column, 1 is asc and -1 is desc
      * @return JobWrapper list
      */
-    List<JobWrapper> getPage(int start, int size);
+    List<JobWrapper> getPage(int start, int size, int order);
 
     /**
      * Remove job wrapper while job task is completed.

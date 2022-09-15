@@ -27,6 +27,7 @@ import com.github.yizzuide.milkomeda.util.Strings;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationListener;
 import org.springframework.data.redis.core.BoundHashOperations;
+import org.springframework.data.redis.core.BoundZSetOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.util.CollectionUtils;
@@ -46,12 +47,15 @@ import java.util.stream.Collectors;
  */
 public class RedisJobInspector implements JobInspector, InitializingBean, ApplicationListener<IceInstanceChangeEvent> {
 
+    private final IceProperties props;
+
     private StringRedisTemplate redisTemplate;
 
     private String jobInspectorCursorKey = IceKeys.JOB_INSPECTOR_CURSOR_KEY_PREFIX;
     private String jobInspectorDataKey = IceKeys.JOB_INSPECTOR_CURSOR_KEY_PREFIX;
 
     public RedisJobInspector(IceProperties props) {
+        this.props = props;
         if (!IceProperties.DEFAULT_INSTANCE_NAME.equals(props.getInstanceName())) {
             this.jobInspectorCursorKey = IceKeys.JOB_INSPECTOR_CURSOR_KEY_PREFIX + ":" + props.getInstanceName();
             this.jobInspectorDataKey = IceKeys.JOB_INSPECTOR_Data_KEY_PREFIX + ":" + props.getInstanceName();
@@ -64,7 +68,9 @@ public class RedisJobInspector implements JobInspector, InitializingBean, Applic
         if (update) {
             jobWrapper.setUpdateTime(System.currentTimeMillis());
         }
-        redisTemplate.boundZSetOps(jobInspectorCursorKey).add(jobWrapper.getId(), jobWrapper.getUpdateTime());
+        long indexTime = this.props.getIntrospect().getIndexType() == IndexType.UPDATE_TIME ?
+                jobWrapper.getUpdateTime() : jobWrapper.getPushTime();
+        redisTemplate.boundZSetOps(jobInspectorCursorKey).add(jobWrapper.getId(), indexTime);
         redisTemplate.boundHashOps(jobInspectorDataKey).put(jobWrapper.getId(), JSONUtil.serialize(jobWrapper));
     }
 
@@ -77,9 +83,12 @@ public class RedisJobInspector implements JobInspector, InitializingBean, Applic
         return JSONUtil.parse(jsonObject, JobWrapper.class);
     }
 
-    public List<JobWrapper> getPage(int start, int size) {
+    public List<JobWrapper> getPage(int start, int size, int order) {
+        // [-1, 1]
+        order = Math.min(1, Math.max(-1, order));
         int pageCount = start * size;
-        Set<String> jobIds = redisTemplate.boundZSetOps(jobInspectorCursorKey).reverseRange(pageCount, pageCount + size);
+        BoundZSetOperations<String, String> ops = redisTemplate.boundZSetOps(jobInspectorCursorKey);
+        Set<String> jobIds = order < 0 ? ops.reverseRange(pageCount, pageCount + size) : ops.range(pageCount, pageCount + size);
         if (CollectionUtils.isEmpty(jobIds)) {
             return Collections.emptyList();
         }

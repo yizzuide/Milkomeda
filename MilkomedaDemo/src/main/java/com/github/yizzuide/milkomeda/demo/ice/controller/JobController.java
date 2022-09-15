@@ -38,11 +38,12 @@ public class JobController {
      * 获取job页数据
      * @param start page num
      * @param size  size of pre page
+     * @param order sorting of corresponding column, 1 is asc and -1 is desc
      * @return  JobWrapper list
      */
     @GetMapping("getPage")
-    public List<JobWrapper> getJobPage(int start, int size) {
-        return ice.getJobInspectPage(start, size);
+    public List<JobWrapper> getJobPage(int start, int size, int order) {
+        return ice.getJobInspectPage(start, size, order);
     }
 
     /**

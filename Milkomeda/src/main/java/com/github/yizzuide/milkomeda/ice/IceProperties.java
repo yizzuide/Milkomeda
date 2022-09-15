@@ -23,6 +23,7 @@ package com.github.yizzuide.milkomeda.ice;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.boot.convert.DurationUnit;
 
 import java.time.Duration;
@@ -144,8 +145,24 @@ class IceProperties {
     private boolean enableRetainToDeadQueueWhenTtrOverload = false;
 
     /**
-     * Enable export job introspection api
+     * Job introspection api.
      * @since 3.14.0
      */
-    private boolean enableIntrospect;
+    @NestedConfigurationProperty
+    private Introspect introspect = new Introspect();
+
+    @Data
+    public static class Introspect {
+        /**
+         * Enable export job introspection api.
+         */
+        private boolean enable = false;
+
+        /**
+         * Select the sorted index type.
+         */
+        private JobInspector.IndexType indexType = JobInspector.IndexType.UPDATE_TIME;
+    }
+
+
 }

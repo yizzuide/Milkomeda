@@ -71,8 +71,9 @@ class DelayJob implements Serializable {
     @SuppressWarnings("rawtypes")
     DelayJob(Job job) {
         this.jodId = job.getId();
-        this.delayTime = System.currentTimeMillis() + job.getDelay();
         this.topic = job.getTopic();
+        this.retryCount = 0;
+        this.delayTime = System.currentTimeMillis() + job.getDelay();
     }
 
     /**

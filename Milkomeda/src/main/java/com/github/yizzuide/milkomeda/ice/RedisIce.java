@@ -91,27 +91,30 @@ public class RedisIce implements Ice, ApplicationListener<IceInstanceChangeEvent
             job.setId(job.getTopic() + "-" + job.getId());
         }
 
-        job.setStatus(JobStatus.DELAY);
         DelayJob delayJob = new DelayJob(job);
-        JobWrapper jobWrapper = JobWrapper.buildFrom(job);
-        if (replaceWhenExists && jobPool.exists(job.getId())) {
-            // Using old state data to test
-            Job<?> mJob = jobPool.get(job.getId());
-            if (mJob.getStatus() == JobStatus.DELAY ||
-                    mJob.getStatus() == JobStatus.READY ||
-                    mJob.getStatus() == JobStatus.RESERVED) {
+        boolean hadSetStatus = job.getStatus() != null;
+        if (replaceWhenExists && (hadSetStatus || jobPool.exists(job.getId()))) {
+            // Using serialized job to test
+            Job<?> serializedJob = hadSetStatus ? job : jobPool.get(job.getId());
+            if (serializedJob.getStatus() == JobStatus.DELAY ||
+                    serializedJob.getStatus() == JobStatus.READY ||
+                    serializedJob.getStatus() == JobStatus.RESERVED) {
                 log.warn("Ice no need to add job which Working normally, jobId: {}", job.getId());
                 return;
             }
             if (props.isEnableRetainToDeadQueueWhenTtrOverload() &&
-                    mJob.getStatus() == JobStatus.IDLE) {
-                // 还原延时时间
-                delayJob.setDelayTime(mJob.getDelay());
+                    serializedJob.getStatus() == JobStatus.IDLE) {
+                // Restore the delay time set at idle state.
+                delayJob.setDelayTime(serializedJob.getDelay());
                 deadQueue.remove(delayJob);
-                // 更新延时时间
+                // Update delay time.
                 delayJob.updateDelayTime();
             }
         }
+
+        job.setStatus(JobStatus.DELAY);
+        JobWrapper jobWrapper = JobWrapper.buildFrom(job);
+
         RedisUtil.batchOps((operations) -> {
             jobPool.remove(operations, job.getId());
             jobPool.push(operations, job);
@@ -122,8 +125,6 @@ public class RedisIce implements Ice, ApplicationListener<IceInstanceChangeEvent
                 jobInspector.initJobInspection(jobWrapper, index);
             }
         }, redisTemplate);
-
-
     }
 
     @Override
@@ -151,11 +152,11 @@ public class RedisIce implements Ice, ApplicationListener<IceInstanceChangeEvent
     }
 
     @Override
-    public List<JobWrapper> getJobInspectPage(int start, int size) {
+    public List<JobWrapper> getJobInspectPage(int start, int size, int order) {
         if (jobInspector == null) {
             return Collections.emptyList();
         }
-        return jobInspector.getPage(start, size);
+        return jobInspector.getPage(start, size, order);
     }
 
     @Override

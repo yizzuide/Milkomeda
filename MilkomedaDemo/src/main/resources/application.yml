@@ -323,7 +323,9 @@ milkomeda:
     # TTR超载任务进入Dead queue
     enable-retain-to-dead-queue-when-ttr-overload: true
     # 开启job任务监控（如果想通过后台页面查看job状态信息）
-    enable-introspect: true
+    introspect:
+      enable: true
+      index-type: update_time
 
   moon:
     instances:

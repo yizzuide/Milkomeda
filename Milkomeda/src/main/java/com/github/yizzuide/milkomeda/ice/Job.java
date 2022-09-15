@@ -34,6 +34,7 @@ import java.io.Serializable;
  *
  * @author yizzuide
  * @since 1.15.0
+ * @version 3.14.0
  * Create at 2019/11/16 12:00
  */
 @Data
@@ -70,6 +71,14 @@ public class Job<T> implements Serializable {
      */
     @JsonSerialize(using = ToStringSerializer.class)
     private JobStatus status;
+
+    /**
+     * Restricted external access.
+     * @param status    job status
+     */
+    void setStatus(JobStatus status) {
+        this.status = status;
+    }
 
     public Job(String id, String topic, long delay, long ttr, int retryCount, T body) {
         this.id = id;
