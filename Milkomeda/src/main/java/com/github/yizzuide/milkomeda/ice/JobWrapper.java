@@ -76,12 +76,12 @@ public class JobWrapper implements Serializable {
     private long updateTime;
 
     /**
-     * Next time of task execution in delay queue. -1 if queue type is `DelayQueue`.
+     * Next time of task execution in delay queue. -1 if queue type is not `DelayQueue`.
      */
     private long executionTime;
 
     /**
-     * Index of delay job bucket in delay queue, -1 if queue type isn't `DelayQueue`.
+     * Index of delay job bucket in delay queue, -1 if queue type is not `DelayQueue`.
      */
     private int bucketIndex;
 

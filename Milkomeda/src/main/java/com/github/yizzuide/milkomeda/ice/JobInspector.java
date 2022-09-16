@@ -37,7 +37,14 @@ public interface JobInspector {
      * Selectable index type.
      */
     enum IndexType {
-        UPDATE_TIME, PUSH_TIME
+        /**
+         * Time of job status updated.
+         */
+        UPDATE_TIME,
+        /**
+         * Time of job first add to job pool.
+         */
+        PUSH_TIME
     }
 
     /**

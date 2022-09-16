@@ -32,6 +32,8 @@ import org.springframework.context.ApplicationEvent;
  * Create at 2020/04/16 16:00
  */
 public class IceInstanceChangeEvent extends ApplicationEvent {
+    private static final long serialVersionUID = 7388649319468560731L;
+
     public IceInstanceChangeEvent(Object source) {
         super(source);
     }
