@@ -2,7 +2,7 @@ package com.github.yizzuide.milkomeda.demo.ice.controller;
 
 import com.github.yizzuide.milkomeda.ice.Ice;
 import com.github.yizzuide.milkomeda.ice.Job;
-import com.github.yizzuide.milkomeda.ice.JobWrapper;
+import com.github.yizzuide.milkomeda.ice.inspector.JobWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;

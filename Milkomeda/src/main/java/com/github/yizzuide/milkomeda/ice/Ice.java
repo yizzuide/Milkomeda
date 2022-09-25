@@ -21,6 +21,7 @@
 
 package com.github.yizzuide.milkomeda.ice;
 
+import com.github.yizzuide.milkomeda.ice.inspector.JobWrapper;
 import org.springframework.data.redis.core.RedisOperations;
 
 import java.time.Duration;

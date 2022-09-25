@@ -21,13 +21,13 @@
 
 package com.github.yizzuide.milkomeda.ice;
 
+import com.github.yizzuide.milkomeda.ice.inspector.IntrospectConfig;
 import com.github.yizzuide.milkomeda.universe.config.MilkomedaContextConfig;
 import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -43,7 +43,7 @@ import org.springframework.data.redis.core.RedisTemplate;
  * @since 3.14.0
  * Create at 2019/11/21 11:16
  */
-@Import(MilkomedaContextConfig.class)
+@Import({MilkomedaContextConfig.class, IntrospectConfig.class})
 @ConditionalOnClass(RedisTemplate.class)
 @AutoConfigureAfter(RedisAutoConfiguration.class)
 @EnableConfigurationProperties(IceProperties.class)
@@ -54,7 +54,6 @@ public class IceBasicConfig {
     @Autowired
     private ApplicationContextHolder applicationContextHolder;
 
-    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
     private IceProperties props;
 
@@ -93,13 +92,5 @@ public class IceBasicConfig {
         RedisIce redisIce = new RedisIce(props);
         IceHolder.setIce(redisIce);
         return redisIce;
-    }
-
-    @Bean
-    @ConditionalOnProperty(prefix = "milkomeda.ice.introspect", name = "enable", havingValue = "true")
-    public JobInspector jobInspector() {
-        JobInspector jobInspector = new RedisJobInspector(props);
-        IceHolder.setJobInspector(jobInspector);
-        return jobInspector;
     }
 }

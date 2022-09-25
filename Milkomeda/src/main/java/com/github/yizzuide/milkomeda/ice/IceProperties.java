@@ -21,6 +21,7 @@
 
 package com.github.yizzuide.milkomeda.ice;
 
+import com.github.yizzuide.milkomeda.ice.inspector.JobInspector;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
@@ -39,9 +40,13 @@ import java.time.temporal.ChronoUnit;
  */
 @Data
 @ConfigurationProperties("milkomeda.ice")
-class IceProperties {
+public class IceProperties {
+
+    public static final String PREFIX = "milkomeda.ice";
 
     public static final String DEFAULT_INSTANCE_NAME = "default";
+
+    public final static String MERGE_ID_SEPARATOR = "-";
 
     /**
      * 实例名（用于多产品隔离，否则不要修改）
@@ -162,6 +167,11 @@ class IceProperties {
          * Select the sorted index type.
          */
         private JobInspector.IndexType indexType = JobInspector.IndexType.UPDATE_TIME;
+
+        /**
+         *  Select strategy which for job inspection store.
+         */
+        private JobInspector.InspectorType inspectorType = JobInspector.InspectorType.REDIS;
     }
 
 

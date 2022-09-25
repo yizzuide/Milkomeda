@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 yizzuide All rights Reserved.
+ * Copyright (c) 2022 yizzuide All rights Reserved.
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -19,29 +19,30 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.universe.metadata;
+package com.github.yizzuide.milkomeda.ice.inspector;
 
 /**
- * BeanIds
+ * Job queue type using for {@link JobWrapper}
  *
  * @author yizzuide
- * @since 3.0.0
- * @version 3.14.0
- * Create at 2020/04/09 15:15
+ * @since 3.14.0
+ * Create at 2022/09/13 23:04
  */
-public interface BeanIds {
+public enum JobQueueType {
     /**
-     * Comet Logger URL解析器Bean名
+     * Wait execution time.
      */
-    String COMET_LOGGER_RESOLVER = "cometLoggerURLPlaceholderResolver";
-
+    DelayQueue,
     /**
-     * Particle URL解析器Bean名
+     * Prepare for consumption.
      */
-    String PARTICLE_RESOLVER = "particleURLPlaceholderResolver";
-
+    ReadyQueue,
     /**
-     * Ice job inspector bean id.
+     * The job is executed fail, need to re-push.
      */
-    String JOB_INSPECTOR = "jobInspector";
+    NoneQueue,
+    /**
+     * The job consumption error, and over maximum number of retries exceeded.
+     */
+    DeadQueue
 }

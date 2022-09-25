@@ -19,7 +19,11 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.ice;
+package com.github.yizzuide.milkomeda.ice.inspector;
+
+import com.github.yizzuide.milkomeda.ice.DelayJob;
+import com.github.yizzuide.milkomeda.ice.JobStatus;
+import com.github.yizzuide.milkomeda.universe.metadata.BeanIds;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -45,6 +49,28 @@ public interface JobInspector {
          * Time of job first add to job pool.
          */
         PUSH_TIME
+    }
+
+    /**
+     *  Job inspection store type.
+     */
+    enum InspectorType {
+        /**
+         * Custom job inspection store, you need to provide a bean instance with `jobInspector` bean id from {@linkplain BeanIds}
+         */
+        AUTO_CHECK,
+        /**
+         * Redis impl.
+         */
+        REDIS,
+        /**
+         * Mysql impl.
+         */
+        MYSQL,
+        /**
+         * MongoDB impl.
+         */
+        MONGODB
     }
 
     /**

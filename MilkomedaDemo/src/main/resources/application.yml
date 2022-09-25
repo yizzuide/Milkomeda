@@ -107,6 +107,7 @@ spring:
 logging:
   level:
     com.github.yizzuide.milkomeda.demo.sundial.mapper: DEBUG
+    com.github.yizzuide.milkomeda.ice.inspector.mapper: DEBUG
   # Springboot 2.4: The charsets used to by Logback and Log4j logging can now be configured
   charset:
     console: UTF-8
@@ -326,6 +327,7 @@ milkomeda:
     introspect:
       enable: true
       index-type: update_time
+      inspector-type: mysql
 
   moon:
     instances:
@@ -461,7 +463,7 @@ milkomeda:
     # 主从切面策略（内部通过桥接Orbit模块功能实现）
     strategy:
       - key-name: read-only # 这里用上面instances里配置的key
-        pointcut-expression: execution(* com..mapper.*.query*(..))
+        pointcut-expression: execution(* com.github.yizzuide.milkomeda.demo..mapper.*.query*(..))
 
     # 开启分库分表
     enable-sharding: true

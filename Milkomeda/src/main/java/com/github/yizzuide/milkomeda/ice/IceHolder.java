@@ -21,6 +21,7 @@
 
 package com.github.yizzuide.milkomeda.ice;
 
+import com.github.yizzuide.milkomeda.ice.inspector.JobInspector;
 import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
@@ -57,7 +58,7 @@ public class IceHolder {
         setApplicationName(props.getInstanceName());
     }
 
-    static IceProperties getProps() {
+    public static IceProperties getProps() {
         return props;
     }
 
@@ -73,19 +74,19 @@ public class IceHolder {
         IceHolder.delayBucket = delayBucket;
     }
 
-    static void setJobInspector(JobInspector jobInspector) {
+    public static void setJobInspector(JobInspector jobInspector) {
         IceHolder.jobInspector = jobInspector;
     }
 
-    static JobInspector getJobInspector() {
+    public static JobInspector getJobInspector() {
         return jobInspector;
     }
 
-    static void setApplicationName(String applicationName) {
+    public static void setApplicationName(String applicationName) {
         IceHolder.applicationName = applicationName;
     }
 
-    static String getApplicationName() {
+    public static String getApplicationName() {
         return applicationName;
     }
 

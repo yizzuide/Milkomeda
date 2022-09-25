@@ -21,6 +21,8 @@
 
 package com.github.yizzuide.milkomeda.ice;
 
+import com.github.yizzuide.milkomeda.ice.inspector.JobWrapper;
+
 import java.util.HashMap;
 import java.util.Map;
 

@@ -19,10 +19,13 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.ice;
+package com.github.yizzuide.milkomeda.ice.inspector;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+import com.github.yizzuide.milkomeda.ice.IceHolder;
+import com.github.yizzuide.milkomeda.ice.Job;
+import com.github.yizzuide.milkomeda.ice.JobStatus;
 import lombok.Data;
 
 import java.io.Serializable;

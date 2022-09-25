@@ -19,8 +19,11 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.ice;
+package com.github.yizzuide.milkomeda.ice.inspector;
 
+import com.github.yizzuide.milkomeda.ice.IceInstanceChangeEvent;
+import com.github.yizzuide.milkomeda.ice.IceKeys;
+import com.github.yizzuide.milkomeda.ice.IceProperties;
 import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import com.github.yizzuide.milkomeda.util.JSONUtil;
 import com.github.yizzuide.milkomeda.util.Strings;
@@ -35,7 +38,6 @@ import org.springframework.util.CollectionUtils;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
@@ -45,7 +47,7 @@ import java.util.stream.Collectors;
  * @since 3.14.0
  * Create at 2022/09/14 16:58
  */
-public class RedisJobInspector implements JobInspector, InitializingBean, ApplicationListener<IceInstanceChangeEvent> {
+public class RedisJobInspector extends AbstractJobInspector implements InitializingBean, ApplicationListener<IceInstanceChangeEvent> {
 
     private final IceProperties props;
 
@@ -62,12 +64,9 @@ public class RedisJobInspector implements JobInspector, InitializingBean, Applic
         }
     }
 
-
     @Override
     public void add(JobWrapper jobWrapper, boolean update) {
-        if (update) {
-            jobWrapper.setUpdateTime(System.currentTimeMillis());
-        }
+        super.add(jobWrapper, update);
         long indexTime = this.props.getIntrospect().getIndexType() == IndexType.UPDATE_TIME ?
                 jobWrapper.getUpdateTime() : jobWrapper.getPushTime();
         redisTemplate.boundZSetOps(jobInspectorCursorKey).add(jobWrapper.getId(), indexTime);
@@ -102,37 +101,9 @@ public class RedisJobInspector implements JobInspector, InitializingBean, Applic
         redisTemplate.boundHashOps(jobInspectorDataKey).delete(jobIds.toArray());
     }
 
-    @Async
-    public void initJobInspection(JobWrapper jobWrapper, Integer index) {
-        jobWrapper.setBucketIndex(index);
-        this.add(jobWrapper, false);
-    }
-
-    @Async
-    public void updateJobInspection(List<DelayJob> delayJobs, Integer index) {
-        updateJobInspection(delayJobs, index, null, null);
-    }
-
-    @Async
-    public void updateJobInspection(List<DelayJob> delayJobs, Integer index, JobStatus status, Consumer<JobWrapper> customizer) {
-        delayJobs.forEach(delayJob -> {
-            JobWrapper jobWrapper = this.get(delayJob.getJodId());
-            if (index != null) {
-                jobWrapper.setBucketIndex(index);
-            }
-            jobWrapper.setExecutionTime(delayJob.getDelayTime());
-            jobWrapper.setHadRetryCount(delayJob.getRetryCount());
-            if (status == null) {
-                jobWrapper.setQueueType(JobQueueType.DelayQueue);
-                jobWrapper.setNeedRePush(false);
-            } else {
-                jobWrapper.changeQueueType(status);
-            }
-            if (customizer != null) {
-                customizer.accept(jobWrapper);
-            }
-            this.add(jobWrapper, true);
-        });
+    @Override
+    protected void doUpdate(List<JobWrapper> jobWrappers) {
+        jobWrappers.forEach(jobWrapper -> this.add(jobWrapper, true));
     }
 
     @Override

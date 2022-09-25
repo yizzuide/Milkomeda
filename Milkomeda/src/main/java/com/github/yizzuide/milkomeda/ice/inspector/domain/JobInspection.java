@@ -19,30 +19,41 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.ice;
+package com.github.yizzuide.milkomeda.ice.inspector.domain;
+
+import lombok.Data;
+
+import java.io.Serializable;
+import java.util.Date;
 
 /**
- * Job queue type using for {@link JobWrapper}
+ * Job inspection entity.
  *
  * @author yizzuide
  * @since 3.14.0
- * Create at 2022/09/13 23:04
+ * Create at 2022/09/25 17:25
  */
-public enum JobQueueType {
-    /**
-     * Wait execution time.
-     */
-    DelayQueue,
-    /**
-     * Prepare for consumption.
-     */
-    ReadyQueue,
-    /**
-     * The job is executed fail, need to re-push.
-     */
-    NoneQueue,
-    /**
-     * The job consumption error, and over maximum number of retries exceeded.
-     */
-    DeadQueue
+@Data
+public class JobInspection implements Serializable {
+    private static final long serialVersionUID = -71079477949653608L;
+
+    private Long id;
+
+    private String topic;
+
+    private String applicationName;
+
+    private Integer queueType;
+
+    private Integer bucketIndex;
+
+    private Integer hadRetryCount;
+
+    private Integer needRePush;
+
+    private Date executionTime;
+
+    private Date pushTime;
+
+    private Date updateTime;
 }

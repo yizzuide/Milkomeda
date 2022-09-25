@@ -21,6 +21,7 @@
 
 package com.github.yizzuide.milkomeda.ice;
 
+import com.github.yizzuide.milkomeda.ice.inspector.JobInspector;
 import com.github.yizzuide.milkomeda.moon.Moon;
 import com.github.yizzuide.milkomeda.moon.PeriodicMoonStrategy;
 import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;

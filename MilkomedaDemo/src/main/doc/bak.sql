@@ -33,3 +33,26 @@ create table t_order_001
     comment 'order table';
 
 
+create table job_inspection
+(
+    id bigint(32) not null,
+    topic varchar(32) not null,
+    application_name varchar(20) not null,
+    queue_type tinyint(1) not null comment '0: DelayQueue, 1: ReadyQueue, 2: NoneQueue, 3: DeadQueue',
+    bucket_index tinyint(1) default -1 null,
+    had_retry_count tinyint(1) default 0 null,
+    need_re_push tinyint(1) default 0 null comment '0: No, 1: Yes',
+    execution_time datetime default null null comment 'time of next execution',
+    push_time datetime default now() null,
+    update_time datetime default now() null,
+    constraint job_inspection_pk
+        primary key (id)
+);
+
+create index job_inspection_push_time_index
+    on job_inspection (push_time);
+
+create index job_inspection_update_time_index
+    on job_inspection (update_time desc);
+
+

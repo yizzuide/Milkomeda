@@ -22,6 +22,8 @@
 package com.github.yizzuide.milkomeda.ice;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.github.yizzuide.milkomeda.ice.inspector.JobInspector;
+import com.github.yizzuide.milkomeda.ice.inspector.JobWrapper;
 import com.github.yizzuide.milkomeda.universe.polyfill.RedisPolyfill;
 import com.github.yizzuide.milkomeda.util.RedisUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -88,7 +90,7 @@ public class RedisIce implements Ice, ApplicationListener<IceInstanceChangeEvent
     @Override
     public void add(Job job, boolean mergeIdWithTopic, boolean replaceWhenExists) {
         if (mergeIdWithTopic) {
-            job.setId(job.getTopic() + "-" + job.getId());
+            job.setId(job.getTopic() + IceProperties.MERGE_ID_SEPARATOR + job.getId());
         }
 
         DelayJob delayJob = new DelayJob(job);

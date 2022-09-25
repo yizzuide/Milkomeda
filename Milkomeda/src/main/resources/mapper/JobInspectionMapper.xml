@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) 2022 yizzuide All rights Reserved.
+  ~ Permission is hereby granted, free of charge, to any person obtaining a copy
+  ~ of this software and associated documentation files (the "Software"), to deal
+  ~ in the Software without restriction, including without limitation the rights
+  ~ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+  ~ copies of the Software, and to permit persons to whom the Software is
+  ~ furnished to do so, subject to the following conditions:
+  ~
+  ~ The above copyright notice and this permission notice shall be included in all
+  ~ copies or substantial portions of the Software.
+  ~
+  ~ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  ~ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  ~ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  ~ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  ~ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  ~ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  ~ SOFTWARE.
+  -->
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.github.yizzuide.milkomeda.ice.inspector.mapper.JobInspectionMapper">
+
+    <resultMap type="com.github.yizzuide.milkomeda.ice.inspector.domain.JobInspection" id="JobInspectionMap">
+        <result property="id" column="id" jdbcType="BIGINT"/>
+        <result property="topic" column="topic" jdbcType="VARCHAR"/>
+        <result property="applicationName" column="application_name" jdbcType="VARCHAR"/>
+        <result property="queueType" column="queue_type" jdbcType="TINYINT"/>
+        <result property="bucketIndex" column="bucket_index" jdbcType="TINYINT"/>
+        <result property="hadRetryCount" column="had_retry_count" jdbcType="TINYINT"/>
+        <result property="needRePush" column="need_re_push" jdbcType="TINYINT"/>
+        <result property="executionTime" column="execution_time" jdbcType="TIMESTAMP"/>
+        <result property="pushTime" column="push_time" jdbcType="TIMESTAMP"/>
+        <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <select id="queryById" resultMap="JobInspectionMap">
+        select
+            id, topic, application_name, queue_type, bucket_index, had_retry_count, need_re_push, execution_time, push_time, update_time
+        from job_inspection
+        where id = #{id}
+    </select>
+
+    <select id="queryAllByLimit" resultMap="JobInspectionMap">
+        select
+            id, topic, application_name, queue_type, bucket_index, had_retry_count, need_re_push, execution_time, push_time, update_time
+        from job_inspection
+        <if test="entity != null">
+            <where>
+                <if test="entity.id != null">
+                    and id = #{entity.id}
+                </if>
+                <if test="entity.topic != null and topic != ''">
+                    and topic = #{entity.topic}
+                </if>
+                <if test="entity.applicationName != null and entity.applicationName != ''">
+                    and application_name = #{entity.applicationName}
+                </if>
+                <if test="entity.queueType != null">
+                    and queue_type = #{entity.queueType}
+                </if>
+                <if test="entity.bucketIndex != null">
+                    and bucket_index = #{entity.bucketIndex}
+                </if>
+                <if test="entity.hadRetryCount != null">
+                    and had_retry_count = #{entity.hadRetryCount}
+                </if>
+                <if test="entity.needRePush != null">
+                    and need_re_push = #{entity.needRePush}
+                </if>
+                <if test="entity.executionTime != null">
+                    and execution_time = #{entity.executionTime}
+                </if>
+                <if test="entity.pushTime != null">
+                    and push_time = #{entity.pushTime}
+                </if>
+                <if test="entity.updateTime != null">
+                    and update_time = #{entity.updateTime}
+                </if>
+            </where>
+        </if>
+        <if test="useUpdate">
+            order by update_time
+        </if>
+        <if test="!useUpdate">
+            order by push_time
+        </if>
+        <if test="sortOrder == -1">
+            desc
+        </if>
+        limit #{pageable.offset}, #{pageable.pageSize}
+    </select>
+
+    <select id="count" resultType="java.lang.Long">
+        select count(1)
+        from job_inspection
+        <where>
+            <if test="id != null">
+                and id = #{id}
+            </if>
+            <if test="topic != null and topic != ''">
+                and topic = #{topic}
+            </if>
+            <if test="applicationName != null and applicationName != ''">
+                and application_name = #{applicationName}
+            </if>
+            <if test="queueType != null">
+                and queue_type = #{queueType}
+            </if>
+            <if test="bucketIndex != null">
+                and bucket_index = #{bucketIndex}
+            </if>
+            <if test="hadRetryCount != null">
+                and had_retry_count = #{hadRetryCount}
+            </if>
+            <if test="needRePush != null">
+                and need_re_push = #{needRePush}
+            </if>
+            <if test="executionTime != null">
+                and execution_time = #{executionTime}
+            </if>
+            <if test="pushTime != null">
+                and push_time = #{pushTime}
+            </if>
+            <if test="updateTime != null">
+                and update_time = #{updateTime}
+            </if>
+        </where>
+    </select>
+
+    <insert id="insert" parameterType="com.github.yizzuide.milkomeda.ice.inspector.domain.JobInspection">
+        insert into job_inspection(id, topic, application_name, queue_type, bucket_index, had_retry_count, need_re_push, execution_time, push_time, update_time)
+        values (#{id}, #{topic}, #{applicationName}, #{queueType}, #{bucketIndex}, #{hadRetryCount}, #{needRePush}, #{executionTime}, #{pushTime}, #{updateTime})
+    </insert>
+
+    <insert id="insertBatch">
+        insert into job_inspection(id, topic, application_name, queue_type, bucket_index, had_retry_count, need_re_push, execution_time, push_time, update_time)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+        (#{id}, #{entity.topic}, #{entity.applicationName}, #{entity.queueType}, #{entity.bucketIndex}, #{entity.hadRetryCount}, #{entity.needRePush}, #{entity.executionTime}, #{entity.pushTime}, #{entity.updateTime})
+        </foreach>
+    </insert>
+
+    <insert id="insertOrUpdateBatch">
+        insert into job_inspection(id, topic, application_name, queue_type, bucket_index, had_retry_count, need_re_push, execution_time, push_time, update_time)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+            (#{entity.id}, #{entity.topic}, #{entity.applicationName}, #{entity.queueType}, #{entity.bucketIndex}, #{entity.hadRetryCount}, #{entity.needRePush}, #{entity.executionTime}, #{entity.pushTime}, #{entity.updateTime})
+        </foreach>
+        on duplicate key update
+        topic = values(topic),
+        application_name = values(application_name),
+        queue_type = values(queue_type),
+        bucket_index = values(bucket_index),
+        had_retry_count = values(had_retry_count),
+        need_re_push = values(need_re_push),
+        execution_time = values(execution_time),
+        push_time = values(push_time),
+        update_time = values(update_time)
+    </insert>
+
+    <update id="update">
+        update job_inspection
+        <set>
+            <if test="topic != null and topic != ''">
+                topic = #{topic},
+            </if>
+            <if test="applicationName != null and applicationName != ''">
+                application_name = #{applicationName},
+            </if>
+            <if test="queueType != null">
+                queue_type = #{queueType},
+            </if>
+            <if test="bucketIndex != null">
+                bucket_index = #{bucketIndex},
+            </if>
+            <if test="hadRetryCount != null">
+                had_retry_count = #{hadRetryCount},
+            </if>
+            <if test="needRePush != null">
+                need_re_push = #{needRePush},
+            </if>
+            <if test="executionTime != null">
+                execution_time = #{executionTime},
+            </if>
+            <if test="pushTime != null">
+                push_time = #{pushTime},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        delete from job_inspection where id = #{id}
+    </delete>
+
+</mapper>
+

@@ -39,7 +39,7 @@ import java.io.Serializable;
  */
 @Data
 @NoArgsConstructor
-class DelayJob implements Serializable {
+public class DelayJob implements Serializable {
     private static final long serialVersionUID = -1408197881231593037L;
 
     /**
