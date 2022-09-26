@@ -22,19 +22,16 @@
 package com.github.yizzuide.milkomeda.ice.inspector;
 
 import com.github.yizzuide.milkomeda.ice.IceHolder;
-import com.github.yizzuide.milkomeda.ice.IceProperties;
 import com.github.yizzuide.milkomeda.ice.inspector.domain.JobInspection;
 import com.github.yizzuide.milkomeda.ice.inspector.mapper.JobInspectionMapper;
-import org.jetbrains.annotations.NotNull;
+import com.github.yizzuide.milkomeda.util.Dates;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
-import java.time.Instant;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -51,16 +48,14 @@ public class MysqlJobInspector extends AbstractJobInspector {
     private JobInspectionMapper jobInspectionMapper;
 
     @Override
-    public void add(JobWrapper jobWrapper, boolean update) {
-        super.add(jobWrapper, update);
-        JobInspection jobInspection = convertToEntity(jobWrapper);
-        jobInspectionMapper.insert(jobInspection);
-    }
-
-    @Override
     public JobWrapper get(String jobId) {
         JobInspection jobInspection = jobInspectionMapper.queryById(getId(jobId));
         return convertFromEntity(jobInspection);
+    }
+
+    @Override
+    public long size() {
+        return jobInspectionMapper.count(null);
     }
 
     @Override
@@ -85,6 +80,12 @@ public class MysqlJobInspector extends AbstractJobInspector {
     }
 
     @Override
+    public void doAdd(JobWrapper jobWrapper) {
+        JobInspection jobInspection = convertToEntity(jobWrapper);
+        jobInspectionMapper.insert(jobInspection);
+    }
+
+    @Override
     protected void doUpdate(List<JobWrapper> jobWrappers) {
         jobWrappers.forEach(jobWrapper -> jobWrapper.setUpdateTime(System.currentTimeMillis()));
         List<JobInspection> jobInspectionList = jobWrappers.stream().map(this::convertToEntity).collect(Collectors.toList());
@@ -99,16 +100,11 @@ public class MysqlJobInspector extends AbstractJobInspector {
         jobInspection.setQueueType(jobWrapper.getQueueType().ordinal());
         jobInspection.setBucketIndex(jobWrapper.getBucketIndex());
         jobInspection.setHadRetryCount(jobWrapper.getHadRetryCount());
-        jobInspection.setExecutionTime(from(jobWrapper.getExecutionTime()));
+        jobInspection.setExecutionTime(Dates.timestamp2Date(jobWrapper.getExecutionTime()));
         jobInspection.setNeedRePush(jobWrapper.isNeedRePush() ? 1 : 0);
-        jobInspection.setUpdateTime(from(jobWrapper.getUpdateTime()));
-        jobInspection.setPushTime(from(jobWrapper.getPushTime()));
+        jobInspection.setUpdateTime(Dates.timestamp2Date(jobWrapper.getUpdateTime()));
+        jobInspection.setPushTime(Dates.timestamp2Date(jobWrapper.getPushTime()));
         return jobInspection;
-    }
-
-    @NotNull
-    private Long getId(String jobId) {
-        return Long.valueOf(jobId.split(IceProperties.MERGE_ID_SEPARATOR)[1]);
     }
 
     private JobWrapper convertFromEntity(JobInspection jobInspection) {
@@ -116,31 +112,16 @@ public class MysqlJobInspector extends AbstractJobInspector {
             return null;
         }
         JobWrapper JobWrapper = new JobWrapper();
-        JobWrapper.setId(jobInspection.getTopic() + IceProperties.MERGE_ID_SEPARATOR + jobInspection.getId());
+        JobWrapper.setId(mergeId(jobInspection.getId(), jobInspection.getTopic()));
         JobWrapper.setTopic(jobInspection.getTopic());
         JobWrapper.setApplicationName(jobInspection.getApplicationName());
         JobWrapper.setQueueType(JobQueueType.values()[jobInspection.getQueueType()]);
         JobWrapper.setBucketIndex(jobInspection.getBucketIndex());
         JobWrapper.setHadRetryCount(jobInspection.getHadRetryCount());
-        JobWrapper.setExecutionTime(to(jobInspection.getExecutionTime()));
+        JobWrapper.setExecutionTime(Dates.date2Timestamp(jobInspection.getExecutionTime()));
         JobWrapper.setNeedRePush(jobInspection.getNeedRePush() == 1);
-        JobWrapper.setUpdateTime(to(jobInspection.getUpdateTime()));
-        JobWrapper.setPushTime(to(jobInspection.getPushTime()));
+        JobWrapper.setUpdateTime(Dates.date2Timestamp(jobInspection.getUpdateTime()));
+        JobWrapper.setPushTime(Dates.date2Timestamp(jobInspection.getPushTime()));
         return JobWrapper;
-    }
-
-    private Date from(long timestamp) {
-        if (timestamp == -1) {
-            return null;
-        }
-        Instant instant = Instant.ofEpochMilli(timestamp);
-        return Date.from(instant);
-    }
-
-    private long to(Date date) {
-        if (date == null) {
-            return -1;
-        }
-        return date.getTime();
     }
 }

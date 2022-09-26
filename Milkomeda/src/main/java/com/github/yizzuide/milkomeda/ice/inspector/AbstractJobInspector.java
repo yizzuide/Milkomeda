@@ -22,7 +22,9 @@
 package com.github.yizzuide.milkomeda.ice.inspector;
 
 import com.github.yizzuide.milkomeda.ice.DelayJob;
+import com.github.yizzuide.milkomeda.ice.IceProperties;
 import com.github.yizzuide.milkomeda.ice.JobStatus;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.scheduling.annotation.Async;
 
 import java.util.List;
@@ -43,6 +45,7 @@ public abstract class AbstractJobInspector implements JobInspector {
         if (update) {
             jobWrapper.setUpdateTime(System.currentTimeMillis());
         }
+        doAdd(jobWrapper);
     }
 
     @Async
@@ -84,8 +87,25 @@ public abstract class AbstractJobInspector implements JobInspector {
     }
 
     /**
+     * Do add a record row.
+     * @param jobWrapper job wrapper info.
+     */
+    protected abstract void doAdd(JobWrapper jobWrapper);
+
+    /**
      * Do Update list.
      * @param jobWrappers job wrapper list.
      */
     protected abstract void doUpdate(List<JobWrapper> jobWrappers);
+
+
+    @NotNull
+    protected Long getId(String jobId) {
+        return Long.valueOf(jobId.split(IceProperties.MERGE_ID_SEPARATOR)[1]);
+    }
+
+    @NotNull
+    protected String mergeId(Object jobId, String topic) {
+        return topic + IceProperties.MERGE_ID_SEPARATOR + jobId;
+    }
 }

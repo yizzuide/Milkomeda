@@ -53,6 +53,12 @@ spring:
   redis:
     host: 127.0.0.1
 
+  data:
+    mongodb:
+      database: milkomeda
+      host: localhost
+      port: 27017
+
   web:
     # Springboot 2.4: 资源不生成mapping映射
     resources:
@@ -326,8 +332,10 @@ milkomeda:
     # 开启job任务监控（如果想通过后台页面查看job状态信息）
     introspect:
       enable: true
+      # 查询监测数据使用的时间排序类型（默认为update_time：每次状态修改都更新时间）
       index-type: update_time
-      inspector-type: mysql
+      # 监测数据存储方案（默认为redis）
+      inspector-type: mongodb
 
   moon:
     instances:

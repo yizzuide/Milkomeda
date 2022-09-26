@@ -65,12 +65,10 @@ public class RedisJobInspector extends AbstractJobInspector implements Initializ
     }
 
     @Override
-    public void add(JobWrapper jobWrapper, boolean update) {
-        super.add(jobWrapper, update);
-        long indexTime = this.props.getIntrospect().getIndexType() == IndexType.UPDATE_TIME ?
-                jobWrapper.getUpdateTime() : jobWrapper.getPushTime();
-        redisTemplate.boundZSetOps(jobInspectorCursorKey).add(jobWrapper.getId(), indexTime);
-        redisTemplate.boundHashOps(jobInspectorDataKey).put(jobWrapper.getId(), JSONUtil.serialize(jobWrapper));
+    public long size() {
+        BoundHashOperations<String, String, String> ops = redisTemplate.boundHashOps(jobInspectorDataKey);
+        Long size = ops.size();
+        return size == null ? 0 : size;
     }
 
     public JobWrapper get(String jobId) {
@@ -99,6 +97,14 @@ public class RedisJobInspector extends AbstractJobInspector implements Initializ
     public void finish(List<String> jobIds) {
         redisTemplate.boundZSetOps(jobInspectorCursorKey).remove(jobIds.toArray());
         redisTemplate.boundHashOps(jobInspectorDataKey).delete(jobIds.toArray());
+    }
+
+    @Override
+    public void doAdd(JobWrapper jobWrapper) {
+        long indexTime = this.props.getIntrospect().getIndexType() == IndexType.UPDATE_TIME ?
+                jobWrapper.getUpdateTime() : jobWrapper.getPushTime();
+        redisTemplate.boundZSetOps(jobInspectorCursorKey).add(jobWrapper.getId(), indexTime);
+        redisTemplate.boundHashOps(jobInspectorDataKey).put(jobWrapper.getId(), JSONUtil.serialize(jobWrapper));
     }
 
     @Override

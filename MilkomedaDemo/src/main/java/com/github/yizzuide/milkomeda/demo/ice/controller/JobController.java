@@ -2,11 +2,14 @@ package com.github.yizzuide.milkomeda.demo.ice.controller;
 
 import com.github.yizzuide.milkomeda.ice.Ice;
 import com.github.yizzuide.milkomeda.ice.Job;
-import com.github.yizzuide.milkomeda.ice.inspector.JobWrapper;
+import com.github.yizzuide.milkomeda.ice.inspector.JobInspectPage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Collections;
 import java.util.List;
@@ -39,10 +42,10 @@ public class JobController {
      * @param start page num
      * @param size  size of pre page
      * @param order sorting of corresponding column, 1 is asc and -1 is desc
-     * @return  JobWrapper list
+     * @return  job Inspection page data
      */
     @GetMapping("getPage")
-    public List<JobWrapper> getJobPage(int start, int size, int order) {
+    public JobInspectPage getJobPage(int start, int size, int order) {
         return ice.getJobInspectPage(start, size, order);
     }
 
@@ -86,21 +89,18 @@ public class JobController {
     @RequestMapping("pop")
     public List<Job<Map<String, Object>>> pop(String topic, Integer count) {
         List<Job<Map<String, Object>>> jobs = Collections.emptyList();
-        try {
-            if (count == null || count < 2) {
-                Job<Map<String, Object>> job = ice.pop(topic);
-                if (job != null) {
-                    jobs = Collections.singletonList(job);
-                }
-                return jobs;
+        if (count == null || count < 2) {
+            Job<Map<String, Object>> job = ice.pop(topic);
+            if (job != null) {
+                jobs = Collections.singletonList(job);
             }
-            jobs = ice.pop(topic, count);
             return jobs;
-        } finally {
-            // 标记完成，清除元数据
-            if (!CollectionUtils.isEmpty(jobs)) {
-                ice.finish(jobs);
-            }
         }
+        jobs = ice.pop(topic, count);
+        // 标记完成，清除元数据
+        if (!CollectionUtils.isEmpty(jobs)) {
+            ice.finish(jobs);
+        }
+        return jobs;
     }
 }

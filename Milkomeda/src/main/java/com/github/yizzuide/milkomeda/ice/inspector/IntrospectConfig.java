@@ -23,11 +23,14 @@ package com.github.yizzuide.milkomeda.ice.inspector;
 
 import com.github.yizzuide.milkomeda.ice.IceHolder;
 import com.github.yizzuide.milkomeda.ice.IceProperties;
+import com.github.yizzuide.milkomeda.universe.metadata.BeanIds;
 import org.apache.ibatis.annotations.Mapper;
 import org.jetbrains.annotations.NotNull;
 import org.mybatis.spring.mapper.MapperScannerConfigurer;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -62,24 +65,30 @@ import java.util.stream.Stream;
 @ConditionalOnProperty(prefix = "milkomeda.ice.introspect", name = "enable", havingValue = "true")
 public class IntrospectConfig {
 
+    @Qualifier(BeanIds.JOB_INSPECTOR)
+    @Autowired(required = false)
+    private JobInspector jobInspector;
+
     @Bean
-    public JobInspector jobInspector(IceProperties iceProperties) {
+    public JobInspector innerJobInspector(IceProperties iceProperties) {
         JobInspector.InspectorType inspectorType = iceProperties.getIntrospect().getInspectorType();
-        JobInspector jobInspector = null;
+        JobInspector innerJobInspector = null;
         switch (inspectorType) {
             case REDIS:
-                jobInspector = new RedisJobInspector(iceProperties);
+                innerJobInspector = new RedisJobInspector(iceProperties);
                 break;
             case MYSQL:
-                jobInspector = new MysqlJobInspector();
+                innerJobInspector = new MysqlJobInspector();
                 break;
             case MONGODB:
+                innerJobInspector = new MongoJobInspector();
                 break;
             case AUTO_CHECK:
+                innerJobInspector =  jobInspector;
                 break;
         }
-        IceHolder.setJobInspector(jobInspector);
-        return jobInspector;
+        IceHolder.setJobInspector(innerJobInspector);
+        return innerJobInspector;
     }
 
     public static class IntrospectRegistrar implements ImportBeanDefinitionRegistrar {

@@ -21,7 +21,7 @@
 
 package com.github.yizzuide.milkomeda.ice;
 
-import com.github.yizzuide.milkomeda.ice.inspector.JobWrapper;
+import com.github.yizzuide.milkomeda.ice.inspector.JobInspectPage;
 import org.springframework.data.redis.core.RedisOperations;
 
 import java.time.Duration;
@@ -111,10 +111,10 @@ public interface Ice {
      * @param start page start index
      * @param size size of per page
      * @param order sorting of corresponding column, 1 is asc and -1 is desc
-     * @return JobWrapper list
+     * @return job Inspection page data
      * @since 3.14.0
      */
-    List<JobWrapper> getJobInspectPage(int start, int size, int order);
+    JobInspectPage getJobInspectPage(int start, int size, int order);
 
     /**
      * Get job info in job pool.

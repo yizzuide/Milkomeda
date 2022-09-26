@@ -128,6 +128,8 @@ public class DelayJobHandler implements Runnable, ApplicationListener<IceInstanc
             if (job == null) {
                 // 移除TTR超时检测任务
                 delayBucket.remove(index, delayJob);
+                // Record job
+                jobInspector.finish(Collections.singletonList(delayJob.getJodId()));
                 return;
             }
             JobStatus status = job.getStatus();

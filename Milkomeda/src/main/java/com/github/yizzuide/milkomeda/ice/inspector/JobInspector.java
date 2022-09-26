@@ -81,6 +81,12 @@ public interface JobInspector {
     void add(JobWrapper jobWrapper, boolean update);
 
     /**
+     * Get jobs total size.
+     * @return jobs size.
+     */
+    long size();
+
+    /**
      * Get job wrapper from cache.
      * @param jobId job id
      * @return  JobWrapper
