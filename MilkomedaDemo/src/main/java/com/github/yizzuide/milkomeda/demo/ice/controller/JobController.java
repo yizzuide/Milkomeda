@@ -5,7 +5,6 @@ import com.github.yizzuide.milkomeda.ice.Job;
 import com.github.yizzuide.milkomeda.ice.inspector.JobInspectPage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -94,13 +93,13 @@ public class JobController {
             if (job != null) {
                 jobs = Collections.singletonList(job);
             }
-            return jobs;
+        } else {
+            jobs = ice.pop(topic, count);
         }
-        jobs = ice.pop(topic, count);
+
         // 标记完成，清除元数据
-        if (!CollectionUtils.isEmpty(jobs)) {
-            ice.finish(jobs);
-        }
+        ice.finish(jobs);
+
         return jobs;
     }
 }

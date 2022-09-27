@@ -94,8 +94,10 @@ public class RedisIce implements Ice, ApplicationListener<IceInstanceChangeEvent
             job.setId(job.getTopic() + IceProperties.MERGE_ID_SEPARATOR + job.getId());
         }
 
+
         DelayJob delayJob = new DelayJob(job);
         boolean hadSetStatus = job.getStatus() != null;
+        boolean isUsedActive = false;
         if (replaceWhenExists && (hadSetStatus || jobPool.exists(job.getId()))) {
             // Using serialized job to test
             Job<?> serializedJob = hadSetStatus ? job : jobPool.get(job.getId());
@@ -112,12 +114,13 @@ public class RedisIce implements Ice, ApplicationListener<IceInstanceChangeEvent
                 deadQueue.remove(delayJob);
                 // Update delay time.
                 delayJob.updateDelayTime();
+                isUsedActive = true;
             }
         }
 
         job.setStatus(JobStatus.DELAY);
         JobWrapper jobWrapper = JobWrapper.buildFrom(job);
-
+        boolean activeFromDeadQueue = isUsedActive;
         RedisUtil.batchOps((operations) -> {
             jobPool.remove(operations, job.getId());
             jobPool.push(operations, job);
@@ -125,7 +128,11 @@ public class RedisIce implements Ice, ApplicationListener<IceInstanceChangeEvent
 
             // Record job
             if (jobInspector != null) {
-                jobInspector.initJobInspection(jobWrapper, index);
+                if (activeFromDeadQueue) {
+                    jobInspector.updateJobInspection(Collections.singletonList(delayJob), index);
+                } else {
+                    jobInspector.initJobInspection(jobWrapper, index);
+                }
             }
         }, redisTemplate);
     }
@@ -151,7 +158,7 @@ public class RedisIce implements Ice, ApplicationListener<IceInstanceChangeEvent
     }
 
     public void rePushJob(String jobId) {
-        add(jobPool.get(jobId));
+        add(jobPool.get(jobId), false, true);
     }
 
     @Override
@@ -258,6 +265,10 @@ public class RedisIce implements Ice, ApplicationListener<IceInstanceChangeEvent
 
     @Override
     public <T> void finish(List<Job<T>> jobs) {
+        if (CollectionUtils.isEmpty(jobs)) {
+            return;
+        }
+
         delete(jobs);
 
         // Record job

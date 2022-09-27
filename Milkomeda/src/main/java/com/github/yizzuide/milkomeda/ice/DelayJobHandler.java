@@ -129,7 +129,9 @@ public class DelayJobHandler implements Runnable, ApplicationListener<IceInstanc
                 // 移除TTR超时检测任务
                 delayBucket.remove(index, delayJob);
                 // Record job
-                jobInspector.finish(Collections.singletonList(delayJob.getJodId()));
+                if (jobInspector != null) {
+                    jobInspector.finish(Collections.singletonList(delayJob.getJodId()));
+                }
                 return;
             }
             JobStatus status = job.getStatus();
@@ -221,6 +223,12 @@ public class DelayJobHandler implements Runnable, ApplicationListener<IceInstanc
             }, redisTemplate);
 
             // Over!
+            return;
+        }
+
+        // check again!
+        boolean isConsumeSuccess = !jobPool.exists(job.getId());
+        if (isConsumeSuccess) {
             return;
         }
 
