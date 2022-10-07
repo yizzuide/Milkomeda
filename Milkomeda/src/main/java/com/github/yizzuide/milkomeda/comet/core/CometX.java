@@ -32,6 +32,7 @@ import java.lang.annotation.Target;
  *
  * @author yizzuide
  * @since 1.12.0
+ * <br />
  * Create at 2019/09/21 01:15
  */
 @Target({ElementType.METHOD})

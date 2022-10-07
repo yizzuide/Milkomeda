@@ -30,6 +30,7 @@ import javax.servlet.http.HttpServletRequest;
  * @author yizzuide
  * @since 0.2.0
  * @version 1.13.3
+ * <br />
  * Create at 2019/04/11 19:45
  */
 public interface CometRecorder {

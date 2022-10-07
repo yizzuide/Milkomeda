@@ -28,6 +28,7 @@ import org.springframework.context.annotation.Bean;
  *
  * @author yizzuide
  * @since 3.10.0
+ * <br />
  * Create at 2020/07/02 16:59
  */
 public class PillarConfig {

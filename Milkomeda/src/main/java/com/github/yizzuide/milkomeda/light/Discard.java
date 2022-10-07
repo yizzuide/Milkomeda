@@ -32,6 +32,7 @@ import java.util.Map;
  * @since 1.8.0
  * @version 2.0.3
  * @author yizzuide
+ * <br />
  * Create at 2019/06/28 14:50
  */
 public interface Discard {

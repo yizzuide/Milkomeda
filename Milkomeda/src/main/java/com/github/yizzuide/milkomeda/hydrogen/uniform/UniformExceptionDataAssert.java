@@ -29,6 +29,7 @@ import java.text.MessageFormat;
  *
  * @author yizzuide
  * @since 3.10.0
+ * <br />
  * Create at 2020/07/03 17:10
  */
 public interface UniformExceptionDataAssert extends UniformExceptionData, UniformExceptionAssert {

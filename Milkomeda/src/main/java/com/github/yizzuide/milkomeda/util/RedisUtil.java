@@ -40,6 +40,7 @@ import java.util.function.Consumer;
  * @author yizzuide
  * @since 1.14.0
  * @version 3.9.0
+ * <br />
  * Create at 2019/11/11 14:07
  */
 public class RedisUtil {

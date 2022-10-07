@@ -38,6 +38,7 @@ import java.util.stream.Collectors;
  * @author yizzuide
  * @since 1.15.0
  * @version 3.12.0
+ * <br />
  * Create at 2019/11/16 17:07
  */
 public class RedisReadyQueue implements ReadyQueue, InitializingBean, ApplicationListener<IceInstanceChangeEvent> {

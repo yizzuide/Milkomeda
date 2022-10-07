@@ -27,6 +27,7 @@ package com.github.yizzuide.milkomeda.particle;
  *
  * @author yizzuide
  * @since 1.5.0
+ * <br />
  * Create at 2019/05/30 17:35
  */
 public enum  TimesType {

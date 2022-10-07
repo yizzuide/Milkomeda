@@ -21,6 +21,7 @@
 
 package com.github.yizzuide.milkomeda.ice.inspector;
 
+import com.github.yizzuide.milkomeda.ice.Ice;
 import com.github.yizzuide.milkomeda.ice.IceHolder;
 import com.github.yizzuide.milkomeda.ice.inspector.domain.JobInspectionDocument;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +41,7 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 3.14.0
+ * <br />
  * Create at 2022/09/26 23:02
  */
 public class MongoJobInspector extends AbstractJobInspector {
@@ -55,7 +57,7 @@ public class MongoJobInspector extends AbstractJobInspector {
 
     @Override
     public JobWrapper get(String jobId) {
-        JobInspectionDocument jobInspectionDocument = mongoTemplate.findById(String.valueOf(getId(jobId)), JobInspectionDocument.class);
+        JobInspectionDocument jobInspectionDocument = mongoTemplate.findById(Ice.getId(jobId), JobInspectionDocument.class);
         return convertFromEntity(jobInspectionDocument);
     }
 
@@ -98,14 +100,14 @@ public class MongoJobInspector extends AbstractJobInspector {
     @Override
     public void finish(List<String> jobIds) {
         jobIds.forEach(jobId -> {
-            Query query = Query.query(Criteria.where("id").is(String.valueOf(getId(jobId))));
+            Query query = Query.query(Criteria.where("id").is(Ice.getId(jobId)));
             mongoTemplate.remove(query, JobInspectionDocument.class);
         });
     }
 
     private JobInspectionDocument convertToEntity(JobWrapper jobWrapper) {
         JobInspectionDocument jobInspectionDocument = new JobInspectionDocument();
-        jobInspectionDocument.setId(String.valueOf(getId(jobWrapper.getId())));
+        jobInspectionDocument.setId(Ice.getId(jobWrapper.getId()));
         jobInspectionDocument.setTopic(jobWrapper.getTopic());
         jobInspectionDocument.setApplicationName(jobWrapper.getApplicationName());
         jobInspectionDocument.setQueueType(jobWrapper.getQueueType().ordinal());
@@ -123,7 +125,7 @@ public class MongoJobInspector extends AbstractJobInspector {
             return null;
         }
         JobWrapper JobWrapper = new JobWrapper();
-        JobWrapper.setId(mergeId(jobInspectionDocument.getId(), jobInspectionDocument.getTopic()));
+        JobWrapper.setId(Ice.mergeId(jobInspectionDocument.getId(), jobInspectionDocument.getTopic()));
         JobWrapper.setTopic(jobInspectionDocument.getTopic());
         JobWrapper.setApplicationName(jobInspectionDocument.getApplicationName());
         JobWrapper.setQueueType(JobQueueType.values()[jobInspectionDocument.getQueueType()]);

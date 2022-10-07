@@ -27,6 +27,7 @@ package com.github.yizzuide.milkomeda.atom;
  *
  * @author yizzuide
  * @since 3.3.1
+ * <br />
  * Create at 2020/05/08 13:46
  */
 public enum AtomLockWaitTimeoutType {

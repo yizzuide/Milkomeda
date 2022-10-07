@@ -51,6 +51,7 @@ import java.util.stream.Collectors;
  * @since 3.0.0
  * @version 3.11.0
  * @see BeanFactoryUtils#beansOfTypeIncludingAncestors(org.springframework.beans.factory.ListableBeanFactory, java.lang.Class)
+ * <br />
  * Create at 2020/03/28 18:54
  */
 @Configuration

@@ -26,6 +26,7 @@ package com.github.yizzuide.milkomeda.crust;
  *
  * @author yizzuide
  * @since 3.12.10
+ * <br />
  * Create at 2022/01/31 17:30
  */
 public class CrustException extends RuntimeException {

@@ -37,6 +37,7 @@ import java.util.Properties;
  * @author yizzuide
  * @since 3.13.0
  * @see org.springframework.context.annotation.PropertySource
+ * <br />
  * Create at 2022/09/05 01:17
  */
 public class YmlPropertySourceFactory implements PropertySourceFactory {

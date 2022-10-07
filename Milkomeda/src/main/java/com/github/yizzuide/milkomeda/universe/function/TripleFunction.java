@@ -25,6 +25,7 @@ package com.github.yizzuide.milkomeda.universe.function;
  * TripleFunction
  *
  * @author yizzuide
+ * <br />
  * Create at 2020/07/03 09:44
  */
 @FunctionalInterface

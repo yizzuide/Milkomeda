@@ -26,6 +26,7 @@ package com.github.yizzuide.milkomeda.hydrogen.uniform;
  *
  * @author yizzuide
  * @since 3.10.0
+ * <br />
  * Create at 2020/07/03 17:08
  */
 public interface UniformExceptionData {

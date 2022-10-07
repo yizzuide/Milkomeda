@@ -29,6 +29,7 @@ import java.nio.ByteOrder;
  *
  * @author yizzuide
  * @since 3.8.0
+ * <br />
  * Create at 2020/06/18 17:15
  */
 public class MurmurHash implements HashFunc {

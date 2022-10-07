@@ -42,6 +42,7 @@ import javax.validation.ValidatorFactory;
  *
  * @author yizzuide
  * @since 3.0.0
+ * <br />
  * Create at 2019/11/28 17:38
  */
 @Configuration

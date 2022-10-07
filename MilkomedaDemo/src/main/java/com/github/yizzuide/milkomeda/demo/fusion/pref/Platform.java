@@ -4,6 +4,7 @@ package com.github.yizzuide.milkomeda.demo.fusion.pref;
  * Platform
  *
  * @author yizzuide
+ * <br />
  * Create at 2020/01/02 14:42
  */
 public class Platform {

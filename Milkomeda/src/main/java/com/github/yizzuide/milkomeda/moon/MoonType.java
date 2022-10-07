@@ -27,6 +27,7 @@ package com.github.yizzuide.milkomeda.moon;
  *
  * @author yizzuide
  * @since 3.1.2
+ * <br />
  * Create at 2020/04/22 14:33
  */
 public enum  MoonType {

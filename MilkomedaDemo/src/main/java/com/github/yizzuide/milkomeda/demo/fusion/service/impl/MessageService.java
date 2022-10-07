@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
  * MessageService
  *
  * @author yizzuide
+ * <br />
  * Create at 2022/05/25 02:34
  */
 // 该类所有被调用的方法不会执行，allowed支持Spring EL表达式

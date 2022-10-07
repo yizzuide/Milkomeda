@@ -46,16 +46,14 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  *
  * @author yizzuide
  * @since 1.14.0
- * @version 3.12.10
+ * @version 3.14.0
+ * <br />
  * Create at 2019/11/11 14:56
  */
 @Configuration
 @ConditionalOnClass({AuthenticationManager.class})
 @EnableConfigurationProperties({CrustProperties.class, LightProperties.class})
 public class CrustConfig {
-
-    @Autowired
-    private LightProperties lightProps;
 
     @Autowired
     private CrustProperties crustProps;
@@ -86,7 +84,7 @@ public class CrustConfig {
 
     @Bean(Crust.CATCH_NAME)
     @ConditionalOnProperty(prefix = "milkomeda.crust", name = "enable-cache", havingValue = "true", matchIfMissing = true)
-    public Cache lightCache() {
+    public Cache lightCache(LightProperties lightProps) {
         LightCache lightCache = new LightCache();
         lightCache.setL1MaxCount(lightProps.getL1MaxCount());
         lightCache.setL1DiscardPercent(lightProps.getL1DiscardPercent());

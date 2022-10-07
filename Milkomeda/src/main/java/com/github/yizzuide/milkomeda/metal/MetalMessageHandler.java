@@ -34,6 +34,7 @@ import org.springframework.util.StringUtils;
  * @author yizzuide
  * @since 3.6.0
  * @version 3.6.1
+ * <br />
  * Create at 2020/05/22 15:59
  */
 public class MetalMessageHandler {

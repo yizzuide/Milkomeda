@@ -27,6 +27,7 @@ package com.github.yizzuide.milkomeda.jupiter;
  * @author yizzuide
  * @since 3.5.0
  * @version 3.12.10
+ * <br />
  * Create at 2020/05/20 15:05
  */
 public class JupiterSqlBuilder {

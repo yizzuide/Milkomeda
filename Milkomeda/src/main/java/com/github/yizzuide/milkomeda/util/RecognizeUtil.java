@@ -26,6 +26,7 @@ package com.github.yizzuide.milkomeda.util;
  *
  * @author yizzuide
  * @since 1.13.9
+ * <br />
  * Create at 2019/10/29 15:49
  */
 public class RecognizeUtil {

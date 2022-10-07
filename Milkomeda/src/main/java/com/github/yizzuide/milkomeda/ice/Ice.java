@@ -22,6 +22,7 @@
 package com.github.yizzuide.milkomeda.ice;
 
 import com.github.yizzuide.milkomeda.ice.inspector.JobInspectPage;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.data.redis.core.RedisOperations;
 
 import java.time.Duration;
@@ -35,6 +36,7 @@ import java.util.Map;
  * @author yizzuide
  * @since 1.15.0
  * @version 3.14.0
+ * <br />
  * Create at 2019/11/16 15:11
  */
 public interface Ice {
@@ -103,8 +105,9 @@ public interface Ice {
     /**
      * Re-push job to job pool.
      * @param jobId job id
+     * @param topic job topic
      */
-    void rePushJob(String jobId);
+    void rePushJob(String jobId, String topic);
 
     /**
      * Get all job inspect info list.
@@ -118,18 +121,30 @@ public interface Ice {
 
     /**
      * Get job info in job pool.
+     * @param jobId job id
+     * @param topic job topic
      * @return  Job
      * @since 3.14.0
      */
-    Job<?> getJobDetail(String jobId);
+    Job<?> getJobDetail(String jobId, String topic);
 
     /**
      * Get cache keys.
      * @param jobId job id
+     * @param topic job topic
      * @return key map
      * @since 3.14.0
      */
-    Map<String, String> getCacheKey(String jobId);
+    Map<String, String> getCacheKey(String jobId, String topic);
+
+    /**
+     * Pull number of jobs.
+     * @param topic job topic
+     * @param count pull size
+     * @param <T>   job list type
+     * @return  job list
+     */
+    <T> List<Job<T>> pull(String topic, Integer count);
 
     /**
      * 取出待处理任务
@@ -153,29 +168,6 @@ public interface Ice {
      * @param jobs    任务列表
      */
     <T> void finish(List<Job<T>> jobs);
-
-    /**
-     * 完成任务
-     * @param operations Pipelined操作
-     * @param jobs    任务列表
-     * @param <T>   业务数据
-     * @since 3.12.0
-     */
-    <T> void finish(RedisOperations<String, String> operations, List<Job<T>> jobs);
-
-    /**
-     * 完成任务
-     * @param jobIds    任务id列表
-     */
-    void finish(Object... jobIds);
-
-    /**
-     * 完成任务
-     * @param operations Pipelined操作
-     * @param jobIds    任务id列表
-     * @since 3.12.0
-     */
-    void finish(RedisOperations<String, String> operations, Object... jobIds);
 
     /**
      * 删除任务
@@ -206,4 +198,33 @@ public interface Ice {
      * @since 3.12.0
      */
     void delete(RedisOperations<String, String> operations, Object... jobIds);
+
+    /**
+     * Extract job id.
+     * @param jobId merged topic with job id.
+     * @return pure job id.
+     * @since 3.14.0
+     */
+    @NotNull
+    static String getId(String jobId) {
+        if (jobId.contains(IceProperties.MERGE_ID_SEPARATOR)) {
+            return jobId.split(IceProperties.MERGE_ID_SEPARATOR)[1];
+        }
+        return  jobId;
+    }
+
+    /**
+     * Mixins job id  with topic.
+     * @param jobId pure job id.
+     * @param topic job topic.
+     * @return  merged topic with job id.
+     * @since 3.14.0
+     */
+    @NotNull
+    static String mergeId(Object jobId, String topic) {
+        if (jobId.toString().contains(IceProperties.MERGE_ID_SEPARATOR)) {
+            return jobId.toString();
+        }
+        return topic + IceProperties.MERGE_ID_SEPARATOR + jobId;
+    }
 }

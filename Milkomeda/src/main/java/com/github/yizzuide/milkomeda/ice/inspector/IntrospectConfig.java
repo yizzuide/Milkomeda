@@ -57,6 +57,7 @@ import java.util.stream.Stream;
  *
  * @author yizzuide
  * @since 3.14.0
+ * <br />
  * Create at 2022/09/25 17:37
  */
 @Configuration

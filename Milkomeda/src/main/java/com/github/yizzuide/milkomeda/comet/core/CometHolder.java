@@ -30,6 +30,7 @@ import com.github.yizzuide.milkomeda.comet.logger.CometLoggerProperties;
  * @author yizzuide
  * @since 3.0.0
  * @version 3.11.0
+ * <br />
  * Create at 2020/03/28 12:42
  */
 public class CometHolder {

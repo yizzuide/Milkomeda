@@ -31,6 +31,7 @@ import org.springframework.boot.autoconfigure.quartz.QuartzProperties;
  * @author yizzuide
  * @since 1.18.0
  * @version 1.18.1
+ * <br />
  * Create at 2019/12/09 21:21
  */
 public class NeutronHolder {

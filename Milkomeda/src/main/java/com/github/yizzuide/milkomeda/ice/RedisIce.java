@@ -47,6 +47,7 @@ import java.util.stream.Collectors;
  * @author yizzuide
  * @since 1.15.0
  * @version 3.14.0
+ * <br />
  * Create at 2019/11/16 15:20
  */
 @Slf4j
@@ -157,8 +158,9 @@ public class RedisIce implements Ice, ApplicationListener<IceInstanceChangeEvent
         return new Job<>(id, topic, delay, props.getTtr().toMillis(), props.getRetryCount(), body);
     }
 
-    public void rePushJob(String jobId) {
-        add(jobPool.get(jobId), false, true);
+    public void rePushJob(String jobId, String topic) {
+        // jobId -> merge jobId
+        add(jobPool.get(Ice.mergeId(jobId, topic)), false, true);
     }
 
     @Override
@@ -167,26 +169,53 @@ public class RedisIce implements Ice, ApplicationListener<IceInstanceChangeEvent
         if (jobInspector == null) {
             page.setTotalSize(0);
             page.setItems(Collections.emptyList());
+            return page;
         }
         page.setTotalSize(jobInspector.size());
-        page.setItems(jobInspector.getPage(start, size, order));
+        List<JobWrapper> jobWrappers = jobInspector.getPage(start, size, order);
+        // merge jobId -> jobId
+        jobWrappers.forEach(jobWrapper -> jobWrapper.setId(Ice.getId(jobWrapper.getId())));
+        page.setItems(jobWrappers);
         return page;
     }
 
     @Override
-    public Job<?> getJobDetail(String jobId) {
-        return jobPool.get(jobId);
+    public Job<?> getJobDetail(String jobId, String topic) {
+        // jobId -> merge jobId
+        Job<?> job = jobPool.get(Ice.mergeId(jobId, topic));
+        // merge jobId -> jobId
+        if (job != null) {
+            job.setId(Ice.getId(job.getId()));
+        }
+        return job;
     }
 
-    public Map<String, String> getCacheKey(String jobId) {
+    public Map<String, String> getCacheKey(String jobId, String topic) {
         if (jobInspector == null) {
             return Collections.emptyMap();
         }
-        JobWrapper jobWrapper = jobInspector.get(jobId);
+        // jobId -> merge jobId
+        JobWrapper jobWrapper = jobInspector.get(Ice.mergeId(jobId, topic));
         if (jobWrapper == null) {
             return Collections.emptyMap();
         }
         return IceKeys.resolve(jobWrapper);
+    }
+
+    @Override
+    public <T> List<Job<T>> pull(String topic, Integer count) {
+        List<Job<T>> jobs = Collections.emptyList();
+        if (count == null || count < 2) {
+            Job<T> job = pop(topic);
+            if (job != null) {
+                jobs = Collections.singletonList(job);
+            }
+        } else {
+            jobs = pop(topic, count);
+        }
+        // 标记完成，清除元数据
+        finish(jobs);
+        return jobs.stream().map(Job::clone).collect(Collectors.toList());
     }
 
     @Override
@@ -269,27 +298,13 @@ public class RedisIce implements Ice, ApplicationListener<IceInstanceChangeEvent
             return;
         }
 
+        // Remove from job pool.
         delete(jobs);
 
         // Record job
         if (jobInspector != null) {
             jobInspector.finish(jobs.stream().map(Job::getId).collect(Collectors.toList()));
         }
-    }
-
-    @Override
-    public <T> void finish(RedisOperations<String, String> operations, List<Job<T>> jobs) {
-        delete(operations, jobs);
-    }
-
-    @Override
-    public void finish(Object... jobIds) {
-        delete(jobIds);
-    }
-
-    @Override
-    public void finish(RedisOperations<String, String> operations, Object... jobIds) {
-        delete(operations, jobIds);
     }
 
     @Override

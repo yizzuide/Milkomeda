@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -18,6 +17,7 @@ import java.util.Map;
  * JobController
  *
  * @author yizzuide
+ * <br />
  * Create at 2019/11/18 20:30
  */
 @RestController
@@ -51,55 +51,45 @@ public class JobController {
     /**
      * 获取当前job的详情信息
      * @param jobId job id
+     * @param topic job topic
      * @return  job
      */
     @GetMapping("getDetail")
-    public Job<?> getJobDetail(String jobId) {
-        return ice.getJobDetail(jobId);
+    public Job<?> getJobDetail(String jobId, String topic) {
+        return ice.getJobDetail(jobId, topic);
     }
 
     /**
      * 获取缓存key
      * @param jobId job id
-     * @return  key map
+     * @param topic job topic
+     * @return  cache key map
      */
     @GetMapping("getJobCacheKeys")
-    public Map<String, String> getJobCacheKeys(String jobId) {
-        return ice.getCacheKey(jobId);
+    public Map<String, String> getJobCacheKeys(String jobId, String topic) {
+        return ice.getCacheKey(jobId, topic);
     }
 
     /**
      * 重推Job
      * @param jobId job id
+     * @param topic job topic
      * @return null
      */
     @GetMapping("rePush")
-    public ResponseEntity<Void> rePushJob(String jobId) {
-        ice.rePushJob(jobId);
+    public ResponseEntity<Void> rePushJob(String jobId, String topic) {
+        ice.rePushJob(jobId, topic);
         return ResponseEntity.ok(null);
     }
 
     /**
-     * 轮询可消费Job
+     * 拉取可消费Job
      * @param topic 消费Topic标识
      * @param count 获取最多消费个数
-     * @return List
+     * @return job list
      */
-    @RequestMapping("pop")
-    public List<Job<Map<String, Object>>> pop(String topic, Integer count) {
-        List<Job<Map<String, Object>>> jobs = Collections.emptyList();
-        if (count == null || count < 2) {
-            Job<Map<String, Object>> job = ice.pop(topic);
-            if (job != null) {
-                jobs = Collections.singletonList(job);
-            }
-        } else {
-            jobs = ice.pop(topic, count);
-        }
-
-        // 标记完成，清除元数据
-        ice.finish(jobs);
-
-        return jobs;
+    @RequestMapping("pull")
+    public List<Job<Map<String, Object>>> pull(String topic, Integer count) {
+        return ice.pull(topic, count);
     }
 }

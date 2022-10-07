@@ -26,6 +26,7 @@ package com.github.yizzuide.milkomeda.pulsar;
  *
  * @author yizzuide
  * @since 3.12.10
+ * <br />
  * Create at 2022/01/31 01:24
  */
 public class PulsarDeferException extends RuntimeException {

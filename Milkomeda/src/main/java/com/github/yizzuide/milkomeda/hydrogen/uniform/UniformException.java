@@ -30,6 +30,7 @@ import lombok.EqualsAndHashCode;
  *
  * @author yizzuide
  * @since 3.10.0
+ * <br />
  * Create at 2020/07/03 17:04
  */
 @EqualsAndHashCode(callSuper = true)

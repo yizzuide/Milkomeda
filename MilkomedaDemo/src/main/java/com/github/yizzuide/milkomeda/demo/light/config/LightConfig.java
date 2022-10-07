@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Configuration;
  * LightConfig
  *
  * @author yizzuide
+ * <br />
  * Create at 2022/03/11 01:24
  */
 @Configuration

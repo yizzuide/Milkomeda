@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
  * MilkomedaApplicationListener
  *
  * @author yizzuide
+ * <br />
  * Create at 2020/04/16 18:24
  */
 @Slf4j

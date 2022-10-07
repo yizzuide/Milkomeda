@@ -32,6 +32,7 @@ import com.github.yizzuide.milkomeda.util.Strings;
 import io.jsonwebtoken.Claims;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -44,7 +45,6 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
-import javax.annotation.Resource;
 import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -56,6 +56,7 @@ import java.util.stream.Collectors;
  * @author yizzuide
  * @since 1.14.0
  * @version 3.12.10
+ * <br />
  * Create at 2019/11/11 15:48
  */
 public class Crust {
@@ -89,7 +90,8 @@ public class Crust {
     @Autowired
     private CrustProperties props;
 
-    @Resource
+    @Qualifier(Crust.CATCH_NAME)
+    @Autowired(required = false)
     Cache lightCacheCrust;
 
     private CrustUserDetailsService crustUserDetailsService;

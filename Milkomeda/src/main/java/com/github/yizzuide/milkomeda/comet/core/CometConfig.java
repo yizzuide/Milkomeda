@@ -48,6 +48,7 @@ import java.util.Objects;
  * @author yizzuide
  * @since 2.0.0
  * @version 3.12.10
+ * <br />
  * Create at 2019/12/12 18:10
  */
 @Configuration

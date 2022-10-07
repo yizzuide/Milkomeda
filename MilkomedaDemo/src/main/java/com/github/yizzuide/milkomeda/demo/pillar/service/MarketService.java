@@ -6,6 +6,7 @@ import java.util.Map;
  * MarketService
  *
  * @author yizzuide
+ * <br />
  * Create at 2020/07/17 17:32
  */
 public interface MarketService {

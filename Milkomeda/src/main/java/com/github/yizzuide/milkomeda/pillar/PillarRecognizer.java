@@ -30,6 +30,7 @@ import java.lang.reflect.Method;
  * @author yizzuide
  * @since 0.2.0
  * @version 1.6.0
+ * <br />
  * Create at 2019/04/11 18:02
  */
 public class PillarRecognizer {

@@ -27,6 +27,7 @@ package com.github.yizzuide.milkomeda.comet.logger;
  *
  * @author yizzuide
  * @since 3.11.0
+ * <br />
  * Create at 2020/07/11 01:18
  */
 public enum CometLoggerType {

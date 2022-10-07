@@ -40,6 +40,7 @@ import java.util.stream.Collectors;
  * @author yizzuide
  * @since 1.14.0
  * @version 1.17.3
+ * <br />
  * Create at 2019/11/11 18:01
  */
 public abstract class CrustUserDetailsService implements UserDetailsService {

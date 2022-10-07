@@ -36,6 +36,7 @@ import java.util.Map;
  *
  * @author yizzuide
  * @since 1.14.0
+ * <br />
  * Create at 2019/11/11 15:16
  */
 public class JwtUtil {

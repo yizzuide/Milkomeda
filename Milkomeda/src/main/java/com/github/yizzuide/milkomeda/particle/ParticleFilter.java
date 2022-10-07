@@ -54,6 +54,7 @@ import static com.github.yizzuide.milkomeda.particle.ParticleProperties.Limiter.
  * @author yizzuide
  * @since 3.0.0
  * @version 3.12.10
+ * <br />
  * Create at 2020/04/08 11:41
  */
 public class ParticleFilter implements Filter {

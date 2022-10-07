@@ -33,6 +33,7 @@ import java.lang.reflect.Type;
  * @since 1.10.0
  * @version 2.1.0
  * @author yizzuide
+ * <br />
  * Create at 2019/07/02 13:23
  */
 public class TypeUtil {

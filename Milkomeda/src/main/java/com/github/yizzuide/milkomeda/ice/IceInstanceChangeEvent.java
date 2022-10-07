@@ -29,6 +29,7 @@ import org.springframework.context.ApplicationEvent;
  *
  * @author yizzuide
  * @since 3.0.7
+ * <br />
  * Create at 2020/04/16 16:00
  */
 public class IceInstanceChangeEvent extends ApplicationEvent {

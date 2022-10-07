@@ -22,9 +22,7 @@
 package com.github.yizzuide.milkomeda.ice.inspector;
 
 import com.github.yizzuide.milkomeda.ice.DelayJob;
-import com.github.yizzuide.milkomeda.ice.IceProperties;
 import com.github.yizzuide.milkomeda.ice.JobStatus;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.scheduling.annotation.Async;
 
 import java.util.List;
@@ -36,6 +34,7 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 3.14.0
+ * <br />
  * Create at 2022/09/26 00:12
  */
 public abstract class AbstractJobInspector implements JobInspector {
@@ -62,6 +61,7 @@ public abstract class AbstractJobInspector implements JobInspector {
     }
 
     @Async
+    @Override
     public void updateJobInspection(List<DelayJob> delayJobs, Integer index, JobStatus status, Consumer<JobWrapper> customizer) {
         List<JobWrapper> jobWrappers = delayJobs.stream().map(delayJob -> {
             JobWrapper jobWrapper = this.get(delayJob.getJodId());
@@ -97,15 +97,4 @@ public abstract class AbstractJobInspector implements JobInspector {
      * @param jobWrappers job wrapper list.
      */
     protected abstract void doUpdate(List<JobWrapper> jobWrappers);
-
-
-    @NotNull
-    protected Long getId(String jobId) {
-        return Long.valueOf(jobId.split(IceProperties.MERGE_ID_SEPARATOR)[1]);
-    }
-
-    @NotNull
-    protected String mergeId(Object jobId, String topic) {
-        return topic + IceProperties.MERGE_ID_SEPARATOR + jobId;
-    }
 }

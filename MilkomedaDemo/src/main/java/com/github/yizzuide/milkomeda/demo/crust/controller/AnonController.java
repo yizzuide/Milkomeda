@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
  * AnonController
  *
  * @author yizzuide
+ * <br />
  * Create at 2020/05/13 11:36
  */
 @RequestMapping("anon")

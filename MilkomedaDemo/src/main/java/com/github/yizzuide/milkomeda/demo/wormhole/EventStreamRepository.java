@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
  * 领域事件流仓储
  *
  * @author yizzuide
+ * <br />
  * Create at 2020/05/05 15:42
  */
 @Slf4j

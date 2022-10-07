@@ -38,6 +38,7 @@ import org.springframework.context.annotation.Import;
  * @author yizzuide
  * @since 3.0.0
  * @version 3.2.0
+ * <br />
  * Create at 2020/03/25 17:46
  */
 @Configuration

@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
  * FusionController
  *
  * @author yizzuide
+ * <br />
  * Create at 2020/01/02 14:38
  */
 @Slf4j

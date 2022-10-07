@@ -32,6 +32,7 @@ import java.util.concurrent.Callable;
  * @author yizzuide
  * @since 1.0.0
  * @version 3.12.10
+ * <br />
  * Create at 2019/04/30 15:47
  */
 public class PulsarHolder {

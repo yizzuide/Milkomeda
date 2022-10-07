@@ -26,6 +26,7 @@ package com.github.yizzuide.milkomeda.jupiter;
  * 规则引擎类型
  *
  * @author yizzuide
+ * <br />
  * Create at 2020/05/20 10:57
  */
 public enum JupiterRuleEngineType {

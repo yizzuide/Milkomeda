@@ -10,6 +10,7 @@ import org.springframework.boot.context.properties.bind.Name;
  * ThirdKey
  *
  * @author yizzuide
+ * <br />
  * Create at 2022/02/12 23:30
  */
 @ConfigurationProperties(prefix = "third")

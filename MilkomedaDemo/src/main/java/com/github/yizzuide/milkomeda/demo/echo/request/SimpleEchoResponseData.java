@@ -8,6 +8,7 @@ import lombok.Data;
  * 扩展响应类例子，如你对接的第三方响应字段不同，需要通过定义实现EchoResponseData接口即可扩展
  *
  * @author yizzuide
+ * <br />
  * Create at 2019/09/21 18:56
  */
 @Data

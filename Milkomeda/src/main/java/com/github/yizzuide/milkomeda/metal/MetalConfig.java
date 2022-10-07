@@ -29,6 +29,7 @@ import org.springframework.context.annotation.Bean;
  *
  * @author yizzuide
  * @since 3.6.0
+ * <br />
  * Create at 2020/05/21 23:26
  */
 public class MetalConfig {

@@ -41,6 +41,7 @@ import java.util.stream.Collectors;
  * @author yizzuide
  * @since 0.2.0
  * @version 1.15.0
+ * <br />
  * Create at 2019/04/11 14:14
  */
 public class PillarExecutor<P, R> {

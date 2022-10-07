@@ -28,6 +28,7 @@ import com.github.yizzuide.milkomeda.hydrogen.core.AbstractHydrogenLoader;
  *
  * @author yizzuide
  * @since 3.0.0
+ * <br />
  * Create at 2020/04/03 11:02
  */
 public abstract class AbstractInterceptorLoader<T> extends AbstractHydrogenLoader<T> implements InterceptorLoader {

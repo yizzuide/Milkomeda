@@ -5,6 +5,7 @@ package com.github.yizzuide.milkomeda.demo.particle.config;
  * Java代码配置（改用YML配置）
  *
  * @author yizzuide
+ * <br />
  * Create at 2019/05/30 15:44
  */
 //@Configuration

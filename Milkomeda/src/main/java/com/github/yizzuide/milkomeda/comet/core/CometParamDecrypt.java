@@ -29,6 +29,7 @@ import java.util.Map;
  *
  * @author yizzuide
  * @since 3.13.0
+ * <br />
  * Create at 2022/07/03 17:12
  */
 public interface CometParamDecrypt {

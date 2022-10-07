@@ -20,6 +20,7 @@ import java.util.Map;
  * 扩展EchoRequest实现当前对接的第三方响应类型
  *
  * @author yizzuide
+ * <br />
  * Create at 2019/09/21 20:35
  */
 @Slf4j

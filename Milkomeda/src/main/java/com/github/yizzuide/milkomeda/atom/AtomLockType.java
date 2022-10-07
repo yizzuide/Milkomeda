@@ -26,6 +26,7 @@ package com.github.yizzuide.milkomeda.atom;
  *
  * @author yizzuide
  * @since 3.3.0
+ * <br />
  * Create at 2020/05/01 13:50
  */
 public enum AtomLockType {

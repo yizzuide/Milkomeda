@@ -27,6 +27,7 @@ package com.github.yizzuide.milkomeda.universe.metadata;
  * @author yizzuide
  * @since 3.0.0
  * @version 3.14.0
+ * <br />
  * Create at 2020/04/09 15:15
  */
 public interface BeanIds {

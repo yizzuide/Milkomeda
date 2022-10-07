@@ -28,6 +28,7 @@ package com.github.yizzuide.milkomeda.universe.algorithm.hash;
  * @author yizzuide
  * @since 3.8.0
  * @version 3.9.0
+ * <br />
  * Create at 2020/06/18 14:44
  */
 public interface HashFunc {

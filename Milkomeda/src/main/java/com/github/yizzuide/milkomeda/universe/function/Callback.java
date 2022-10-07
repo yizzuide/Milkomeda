@@ -27,6 +27,7 @@ package com.github.yizzuide.milkomeda.universe.function;
  *
  * @author yizzuide
  * @since 1.15.0
+ * <br />
  * Create at 2019/11/18 15:26
  */
 @FunctionalInterface

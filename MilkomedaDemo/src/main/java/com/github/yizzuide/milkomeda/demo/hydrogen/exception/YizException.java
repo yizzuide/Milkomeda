@@ -8,6 +8,7 @@ import lombok.EqualsAndHashCode;
  * 自定义异常
  *
  * @author yizzuide
+ * <br />
  * Create at 2019/03/24 22:44
  */
 @Data

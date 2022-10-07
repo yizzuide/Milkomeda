@@ -8,6 +8,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  * WebMvcConfig
  *
  * @author yizzuide
+ * <br />
  * Create at 2020/04/03 18:33
  */
 // 这个注解会自动配置：DelegatingWebMvcConfiguration -> WebMvcConfigurationSupport

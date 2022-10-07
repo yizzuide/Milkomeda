@@ -37,6 +37,7 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @author yizzuide
  * @since 3.5.0
+ * <br />
  * Create at 2020/05/20 11:39
  */
 @Slf4j

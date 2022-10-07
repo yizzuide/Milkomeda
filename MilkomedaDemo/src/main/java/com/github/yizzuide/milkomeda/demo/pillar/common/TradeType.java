@@ -9,6 +9,7 @@ import lombok.Getter;
  * 交易类型
  *
  * @author yizzuide
+ * <br />
  * Create at 2019/04/11 16:46
  */
 @Getter

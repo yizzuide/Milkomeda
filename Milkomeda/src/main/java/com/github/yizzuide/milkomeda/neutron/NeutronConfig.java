@@ -36,6 +36,7 @@ import org.springframework.scheduling.quartz.SchedulerFactoryBean;
  * @author yizzuide
  * @since 1.18.0
  * @version 1.18.1
+ * <br />
  * Create at 2019/12/09 22:34
  */
 @Import(QuartzAutoConfiguration.class)

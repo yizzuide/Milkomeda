@@ -31,6 +31,7 @@ import java.lang.annotation.*;
  *
  * @author yizzuide
  * @since 3.0.0
+ * <br />
  * Create at 2020/03/29 16:53
  */
 @Target({ElementType.TYPE})

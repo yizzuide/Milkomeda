@@ -29,6 +29,7 @@ import java.time.Duration;
  * @author yizzuide
  * @since 3.3.0
  * @version 3.3.1
+ * <br />
  * Create at 2020/04/30 16:10
  */
 public interface Atom {

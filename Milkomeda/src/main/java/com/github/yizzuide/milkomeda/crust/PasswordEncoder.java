@@ -32,6 +32,7 @@ import java.security.MessageDigest;
  *
  * @author yizzuide
  * @since 1.14.0
+ * <br />
  * Create at 2019/11/11 18:10
  */
 public class PasswordEncoder implements org.springframework.security.crypto.password.PasswordEncoder {

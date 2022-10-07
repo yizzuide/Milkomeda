@@ -40,6 +40,7 @@ import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
  * @author yizzuide
  * @since 3.6.0
  * @version 3.6.1
+ * <br />
  * Create at 2020/05/22 16:34
  */
 @EnableConfigurationProperties(MetalProperties.class)

@@ -27,8 +27,9 @@ import lombok.Data;
  * TtrJob
  * 重试任务信息
  *
- * @author yizzuide
  * @since 3.2.0
+ * @author yizzuide
+ * <br />
  * Create at 2020/04/26 10:52
  */
 @Data

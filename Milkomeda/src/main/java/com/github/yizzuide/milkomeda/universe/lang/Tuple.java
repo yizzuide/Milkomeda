@@ -28,6 +28,7 @@ import lombok.Getter;
  *
  * @author yizzuide
  * @since 3.12.10
+ * <br />
  * Create at 2022/02/04 18:09
  */
 public class Tuple<T1, T2> {

@@ -13,6 +13,7 @@ import java.util.List;
  * 自定义任务接收处理（API调用方式）
  *
  * @author yizzuide
+ * <br />
  * Create at 2019/11/16 21:42
  */
 @Slf4j
@@ -45,24 +46,6 @@ public class ProductCheckTask {
             }
             // 完成处理
             ice.finish(jobs);
-        } catch (Exception e) {
-            log.error("DelayChecker error", e);
-        }
-    }
-
-    // 单个处理
-    private void process() {
-        try {
-            // 从待处理队列获取
-            Job<Product> job = ice.pop("topic_product_check");
-            if (job == null) {
-                return;
-            }
-            // 模拟处理中
-            log.info("获得需要处理的黑名单商品：{}", job.getBody());
-            Thread.sleep(1000);
-            // 完成处理
-            ice.finish(job.getId());
         } catch (Exception e) {
             log.error("DelayChecker error", e);
         }

@@ -43,6 +43,7 @@ import java.util.function.Supplier;
  * @author yizzuide
  * @since 1.14.0
  * @version 2.0.4
+ * <br />
  * Create at 2019/11/12 22:26
  */
 public class CrustAuthenticationConfigurer<T extends CrustAuthenticationConfigurer<T, B>, B extends HttpSecurityBuilder<B>> extends AbstractHttpConfigurer<T, B> {

@@ -27,6 +27,7 @@ package com.github.yizzuide.milkomeda.fusion;
  *
  * @author yizzuide
  * @since 3.0.0
+ * <br />
  * Create at 2020/04/01 15:52
  */
 public enum FusionAllowedType {

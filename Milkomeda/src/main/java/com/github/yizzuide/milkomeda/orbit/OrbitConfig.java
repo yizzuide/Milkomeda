@@ -30,6 +30,7 @@ import org.springframework.context.annotation.Import;
  *
  * @author yizzuide
  * @since 3.13.0
+ * <br />
  * Create at 2022/02/21 01:21
  */
 @Import(OrbitRegistrar.class)

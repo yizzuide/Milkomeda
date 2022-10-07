@@ -26,6 +26,7 @@ package com.github.yizzuide.milkomeda.jupiter;
  *
  * @author yizzuide
  * @since 3.5.0
+ * <br />
  * Create at 2020/05/19 22:11
  */
 public enum JupiterCompilerType {

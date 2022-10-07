@@ -37,6 +37,7 @@ import java.util.Locale;
  * @see org.springframework.web.servlet.i18n.AbstractLocaleContextResolver
  * @see org.springframework.web.servlet.i18n.FixedLocaleResolver
  * @see org.springframework.web.servlet.i18n.SessionLocaleResolver
+ * <br />
  * Create at 2019/08/01 17:04
  */
 public class I18nLocaleResolver extends AbstractLocaleResolver {

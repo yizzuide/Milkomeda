@@ -21,6 +21,7 @@
 
 package com.github.yizzuide.milkomeda.ice.inspector;
 
+import com.github.yizzuide.milkomeda.ice.Ice;
 import com.github.yizzuide.milkomeda.ice.IceHolder;
 import com.github.yizzuide.milkomeda.ice.inspector.domain.JobInspection;
 import com.github.yizzuide.milkomeda.ice.inspector.mapper.JobInspectionMapper;
@@ -40,6 +41,7 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 3.14.0
+ * <br />
  * Create at 2022/09/25 16:12
  */
 public class MysqlJobInspector extends AbstractJobInspector {
@@ -49,7 +51,7 @@ public class MysqlJobInspector extends AbstractJobInspector {
 
     @Override
     public JobWrapper get(String jobId) {
-        JobInspection jobInspection = jobInspectionMapper.queryById(getId(jobId));
+        JobInspection jobInspection = jobInspectionMapper.queryById(Long.valueOf(Ice.getId(jobId)));
         return convertFromEntity(jobInspection);
     }
 
@@ -76,7 +78,7 @@ public class MysqlJobInspector extends AbstractJobInspector {
     @Async
     @Override
     public void finish(List<String> jobIds) {
-        jobIds.forEach(jobId -> jobInspectionMapper.deleteById(getId(jobId)));
+        jobIds.forEach(jobId -> jobInspectionMapper.deleteById(Long.valueOf(Ice.getId(jobId))));
     }
 
     @Override
@@ -94,7 +96,7 @@ public class MysqlJobInspector extends AbstractJobInspector {
 
     private JobInspection convertToEntity(JobWrapper jobWrapper) {
         JobInspection jobInspection = new JobInspection();
-        jobInspection.setId(getId(jobWrapper.getId()));
+        jobInspection.setId(Long.valueOf(Ice.getId(jobWrapper.getId())));
         jobInspection.setTopic(jobWrapper.getTopic());
         jobInspection.setApplicationName(jobWrapper.getApplicationName());
         jobInspection.setQueueType(jobWrapper.getQueueType().ordinal());
@@ -112,7 +114,7 @@ public class MysqlJobInspector extends AbstractJobInspector {
             return null;
         }
         JobWrapper JobWrapper = new JobWrapper();
-        JobWrapper.setId(mergeId(jobInspection.getId(), jobInspection.getTopic()));
+        JobWrapper.setId(Ice.mergeId(jobInspection.getId(), jobInspection.getTopic()));
         JobWrapper.setTopic(jobInspection.getTopic());
         JobWrapper.setApplicationName(jobInspection.getApplicationName());
         JobWrapper.setQueueType(JobQueueType.values()[jobInspection.getQueueType()]);

@@ -27,6 +27,7 @@ package com.github.yizzuide.milkomeda.particle;
  *
  * @author yizzuide
  * @since 3.1.2
+ * <br />
  * Create at 2020/04/22 14:14
  */
 public enum LimiterType {

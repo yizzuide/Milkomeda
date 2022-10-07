@@ -29,6 +29,7 @@ package com.github.yizzuide.milkomeda.wormhole;
  * @since 3.3.0
  * @version 3.13.0
  * @see WormholeEventTracker
+ * <br />
  * Create at 2020/05/05 14:48
  */
 @FunctionalInterface

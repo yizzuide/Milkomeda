@@ -35,11 +35,12 @@ import java.io.Serializable;
  * @author yizzuide
  * @since 1.15.0
  * @version 3.14.0
+ * <br />
  * Create at 2019/11/16 12:00
  */
 @Data
 @NoArgsConstructor
-public class Job<T> implements Serializable {
+public class Job<T> implements Serializable, Cloneable {
     private static final long serialVersionUID = -3823440541412673211L;
     /**
      * 全局唯一ID（内部会将topic拼接进来以保证唯一性：topic-id，长度最好小于62，因为存储重试次数多占了两位，用于Redis的 ziplist 内存存储优化）
@@ -87,5 +88,18 @@ public class Job<T> implements Serializable {
         this.ttr = ttr;
         this.retryCount = retryCount;
         this.body = body;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public Job<T> clone() {
+        try {
+            Job<T> clone = (Job<T>) super.clone();
+            // merge jobId -> jobId
+            clone.setId(Ice.getId(clone.getId()));
+            return clone;
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError("Job clone error with msg: " + e.getMessage());
+        }
     }
 }

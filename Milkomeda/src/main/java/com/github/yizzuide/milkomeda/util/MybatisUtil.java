@@ -38,6 +38,7 @@ import java.util.List;
  * @author yizzuide
  * @since 2.5.0
  * @version 3.7.1
+ * <br />
  * Create at 2020/01/30 20:34
  */
 public class MybatisUtil {

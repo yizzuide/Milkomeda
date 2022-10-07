@@ -31,6 +31,7 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
  *
  * @author yizzuide
  * @since 1.5.0
+ * <br />
  * Create at 2019/07/25 18:23
  */
 public class RedisPolyfill {

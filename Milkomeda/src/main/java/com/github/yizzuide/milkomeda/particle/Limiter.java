@@ -28,6 +28,7 @@ package com.github.yizzuide.milkomeda.particle;
  * @author yizzuide
  * @since 1.5.0
  * @version 3.12.10
+ * <br />
  * Create at 2019/05/30 13:41
  */
 public interface Limiter {

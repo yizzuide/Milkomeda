@@ -36,6 +36,7 @@ import java.util.UUID;
  * @author yizzuide
  * @since 3.3.0
  * @version 3.13.0
+ * <br />
  * Create at 2020/05/05 14:13
  */
 @ToString(callSuper = true)
