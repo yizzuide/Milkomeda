@@ -79,7 +79,7 @@ public class CrustConfigurerAdapter extends WebSecurityConfigurerAdapter {
     public void configure(AuthenticationManagerBuilder auth) {
         // 使用继承自DaoAuthenticationProvider
         CrustAuthenticationProvider authenticationProvider = new CrustAuthenticationProvider(props, passwordEncoder);
-        // 扩展配置
+        // 扩展配置（UserDetailsService、PasswordEncoder）
         configureProvider(authenticationProvider);
         // 添加自定义身份验证组件
         auth.authenticationProvider(authenticationProvider);
@@ -96,13 +96,14 @@ public class CrustConfigurerAdapter extends WebSecurityConfigurerAdapter {
         }
         // 标记匿名访问
         // Find URL method map
-        Map<RequestMappingInfo, HandlerMethod> handlerMethodMap = applicationContextHolder.getApplicationContext().getBean(RequestMappingHandlerMapping.class).getHandlerMethods();
+        Map<RequestMappingInfo, HandlerMethod> handlerMethodMap = applicationContextHolder.getApplicationContext()
+                .getBean(RequestMappingHandlerMapping.class).getHandlerMethods();
         Set<String> anonUrls = new HashSet<>();
         for (Map.Entry<RequestMappingInfo, HandlerMethod> infoEntry : handlerMethodMap.entrySet()) {
             HandlerMethod handlerMethod = infoEntry.getValue();
             // Has `CrustAnon` annotation on Method？
             CrustAnon crustAnon = handlerMethod.getMethodAnnotation(CrustAnon.class);
-            if (null != crustAnon) {
+            if (null != crustAnon && null != infoEntry.getKey().getPatternsCondition()) {
                 anonUrls.addAll(infoEntry.getKey().getPatternsCondition().getPatterns());
             }
         }
@@ -173,9 +174,9 @@ public class CrustConfigurerAdapter extends WebSecurityConfigurerAdapter {
     /**
      * 自定义添加允许匿名访问的路径
      *
-     * @param urlRegistry URL配置对象
-     * @param http        HttpSecurity
-     * @throws Exception 配置异常
+     * @param urlRegistry   URL配置对象
+     * @param http          HttpSecurity
+     * @throws Exception    配置异常
      */
     protected void additionalConfigure(ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry urlRegistry, HttpSecurity http) throws Exception { }
 
@@ -185,6 +186,7 @@ public class CrustConfigurerAdapter extends WebSecurityConfigurerAdapter {
      * @see DaoAuthenticationProvider#setPasswordEncoder(PasswordEncoder)
      */
     protected void configureProvider(DaoAuthenticationProvider provider) {
+        provider.setHideUserNotFoundExceptions(false);
         provider.setUserDetailsService(userDetailsService());
     }
 

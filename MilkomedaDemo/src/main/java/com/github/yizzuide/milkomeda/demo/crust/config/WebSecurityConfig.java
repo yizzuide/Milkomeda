@@ -15,6 +15,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class WebSecurityConfig extends CrustConfigurerAdapter {
     @Bean
+    @Override
     public UserDetailsService userDetailsService() {
         return new UserDetailsService();
     }

@@ -141,7 +141,12 @@ public class YmlParser {
         // 替换数据来源
         if (replaceData instanceof Map) {
             Map<String, Object> replaceMap = (Map<String, Object>) replaceData;
+            Object initSetValue = ymlAliasNode.getValue();
             ymlAliasNode.setValue(hasAliasNode ? replaceMap.get(ownerAliasKey) : replaceMap.get(key));
+            // 如果替换的Map没有值，使用yml里配置的值
+            if (ymlAliasNode.getValue() == null) {
+                ymlAliasNode.setValue(initSetValue);
+            }
             aliasNodeMap.put(ownerAliasKey, ymlAliasNode);
             return;
         }

@@ -63,7 +63,7 @@ public class YmlResponseOutput {
         // 自定义异常基本信息写出
         if (e != null && customException) {
             Map<String, Object> exMap = DataTypeConvertUtil.beanToMap(e);
-            // 自定义异常的信息值必须来自自定义异常属性值
+            // 自定义异常的信息值使用自定义异常属性值替换
             YmlParser.parseAliasMapPath(nodeMap, result, CODE, null, exMap);
             YmlParser.parseAliasMapPath(nodeMap, result, MESSAGE, null, exMap);
             // 其它自定义key通过自定义异常属性写出
