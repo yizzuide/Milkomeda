@@ -21,12 +21,16 @@
 
 package com.github.yizzuide.milkomeda.hydrogen.uniform;
 
+import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import com.github.yizzuide.milkomeda.universe.context.WebContext;
 import com.github.yizzuide.milkomeda.universe.parser.yml.YmlResponseOutput;
+import com.github.yizzuide.milkomeda.util.JSONUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
@@ -40,8 +44,11 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.*;
 
 /**
@@ -219,4 +226,25 @@ public class UniformHandler extends ResponseEntityExceptionHandler {
         return ResponseEntity.status(Integer.parseInt(presetStatusCode)).body(result);
     }
 
+    /**
+     * Used for external match write.
+     * @param response  HttpServletResponse
+     * @throws IOException  if an input or output exception occurred
+     */
+    @SuppressWarnings("unchecked")
+    public static void matchWrite(HttpServletResponse response) throws IOException {
+        UniformProperties props = Binder.get(ApplicationContextHolder.get().getEnvironment()).bind(UniformProperties.PREFIX, UniformProperties.class).get();
+        Map<String, Object> resolveMap = (Map<String, Object>) props.getResponse().get(String.valueOf(response.getStatus()));
+        if (resolveMap != null) {
+            Map<String, Object> result = new HashMap<>();
+            Object statusCode = resolveMap.get(YmlResponseOutput.STATUS);
+            YmlResponseOutput.output(resolveMap, result, null, null, false);
+            response.setStatus(Integer.parseInt(statusCode.toString()));
+            response.setCharacterEncoding("UTF-8");
+            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+            PrintWriter writer = response.getWriter();
+            writer.println(JSONUtil.serialize(result));
+            writer.flush();
+        }
+    }
 }

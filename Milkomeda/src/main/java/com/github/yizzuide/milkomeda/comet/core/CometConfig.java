@@ -54,6 +54,7 @@ import java.util.Objects;
 @Configuration
 @AutoConfigureAfter({WebMvcAutoConfiguration.class, PulsarConfig.class})
 @EnableConfigurationProperties({MilkomedaProperties.class, CometProperties.class})
+@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 public class CometConfig {
 
     @Autowired CometProperties cometProperties;

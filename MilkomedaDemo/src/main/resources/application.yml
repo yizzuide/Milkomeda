@@ -366,7 +366,7 @@ milkomeda:
     uniform:
       enable: true
       response:
-        # 通用异常处理，如：500、403
+        # 5xx通用服务异常处理
         status: 200 # 这个是HTTP标准响应码，不是业务返回字段
         code: -1 # 支持改字段名：code[别名]，返回的是这个别名
         message: 服务器繁忙，请稍后再试！
@@ -405,7 +405,7 @@ milkomeda:
         customs:
           - clazz: com.github.yizzuide.milkomeda.demo.hydrogen.exception.YizException
             status: 200
-            # 下面不需要指定值，只需要列出来需要返回，内部将从YizException获取
+            # 下面不指定值时，内部将从YizException的属性列表获取
             code:
             message:
             type:

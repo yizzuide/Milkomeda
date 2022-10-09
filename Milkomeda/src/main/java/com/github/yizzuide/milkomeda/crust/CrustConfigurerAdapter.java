@@ -38,6 +38,7 @@ import org.springframework.security.config.annotation.web.configurers.Expression
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler;
@@ -143,6 +144,7 @@ public class CrustConfigurerAdapter extends WebSecurityConfigurerAdapter {
                     .logoutUrl(props.getLogoutUrl())
                     .addLogoutHandler((req, res, auth) -> CrustContext.invalidate())
                     .logoutSuccessHandler(new HttpStatusReturningLogoutSuccessHandler());
+            http.exceptionHandling().accessDeniedHandler(accessDeniedHandler().get());
         } else {
             // 自定义session方式登录
             http.httpBasic().authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint(props.getLoginUrl()))
@@ -191,8 +193,20 @@ public class CrustConfigurerAdapter extends WebSecurityConfigurerAdapter {
     }
 
     /**
+     * 访问拒绝处理器
+     * @return Supplier
+     * @since 3.14.0
+     */
+    @NonNull
+    protected Supplier<AccessDeniedHandler> accessDeniedHandler() {
+        return () -> (request, response, exception) -> {
+            response.setStatus(HttpStatus.FORBIDDEN.value());
+            response.getWriter().flush();
+        };
+    }
+
+    /**
      * 认证失败处理器
-     *
      * @return Supplier
      */
     @NonNull

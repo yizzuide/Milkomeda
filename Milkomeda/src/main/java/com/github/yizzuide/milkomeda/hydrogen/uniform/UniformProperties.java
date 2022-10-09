@@ -36,8 +36,10 @@ import java.util.Map;
  * Create at 2020/04/06 00:06
  */
 @Data
-@ConfigurationProperties("milkomeda.hydrogen.uniform")
+@ConfigurationProperties(UniformProperties.PREFIX)
 public class UniformProperties {
+    public static final String PREFIX = "milkomeda.hydrogen.uniform";
+
     /**
      * 启用统一异常处理
      */

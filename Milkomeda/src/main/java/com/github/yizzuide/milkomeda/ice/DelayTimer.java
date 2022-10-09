@@ -41,6 +41,7 @@ public class DelayTimer implements ApplicationListener<ApplicationStartedEvent> 
     @Autowired
     private IceProperties props;
 
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
     private ThreadPoolTaskScheduler taskScheduler;
 

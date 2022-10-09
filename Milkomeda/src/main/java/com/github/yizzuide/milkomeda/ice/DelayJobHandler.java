@@ -285,4 +285,9 @@ public class DelayJobHandler implements Runnable, ApplicationListener<IceInstanc
         String instanceName = event.getSource().toString();
         this.lockKey = "ice:execute_delay_bucket_lock_" + this.index + ":" + instanceName;
     }
+
+    @Override
+    public String toString() {
+        return this.getClass().getSimpleName() + "(index=" + index + ")";
+    }
 }

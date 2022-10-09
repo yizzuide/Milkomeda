@@ -50,7 +50,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupp
 @ConditionalOnProperty(prefix = "milkomeda.hydrogen.uniform", name = "enable", havingValue = "true")
 @Configuration
 public class UniformConfig {
-    // 注入需要需要使用的ApplicationContext（让MilkomedaContextConfig先配置）
+    // 注入需要使用的ApplicationContext（让MilkomedaContextConfig先配置）
     @SuppressWarnings("unused")
     @Autowired
     private ApplicationContextHolder applicationContextHolder;

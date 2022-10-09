@@ -62,7 +62,6 @@ public class DelegatingDelayJobHandler implements Runnable, InitializingBean {
     @Autowired(required = false)
     private JobInspector jobInspector;
 
-    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
     private IceProperties props;
 
