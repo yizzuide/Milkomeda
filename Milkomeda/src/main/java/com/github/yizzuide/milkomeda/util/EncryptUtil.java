@@ -23,13 +23,13 @@ package com.github.yizzuide.milkomeda.util;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.binary.Base64;
-import com.github.yizzuide.milkomeda.util.Strings;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.ByteArrayOutputStream;
+import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
@@ -52,7 +52,7 @@ public class EncryptUtil {
     /**
      * 编码格式
      */
-    private static final String CHARSET = "UTF-8";
+    private static final String CHARSET = StandardCharsets.UTF_8.toString();
     /**
      * SHA128
      */

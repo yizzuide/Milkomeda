@@ -23,6 +23,8 @@ package com.github.yizzuide.milkomeda.hydrogen.uniform;
 
 import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import com.github.yizzuide.milkomeda.universe.context.WebContext;
+import com.github.yizzuide.milkomeda.universe.lang.Tuple;
+import com.github.yizzuide.milkomeda.universe.parser.yml.YmlParser;
 import com.github.yizzuide.milkomeda.universe.parser.yml.YmlResponseOutput;
 import com.github.yizzuide.milkomeda.util.JSONUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -49,6 +51,7 @@ import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 /**
@@ -227,24 +230,52 @@ public class UniformHandler extends ResponseEntityExceptionHandler {
     }
 
     /**
-     * Used for external match write.
-     * @param response  HttpServletResponse
-     * @throws IOException  if an input or output exception occurred
+     *  Used for external match with status code to get response result.
+     * @param response  response object
+     * @param source    replace data
+     * @return tuple(yml node map, response content)
+     * @since 3.14.0
      */
     @SuppressWarnings("unchecked")
-    public static void matchWrite(HttpServletResponse response) throws IOException {
+    public static Tuple<Map<String, Object>, Map<String, Object>> matchStatusResult(HttpServletResponse response, Map<String, Object> source) {
         UniformProperties props = Binder.get(ApplicationContextHolder.get().getEnvironment()).bind(UniformProperties.PREFIX, UniformProperties.class).get();
         Map<String, Object> resolveMap = (Map<String, Object>) props.getResponse().get(String.valueOf(response.getStatus()));
+        Map<String, Object> result = new HashMap<>();
         if (resolveMap != null) {
-            Map<String, Object> result = new HashMap<>();
-            Object statusCode = resolveMap.get(YmlResponseOutput.STATUS);
-            YmlResponseOutput.output(resolveMap, result, null, null, false);
-            response.setStatus(Integer.parseInt(statusCode.toString()));
-            response.setCharacterEncoding("UTF-8");
-            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-            PrintWriter writer = response.getWriter();
-            writer.println(JSONUtil.serialize(result));
-            writer.flush();
+            // status == 200?
+            if (response.getStatus() == HttpStatus.OK.value()) {
+                YmlParser.parseAliasMapPath(resolveMap, result, YmlResponseOutput.CODE, null, source);
+                YmlParser.parseAliasMapPath(resolveMap, result, YmlResponseOutput.MESSAGE, null, source);
+                YmlParser.parseAliasMapPath(resolveMap, result, YmlResponseOutput.DATA, null, source);
+            } else { // status != 200
+                YmlResponseOutput.output(resolveMap, result, source, null, false);
+            }
         }
+        return Tuple.build(resolveMap, result);
+    }
+
+    /**
+     * Used for external match with status code to write.
+     * @param response  response object
+     * @param source    replace data
+     * @throws IOException  if an input or output exception occurred
+     * @since 3.14.0
+     */
+    public static void matchStatusToWrite(HttpServletResponse response, Map<String, Object> source) throws IOException {
+        Tuple<Map<String, Object>, Map<String, Object>> mapTuple = matchStatusResult(response, source);
+        Map<String, Object> resolveMap = mapTuple.getT1();
+        Map<String, Object> result = mapTuple.getT2();
+        if (mapTuple.getT1() == null || mapTuple.getT1().size() == 0) {
+            return;
+        }
+        String body = JSONUtil.serialize(result);
+        Object statusCode = resolveMap.get(YmlResponseOutput.STATUS);
+        response.setStatus(Integer.parseInt(statusCode.toString()));
+        response.setCharacterEncoding(StandardCharsets.UTF_8.toString());
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.setContentLength(body.length());
+        PrintWriter writer = response.getWriter();
+        writer.println(body);
+        writer.flush();
     }
 }

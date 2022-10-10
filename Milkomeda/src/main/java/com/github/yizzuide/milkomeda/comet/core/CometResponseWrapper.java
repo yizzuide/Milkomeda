@@ -21,7 +21,13 @@
 
 package com.github.yizzuide.milkomeda.comet.core;
 
+import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
+import com.github.yizzuide.milkomeda.universe.context.WebContext;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.core.OrderComparator;
 import org.springframework.lang.Nullable;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.FastByteArrayOutputStream;
 import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.util.WebUtils;
@@ -31,6 +37,10 @@ import javax.servlet.WriteListener;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * CometResponseWrapper
@@ -57,10 +67,20 @@ public class CometResponseWrapper extends HttpServletResponseWrapper {
     @Nullable
     private Integer contentLength;
 
+    private static List<CometResponseInterceptor> INTERCEPTOR_LIST;
+
     public CometResponseWrapper(HttpServletResponse response) {
         super(response);
+        if (INTERCEPTOR_LIST == null) {
+            INTERCEPTOR_LIST = new ArrayList<>();
+            ObjectProvider<CometResponseInterceptor> beanProvider = ApplicationContextHolder.get().getBeanProvider(CometResponseInterceptor.class);
+            beanProvider.forEach(INTERCEPTOR_LIST::add);
+            if (!CollectionUtils.isEmpty(INTERCEPTOR_LIST)) {
+                INTERCEPTOR_LIST = INTERCEPTOR_LIST.stream()
+                        .sorted(OrderComparator.INSTANCE.withSourceProvider(inter -> inter)).collect(Collectors.toList());
+            }
+        }
     }
-
 
     @Override
     public void sendError(int sc) throws IOException {
@@ -97,7 +117,7 @@ public class CometResponseWrapper extends HttpServletResponseWrapper {
     public ServletOutputStream getOutputStream() throws IOException {
         if (this.outputStream == null) {
             // 设置默认编码，默认为ISO-8859-1
-            this.getResponse().setCharacterEncoding("UTF-8");
+            this.getResponse().setCharacterEncoding(StandardCharsets.UTF_8.toString());
             this.outputStream = new ResponseServletOutputStream(getResponse().getOutputStream());
         }
         return this.outputStream;
@@ -107,7 +127,7 @@ public class CometResponseWrapper extends HttpServletResponseWrapper {
     public PrintWriter getWriter() throws IOException {
         if (this.writer == null) {
             // 设置默认编码，默认为ISO-8859-1
-            this.getResponse().setCharacterEncoding("UTF-8");
+            this.getResponse().setCharacterEncoding(StandardCharsets.UTF_8.toString());
             String characterEncoding = getCharacterEncoding();
             this.writer = (characterEncoding != null ? new ResponsePrintWriter(characterEncoding) :
                     new ResponsePrintWriter(WebUtils.DEFAULT_CHARACTER_ENCODING));
@@ -151,6 +171,7 @@ public class CometResponseWrapper extends HttpServletResponseWrapper {
 
     @Override
     public void resetBuffer() {
+        super.resetBuffer();
         this.content.reset();
     }
 
@@ -205,7 +226,22 @@ public class CometResponseWrapper extends HttpServletResponseWrapper {
                 rawResponse.setContentLength(complete ? this.content.size() : this.contentLength);
                 this.contentLength = null;
             }
-            this.content.writeTo(rawResponse.getOutputStream());
+            boolean intercepted = false;
+            if (complete) {
+                if (!CollectionUtils.isEmpty(INTERCEPTOR_LIST)) {
+                    for (CometResponseInterceptor interceptor: INTERCEPTOR_LIST) {
+                        Object body = WebContext.getRequest().getAttribute(CometResponseBodyAdvice.REQUEST_ATTRIBUTE_BODY);
+                        intercepted = interceptor.writeToResponse(this.content, this, rawResponse, body);
+                        if (intercepted) {
+                            break;
+                        }
+                    }
+                }
+            }
+            // if not intercepted within interceptor list
+            if (!intercepted) {
+                this.content.writeTo(rawResponse.getOutputStream());
+            }
             this.content.reset();
             if (complete) {
                 super.flushBuffer();
@@ -259,13 +295,13 @@ public class CometResponseWrapper extends HttpServletResponseWrapper {
         }
 
         @Override
-        public void write(char[] buf, int off, int len) {
+        public void write(@NotNull char[] buf, int off, int len) {
             super.write(buf, off, len);
             super.flush();
         }
 
         @Override
-        public void write(String s, int off, int len) {
+        public void write(@NotNull String s, int off, int len) {
             super.write(s, off, len);
             super.flush();
         }

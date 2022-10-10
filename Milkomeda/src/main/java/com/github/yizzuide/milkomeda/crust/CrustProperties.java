@@ -126,7 +126,8 @@ public class CrustProperties {
      * 默认允许访问的URL
      * @since 3.5.0
      */
-    private List<String> permitURLs = Arrays.asList("/webjars/**", "/druid/**", "/swagger-ui.html", "/swagger-resources/**");
+    private List<String> permitURLs = Arrays.asList("/favicon.ico", "/druid/**", "/doc.html", "/webjars/**",
+            "/swagger-resources/**", "/swagger-ui.html");
 
     /**
      * 添加允许访问的URL

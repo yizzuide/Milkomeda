@@ -27,12 +27,12 @@ import com.github.yizzuide.milkomeda.universe.parser.url.URLPlaceholderParser;
 import com.github.yizzuide.milkomeda.universe.parser.url.URLPlaceholderResolver;
 import com.github.yizzuide.milkomeda.universe.parser.yml.YmlResponseOutput;
 import com.github.yizzuide.milkomeda.util.JSONUtil;
+import com.github.yizzuide.milkomeda.util.Strings;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
 import org.springframework.util.CollectionUtils;
-import com.github.yizzuide.milkomeda.util.Strings;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.*;
@@ -40,6 +40,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -160,7 +161,7 @@ public class ParticleFilter implements Filter {
                 HttpServletResponse httpServletResponse = (HttpServletResponse) response;
                 httpServletResponse.setStatus(Integer.parseInt(returnData.get(YmlResponseOutput.STATUS).toString()));
                 returnData.remove(YmlResponseOutput.STATUS);
-                httpServletResponse.setCharacterEncoding("UTF-8");
+                httpServletResponse.setCharacterEncoding(StandardCharsets.UTF_8.toString());
                 String contentType = String.valueOf(returnData.get(RESPONSE_CONTENT_TYPE));
                 String data;
                 if (MediaType.APPLICATION_JSON_VALUE.equals(contentType)) {

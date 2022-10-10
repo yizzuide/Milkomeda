@@ -55,9 +55,19 @@ public class UniformConfig {
     @Autowired
     private ApplicationContextHolder applicationContextHolder;
 
+    @Autowired
+    public void config(UniformProperties props) {
+        UniformHolder.setProps(props);
+    }
+
     @Bean
     public UniformHandler uniformHandler() {
         return new UniformHandler();
+    }
+
+    @Bean
+    public UniformResponseInterceptor uniformResponseInterceptor() {
+        return new UniformResponseInterceptor();
     }
 
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 yizzuide All rights Reserved.
+ * Copyright (c) 2022 yizzuide All rights Reserved.
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -22,46 +22,46 @@
 package com.github.yizzuide.milkomeda.hydrogen.uniform;
 
 import lombok.Data;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
- * UniformProperties
+ * Uniformed result view object.
  *
+ * @since 3.14.0
  * @author yizzuide
- * @since 3.0.0
  * <br />
- * Create at 2020/04/06 00:06
+ * Create at 2022/10/10 16:24
  */
 @Data
-@ConfigurationProperties(UniformProperties.PREFIX)
-public class UniformProperties {
-    public static final String PREFIX = "milkomeda.hydrogen.uniform";
+public class UniformResult<T> implements ResultVO<T> {
+    private String code;
+    private String message;
+    private T data;
 
     /**
-     * 启用统一响应处理
+     * Return success.
+     * @param data  success data
+     * @param <T>   data type
+     * @return  ResultVO
      */
-    private boolean enable = false;
+    public static <T> ResultVO<T> ok(T data) {
+        UniformResult<T> resultVo = new UniformResult<>();
+        resultVo.setCode(UniformHolder.getProps().getDefaultSuccessCode());
+        resultVo.setMessage(UniformHolder.getProps().getDefaultSuccessMessage());
+        resultVo.setData(data);
+        return resultVo;
+    }
 
     /**
-     * 默认响应成功code
+     * Return failure.
+     * @param code      failure code
+     * @param message   failure message
+     * @return  ResultVO
      */
-    private String defaultSuccessCode = "0";
-
-    /**
-     * 默认响应成功message
-     */
-    private String defaultSuccessMessage;
-
-    /**
-     * 默认响应失败data
-     */
-    private Object defaultFailureData;
-
-    /**
-     * 响应数据
-     */
-    private Map<String, Object> response = new HashMap<>();
+    public static ResultVO<?> error(String code, String message) {
+        UniformResult<Object> resultVo = new UniformResult<>();
+        resultVo.setCode(code);
+        resultVo.setMessage(message);
+        resultVo.setData(UniformHolder.getProps().getDefaultFailureData());
+        return resultVo;
+    }
 }

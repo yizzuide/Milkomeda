@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 yizzuide All rights Reserved.
+ * Copyright (c) 2022 yizzuide All rights Reserved.
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -19,49 +19,30 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.hydrogen.uniform;
+package com.github.yizzuide.milkomeda.comet.core;
 
-import lombok.Data;
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import com.mongodb.lang.Nullable;
+import org.springframework.core.Ordered;
+import org.springframework.util.FastByteArrayOutputStream;
 
-import java.util.HashMap;
-import java.util.Map;
+import javax.servlet.http.HttpServletResponse;
 
 /**
- * UniformProperties
+ * Comet response wrapper interceptor.
  *
+ * @since 3.14.0
  * @author yizzuide
- * @since 3.0.0
  * <br />
- * Create at 2020/04/06 00:06
+ * Create at 2022/10/10 17:22
  */
-@Data
-@ConfigurationProperties(UniformProperties.PREFIX)
-public class UniformProperties {
-    public static final String PREFIX = "milkomeda.hydrogen.uniform";
-
+public interface CometResponseInterceptor extends Ordered {
     /**
-     * 启用统一响应处理
+     * Start write content to response.
+     * @param outputStream  content of response
+     * @param wrapperResponse  wrapper response object
+     * @param rawResponse   real response object
+     * @param body  response body
+     * @return  if true to interrupted content winter to response body, and the behind interceptors will not be executed.
      */
-    private boolean enable = false;
-
-    /**
-     * 默认响应成功code
-     */
-    private String defaultSuccessCode = "0";
-
-    /**
-     * 默认响应成功message
-     */
-    private String defaultSuccessMessage;
-
-    /**
-     * 默认响应失败data
-     */
-    private Object defaultFailureData;
-
-    /**
-     * 响应数据
-     */
-    private Map<String, Object> response = new HashMap<>();
+    boolean writeToResponse(FastByteArrayOutputStream outputStream, HttpServletResponse wrapperResponse, HttpServletResponse rawResponse, @Nullable Object body);
 }
