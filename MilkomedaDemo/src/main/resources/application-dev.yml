@@ -1,0 +1,89 @@
+server:
+  port: 8091
+  tomcat:
+    # Springboot 2.3: 设置服务器工作线程
+    threads:
+      max: 120
+    # Springboot 2.4: Configure how long Tomcat will wait for another request before closing a keep-alive connection.
+    keep-alive-timeout: 30s
+    # Springboot 2.4: Control the maximum number of requests that can be made on a keep-alive connection before it is closed
+    max-keep-alive-requests: 120
+
+spring:
+  config:
+    # Springboot 2.4: 根据当前环境变量来激活当前配置
+    activate:
+      on-profile: dev
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    druid:
+      url: jdbc:mysql://localhost:3306/milkomeda?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&useSSL=false&rewriteBatchedStatements=true&allowMultiQueries=true&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
+      username: root
+      password: ${MYSQL_PWD}
+
+  redis:
+    host: 127.0.0.1
+
+  data:
+    mongodb:
+      database: milkomeda
+      host: localhost
+      port: 27017
+
+
+  # Pulsar模块异步线程池（Async异步任务线程池，SpringBoot 2.1.0+在这里配置）
+  task:
+    execution:
+      thread-name-prefix: pulsar-
+      pool:
+        queue-capacity: 150
+        core-size: 8
+        max-size: 12
+        keep-alive: 100s
+
+    # Ice模块的调度线程池（Spring Task调度线程池，SpringBoot 2.1.0+在这里配置）
+    scheduling:
+      thread-name-prefix: ice-
+      pool:
+        size: 20
+      shutdown:
+        await-termination: true
+        await-termination-period: 60s
+
+  quartz:
+    scheduler-name: neutron
+    overwrite-existing-jobs: true
+    wait-for-jobs-to-complete-on-shutdown: true
+
+mybatis:
+  type-aliases-package: com.github.yizzuide.milkomeda.demo.halo.domain
+  mapper-locations:
+    - classpath*:mapper/*.xml
+  config-location: classpath:config/mybatis-config.xml
+
+logging:
+  level:
+    com.github.yizzuide.milkomeda.demo.sundial.mapper: DEBUG
+    com.github.yizzuide.milkomeda.ice.inspector.mapper: DEBUG
+  # Springboot 2.4: The charsets used to by Logback and Log4j logging can now be configured
+  charset:
+    console: UTF-8
+    file: UTF-8
+
+management:
+  endpoint:
+    shutdown:
+      enabled: false
+    health:
+      show-details: always
+    # Springboot 2.4: A new startup actuator endpoint is now available that shows information about your application startup.
+    startup:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+  # Springboot 2.4: HTTP traces no longer include cookie headers by default
+  #trace:
+    #http:
+      #include: cookies, errors, request-headers, response-headers

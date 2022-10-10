@@ -20,8 +20,8 @@ public class Config {
     private String appId;
 
     @Autowired
-    public void config(){
-        System.out.println(appId);
+    public void config() {
+        //System.out.println(appId);
     }
 
 

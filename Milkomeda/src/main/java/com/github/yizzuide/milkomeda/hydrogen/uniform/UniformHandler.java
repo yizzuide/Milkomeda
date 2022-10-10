@@ -59,7 +59,7 @@ import java.util.*;
  *
  * @author yizzuide
  * @since 3.0.0
- * @version 3.12.10
+ * @version 3.14.0
  * @see org.springframework.boot.SpringApplication#run(java.lang.String...)
  * #see org.springframework.boot.SpringApplication#registerLoggedException(java.lang.Throwable)
  * #see org.springframework.boot.SpringBootExceptionHandler.LoggedExceptionHandlerThreadLocal#initialValue()

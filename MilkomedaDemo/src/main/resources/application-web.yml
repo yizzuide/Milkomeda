@@ -1,0 +1,54 @@
+server:
+  servlet:
+    session:
+      timeout: 120m
+      cookie:
+        http-only: true
+        # 自定义sessionId，用于后台登录唯一标识，防止被第三方平台覆盖
+        name: mk-sessionId
+    # Spring Boot 2.4: No longer register the DefaultServlet provided by your servlet container.
+    register-default-servlet: true
+    # Springboot 2.3: 设置服务器编码
+    encoding:
+      charset: UTF-8
+  # Springboot 2.3: 优雅关机，拒绝新请求，等正在执行的请求完成
+  shutdown: graceful
+  # Springboot 2.3: 不再响应默认的错误信息
+  error:
+    include-binding-errors: never
+    include-message: never
+    include-stacktrace: never
+
+
+spring:
+  # Springboot 2.3: 优雅关机等待时间
+  lifecycle:
+    timeout-per-shutdown-phase: 20s
+  # Springboot 2.1: Bean重复定义是否覆盖
+  main:
+    allow-bean-definition-overriding: false
+  web:
+    # Springboot 2.4: 资源不生成mapping映射
+    resources:
+      add-mappings: false
+
+  mvc:
+    # 异步超时
+    async:
+      request-timeout: 20s
+
+    # 让404错误抛出NoHandlerFoundException异常
+    throw-exception-if-no-handler-found: true
+
+    # 资源不生成mapping映射（Springboot2.4 迁移到web里）
+    #resources:
+    #add-mappings: false
+
+  # 国际化资源位置
+  messages:
+    basename: i18n/messages
+
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    locale: zh_CN
+    time-zone: GMT+8

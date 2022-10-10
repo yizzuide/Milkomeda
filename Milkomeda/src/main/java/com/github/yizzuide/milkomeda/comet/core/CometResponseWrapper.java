@@ -49,6 +49,7 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 3.0.0
+ * @version 3.14.0
  * @see org.springframework.web.util.ContentCachingResponseWrapper
  * @see org.springframework.web.filter.ShallowEtagHeaderFilter
  * <br />

@@ -1,0 +1,389 @@
+spring:
+  config:
+    activate:
+      on-profile: milkomeda
+
+milkomeda:
+  # 配置是否显示详细日志信息，包含debug,info（线上环境应该关闭）
+  show-log: true
+  # 自定义业务参数配置（可选，非框架使用）
+  env:
+    version: 1.0
+
+  comet:
+    # 读取请求body里的json数据需要开启（默认不开启）
+    enable-read-request-body: true
+    # 读取Response直接写出的内容时需要开启
+    enable-read-response-body: true
+    # 统一请求日志打印
+    logger:
+      enable: true
+      # 开启打印响应数据
+      enable-response: true
+      # 根据路径匹配策略
+      strategy:
+        - paths: ["/**"]
+          # 除了uri, method, params, resp常量外，$x.key需要设置自定义请求参数解析器（通过配置URLPlaceholderResolver Bean）
+          # $params为对象导航，支持数组索引，如：$params.list[0].id
+          tpl: url->{uri},userId:{$x.uid},token:{$header.token:0},method->{method},parameters->{params},dataId->{$params.data.id}
+        - paths: ["/collect/usage"]
+          type: response # 设置打印为响应类型（默认为请求类型）
+          tpl: "{\"url\": \"{uri}\", \"resp\": {resp}}"
+        - paths: ["/error/**"]
+          tpl: url->{uri},method->{method}
+    # 日志收集器
+    collector:
+      enable: true
+      # 开启标签收集
+      enable-tag: true
+      tags:
+        product-tag:
+          include: ["/collect/product/*"]
+          # 异常监控：由于异常可能被 @ControllerAdvice 吞没，拦截器就获取不到异常
+          exception-monitor:
+            # 忽略正常的响应，业务标识字段为code
+            ignore-code[code]: 1
+            # 错误信息记录，业务标识字段为innerErrInfo和innerErrInfoDesc
+            error-stack-msg[innerErrInfo]:
+            error-stack[innerErrInfoDesc]:
+
+  # 限制器
+  particle:
+    enable-filter: true
+    limiters:
+      # 新配置一个去重限制器（内部配置了idempotentLimiter），用来添加到BarrierLimiter组合链，防止污染限制器链
+      - name: noRepeatLimiter
+        key-expire: 20s
+        include-urls: [ "/particle/pay" ]
+        response:
+          status: 200
+          code: -1
+          message[msg]: 请求太频繁，请稍后再试！
+      - name: timesLimiter
+        type: times
+        props:
+          timesType: MIN
+          limitTimes: 3
+        include-urls: [ "/particle/pay" ]
+        #response-content-type: text/plain # 修改响应类型，默认为application/json
+        response:
+          status: 200
+          #content: success # 非application/json类型的响应内容
+          code: -1
+          message[msg]: 请求超过次数，请稍后再试！
+          addition:
+            data: ${collections.emptyMap}
+      - name: barrierLimiter
+        type: barrier
+        props:
+          chain: [ "noRepeatLimiter", "timesLimiter" ]
+        order: -1
+        include-urls: [ "/particle/pay" ]
+      - name: userBloomLimiter
+        type: bloom
+        props:
+          # bitmap key
+          bitKey: bit_user
+          # 数据量
+          insertions: 2000000
+          # 取值分隔器，默认为`_`
+          #valueSeparator: _
+        # 这里的匹配数据：$params.phone，默认前面必须用`_`分隔，可通过上面valueSeparator配置
+        key-tpl: limit_{method}_{uri}_{$params.phone}
+        include-urls: [ "/particle/exists" ]
+        response:
+          status: 200
+          code: -1
+          message[msg]: 用户不存在，请先注册
+    exclude-urls: ["/favicon.ico"]
+
+  light:
+    # 这个ThreadLocalScope是独立的功能，和下面缓存没有关联
+    enable-light-thread-local-scope: true
+    instances:
+      # 缓存实例配置（没有配置的使用默认值）
+      order:
+        # 缓存策略
+        strategy: LazyExpire
+        # 不需要ThreadLocal缓存
+        enable-super-cache: false
+        l1-expire: 1m
+        l2-expire: 1m
+        #smsMoonCache:
+        #only-cache-l2: true
+        #abTestMoonCache:
+        #only-cache-l2: true
+
+  echo:
+    # 设置请求读取超时
+    read-timeout: 10s
+
+  crust:
+    # -- 设置token方式 --
+    stateless: true
+    # token方式不缓存
+    enable-cache: false
+    # 使用对称密钥生成token
+    secure-key: crust_secure_key
+    # 自定义token头，默认为token
+    token-name: Authorization
+
+    # -- 设置session方式 --
+    #stateless: false
+    #login-url: ${url.login}
+    #root-redirect: ${url.index}
+
+    # 不使用BCrypt（如果用户表有salt字段的情况）
+    #use-bcrypt: false
+    # 添加到匿名访问许可
+    addition-permit-urls:
+      - /s_login
+      - /collect/**
+      - /echo/**
+      - /test/**
+      - /order/**
+      - /particle/**
+      - /pay/**
+      - /user/**
+      - /ice/**
+      - /job/**
+      - /neutron/**
+      - /moon/**
+      - /fusion/**
+      - /halo/**
+      - /hydrogen/**
+      - /audit/**
+      - /seckill/**
+      - /sundial/**
+      - /jupiter/**
+      - /metal/**
+      - /pillar/**
+      - /orbit/**
+    # 放开static资源访问
+    allow-static-urls:
+      - /build/*
+      - /error/*
+
+  ice:
+    # 在分布式布署时，需要设置实例名
+    instance-name: ${spring.application.name}
+    # 开启Job作业（作为消费端使用时，设置为false）
+    #enable-job-timer: false
+    # 是否用于分布式job作业
+    #enable-job-timer-distributed: true
+    # Job作业频率（默认5s）
+    delay-bucket-poll-rate: 2s
+    # 延迟队列分桶数量（默认为3）
+    delay-bucket-count: 2
+    # 消费执行超时时间（默认30s）
+    ttr: 20s
+    # 重试时添加延迟增长因子（默认为1，计算公式：delay * (retryCount++) * factor）
+    #retry-delay-multi-factor: 2
+    # 开启Task功能（使用@EnableIce时消费端需要配置为true）
+    enable-task: true
+    # 最大消费个数（默认为10）
+    task-topic-pop-max-size: 5
+    # 消费轮询间隔（默认5s）
+    task-execute-rate: 2s
+    # 消费处理器支持多个监听器
+    multi-topic-listener-per-handler: true
+    # TTR超载任务进入Dead queue
+    enable-retain-to-dead-queue-when-ttr-overload: true
+    # 开启job任务监控（如果想通过后台页面查看job状态信息）
+    introspect:
+      enable: true
+      # 查询监测数据使用的时间排序类型（默认为update_time：每次状态修改都更新时间）
+      index-type: update_time
+      # 监测数据存储方案（默认为redis）
+      inspector-type: mongodb
+
+  moon:
+    instances:
+      - name: smsMoon
+        # 默认采用lua高性能方式，不需要设置缓存名
+        #cache-name: smsMoonCache
+        phases: [ "七牛云短信", "阿里云短信", "容联云短信" ]
+      - name: abTestMoon
+        #cache-name: abTestMoonCache
+        # 使用百分比分配策略
+        type: percent
+        # 20%的0，80%的1
+        #phases: [20, 80]
+        # 同上
+        #phases: [2, 8]
+        # 50%的0，50%的1
+        phases: [ 1, 1 ]
+
+
+  hydrogen:
+    transaction:
+      enable: true
+      # 事务60秒超时回滚（支持自定义时间单位，不指定单位默认单位：s）
+      rollback-when-timeout: 60s
+      read-only-append-prefix:
+        - fetch*
+
+    uniform:
+      enable: true
+      response:
+        # 5xx通用服务异常处理
+        status: 200 # 这个是HTTP标准响应码，不是业务返回字段
+        code: -1 # 支持改字段名：code[别名]，返回的是这个别名
+        message: 服务器繁忙，请稍后再试！
+        # 下面字段内部会获取异常栈信息，外面不需要添加值，列出需要的字段即可
+        error-stack-msg[innerErrInfo]:
+        error-stack[innerErrInfoDesc]:
+
+        # 服务器响应超时，DeferredResult异步超时
+        503:
+          status: 200
+          code: -1
+          message: 请求响应超时！
+
+        # 404异常处理，需要配置：
+        # spring.mvc.throw-exception-if-no-handler-found=true; spring.mvc.add-mappings=false;
+        404:
+          status: 200
+          code: -1
+          message: 请求的路径错误！
+
+        405:
+          status: 200
+          code: -1
+          message: 请求方式不支持！
+
+        # 参数异常处理
+        400:
+          status: 200
+          code: -1
+          # 如果需要Exception异常信息
+          #message: 参数错误
+          addition:
+            data: ${collections.emptyMap}
+
+        # 自定义异常列表处理
+        customs:
+          - clazz: com.github.yizzuide.milkomeda.demo.hydrogen.exception.YizException
+            status: 200
+            # 下面不指定值时，内部将从YizException的属性列表获取
+            code:
+            message:
+            type:
+          - clazz: com.github.yizzuide.milkomeda.hydrogen.uniform.UniformException
+            status: 200
+            code:
+            message:
+
+    # 参数校验
+    validator:
+      enable: true
+
+    # 国际化：需配置spring.messages.basename
+    i18n:
+      enable: true
+      # 语言设置参数名，默认为lang，如：zh_CN
+      query: lang
+
+
+    # 动态添加拦截器
+    interceptor:
+      enable: true
+      interceptors:
+        - clazz: com.github.yizzuide.milkomeda.demo.hydrogen.handler.UrlLogInterceptor
+          order: 1
+          exclude-urls:
+            - /error
+          props:
+            open: true
+
+
+    # 过滤器
+    filter:
+      #enable: true
+      # 测试表达式计算
+      enable: ${condition.equals(${spring.application.name}, milkomeda-demo)}
+      filters:
+        - name: ipLimiterFilter
+          clazz: com.github.yizzuide.milkomeda.demo.hydrogen.handler.IPLimiterFilter
+          url-patterns:
+            - /*
+
+
+  # 分布式锁
+  atom:
+    strategy: redis # 默认的策略为redis
+
+  ## 数据源配置
+  sundial:
+    datasource-type: com.alibaba.druid.pool.DruidDataSource
+    # 设置原有数据源配置前缀，作为下面instances数据源创建新的DataSource的模板
+    config-prefix: spring.datasource.druid
+    instances:
+      # 只读从库必需命名为以read-only为前缀，用于解决主从多数据源事务问题（特别是与分库功能一起使用时的事务管理问题）
+      read-only:
+        username: root
+        password: ${MYSQL_PWD}
+        url:  jdbc:mysql://localhost:3306/milkomeda_r?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&useSSL=false&rewriteBatchedStatements=true&allowMultiQueries=true&allowPublicKeyRetrieval=true
+      db-01:
+        username: root
+        password: ${MYSQL_PWD}
+        url:  jdbc:mysql://localhost:3306?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&useSSL=false&rewriteBatchedStatements=true&allowMultiQueries=true&allowPublicKeyRetrieval=true
+    # 主从切面策略（内部通过桥接Orbit模块功能实现）
+    strategy:
+      - key-name: read-only # 这里用上面instances里配置的key
+        pointcut-expression: execution(* com.github.yizzuide.milkomeda.demo..mapper.*.query*(..))
+
+    # 开启分库分表
+    enable-sharding: true
+    sharding:
+      # 忽略索引0后缀，兼容之前的无索引库名、表名
+      original-name-as-index-zero: true
+      # 分库、分库分表需要的节点配置（仅分表不需要配置）
+      nodes:
+        # 一个主、从配置为一个节点，节点名与拆分key相关（从库可选配置）
+        node_0:
+          # spring.datasource配置的默认会生成master数据源实例
+          leader: master
+          follows: ["read-only"]
+        node_1:
+          # 如果数据源实例没有指定数据库，使用schema指定
+          schema: milkomeda_01
+          leader:  db-01
+          #follows: ["xxx"]
+
+  # 规则引擎
+  jupiter:
+    # 匹配表达里的结果对象下划线转驼峰
+    match-camel-case: true
+    rules:
+      # 规则名随意取，但不能重复
+      payRule:
+        rule-items:
+          # 规则项名随意取，让规则项知其名明其意
+          global:
+            # 结果匹配表达式
+            match: true
+          # 下面的规则是新客才能下单成功
+          new-user-pay-rule:
+            # 查询领域（表名）
+            domain: t_order
+            # 包含字段
+            fields: id
+            # 查询过滤，支持$params（Request Parameter域）、$attr（Request Attribute域）、$header（Request Header域）、$cookie（Request Cookie域）
+            # 关系逻辑使用符：&&、||
+            filter: user_id={$attr.userInfo.uid}
+            # 结果匹配表达式，默认使用EL表达式，EL和OGNL都支持使用`#root`来访问根对象，如：#root != null
+            #match: size() == 0
+            match: size == 0
+            syntax: ognl
+
+  # 分布式应用名配置（默认取当前应用名）
+  metal:
+    application-name: demo
+
+  # 环绕切面
+  orbit:
+    instances:
+      - key-name: pre-log
+        pointcut-expression: execution(* com..orbit.*API.fetch*(..))
+        advice-class-name: com.github.yizzuide.milkomeda.demo.orbit.PreLogAdvice
