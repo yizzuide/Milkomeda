@@ -31,7 +31,7 @@ import java.util.Set;
  *
  * @author yizzuide
  * @since 3.2.0
- * <br />
+ * <br>
  * Create at 2020/04/24 18:42
  */
 public class DelegatingEnvironmentChangeEvent extends ApplicationEvent {

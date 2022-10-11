@@ -29,7 +29,7 @@ package com.github.yizzuide.milkomeda.echo;
  * @author yizzuide
  * @since 1.13.0
  * @version 1.13.3
- * <br />
+ * <br>
  * Create at 2019/09/21 17:13
  */
 public interface EchoResponseData<T> {

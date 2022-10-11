@@ -52,7 +52,7 @@ import static com.github.yizzuide.milkomeda.util.ReflectUtil.*;
  * @author yizzuide
  * @since 0.1.0
  * @version 3.12.10
- * <br />
+ * <br>
  * Create at 2019/03/29 10:36
  */
 @Slf4j

@@ -26,7 +26,7 @@ package com.github.yizzuide.milkomeda.universe.algorithm.hash;
  *
  * @author yizzuide
  * @since 3.8.0
- * <br />
+ * <br>
  * Create at 2020/06/18 14:46
  */
 public class FNV132Hash implements HashFunc {

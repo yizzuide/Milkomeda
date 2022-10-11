@@ -42,7 +42,7 @@ import java.util.Set;
  * @since 3.13.0
  * @see org.springframework.core.convert.support.DefaultConversionService
  * @see org.springframework.context.support.ConversionServiceFactoryBean
- * <br />
+ * <br>
  * Create at 2022/08/30 19:46
  */
 public class MapToCollectionConverter implements ConditionalGenericConverter {

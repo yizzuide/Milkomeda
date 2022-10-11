@@ -38,7 +38,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * @author yizzuide
  * @since 2.6.0
  * @version 3.12.10
- * <br />
+ * <br>
  * Create at 2020/03/13 21:20
  */
 public class PeriodicMoonStrategy extends AbstractMoonStrategy {

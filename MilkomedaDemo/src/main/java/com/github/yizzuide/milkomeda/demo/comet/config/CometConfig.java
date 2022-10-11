@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration;
  * CometConfig
  *
  * @author yizzuide
- * <br />
+ * <br>
  * Create at 2019/04/11 22:18
  */
 @Slf4j

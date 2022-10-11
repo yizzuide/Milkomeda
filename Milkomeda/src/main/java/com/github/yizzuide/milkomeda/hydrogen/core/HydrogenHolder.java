@@ -30,7 +30,7 @@ import javax.validation.Validator;
  *
  * @author yizzuide
  * @since 3.0.0
- * <br />
+ * <br>
  * Create at 2020/03/26 20:25
  */
 public class HydrogenHolder {

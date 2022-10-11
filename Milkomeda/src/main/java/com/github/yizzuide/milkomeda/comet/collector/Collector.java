@@ -31,7 +31,7 @@ import com.github.yizzuide.milkomeda.pillar.Pillar;
  * @author yizzuide
  * @since 1.15.0
  * @version 1.16.0
- * <br />
+ * <br>
  * Create at 2019/11/13 18:12
  */
 public interface Collector extends Pillar<CometData, Object> {

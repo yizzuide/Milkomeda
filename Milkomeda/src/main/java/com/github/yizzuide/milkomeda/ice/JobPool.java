@@ -32,7 +32,7 @@ import java.util.List;
  * @author yizzuide
  * @since 1.15.0
  * @version 3.12.0
- * <br />
+ * <br>
  * Create at 2019/11/16 15:42
  */
 public interface JobPool {

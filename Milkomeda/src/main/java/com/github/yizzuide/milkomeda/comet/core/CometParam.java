@@ -30,7 +30,7 @@ import java.lang.annotation.*;
  * @author yizzuide
  * @since 2.0.0
  * @version 3.13.0
- * <br />
+ * <br>
  * Create at 2019/12/12 18:42
  */
 @Target({ElementType.PARAMETER})

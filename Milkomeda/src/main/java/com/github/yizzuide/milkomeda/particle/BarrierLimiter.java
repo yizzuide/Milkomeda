@@ -35,7 +35,7 @@ import java.util.List;
  * @author yizzuide
  * @since 1.5.0
  * @version 3.0.0
- * <br />
+ * <br>
  * Create at 2019/05/31 11:25
  */
 public class BarrierLimiter extends LimitHandler {

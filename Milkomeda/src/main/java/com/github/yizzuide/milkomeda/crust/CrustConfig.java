@@ -37,6 +37,7 @@ import org.springframework.core.Ordered;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -47,7 +48,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  * @author yizzuide
  * @since 1.14.0
  * @version 3.14.0
- * <br />
+ * <br>
  * Create at 2019/11/11 14:56
  */
 @Configuration
@@ -60,12 +61,9 @@ public class CrustConfig {
 
     @Bean
     public Crust crust() {
-        return new Crust();
-    }
-
-    @Autowired
-    public void configCrustContext(Crust crust) {
+        Crust crust = new Crust();
         CrustContext.set(crust);
+        return crust;
     }
 
     @Bean
@@ -118,11 +116,16 @@ public class CrustConfig {
 
         @Override
         public void addResourceHandlers(@NonNull ResourceHandlerRegistry registry) {
-            if (StringUtils.isEmpty(crustProps.getStaticLocation())) {
-                return;
+            if (!StringUtils.isEmpty(crustProps.getStaticLocation())) {
+                // 设置静态资源，用于Spring Security配置
+                registry.addResourceHandler("/**").addResourceLocations(crustProps.getStaticLocation());
             }
-            // 设置静态资源，用于Spring Security配置
-            registry.addResourceHandler("/**").addResourceLocations(crustProps.getStaticLocation());
+
+            if (!CollectionUtils.isEmpty(crustProps.getResourceMappings())) {
+                crustProps.getResourceMappings().forEach(ResourceMapping ->
+                        registry.addResourceHandler(ResourceMapping.getPathPatterns().toArray(new String[0]))
+                                .addResourceLocations(ResourceMapping.getTargetLocations().toArray(new String[0])));
+            }
         }
     }
 }

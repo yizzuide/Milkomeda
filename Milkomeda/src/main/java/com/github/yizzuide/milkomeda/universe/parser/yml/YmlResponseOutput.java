@@ -36,7 +36,7 @@ import java.util.Map;
  *
  * @author yizzuide
  * @since 3.0.0
- * <br />
+ * <br>
  * Create at 2020/04/10 14:15
  */
 public class YmlResponseOutput {

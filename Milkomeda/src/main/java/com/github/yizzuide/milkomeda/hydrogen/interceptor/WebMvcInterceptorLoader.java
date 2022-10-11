@@ -43,7 +43,7 @@ import java.util.function.BiConsumer;
  * @author yizzuide
  * @since 3.0.0
  * @version 3.13.0
- * <br />
+ * <br>
  * Create at 2020/03/31 00:12
  */
 @Slf4j

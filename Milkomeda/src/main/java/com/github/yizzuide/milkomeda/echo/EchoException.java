@@ -29,7 +29,7 @@ import org.springframework.web.client.RestClientException;
  *
  * @author yizzuide
  * @since 1.13.0
- * <br />
+ * <br>
  * Create at 2019/09/21 17:17
  */
 public class EchoException extends RestClientException {

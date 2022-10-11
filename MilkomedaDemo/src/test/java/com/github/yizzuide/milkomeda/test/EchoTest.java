@@ -24,7 +24,7 @@ import java.util.Collections;
  * EchoTest
  *
  * @author yizzuide
- * <br />
+ * <br>
  * Create at 2019/11/12 17:19
  */
 @Slf4j
@@ -50,7 +50,7 @@ public class EchoTest {
 
         val ret = mockMvc.perform(MockMvcRequestBuilders.get("/echo/account/open")
                 .params(reqParams)
-                .contentType(MediaType.APPLICATION_JSON_UTF8))
+                .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andReturn().getResponse().getContentAsString();
         System.out.println(ret);

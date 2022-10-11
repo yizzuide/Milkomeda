@@ -29,7 +29,7 @@ import javax.servlet.http.HttpServletRequest;
  *
  * @author yizzuide
  * @since 3.0.0
- * <br />
+ * <br>
  * Create at 2020/03/28 12:55
  */
 @FunctionalInterface

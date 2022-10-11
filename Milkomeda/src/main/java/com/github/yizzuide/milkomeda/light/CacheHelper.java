@@ -37,7 +37,7 @@ import java.util.function.Function;
  * @since 1.10.0
  * @version 3.12.10
  * @author yizzuide
- * <br />
+ * <br>
  * Create at 2019/07/02 11:36
  */
 @Slf4j

@@ -14,7 +14,7 @@ import java.util.List;
  * HaloController
  *
  * @author yizzuide
- * <br />
+ * <br>
  * Create at 2020/01/30 20:15
  */
 @RequestMapping("/halo")

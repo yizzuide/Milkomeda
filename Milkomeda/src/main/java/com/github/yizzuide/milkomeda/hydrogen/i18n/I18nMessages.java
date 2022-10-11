@@ -38,7 +38,7 @@ import java.util.Locale;
  *
  * @author yizzuide
  * @since 3.0.0
- * <br />
+ * <br>
  * Create at 2019/08/01 17:13
  */
 @Slf4j

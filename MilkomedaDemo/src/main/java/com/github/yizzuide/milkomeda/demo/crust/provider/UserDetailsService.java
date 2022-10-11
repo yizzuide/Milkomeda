@@ -14,7 +14,7 @@ import java.util.List;
  * UserDetailsService
  *
  * @author yizzuide
- * <br />
+ * <br>
  * Create at 2019/11/11 23:44
  */
 public class UserDetailsService extends CrustUserDetailsService {

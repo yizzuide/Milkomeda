@@ -10,7 +10,7 @@ import org.springframework.boot.context.properties.bind.Name;
  * ThirdKey
  *
  * @author yizzuide
- * <br />
+ * <br>
  * Create at 2022/02/12 23:30
  */
 @ConfigurationProperties(prefix = "third")
@@ -25,10 +25,9 @@ public class ThirdKey {
         priKey = "";
     }
 
-    // Springboot 2.2.0 推出的构造器绑定
-    // 单个参数构造器时，直接放在类上
-    // 在提供多个构造器情况下，必需放在指定的构造器上
-    // Springboot 2.4 提供@Name自定义参数名，@DurationUnit, @DataSizeUnit, and @PeriodUnit can annotate a constructor parameter using @ConstructorBinding
+    // Springboot 2.2: 推出的构造器绑定，单个参数构造器时直接放在类上；在提供多个构造器情况下，必需放在指定的构造器上
+    // Springboot 2.4: 提供@Name自定义参数名，@DurationUnit, @DataSizeUnit, and @PeriodUnit can annotate a constructor parameter using @ConstructorBinding
+    // Springboot 2.6: If you are using @ConfigurationProperties with a Java 16 record and the record has a single constructor, it no longer needs to be annotated with @ConstructorBinding.
     @ConstructorBinding
     public ThirdKey(@Name("parPubKey") String parPubKey, String priKey) {
         this.parPubKey = parPubKey;

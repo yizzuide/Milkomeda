@@ -40,7 +40,7 @@ import java.io.IOException;
  * @version 3.5.0
  * @see org.springframework.web.filter.CharacterEncodingFilter
  * @see org.apache.coyote.Response#isCommitted()
- * <br />
+ * <br>
  * Create at 2019/12/12 17:48
  */
 @Slf4j

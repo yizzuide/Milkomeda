@@ -35,7 +35,7 @@ import java.nio.charset.StandardCharsets;
  * @author yizzuide
  * @since 3.3.1
  * @version 3.7.0
- * <br />
+ * <br>
  * Create at 2020/05/07 14:17
  */
 public class IOUtils {

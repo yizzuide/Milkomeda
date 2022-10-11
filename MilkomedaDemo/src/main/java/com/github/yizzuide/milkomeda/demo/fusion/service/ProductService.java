@@ -6,7 +6,7 @@ import com.github.yizzuide.milkomeda.demo.ice.pojo.Product;
  * ProductService
  *
  * @author yizzuide
- * <br />
+ * <br>
  * Create at 2020/01/02 14:38
  */
 public interface ProductService {

@@ -29,7 +29,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  *
  * @author yizzuide
  * @since 3.6.1
- * <br />
+ * <br>
  * Create at 2020/05/23 22:54
  */
 @Data

@@ -34,7 +34,7 @@ import java.io.Serializable;
  * JobInspectionDocument
  *
  * @author yizzuide
- * <br />
+ * <br>
  * Create at 2022/09/26 23:14
  */
 @Data

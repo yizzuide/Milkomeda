@@ -41,6 +41,7 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.util.PathMatcher;
 import org.springframework.web.filter.DelegatingFilterProxy;
 import org.springframework.web.util.UrlPathHelper;
+import org.springframework.web.util.pattern.PathPatternParser;
 
 import java.io.Serializable;
 import java.util.Collections;
@@ -50,8 +51,8 @@ import java.util.Collections;
  *
  * @author yizzuide
  * @since 2.0.0
- * @version 3.12.9
- * <br />
+ * @version 3.14.0
+ * <br>
  * Create at 2019/12/13 19:09
  */
 @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
@@ -79,8 +80,9 @@ public class MilkomedaContextConfig {
     }
 
     @Autowired
-    public void config(PathMatcher mvcPathMatcher, UrlPathHelper mvcUrlPathHelper) {
+    public void config(PathMatcher mvcPathMatcher, PathPatternParser mvcPatternParser, UrlPathHelper mvcUrlPathHelper) {
         WebContext.setMvcPathMatcher(mvcPathMatcher);
+        WebContext.setMvcPatternParser(mvcPatternParser);
         WebContext.setUrlPathHelper(mvcUrlPathHelper);
     }
 

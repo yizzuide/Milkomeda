@@ -27,7 +27,7 @@ package com.github.yizzuide.milkomeda.pillar;
  *
  * @author yizzuide
  * @since 0.2.0
- * <br />
+ * <br>
  * Create at 2019/04/11 18:19
  */
 public interface PillarType {

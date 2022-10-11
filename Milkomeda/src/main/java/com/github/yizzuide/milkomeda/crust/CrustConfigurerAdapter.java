@@ -62,7 +62,7 @@ import java.util.function.Supplier;
  * @author yizzuide
  * @since 1.14.0
  * @version 3.11.2
- * <br />
+ * <br>
  * Create at 2019/11/11 18:25
  */
 public class CrustConfigurerAdapter extends WebSecurityConfigurerAdapter {

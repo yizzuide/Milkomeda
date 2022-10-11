@@ -40,7 +40,7 @@ import java.util.regex.Pattern;
  * @author yizzuide
  * @since 1.13.0
  * @version 3.8.0
- * <br />
+ * <br>
  * Create at 2019/09/21 17:23
  */
 public class DataTypeConvertUtil {

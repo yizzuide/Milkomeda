@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration;
  * Config
  *
  * @author yizzuide
- * <br />
+ * <br>
  * Create at 2022/02/12 23:40
  */
 @Configuration

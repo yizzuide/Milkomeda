@@ -41,7 +41,7 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 3.14.0
- * <br />
+ * <br>
  * Create at 2022/09/25 16:12
  */
 public class MysqlJobInspector extends AbstractJobInspector {

@@ -33,7 +33,7 @@ import java.util.function.Consumer;
  *
  * @author yizzuide
  * @since 3.14.0
- * <br />
+ * <br>
  * Create at 2022/09/14 16:55
  */
 public interface JobInspector {

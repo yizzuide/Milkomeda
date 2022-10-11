@@ -11,7 +11,7 @@ import java.time.Duration;
  * 使用注解直接接收的方式
  *
  * @author yizzuide
- * <br />
+ * <br>
  * Create at 2019/11/17 17:34
  */
 @Slf4j

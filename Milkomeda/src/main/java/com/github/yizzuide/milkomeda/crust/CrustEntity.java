@@ -30,7 +30,7 @@ import java.io.Serializable;
  * @author yizzuide
  * @since 1.14.0
  * @version 2.0.4
- * <br />
+ * <br>
  * Create at 2019/11/11 18:47
  */
 public interface CrustEntity extends Serializable {

@@ -19,7 +19,7 @@ import org.springframework.web.context.WebApplicationContext;
  * CometTest
  *
  * @author yizzuide
- * <br />
+ * <br>
  * Create at 2019/04/11 23:02
  */
 @RunWith(SpringRunner.class)

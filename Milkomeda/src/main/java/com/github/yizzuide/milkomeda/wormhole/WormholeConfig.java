@@ -29,7 +29,7 @@ import org.springframework.context.annotation.Configuration;
  *
  * @author yizzuide
  * @since 3.3.0
- * <br />
+ * <br>
  * Create at 2020/05/05 13:58
  */
 @Configuration

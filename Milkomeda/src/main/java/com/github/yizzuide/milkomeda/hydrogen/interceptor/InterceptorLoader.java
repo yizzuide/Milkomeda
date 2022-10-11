@@ -32,7 +32,7 @@ import java.util.Map;
  *
  * @author yizzuide
  * @since 3.0.0
- * <br />
+ * <br>
  * Create at 2020/04/03 10:59
  */
 public interface InterceptorLoader extends HydrogenLoader {

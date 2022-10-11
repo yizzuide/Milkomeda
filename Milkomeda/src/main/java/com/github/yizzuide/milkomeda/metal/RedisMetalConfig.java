@@ -39,8 +39,8 @@ import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
  *
  * @author yizzuide
  * @since 3.6.0
- * @version 3.6.1
- * <br />
+ * @version 3.14.0
+ * <br>
  * Create at 2020/05/22 16:34
  */
 @EnableConfigurationProperties(MetalProperties.class)
@@ -67,11 +67,8 @@ public class RedisMetalConfig {
 
     @Bean
     public MetalMessageHandler metalMessageHandler() {
-        return new MetalMessageHandler();
-    }
-
-    @Autowired
-    public void config(MetalMessageHandler metalMessageHandler) {
+        MetalMessageHandler metalMessageHandler = new MetalMessageHandler();
         MetalHolder.setMetalMessageHandler(metalMessageHandler);
+        return metalMessageHandler;
     }
 }

@@ -30,7 +30,7 @@ import lombok.Getter;
  *
  * @author yizzuide
  * @since 1.5.0
- * <br />
+ * <br>
  * Create at 2019/05/30 22:10
  */
 @Getter

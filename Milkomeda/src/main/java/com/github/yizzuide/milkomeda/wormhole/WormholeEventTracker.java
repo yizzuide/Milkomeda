@@ -32,7 +32,7 @@ import java.lang.annotation.*;
  * @author yizzuide
  * @since 3.3.0
  * @see WormholeEventTrack
- * <br />
+ * <br>
  * Create at 2020/05/05 14:56
  */
 @Documented

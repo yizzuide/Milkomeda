@@ -31,7 +31,7 @@ import org.springframework.context.annotation.Import;
  *
  * @author yizzuide
  * @since 3.7.0
- * <br />
+ * <br>
  * Create at 2020/05/29 14:10
  */
 @Import({LightConfig.class, AtomConfig.class})

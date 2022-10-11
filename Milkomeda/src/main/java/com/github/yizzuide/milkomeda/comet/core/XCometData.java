@@ -29,7 +29,7 @@ import lombok.EqualsAndHashCode;
  *
  * @author yizzuide
  * @since 1.12.0
- * <br />
+ * <br>
  * Create at 2019/09/21 10:55
  */
 @Data

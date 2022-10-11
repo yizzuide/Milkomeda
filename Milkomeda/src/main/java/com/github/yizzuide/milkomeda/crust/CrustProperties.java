@@ -37,7 +37,7 @@ import java.util.List;
  * @author yizzuide
  * @since 1.14.0
  * @version 3.12.10
- * <br />
+ * <br>
  * Create at 2019/11/11 15:51
  */
 @Data
@@ -153,4 +153,25 @@ public class CrustProperties {
      * @since 3.12.10
      */
     private String staticLocation = CrustConfig.CrustURLMappingConfigurer.staticLocation;
+
+    /**
+     * 配置静态资源映射
+     * @since 3.14.0
+     */
+    private List<ResourceMapping> resourceMappings;
+
+    @Data
+    public static class ResourceMapping {
+        /**
+         * Path pattern list.
+         * @since 3.14.0
+         */
+        private List<String> pathPatterns;
+        /**
+         * Target location list.
+         * @since 3.14.0
+         */
+        private List<String> targetLocations;
+
+    }
 }

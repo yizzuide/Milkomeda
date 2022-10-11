@@ -36,7 +36,7 @@ import java.lang.annotation.Target;
  * @author yizzuide
  * @since  0.1.0
  * @version 1.5.0
- * <br />
+ * <br>
  * Create at 2019/03/29 10:22
  */
 @Target(ElementType.METHOD)

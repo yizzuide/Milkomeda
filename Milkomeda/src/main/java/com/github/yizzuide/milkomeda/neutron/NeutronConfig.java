@@ -22,6 +22,7 @@
 package com.github.yizzuide.milkomeda.neutron;
 
 import org.quartz.spi.JobFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.quartz.QuartzAutoConfiguration;
@@ -35,20 +36,23 @@ import org.springframework.scheduling.quartz.SchedulerFactoryBean;
  *
  * @author yizzuide
  * @since 1.18.0
- * @version 1.18.1
- * <br />
+ * @version 3.14.0
+ * <br>
  * Create at 2019/12/09 22:34
  */
 @Import(QuartzAutoConfiguration.class)
 @ConditionalOnClass(JobFactory.class)
 @Configuration(proxyBeanMethods = false)
-public class NeutronConfig {
+public class NeutronConfig implements InitializingBean {
 
     @Autowired
     private QuartzProperties props;
 
     @Autowired
-    public void configHolder(SchedulerFactoryBean schedulerFactoryBean) {
+    private SchedulerFactoryBean schedulerFactoryBean;
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
         NeutronHolder.setScheduler(schedulerFactoryBean.getScheduler());
         NeutronHolder.setProps(props);
     }

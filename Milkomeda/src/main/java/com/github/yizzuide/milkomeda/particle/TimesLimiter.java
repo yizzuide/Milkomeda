@@ -40,7 +40,7 @@ import java.util.Collections;
  * @author yizzuide
  * @since 1.5.2
  * @version 3.12.10
- * <br />
+ * <br>
  * Create at 2019/05/30 17:32
  */
 @Data

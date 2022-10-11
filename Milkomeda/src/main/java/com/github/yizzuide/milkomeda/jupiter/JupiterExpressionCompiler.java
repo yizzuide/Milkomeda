@@ -27,7 +27,7 @@ package com.github.yizzuide.milkomeda.jupiter;
  *
  * @author yizzuide
  * @since 3.5.0
- * <br />
+ * <br>
  * Create at 2020/05/19 21:41
  */
 public interface JupiterExpressionCompiler {

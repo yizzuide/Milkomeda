@@ -32,7 +32,7 @@ import java.util.TreeMap;
  * @author yizzuide
  * @since 3.8.0
  * @version 3.12.10
- * <br />
+ * <br>
  * Create at 2020/06/18 14:43
  */
 public class ConsistentHashRing<T> {

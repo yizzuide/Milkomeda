@@ -28,7 +28,7 @@ package com.github.yizzuide.milkomeda.universe.algorithm.hash;
  * 2. 如果该元素被判断存在，那么很可能存在
  * @author yizzuide
  * @since 3.9.0
- * <br />
+ * <br>
  * Create at 2020/06/23 15:17
  */
 public class BloomHashWrapper<T> {

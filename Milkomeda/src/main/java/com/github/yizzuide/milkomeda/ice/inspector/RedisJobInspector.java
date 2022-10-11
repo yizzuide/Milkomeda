@@ -45,7 +45,7 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 3.14.0
- * <br />
+ * <br>
  * Create at 2022/09/14 16:58
  */
 public class RedisJobInspector extends AbstractJobInspector implements InitializingBean, ApplicationListener<IceInstanceChangeEvent> {

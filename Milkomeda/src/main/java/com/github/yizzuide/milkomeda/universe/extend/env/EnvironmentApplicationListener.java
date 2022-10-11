@@ -41,7 +41,7 @@ import org.springframework.lang.NonNull;
  * @version 3.13.0
  * @see org.springframework.boot.context.config.ConfigDataEnvironmentPostProcessor
  * @see org.springframework.boot.context.config.AnsiOutputApplicationListener
- * <br />
+ * <br>
  * Create at 2020/04/11 11:56
  */
 @Slf4j

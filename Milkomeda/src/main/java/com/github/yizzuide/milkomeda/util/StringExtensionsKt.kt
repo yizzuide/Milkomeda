@@ -31,7 +31,7 @@ import com.github.yizzuide.milkomeda.universe.polyfill.SpringPolyfill
  * 字符串扩展
  *
  * @author yizzuide
- * <br />
+ * <br>
  * Create at 2022/08/06 17:55
  * @since 3.13.0
  */

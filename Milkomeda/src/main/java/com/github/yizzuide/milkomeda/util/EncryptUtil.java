@@ -43,7 +43,7 @@ import java.util.function.Function;
  * @author yizzuide
  * @since 1.13.0
  * @version 3.10.0
- * <br />
+ * <br>
  * Create at 2019/09/21 19:58
  */
 @Slf4j

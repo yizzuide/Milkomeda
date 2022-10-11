@@ -32,7 +32,7 @@ import javax.sql.DataSource;
  *
  * @author yizzuide
  * @since 3.7.1
- * <br />
+ * <br>
  * Create at 2020/05/31 12:22
  */
 public class MultiDataSourceTransactionFactory extends SpringManagedTransactionFactory {

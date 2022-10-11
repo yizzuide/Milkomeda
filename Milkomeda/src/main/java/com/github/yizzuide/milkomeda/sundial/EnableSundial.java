@@ -30,7 +30,7 @@ import java.lang.annotation.*;
  * @author jsq 786063250@qq.com
  * @since 3.4.0
  * @version 3.7.1
- * <br />
+ * <br>
  * Create at 2020/5/8
  */
 @Documented

@@ -45,7 +45,7 @@ import java.util.Map;
  * @author yizzuide
  * @since 2.0.0
  * @version 3.10.0
- * <br />
+ * <br>
  * Create at 2019/12/12 22:08
  */
 public class CometParamResolver implements HandlerMethodArgumentResolver {

@@ -33,7 +33,7 @@ import java.io.Serializable;
  * @author yizzuide
  * @since 3.7.0
  * @version 3.12.10
- * <br />
+ * <br>
  * Create at 2020/05/28 23:59
  */
 public abstract class AbstractMoonStrategy implements MoonStrategy {

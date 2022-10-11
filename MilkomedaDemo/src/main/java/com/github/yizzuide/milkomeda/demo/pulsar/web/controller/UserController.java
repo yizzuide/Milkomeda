@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
  * UserController
  *
  * @author yizzuide
- * <br />
+ * <br>
  * Create at 2019/03/30 19:17
  */
 @Slf4j

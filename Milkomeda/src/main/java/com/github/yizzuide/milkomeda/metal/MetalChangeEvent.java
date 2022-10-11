@@ -28,7 +28,7 @@ import org.springframework.context.ApplicationEvent;
  *
  * @author yizzuide
  * @since 3.6.2
- * <br />
+ * <br>
  * Create at 2020/05/26 15:29
  */
 public class MetalChangeEvent extends ApplicationEvent {

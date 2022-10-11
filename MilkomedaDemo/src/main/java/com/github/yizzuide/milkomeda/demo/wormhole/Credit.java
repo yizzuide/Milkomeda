@@ -7,7 +7,7 @@ import lombok.Data;
  * 领域业务模块（聚合根）
  *
  * @author yizzuide
- * <br />
+ * <br>
  * Create at 2020/05/05 15:51
  */
 @Data

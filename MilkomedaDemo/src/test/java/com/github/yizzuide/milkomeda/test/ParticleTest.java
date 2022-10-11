@@ -19,7 +19,7 @@ import org.springframework.web.context.WebApplicationContext;
  * ParticleTest
  *
  * @author yizzuide
- * <br />
+ * <br>
  * Create at 2019/05/31 14:51
  */
 @RunWith(SpringRunner.class)
@@ -119,7 +119,7 @@ public class ParticleTest {
     public void testNotify() throws Exception {
         val ret = mockMvc.perform(MockMvcRequestBuilders.get("/particle/notify")
                 .content("{\"orderId\":\"12345676543456\",\"state\": 12}")
-                .contentType(MediaType.APPLICATION_JSON_UTF8))
+                .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andReturn().getResponse().getContentAsString();
         System.out.println(ret);

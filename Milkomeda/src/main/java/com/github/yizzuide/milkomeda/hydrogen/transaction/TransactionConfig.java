@@ -34,6 +34,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.TransactionManager;
 import org.springframework.transaction.interceptor.NameMatchTransactionAttributeSource;
 import org.springframework.transaction.interceptor.RollbackRuleAttribute;
 import org.springframework.transaction.interceptor.RuleBasedTransactionAttribute;
@@ -48,8 +49,8 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 3.0.0
- * @version 3.11.6
- * <br />
+ * @version 3.14.0
+ * <br>
  * Create at 2019/11/25 10:56
  */
 @Aspect
@@ -62,6 +63,7 @@ public class TransactionConfig {
     @Autowired
     private TransactionProperties props;
 
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Bean
     public TransactionInterceptor txAdvice(PlatformTransactionManager transactionManager) {
         RuleBasedTransactionAttribute txAttr_REQUIRED = new RuleBasedTransactionAttribute();
@@ -93,7 +95,7 @@ public class TransactionConfig {
 
         // 其它都需要事务
         source.addTransactionalMethod("*", txAttr_REQUIRED);
-        return new TransactionInterceptor(transactionManager, source);
+        return new TransactionInterceptor((TransactionManager) transactionManager, source);
     }
 
     @Bean

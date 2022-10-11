@@ -30,7 +30,7 @@ import org.springframework.security.core.GrantedAuthority;
  *
  * @author yizzuide
  * @since 1.14.0
- * <br />
+ * <br>
  * Create at 2019/11/11 17:40
  */
 public class GrantedAuthorityImpl implements GrantedAuthority {

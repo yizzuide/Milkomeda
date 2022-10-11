@@ -26,6 +26,11 @@ spring:
   redis:
     host: 127.0.0.1
 
+  # Springboot 2.6: To use embedded mongo, the spring.mongodb.embedded.version property must now be set.
+  #mongodb:
+    #embedded:
+      #version: 3.6
+
   data:
     mongodb:
       database: milkomeda
@@ -85,7 +90,14 @@ management:
     web:
       exposure:
         include: '*'
-  # Springboot 2.4: HTTP traces no longer include cookie headers by default
+  # Springboot 2.4: HTTP traces no longer include cookie headers by default.
   #trace:
     #http:
       #include: cookies, errors, request-headers, response-headers
+  info:
+    # Springboot 2.6: The env info contributor is now disabled by default. It would like them to appear them in the InfoEndpoint.
+    env:
+      enabled: true
+    # Springboot 2.6:  Expose Java Runtime information under the java key.
+    java:
+      enabled: true

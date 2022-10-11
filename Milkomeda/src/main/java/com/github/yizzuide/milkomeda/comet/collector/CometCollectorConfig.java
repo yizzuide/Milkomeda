@@ -49,9 +49,9 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 3.0.0
- * @version 3.11.0
+ * @version 3.14.0
  * @see BeanFactoryUtils#beansOfTypeIncludingAncestors(org.springframework.beans.factory.ListableBeanFactory, java.lang.Class)
- * <br />
+ * <br>
  * Create at 2020/03/28 18:54
  */
 @Configuration
@@ -62,6 +62,13 @@ public class CometCollectorConfig implements ApplicationContextAware {
 
     @Autowired(required = false)
     private List<Collector> collectors;
+
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
+    @Autowired
+    private CometAspect cometAspect;
+
+    @Autowired
+    private CometCollectorProperties cometCollectorProperties;
 
     @Bean
     public CollectorFactory collectorFactory() {
@@ -77,18 +84,14 @@ public class CometCollectorConfig implements ApplicationContextAware {
 
     @Bean
     public CollectorRecorder collectorRecorder() {
-        return new CollectorRecorder(collectorFactory());
-    }
-
-    @Autowired
-    public void config(CometAspect cometAspect, CometCollectorProperties cometCollectorProperties) {
-        // 设置日志采集器
-        cometAspect.setRecorder(collectorRecorder());
-        CometHolder.setCollectorProps(cometCollectorProperties);
+        CollectorRecorder collectorRecorder = new CollectorRecorder(collectorFactory());
+        cometAspect.setRecorder(collectorRecorder);
+        return collectorRecorder;
     }
 
     @Override
     public void setApplicationContext(@NonNull ApplicationContext applicationContext) throws BeansException {
+        CometHolder.setCollectorProps(cometCollectorProperties);
         // 如果为空，到BeanFactory里查找
         if (CollectionUtils.isEmpty(collectors)) {
             collectors = new ArrayList<>(BeanFactoryUtils.beansOfTypeIncludingAncestors(applicationContext, Collector.class).values());

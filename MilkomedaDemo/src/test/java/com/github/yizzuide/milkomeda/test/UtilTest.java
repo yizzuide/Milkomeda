@@ -21,21 +21,26 @@ import static com.github.yizzuide.milkomeda.util.JSONUtil.toCamel;
  * UtilTest
  *
  * @author yizzuide
- * <br />
+ * <br>
  * Create at 2019/09/21 18:23
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = MilkomedaDemoApplication.class)
 public class UtilTest {
+    @SuppressWarnings("rawtypes")
     @Test
     public void testCamelConvert() throws IOException {
         Map<String, Object> map = new HashMap<>();
         map.put("code", 0);
         map.put("error_msg", "成功");
-        map.put("data", Arrays.asList(new HashMap<String, Object>(){{
+        map.put("data", Arrays.asList(new HashMap<String, Object>(){
+            private static final long serialVersionUID = -3937328164911590828L;
+            {
             put("user_name", "yiz1");
             put("id_no", "111111");
-        }}, new HashMap<String, Object>(){{
+        }}, new HashMap<String, Object>(){
+            private static final long serialVersionUID = 5323752083610124134L;
+            {
             put("user_name", "yiz2");
             put("id_no", "222222");
         }}));

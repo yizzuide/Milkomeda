@@ -65,7 +65,7 @@ import java.util.*;
  * #see org.springframework.boot.SpringBootExceptionHandler.LoggedExceptionHandlerThreadLocal#initialValue()
  * @see org.springframework.boot.SpringApplication#setRegisterShutdownHook(boolean)
  * @see org.springframework.context.support.AbstractApplicationContext#registerShutdownHook()
- * <br />
+ * <br>
  * Create at 2020/03/25 22:47
  */
 @Slf4j

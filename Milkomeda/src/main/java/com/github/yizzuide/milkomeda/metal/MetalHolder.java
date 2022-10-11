@@ -32,7 +32,7 @@ import java.util.Map;
  * @author yizzuide
  * @since 3.6.0
  * @version 3.13.0
- * <br />
+ * <br>
  * Create at 2020/05/21 23:19
  */
 public class MetalHolder {

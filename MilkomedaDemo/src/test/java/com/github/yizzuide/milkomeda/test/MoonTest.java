@@ -18,7 +18,7 @@ import javax.annotation.Resource;
  * MoonTest
  *
  * @author yizzuide
- * <br />
+ * <br>
  * Create at 2020/05/28 10:55
  */
 @Slf4j

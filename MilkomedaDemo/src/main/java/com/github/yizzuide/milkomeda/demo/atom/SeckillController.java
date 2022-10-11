@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
  * SeckillController
  *
  * @author yizzuide
- * <br />
+ * <br>
  * Create at 2020/05/07 00:12
  */
 @RestController

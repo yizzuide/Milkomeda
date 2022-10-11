@@ -34,7 +34,7 @@ import org.springframework.context.annotation.Configuration;
  * @author yizzuide
  * @since 1.17.0
  * @version 3.13.0
- * <br />
+ * <br>
  * Create at 2019/12/03 16:22
  */
 @Configuration

@@ -9,7 +9,7 @@ import lombok.extern.slf4j.Slf4j;
  * ProductTagCollector
  *
  * @author yizzuide
- * <br />
+ * <br>
  * Create at 2020/03/29 17:16
  */
 @Slf4j

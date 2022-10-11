@@ -41,7 +41,7 @@ import java.util.Map;
  * @author yizzuide
  * @since 3.5.0
  * @version 3.5.1
- * <br />
+ * <br>
  * Create at 2020/05/19 16:57
  */
 @EnableConfigurationProperties(JupiterProperties.class)

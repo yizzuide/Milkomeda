@@ -1,14 +1,21 @@
 package com.github.yizzuide.milkomeda.demo;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.actuate.endpoint.SanitizingFunction;
+import org.springframework.boot.autoconfigure.web.WebProperties;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.PropertySource;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+import static org.springframework.boot.actuate.endpoint.SanitizableData.SANITIZED_VALUE;
 
 /**
  * WebMvcConfig
  *
  * @author yizzuide
- * <br />
+ * <br>
  * Create at 2020/04/03 18:33
  */
 // 这个注解会自动配置：DelegatingWebMvcConfiguration -> WebMvcConfigurationSupport
@@ -25,4 +32,21 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @ActiveProfiles({"dev","test"})
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
+    // Springboot 2.6: Injecting `Resources` directly no longer works as this configuration has been harmonized in WebProperties
+    @Autowired
+    private WebProperties webProperties;
+
+    // Springboot 2.6: Spring Boot现在可以清理 /env 和 /configprops 端点中存在的敏感值
+    @Bean
+    public SanitizingFunction mysqlSanitizingFunction() {
+        return data -> {
+            PropertySource<?> propertySource = data.getPropertySource();
+            if (propertySource.getName().contains("develop.properties")) {
+                if (data.getKey().equals("mysql.user")) {
+                    return data.withValue(SANITIZED_VALUE);
+                }
+            }
+            return data;
+        };
+    }
 }

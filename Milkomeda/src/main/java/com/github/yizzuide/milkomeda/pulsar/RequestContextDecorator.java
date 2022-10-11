@@ -31,7 +31,7 @@ import org.springframework.web.context.request.RequestContextHolder;
  *
  * @author yizzuide
  * @since  1.13.11
- * <br />
+ * <br>
  * Create at 2019/03/29 10:36
  */
 public class RequestContextDecorator implements TaskDecorator {

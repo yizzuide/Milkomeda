@@ -11,7 +11,7 @@ import java.util.Date;
  * 订单实体
  *
  * @author yizzuide
- * <br />
+ * <br>
  * Create at 2019/07/01 17:08
  */
 @Data

@@ -14,7 +14,7 @@ import org.springframework.web.context.request.async.DeferredResult;
  * 模拟消息队列侦听器
  *
  * @author yizzuide
- * <br />
+ * <br>
  * Create at 2019/03/30 00:32
  */
 @Component

@@ -35,7 +35,7 @@ import org.springframework.context.annotation.Configuration;
  * @author yizzuide
  * @since 3.0.0
  * @version 3.11.0
- * <br />
+ * <br>
  * Create at 2020/04/05 18:50
  */
 @Configuration
@@ -45,7 +45,7 @@ import org.springframework.context.annotation.Configuration;
 public class CometLoggerConfig {
 
     @Autowired
-    public void config(CometLoggerProperties props) {
+    public void setProps(CometLoggerProperties props) {
         CometHolder.setLogProps(props);
     }
 }

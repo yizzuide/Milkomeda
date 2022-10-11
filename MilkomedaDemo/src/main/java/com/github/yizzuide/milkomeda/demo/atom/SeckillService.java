@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
  * SeckillService
  *
  * @author yizzuide
- * <br />
+ * <br>
  * Create at 2020/05/07 00:13
  */
 @Slf4j

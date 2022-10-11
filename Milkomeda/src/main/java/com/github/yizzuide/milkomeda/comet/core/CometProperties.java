@@ -30,7 +30,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * @author yizzuide
  * @since 2.0.0
  * @version 3.5.0
- * <br />
+ * <br>
  * Create at 2019/12/12 18:04
  */
 @Data

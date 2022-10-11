@@ -36,7 +36,7 @@ import java.util.concurrent.TimeUnit;
  * @author yizzuide
  * @since 3.3.0
  * @version 3.3.1
- * <br />
+ * <br>
  * Create at 2020/04/30 17:09
  */
 @AllArgsConstructor

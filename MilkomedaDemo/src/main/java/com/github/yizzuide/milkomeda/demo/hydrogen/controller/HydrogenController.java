@@ -13,6 +13,7 @@ import com.github.yizzuide.milkomeda.pulsar.PulsarHolder;
 import com.github.yizzuide.milkomeda.universe.polyfill.SpringPolyfill;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cloud.context.refresh.ContextRefresher;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.CollectionUtils;
@@ -30,10 +31,11 @@ import java.util.Map;
  * HydrogenController
  *
  * @author yizzuide
- * <br />
+ * <br>
  * Create at 2020/03/25 21:48
  */
-@Validated // 让方法参数上的校验注解生效，需要在Controller添加@Validated
+// 让方法参数上的校验注解生效，需要在Controller添加@Validated
+@Validated
 @Slf4j
 @RequestMapping("hydrogen")
 @RestController
@@ -42,6 +44,7 @@ public class HydrogenController {
     @Resource
     private TOrderService tOrderService;
 
+    @Qualifier("configDataContextRefresher")
     @Autowired
     private ContextRefresher contextRefresher;
 

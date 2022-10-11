@@ -26,7 +26,7 @@ package com.github.yizzuide.milkomeda.ice.inspector;
  *
  * @author yizzuide
  * @since 3.14.0
- * <br />
+ * <br>
  * Create at 2022/09/13 23:04
  */
 public enum JobQueueType {

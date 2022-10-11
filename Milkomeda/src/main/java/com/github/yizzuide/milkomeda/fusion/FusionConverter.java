@@ -27,7 +27,7 @@ package com.github.yizzuide.milkomeda.fusion;
  * @author yizzuide
  * @since 2.2.0
  * @version 3.0.0
- * <br />
+ * <br>
  * Create at 2020/01/04 11:14
  */
 @FunctionalInterface

@@ -21,7 +21,6 @@
 
 package com.github.yizzuide.milkomeda.metal;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 
 /**
@@ -29,7 +28,7 @@ import org.springframework.context.annotation.Bean;
  *
  * @author yizzuide
  * @since 3.6.0
- * <br />
+ * <br>
  * Create at 2020/05/21 23:26
  */
 public class MetalConfig {
@@ -41,17 +40,14 @@ public class MetalConfig {
 
     @Bean
     public MetalContainer metalContainer(MetalSource metalSource) {
-        return new MetalContainer(metalSource);
+        MetalContainer metalContainer = new MetalContainer(metalSource);
+        MetalHolder.setMetalContainer(metalContainer);
+        return metalContainer;
     }
 
     @Bean
     public MetalRegister metalRegister(MetalContainer metalContainer) {
         return new MetalRegister(metalContainer);
-    }
-
-    @Autowired
-    public void config(MetalContainer metalContainer) {
-        MetalHolder.setMetalContainer(metalContainer);
     }
 
 }

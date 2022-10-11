@@ -57,7 +57,7 @@ import java.util.regex.Pattern;
  * @author yizzuide
  * @since 2.5.0
  * @version 3.11.4
- * <br />
+ * <br>
  * Create at 2020/01/30 20:38
  */
 @Slf4j

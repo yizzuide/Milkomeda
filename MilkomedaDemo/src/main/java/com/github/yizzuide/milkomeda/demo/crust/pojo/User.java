@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
  * 用户表映射实体
  *
  * @author yizzuide
- * <br />
+ * <br>
  * Create at 2019/11/11 23:46
  */
 @Data

@@ -27,7 +27,7 @@ package com.github.yizzuide.milkomeda.halo;
  *
  * @author yizzuide
  * @since 2.5.0
- * <br />
+ * <br>
  * Create at 2020/02/01 18:36
  */
 public enum HaloType {

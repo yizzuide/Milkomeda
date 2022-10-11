@@ -28,7 +28,7 @@ import lombok.Data;
  * OrdderCreatedEvent
  *
  * @author yizzuide
- * <br />
+ * <br>
  * Create at 2022/02/04 23:05
  */
 @Data

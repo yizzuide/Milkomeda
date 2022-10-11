@@ -52,7 +52,7 @@ import java.util.stream.Collectors;
  * @version 3.14.0
  * @see org.springframework.web.util.ContentCachingResponseWrapper
  * @see org.springframework.web.filter.ShallowEtagHeaderFilter
- * <br />
+ * <br>
  * Create at 2020/04/07 14:54
  */
 public class CometResponseWrapper extends HttpServletResponseWrapper {

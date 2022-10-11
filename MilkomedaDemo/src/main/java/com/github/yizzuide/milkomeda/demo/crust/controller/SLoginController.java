@@ -32,7 +32,7 @@ import org.springframework.web.bind.annotation.PostMapping;
  * SLoginController
  *
  * @author yizzuide
- * <br />
+ * <br>
  * Create at 2022/01/31 16:45
  */
 @Slf4j

@@ -31,7 +31,7 @@ import org.springframework.context.annotation.Configuration;
  *
  * @author yizzuide
  * @since 3.0.0
- * <br />
+ * <br>
  * Create at 2020/04/03 00:51
  */
 @ConditionalOnClass(name = {"org.apache.catalina.core.StandardContext"})

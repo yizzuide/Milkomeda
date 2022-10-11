@@ -33,7 +33,7 @@ import java.time.temporal.ChronoUnit;
  *
  * @author yizzuide
  * @since 3.6.0
- * <br />
+ * <br>
  * Create at 2020/05/21 14:04
  */
 @Data

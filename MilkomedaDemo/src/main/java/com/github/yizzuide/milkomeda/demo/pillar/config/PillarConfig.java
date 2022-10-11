@@ -14,7 +14,7 @@ import java.util.Map;
  * PillarConfig
  *
  * @author yizzuide
- * <br />
+ * <br>
  * Create at 2019/05/25 21:21
  */
 @Configuration

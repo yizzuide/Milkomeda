@@ -27,7 +27,7 @@ package com.github.yizzuide.milkomeda.comet.collector;
  *
  * @author yizzuide
  * @since 3.0.0
- * <br />
+ * <br>
  * Create at 2020/03/29 17:12
  */
 public abstract class TagCollector implements Collector {

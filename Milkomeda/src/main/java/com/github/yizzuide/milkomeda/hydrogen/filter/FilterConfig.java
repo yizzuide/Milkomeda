@@ -32,7 +32,7 @@ import org.springframework.context.annotation.Import;
  *
  * @author yizzuide
  * @since 3.0.0
- * <br />
+ * <br>
  * Create at 2020/04/01 18:18
  */
 @Configuration

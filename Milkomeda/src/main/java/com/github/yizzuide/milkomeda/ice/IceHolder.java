@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
  * @author yizzuide
  * @since 3.0.0
  * @version 3.14.0
- * <br />
+ * <br>
  * Create at 2020/04/09 14:03
  */
 @Slf4j

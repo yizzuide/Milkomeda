@@ -11,7 +11,7 @@ import javax.annotation.Resource;
  * 领域适配器
  *
  * @author yizzuide
- * <br />
+ * <br>
  * Create at 2020/05/05 15:36
  */
 @RestController

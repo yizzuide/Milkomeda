@@ -32,7 +32,7 @@ import org.springframework.util.StringUtils;
  *
  * @author yizzuide
  * @version 3.2.1
- * <br />
+ * <br>
  * Create at 2020/04/29 15:30
  */
 @Slf4j

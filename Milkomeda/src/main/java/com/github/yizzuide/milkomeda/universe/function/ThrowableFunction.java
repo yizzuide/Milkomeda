@@ -25,7 +25,7 @@ package com.github.yizzuide.milkomeda.universe.function;
  * ThrowableFunction
  *
  * @author yizzuide
- * <br />
+ * <br>
  * Create at 2019/12/18 17:31
  */
 @FunctionalInterface

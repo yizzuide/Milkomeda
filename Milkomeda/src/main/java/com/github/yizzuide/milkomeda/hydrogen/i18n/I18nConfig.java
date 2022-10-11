@@ -24,6 +24,7 @@ package com.github.yizzuide.milkomeda.hydrogen.i18n;
 import com.github.yizzuide.milkomeda.hydrogen.core.HydrogenHolder;
 import com.github.yizzuide.milkomeda.universe.polyfill.SpringMvcPolyfill;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -45,10 +46,11 @@ import java.util.Collections;
  *
  * @author yizzuide
  * @since 3.0.0
+ * @version 3.14.0
  * @see org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport#requestMappingHandlerAdapter(org.springframework.web.accept.ContentNegotiationManager, org.springframework.format.support.FormattingConversionService, org.springframework.validation.Validator)
  * @see org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport#requestMappingHandlerMapping(org.springframework.web.accept.ContentNegotiationManager, org.springframework.format.support.FormattingConversionService, org.springframework.web.servlet.resource.ResourceUrlProvider)
  * @see org.springframework.web.servlet.handler.AbstractHandlerMapping
- * <br />
+ * <br>
  * Create at 2019/08/02 15:24
  */
 @Slf4j
@@ -57,16 +59,10 @@ import java.util.Collections;
 @AutoConfigureAfter({MessageSourceAutoConfiguration.class, WebMvcAutoConfiguration.class})
 @ConditionalOnProperty(prefix = "milkomeda.hydrogen.i18n", name = "enable", havingValue = "true")
 public class I18nConfig {
-    @Autowired
-    private I18nProperties i18nProperties;
-
+    // Springboot 2.6: The application’s MessageSource is now used when resolving {parameters} in constraint messages.
+    //  This allows you to use your application’s messages.properties files for Bean Validation messages.
     @Autowired
     private MessageSource messageSource;
-
-    @Autowired
-    public void config(I18nMessages i18nMessages) {
-        HydrogenHolder.setI18nMessages(i18nMessages);
-    }
 
     // 在web应用程序上下文中注册一个LocaleResolver类型，必需设置Bean名称设置为localeResolver
     // 在DispatcherServlet源码中获取：this.localeResolver = context.getBean(LOCALE_RESOLVER_BEAN_NAME, LocaleResolver.class);
@@ -80,12 +76,32 @@ public class I18nConfig {
         return new I18nMessages(messageSource);
     }
 
-    @Autowired
-    public void configRequestMappingHandlerMapping(RequestMappingHandlerMapping requestMappingHandlerMapping) {
-        // 使用内置拦截器
-        final LocaleChangeInterceptor localeChangeInterceptor = new LocaleChangeInterceptor();
-        localeChangeInterceptor.setParamName(i18nProperties.getQuery());
-        SpringMvcPolyfill.addDynamicInterceptor(localeChangeInterceptor, Ordered.HIGHEST_PRECEDENCE + 10, Collections.singletonList("/**"),
-                null, requestMappingHandlerMapping);
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
+    @Configuration
+    static class ExtendedConfig implements InitializingBean {
+
+        @Autowired
+        private I18nProperties i18nProperties;
+
+        @Autowired
+        private I18nMessages i18nMessages;
+
+        @Autowired
+        private RequestMappingHandlerMapping requestMappingHandlerMapping;
+
+
+        @Override
+        public void afterPropertiesSet() throws Exception {
+            HydrogenHolder.setI18nMessages(i18nMessages);
+            configRequestMappingHandlerMapping();
+        }
+
+        // 动态添加拦截器
+        private void configRequestMappingHandlerMapping() {
+            final LocaleChangeInterceptor localeChangeInterceptor = new LocaleChangeInterceptor();
+            localeChangeInterceptor.setParamName(i18nProperties.getQuery());
+            SpringMvcPolyfill.addDynamicInterceptor(localeChangeInterceptor, Ordered.HIGHEST_PRECEDENCE + 10, Collections.singletonList("/**"),
+                    null, requestMappingHandlerMapping);
+        }
     }
 }

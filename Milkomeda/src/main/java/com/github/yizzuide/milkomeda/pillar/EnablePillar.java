@@ -30,7 +30,7 @@ import java.lang.annotation.*;
  *
  * @author yizzuide
  * @since 3.10.0
- * <br />
+ * <br>
  * Create at 2020/07/02 16:24
  */
 @Target({ElementType.TYPE})

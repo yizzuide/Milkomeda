@@ -10,7 +10,7 @@ import com.github.yizzuide.milkomeda.fusion.FusionMetaData;
  * APIResponseDataHandler
  *
  * @author yizzuide
- * <br />
+ * <br>
  * Create at 2020/05/05 16:41
  */
 @FusionHandler

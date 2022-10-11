@@ -34,7 +34,7 @@ import java.time.temporal.ChronoUnit;
  * @author yizzuide
  * @since 1.13.3
  * @version 3.0.0
- * <br />
+ * <br>
  * Create at 2019/10/23 20:53
  */
 @Data

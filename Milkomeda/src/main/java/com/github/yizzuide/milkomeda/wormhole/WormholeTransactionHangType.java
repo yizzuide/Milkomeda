@@ -26,7 +26,7 @@ package com.github.yizzuide.milkomeda.wormhole;
  *
  * @author yizzuide
  * @since 3.11.0
- * <br />
+ * <br>
  * Create at 2020/07/08 16:20
  */
 public enum WormholeTransactionHangType {

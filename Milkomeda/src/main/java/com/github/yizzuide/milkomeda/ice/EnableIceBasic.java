@@ -43,7 +43,7 @@ import java.lang.annotation.*;
  *
  * @author yizzuide
  * @since 3.0.0
- * <br />
+ * <br>
  * Create at 2020/04/09 11:31
  */
 @Documented

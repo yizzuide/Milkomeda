@@ -31,10 +31,11 @@ import java.util.List;
  * URLPathMatcher
  * 路径匹配器
  *
- * @see "PathPatternParser"
+ * @see org.springframework.util.AntPathMatcher
+ * @see org.springframework.web.util.pattern.PathPatternParser
  * @author yizzuide
  * @since 3.0.0
- * <br />
+ * <br>
  * Create at 2020/03/29 14:07
  */
 public class URLPathMatcher {
@@ -64,6 +65,10 @@ public class URLPathMatcher {
      * @return  匹配是否成功
      */
     public static boolean match(List<String> sourcePaths, String targetPath) {
+        // Springboot 2.6: Using PathPatternParser to match.
+        //return sourcePaths.stream().anyMatch(pathPattern -> WebContext.getMvcPatternParser().parse(pathPattern).matches(PathContainer.parsePath(targetPath)));
+
+        // Simple impl...
         boolean matched = false;
         for (String path : sourcePaths) {
             if (Strings.isEmpty(path)) continue;

@@ -31,7 +31,7 @@ import lombok.NoArgsConstructor;
  *
  * @since 1.8.0
  * @author yizzuide
- * <br />
+ * <br>
  * Create at 2019/06/28 13:49
  */
 @Data

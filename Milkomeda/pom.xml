@@ -13,14 +13,14 @@
         <java.version>1.8</java.version>
         <kotlin.version>1.5.32</kotlin.version>
         <project.release.version>3.14.0-SNAPSHOT</project.release.version>
-        <spring-boot.version>2.5.14</spring-boot.version>
-        <spring-cloud.version>2020.0.5</spring-cloud.version>
-        <mybatis.starter.version>2.1.4</mybatis.starter.version>
-        <jsqlparser.version>4.1</jsqlparser.version>
+        <spring-boot.version>2.6.12</spring-boot.version>
+        <spring-cloud.version>2021.0.4</spring-cloud.version>
+        <mybatis.starter.version>2.2.2</mybatis.starter.version>
+        <redission.version>3.17.7</redission.version>
+        <jsqlparser.version>4.5</jsqlparser.version>
         <jwt.version>0.9.1</jwt.version>
         <commons-beanutils.version>1.9.4</commons-beanutils.version>
-        <redission.version>3.16.8</redission.version>
-        <ognl.version>3.3.2</ognl.version>
+        <ognl.version>3.3.4</ognl.version>
     </properties>
 
     <parent>
@@ -195,6 +195,11 @@
             <groupId>commons-beanutils</groupId>
             <artifactId>commons-beanutils</artifactId>
             <version>${commons-beanutils.version}</version>
+        </dependency>
+        <!-- Springboot 2.6: Redis (both Jedis and Lettuce) will now automatically enable pooling when commons-pool2 is on the classpath. -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-pool2</artifactId>
         </dependency>
         <dependency>
             <groupId>ognl</groupId>

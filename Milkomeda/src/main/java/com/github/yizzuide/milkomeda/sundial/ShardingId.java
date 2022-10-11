@@ -27,7 +27,7 @@ package com.github.yizzuide.milkomeda.sundial;
  *
  * @author yizzuide
  * @since 3.8.0
- * <br />
+ * <br>
  * Create at 2020/06/22 09:53
  */
 public class ShardingId {

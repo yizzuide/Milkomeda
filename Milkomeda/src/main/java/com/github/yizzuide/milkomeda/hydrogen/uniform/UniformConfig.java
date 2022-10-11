@@ -24,6 +24,7 @@ package com.github.yizzuide.milkomeda.hydrogen.uniform;
 import com.github.yizzuide.milkomeda.universe.config.MilkomedaContextConfig;
 import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import com.github.yizzuide.milkomeda.universe.polyfill.SpringMvcPolyfill;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -38,11 +39,11 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupp
  *
  * @author yizzuide
  * @since 3.0.0
- * @version 3.0.2
+ * @version 3.14.0
  * @see WebMvcConfigurationSupport#handlerExceptionResolver(org.springframework.web.accept.ContentNegotiationManager)
  * #see ExceptionHandlerExceptionResolver#initExceptionHandlerAdviceCache()
  * #see ExceptionHandlerExceptionResolver#getExceptionHandlerMethod(org.springframework.web.method.HandlerMethod, java.lang.Exception)
- * <br />
+ * <br>
  * Create at 2020/03/25 22:46
  */
 @Import(MilkomedaContextConfig.class)
@@ -55,11 +56,6 @@ public class UniformConfig {
     @Autowired
     private ApplicationContextHolder applicationContextHolder;
 
-    @Autowired
-    public void config(UniformProperties props) {
-        UniformHolder.setProps(props);
-    }
-
     @Bean
     public UniformHandler uniformHandler() {
         return new UniformHandler();
@@ -71,8 +67,24 @@ public class UniformConfig {
     }
 
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
-    @Autowired
-    public void configParamResolve(HandlerExceptionResolver handlerExceptionResolver) {
-        SpringMvcPolyfill.addDynamicExceptionAdvice(handlerExceptionResolver, ApplicationContextHolder.get(),  "uniformHandler");
+    @Configuration
+    static class ExtendedConfig implements InitializingBean {
+
+        @Autowired
+        private UniformProperties props;
+
+        @Autowired
+        private HandlerExceptionResolver handlerExceptionResolver;
+
+        @Override
+        public void afterPropertiesSet() throws Exception {
+            UniformHolder.setProps(props);
+            configExceptionAdvice();
+        }
+
+        // 动态添加异常切面
+        private void configExceptionAdvice() {
+            SpringMvcPolyfill.addDynamicExceptionAdvice(handlerExceptionResolver, ApplicationContextHolder.get(),  "uniformHandler");
+        }
     }
 }

@@ -27,7 +27,7 @@ package com.github.yizzuide.milkomeda.wormhole;
  *
  * @author yizzuide
  * @since 3.3.0
- * <br />
+ * <br>
  * Create at 2020/05/05 14:47
  */
 @FunctionalInterface

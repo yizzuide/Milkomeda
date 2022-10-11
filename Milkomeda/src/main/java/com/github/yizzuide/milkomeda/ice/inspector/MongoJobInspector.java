@@ -41,7 +41,7 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 3.14.0
- * <br />
+ * <br>
  * Create at 2022/09/26 23:02
  */
 public class MongoJobInspector extends AbstractJobInspector {

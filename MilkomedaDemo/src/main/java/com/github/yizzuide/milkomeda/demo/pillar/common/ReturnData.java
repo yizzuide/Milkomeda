@@ -7,7 +7,7 @@ import lombok.Data;
  * 响应对象
  *
  * @author yizzuide
- * <br />
+ * <br>
  * Create at 2019/04/11 16:54
  */
 @Data

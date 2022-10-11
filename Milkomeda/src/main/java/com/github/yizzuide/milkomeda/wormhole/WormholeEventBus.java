@@ -40,7 +40,7 @@ import java.util.concurrent.Future;
  * @author yizzuide
  * @since 3.3.0
  * @version 3.11.4
- * <br />
+ * <br>
  * Create at 2020/05/05 14:30
  */
 @Slf4j

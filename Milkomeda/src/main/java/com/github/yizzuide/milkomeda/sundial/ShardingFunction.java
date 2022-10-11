@@ -39,7 +39,7 @@ import java.util.Date;
  * @author yizzuide
  * @since 3.8.0
  * @version 3.9.0
- * <br />
+ * <br>
  * Create at 2020/06/16 10:34
  */
 @Slf4j

@@ -31,7 +31,7 @@ import java.lang.annotation.*;
  *
  * @author yizzuide
  * @since 3.3.0
- * <br />
+ * <br>
  * Create at 2020/05/05 14:20
  */
 @Documented

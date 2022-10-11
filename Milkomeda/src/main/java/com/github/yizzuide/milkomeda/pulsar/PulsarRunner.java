@@ -37,7 +37,7 @@ import java.util.concurrent.Callable;
  * @since 1.1.0
  * @version 3.12.10
  * @author yizzuide
- * <br />
+ * <br>
  * Create at 2019/05/03 23:53
  */
 @Slf4j

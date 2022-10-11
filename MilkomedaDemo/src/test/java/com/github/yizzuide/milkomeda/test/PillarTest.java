@@ -19,7 +19,7 @@ import org.springframework.web.context.WebApplicationContext;
  * PillarTest
  *
  * @author yizzuide
- * <br />
+ * <br>
  * Create at 2019/04/11 18:40
  */
 @RunWith(SpringRunner.class)
@@ -40,7 +40,7 @@ public class PillarTest {
         val ret = mockMvc.perform(MockMvcRequestBuilders.get("/pay/bankcardPrepay")
                 .param("type", "1")
                 .param("orderId", "1243224343")
-                .contentType(MediaType.APPLICATION_JSON_UTF8))
+                .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andReturn().getResponse().getContentAsString();
         System.out.println(ret);

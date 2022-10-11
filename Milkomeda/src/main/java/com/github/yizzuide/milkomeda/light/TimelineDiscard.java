@@ -33,7 +33,7 @@ import java.util.Date;
  * @since 1.8.0
  * @version 2.0.3
  * @author yizzuide
- * <br />
+ * <br>
  * Create at 2019/06/28 16:25
  */
 public class TimelineDiscard extends SortDiscard {

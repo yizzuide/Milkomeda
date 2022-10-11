@@ -35,7 +35,7 @@ import org.springframework.lang.NonNull;
  * @author yizzuide
  * @since 0.2.1
  * @version 3.1.0
- * <br />
+ * <br>
  * Create at 2019/04/12 11:04
  */
 public class ApplicationContextHolder implements ApplicationContextAware {

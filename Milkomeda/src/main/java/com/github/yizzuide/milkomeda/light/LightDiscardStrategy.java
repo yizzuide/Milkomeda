@@ -27,7 +27,7 @@ package com.github.yizzuide.milkomeda.light;
  * @author yizzuide
  * @version 1.17.0
  * @version 2.0.1
- * <br />
+ * <br>
  * Create at 2019/12/03 16:30
  */
 public enum LightDiscardStrategy {

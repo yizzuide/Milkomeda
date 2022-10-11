@@ -27,7 +27,7 @@ package com.github.yizzuide.milkomeda.moon;
  * @author yizzuide
  * @since 2.6.0
  * @version 3.7.0
- * <br />
+ * <br>
  * Create at 2020/03/13 21:16
  */
 public interface MoonStrategy {

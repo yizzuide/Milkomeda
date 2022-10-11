@@ -32,7 +32,7 @@ import javax.servlet.http.HttpServletResponse;
  *
  * @since 3.14.0
  * @author yizzuide
- * <br />
+ * <br>
  * Create at 2022/10/10 17:22
  */
 public interface CometResponseInterceptor extends Ordered {

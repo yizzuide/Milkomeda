@@ -35,7 +35,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
  * @author yizzuide
  * @since 3.7.1
  * @version 3.12.10
- * <br />
+ * <br>
  * Create at 2020/05/31 14:57
  */
 @ConditionalOnClass(MybatisAutoConfiguration.class)

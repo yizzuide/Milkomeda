@@ -26,7 +26,7 @@ package com.github.yizzuide.milkomeda.atom;
  * 获取锁超时异常
  *
  * @author yizzuide
- * <br />
+ * <br>
  * Create at 2020/05/01 02:19
  */
 public class AtomLockWaitTimeoutException extends RuntimeException {

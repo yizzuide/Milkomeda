@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 3.14.0
- * <br />
+ * <br>
  * Create at 2022/09/26 00:12
  */
 public abstract class AbstractJobInspector implements JobInspector {

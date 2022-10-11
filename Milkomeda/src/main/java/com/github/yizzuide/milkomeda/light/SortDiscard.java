@@ -38,7 +38,7 @@ import java.util.stream.Collectors;
  * @since 1.8.0
  * @version 3.12.10
  * @author yizzuide
- * <br />
+ * <br>
  * Create at 2019/06/28 16:32
  */
 @Slf4j

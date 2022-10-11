@@ -26,7 +26,7 @@ package com.github.yizzuide.milkomeda.hydrogen.uniform;
  *
  * @since 3.14.0
  * @author yizzuide
- * <br />
+ * <br>
  * Create at 2022/10/10 18:38
  */
 public interface ResultVO<T> {

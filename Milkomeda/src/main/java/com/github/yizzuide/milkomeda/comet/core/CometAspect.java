@@ -60,7 +60,7 @@ import java.util.function.Function;
  * @author yizzuide
  * @since 0.2.0
  * @version 3.0.3
- * <br />
+ * <br>
  * Create at 2019/04/11 19:48
  */
 @Slf4j

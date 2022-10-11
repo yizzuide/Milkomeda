@@ -29,7 +29,7 @@ import lombok.Data;
  *
  * @author yizzuide
  * @since 3.8.0
- * <br />
+ * <br>
  * Create at 2020/06/16 14:20
  */
 @Data

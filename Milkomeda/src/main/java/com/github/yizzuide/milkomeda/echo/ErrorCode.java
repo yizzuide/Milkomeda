@@ -27,7 +27,7 @@ package com.github.yizzuide.milkomeda.echo;
  * @author yizzuide
  * @since 1.13.0
  * @version 1.13.1
- * <br />
+ * <br>
  * Create at 2019/09/03 16:47
  */
 public interface ErrorCode {

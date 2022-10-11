@@ -40,7 +40,7 @@ import static org.springframework.web.servlet.HandlerMapping.LOOKUP_PATH;
  *
  * @author yizzuide
  * @since 3.0.0
- * <br />
+ * <br>
  * Create at 2020/03/31 14:56
  */
 @Data

@@ -31,7 +31,7 @@ import org.springframework.web.context.request.async.DeferredResult;
  * @author yizzuide
  * @since  0.1.0
  * @version 1.4.0
- * <br />
+ * <br>
  * Create at 2019/03/30 00:03
  */
 @Data

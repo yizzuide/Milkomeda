@@ -35,7 +35,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
  * @author yizzuide
  * @since 1.14.0
  * @version 1.16.4
- * <br />
+ * <br>
  * Create at 2019/11/11 18:02
  * @see org.springframework.security.authentication.dao.AbstractUserDetailsAuthenticationProvider
  */

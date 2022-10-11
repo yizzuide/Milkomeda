@@ -41,7 +41,7 @@ import java.util.Map;
  * @author yizzuide
  * @since 3.3.0
  * @version 3.11.1
- * <br />
+ * <br>
  * Create at 2020/05/05 14:15
  */
 public class WormholeRegistration {

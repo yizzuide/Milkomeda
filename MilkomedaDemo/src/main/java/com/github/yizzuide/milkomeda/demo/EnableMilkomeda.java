@@ -30,7 +30,7 @@ import java.lang.annotation.Target;
  * Milkomeda里的模块开启集合
  *
  * @author yizzuide
- * <br />
+ * <br>
  * Create at 2019/12/13 01:03
  */
 @EnableOrbit

@@ -40,7 +40,7 @@ import java.util.concurrent.Executor;
  * @author yizzuide
  * @since 1.14.0
  * @version 3.0.0
- * <br />
+ * <br>
  * Create at 2019/11/11 11:34
  */
 @Configuration

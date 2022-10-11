@@ -31,7 +31,7 @@ import org.apache.ibatis.mapping.SqlCommandType;
  *
  * @author yizzuide
  * @since 2.5.1
- * <br />
+ * <br>
  * Create at 2020/02/06 14:38
  */
 @Data

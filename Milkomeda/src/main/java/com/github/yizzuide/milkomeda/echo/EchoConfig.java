@@ -60,7 +60,7 @@ import java.util.Objects;
  * @author yizzuide
  * @since 1.13.0
  * @version 1.13.12
- * <br />
+ * <br>
  * Create at 2019/09/21 16:24
  */
 @Slf4j

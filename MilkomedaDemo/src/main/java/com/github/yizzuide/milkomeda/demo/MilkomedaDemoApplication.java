@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  * MilkomedaDemoApplication
  *
  * @author yizzuide
- * <br />
+ * <br>
  * Create at 2019/03/30 19:04
  */
 @EnableMilkomeda

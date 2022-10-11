@@ -36,7 +36,7 @@ import java.io.Serializable;
  * @since 1.9.0
  * @version 1.17.0
  * @author yizzuide
- * <br />
+ * <br>
  * Create at 2019/07/01 15:39
  */
 public interface Cache {

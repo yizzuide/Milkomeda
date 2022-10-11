@@ -32,7 +32,7 @@ import org.springframework.core.env.ConfigurableEnvironment;
  * @author yizzuide
  * @since 3.0.1
  * @version 3.2.1
- * <br />
+ * <br>
  * Create at 2020/04/11 10:48
  */
 public class CustomPropertySourceLocator implements /*PropertySourceLocator,*/ EnvironmentPostProcessor {

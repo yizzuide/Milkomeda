@@ -32,7 +32,7 @@ import java.io.Serializable;
  *
  * @author yizzuide
  * @since 3.5.0
- * <br />
+ * <br>
  * Create at 2020/05/18 18:02
  */
 @NoArgsConstructor

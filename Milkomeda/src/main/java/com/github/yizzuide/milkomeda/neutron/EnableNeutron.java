@@ -30,7 +30,7 @@ import java.lang.annotation.*;
  *
  * @author yizzuide
  * @since 1.18.0
- * <br />
+ * <br>
  * Create at 2019/12/09 22:33
  */
 @Documented

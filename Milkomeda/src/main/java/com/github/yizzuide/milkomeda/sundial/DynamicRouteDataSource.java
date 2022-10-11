@@ -34,7 +34,7 @@ import java.util.Map;
  * 数据源路由
  * @author jsq 786063250@qq.com
  * @since 3.4.0
- * <br />
+ * <br>
  * Create at 2020/5/8
  */
 @NoArgsConstructor

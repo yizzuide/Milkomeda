@@ -39,7 +39,7 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 3.13.0
- * <br />
+ * <br>
  * Create at 2022/02/23 02:11
  */
 // 虽然@OrbitSourceProvider有添加`@Component`注解，但由于默认的用户业务应用并不扫描这个路径，所以不会被Spring IoC所识别。

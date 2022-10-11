@@ -88,7 +88,7 @@ import java.lang.annotation.*;
  * @author yizzuide
  * @since 1.15.0
  * @version 1.16.0
- * <br />
+ * <br>
  * Create at 2019/11/16 17:24
  */
 @Documented

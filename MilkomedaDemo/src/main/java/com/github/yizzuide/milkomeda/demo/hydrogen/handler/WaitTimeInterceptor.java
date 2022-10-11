@@ -11,7 +11,7 @@ import javax.servlet.http.HttpServletResponse;
  * WaitTimeInterceptor
  *
  * @author yizzuide
- * <br />
+ * <br>
  * Create at 2020/03/31 14:17
  */
 @Slf4j

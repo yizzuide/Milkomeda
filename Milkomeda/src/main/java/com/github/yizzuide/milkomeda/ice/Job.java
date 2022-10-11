@@ -35,7 +35,7 @@ import java.io.Serializable;
  * @author yizzuide
  * @since 1.15.0
  * @version 3.14.0
- * <br />
+ * <br>
  * Create at 2019/11/16 12:00
  */
 @Data

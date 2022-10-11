@@ -44,7 +44,7 @@ import java.util.List;
  * @author yizzuide
  * @since 2.6.0
  * @version 3.12.10
- * <br />
+ * <br>
  * Create at 2020/03/13 21:42
  */
 @EqualsAndHashCode(callSuper = false)

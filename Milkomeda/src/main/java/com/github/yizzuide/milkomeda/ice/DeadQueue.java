@@ -31,7 +31,7 @@ import java.util.List;
  * @author yizzuide
  * @since 3.0.8
  * @version 3.14.0
- * <br />
+ * <br>
  * Create at 2020/04/17 00:40
  */
 public interface DeadQueue {

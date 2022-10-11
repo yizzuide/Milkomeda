@@ -34,7 +34,7 @@ import java.util.Collection;
  *
  * @author yizzuide
  * @since 1.14.0
- * <br />
+ * <br>
  * Create at 2019/11/11 17:12
  */
 public class CrustAuthenticationToken extends UsernamePasswordAuthenticationToken {

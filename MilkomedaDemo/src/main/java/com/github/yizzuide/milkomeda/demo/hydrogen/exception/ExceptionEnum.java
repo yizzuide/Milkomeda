@@ -6,7 +6,7 @@ import com.github.yizzuide.milkomeda.hydrogen.uniform.UniformI18nExceptionDataAs
  * ResponseEnum
  *
  * @author yizzuide
- * <br />
+ * <br>
  * Create at 2020/07/03 17:17
  */
 public enum ExceptionEnum implements UniformI18nExceptionDataAssert {

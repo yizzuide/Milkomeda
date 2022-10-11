@@ -46,7 +46,7 @@ import java.util.stream.Collectors;
  * @author yizzuide
  * @since 1.12.0
  * @version 3.13.0
- * <br />
+ * <br>
  * Create at 2019/08/09 11:09
  */
 @Order(99)

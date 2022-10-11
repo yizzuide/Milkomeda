@@ -37,7 +37,7 @@ import java.util.Properties;
  *
  * @author yizzuide
  * @since 3.1.0
- * <br />
+ * <br>
  * Create at 2020/04/21 10:44
  */
 public class Environment {
