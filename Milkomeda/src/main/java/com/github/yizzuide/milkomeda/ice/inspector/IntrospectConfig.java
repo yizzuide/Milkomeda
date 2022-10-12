@@ -71,6 +71,11 @@ public class IntrospectConfig {
     private JobInspector jobInspector;
 
     @Bean
+    public JobInspectEndpoint jobInspectEndpoint() {
+        return new JobInspectEndpoint();
+    }
+
+    @Bean
     public JobInspector innerJobInspector(IceProperties iceProperties) {
         JobInspector.InspectorType inspectorType = iceProperties.getIntrospect().getInspectorType();
         JobInspector innerJobInspector = null;

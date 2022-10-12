@@ -35,6 +35,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.CollectionUtils;
 
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -84,17 +85,16 @@ public class RedisIce implements Ice, ApplicationListener<IceInstanceChangeEvent
 
     @SuppressWarnings("rawtypes")
     @Override
-    public void add(Job job) {
-        add(job, true, true);
+    public boolean add(Job job) {
+        return add(job, true, true);
     }
 
     @SuppressWarnings("rawtypes")
     @Override
-    public void add(Job job, boolean mergeIdWithTopic, boolean replaceWhenExists) {
+    public boolean add(Job job, boolean mergeIdWithTopic, boolean replaceWhenExists) {
         if (mergeIdWithTopic) {
             job.setId(job.getTopic() + IceProperties.MERGE_ID_SEPARATOR + job.getId());
         }
-
 
         DelayJob delayJob = new DelayJob(job);
         boolean hadSetStatus = job.getStatus() != null;
@@ -106,7 +106,7 @@ public class RedisIce implements Ice, ApplicationListener<IceInstanceChangeEvent
                     serializedJob.getStatus() == JobStatus.READY ||
                     serializedJob.getStatus() == JobStatus.RESERVED) {
                 log.warn("Ice no need to add job which Working normally, jobId: {}", job.getId());
-                return;
+                return false;
             }
             if (props.isEnableRetainToDeadQueueWhenTtrOverload() &&
                     serializedJob.getStatus() == JobStatus.IDLE) {
@@ -136,16 +136,17 @@ public class RedisIce implements Ice, ApplicationListener<IceInstanceChangeEvent
                 }
             }
         }, redisTemplate);
+        return true;
     }
 
     @Override
-    public <T> void add(String id, String topic, T body, Duration delay) {
-        add(build(id, topic, body, delay));
+    public <T> boolean add(String id, String topic, T body, Duration delay) {
+        return add(build(id, topic, body, delay));
     }
 
     @Override
-    public <T> void add(String id, String topic, T body, long delay) {
-        add(build(id, topic, body, delay));
+    public <T> boolean add(String id, String topic, T body, long delay) {
+        return add(build(id, topic, body, delay));
     }
 
     @Override
@@ -158,9 +159,9 @@ public class RedisIce implements Ice, ApplicationListener<IceInstanceChangeEvent
         return new Job<>(id, topic, delay, props.getTtr().toMillis(), props.getRetryCount(), body);
     }
 
-    public void rePushJob(String jobId, String topic) {
+    public boolean rePushJob(String jobId, String topic) {
         // jobId -> merge jobId
-        add(jobPool.get(Ice.mergeId(jobId, topic)), false, true);
+        return add(jobPool.get(Ice.mergeId(jobId, topic)), false, true);
     }
 
     @Override
@@ -177,6 +178,15 @@ public class RedisIce implements Ice, ApplicationListener<IceInstanceChangeEvent
         jobWrappers.forEach(jobWrapper -> jobWrapper.setId(Ice.getId(jobWrapper.getId())));
         page.setItems(jobWrappers);
         return page;
+    }
+
+    @Override
+    public JobWrapper getJobInspectInfo(String topic, String jobId) {
+        JobWrapper jobWrapper = jobInspector.get(Ice.mergeId(jobId, topic));
+        if (jobWrapper != null) {
+            jobWrapper.setId(Ice.getId(jobWrapper.getId()));
+        }
+        return jobWrapper;
     }
 
     @Override
@@ -304,6 +314,15 @@ public class RedisIce implements Ice, ApplicationListener<IceInstanceChangeEvent
         // Record job
         if (jobInspector != null) {
             jobInspector.finish(jobs.stream().map(Job::getId).collect(Collectors.toList()));
+        }
+    }
+
+    @Override
+    public void finish(Object... jobIds) {
+        delete(jobIds);
+        // Record job
+        if (jobInspector != null) {
+            jobInspector.finish(Arrays.stream(jobIds).map(Object::toString).collect(Collectors.toList()));
         }
     }
 

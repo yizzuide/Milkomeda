@@ -22,6 +22,8 @@
 package com.github.yizzuide.milkomeda.ice;
 
 import com.github.yizzuide.milkomeda.ice.inspector.JobInspectPage;
+import com.github.yizzuide.milkomeda.ice.inspector.JobWrapper;
+import com.github.yizzuide.milkomeda.universe.lang.Tuple;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.redis.core.RedisOperations;
 
@@ -43,19 +45,21 @@ public interface Ice {
     /**
      * 添加延迟任务（job的id会与topic合并）
      * @param job   Job
+     * @return true if add success
      */
     @SuppressWarnings("rawtypes")
-    void add(Job job);
+    boolean add(Job job);
 
     /**
      * 添加延迟任务
      * @param job               Job
      * @param mergeIdWithTopic  是否把Job的topic合并进id（一般是建议合并，因为延迟任务会有topic流转再入队的情况）
      * @param replaceWhenExists 当存在时替换
+     * @return true if add success
      * @since 3.0.9
      */
     @SuppressWarnings("rawtypes")
-    void add(Job job, boolean mergeIdWithTopic, boolean replaceWhenExists);
+    boolean add(Job job, boolean mergeIdWithTopic, boolean replaceWhenExists);
 
     /**
      * 添加延迟任务（job的id会与topic合并）
@@ -64,9 +68,10 @@ public interface Ice {
      * @param body  业务数据
      * @param delay 延迟时间
      * @param <T>   业务数据类型
+     * @return true if add success
      * @since 3.0.0
      */
-    <T> void add(String id, String topic, T body, Duration delay);
+    <T> boolean add(String id, String topic, T body, Duration delay);
 
     /**
      * 添加延迟任务（job的id会与topic合并）
@@ -75,8 +80,10 @@ public interface Ice {
      * @param body  业务数据
      * @param delay 延迟时间ms
      * @param <T>   业务数据类型
+     * @return true if add success
+     * @since 3.0.0
      */
-    <T> void add(String id, String topic, T body, long delay);
+    <T> boolean add(String id, String topic, T body, long delay);
 
     /**
      * 构建延迟任务
@@ -106,8 +113,10 @@ public interface Ice {
      * Re-push job to job pool.
      * @param jobId job id
      * @param topic job topic
+     * @return ture if push success
+     * @since 3.14.0
      */
-    void rePushJob(String jobId, String topic);
+    boolean rePushJob(String jobId, String topic);
 
     /**
      * Get all job inspect info list.
@@ -118,6 +127,15 @@ public interface Ice {
      * @since 3.14.0
      */
     JobInspectPage getJobInspectPage(int start, int size, int order);
+
+    /**
+     * Get job inspect info with topic and job id.
+     * @param topic job topic
+     * @param jobId job id
+     * @return  job inspection info
+     * @since 3.14.0
+     */
+    JobWrapper getJobInspectInfo(String topic, String jobId);
 
     /**
      * Get job info in job pool.
@@ -170,6 +188,12 @@ public interface Ice {
     <T> void finish(List<Job<T>> jobs);
 
     /**
+     * finish job list.
+     * @param jobIds job id list
+     */
+    void finish(Object... jobIds);
+
+    /**
      * 删除任务
      * @param jobs    任务列表
      * @param <T>   业务数据
@@ -201,23 +225,38 @@ public interface Ice {
 
     /**
      * Extract job id.
-     * @param jobId merged topic with job id.
-     * @return pure job id.
+     * @param mixId merged topic with job id
+     * @return pure job id
      * @since 3.14.0
      */
     @NotNull
-    static String getId(String jobId) {
-        if (jobId.contains(IceProperties.MERGE_ID_SEPARATOR)) {
-            return jobId.split(IceProperties.MERGE_ID_SEPARATOR)[1];
+    static String getId(String mixId) {
+        if (!mixId.contains(IceProperties.MERGE_ID_SEPARATOR)) {
+            return mixId;
         }
-        return  jobId;
+        return deconstruct(mixId).getT2();
+    }
+
+    /**
+     * Deconstructing topic and job id within mixId.
+     * @param mixId merged topic with job id
+     * @return  tuple(topic, jobId)
+     * @since 3.14.0
+     */
+    @NotNull
+    static Tuple<String, String> deconstruct(String mixId) {
+        if (!mixId.contains(IceProperties.MERGE_ID_SEPARATOR)) {
+            throw new IllegalArgumentException("Ice deconstruct job error with mixId: " + mixId);
+        }
+        String[] parts = mixId.split(IceProperties.MERGE_ID_SEPARATOR);
+        return Tuple.build(parts[0], parts[1]);
     }
 
     /**
      * Mixins job id  with topic.
-     * @param jobId pure job id.
-     * @param topic job topic.
-     * @return  merged topic with job id.
+     * @param jobId pure job id
+     * @param topic job topic
+     * @return  merged topic with job id
      * @since 3.14.0
      */
     @NotNull

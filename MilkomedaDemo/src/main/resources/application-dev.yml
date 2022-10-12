@@ -78,6 +78,8 @@ logging:
     file: UTF-8
 
 management:
+  server:
+    port: 9000
   endpoint:
     shutdown:
       enabled: false

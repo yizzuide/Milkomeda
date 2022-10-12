@@ -137,6 +137,8 @@ milkomeda:
     #use-bcrypt: false
     # 添加到匿名访问许可
     addition-permit-urls:
+      - /actuator
+      - /actuator/**
       - /s_login
       - /collect/**
       - /echo/**
