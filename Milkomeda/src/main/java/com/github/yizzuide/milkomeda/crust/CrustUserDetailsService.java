@@ -28,7 +28,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.util.CollectionUtils;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -49,7 +48,7 @@ public abstract class CrustUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         CrustEntity entity = findEntityByUsername(username);
         if (entity == null) {
-            throw new UsernameNotFoundException("Not Found: " + username);
+            throw new UsernameNotFoundException("Not found entity with username: " + username);
         }
         CrustPerm crustPerm = findPermissionsById(entity.getUID(), username);
         List<GrantedAuthority> grantedAuthorities = null;
@@ -63,7 +62,7 @@ public abstract class CrustUserDetailsService implements UserDetailsService {
             }
         }
         return new CrustUserDetails(entity.getUID(), entity.getUsername(), entity.getPassword(),
-                entity.getSalt(), grantedAuthorities, roleIds, entity);
+                entity.getSalt(), roleIds, grantedAuthorities, entity);
     }
 
     /**
@@ -92,7 +91,7 @@ public abstract class CrustUserDetailsService implements UserDetailsService {
      * @return  CrustEntity
      */
     @Nullable
-    protected Serializable findEntityById(String uid) {return null;}
+    protected CrustEntity findEntityById(String uid) {return null;}
 
     /**
      * 解析Token时根据用户id查找权限列表

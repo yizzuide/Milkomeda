@@ -42,7 +42,7 @@ import java.util.function.Supplier;
  *
  * @author yizzuide
  * @since 1.14.0
- * @version 2.0.4
+ * @version 3.14.0
  * <br>
  * Create at 2019/11/12 22:26
  */
@@ -64,7 +64,9 @@ public class CrustAuthenticationConfigurer<T extends CrustAuthenticationConfigur
     @Override
     public void configure(B http) {
         // 设置认证失败处理器
-        authFilter.setAuthenticationFailureHandler(authFailureHandler.get());
+        if (this.authFailureHandler != null) {
+            authFilter.setAuthenticationFailureHandler(authFailureHandler.get());
+        }
         CrustProperties crustProperties = ApplicationContextHolder.get().getBean(CrustProperties.class);
         if (crustProperties.isEnableAutoRefreshToken()) {
             authFilter.setAuthenticationSuccessHandler(new RefreshSuccessHandler(crustProperties.getRefreshTokenName()));

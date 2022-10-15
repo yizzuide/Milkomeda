@@ -19,30 +19,23 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.comet.core;
-
-import com.mongodb.lang.Nullable;
-import org.springframework.core.Ordered;
-import org.springframework.util.FastByteArrayOutputStream;
-
-import javax.servlet.http.HttpServletResponse;
+package com.github.yizzuide.milkomeda.crust;
 
 /**
- * Comet response wrapper interceptor.
+ * Stateful crust entity that correspond to spring security `UserDetails`.
  *
  * @since 3.14.0
  * @author yizzuide
  * <br>
- * Create at 2022/10/10 17:22
+ * Create at 2022/10/15 13:35
  */
-public interface CometResponseInterceptor extends Ordered {
-    /**
-     * Start write content to response.
-     * @param outputStream  content of response
-     * @param wrapperResponse  wrapper response object
-     * @param rawResponse   real response object
-     * @param body  response body
-     * @return  if true to interrupted content write to response body, and the behind interceptors will not be executed.
-     */
-    boolean writeToResponse(FastByteArrayOutputStream outputStream, HttpServletResponse wrapperResponse, HttpServletResponse rawResponse, @Nullable Object body);
+public interface CrustStatefulEntity extends CrustEntity {
+
+    boolean accountExpired();
+
+    boolean accountLocked();
+
+    boolean credentialsExpired();
+
+    boolean enabled();
 }

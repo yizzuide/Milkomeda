@@ -21,6 +21,9 @@
 
 package com.github.yizzuide.milkomeda.universe.context;
 
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.PathMatcher;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -97,6 +100,7 @@ public final class WebContext {
      * 获取请求信息
      * @return  ServletRequestAttributes
      */
+    @Nullable
     public static ServletRequestAttributes getRequestAttributes() {
         return (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
     }
@@ -105,23 +109,39 @@ public final class WebContext {
      * 获得请求对象
      * @return  HttpServletRequest
      */
+    @Nullable
     public static HttpServletRequest getRequest() {
-        return getRequestAttributes().getRequest();
+        ServletRequestAttributes requestAttributes = getRequestAttributes();
+        if (requestAttributes == null) return null;
+        return requestAttributes.getRequest();
+    }
+
+    @NonNull
+    public static HttpServletRequest getRequestNonNull() {
+        HttpServletRequest request = WebContext.getRequest();
+        Assert.notNull(request, "HttpServletRequest is null");
+        return request;
     }
 
     /**
      * 获取响应对象
      * @return HttpServletResponse
      */
+    @Nullable
     public static HttpServletResponse getResponse() {
-        return getRequestAttributes().getResponse();
+        ServletRequestAttributes requestAttributes = getRequestAttributes();
+        if (requestAttributes == null) return null;
+        return requestAttributes.getResponse();
     }
 
     /**
      * 获取当前会话
      * @return  HttpSession
      */
+    @Nullable
     public static HttpSession getSession() {
-        return getRequest().getSession();
+        HttpServletRequest request = getRequest();
+        if (request == null) return null;
+        return request.getSession();
     }
 }

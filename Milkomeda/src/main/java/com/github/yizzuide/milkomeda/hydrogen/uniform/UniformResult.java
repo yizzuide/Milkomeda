@@ -21,7 +21,11 @@
 
 package com.github.yizzuide.milkomeda.hydrogen.uniform;
 
+import com.github.yizzuide.milkomeda.universe.parser.yml.YmlResponseOutput;
 import lombok.Data;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Uniformed result view object.
@@ -33,9 +37,20 @@ import lombok.Data;
  */
 @Data
 public class UniformResult<T> implements ResultVO<T> {
+
     private String code;
+
     private String message;
+
     private T data;
+
+    public Map<String, Object> toMap() {
+        Map<String, Object> map = new HashMap<>(5);
+        map.put(YmlResponseOutput.CODE, getCode());
+        map.put(YmlResponseOutput.MESSAGE, getMessage());
+        map.put(YmlResponseOutput.DATA, getData());
+        return map;
+    }
 
     /**
      * Return success.
@@ -45,8 +60,6 @@ public class UniformResult<T> implements ResultVO<T> {
      */
     public static <T> ResultVO<T> ok(T data) {
         UniformResult<T> resultVo = new UniformResult<>();
-        resultVo.setCode(UniformHolder.getProps().getDefaultSuccessCode());
-        resultVo.setMessage(UniformHolder.getProps().getDefaultSuccessMessage());
         resultVo.setData(data);
         return resultVo;
     }
@@ -55,13 +68,13 @@ public class UniformResult<T> implements ResultVO<T> {
      * Return failure.
      * @param code      failure code
      * @param message   failure message
+     * @param <T>   data type
      * @return  ResultVO
      */
-    public static ResultVO<?> error(String code, String message) {
-        UniformResult<Object> resultVo = new UniformResult<>();
+    public static <T> ResultVO<T> error(String code, String message) {
+        UniformResult<T> resultVo = new UniformResult<>();
         resultVo.setCode(code);
         resultVo.setMessage(message);
-        resultVo.setData(UniformHolder.getProps().getDefaultFailureData());
         return resultVo;
     }
 }

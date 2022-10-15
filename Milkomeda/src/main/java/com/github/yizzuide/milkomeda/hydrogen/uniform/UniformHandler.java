@@ -28,6 +28,7 @@ import com.github.yizzuide.milkomeda.universe.parser.yml.YmlParser;
 import com.github.yizzuide.milkomeda.universe.parser.yml.YmlResponseOutput;
 import com.github.yizzuide.milkomeda.util.JSONUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.http.HttpHeaders;
@@ -77,9 +78,9 @@ public class UniformHandler extends ResponseEntityExceptionHandler {
     private UniformProperties props;
 
     /**
-     * 自定义异常配置列表缓存
+     * 自定义异常列表
      */
-    private List<Map<String, Object>> customConfList;
+    private List<Map<String, Object>> customExpClazzList;
 
     @SuppressWarnings("unchecked")
     @PostConstruct
@@ -89,22 +90,39 @@ public class UniformHandler extends ResponseEntityExceptionHandler {
         if (customs == null) {
             return;
         }
-        this.customConfList = new ArrayList<>();
+        this.customExpClazzList = new ArrayList<>();
         Map<String, Map<String, Object>> customsMap = (Map<String, Map<String, Object>>) customs;
         for (String k : customsMap.keySet()) {
-            Map<String, Object> eleMap = customsMap.get(k);
-            Object clazz = eleMap.get(YmlResponseOutput.CLAZZ);
-            if (!(clazz instanceof String)) continue;
-            Class<?> expClazz;
-            try {
-                expClazz = Class.forName(clazz.toString());
-            } catch (Exception ex) {
-                log.error("Hydrogen load class error with msg: {}", ex.getMessage(), ex);
-                continue;
+            Map<String, Object> configNodeMap = customsMap.get(k);
+            Object clazzComposite = configNodeMap.get(YmlResponseOutput.CLAZZ);
+            // clazz -> clazz list
+            ArrayList<Class<?>> expClazzList = new ArrayList<>();
+            if (clazzComposite instanceof Map) {
+                Map<String, Object> clazzCompositeIndexMap = (Map<String, Object>) clazzComposite;
+                for (String index : clazzCompositeIndexMap.keySet()) {
+                    Class<?> expClazz = createExceptionClass(clazzCompositeIndexMap.get(index));
+                    expClazzList.add(expClazz);
+                }
+            } else {
+                Class<?> expClazz = createExceptionClass(clazzComposite);
+                if (expClazz != null) {
+                    expClazzList.add(expClazz);
+                }
             }
-            eleMap.put(YmlResponseOutput.CLAZZ, expClazz);
-            this.customConfList.add(eleMap);
+            configNodeMap.put(YmlResponseOutput.CLAZZ, expClazzList);
+            this.customExpClazzList.add(configNodeMap);
         }
+    }
+
+    private Class<?> createExceptionClass(Object clazz) {
+        if (!(clazz instanceof String)) return null;
+        Class<?> expClazz = null;
+        try {
+            expClazz = Class.forName(clazz.toString());
+        } catch (Exception ex) {
+            log.error("Hydrogen load class error with msg: {}", ex.getMessage(), ex);
+        }
+        return expClazz;
     }
 
     // 4xx异常处理
@@ -122,7 +140,7 @@ public class UniformHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<Object> constraintViolationException(ConstraintViolationException e) {
         ConstraintViolation<?> constraintViolation = e.getConstraintViolations().iterator().next();
         String value = String.valueOf(constraintViolation.getInvalidValue());
-        String message = WebContext.getRequest().getRequestURI() +
+        String message = WebContext.getRequestNonNull().getRequestURI() +
                 " [" + constraintViolation.getPropertyPath() + "=" + value + "] " + constraintViolation.getMessage();
         log.warn("Hydrogen uniform valid response exception with msg: {} ", message);
         ResponseEntity<Object> responseEntity = handleExceptionResponse(e, HttpStatus.BAD_REQUEST.value(), message);
@@ -153,10 +171,10 @@ public class UniformHandler extends ResponseEntityExceptionHandler {
         Map<String, Object> result = new HashMap<>();
 
         // 查找自定义异常处理
-        if (this.customConfList != null) {
-            for (Map<String, Object> map : this.customConfList) {
-                Class<Exception> exceptionClass = (Class<Exception>) map.get(YmlResponseOutput.CLAZZ);
-                if (exceptionClass.isInstance(e)) {
+        if (this.customExpClazzList != null) {
+            for (Map<String, Object> map : this.customExpClazzList) {
+                List<Class<Exception>> expClazzList = (List<Class<Exception>>) map.get(YmlResponseOutput.CLAZZ);
+                if (expClazzList.stream().anyMatch(expClazz -> expClazz.isInstance(e))) {
                     YmlResponseOutput.output(map, result, null, e, true);
                     return ResponseEntity.status(Integer.parseInt(status.toString())).body(result);
                 }
@@ -178,7 +196,7 @@ public class UniformHandler extends ResponseEntityExceptionHandler {
         String message = objectError.getDefaultMessage();
         if (objectError.getArguments() != null && objectError.getArguments().length > 0) {
             FieldError fieldError = (FieldError) objectError;
-            message = WebContext.getRequest().getRequestURI() + " [" + fieldError.getField() + "=" + fieldError.getRejectedValue() + "] " + message;
+            message = WebContext.getRequestNonNull().getRequestURI() + " [" + fieldError.getField() + "=" + fieldError.getRejectedValue() + "] " + message;
         }
         log.warn("Hydrogen uniform valid response exception with msg: {} ", message);
         return handleExceptionResponse(ex, HttpStatus.BAD_REQUEST.value(), message);
@@ -230,7 +248,7 @@ public class UniformHandler extends ResponseEntityExceptionHandler {
     }
 
     /**
-     *  Used for external match with status code to get response result.
+     * Used for external match with status code to get response result.
      * @param response  response object
      * @param source    replace data
      * @return tuple(yml node map, response content)
@@ -239,19 +257,35 @@ public class UniformHandler extends ResponseEntityExceptionHandler {
     @SuppressWarnings("unchecked")
     public static Tuple<Map<String, Object>, Map<String, Object>> matchStatusResult(HttpServletResponse response, Map<String, Object> source) {
         UniformProperties props = Binder.get(ApplicationContextHolder.get().getEnvironment()).bind(UniformProperties.PREFIX, UniformProperties.class).get();
-        Map<String, Object> resolveMap = (Map<String, Object>) props.getResponse().get(String.valueOf(response.getStatus()));
-        Map<String, Object> result = new HashMap<>();
-        if (resolveMap != null) {
-            // status == 200?
-            if (response.getStatus() == HttpStatus.OK.value()) {
-                YmlParser.parseAliasMapPath(resolveMap, result, YmlResponseOutput.CODE, null, source);
-                YmlParser.parseAliasMapPath(resolveMap, result, YmlResponseOutput.MESSAGE, null, source);
-                YmlParser.parseAliasMapPath(resolveMap, result, YmlResponseOutput.DATA, null, source);
-            } else { // status != 200
-                YmlResponseOutput.output(resolveMap, result, source, null, false);
+        Map<String, Object> resolveMap;
+        if (props == null) {
+            resolveMap = createInitResolveMap();
+        } else {
+            resolveMap = (Map<String, Object>) props.getResponse().get(String.valueOf(response.getStatus()));
+            if (resolveMap == null) {
+                resolveMap = createInitResolveMap();
             }
         }
+        Map<String, Object> result = new HashMap<>();
+        // status == 200?
+        if (response.getStatus() == HttpStatus.OK.value()) {
+            YmlParser.parseAliasMapPath(resolveMap, result, YmlResponseOutput.CODE, null, source);
+            YmlParser.parseAliasMapPath(resolveMap, result, YmlResponseOutput.MESSAGE, null, source);
+            YmlParser.parseAliasMapPath(resolveMap, result, YmlResponseOutput.DATA, null, source);
+        } else { // status != 200
+            YmlResponseOutput.output(resolveMap, result, source, null, false);
+        }
         return Tuple.build(resolveMap, result);
+    }
+
+    @NotNull
+    private static Map<String, Object> createInitResolveMap() {
+        Map<String, Object> resolveMap = new HashMap<>(7);
+        resolveMap.put(YmlResponseOutput.STATUS, HttpStatus.OK.value());
+        resolveMap.put(YmlResponseOutput.CODE, "");
+        resolveMap.put(YmlResponseOutput.MESSAGE, "");
+        resolveMap.put(YmlResponseOutput.DATA, Collections.emptyMap());
+        return resolveMap;
     }
 
     /**
@@ -270,12 +304,15 @@ public class UniformHandler extends ResponseEntityExceptionHandler {
         }
         String body = JSONUtil.serialize(result);
         Object statusCode = resolveMap.get(YmlResponseOutput.STATUS);
-        response.setStatus(Integer.parseInt(statusCode.toString()));
+        if (statusCode != null) {
+            response.setStatus(Integer.parseInt(statusCode.toString()));
+        }
         response.setCharacterEncoding(StandardCharsets.UTF_8.toString());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setContentLength(body.length());
         PrintWriter writer = response.getWriter();
         writer.println(body);
         writer.flush();
+        writer.close();
     }
 }

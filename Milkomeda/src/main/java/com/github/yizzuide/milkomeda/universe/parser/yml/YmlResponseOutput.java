@@ -27,7 +27,6 @@ import lombok.NonNull;
 import org.springframework.lang.Nullable;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Map;
 
 /**
@@ -36,6 +35,7 @@ import java.util.Map;
  *
  * @author yizzuide
  * @since 3.0.0
+ * @version 3.14.0
  * <br>
  * Create at 2020/04/10 14:15
  */
@@ -90,13 +90,7 @@ public class YmlResponseOutput {
             Map<String, Object> additionMap = (Map) addition;
             for (String key : additionMap.keySet()) {
                 Object ele = additionMap.get(key);
-                if (CollectionsPropertySource.COLLECTIONS_EMPTY_MAP.equals(ele)) {
-                    additionMap.put(key, Collections.emptyMap());
-                    continue;
-                }
-                if (CollectionsPropertySource.COLLECTIONS_EMPTY_LIST.equals(ele)) {
-                    additionMap.put(key, Collections.emptyList());
-                }
+                additionMap.put(key, CollectionsPropertySource.of(String.valueOf(ele)));
             }
             result.putAll(additionMap);
         }

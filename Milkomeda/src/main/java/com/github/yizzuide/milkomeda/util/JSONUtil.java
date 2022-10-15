@@ -49,13 +49,15 @@ public class JSONUtil {
     static {
         // 排除json字符串中实体类没有的字段
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        // 允许特殊字符
+        mapper.configure(JsonReadFeature.ALLOW_UNESCAPED_CONTROL_CHARS.mappedFeature(),true);
+        // 压缩空白输出
         // mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
+
         TimeZone china = TimeZone.getTimeZone("GMT+08:00");
         mapper.setTimeZone(china);
         mapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
         // mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
-        // 允许特殊字符
-        mapper.configure(JsonReadFeature.ALLOW_UNESCAPED_CONTROL_CHARS.mappedFeature(),true);
     }
 
     public static String serialize(Object obj) {

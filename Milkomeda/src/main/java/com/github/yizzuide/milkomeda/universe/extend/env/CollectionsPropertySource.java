@@ -26,6 +26,8 @@ import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.env.StandardEnvironment;
 
+import java.util.Collections;
+
 /**
  * CollectionsPropertySource
  *
@@ -69,6 +71,23 @@ public class CollectionsPropertySource extends PropertySource<Object> {
             return COLLECTIONS_EMPTY_LIST;
         }
         return null;
+    }
+
+    /**
+     * Get empty object with token
+     * @param token token string which express empty type
+     * @return  empty object
+     * @since 3.14.0
+     */
+    public static Object of(Object token) {
+        if (token == null) return null;
+        if (token.equals(COLLECTIONS_EMPTY_MAP)) {
+            return Collections.emptyMap();
+        }
+        if (token.equals(COLLECTIONS_EMPTY_LIST)) {
+            return Collections.emptyList();
+        }
+        return token;
     }
 
     public static void addToEnvironment(ConfigurableEnvironment environment) {

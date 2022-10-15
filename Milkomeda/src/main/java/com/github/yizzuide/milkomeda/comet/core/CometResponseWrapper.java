@@ -34,6 +34,7 @@ import org.springframework.web.util.WebUtils;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.WriteListener;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 import java.io.*;
@@ -231,7 +232,8 @@ public class CometResponseWrapper extends HttpServletResponseWrapper {
             if (complete) {
                 if (!CollectionUtils.isEmpty(INTERCEPTOR_LIST)) {
                     for (CometResponseInterceptor interceptor: INTERCEPTOR_LIST) {
-                        Object body = WebContext.getRequest().getAttribute(CometResponseBodyAdvice.REQUEST_ATTRIBUTE_BODY);
+                        HttpServletRequest request = WebContext.getRequest();
+                        Object body = request == null ? null : request.getAttribute(CometResponseBodyAdvice.REQUEST_ATTRIBUTE_BODY);
                         intercepted = interceptor.writeToResponse(this.content, this, rawResponse, body);
                         if (intercepted) {
                             break;

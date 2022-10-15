@@ -59,6 +59,10 @@ spring:
     #resources:
     #add-mappings: false
 
+    format:
+      date: yyyy-MM-dd
+      date-time: yyyy-MM-dd HH:mm:ss
+
   # 国际化资源位置
   messages:
     basename: i18n/messages

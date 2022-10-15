@@ -110,10 +110,11 @@ public class LightContext<ID, V> {
      * 获取线程数据（用于注册的LightContext Bean）
      * @param identifier 唯一标识
      * @param <V>   对象类型
+     * @return cache value
      * @since 3.13.0
      */
     @SuppressWarnings("unchecked")
-    public static  <V> V getValue(String identifier) {
+    public static <V> V getValue(String identifier) {
         LightContext<Serializable, V> lightContext = SpringContext.registerBean((ConfigurableApplicationContext) ApplicationContextHolder.get(), identifier, LightContext.class);
         Spot<Serializable, V> spot = lightContext.get();
         return spot.getData();

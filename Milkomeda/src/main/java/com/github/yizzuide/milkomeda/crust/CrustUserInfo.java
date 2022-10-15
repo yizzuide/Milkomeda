@@ -58,7 +58,7 @@ public class CrustUserInfo<T> implements Serializable {
      */
     private String token;
     /**
-     * 角色id
+     * 角色id列表
      */
     private List<Long> roleIds;
     /**
@@ -69,8 +69,7 @@ public class CrustUserInfo<T> implements Serializable {
      * 如果stateless=true，那么是无状态token认证方式，该值默认为null，如果想要有值，可实现：<br>
      * <pre class="code">
      * public class XXXDetailsService extends CrustUserDetailsService {
-     *   protected Serializable findEntityById(String uid) {
-     *      return new User("1000", "yiz", new BCryptPasswordEncoder().encode("123456"), null);
+     *   protected CrustEntity findEntityById(String uid) {
      *   }
      * }
      * </pre>
@@ -88,15 +87,5 @@ public class CrustUserInfo<T> implements Serializable {
             return null;
         }
         return getRoleIds().get(0);
-    }
-
-    /**
-     * 获取第一个角色id
-     * @return  角色id
-     */
-    public long firstRoleVal() {
-        Long val = firstRole();
-        assert val != null;
-        return val;
     }
 }

@@ -47,7 +47,7 @@ create table job_inspection
     update_time datetime default now() null,
     constraint job_inspection_pk
         primary key (id)
-);
+) comment 'job状态描述表';
 
 create index job_inspection_push_time_index
     on job_inspection (push_time);

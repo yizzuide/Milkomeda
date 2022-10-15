@@ -27,7 +27,6 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 
 /**
- * PasswordEncoder
  * 自定义加salt密码加密器
  *
  * @author yizzuide

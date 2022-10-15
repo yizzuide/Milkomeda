@@ -26,7 +26,6 @@ import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 
@@ -45,25 +44,40 @@ import java.util.List;
 public class CrustUserDetails implements UserDetails {
     private static final long serialVersionUID = 2749178892063846690L;
 
+    /**
+     * 登录用户ID
+     */
     private String uid;
+
+    /**
+     * 登录用户名
+     */
     private String username;
+
+    /**
+     * 登录密码
+     */
     private String password;
+
     /**
      * 可选自定义加密盐数据列
      */
     private String salt;
-    /**
-     * 权限列表，角色权限必需"ROLE_"前缀，操作权限名随意
-     */
-    private Collection<? extends GrantedAuthority> authorities;
+
     /**
      * 角色id列表
      */
     private List<Long> roleIds;
+
     /**
-     * 数据实体
+     * 角色权限
      */
-    private Serializable entity;
+    private Collection<? extends GrantedAuthority> authorities;
+
+    /**
+     * 用户实体
+     */
+    private CrustEntity entity;
 
     CrustUserDetails(String uid, String username, Collection<? extends GrantedAuthority> authorities, List<Long> roleIds) {
         this.uid = uid;
@@ -74,21 +88,33 @@ public class CrustUserDetails implements UserDetails {
 
     @Override
     public boolean isAccountNonExpired() {
+        if (entity instanceof CrustStatefulEntity) {
+            return !((CrustStatefulEntity) entity).accountExpired();
+        }
         return true;
     }
 
     @Override
     public boolean isAccountNonLocked() {
+        if (entity instanceof CrustStatefulEntity) {
+            return !((CrustStatefulEntity) entity).accountLocked();
+        }
         return true;
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
+        if (entity instanceof CrustStatefulEntity) {
+            return !((CrustStatefulEntity) entity).credentialsExpired();
+        }
         return true;
     }
 
     @Override
     public boolean isEnabled() {
+        if (entity instanceof CrustStatefulEntity) {
+            return ((CrustStatefulEntity) entity).enabled();
+        }
         return true;
     }
 }

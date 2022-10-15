@@ -39,6 +39,7 @@ public interface OrbitSource {
     /**
      * 初始化配置
      * @param environment   Environment
+     * @return Orbit node list
      */
     List<OrbitNode> createNodes(Environment environment);
 }

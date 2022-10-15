@@ -21,6 +21,7 @@
 
 package com.github.yizzuide.milkomeda.universe.parser.yml;
 
+import com.github.yizzuide.milkomeda.universe.extend.env.CollectionsPropertySource;
 import com.github.yizzuide.milkomeda.util.Strings;
 
 import java.util.HashMap;
@@ -128,7 +129,8 @@ public class YmlParser {
             value = valueMap.get(key);
             hasAliasNode = true;
         }
-        // 配置中未指定返回的字段，直接返回
+
+        // 配置中未添加该返回的字段，不计入返回结果
         if (value == null) {
             return;
         }
@@ -147,6 +149,8 @@ public class YmlParser {
             if (ymlAliasNode.getValue() == null) {
                 ymlAliasNode.setValue(initSetValue);
             }
+            // Replace empty token
+            ymlAliasNode.setValue(CollectionsPropertySource.of(ymlAliasNode.getValue()));
             aliasNodeMap.put(ownerAliasKey, ymlAliasNode);
             return;
         }

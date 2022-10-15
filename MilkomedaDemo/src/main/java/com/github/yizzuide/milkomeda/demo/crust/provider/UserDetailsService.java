@@ -6,7 +6,6 @@ import com.github.yizzuide.milkomeda.crust.CrustUserDetailsService;
 import com.github.yizzuide.milkomeda.demo.crust.pojo.User;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
 
@@ -35,7 +34,7 @@ public class UserDetailsService extends CrustUserDetailsService {
     }
 
     @Override
-    protected Serializable findEntityById(String uid) {
+    protected CrustEntity findEntityById(String uid) {
         return new User("1000", "yiz", new BCryptPasswordEncoder().encode("123456"), null);
     }
 

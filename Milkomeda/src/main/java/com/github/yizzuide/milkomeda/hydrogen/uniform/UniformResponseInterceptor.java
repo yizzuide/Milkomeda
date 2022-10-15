@@ -66,7 +66,7 @@ public class UniformResponseInterceptor implements CometResponseInterceptor {
                 wrapperResponse.setContentLength(bytes.length);
                 outputStream.write(bytes);
                 rawResponse.setContentLength(outputStream.size());
-                // winter to response
+                // write to response
                 outputStream.writeTo(rawResponse.getOutputStream());
                 return true;
             } catch (Exception e) {

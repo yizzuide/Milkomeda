@@ -80,7 +80,7 @@ public class CrustAuthenticationProvider extends DaoAuthenticationProvider {
 
         // 如果验证失败
         if (!isMatched) {
-            logger.debug("Authentication failed: password does not match stored value");
+            logger.warn("Authentication failed: password does not match stored value");
             throw new BadCredentialsException(messages.getMessage("AbstractUserDetailsAuthenticationProvider.badCredentials", "Bad credentials"));
         }
     }

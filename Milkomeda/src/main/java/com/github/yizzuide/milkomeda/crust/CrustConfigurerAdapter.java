@@ -21,11 +21,13 @@
 
 package com.github.yizzuide.milkomeda.crust;
 
+import com.github.yizzuide.milkomeda.hydrogen.uniform.ResultVO;
+import com.github.yizzuide.milkomeda.hydrogen.uniform.UniformHandler;
+import com.github.yizzuide.milkomeda.hydrogen.uniform.UniformResult;
 import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -41,7 +43,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
-import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -143,8 +144,10 @@ public class CrustConfigurerAdapter extends WebSecurityConfigurerAdapter {
                     .logout()
                     .logoutUrl(props.getLogoutUrl())
                     .addLogoutHandler((req, res, auth) -> CrustContext.invalidate())
-                    .logoutSuccessHandler(new HttpStatusReturningLogoutSuccessHandler());
-            http.exceptionHandling().accessDeniedHandler(accessDeniedHandler().get());
+                    .logoutSuccessHandler((req, res, auth) -> {
+                        ResultVO<?> source = UniformResult.ok(null);
+                        UniformHandler.matchStatusToWrite(res, source.toMap());
+                    });
         } else {
             // 自定义session方式登录
             http.httpBasic().authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint(props.getLoginUrl()))
@@ -159,6 +162,8 @@ public class CrustConfigurerAdapter extends WebSecurityConfigurerAdapter {
                     .logoutSuccessUrl(props.getLoginUrl())
                     .invalidateHttpSession(true);
         }
+        // Permission access denied handler
+        http.exceptionHandling().accessDeniedHandler(accessDeniedHandler().get());
     }
 
     /**
@@ -193,15 +198,15 @@ public class CrustConfigurerAdapter extends WebSecurityConfigurerAdapter {
     }
 
     /**
-     * 访问拒绝处理器
+     * 权限访问拒绝处理器
      * @return Supplier
      * @since 3.14.0
      */
     @NonNull
     protected Supplier<AccessDeniedHandler> accessDeniedHandler() {
         return () -> (request, response, exception) -> {
-            response.setStatus(HttpStatus.FORBIDDEN.value());
-            response.getWriter().flush();
+            ResultVO<?> source = UniformResult.error(props.getAuthFailCode(), "Access denied.");
+            UniformHandler.matchStatusToWrite(response, source.toMap());
         };
     }
 
@@ -211,7 +216,10 @@ public class CrustConfigurerAdapter extends WebSecurityConfigurerAdapter {
      */
     @NonNull
     protected Supplier<AuthenticationFailureHandler> authFailureHandler() {
-        return () -> (request, response, exception) -> response.setStatus(HttpStatus.UNAUTHORIZED.value());
+        return () -> (request, response, exception) -> {
+            ResultVO<?> source = UniformResult.error(props.getAuthFailCode(), "Authed fail.");
+            UniformHandler.matchStatusToWrite(response, source.toMap());
+        };
     }
 
     @Bean(name = BeanIds.AUTHENTICATION_MANAGER)

@@ -26,6 +26,7 @@ import com.github.yizzuide.milkomeda.universe.config.MilkomedaProperties;
 import com.github.yizzuide.milkomeda.universe.polyfill.SpringMvcPolyfill;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -98,6 +99,7 @@ public class CometConfig {
         @Autowired
         private RequestMappingHandlerAdapter adapter;
 
+        @Qualifier("requestMappingHandlerMapping")
         @Autowired
         private RequestMappingHandlerMapping requestMappingHandlerMapping;
 

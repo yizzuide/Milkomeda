@@ -113,6 +113,12 @@ public class CrustProperties {
     private String refreshTokenName = "Authorization";
 
     /**
+     * default auth fail code.
+     * @since 3.14.0
+     */
+    private String authFailCode = "401";
+
+    /**
      * 登录页面路径（仅在stateless=false时有效，默认/login）
      */
     private String loginUrl = "/login";

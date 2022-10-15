@@ -21,6 +21,8 @@
 
 package com.github.yizzuide.milkomeda.hydrogen.uniform;
 
+import java.util.Map;
+
 /**
  * View Object interface.
  *
@@ -45,4 +47,10 @@ public interface ResultVO<T> {
      * @return  T
      */
     T getData();
+
+    /**
+     * Convert to map.
+     * @return Map
+     */
+    Map<String, Object> toMap();
 }

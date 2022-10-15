@@ -46,21 +46,6 @@ public class UniformProperties {
     private boolean enable = false;
 
     /**
-     * 默认响应成功code
-     */
-    private String defaultSuccessCode = "0";
-
-    /**
-     * 默认响应成功message
-     */
-    private String defaultSuccessMessage;
-
-    /**
-     * 默认响应失败data
-     */
-    private Object defaultFailureData;
-
-    /**
      * 响应数据
      */
     private Map<String, Object> response = new HashMap<>();

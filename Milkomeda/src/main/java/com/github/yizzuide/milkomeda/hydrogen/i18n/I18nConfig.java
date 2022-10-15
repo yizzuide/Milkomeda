@@ -26,6 +26,7 @@ import com.github.yizzuide.milkomeda.universe.polyfill.SpringMvcPolyfill;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.context.MessageSourceAutoConfiguration;
@@ -86,6 +87,7 @@ public class I18nConfig {
         @Autowired
         private I18nMessages i18nMessages;
 
+        @Qualifier("requestMappingHandlerMapping")
         @Autowired
         private RequestMappingHandlerMapping requestMappingHandlerMapping;
 

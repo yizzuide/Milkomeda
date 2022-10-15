@@ -36,7 +36,7 @@ import java.util.Map;
  *
  * @since 3.14.0
  * @author yizzuide
- * <br />
+ * <br>
  * Create at 2022/10/12 15:37
  */
 // Spring boot 2.x 提供了@ControllerEndpoint和@RestControllerEndpoint实现仅由 Spring MVC 或 Spring WebFlux 公开的端点
