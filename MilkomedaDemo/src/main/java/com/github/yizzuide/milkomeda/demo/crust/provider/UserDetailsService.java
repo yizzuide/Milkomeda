@@ -6,6 +6,7 @@ import com.github.yizzuide.milkomeda.crust.CrustUserDetailsService;
 import com.github.yizzuide.milkomeda.demo.crust.pojo.User;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
 
@@ -28,18 +29,18 @@ public class UserDetailsService extends CrustUserDetailsService {
     }
 
     @Override
-    protected CrustPerm findPermissionsById(String uid, String username) {
+    protected CrustPerm findPermissionsById(Serializable uid, String username) {
         // 实际情况下通过Dao查询
         return CrustPerm.builder().permNames(Collections.singletonList("ROLE_USER")).build();
     }
 
     @Override
-    protected CrustEntity findEntityById(String uid) {
+    protected CrustEntity findEntityById(Serializable uid) {
         return new User("1000", "yiz", new BCryptPasswordEncoder().encode("123456"), null);
     }
 
     @Override
-    protected List<String> findAuthorities(String uid) {
+    protected List<String> findAuthorities(Serializable uid) {
         return Collections.singletonList("ROLE_USER");
     }
 }

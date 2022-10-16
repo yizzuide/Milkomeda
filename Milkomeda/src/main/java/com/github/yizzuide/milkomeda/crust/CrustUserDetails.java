@@ -26,6 +26,7 @@ import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 
@@ -47,7 +48,7 @@ public class CrustUserDetails implements UserDetails {
     /**
      * 登录用户ID
      */
-    private String uid;
+    private Serializable uid;
 
     /**
      * 登录用户名
@@ -79,7 +80,7 @@ public class CrustUserDetails implements UserDetails {
      */
     private CrustEntity entity;
 
-    CrustUserDetails(String uid, String username, Collection<? extends GrantedAuthority> authorities, List<Long> roleIds) {
+    CrustUserDetails(Serializable uid, String username, Collection<? extends GrantedAuthority> authorities, List<Long> roleIds) {
         this.uid = uid;
         this.username = username;
         this.authorities = authorities;

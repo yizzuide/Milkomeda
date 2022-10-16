@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * CrustPerm
+ * 角色与权限Code
  *
  * @author yizzuide
  * @since 1.17.2
@@ -46,8 +46,14 @@ public class CrustPerm {
      * 角色ID列表
      */
     private Set<Long> roleIds;
+
     /**
-     * 权限或角色名列表
+     * 权限Code名列表
      */
     private List<String> permNames;
+
+    /**
+     * 权限列表
+     */
+    private List<? extends CrustPermission> permissionList;
 }

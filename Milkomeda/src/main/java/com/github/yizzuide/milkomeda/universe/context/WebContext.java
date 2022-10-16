@@ -119,7 +119,7 @@ public final class WebContext {
     @NonNull
     public static HttpServletRequest getRequestNonNull() {
         HttpServletRequest request = WebContext.getRequest();
-        Assert.notNull(request, "HttpServletRequest is null");
+        Assert.notNull(request, "HttpServletRequest cannot be null");
         return request;
     }
 

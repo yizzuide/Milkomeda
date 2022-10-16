@@ -48,7 +48,7 @@ public class CrustUserInfo<T> implements Serializable {
     /**
      * 用户id
      */
-    private String uid;
+    private Serializable uid;
     /**
      * 用户名
      */
@@ -57,6 +57,10 @@ public class CrustUserInfo<T> implements Serializable {
      * 认证token（stateless=true时有值）
      */
     private String token;
+    /**
+     * token过期时间
+     */
+    private Long tokenExpire;
     /**
      * 角色id列表
      */
@@ -73,9 +77,28 @@ public class CrustUserInfo<T> implements Serializable {
      *   }
      * }
      * </pre>
-     * @see CrustUserDetailsService#findEntityById(String)
+     * @see CrustUserDetailsService#findEntityById(Serializable)
      */
     private T entity;
+
+    public CrustUserInfo(Serializable uid, String username, String token, List<Long> roleIds, T entity) {
+        this.uid = uid;
+        this.username = username;
+        this.token = token;
+        this.roleIds = roleIds;
+        this.entity = entity;
+    }
+
+    public Serializable getUid() {
+        return uid.toString();
+    }
+
+    public Long getUidLong() {
+        if (uid instanceof Long) {
+            return (Long) uid;
+        }
+        return Long.parseLong(uid.toString());
+    }
 
     /**
      * 获取第一个角色id

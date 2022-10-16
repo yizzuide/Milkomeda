@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 yizzuide All rights Reserved.
+ * Copyright (c) 2022 yizzuide All rights Reserved.
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -21,36 +21,68 @@
 
 package com.github.yizzuide.milkomeda.crust;
 
-import lombok.Getter;
-import lombok.Setter;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.GrantedAuthority;
-
-import java.util.Collection;
+import org.springframework.core.Ordered;
 
 /**
- * CrustAuthenticationToken
- * 支持JWT token的认证令牌
+ * Permission for front-end request.
  *
+ * @since 3.14.0
  * @author yizzuide
- * @since 1.14.0
  * <br>
- * Create at 2019/11/11 17:12
+ * Create at 2022/10/16 16:35
  */
-public class CrustAuthenticationToken extends UsernamePasswordAuthenticationToken {
-    private static final long serialVersionUID = -4832533804982166177L;
+public interface CrustPermission extends Ordered {
     /**
-     * 访问令牌
+     * Permission id.
+     * @return  Long
      */
-    @Getter @Setter
-    private String token;
+    Long getId();
 
-    public CrustAuthenticationToken(Object principal, Object credentials){
-        super(principal, credentials);
-    }
+    /**
+     * Permission parent id.
+     * @return  Long
+     */
+    Long getParentId();
 
-    public CrustAuthenticationToken(Object principal, Object credentials, Collection<? extends GrantedAuthority> authorities, String token) {
-        super(principal, credentials, authorities);
-        this.token = token;
-    }
+    /**
+     * Permission name.
+     * @return  String
+     */
+    String getLabel();
+
+    /**
+     * Permission icon.
+     * @return String
+     */
+    String getIcon();
+
+    /**
+     * Permission code.
+     * @return String
+     */
+    String getCode();
+
+    /**
+     * Permission type. (0 is menu directory, 1 is menu, 2 is button action)
+     * @return  Integer
+     */
+    Integer getType();
+
+    /**
+     * Front-end route path.
+     * @return  String
+     */
+    String getRoutePath();
+
+    /**
+     * Front-end route name.
+     * @return  String
+     */
+    String getRouteName();
+
+    /**
+     * Permission access resource url.
+     * @return String
+     */
+    String getUrl();
 }

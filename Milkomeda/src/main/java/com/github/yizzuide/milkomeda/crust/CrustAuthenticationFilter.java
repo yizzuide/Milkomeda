@@ -28,7 +28,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
-import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -75,7 +74,8 @@ public class CrustAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain chain) throws IOException, ServletException {
-        if (!requiresAuthentication(request, response)) {
+        // check match permission url, let it go next.
+        if (permissiveRequest(request)) {
             chain.doFilter(request, response);
             return;
         }
@@ -83,27 +83,28 @@ public class CrustAuthenticationFilter extends OncePerRequestFilter {
         Authentication authResult = null;
         AuthenticationException failed = null;
         Crust crust = CrustContext.get();
-        String token = crust.getToken();
-        try {
-            if (StringUtils.isNotBlank(token)) {
-                authResult = crust.getAuthenticationFromToken(token);
-            } else {
-                failed = new InsufficientAuthenticationException("Require Token is not set");
+        // check request header has token
+        if (!requiresAuthentication(request, response)) {
+            failed = new InsufficientAuthenticationException("Required token is not set.");
+        } else {
+            String token = crust.getToken();
+            try {
+                if (StringUtils.isNotBlank(token)) {
+                    authResult = crust.getAuthenticationFromToken(token);
+                } else {
+                    failed = new InsufficientAuthenticationException("Required token is not set.");
+                }
+            } catch (ClaimJwtException e) {
+                failed = new InsufficientAuthenticationException("Jwt resolve error", e);
+            } catch (AuthenticationException e) {
+                // Authentication failed!
+                failed = e;
             }
-        } catch (ClaimJwtException e) {
-            log.error("JWT format error: {}", e.getMessage(), e);
-            failed = new InsufficientAuthenticationException("JWT format error", failed);
-        } catch (InternalAuthenticationServiceException e) {
-            log.error("An internal error occurred while trying to authenticate the user.", failed);
-            failed = e;
-        } catch (AuthenticationException e) {
-            // Authentication failed			
-            failed = e;
         }
 
         if (authResult != null) {
             successfulAuthentication(request, response, chain, authResult);
-        } else if (!permissiveRequest(request)) {
+        } else {
             unsuccessfulAuthentication(request, response, failed);
             return;
         }
@@ -131,6 +132,7 @@ public class CrustAuthenticationFilter extends OncePerRequestFilter {
 
     protected boolean requiresAuthentication(HttpServletRequest request,
                                              HttpServletResponse response) {
+
         return requiresAuthenticationRequestMatcher.matches(request);
     }
 
@@ -151,14 +153,12 @@ public class CrustAuthenticationFilter extends OncePerRequestFilter {
             permissiveRequestMatchers.add(new AntPathRequestMatcher(url));
     }
 
-    public void setAuthenticationSuccessHandler(
-            AuthenticationSuccessHandler successHandler) {
+    public void setAuthenticationSuccessHandler(AuthenticationSuccessHandler successHandler) {
         Assert.notNull(successHandler, "successHandler cannot be null");
         this.successHandler = successHandler;
     }
 
-    public void setAuthenticationFailureHandler(
-            AuthenticationFailureHandler failureHandler) {
+    public void setAuthenticationFailureHandler(AuthenticationFailureHandler failureHandler) {
         Assert.notNull(failureHandler, "failureHandler cannot be null");
         this.failureHandler = failureHandler;
     }

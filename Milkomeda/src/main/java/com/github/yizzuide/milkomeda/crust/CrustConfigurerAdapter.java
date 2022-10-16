@@ -28,7 +28,7 @@ import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpMethod;
-import org.springframework.lang.NonNull;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.BeanIds;
@@ -36,10 +36,11 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
@@ -51,8 +52,11 @@ import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.*;
-import java.util.function.Supplier;
 
 /**
  * CrustConfigurerAdapter
@@ -113,8 +117,8 @@ public class CrustConfigurerAdapter extends WebSecurityConfigurerAdapter {
             allowURLs.addAll(anonUrls);
         }
         String[] permitAllMapping = allowURLs.toArray(new String[0]);
-        // 添加自定义匿名路径
-        additionalConfigure(http.authorizeRequests(), http);
+        // 通用失败处理器
+        DefaultFailureHandler failureHandler = new DefaultFailureHandler(this);
         http.csrf()
                 .disable()
             .sessionManagement().sessionCreationPolicy(props.isStateless() ?
@@ -139,7 +143,7 @@ public class CrustConfigurerAdapter extends WebSecurityConfigurerAdapter {
         // 如果是无状态方式
         if (props.isStateless()) {
             // 应用Token认证配置器，忽略登出请求
-            http.apply(new CrustAuthenticationConfigurer<>(authFailureHandler())).permissiveRequestUrls(props.getLogoutUrl())
+            http.apply(new CrustAuthenticationConfigurer<>(() -> failureHandler)).permissiveRequestUrls(props.getLoginUrl())
                     .and()
                     .logout()
                     .logoutUrl(props.getLogoutUrl())
@@ -155,15 +159,21 @@ public class CrustConfigurerAdapter extends WebSecurityConfigurerAdapter {
                     .sessionManagement()
                     .sessionFixation().changeSessionId()
                     .sessionAuthenticationErrorUrl(props.getLoginUrl())
-                    .sessionAuthenticationFailureHandler(authFailureHandler().get()).and()
+                    .sessionAuthenticationFailureHandler(failureHandler).and()
             .logout()
                     .logoutUrl(props.getLogoutUrl())
                     .addLogoutHandler((req, res, auth) -> CrustContext.invalidate())
                     .logoutSuccessUrl(props.getLoginUrl())
                     .invalidateHttpSession(true);
         }
-        // Permission access denied handler
-        http.exceptionHandling().accessDeniedHandler(accessDeniedHandler().get());
+
+        // 认证用户无权限访问处理
+        http.exceptionHandling().accessDeniedHandler(failureHandler)
+                // 匿名用户无权限访问处理
+                .authenticationEntryPoint(failureHandler);
+
+        // add others http configure
+        additionalConfigure(http, props.isStateless());
     }
 
     /**
@@ -179,13 +189,11 @@ public class CrustConfigurerAdapter extends WebSecurityConfigurerAdapter {
     }
 
     /**
-     * 自定义添加允许匿名访问的路径
-     *
-     * @param urlRegistry   URL配置对象
-     * @param http          HttpSecurity
-     * @throws Exception    配置异常
+     * Custom http configure.
+     * @param http  HttpSecurity
+     * @param stateless true for session type, false for token type
      */
-    protected void additionalConfigure(ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry urlRegistry, HttpSecurity http) throws Exception { }
+    protected void additionalConfigure(HttpSecurity http, boolean stateless) { }
 
     /**
      * 自定义配置数据源提供及<code>PasswordEncoder</code>
@@ -198,28 +206,17 @@ public class CrustConfigurerAdapter extends WebSecurityConfigurerAdapter {
     }
 
     /**
-     * 权限访问拒绝处理器
-     * @return Supplier
+     * Custom response for auth or access failure handler.
+     * @param isAuth    true if is auth type
+     * @param request   http request
+     * @param response  http response
+     * @param exception AuthenticationException (auth type) | AccessDeniedException (access type)
+     * @throws IOException  if an input or output exception occurred
      * @since 3.14.0
      */
-    @NonNull
-    protected Supplier<AccessDeniedHandler> accessDeniedHandler() {
-        return () -> (request, response, exception) -> {
-            ResultVO<?> source = UniformResult.error(props.getAuthFailCode(), "Access denied.");
-            UniformHandler.matchStatusToWrite(response, source.toMap());
-        };
-    }
-
-    /**
-     * 认证失败处理器
-     * @return Supplier
-     */
-    @NonNull
-    protected Supplier<AuthenticationFailureHandler> authFailureHandler() {
-        return () -> (request, response, exception) -> {
-            ResultVO<?> source = UniformResult.error(props.getAuthFailCode(), "Authed fail.");
-            UniformHandler.matchStatusToWrite(response, source.toMap());
-        };
+    protected void doFailure(boolean isAuth, HttpServletRequest request, HttpServletResponse response, RuntimeException exception) throws IOException {
+        ResultVO<?> source = UniformResult.error(props.getAuthFailCode(), exception.getMessage());
+        UniformHandler.matchStatusToWrite(response, source.toMap());
     }
 
     @Bean(name = BeanIds.AUTHENTICATION_MANAGER)
@@ -238,5 +235,32 @@ public class CrustConfigurerAdapter extends WebSecurityConfigurerAdapter {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
+    }
+
+    static class DefaultFailureHandler implements AuthenticationFailureHandler, AccessDeniedHandler, AuthenticationEntryPoint {
+
+        private final CrustConfigurerAdapter configurerAdapter;
+
+        public DefaultFailureHandler(CrustConfigurerAdapter configurerAdapter) {
+            this.configurerAdapter = configurerAdapter;
+        }
+
+        // 认证失败处理器
+        @Override
+        public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
+            configurerAdapter.doFailure(true, request, response, exception);
+        }
+
+        // 认证用户无权限访问拒绝处理器
+        @Override
+        public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException, ServletException {
+            configurerAdapter.doFailure(false, request, response, accessDeniedException);
+        }
+
+        // 匿名用户无权限访问拒绝处理器
+        @Override
+        public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
+            configurerAdapter.doFailure(false, request, response, authException);
+        }
     }
 }

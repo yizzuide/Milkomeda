@@ -37,6 +37,7 @@ import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationServiceException;
+import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
@@ -46,6 +47,8 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -129,19 +132,23 @@ public class Crust {
 
     /**
      * 刷新令牌
-     * @return Token
+     * @return CrustUserInfo
      */
-    public String refreshToken() {
+    public CrustUserInfo<?> refreshToken() {
         if (!props.isStateless()) { return null; }
         String refreshedToken;
         try {
             Claims claims = JwtUtil.parseToken(getToken(), getUnSignKey());
             claims.put(CREATED, new Date());
+            long expire = LocalDateTime.now().plusMinutes(props.getExpire().toMinutes()).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
             refreshedToken = JwtUtil.generateToken(claims, getSignKey(), Math.toIntExact(props.getExpire().toMinutes()), props.isUseRsa());
+            CrustUserInfo<?> loginUserInfo = getLoginUserInfo(getAuthentication(), null);
+            loginUserInfo.setToken(refreshedToken);
+            loginUserInfo.setTokenExpire(expire);
+            return loginUserInfo;
         } catch (Exception e) {
-            refreshedToken = null;
+            throw new InsufficientAuthenticationException(e.getMessage(), e);
         }
-        return refreshedToken;
     }
 
     /**
@@ -291,9 +298,9 @@ public class Crust {
      */
     @NonNull
     private Boolean validateToken(@NonNull String token, @NonNull String username) {
-        String userName = tokenMetaDataThreadLocal.get().getUsername();
-        if (Strings.isEmpty(userName)) { return false; }
-        return (userName.equals(username) && !JwtUtil.isTokenExpired(token, getUnSignKey()));
+        String usernameFromToken = tokenMetaDataThreadLocal.get().getUsername();
+        if (Strings.isEmpty(usernameFromToken)) { return false; }
+        return (usernameFromToken.equals(username) && !JwtUtil.isTokenExpired(token, getUnSignKey()));
     }
 
     /**
@@ -317,8 +324,10 @@ public class Crust {
                 claims.put(ROLE_IDS, StringUtils.arrayToCommaDelimitedString(roleIds.toArray()));
             }
         }
+        long expire = LocalDateTime.now().plusMinutes(props.getExpire().toMinutes()).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
         String token = JwtUtil.generateToken(claims, getSignKey(), Math.toIntExact(props.getExpire().toMinutes()), props.isUseRsa());
         userInfo.setToken(token);
+        userInfo.setTokenExpire(expire);
         return userInfo;
     }
 
@@ -338,7 +347,7 @@ public class Crust {
         CrustAuthenticationToken authenticationToken = (CrustAuthenticationToken) authentication;
         String token = authenticationToken.getToken();
         CrustUserDetails userDetails = (CrustUserDetails) principal;
-        String uid = userDetails.getUid();
+        Serializable uid = userDetails.getUid();
         List<Long> roleIds = userDetails.getRoleIds();
         T entity = (T) getCrustUserDetailsService().findEntityById(uid);
         return new CrustUserInfo<>(uid, authenticationToken.getName(), token, roleIds,  entity);
@@ -355,7 +364,7 @@ public class Crust {
      * @return  CrustUserInfo
      */
     @SuppressWarnings("unchecked")
-    private <T> CrustUserInfo<T> getLoginUserInfo(Authentication authentication, @NonNull Class<T> clazz) {
+    private <T> CrustUserInfo<T> getLoginUserInfo(Authentication authentication, Class<T> clazz) {
         if (authentication == null) {
             throw new AuthenticationServiceException("Authentication is must be not null");
         }
@@ -388,7 +397,7 @@ public class Crust {
     @Nullable
     public String getToken() {
         if (!props.isStateless()) { return null; }
-        String token = WebContext.getRequest().getHeader(props.getTokenName());
+        String token = WebContext.getRequestNonNull().getHeader(props.getTokenName());
         if (Strings.isEmpty(token)) { return null; }
         // 一般请求头Authorization的值会添加Bearer
         String tokenHead = "Bearer ";

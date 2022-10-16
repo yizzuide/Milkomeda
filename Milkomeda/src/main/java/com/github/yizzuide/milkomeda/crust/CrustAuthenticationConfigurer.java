@@ -108,7 +108,7 @@ class RefreshSuccessHandler implements AuthenticationSuccessHandler {
                                         Authentication authentication) {
         boolean shouldRefresh = shouldTokenRefresh(CrustContext.get().getTokenExpire());
         if (shouldRefresh) {
-            response.setHeader(refreshTokenName, CrustContext.get().refreshToken());
+            response.setHeader(refreshTokenName, CrustContext.get().refreshToken().getToken());
         }
     }
 

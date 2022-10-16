@@ -25,10 +25,8 @@ public class LoginController {
     }
 
     @GetMapping("refresh")
-    public ResultVO<CrustUserInfo<User>> refresh() {
-        CrustUserInfo<User> userInfo = CrustContext.get().getUserInfo(User.class);
-        String token = CrustContext.get().refreshToken();
-        userInfo.setToken(token);
+    public ResultVO<CrustUserInfo<?>> refresh() {
+        CrustUserInfo<?> userInfo = CrustContext.get().refreshToken();
         return UniformResult.ok(userInfo);
     }
 }
