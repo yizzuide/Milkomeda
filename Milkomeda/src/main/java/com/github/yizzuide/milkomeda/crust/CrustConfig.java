@@ -26,6 +26,8 @@ import com.github.yizzuide.milkomeda.light.LightCache;
 import com.github.yizzuide.milkomeda.light.LightCacheAspect;
 import com.github.yizzuide.milkomeda.light.LightProperties;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -42,9 +44,12 @@ import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import javax.annotation.Resource;
+
 /**
  * CrustConfig
  *
+ * @see AbstractAutoProxyCreator#postProcessAfterInitialization(java.lang.Object, java.lang.String)
  * @author yizzuide
  * @since 1.14.0
  * @version 3.14.0
@@ -61,9 +66,7 @@ public class CrustConfig {
 
     @Bean
     public Crust crust() {
-        Crust crust = new Crust();
-        CrustContext.set(crust);
-        return crust;
+        return new Crust();
     }
 
     @Bean
@@ -98,9 +101,12 @@ public class CrustConfig {
 
     @Configuration(proxyBeanMethods = false)
     @EnableConfigurationProperties(CrustProperties.class)
-    public static class CrustURLMappingConfigurer implements WebMvcConfigurer {
+    public static class CrustURLMappingConfigurer implements WebMvcConfigurer, InitializingBean {
         @Autowired
         private CrustProperties crustProps;
+
+        @Resource
+        private Crust crust;
 
         public static final String staticLocation = "classpath:/static/";
 
@@ -126,6 +132,11 @@ public class CrustConfig {
                         registry.addResourceHandler(ResourceMapping.getPathPatterns().toArray(new String[0]))
                                 .addResourceLocations(ResourceMapping.getTargetLocations().toArray(new String[0])));
             }
+        }
+
+        @Override
+        public void afterPropertiesSet() throws Exception {
+            CrustContext.set(crust);
         }
     }
 }

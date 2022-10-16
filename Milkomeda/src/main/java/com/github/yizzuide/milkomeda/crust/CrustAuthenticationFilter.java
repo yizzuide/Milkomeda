@@ -94,7 +94,7 @@ public class CrustAuthenticationFilter extends OncePerRequestFilter {
                     failed = new InsufficientAuthenticationException("Required token is not set.");
                 }
             } catch (ClaimJwtException e) {
-                failed = new InsufficientAuthenticationException("Jwt resolve error", e);
+                failed = new InsufficientAuthenticationException(e.getMessage(), e);
             } catch (AuthenticationException e) {
                 // Authentication failed!
                 failed = e;

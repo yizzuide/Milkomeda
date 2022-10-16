@@ -337,7 +337,7 @@ public class Crust {
 
     // #authentication 与 args[0] 等价
     // #target 与 @crust、#this.object、#root.object等价（#this在表达式不同部分解析过程中可能会改变，但是#root总是指向根，object为自定义root对象属性）
-    @LightCacheable(value = CATCH_NAME, keyPrefix = CATCH_KEY_PREFIX, key = "T(org.springframework.util.DigestUtils).md5Hex(#authentication?.token.bytes)",
+    @LightCacheable(value = CATCH_NAME, keyPrefix = CATCH_KEY_PREFIX, key = "T(org.springframework.util.DigestUtils).md5DigestAsHex(#authentication?.token.bytes)",
             condition = "#authentication!=null&&#target.props.enableCache")
     @SuppressWarnings("unchecked")
     public <T extends CrustEntity> CrustUserInfo<T> getTokenUserInfo(Authentication authentication, @NonNull Class<T> clazz) {

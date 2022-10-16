@@ -24,6 +24,7 @@ package com.github.yizzuide.milkomeda.light;
 import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import com.github.yizzuide.milkomeda.universe.context.SpringContext;
 import com.github.yizzuide.milkomeda.universe.engine.el.ELContext;
+import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -55,6 +56,7 @@ import static com.github.yizzuide.milkomeda.util.ReflectUtil.extractValue;
  * <br>
  * Create at 2019/12/18 14:45
  */
+@Slf4j
 @Order(98)
 @Aspect
 public class LightCacheAspect {
@@ -95,20 +97,24 @@ public class LightCacheAspect {
         // 解析表达式
         String viewId = extractValue(joinPoint, key);
         LightCache cache;
-        String originCacheBeanName = cacheBeanName;
-        // 修改Bean name，防止与开发者项目里重复
-        cacheBeanName = innerCacheBeanName(cacheBeanName);
         if (ApplicationContextHolder.get().containsBean(cacheBeanName)) {
             cache = ApplicationContextHolder.get().getBean(cacheBeanName, LightCache.class);
         } else {
+            String originCacheBeanName = cacheBeanName;
+            // 修改Bean name，防止与开发者项目里重复
+            cacheBeanName = innerCacheBeanName(cacheBeanName);
             cache = SpringContext.registerBean((ConfigurableApplicationContext) ApplicationContextHolder.get(), cacheBeanName, LightCache.class);
             // 自定义缓存实例配置
             if (props.getInstances().containsKey(originCacheBeanName)) {
                 cache.configFrom(props.getInstances().get(originCacheBeanName));
             } else {
                 // 否则拷贝默认的配置
-                LightCache defaultBean = ApplicationContextHolder.get().getBean(DEFAULT_BEAN_NAME, LightCache.class);
-                cache.copyFrom(defaultBean);
+                try {
+                    LightCache defaultBean = ApplicationContextHolder.get().getBean(DEFAULT_BEAN_NAME, LightCache.class);
+                    cache.copyFrom(defaultBean);
+                } catch (Exception e) {
+                  log.warn(e.getMessage(), e);
+                }
             }
         }
 
