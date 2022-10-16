@@ -22,7 +22,6 @@
 package com.github.yizzuide.milkomeda.crust;
 
 import java.io.Serializable;
-import java.util.List;
 
 /**
  * CrustEntity
@@ -39,7 +38,7 @@ public interface CrustEntity extends Serializable {
      * 用户id
      * @return user id
      */
-    Serializable getUId();
+    Serializable getUid();
 
     /**
      * 用户名
@@ -59,19 +58,4 @@ public interface CrustEntity extends Serializable {
      * @return salt
      */
     default String getSalt() {return null;}
-
-    /**
-     * Set permission list.
-     * @param permissionList    permission list
-     * @since 3.14.0
-     */
-    void setPermissionList(List<? extends CrustPermission> permissionList);
-
-    /**
-     * Get permission list.
-     * @return permission list
-     * @since 3.14.0
-     */
-    List<? extends CrustPermission> getPermissionList();
-
 }

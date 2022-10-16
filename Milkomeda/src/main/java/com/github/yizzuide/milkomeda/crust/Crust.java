@@ -128,7 +128,7 @@ public class Crust {
             return generateToken(authentication, entityClazz);
         }
         // session方式
-        return getLoginUserInfo(authentication, entityClazz);
+        return getCurrentLoginUserInfo(authentication, entityClazz);
     }
 
     /**
@@ -143,7 +143,7 @@ public class Crust {
             claims.put(CREATED, new Date());
             long expire = LocalDateTime.now().plusMinutes(props.getExpire().toMinutes()).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
             refreshedToken = JwtUtil.generateToken(claims, getSignKey(), Math.toIntExact(props.getExpire().toMinutes()), props.isUseRsa());
-            CrustUserInfo<?> loginUserInfo = getLoginUserInfo(getAuthentication(), null);
+            CrustUserInfo<?> loginUserInfo = getCurrentLoginUserInfo(getAuthentication(), null);
             loginUserInfo.setToken(refreshedToken);
             loginUserInfo.setTokenExpire(expire);
             return loginUserInfo;
@@ -187,10 +187,10 @@ public class Crust {
 
         // Session方式开启超级缓存
         if (getProps().isEnableCache()) {
-            return CacheHelper.getFastLevel(lightCacheCrust, spot -> getLoginUserInfo(authentication, entityClazz));
+            return CacheHelper.getFastLevel(lightCacheCrust, spot -> getCurrentLoginUserInfo(authentication, entityClazz));
         }
         // Session方式无超级缓存
-        return getLoginUserInfo(authentication, entityClazz);
+        return getCurrentLoginUserInfo(authentication, entityClazz);
     }
 
     /**
@@ -268,11 +268,15 @@ public class Crust {
                 }
                 CrustPerm crustPerm = getCrustUserDetailsService().findPermissionsById(uid);
                 List<GrantedAuthority> authorities = null;
+                CrustUserInfo<CrustEntity> userInfo = new CrustUserInfo<>(uid, username, token, roleIds, null);
+                userInfo.setTokenExpire(expire);
                 if (crustPerm != null) {
                     tokenMetaDataThreadLocal.get().setPermissionList(crustPerm.getPermissionList());
-                    authorities= CrustPerm.buildAuthorities(crustPerm.getPermissionList());
+                    authorities = CrustPerm.buildAuthorities(crustPerm.getPermissionList());
+                    userInfo.setPermissionList(crustPerm.getPermissionList());
                 }
                 CrustUserDetails userDetails = new CrustUserDetails(uid, username, authorities, roleIds);
+                userDetails.setUserInfo(userInfo);
                 authentication = new CrustAuthenticationToken(userDetails, null, authorities, token);
             } else {
                 // 当前上下文认证信息存在，验证token是否正确匹配
@@ -317,7 +321,7 @@ public class Crust {
     @NonNull
     private <T extends CrustEntity> CrustUserInfo<T> generateToken(@NonNull Authentication authentication, @NonNull Class<T> entityClazz) {
         Map<String, Object> claims = new HashMap<>(6);
-        CrustUserInfo<T> userInfo = getLoginUserInfo(authentication, entityClazz);
+        CrustUserInfo<T> userInfo = getCurrentLoginUserInfo(authentication, entityClazz);
         claims.put(UID, userInfo.getUidLong());
         claims.put(USERNAME, userInfo.getUsername());
         claims.put(CREATED, new Date());
@@ -341,32 +345,18 @@ public class Crust {
             condition = "#authentication!=null&&#target.props.enableCache")
     @SuppressWarnings("unchecked")
     public <T extends CrustEntity> CrustUserInfo<T> getTokenUserInfo(Authentication authentication, @NonNull Class<T> clazz) {
-        if (authentication == null) {
-            throw new CrustException("authentication is null");
-        }
-        // 解析Token方式获取用户信息
-        Object principal = authentication.getPrincipal();
-        if (!(authentication instanceof CrustAuthenticationToken) ||
-                !(principal instanceof CrustUserDetails)) {
-            throw new AuthenticationServiceException("Authentication principal must be subtype of CrustUserDetails");
-        }
-        CrustAuthenticationToken authenticationToken = (CrustAuthenticationToken) authentication;
-        String token = authenticationToken.getToken();
-        CrustUserDetails userDetails = (CrustUserDetails) principal;
-        Serializable uid = userDetails.getUid();
-        List<Long> roleIds = userDetails.getRoleIds();
-        T entity = (T) getCrustUserDetailsService().findEntityById(uid);
-        if (entity != null) {
-            List<? extends CrustPermission> permissionList = tokenMetaDataThreadLocal.get().getPermissionList();
-            entity.setPermissionList(permissionList);
-        }
-        return new CrustUserInfo<>(uid, authenticationToken.getName(), token, roleIds,  entity);
+        CrustUserInfo<T> userInfo = getCurrentLoginUserInfo(authentication, clazz);
+        T entity = (T) getCrustUserDetailsService().findEntityById(userInfo.getUid());
+        List<? extends CrustPermission> permissionList = tokenMetaDataThreadLocal.get().getPermissionList();
+        userInfo.setEntity(entity);
+        userInfo.setPermissionList(permissionList);
+        return userInfo;
     }
 
     /**
      * 获取登录时用户信息
      * <br>
-     * Session方式和Token方式登录时都会调用（Session方式获取用户信息也走这里）
+     * Session方式 和 Token方式登录/刷新Token 时都会调用（Session方式获取用户信息也走这里）
      *
      * @param authentication    认证信息
      * @param clazz             实体类型
@@ -374,7 +364,7 @@ public class Crust {
      * @return  CrustUserInfo
      */
     @SuppressWarnings("unchecked")
-    private <T extends CrustEntity> CrustUserInfo<T> getLoginUserInfo(Authentication authentication, Class<T> clazz) {
+    private <T extends CrustEntity> CrustUserInfo<T> getCurrentLoginUserInfo(Authentication authentication, Class<T> clazz) {
         if (authentication == null) {
             throw new AuthenticationServiceException("Authentication is must be not null");
         }
@@ -384,7 +374,7 @@ public class Crust {
             throw new AuthenticationServiceException("Authentication principal must be subtype of CrustUserDetails");
         }
         CrustUserDetails userDetails = (CrustUserDetails) principal;
-        return new CrustUserInfo<>(userDetails.getUid(), userDetails.getUsername(), getToken(), userDetails.getRoleIds(), (T) userDetails.getEntity());
+        return (CrustUserInfo<T>) userDetails.getUserInfo();
     }
 
     /**

@@ -50,18 +50,24 @@ public abstract class CrustUserDetailsService implements UserDetailsService {
         if (entity == null) {
             throw new UsernameNotFoundException("Not found entity with username: " + username);
         }
-        CrustPerm crustPerm = findPermissionsById(entity.getUId());
+        CrustUserInfo<CrustEntity> userInfo = new CrustUserInfo<>();
+        CrustPerm crustPerm = findPermissionsById(entity.getUid());
         List<GrantedAuthority> grantedAuthorities = null;
         List<Long> roleIds = null;
         if (crustPerm != null) {
             if (!CollectionUtils.isEmpty(crustPerm.getRoleIds())) {
                 roleIds = new ArrayList<>(crustPerm.getRoleIds());
+                userInfo.setRoleIds(roleIds);
             }
-            entity.setPermissionList(crustPerm.getPermissionList());
-            grantedAuthorities = CrustPerm.buildAuthorities(crustPerm.getPermissionList());
+            List<? extends CrustPermission> permissionList = crustPerm.getPermissionList();
+            userInfo.setPermissionList(permissionList);
+            grantedAuthorities = CrustPerm.buildAuthorities(permissionList);
         }
-        return new CrustUserDetails(entity.getUId(), entity.getUsername(), entity.getPassword(),
-                entity.getSalt(), roleIds, grantedAuthorities, entity);
+        userInfo.setEntity(entity);
+        userInfo.setUid(entity.getUid());
+        userInfo.setUsername(entity.getUsername());
+        return new CrustUserDetails(userInfo.getUid(), userInfo.getUsername(), entity.getPassword(),
+                entity.getSalt(), roleIds, grantedAuthorities, userInfo);
     }
 
     /**

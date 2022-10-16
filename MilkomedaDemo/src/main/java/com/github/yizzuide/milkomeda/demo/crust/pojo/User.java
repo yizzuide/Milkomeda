@@ -2,13 +2,11 @@ package com.github.yizzuide.milkomeda.demo.crust.pojo;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.github.yizzuide.milkomeda.crust.CrustEntity;
-import com.github.yizzuide.milkomeda.crust.CrustPermission;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
-import java.util.List;
 
 /**
  * User
@@ -32,16 +30,7 @@ public class User implements CrustEntity {
     private String salt;
 
     @Override
-    public Serializable getUId() {
+    public Serializable getUid() {
         return id;
-    }
-
-    @Override
-    public void setPermissionList(List<? extends CrustPermission> permissionList) {
-    }
-
-    @Override
-    public List<? extends CrustPermission> getPermissionList() {
-        return null;
     }
 }

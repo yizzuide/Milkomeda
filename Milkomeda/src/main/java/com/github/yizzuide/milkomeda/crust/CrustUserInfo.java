@@ -66,6 +66,10 @@ public class CrustUserInfo<T> implements Serializable {
      */
     private List<Long> roleIds;
     /**
+     * 权限列表
+     */
+    private List<? extends CrustPermission> permissionList;
+    /**
      * 用户实体对象
      * <br>
      * 注意，这个有没有值根据下面条件：<br>
@@ -90,7 +94,7 @@ public class CrustUserInfo<T> implements Serializable {
     }
 
     public Serializable getUid() {
-        return uid.toString();
+        return uid;
     }
 
     public Long getUidLong() {

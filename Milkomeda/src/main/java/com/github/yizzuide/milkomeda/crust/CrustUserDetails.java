@@ -76,9 +76,9 @@ public class CrustUserDetails implements UserDetails {
     private Collection<? extends GrantedAuthority> authorities;
 
     /**
-     * 用户实体
+     * 用户信息
      */
-    private CrustEntity entity;
+    private CrustUserInfo<CrustEntity> userInfo;
 
     CrustUserDetails(Serializable uid, String username, Collection<? extends GrantedAuthority> authorities, List<Long> roleIds) {
         this.uid = uid;
@@ -89,32 +89,32 @@ public class CrustUserDetails implements UserDetails {
 
     @Override
     public boolean isAccountNonExpired() {
-        if (entity instanceof CrustStatefulEntity) {
-            return !((CrustStatefulEntity) entity).accountExpired();
+        if (userInfo.getEntity() instanceof CrustStatefulEntity) {
+            return !((CrustStatefulEntity) userInfo.getEntity()).accountExpired();
         }
         return true;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        if (entity instanceof CrustStatefulEntity) {
-            return !((CrustStatefulEntity) entity).accountLocked();
+        if (userInfo.getEntity() instanceof CrustStatefulEntity) {
+            return !((CrustStatefulEntity) userInfo.getEntity()).accountLocked();
         }
         return true;
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        if (entity instanceof CrustStatefulEntity) {
-            return !((CrustStatefulEntity) entity).credentialsExpired();
+        if (userInfo.getEntity() instanceof CrustStatefulEntity) {
+            return !((CrustStatefulEntity) userInfo.getEntity()).credentialsExpired();
         }
         return true;
     }
 
     @Override
     public boolean isEnabled() {
-        if (entity instanceof CrustStatefulEntity) {
-            return ((CrustStatefulEntity) entity).enabled();
+        if (userInfo.getEntity() instanceof CrustStatefulEntity) {
+            return ((CrustStatefulEntity) userInfo.getEntity()).enabled();
         }
         return true;
     }
