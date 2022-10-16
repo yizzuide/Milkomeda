@@ -162,7 +162,7 @@ public class CacheHelper {
      * @throws Throwable 获取异常
      */
     @Deprecated
-    public static  <E> E get(Cache cache, TypeReference<E> eTypeRef,
+    public static <E> E get(Cache cache, TypeReference<E> eTypeRef,
                              Function<Serializable, String> keyGenerator, ThrowableFunction<String, E> dataGenerator) throws Throwable {
         return get(cache, eTypeRef, null, keyGenerator, dataGenerator);
     }
@@ -179,7 +179,7 @@ public class CacheHelper {
      * @return                  缓存数据
      * @throws Throwable 获取异常
      */
-    public static  <E> E get(Cache cache, TypeReference<E> eTypeRef, Serializable id,
+    public static <E> E get(Cache cache, TypeReference<E> eTypeRef, Serializable id,
                                 Function<Serializable, String> keyGenerator, ThrowableFunction<String, E> dataGenerator) throws Throwable {
         E data;
         Spot<Serializable, E> fastSpot = null;

@@ -56,7 +56,7 @@ public class CrustContext {
      * @return  CrustUserInfo
      */
     @NonNull
-    public static <T> CrustUserInfo<T> getUserInfo(@NonNull Class<T> entityClass) { return get().getUserInfo(entityClass); }
+    public static <T extends CrustEntity> CrustUserInfo<T> getUserInfo(@NonNull Class<T> entityClass) { return get().getUserInfo(entityClass); }
 
     /**
      * 使登录信息失效，清空当前用户的缓存

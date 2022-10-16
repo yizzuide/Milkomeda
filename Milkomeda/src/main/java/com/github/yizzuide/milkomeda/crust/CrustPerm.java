@@ -25,9 +25,13 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * 角色与权限Code
@@ -48,12 +52,24 @@ public class CrustPerm {
     private Set<Long> roleIds;
 
     /**
-     * 权限Code名列表
-     */
-    private List<String> permNames;
-
-    /**
      * 权限列表
+     * @since 3.14.0
      */
     private List<? extends CrustPermission> permissionList;
+
+    /**
+     * Build spring security authorities.
+     * @return authorities list.
+     * @since 3.14.0
+     */
+    public static List<GrantedAuthority> buildAuthorities(List<? extends CrustPermission> permissionList) {
+        if (permissionList == null) {
+            return null;
+        }
+        List<String> codeList = permissionList.stream().map(CrustPermission::getCode).filter(StringUtils::isNotBlank).collect(Collectors.toList());
+        if (CollectionUtils.isEmpty(codeList)) {
+            return null;
+        }
+        return codeList.stream().map(GrantedAuthorityImpl::new).collect(Collectors.toList());
+    }
 }

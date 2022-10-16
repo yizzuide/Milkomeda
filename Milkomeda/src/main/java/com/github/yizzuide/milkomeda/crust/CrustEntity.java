@@ -39,7 +39,7 @@ public interface CrustEntity extends Serializable {
      * 用户id
      * @return user id
      */
-    Serializable getUID();
+    Serializable getUId();
 
     /**
      * 用户名
@@ -63,6 +63,15 @@ public interface CrustEntity extends Serializable {
     /**
      * Set permission list.
      * @param permissionList    permission list
+     * @since 3.14.0
      */
-    default void setPermissionList(List<? extends CrustPermission> permissionList) {}
+    void setPermissionList(List<? extends CrustPermission> permissionList);
+
+    /**
+     * Get permission list.
+     * @return permission list
+     * @since 3.14.0
+     */
+    List<? extends CrustPermission> getPermissionList();
+
 }

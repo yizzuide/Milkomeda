@@ -31,7 +31,6 @@ import org.springframework.util.CollectionUtils;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * CrustUserDetailsService
@@ -51,24 +50,22 @@ public abstract class CrustUserDetailsService implements UserDetailsService {
         if (entity == null) {
             throw new UsernameNotFoundException("Not found entity with username: " + username);
         }
-        CrustPerm crustPerm = findPermissionsById(entity.getUID(), username);
+        CrustPerm crustPerm = findPermissionsById(entity.getUId());
         List<GrantedAuthority> grantedAuthorities = null;
         List<Long> roleIds = null;
         if (crustPerm != null) {
             if (!CollectionUtils.isEmpty(crustPerm.getRoleIds())) {
                 roleIds = new ArrayList<>(crustPerm.getRoleIds());
             }
-            if (!CollectionUtils.isEmpty(crustPerm.getPermNames())) {
-                grantedAuthorities = crustPerm.getPermNames().stream().map(GrantedAuthorityImpl::new).collect(Collectors.toList());
-            }
             entity.setPermissionList(crustPerm.getPermissionList());
+            grantedAuthorities = CrustPerm.buildAuthorities(crustPerm.getPermissionList());
         }
-        return new CrustUserDetails(entity.getUID(), entity.getUsername(), entity.getPassword(),
+        return new CrustUserDetails(entity.getUId(), entity.getUsername(), entity.getPassword(),
                 entity.getSalt(), roleIds, grantedAuthorities, entity);
     }
 
     /**
-     * 登录时根据用户名查找实体
+     * 登录时根据用户名查找实体（Session + Token）
      *
      * @param username  用户名
      * @return  CrustEntity
@@ -77,31 +74,20 @@ public abstract class CrustUserDetailsService implements UserDetailsService {
     protected abstract CrustEntity findEntityByUsername(String username);
 
     /**
-     * 登录时根据用户名查找权限列表（Session方式查询角色ID和权限，Token方式查询角色ID）
+     * 登录时根据用户名查找权限列表（Session + Token）
      *
      * @param uid  用户id
-     * @param username 用户名
      * @return  权限数据
      */
     @Nullable
-    protected abstract CrustPerm findPermissionsById(Serializable uid, String username);
+    protected abstract CrustPerm findPermissionsById(Serializable uid);
 
     /**
-     * 解析Token时根据用户id查找实体
+     * 解析Token时根据用户id查找实体（Token）
      *
      * @param uid   用户id
      * @return  CrustEntity
      */
     @Nullable
     protected CrustEntity findEntityById(Serializable uid) {return null;}
-
-    /**
-     * 解析Token时根据用户id查找权限列表
-     * @param uid   用户id
-     * @return  权限数据
-     */
-    @Nullable
-    protected List<String> findAuthorities(Serializable uid) {
-        return null;
-    }
 }

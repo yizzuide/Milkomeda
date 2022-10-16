@@ -31,6 +31,7 @@ import com.github.yizzuide.milkomeda.util.JwtUtil;
 import com.github.yizzuide.milkomeda.util.Strings;
 import io.jsonwebtoken.Claims;
 import lombok.Getter;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.lang.NonNull;
@@ -95,7 +96,7 @@ public class Crust {
 
     @Qualifier(Crust.CATCH_NAME)
     @Autowired(required = false)
-    Cache lightCacheCrust;
+    private Cache lightCacheCrust;
 
     private CrustUserDetailsService crustUserDetailsService;
 
@@ -109,7 +110,7 @@ public class Crust {
      * @return CrustUserInfo
      */
     @NonNull
-    public <T> CrustUserInfo<T> login(@NonNull String username, @NonNull String password, @NonNull Class<T> entityClazz) {
+    public <T extends CrustEntity> CrustUserInfo<T> login(@NonNull String username, @NonNull String password, @NonNull Class<T> entityClazz) {
         // CrustAuthenticationToken封装了UsernamePasswordAuthenticationToken
         CrustAuthenticationToken authenticationToken = new CrustAuthenticationToken(username, password);
         // 设置请求信息
@@ -172,7 +173,7 @@ public class Crust {
      * @return  CrustUserInfo
      */
     @NonNull
-    public <T> CrustUserInfo<T> getUserInfo(@NonNull Class<T> entityClazz) {
+    public <T extends CrustEntity> CrustUserInfo<T> getUserInfo(Class<T> entityClazz) {
         Authentication authentication = getAuthentication();
         if (authentication == null) {
             throw new CrustException("authentication is null");
@@ -208,7 +209,8 @@ public class Crust {
         try {
             // Token方式下开启缓存时清空
             if (getProps().isEnableCache() && getProps().isStateless()) {
-                CacheHelper.erase(lightCacheCrust, getUserInfo(Serializable.class).getUid(), id -> Crust.CATCH_KEY_PREFIX + id);
+                CrustUserInfo<CrustEntity> userInfo = getUserInfo(null);
+                CacheHelper.erase(lightCacheCrust, userInfo.getUid(), id -> CATCH_KEY_PREFIX + DigestUtils.md5Hex(userInfo.getToken()));
             }
         } finally {
             SecurityContextHolder.clearContext();
@@ -253,7 +255,7 @@ public class Crust {
                 if (JwtUtil.isTokenExpired(token, unSignKey)) {
                     return null;
                 }
-                String uid = (String) claims.get(UID);
+                Serializable uid = (Serializable) claims.get(UID);
                 long issuedAt = (long) claims.get(CREATED);
                 long expire = claims.getExpiration().getTime();
                 // 设置Token元数据
@@ -264,10 +266,11 @@ public class Crust {
                 if (RoleIdsObj != null) {
                     roleIds = Arrays.stream(((String) RoleIdsObj).split(",")).map(Long::parseLong).collect(Collectors.toList());
                 }
-                List<String> authoritiesList = getCrustUserDetailsService().findAuthorities(uid);
+                CrustPerm crustPerm = getCrustUserDetailsService().findPermissionsById(uid);
                 List<GrantedAuthority> authorities = null;
-                if (authoritiesList != null) {
-                    authorities = authoritiesList.stream().map(GrantedAuthorityImpl::new).collect(Collectors.toList());
+                if (crustPerm != null) {
+                    tokenMetaDataThreadLocal.get().setPermissionList(crustPerm.getPermissionList());
+                    authorities= CrustPerm.buildAuthorities(crustPerm.getPermissionList());
                 }
                 CrustUserDetails userDetails = new CrustUserDetails(uid, username, authorities, roleIds);
                 authentication = new CrustAuthenticationToken(userDetails, null, authorities, token);
@@ -279,6 +282,7 @@ public class Crust {
                 }
             }
         }
+        SecurityContextHolder.getContext().setAuthentication(authentication);
         return authentication;
     }
 
@@ -311,10 +315,10 @@ public class Crust {
      * @return CrustUserInfo
      */
     @NonNull
-    private <T> CrustUserInfo<T> generateToken(@NonNull Authentication authentication, @NonNull Class<T> entityClazz) {
+    private <T extends CrustEntity> CrustUserInfo<T> generateToken(@NonNull Authentication authentication, @NonNull Class<T> entityClazz) {
         Map<String, Object> claims = new HashMap<>(6);
         CrustUserInfo<T> userInfo = getLoginUserInfo(authentication, entityClazz);
-        claims.put(UID, userInfo.getUid());
+        claims.put(UID, userInfo.getUidLong());
         claims.put(USERNAME, userInfo.getUsername());
         claims.put(CREATED, new Date());
         Object principal = authentication.getPrincipal();
@@ -331,10 +335,12 @@ public class Crust {
         return userInfo;
     }
 
+    // #authentication 与 args[0] 等价
+    // #target 与 @crust、#this.object、#root.object等价（#this在表达式不同部分解析过程中可能会改变，但是#root总是指向根，object为自定义root对象属性）
+    @LightCacheable(value = CATCH_NAME, keyPrefix = CATCH_KEY_PREFIX, key = "T(org.springframework.util.DigestUtils).md5Hex(#authentication?.token.bytes)",
+            condition = "#authentication!=null&&#target.props.enableCache")
     @SuppressWarnings("unchecked")
-    @LightCacheable(value = CATCH_NAME, keyPrefix = CATCH_KEY_PREFIX, key = "T(org.springframework.util.DigestUtils).md5DigestAsHex(#authentication?.token.bytes)", // #authentication 与 args[0] 等价
-            condition = "#authentication!=null&&#target.props.enableCache") // #target 与 @crust、#this.object、#root.object等价（#this在表达式不同部分解析过程中可能会改变，但是#root总是指向根，object为自定义root对象属性）
-    public <T> CrustUserInfo<T> getTokenUserInfo(Authentication authentication, @NonNull Class<T> clazz) {
+    public <T extends CrustEntity> CrustUserInfo<T> getTokenUserInfo(Authentication authentication, @NonNull Class<T> clazz) {
         if (authentication == null) {
             throw new CrustException("authentication is null");
         }
@@ -350,6 +356,10 @@ public class Crust {
         Serializable uid = userDetails.getUid();
         List<Long> roleIds = userDetails.getRoleIds();
         T entity = (T) getCrustUserDetailsService().findEntityById(uid);
+        if (entity != null) {
+            List<? extends CrustPermission> permissionList = tokenMetaDataThreadLocal.get().getPermissionList();
+            entity.setPermissionList(permissionList);
+        }
         return new CrustUserInfo<>(uid, authenticationToken.getName(), token, roleIds,  entity);
     }
 
@@ -364,7 +374,7 @@ public class Crust {
      * @return  CrustUserInfo
      */
     @SuppressWarnings("unchecked")
-    private <T> CrustUserInfo<T> getLoginUserInfo(Authentication authentication, Class<T> clazz) {
+    private <T extends CrustEntity> CrustUserInfo<T> getLoginUserInfo(Authentication authentication, Class<T> clazz) {
         if (authentication == null) {
             throw new AuthenticationServiceException("Authentication is must be not null");
         }

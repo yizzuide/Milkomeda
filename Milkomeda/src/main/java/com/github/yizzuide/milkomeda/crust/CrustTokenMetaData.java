@@ -25,6 +25,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
+import java.util.List;
+
 /**
  * CrustTokenMetaData
  *
@@ -41,10 +44,11 @@ public class CrustTokenMetaData {
      * 用户名
      */
     private String username;
+
     /**
      * 用户id
      */
-    private String uid;
+    private Serializable uid;
 
     /**
      * token发行时间
@@ -55,4 +59,16 @@ public class CrustTokenMetaData {
      * 过期时间
      */
     private long expire;
+
+    /**
+     * 权限列表
+     */
+    List<? extends CrustPermission> permissionList;
+
+    public CrustTokenMetaData(String username, Serializable uid, long issuedAt, long expire) {
+        this.username = username;
+        this.uid = uid;
+        this.issuedAt = issuedAt;
+        this.expire = expire;
+    }
 }
