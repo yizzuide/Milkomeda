@@ -343,6 +343,10 @@ public class LightCache implements Cache {
 
     @Override
     public void erase(String key) {
+        if (enableSuperCache) {
+            // 从超级缓存移除
+            superCache.remove();
+        }
         if (!onlyCacheL1) {
             // 从二级缓存移除
             RedisPolyfill.redisDelete(stringRedisTemplate, key);

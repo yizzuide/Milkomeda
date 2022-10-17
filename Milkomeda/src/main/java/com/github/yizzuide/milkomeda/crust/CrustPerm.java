@@ -58,6 +58,21 @@ public class CrustPerm {
     private List<CrustPermission> permissionList;
 
     /**
+     * Create from permission list.
+     * @param permissionList crust permission list
+     * @return CrustPerm
+     * @since 3.14.0
+     */
+    public static CrustPerm create(List<? extends CrustPermission> permissionList) {
+        if (permissionList == null) {
+            return CrustPerm.builder().build();
+        }
+        CrustPerm crustPerm = new CrustPerm();
+        crustPerm.setPermissionList(permissionList.stream().map(perm -> (CrustPermission)perm).collect(Collectors.toList()));
+        return crustPerm;
+    }
+
+    /**
      * Build spring security authorities.
      * @return authorities list.
      * @since 3.14.0

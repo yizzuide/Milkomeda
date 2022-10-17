@@ -142,6 +142,9 @@ public class CrustUserInfo<T, P> implements Serializable {
     @SuppressWarnings("unchecked")
     public T getEntity() {
         if (this.entity instanceof Map) {
+            if (this.getEntityClass() == null) {
+                return this.entity;
+            }
             this.entity = (T) JSONUtil.parse(JSONUtil.serialize(this.entity), this.getEntityClass());
         }
         return this.entity;
@@ -150,6 +153,10 @@ public class CrustUserInfo<T, P> implements Serializable {
     @SneakyThrows
     @SuppressWarnings("unchecked")
     public void setPermissionList(List<P> permissionList) {
+        if (permissionList == null) {
+            this.permissionList = null;
+            return;
+        }
         boolean isMap = permissionList.get(0) instanceof Map;
         if (!CollectionUtils.isEmpty(permissionList)) {
             if (isMap && this.permClass != null) {

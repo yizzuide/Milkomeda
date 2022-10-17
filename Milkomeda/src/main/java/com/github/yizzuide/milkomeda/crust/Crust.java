@@ -23,6 +23,7 @@ package com.github.yizzuide.milkomeda.crust;
 
 import com.github.yizzuide.milkomeda.light.Cache;
 import com.github.yizzuide.milkomeda.light.CacheHelper;
+import com.github.yizzuide.milkomeda.light.LightCacheEvict;
 import com.github.yizzuide.milkomeda.light.LightCacheable;
 import com.github.yizzuide.milkomeda.universe.context.AopContextHolder;
 import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
@@ -44,7 +45,6 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.DigestUtils;
 import org.springframework.util.StringUtils;
 
 import java.io.Serializable;
@@ -202,7 +202,7 @@ public class Crust {
         // Token方式 || Session方式无超级缓存
         if (props.isStateless() || !getProps().isEnableCache()) {
             CrustUserInfo<T, CrustPermission> userInfo = getCurrentLoginUserInfo(authentication, entityClazz);
-            if (props.isEnableCache()) {
+            if (props.isEnableCache() && entityClazz != null) {
                 // set entity class for create real type's object later.
                 userInfo.setEntityClass(entityClazz);
             }
@@ -218,8 +218,6 @@ public class Crust {
      * @param token 请求令牌
      * @return CrustUserInfo
      */
-    // #token 与 args[0] 等价
-    // #target 与 @crust、#this.object、#root.object等价（#this在表达式不同部分解析过程中可能会改变，但是#root总是指向根，object为自定义root对象属性）
     @LightCacheable(value = CATCH_NAME, keyPrefix = CATCH_KEY_PREFIX, key = "T(org.springframework.util.DigestUtils).md5DigestAsHex(#token?.bytes)", condition = "#target.props.enableCache")
     // 不使用泛型，因为不知道具体类型，无法恢复回来，让其先转为Map或List
     @SuppressWarnings("rawtypes")
@@ -256,6 +254,12 @@ public class Crust {
         return userInfo;
     }
 
+    // #token 与 args[0] 等价
+    // #target 与 @crust、#this.object、#root.object等价（#this在表达式不同部分解析过程中可能会改变，但是#root总是指向根，object为自定义root对象属性）
+    @LightCacheEvict(value = Crust.CATCH_NAME, keyPrefix = CATCH_KEY_PREFIX, key = "T(org.springframework.util.DigestUtils).md5DigestAsHex(#token?.bytes)", condition = "#target.props.enableCache")
+    public void removeTokenCache(String token) {
+    }
+
     /**
      * Active authentication with crust user info.
      * @param userInfo CrustUserInfo
@@ -285,13 +289,18 @@ public class Crust {
         if (!props.isStateless()) { return null; }
         String refreshedToken;
         try {
-            Claims claims = JwtUtil.parseToken(getToken(), getUnSignKey());
+            String token = getToken();
+            Claims claims = JwtUtil.parseToken(token, getUnSignKey());
             claims.put(CREATED, new Date());
             long expire = LocalDateTime.now().plusMinutes(props.getExpire().toMinutes()).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
             refreshedToken = JwtUtil.generateToken(claims, getSignKey(), expire, props.isUseRsa());
             CrustUserInfo<?, CrustPermission> loginUserInfo = getCurrentLoginUserInfo(getAuthentication(), null);
             loginUserInfo.setToken(refreshedToken);
             loginUserInfo.setTokenExpire(expire);
+            // remove cache (old token with user auth info)
+            AopContextHolder.self(this.getClass()).removeTokenCache(token);
+            // re-cache user auth info with refreshed token, not need change it.
+            AopContextHolder.self(this.getClass()).getAuthInfoFromToken(refreshedToken);
             return loginUserInfo;
         } catch (Exception e) {
             log.warn("Crust refresh token fail with msg: {}", e.getMessage());
@@ -314,9 +323,8 @@ public class Crust {
     public void invalidate() {
         try {
             // Token方式下开启缓存时清空
-            if (getProps().isEnableCache() && getProps().isStateless()) {
-                CrustUserInfo<CrustEntity, CrustPermission> userInfo = getUserInfo(null);
-                CacheHelper.erase(lightCacheCrust, userInfo.getUid(), id -> CATCH_KEY_PREFIX + DigestUtils.md5DigestAsHex(userInfo.getToken().getBytes()));
+            if (getProps().isStateless()) {
+                AopContextHolder.self(this.getClass()).removeTokenCache(getUserInfo(null).getToken());
             }
         } finally {
             SecurityContextHolder.clearContext();
