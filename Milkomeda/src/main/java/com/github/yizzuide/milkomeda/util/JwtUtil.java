@@ -26,6 +26,7 @@ import io.jsonwebtoken.*;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SignatureException;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
@@ -68,7 +69,7 @@ public class JwtUtil {
     public static String generateToken(Map<String, Object> claims, String secureKey, long expireTime, boolean usedRSA) {
         return Jwts.builder()
                 .setClaims(claims)
-                .setExpiration(new Date(expireTime))
+                .setExpiration(Date.from(Instant.ofEpochMilli(expireTime)))
                 .signWith(usedRSA ? SignatureAlgorithm.RS256 : SignatureAlgorithm.HS512, secureKey)
                 .compact();
     }
