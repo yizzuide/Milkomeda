@@ -79,7 +79,7 @@ public class CrustAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        Authentication authResult = null;
+        CrustUserInfo<CrustEntity> authResult = null;
         AuthenticationException failed = null;
         Crust crust = CrustContext.get();
         // check request header has token
@@ -102,17 +102,17 @@ public class CrustAuthenticationFilter extends OncePerRequestFilter {
         }
 
         if (authResult != null) {
-            successfulAuthentication(request, response, chain, authResult);
+            Authentication authentication = crust.getContext().getAuthentication();
+            // null is getting from cache, need active authentication.
+            if (authentication == null) {
+                crust.activeAuthentication(authResult);
+            }
+            successfulAuthentication(request, response, chain, authentication);
         } else {
             unsuccessfulAuthentication(request, response, failed);
             return;
         }
-        try {
-            chain.doFilter(request, response);
-        } finally {
-            // 清空Token元数据（防止内存泄露）
-            crust.clearTokenMetaData();
-        }
+        chain.doFilter(request, response);
     }
 
     protected void unsuccessfulAuthentication(HttpServletRequest request,
@@ -122,9 +122,9 @@ public class CrustAuthenticationFilter extends OncePerRequestFilter {
     }
 
     protected void successfulAuthentication(HttpServletRequest request,
-                                            HttpServletResponse response, FilterChain chain, Authentication authResult)
+                                            HttpServletResponse response, FilterChain chain, Authentication authentication)
             throws IOException, ServletException {
-        successHandler.onAuthenticationSuccess(request, response, authResult);
+        successHandler.onAuthenticationSuccess(request, response, authentication);
     }
 
     protected boolean requiresAuthentication(HttpServletRequest request,

@@ -36,6 +36,7 @@ import java.util.Map;
  *
  * @author yizzuide
  * @since 1.14.0
+ * @version 3.14.0
  * <br>
  * Create at 2019/11/11 15:16
  */
@@ -128,8 +129,18 @@ public class JwtUtil {
      * @return 是否过期
      */
     public static Boolean isTokenExpired(String token, String secureKey) {
+        Claims claims = parseToken(token, secureKey);
+        return isTokenExpired(claims);
+    }
+
+    /**
+     * 判断令牌是否过期
+     * @param claims Token数据
+     * @return 是否过期
+     * @since 3.14.0
+     */
+    public static Boolean isTokenExpired(Claims claims) {
         try {
-            Claims claims = parseToken(token, secureKey);
             Date expiration = claims.getExpiration();
             return expiration.before(new Date());
         } catch (Exception e) {

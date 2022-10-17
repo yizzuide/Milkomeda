@@ -24,14 +24,12 @@ package com.github.yizzuide.milkomeda.crust;
 import com.github.yizzuide.milkomeda.light.Cache;
 import com.github.yizzuide.milkomeda.light.CacheHelper;
 import com.github.yizzuide.milkomeda.light.LightCacheable;
-import com.github.yizzuide.milkomeda.universe.context.AopContextHolder;
 import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import com.github.yizzuide.milkomeda.universe.context.WebContext;
 import com.github.yizzuide.milkomeda.util.JwtUtil;
 import com.github.yizzuide.milkomeda.util.Strings;
 import io.jsonwebtoken.Claims;
 import lombok.Getter;
-import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.lang.NonNull;
@@ -45,6 +43,7 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.DigestUtils;
 import org.springframework.util.StringUtils;
 
 import java.io.Serializable;
@@ -64,15 +63,14 @@ import java.util.stream.Collectors;
  * Create at 2019/11/11 15:48
  */
 public class Crust {
-    // 缓存标识
-    static final String CATCH_NAME = "lightCacheCrust";
-
-    // 缓存前辍
+    /**
+     * 缓存前辍
+     */
     private static final String CATCH_KEY_PREFIX = "crust:user:";
-
-    // Token元数据（提高访问性能）
-    private static final ThreadLocal<CrustTokenMetaData> tokenMetaDataThreadLocal = new ThreadLocal<>();
-
+    /**
+     * 缓存标识
+     */
+    static final String CATCH_NAME = "lightCacheCrust";
     /**
      * 用户id
      */
@@ -132,186 +130,6 @@ public class Crust {
     }
 
     /**
-     * 刷新令牌
-     * @return CrustUserInfo
-     */
-    public CrustUserInfo<?> refreshToken() {
-        if (!props.isStateless()) { return null; }
-        String refreshedToken;
-        try {
-            Claims claims = JwtUtil.parseToken(getToken(), getUnSignKey());
-            claims.put(CREATED, new Date());
-            long expire = LocalDateTime.now().plusMinutes(props.getExpire().toMinutes()).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-            refreshedToken = JwtUtil.generateToken(claims, getSignKey(), Math.toIntExact(props.getExpire().toMinutes()), props.isUseRsa());
-            CrustUserInfo<?> loginUserInfo = getCurrentLoginUserInfo(getAuthentication(), null);
-            loginUserInfo.setToken(refreshedToken);
-            loginUserInfo.setTokenExpire(expire);
-            return loginUserInfo;
-        } catch (Exception e) {
-            throw new InsufficientAuthenticationException(e.getMessage(), e);
-        }
-    }
-
-    /**
-     * 从认证信息获取用户名
-     *
-     * @return 用户名
-     */
-    public String getUsername() {
-        Authentication authentication = getAuthentication();
-        if (authentication != null) {
-            return authentication.getName();
-        }
-        return null;
-    }
-
-    /**
-     * 获取当前用户信息
-     *
-     * @param entityClazz 实体类型
-     * @param <T> 实体类型
-     * @return  CrustUserInfo
-     */
-    @NonNull
-    public <T extends CrustEntity> CrustUserInfo<T> getUserInfo(Class<T> entityClazz) {
-        Authentication authentication = getAuthentication();
-        if (authentication == null) {
-            throw new CrustException("authentication is null");
-        }
-
-        // Token方式
-        if (props.isStateless()) {
-            Crust crustProxy = AopContextHolder.self(this.getClass());
-            return crustProxy.getTokenUserInfo(authentication, entityClazz);
-        }
-
-        // Session方式开启超级缓存
-        if (getProps().isEnableCache()) {
-            return CacheHelper.getFastLevel(lightCacheCrust, spot -> getCurrentLoginUserInfo(authentication, entityClazz));
-        }
-        // Session方式无超级缓存
-        return getCurrentLoginUserInfo(authentication, entityClazz);
-    }
-
-    /**
-     * 获取Spring Security上下文
-     * @return SecurityContext
-     */
-    @NonNull
-    public SecurityContext getContext() {
-        return SecurityContextHolder.getContext();
-    }
-
-    /**
-     * 使登录信息失效
-     */
-    public void invalidate() {
-        try {
-            // Token方式下开启缓存时清空
-            if (getProps().isEnableCache() && getProps().isStateless()) {
-                CrustUserInfo<CrustEntity> userInfo = getUserInfo(null);
-                CacheHelper.erase(lightCacheCrust, userInfo.getUid(), id -> CATCH_KEY_PREFIX + DigestUtils.md5Hex(userInfo.getToken()));
-            }
-        } finally {
-            SecurityContextHolder.clearContext();
-        }
-    }
-
-    /**
-     * 获取Token发行时间
-     * @return token issue time
-     */
-    long getTokenIssue() {
-        return tokenMetaDataThreadLocal.get().getIssuedAt();
-    }
-
-    /**
-     * 获取Token过期时间
-     * @return token expire time
-     */
-    long getTokenExpire() {
-        return tokenMetaDataThreadLocal.get().getExpire();
-    }
-
-    /**
-     * 根据请求令牌获取登录认证信息
-     * @param token 请求令牌
-     * @return Authentication
-     */
-    Authentication getAuthenticationFromToken(String token) {
-        Authentication authentication = null;
-        if (token != null) {
-            // 当前上下文认证信息不存在
-            if (getAuthentication() == null) {
-                String unSignKey = getUnSignKey();
-                Claims claims = JwtUtil.parseToken(token, unSignKey);
-                if (claims == null) {
-                    return null;
-                }
-                String username = claims.getSubject();
-                if (username == null) {
-                    return null;
-                }
-                if (JwtUtil.isTokenExpired(token, unSignKey)) {
-                    return null;
-                }
-                Serializable uid = (Serializable) claims.get(UID);
-                long issuedAt = (long) claims.get(CREATED);
-                long expire = claims.getExpiration().getTime();
-                // 设置Token元数据
-                CrustTokenMetaData tokenMetaData = new CrustTokenMetaData(username, uid, issuedAt, expire);
-                tokenMetaDataThreadLocal.set(tokenMetaData);
-                Object RoleIdsObj = claims.get(ROLE_IDS);
-                List<Long> roleIds = null;
-                if (RoleIdsObj != null) {
-                    roleIds = Arrays.stream(((String) RoleIdsObj).split(",")).map(Long::parseLong).collect(Collectors.toList());
-                }
-                CrustPerm crustPerm = getCrustUserDetailsService().findPermissionsById(uid);
-                List<GrantedAuthority> authorities = null;
-                CrustUserInfo<CrustEntity> userInfo = new CrustUserInfo<>(uid, username, token, roleIds, null);
-                userInfo.setTokenExpire(expire);
-                if (crustPerm != null) {
-                    tokenMetaDataThreadLocal.get().setPermissionList(crustPerm.getPermissionList());
-                    authorities = CrustPerm.buildAuthorities(crustPerm.getPermissionList());
-                    userInfo.setPermissionList(crustPerm.getPermissionList());
-                }
-                CrustUserDetails userDetails = new CrustUserDetails(uid, username, authorities, roleIds);
-                userDetails.setUserInfo(userInfo);
-                authentication = new CrustAuthenticationToken(userDetails, null, authorities, token);
-            } else {
-                // 当前上下文认证信息存在，验证token是否正确匹配
-                if (validateToken(token, getUsername())) {
-                    // 如果上下文中Authentication非空，且请求令牌合法，直接返回当前登录认证信息
-                    authentication = getAuthentication();
-                }
-            }
-        }
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        return authentication;
-    }
-
-    /**
-     * 清除Token元数据
-     */
-    void clearTokenMetaData() {
-        tokenMetaDataThreadLocal.remove();
-    }
-
-    /**
-     * 验证令牌
-     *
-     * @param token    令牌
-     * @param username 用户名
-     * @return 验证是否成功
-     */
-    @NonNull
-    private Boolean validateToken(@NonNull String token, @NonNull String username) {
-        String usernameFromToken = tokenMetaDataThreadLocal.get().getUsername();
-        if (Strings.isEmpty(usernameFromToken)) { return false; }
-        return (usernameFromToken.equals(username) && !JwtUtil.isTokenExpired(token, getUnSignKey()));
-    }
-
-    /**
      * 登录成功后生成令牌
      *
      * @param authentication 认证对象
@@ -339,20 +157,6 @@ public class Crust {
         return userInfo;
     }
 
-    // #authentication 与 args[0] 等价
-    // #target 与 @crust、#this.object、#root.object等价（#this在表达式不同部分解析过程中可能会改变，但是#root总是指向根，object为自定义root对象属性）
-    @LightCacheable(value = CATCH_NAME, keyPrefix = CATCH_KEY_PREFIX, key = "T(org.springframework.util.DigestUtils).md5DigestAsHex(#authentication?.token.bytes)",
-            condition = "#authentication!=null&&#target.props.enableCache")
-    @SuppressWarnings("unchecked")
-    public <T extends CrustEntity> CrustUserInfo<T> getTokenUserInfo(Authentication authentication, @NonNull Class<T> clazz) {
-        CrustUserInfo<T> userInfo = getCurrentLoginUserInfo(authentication, clazz);
-        T entity = (T) getCrustUserDetailsService().findEntityById(userInfo.getUid());
-        List<? extends CrustPermission> permissionList = tokenMetaDataThreadLocal.get().getPermissionList();
-        userInfo.setEntity(entity);
-        userInfo.setPermissionList(permissionList);
-        return userInfo;
-    }
-
     /**
      * 获取登录时用户信息
      * <br>
@@ -375,6 +179,130 @@ public class Crust {
         }
         CrustUserDetails userDetails = (CrustUserDetails) principal;
         return (CrustUserInfo<T>) userDetails.getUserInfo();
+    }
+
+    /**
+     * 获取当前用户信息（外面API调用）
+     *
+     * @param entityClazz 实体类型
+     * @param <T> 实体类型
+     * @return  CrustUserInfo
+     */
+    @NonNull
+    public <T extends CrustEntity> CrustUserInfo<T> getUserInfo(Class<T> entityClazz) {
+        Authentication authentication = getAuthentication();
+        if (authentication == null) {
+            throw new CrustException("authentication is null");
+        }
+
+        // Token方式
+        if (props.isStateless()) {
+            //Crust crustProxy = AopContextHolder.self(this.getClass());
+            return getCurrentLoginUserInfo(authentication, entityClazz);
+        }
+
+        // Session方式开启超级缓存
+        if (getProps().isEnableCache()) {
+            return CacheHelper.getFastLevel(lightCacheCrust, spot -> getCurrentLoginUserInfo(authentication, entityClazz));
+        }
+        // Session方式无超级缓存
+        return getCurrentLoginUserInfo(authentication, entityClazz);
+    }
+
+    /**
+     * 根据请求令牌获取登录认证信息
+     * @param token 请求令牌
+     * @return CrustUserInfo
+     */
+    // #token 与 args[0] 等价
+    // #target 与 @crust、#this.object、#root.object等价（#this在表达式不同部分解析过程中可能会改变，但是#root总是指向根，object为自定义root对象属性）
+    @LightCacheable(value = CATCH_NAME, keyPrefix = CATCH_KEY_PREFIX, key = "T(org.springframework.util.DigestUtils).md5DigestAsHex(#token?.bytes)", condition = "#target.props.enableCache")
+    CrustUserInfo<CrustEntity> getAuthenticationFromToken(String token) {
+        String unSignKey = getUnSignKey();
+        Claims claims = JwtUtil.parseToken(token, unSignKey);
+        if (claims == null) {
+            return null;
+        }
+        String username = claims.getSubject();
+        if (username == null) {
+            return null;
+        }
+        Serializable uid = (Serializable) claims.get(UID);
+        //long issuedAt = (long) claims.get(CREATED);
+        long expire = claims.getExpiration().getTime();
+        Object RoleIdsObj = claims.get(ROLE_IDS);
+        List<Long> roleIds = null;
+        if (RoleIdsObj != null) {
+            roleIds = Arrays.stream(((String) RoleIdsObj).split(",")).map(Long::parseLong).collect(Collectors.toList());
+        }
+        CrustEntity entity = getCrustUserDetailsService().findEntityById(uid);
+        CrustUserInfo<CrustEntity> userInfo = new CrustUserInfo<>(uid, username, token, roleIds, entity);
+        userInfo.setTokenExpire(expire);
+        // active!
+        activeAuthentication(userInfo);
+        return userInfo;
+    }
+
+    /**
+     * Active authentication with crust user info.
+     * @param userInfo CrustUserInfo
+     */
+    void activeAuthentication(CrustUserInfo<CrustEntity> userInfo) {
+        List<GrantedAuthority> authorities = null;
+        CrustPerm crustPerm = getCrustUserDetailsService().findPermissionsById(userInfo.getUid());
+        if (crustPerm != null) {
+            authorities = CrustPerm.buildAuthorities(crustPerm.getPermissionList());
+            userInfo.setPermissionList(crustPerm.getPermissionList());
+        }
+        CrustUserDetails userDetails = new CrustUserDetails(userInfo.getUid(), userInfo.getUsername(), authorities, userInfo.getRoleIds());
+        userDetails.setUserInfo(userInfo);
+        Authentication authentication = new CrustAuthenticationToken(userDetails, null, authorities, userInfo.getToken());
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+    }
+
+    /**
+     * 刷新令牌
+     * @return CrustUserInfo
+     */
+    public CrustUserInfo<?> refreshToken() {
+        if (!props.isStateless()) { return null; }
+        String refreshedToken;
+        try {
+            Claims claims = JwtUtil.parseToken(getToken(), getUnSignKey());
+            claims.put(CREATED, new Date());
+            long expire = LocalDateTime.now().plusMinutes(props.getExpire().toMinutes()).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+            refreshedToken = JwtUtil.generateToken(claims, getSignKey(), Math.toIntExact(props.getExpire().toMinutes()), props.isUseRsa());
+            CrustUserInfo<?> loginUserInfo = getCurrentLoginUserInfo(getAuthentication(), null);
+            loginUserInfo.setToken(refreshedToken);
+            loginUserInfo.setTokenExpire(expire);
+            return loginUserInfo;
+        } catch (Exception e) {
+            throw new InsufficientAuthenticationException(e.getMessage(), e);
+        }
+    }
+
+    /**
+     * 获取Spring Security上下文
+     * @return SecurityContext
+     */
+    @NonNull
+    public SecurityContext getContext() {
+        return SecurityContextHolder.getContext();
+    }
+
+    /**
+     * 使登录信息失效
+     */
+    public void invalidate() {
+        try {
+            // Token方式下开启缓存时清空
+            if (getProps().isEnableCache() && getProps().isStateless()) {
+                CrustUserInfo<CrustEntity> userInfo = getUserInfo(null);
+                CacheHelper.erase(lightCacheCrust, userInfo.getUid(), id -> CATCH_KEY_PREFIX + DigestUtils.md5DigestAsHex(userInfo.getToken().getBytes()));
+            }
+        } finally {
+            SecurityContextHolder.clearContext();
+        }
     }
 
     /**
