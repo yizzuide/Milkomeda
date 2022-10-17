@@ -21,10 +21,12 @@
 
 package com.github.yizzuide.milkomeda.crust;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.github.yizzuide.milkomeda.util.JSONUtil;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.SneakyThrows;
 import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 
@@ -61,6 +63,7 @@ public class CrustUserInfo<T, P> implements Serializable {
     private String token;
     /**
      * token过期时间
+     * @since 3.14.0
      */
     private Long tokenExpire;
     /**
@@ -69,6 +72,7 @@ public class CrustUserInfo<T, P> implements Serializable {
     private List<Long> roleIds;
     /**
      * 权限列表
+     * @since 3.14.0
      */
     private List<P> permissionList;
     /**
@@ -89,8 +93,18 @@ public class CrustUserInfo<T, P> implements Serializable {
 
     /**
      * User entity current class.
+     * @since 3.14.0
      */
+    @JsonIgnore
     private Class<?> entityClass;
+
+    /**
+     * Permission class type.
+     * @since 3.14.0
+     */
+    private Class<?> permClass;
+
+
 
     public CrustUserInfo(Serializable uid, String username, String token, List<Long> roleIds, T entity) {
         this.uid = uid;
@@ -111,7 +125,9 @@ public class CrustUserInfo<T, P> implements Serializable {
     /**
      * Get long type user id.
      * @return user id
+     * @since 3.14.0
      */
+    @JsonIgnore
     public Long getUidLong() {
         if (this.uid instanceof Long) {
             return (Long) this.uid;
@@ -129,6 +145,25 @@ public class CrustUserInfo<T, P> implements Serializable {
             this.entity = (T) JSONUtil.parse(JSONUtil.serialize(this.entity), this.getEntityClass());
         }
         return this.entity;
+    }
+
+    @SneakyThrows
+    @SuppressWarnings("unchecked")
+    public void setPermissionList(List<P> permissionList) {
+        boolean isMap = permissionList.get(0) instanceof Map;
+        if (!CollectionUtils.isEmpty(permissionList)) {
+            if (isMap && this.permClass != null) {
+                this.permissionList = (List<P>) JSONUtil.parseList(JSONUtil.serialize(permissionList), this.permClass);
+                return;
+            }
+            this.permClass = permissionList.get(0).getClass();
+            this.permissionList = permissionList;
+        }
+    }
+
+    public void setPermClass(Class<?> permClass) {
+        this.permClass = permClass;
+        this.setPermissionList(this.permissionList);
     }
 
     /**

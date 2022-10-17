@@ -21,6 +21,8 @@
 
 package com.github.yizzuide.milkomeda.crust;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.io.Serializable;
 
 /**
@@ -57,5 +59,6 @@ public interface CrustEntity extends Serializable {
      * 那个这个字段不需要实现，否则需要实现
      * @return salt
      */
+    @JsonIgnore
     default String getSalt() {return null;}
 }

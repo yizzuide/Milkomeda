@@ -33,10 +33,22 @@ import org.springframework.core.Ordered;
  */
 public interface CrustPermission extends Ordered {
     /**
+     * Set permission id.
+     * @param id Long
+     */
+    void setId(Long id);
+
+    /**
      * Permission id.
-     * @return  Long
+     * @return Long
      */
     Long getId();
+
+    /**
+     * Set permission parent id.
+     * @param parentId Long
+     */
+    void setParentId(Long parentId);
 
     /**
      * Permission parent id.
@@ -45,10 +57,22 @@ public interface CrustPermission extends Ordered {
     Long getParentId();
 
     /**
+     * Set permission name.
+     * @param label String
+     */
+    void setLabel(String label);
+
+    /**
      * Permission name.
      * @return  String
      */
     String getLabel();
+
+    /**
+     * Set permission icon.
+     * @param icon  String
+     */
+    void setIcon(String icon);
 
     /**
      * Permission icon.
@@ -57,10 +81,22 @@ public interface CrustPermission extends Ordered {
     String getIcon();
 
     /**
+     * Set permission code.
+     * @param code String
+     */
+    void setCode(String code);
+
+    /**
      * Permission code.
      * @return String
      */
     String getCode();
+
+    /**
+     * Set permission type.
+     * @param type 0 is menu directory, 1 is menu, 2 is button action
+     */
+    void setType(Integer type);
 
     /**
      * Permission type. (0 is menu directory, 1 is menu, 2 is button action)
@@ -69,10 +105,22 @@ public interface CrustPermission extends Ordered {
     Integer getType();
 
     /**
+     * Set front-end route path.
+     * @param routePath String
+     */
+    void setRoutePath(String routePath);
+
+    /**
      * Front-end route path.
      * @return  String
      */
     String getRoutePath();
+
+    /**
+     * Set front-end route name.
+     * @param routeName String
+     */
+    void setRouteName(String routeName);
 
     /**
      * Front-end route name.
@@ -81,8 +129,20 @@ public interface CrustPermission extends Ordered {
     String getRouteName();
 
     /**
+     * Set permission access resource url.
+     * @param url String
+     */
+    void setUrl(String url);
+
+    /**
      * Permission access resource url.
      * @return String
      */
     String getUrl();
+
+    /**
+     * Set permission order.
+     * @param order int
+     */
+    void setOrder(int order);
 }

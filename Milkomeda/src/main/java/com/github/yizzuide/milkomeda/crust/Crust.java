@@ -263,11 +263,13 @@ public class Crust {
      */
     @SuppressWarnings({"rawtypes", "unchecked"})
     void activeAuthentication(CrustUserInfo userInfo) {
+        // has find perms from cache?
+        List permissionList = userInfo.getPermissionList();
+        CrustPerm crustPerm = permissionList == null ? getCrustUserDetailsService().findPermissionsById(userInfo.getUid()) :
+                CrustPerm.builder().permissionList(permissionList).build();
         List<GrantedAuthority> authorities = null;
-        CrustPerm crustPerm = getCrustUserDetailsService().findPermissionsById(userInfo.getUid());
         if (crustPerm != null) {
             authorities = CrustPerm.buildAuthorities(crustPerm.getPermissionList());
-            userInfo.setPermissionList(crustPerm.getPermissionList());
         }
         CrustUserDetails userDetails = new CrustUserDetails(userInfo.getUid(), userInfo.getUsername(), authorities, userInfo.getRoleIds());
         userDetails.setUserInfo(userInfo);
