@@ -21,6 +21,7 @@
 
 package com.github.yizzuide.milkomeda.crust;
 
+import com.github.yizzuide.milkomeda.util.JSONUtil;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -29,6 +30,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 
 /**
  * CrustUserInfo
@@ -43,7 +45,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class CrustUserInfo<T> implements Serializable {
+public class CrustUserInfo<T, P> implements Serializable {
     private static final long serialVersionUID = -3849153553850107966L;
     /**
      * 用户id
@@ -68,7 +70,7 @@ public class CrustUserInfo<T> implements Serializable {
     /**
      * 权限列表
      */
-    private List<? extends CrustPermission> permissionList;
+    private List<P> permissionList;
     /**
      * 用户实体对象
      * <br>
@@ -85,6 +87,11 @@ public class CrustUserInfo<T> implements Serializable {
      */
     private T entity;
 
+    /**
+     * User entity current class.
+     */
+    private Class<?> entityClass;
+
     public CrustUserInfo(Serializable uid, String username, String token, List<Long> roleIds, T entity) {
         this.uid = uid;
         this.username = username;
@@ -93,15 +100,35 @@ public class CrustUserInfo<T> implements Serializable {
         this.entity = entity;
     }
 
+    /**
+     * Get string type user id.
+     * @return user id
+     */
     public Serializable getUid() {
-        return uid;
+        return this.uid.toString();
     }
 
+    /**
+     * Get long type user id.
+     * @return user id
+     */
     public Long getUidLong() {
-        if (uid instanceof Long) {
-            return (Long) uid;
+        if (this.uid instanceof Long) {
+            return (Long) this.uid;
         }
-        return Long.parseLong(uid.toString());
+        return Long.parseLong(this.uid.toString());
+    }
+
+    /**
+     * Get user entity.
+     * @return user entity
+     */
+    @SuppressWarnings("unchecked")
+    public T getEntity() {
+        if (this.entity instanceof Map) {
+            this.entity = (T) JSONUtil.parse(JSONUtil.serialize(this.entity), this.getEntityClass());
+        }
+        return this.entity;
     }
 
     /**
@@ -110,7 +137,7 @@ public class CrustUserInfo<T> implements Serializable {
      */
     @Nullable
     public Long firstRole() {
-        if (CollectionUtils.isEmpty(roleIds)) {
+        if (CollectionUtils.isEmpty(this.getRoleIds())) {
             return null;
         }
         return getRoleIds().get(0);

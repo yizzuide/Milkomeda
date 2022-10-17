@@ -71,6 +71,7 @@ public class CrustAuthenticationFilter extends OncePerRequestFilter {
         this.requiresAuthenticationRequestMatcher = new RequestHeaderRequestMatcher(tokenName);
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain chain) throws IOException, ServletException {
         // check match permission url, let it go next.
@@ -79,7 +80,7 @@ public class CrustAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        CrustUserInfo<CrustEntity> authResult = null;
+        CrustUserInfo authResult = null;
         AuthenticationException failed = null;
         Crust crust = CrustContext.get();
         // check request header has token
@@ -89,12 +90,12 @@ public class CrustAuthenticationFilter extends OncePerRequestFilter {
             String token = crust.getToken();
             try {
                 if (StringUtils.isNotBlank(token)) {
-                    authResult = crust.getAuthenticationFromToken(token);
+                    authResult = crust.getAuthInfoFromToken(token);
                 } else {
                     failed = new InsufficientAuthenticationException("Required token is not set.");
                 }
             } catch (ClaimJwtException e) {
-                failed = new InsufficientAuthenticationException(e.getMessage(), e);
+                failed = new InsufficientAuthenticationException(e.getMessage());
             } catch (AuthenticationException e) {
                 // Authentication failed!
                 failed = e;
@@ -103,7 +104,7 @@ public class CrustAuthenticationFilter extends OncePerRequestFilter {
 
         if (authResult != null) {
             Authentication authentication = crust.getContext().getAuthentication();
-            // null is getting from cache, need active authentication.
+            // null if getting from cache, it's need active authentication.
             if (authentication == null) {
                 crust.activeAuthentication(authResult);
             }

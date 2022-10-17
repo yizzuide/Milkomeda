@@ -24,19 +24,19 @@ package com.github.yizzuide.milkomeda.crust;
 import com.github.yizzuide.milkomeda.light.Cache;
 import com.github.yizzuide.milkomeda.light.CacheHelper;
 import com.github.yizzuide.milkomeda.light.LightCacheable;
+import com.github.yizzuide.milkomeda.universe.context.AopContextHolder;
 import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import com.github.yizzuide.milkomeda.universe.context.WebContext;
 import com.github.yizzuide.milkomeda.util.JwtUtil;
 import com.github.yizzuide.milkomeda.util.Strings;
 import io.jsonwebtoken.Claims;
-import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationServiceException;
-import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
@@ -62,6 +62,7 @@ import java.util.stream.Collectors;
  * <br>
  * Create at 2019/11/11 15:48
  */
+@Slf4j
 public class Crust {
     /**
      * 缓存前辍
@@ -88,7 +89,6 @@ public class Crust {
      */
     private static final String ROLE_IDS = "roles";
 
-    @Getter
     @Autowired
     private CrustProperties props;
 
@@ -108,7 +108,7 @@ public class Crust {
      * @return CrustUserInfo
      */
     @NonNull
-    public <T extends CrustEntity> CrustUserInfo<T> login(@NonNull String username, @NonNull String password, @NonNull Class<T> entityClazz) {
+    public <T extends CrustEntity> CrustUserInfo<T, CrustPermission> login(@NonNull String username, @NonNull String password, @NonNull Class<T> entityClazz) {
         // CrustAuthenticationToken封装了UsernamePasswordAuthenticationToken
         CrustAuthenticationToken authenticationToken = new CrustAuthenticationToken(username, password);
         // 设置请求信息
@@ -137,9 +137,9 @@ public class Crust {
      * @return CrustUserInfo
      */
     @NonNull
-    private <T extends CrustEntity> CrustUserInfo<T> generateToken(@NonNull Authentication authentication, @NonNull Class<T> entityClazz) {
+    private <T extends CrustEntity> CrustUserInfo<T, CrustPermission> generateToken(@NonNull Authentication authentication, @NonNull Class<T> entityClazz) {
         Map<String, Object> claims = new HashMap<>(6);
-        CrustUserInfo<T> userInfo = getCurrentLoginUserInfo(authentication, entityClazz);
+        CrustUserInfo<T, CrustPermission> userInfo = getCurrentLoginUserInfo(authentication, entityClazz);
         claims.put(UID, userInfo.getUidLong());
         claims.put(USERNAME, userInfo.getUsername());
         claims.put(CREATED, new Date());
@@ -151,9 +151,11 @@ public class Crust {
             }
         }
         long expire = LocalDateTime.now().plusMinutes(props.getExpire().toMinutes()).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-        String token = JwtUtil.generateToken(claims, getSignKey(), Math.toIntExact(props.getExpire().toMinutes()), props.isUseRsa());
+        String token = JwtUtil.generateToken(claims, getSignKey(), expire, props.isUseRsa());
         userInfo.setToken(token);
         userInfo.setTokenExpire(expire);
+        // help cache the auth info，that synchronize with the expired token.
+        AopContextHolder.self(this.getClass()).getAuthInfoFromToken(token);
         return userInfo;
     }
 
@@ -168,7 +170,7 @@ public class Crust {
      * @return  CrustUserInfo
      */
     @SuppressWarnings("unchecked")
-    private <T extends CrustEntity> CrustUserInfo<T> getCurrentLoginUserInfo(Authentication authentication, Class<T> clazz) {
+    private <T extends CrustEntity> CrustUserInfo<T, CrustPermission> getCurrentLoginUserInfo(Authentication authentication, Class<T> clazz) {
         if (authentication == null) {
             throw new AuthenticationServiceException("Authentication is must be not null");
         }
@@ -178,7 +180,7 @@ public class Crust {
             throw new AuthenticationServiceException("Authentication principal must be subtype of CrustUserDetails");
         }
         CrustUserDetails userDetails = (CrustUserDetails) principal;
-        return (CrustUserInfo<T>) userDetails.getUserInfo();
+        return (CrustUserInfo<T, CrustPermission>) userDetails.getUserInfo();
     }
 
     /**
@@ -189,24 +191,24 @@ public class Crust {
      * @return  CrustUserInfo
      */
     @NonNull
-    public <T extends CrustEntity> CrustUserInfo<T> getUserInfo(Class<T> entityClazz) {
+    public <T extends CrustEntity> CrustUserInfo<T, CrustPermission> getUserInfo(Class<T> entityClazz) {
         Authentication authentication = getAuthentication();
         if (authentication == null) {
             throw new CrustException("authentication is null");
         }
 
-        // Token方式
-        if (props.isStateless()) {
-            //Crust crustProxy = AopContextHolder.self(this.getClass());
-            return getCurrentLoginUserInfo(authentication, entityClazz);
+        // Token方式 || Session方式无超级缓存
+        if (props.isStateless() || !getProps().isEnableCache()) {
+            CrustUserInfo<T, CrustPermission> userInfo = getCurrentLoginUserInfo(authentication, entityClazz);
+            if (props.isEnableCache()) {
+                // set entity class for create real type's object later.
+                userInfo.setEntityClass(entityClazz);
+            }
+            return userInfo;
         }
 
         // Session方式开启超级缓存
-        if (getProps().isEnableCache()) {
-            return CacheHelper.getFastLevel(lightCacheCrust, spot -> getCurrentLoginUserInfo(authentication, entityClazz));
-        }
-        // Session方式无超级缓存
-        return getCurrentLoginUserInfo(authentication, entityClazz);
+        return CacheHelper.getFastLevel(lightCacheCrust, spot -> getCurrentLoginUserInfo(authentication, entityClazz));
     }
 
     /**
@@ -217,7 +219,16 @@ public class Crust {
     // #token 与 args[0] 等价
     // #target 与 @crust、#this.object、#root.object等价（#this在表达式不同部分解析过程中可能会改变，但是#root总是指向根，object为自定义root对象属性）
     @LightCacheable(value = CATCH_NAME, keyPrefix = CATCH_KEY_PREFIX, key = "T(org.springframework.util.DigestUtils).md5DigestAsHex(#token?.bytes)", condition = "#target.props.enableCache")
-    CrustUserInfo<CrustEntity> getAuthenticationFromToken(String token) {
+    // 不使用泛型，因为不知道具体类型，无法恢复回来，让其先转为Map或List
+    @SuppressWarnings("rawtypes")
+    CrustUserInfo getAuthInfoFromToken(String token) {
+        // invoke from generateToken()
+        Authentication authentication = getAuthentication();
+        if (authentication != null) {
+            return getCurrentLoginUserInfo(authentication, null);
+        }
+
+        // invoke from CrustAuthenticationFilter.doFilterInternal()
         String unSignKey = getUnSignKey();
         Claims claims = JwtUtil.parseToken(token, unSignKey);
         if (claims == null) {
@@ -236,7 +247,7 @@ public class Crust {
             roleIds = Arrays.stream(((String) RoleIdsObj).split(",")).map(Long::parseLong).collect(Collectors.toList());
         }
         CrustEntity entity = getCrustUserDetailsService().findEntityById(uid);
-        CrustUserInfo<CrustEntity> userInfo = new CrustUserInfo<>(uid, username, token, roleIds, entity);
+        CrustUserInfo userInfo = new CrustUserInfo<>(uid, username, token, roleIds, entity);
         userInfo.setTokenExpire(expire);
         // active!
         activeAuthentication(userInfo);
@@ -246,8 +257,10 @@ public class Crust {
     /**
      * Active authentication with crust user info.
      * @param userInfo CrustUserInfo
+     * @since 3.14.0
      */
-    void activeAuthentication(CrustUserInfo<CrustEntity> userInfo) {
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    void activeAuthentication(CrustUserInfo userInfo) {
         List<GrantedAuthority> authorities = null;
         CrustPerm crustPerm = getCrustUserDetailsService().findPermissionsById(userInfo.getUid());
         if (crustPerm != null) {
@@ -264,20 +277,21 @@ public class Crust {
      * 刷新令牌
      * @return CrustUserInfo
      */
-    public CrustUserInfo<?> refreshToken() {
+    public CrustUserInfo<?, CrustPermission> refreshToken() {
         if (!props.isStateless()) { return null; }
         String refreshedToken;
         try {
             Claims claims = JwtUtil.parseToken(getToken(), getUnSignKey());
             claims.put(CREATED, new Date());
             long expire = LocalDateTime.now().plusMinutes(props.getExpire().toMinutes()).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-            refreshedToken = JwtUtil.generateToken(claims, getSignKey(), Math.toIntExact(props.getExpire().toMinutes()), props.isUseRsa());
-            CrustUserInfo<?> loginUserInfo = getCurrentLoginUserInfo(getAuthentication(), null);
+            refreshedToken = JwtUtil.generateToken(claims, getSignKey(), expire, props.isUseRsa());
+            CrustUserInfo<?, CrustPermission> loginUserInfo = getCurrentLoginUserInfo(getAuthentication(), null);
             loginUserInfo.setToken(refreshedToken);
             loginUserInfo.setTokenExpire(expire);
             return loginUserInfo;
         } catch (Exception e) {
-            throw new InsufficientAuthenticationException(e.getMessage(), e);
+            log.warn("Crust refresh token fail with msg: {}", e.getMessage());
+            return null;
         }
     }
 
@@ -297,7 +311,7 @@ public class Crust {
         try {
             // Token方式下开启缓存时清空
             if (getProps().isEnableCache() && getProps().isStateless()) {
-                CrustUserInfo<CrustEntity> userInfo = getUserInfo(null);
+                CrustUserInfo<CrustEntity, CrustPermission> userInfo = getUserInfo(null);
                 CacheHelper.erase(lightCacheCrust, userInfo.getUid(), id -> CATCH_KEY_PREFIX + DigestUtils.md5DigestAsHex(userInfo.getToken().getBytes()));
             }
         } finally {
@@ -366,5 +380,9 @@ public class Crust {
             crustUserDetailsService = ApplicationContextHolder.get().getBean(CrustUserDetailsService.class);
         }
         return crustUserDetailsService;
+    }
+
+    CrustProperties getProps() {
+        return props;
     }
 }

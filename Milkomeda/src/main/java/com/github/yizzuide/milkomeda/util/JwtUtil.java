@@ -61,14 +61,14 @@ public class JwtUtil {
      * 生成Token
      * @param claims        载荷中的数据
      * @param secureKey     密钥
-     * @param expireMinutes 过期时间，单位分钟
+     * @param expireTime    过期时间
      * @param usedRSA       是否使用RSA加密方式
      * @return  Token
      */
-    public static String generateToken(Map<String, Object> claims, String secureKey, int expireMinutes, boolean usedRSA) {
+    public static String generateToken(Map<String, Object> claims, String secureKey, long expireTime, boolean usedRSA) {
         return Jwts.builder()
                 .setClaims(claims)
-                .setExpiration(Date.from(LocalDateTime.now().plusMinutes(expireMinutes).atZone(ZoneId.systemDefault()).toInstant()))
+                .setExpiration(new Date(expireTime))
                 .signWith(usedRSA ? SignatureAlgorithm.RS256 : SignatureAlgorithm.HS512, secureKey)
                 .compact();
     }

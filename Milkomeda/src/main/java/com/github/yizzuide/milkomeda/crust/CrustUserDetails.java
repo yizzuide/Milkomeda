@@ -78,7 +78,7 @@ public class CrustUserDetails implements UserDetails {
     /**
      * 用户信息
      */
-    private CrustUserInfo<CrustEntity> userInfo;
+    private CrustUserInfo<CrustEntity, CrustPermission> userInfo;
 
     CrustUserDetails(Serializable uid, String username, Collection<? extends GrantedAuthority> authorities, List<Long> roleIds) {
         this.uid = uid;

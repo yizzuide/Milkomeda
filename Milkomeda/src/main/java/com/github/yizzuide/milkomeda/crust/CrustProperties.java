@@ -49,7 +49,7 @@ public class CrustProperties {
     private boolean stateless = true;
 
     /**
-     * Token方式情况下，是否开启实体查询的多级缓存（API服务建议不开启）；Session方式下仅开启超级缓存（建议开启）
+     * 查询认证信息缓存（Session方式下仅开启超级缓存，因为Session本身有Session级缓存）
      */
     private boolean enableCache = true;
     /**

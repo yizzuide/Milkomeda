@@ -50,7 +50,7 @@ public abstract class CrustUserDetailsService implements UserDetailsService {
         if (entity == null) {
             throw new UsernameNotFoundException("Not found entity with username: " + username);
         }
-        CrustUserInfo<CrustEntity> userInfo = new CrustUserInfo<>();
+        CrustUserInfo<CrustEntity, CrustPermission> userInfo = new CrustUserInfo<>();
         CrustPerm crustPerm = findPermissionsById(entity.getUid());
         List<GrantedAuthority> grantedAuthorities = null;
         List<Long> roleIds = null;
@@ -59,7 +59,7 @@ public abstract class CrustUserDetailsService implements UserDetailsService {
                 roleIds = new ArrayList<>(crustPerm.getRoleIds());
                 userInfo.setRoleIds(roleIds);
             }
-            List<? extends CrustPermission> permissionList = crustPerm.getPermissionList();
+            List<CrustPermission> permissionList = crustPerm.getPermissionList();
             userInfo.setPermissionList(permissionList);
             grantedAuthorities = CrustPerm.buildAuthorities(permissionList);
         }

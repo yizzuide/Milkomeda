@@ -55,7 +55,7 @@ public class CrustPerm {
      * 权限列表
      * @since 3.14.0
      */
-    private List<? extends CrustPermission> permissionList;
+    private List<CrustPermission> permissionList;
 
     /**
      * Build spring security authorities.
