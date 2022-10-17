@@ -21,6 +21,7 @@
 
 package com.github.yizzuide.milkomeda.universe.parser.yml;
 
+import com.github.yizzuide.milkomeda.hydrogen.uniform.UniformHandler;
 import com.github.yizzuide.milkomeda.universe.extend.env.CollectionsPropertySource;
 import com.github.yizzuide.milkomeda.util.DataTypeConvertUtil;
 import lombok.NonNull;
@@ -94,5 +95,6 @@ public class YmlResponseOutput {
             }
             result.putAll(additionMap);
         }
+        UniformHandler.resultFilter(result);
     }
 }

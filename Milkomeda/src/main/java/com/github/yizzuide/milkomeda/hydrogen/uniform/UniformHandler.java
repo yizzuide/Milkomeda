@@ -267,24 +267,13 @@ public class UniformHandler extends ResponseEntityExceptionHandler {
             }
         }
 
-        // force code type!
-        ResultVO.CodeType codeType = UniformHolder.getProps().getCodeType();
-        Object code = source.get(YmlResponseOutput.CODE);
-        if (code != null) {
-            if (codeType == ResultVO.CodeType.INT) {
-                code = Integer.parseInt(code.toString());
-            } else {
-                code = code.toString();
-            }
-            source.put(YmlResponseOutput.CODE, code);
-        }
-
         Map<String, Object> result = new HashMap<>();
         // status == 200?
         if (response.getStatus() == HttpStatus.OK.value()) {
             YmlParser.parseAliasMapPath(resolveMap, result, YmlResponseOutput.CODE, null, source);
             YmlParser.parseAliasMapPath(resolveMap, result, YmlResponseOutput.MESSAGE, null, source);
             YmlParser.parseAliasMapPath(resolveMap, result, YmlResponseOutput.DATA, null, source);
+            resultFilter(result);
         } else { // status != 200
             YmlResponseOutput.output(resolveMap, result, source, null, false);
         }
@@ -327,5 +316,23 @@ public class UniformHandler extends ResponseEntityExceptionHandler {
         writer.println(body);
         writer.flush();
         writer.close();
+    }
+
+    /**
+     * Force code type with config <code>milkomeda.hydrogen.uniform.code-type</code>
+     * @param result response result map
+     * @since 3.14.0
+     */
+    public static void resultFilter(Map<String, Object> result) {
+        ResultVO.CodeType codeType = UniformHolder.getProps().getCodeType();
+        Object code = result.get(YmlResponseOutput.CODE);
+        if (code != null) {
+            if (codeType == ResultVO.CodeType.INT) {
+                code = Integer.parseInt(code.toString());
+            } else {
+                code = code.toString();
+            }
+            result.put(YmlResponseOutput.CODE, code);
+        }
     }
 }
