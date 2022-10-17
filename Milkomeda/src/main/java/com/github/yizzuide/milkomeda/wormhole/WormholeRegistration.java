@@ -74,7 +74,7 @@ public class WormholeRegistration {
         }, false);
 
         // 领域事件跟踪处理器
-        List<WormholeEventTrack<?>> trackers = SpringContext.getTypeHandlers(WormholeEventTracker.class);
+        List<WormholeEventTrack<WormholeEvent<?>>> trackers = SpringContext.getTypeHandlers(WormholeEventTracker.class);
         if (!CollectionUtils.isEmpty(trackers)) {
             eventBus.setTrackers(trackers);
         }

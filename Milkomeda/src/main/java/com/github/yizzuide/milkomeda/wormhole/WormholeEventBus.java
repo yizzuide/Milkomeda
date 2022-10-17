@@ -49,7 +49,7 @@ public class WormholeEventBus {
     /**
      * 领域事件跟踪器
      */
-    private List<WormholeEventTrack<? extends WormholeEvent<?>>> trackers;
+    private List<WormholeEventTrack<WormholeEvent<?>>> trackers;
 
     /**
      * 发布领域事件
@@ -119,7 +119,7 @@ public class WormholeEventBus {
 
         // write into event store
         if (trackers != null) {
-            for (WormholeEventTrack tracker : trackers) {
+            for (WormholeEventTrack<WormholeEvent<?>> tracker : trackers) {
                 tracker.track(event);
             }
         }

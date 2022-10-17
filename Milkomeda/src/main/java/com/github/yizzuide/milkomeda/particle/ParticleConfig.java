@@ -94,7 +94,6 @@ public class ParticleConfig implements ApplicationContextAware {
     @ConditionalOnProperty(prefix = "milkomeda.particle", name = "enable-filter", havingValue = "true")
     public FilterRegistrationBean particleFilterRegistrationBean() {
         FilterRegistrationBean particleFilterRegistrationBean = new FilterRegistrationBean();
-        // 设置代理注册的Bean
         particleFilterRegistrationBean.setFilter(new DelegatingFilterProxy("particleFilter"));
         particleFilterRegistrationBean.setName("particleFilter");
         particleFilterRegistrationBean.setUrlPatterns(Collections.singleton("/*"));
