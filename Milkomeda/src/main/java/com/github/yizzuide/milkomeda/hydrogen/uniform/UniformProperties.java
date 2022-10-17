@@ -46,6 +46,12 @@ public class UniformProperties {
     private boolean enable = false;
 
     /**
+     * Response code type.
+     * @since 3.14.0
+     */
+    private ResultVO.CodeType codeType = ResultVO.CodeType.INT;
+
+    /**
      * 响应数据
      */
     private Map<String, Object> response = new HashMap<>();

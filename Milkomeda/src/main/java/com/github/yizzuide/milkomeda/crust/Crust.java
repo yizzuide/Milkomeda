@@ -30,6 +30,7 @@ import com.github.yizzuide.milkomeda.universe.context.WebContext;
 import com.github.yizzuide.milkomeda.util.JwtUtil;
 import com.github.yizzuide.milkomeda.util.Strings;
 import io.jsonwebtoken.Claims;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -89,6 +90,7 @@ public class Crust {
      */
     private static final String ROLE_IDS = "roles";
 
+    @Getter
     @Autowired
     private CrustProperties props;
 
@@ -380,9 +382,5 @@ public class Crust {
             crustUserDetailsService = ApplicationContextHolder.get().getBean(CrustUserDetailsService.class);
         }
         return crustUserDetailsService;
-    }
-
-    CrustProperties getProps() {
-        return props;
     }
 }

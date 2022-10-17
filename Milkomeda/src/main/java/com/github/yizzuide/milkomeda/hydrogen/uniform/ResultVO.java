@@ -33,6 +33,14 @@ import java.util.Map;
  */
 public interface ResultVO<T> {
     /**
+     * code field type.
+     */
+    enum CodeType {
+        INT,
+        STRING
+    }
+
+    /**
      * Code field of response body.
      * @return  String
      */

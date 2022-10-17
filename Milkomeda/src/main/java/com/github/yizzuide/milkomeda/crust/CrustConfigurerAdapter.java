@@ -28,6 +28,7 @@ import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -215,6 +216,7 @@ public class CrustConfigurerAdapter extends WebSecurityConfigurerAdapter {
      * @since 3.14.0
      */
     protected void doFailure(boolean isAuth, HttpServletRequest request, HttpServletResponse response, RuntimeException exception) throws IOException {
+        response.setStatus(HttpStatus.OK.value());
         ResultVO<?> source = UniformResult.error(props.getAuthFailCode(), exception.getMessage());
         UniformHandler.matchStatusToWrite(response, source.toMap());
     }

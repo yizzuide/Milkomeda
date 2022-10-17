@@ -266,6 +266,19 @@ public class UniformHandler extends ResponseEntityExceptionHandler {
                 resolveMap = createInitResolveMap();
             }
         }
+
+        // force code type!
+        ResultVO.CodeType codeType = UniformHolder.getProps().getCodeType();
+        Object code = source.get(YmlResponseOutput.CODE);
+        if (code != null) {
+            if (codeType == ResultVO.CodeType.INT) {
+                code = Integer.parseInt(code.toString());
+            } else {
+                code = code.toString();
+            }
+            source.put(YmlResponseOutput.CODE, code);
+        }
+
         Map<String, Object> result = new HashMap<>();
         // status == 200?
         if (response.getStatus() == HttpStatus.OK.value()) {
