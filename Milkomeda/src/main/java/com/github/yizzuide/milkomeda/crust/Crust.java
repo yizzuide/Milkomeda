@@ -362,7 +362,7 @@ public class Crust {
         if (token.contains(tokenHead)) {
             token = token.substring(tokenHead.length());
         }
-        if (checkIsExists) {
+        if (checkIsExists && props.isEnableCache()) {
             String cacheKey = CATCH_KEY_PREFIX + DigestUtils.md5DigestAsHex(token.getBytes());
             if (!lightCacheCrust.isCacheL2Exists(cacheKey)) {
                 return null;
