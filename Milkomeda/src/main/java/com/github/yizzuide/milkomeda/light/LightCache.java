@@ -35,6 +35,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 
 import java.io.Serializable;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.TimeUnit;
@@ -48,7 +49,7 @@ import java.util.concurrent.TimeUnit;
  * E：缓存业务数据
  *
  * @since 1.8.0
- * @version 3.12.4
+ * @version 3.14.0
  * @author yizzuide
  * <br>
  * Create at 2019/06/28 13:33
@@ -355,6 +356,11 @@ public class LightCache implements Cache {
             // 从一级缓存移除
             cacheMap.remove(key);
         }
+    }
+
+    @Override
+    public boolean isCacheL2Exists(String key) {
+        return Objects.requireNonNull(stringRedisTemplate.hasKey(key));
     }
 
     /**

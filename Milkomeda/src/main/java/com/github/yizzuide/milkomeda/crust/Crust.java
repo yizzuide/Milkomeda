@@ -45,6 +45,7 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.DigestUtils;
 import org.springframework.util.StringUtils;
 
 import java.io.Serializable;
@@ -274,6 +275,9 @@ public class Crust {
         List<GrantedAuthority> authorities = null;
         if (crustPerm != null) {
             authorities = CrustPerm.buildAuthorities(crustPerm.getPermissionList());
+            if (permissionList == null) {
+                userInfo.setPermissionList(crustPerm.getPermissionList());
+            }
         }
         CrustUserDetails userDetails = new CrustUserDetails(userInfo.getUid(), userInfo.getUsername(), authorities, userInfo.getRoleIds());
         userDetails.setUserInfo(userInfo);
@@ -289,7 +293,7 @@ public class Crust {
         if (!props.isStateless()) { return null; }
         String refreshedToken;
         try {
-            String token = getToken();
+            String token = getToken(false);
             Claims claims = JwtUtil.parseToken(token, getUnSignKey());
             claims.put(CREATED, new Date());
             long expire = LocalDateTime.now().plusMinutes(props.getExpire().toMinutes()).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
@@ -345,11 +349,11 @@ public class Crust {
 
     /**
      * 从请求中获取Token
-     *
+     * @param checkIsExists 检查是否存在
      * @return Token
      */
     @Nullable
-    public String getToken() {
+    public String getToken(boolean checkIsExists) {
         if (!props.isStateless()) { return null; }
         String token = WebContext.getRequestNonNull().getHeader(props.getTokenName());
         if (Strings.isEmpty(token)) { return null; }
@@ -357,6 +361,12 @@ public class Crust {
         String tokenHead = "Bearer ";
         if (token.contains(tokenHead)) {
             token = token.substring(tokenHead.length());
+        }
+        if (checkIsExists) {
+            String cacheKey = CATCH_KEY_PREFIX + DigestUtils.md5DigestAsHex(token.getBytes());
+            if (!lightCacheCrust.isCacheL2Exists(cacheKey)) {
+                return null;
+            }
         }
         return token;
     }

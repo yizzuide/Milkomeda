@@ -26,7 +26,6 @@ import com.github.yizzuide.milkomeda.util.JSONUtil;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.SneakyThrows;
 import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 
@@ -150,27 +149,24 @@ public class CrustUserInfo<T, P> implements Serializable {
         return this.entity;
     }
 
-    @SneakyThrows
     @SuppressWarnings("unchecked")
     public void setPermissionList(List<P> permissionList) {
-        if (permissionList == null) {
-            this.permissionList = null;
-            return;
-        }
-        boolean isMap = permissionList.get(0) instanceof Map;
         if (!CollectionUtils.isEmpty(permissionList)) {
+            boolean isMap = permissionList.get(0) instanceof Map;
             if (isMap && this.permClass != null) {
                 this.permissionList = (List<P>) JSONUtil.parseList(JSONUtil.serialize(permissionList), this.permClass);
                 return;
             }
             this.permClass = permissionList.get(0).getClass();
-            this.permissionList = permissionList;
         }
+        this.permissionList = permissionList;
     }
 
     public void setPermClass(Class<?> permClass) {
         this.permClass = permClass;
-        this.setPermissionList(this.permissionList);
+        if (this.permissionList != null) {
+            this.setPermissionList(this.permissionList);
+        }
     }
 
     /**

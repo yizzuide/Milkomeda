@@ -107,4 +107,12 @@ public interface Cache {
      * @param key   缓存key
      */
     void erase(String key);
+
+    /**
+     * Check is cache in redis.
+     * @param key cache key
+     * @return ture if exists
+     * @since 3.14.0
+     */
+    boolean isCacheL2Exists(String key);
 }

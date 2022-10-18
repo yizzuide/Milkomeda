@@ -87,12 +87,12 @@ public class CrustAuthenticationFilter extends OncePerRequestFilter {
         if (!requiresAuthentication(request, response)) {
             failed = new InsufficientAuthenticationException("Required token is not set.");
         } else {
-            String token = crust.getToken();
+            String token = crust.getToken(true);
             try {
                 if (StringUtils.isNotBlank(token)) {
                     authResult = crust.getAuthInfoFromToken(token);
                 } else {
-                    failed = new InsufficientAuthenticationException("Required token is not set.");
+                    failed = new InsufficientAuthenticationException("Token is not exists.");
                 }
             } catch (ClaimJwtException e) {
                 failed = new InsufficientAuthenticationException(e.getMessage());
@@ -107,6 +107,7 @@ public class CrustAuthenticationFilter extends OncePerRequestFilter {
             // null if getting from cache, it's need active authentication.
             if (authentication == null) {
                 crust.activeAuthentication(authResult);
+                authentication = crust.getContext().getAuthentication();
             }
             successfulAuthentication(request, response, chain, authentication);
         } else {
