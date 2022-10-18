@@ -22,13 +22,13 @@
 package com.github.yizzuide.milkomeda.crust;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.util.CollectionUtils;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -41,7 +41,6 @@ import java.util.stream.Collectors;
  * <br>
  * Create at 2019/12/06 17:17
  */
-@Builder
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -57,19 +56,32 @@ public class CrustPerm {
      */
     private List<CrustPermission> permissionList;
 
-    /**
-     * Create from permission list.
-     * @param permissionList crust permission list
-     * @return CrustPerm
-     * @since 3.14.0
-     */
-    public static CrustPerm create(List<? extends CrustPermission> permissionList) {
-        if (permissionList == null) {
-            return CrustPerm.builder().build();
+    public static Builder builder() {
+        return new Builder(new CrustPerm());
+    }
+
+    public static class Builder {
+
+        private final CrustPerm crustPerm;
+
+        public Builder(CrustPerm crustPerm) {
+            this.crustPerm = crustPerm;
         }
-        CrustPerm crustPerm = new CrustPerm();
-        crustPerm.setPermissionList(permissionList.stream().map(perm -> (CrustPermission)perm).collect(Collectors.toList()));
-        return crustPerm;
+
+        public Builder roleIds(List<Long> roleIds) {
+            this.crustPerm.setRoleIds(new HashSet<>(roleIds));
+            return this;
+        }
+
+        public Builder permissionList(List<? extends CrustPermission> permissionList) {
+            this.crustPerm.setPermissionList(permissionList.stream().map(perm -> (CrustPermission)perm).collect(Collectors.toList()));
+            return this;
+        }
+
+        public CrustPerm build() {
+            return this.crustPerm;
+        }
+
     }
 
     /**

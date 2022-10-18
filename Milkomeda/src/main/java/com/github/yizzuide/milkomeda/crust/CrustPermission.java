@@ -21,7 +21,15 @@
 
 package com.github.yizzuide.milkomeda.crust;
 
+import org.springframework.beans.BeanUtils;
+import org.springframework.core.OrderComparator;
 import org.springframework.core.Ordered;
+import org.springframework.lang.NonNull;
+import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Permission for front-end request.
@@ -135,7 +143,7 @@ public interface CrustPermission extends Ordered {
     void setUrl(String url);
 
     /**
-     * Permission access resource url.
+     * Component resource url.
      * @return String
      */
     String getUrl();
@@ -145,4 +153,61 @@ public interface CrustPermission extends Ordered {
      * @param order int
      */
     void setOrder(int order);
+
+    /**
+     * Set sub-permission list.
+     * @param children  sub-permission list
+     */
+    void setChildren(List<CrustPermission> children);
+
+    /**
+     * Get sub-permission list.
+     * @return  sub-permission list
+     */
+    List<CrustPermission> getChildren();
+
+    /**
+     * build perm tree from permission list.
+     * @param permissionList    permission list
+     * @param parentId          build start parent id
+     * @return menu tree
+     */
+    static List<CrustPermission> buildPermTree(List<CrustPermission> permissionList, @NonNull Class<?> permClass, Long parentId) {
+        if (CollectionUtils.isEmpty(permissionList)) {
+            return null;
+        }
+        return permissionList.stream().filter(perm -> perm.getParentId() == null ? parentId == null : perm.getParentId().equals(parentId))
+                .map(perm -> {
+                    CrustPermission newPerm = null;
+                    try {
+                        newPerm = (CrustPermission) permClass.newInstance();
+                    } catch (Exception ignore) {}
+                    Assert.notNull(newPerm, "Create instance error with class: " + permClass.getTypeName());
+                    BeanUtils.copyProperties(perm, newPerm);
+                    return newPerm;
+                })
+                .peek(perm -> perm.setChildren(buildPermTree(permissionList, permClass, perm.getId())))
+                .sorted(OrderComparator.INSTANCE.withSourceProvider(p -> p))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * build menu tree from permission list.
+     * @param permissionList    permission list
+     * @param parentId          build start parent id
+     * @return menu tree
+     */
+    static List<CrustMenu> buildMenuTree(List<CrustPermission> permissionList, Long parentId) {
+        if (CollectionUtils.isEmpty(permissionList)) {
+            return null;
+        }
+        return permissionList.stream().filter(perm -> perm.getParentId() == null ?
+                        parentId == null : perm.getParentId().equals(parentId) && perm.getType() != 2)
+                .map(perm -> {
+                    CrustMenu menu = CrustMenu.buildOf(perm);
+                    List<CrustMenu> subMenuList = buildMenuTree(permissionList, perm.getId());
+                    menu.setChildren(subMenuList);
+                    return menu;
+                }).sorted(OrderComparator.INSTANCE.withSourceProvider(m -> m)).collect(Collectors.toList());
+    }
 }
