@@ -143,8 +143,10 @@ public class CrustConfigurerAdapter extends WebSecurityConfigurerAdapter {
 
         // 如果是无状态方式
         if (props.isStateless()) {
-            // 应用Token认证配置器，忽略登出请求
-            http.apply(new CrustAuthenticationConfigurer<>(() -> failureHandler)).permissiveRequestUrls(props.getLoginUrl())
+            anonUrls.add(props.getLoginUrl());
+            // 应用Token认证配置器，忽略需要匿名的请求
+            http.apply(new CrustAuthenticationConfigurer<>(() -> failureHandler))
+                    .permissiveRequestUrls(anonUrls.toArray(new String[0]))
                     .and()
                     .logout()
                     .logoutUrl(props.getLogoutUrl())
