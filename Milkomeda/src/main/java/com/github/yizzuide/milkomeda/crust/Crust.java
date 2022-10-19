@@ -44,6 +44,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.DigestUtils;
 import org.springframework.util.StringUtils;
@@ -313,15 +314,6 @@ public class Crust {
     }
 
     /**
-     * 获取Spring Security上下文
-     * @return SecurityContext
-     */
-    @NonNull
-    public SecurityContext getContext() {
-        return SecurityContextHolder.getContext();
-    }
-
-    /**
      * 使登录信息失效
      */
     public void invalidate() {
@@ -348,6 +340,15 @@ public class Crust {
     }
 
     /**
+     * 获取Spring Security上下文
+     * @return SecurityContext
+     */
+    @NonNull
+    public SecurityContext getContext() {
+        return SecurityContextHolder.getContext();
+    }
+
+    /**
      * 从请求中获取Token
      * @param checkIsExists 检查是否存在
      * @return Token
@@ -369,6 +370,20 @@ public class Crust {
             }
         }
         return token;
+    }
+
+    /**
+     * Custom permission any match.
+     * @param permissions permission list.
+     * @return  ture if match
+     * @since 3.14.0
+     */
+    public boolean permAny(String ...permissions) {
+        Authentication authentication = getAuthentication();
+        Assert.notNull(authentication, "Authentication must be not null.");
+        CrustUserInfo<CrustEntity, CrustPermission> loginUserInfo = getCurrentLoginUserInfo(authentication, null);
+        List<String> perms = authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList());
+        return loginUserInfo.getIsAdmin() || Arrays.stream(permissions).anyMatch(perms::contains);
     }
 
     /**

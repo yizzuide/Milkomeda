@@ -46,6 +46,12 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class CrustPerm {
     /**
+     * 是否为Admin用户
+     * @since 3.14.0
+     */
+    private boolean isAdmin;
+
+    /**
      * 角色ID列表
      */
     private Set<Long> roleIds;
@@ -66,6 +72,11 @@ public class CrustPerm {
 
         public Builder(CrustPerm crustPerm) {
             this.crustPerm = crustPerm;
+        }
+
+        public Builder admin(Boolean isAdmin) {
+            this.crustPerm.setAdmin(isAdmin);
+            return this;
         }
 
         public Builder roleIds(List<Long> roleIds) {

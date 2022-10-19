@@ -55,6 +55,7 @@ public abstract class CrustUserDetailsService implements UserDetailsService {
         List<GrantedAuthority> grantedAuthorities = null;
         List<Long> roleIds = null;
         if (crustPerm != null) {
+            userInfo.setIsAdmin(crustPerm.isAdmin());
             if (!CollectionUtils.isEmpty(crustPerm.getRoleIds())) {
                 roleIds = new ArrayList<>(crustPerm.getRoleIds());
                 userInfo.setRoleIds(roleIds);

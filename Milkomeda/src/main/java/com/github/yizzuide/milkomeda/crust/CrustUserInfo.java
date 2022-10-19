@@ -66,6 +66,11 @@ public class CrustUserInfo<T, P> implements Serializable {
      */
     private Long tokenExpire;
     /**
+     * Check is admin user.
+     * @since 3.14.0
+     */
+    private Boolean isAdmin;
+    /**
      * 角色id列表
      */
     private List<Long> roleIds;
