@@ -81,8 +81,12 @@ public class YmlResponseOutput {
             YmlParser.parseAliasMapPath(nodeMap, result, ERROR_STACK_MSG, null, e.getMessage());
             StackTraceElement[] stackTrace = e.getStackTrace();
             if (stackTrace.length > 0) {
-                String errorStack = String.format("exception happened: %s \n invoke root: %s", stackTrace[0], stackTrace[stackTrace.length - 1]);
-                YmlParser.parseAliasMapPath(nodeMap, result, ERROR_STACK, null, errorStack);
+                StringBuilder errorStack = new StringBuilder("exception thrown at: ");
+                for (int i = 0; i < 3; i++) {
+                    errorStack.append(String.format("%s \n", stackTrace[i]));
+                }
+                errorStack.append("omit...");
+                YmlParser.parseAliasMapPath(nodeMap, result, ERROR_STACK, null, errorStack.toString());
             }
         }
         // 附加字段写出

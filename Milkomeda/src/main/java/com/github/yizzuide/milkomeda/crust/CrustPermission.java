@@ -137,16 +137,16 @@ public interface CrustPermission extends Ordered {
     String getRouteName();
 
     /**
-     * Set permission access resource url.
-     * @param url String
+     * Set permission component resource url.
+     * @param componentPath String
      */
-    void setUrl(String url);
+    void setComponentPath(String componentPath);
 
     /**
      * Component resource url.
      * @return String
      */
-    String getUrl();
+    String getComponentPath();
 
     /**
      * Set permission order.

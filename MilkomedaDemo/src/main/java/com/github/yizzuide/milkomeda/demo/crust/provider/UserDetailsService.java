@@ -7,6 +7,7 @@ import com.github.yizzuide.milkomeda.demo.crust.pojo.User;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.io.Serializable;
+import java.util.Collections;
 
 /**
  * UserDetailsService
@@ -29,7 +30,7 @@ public class UserDetailsService extends CrustUserDetailsService {
     @Override
     protected CrustPerm findPermissionsById(Serializable uid) {
         // 实际情况下通过Dao查询
-        return CrustPerm.builder().build();
+        return CrustPerm.builder().permissionList(Collections.singletonList(CrustDefaultPermission.createRole("ADMIN"))).build();
     }
 
     @Override

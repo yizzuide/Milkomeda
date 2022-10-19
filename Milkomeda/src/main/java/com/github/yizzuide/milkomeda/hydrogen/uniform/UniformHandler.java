@@ -163,8 +163,8 @@ public class UniformHandler extends ResponseEntityExceptionHandler {
 
     // 其它内部异常处理
     @SuppressWarnings("unchecked")
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<Object> handleException(Exception e) {
+    @ExceptionHandler(Throwable.class)
+    public ResponseEntity<Object> handleException(Throwable e) {
         Map<String, Object> response = props.getResponse();
         Object status = response.get(YmlResponseOutput.STATUS);
         status = status == null ?  500 : status;
@@ -175,14 +175,14 @@ public class UniformHandler extends ResponseEntityExceptionHandler {
             for (Map<String, Object> map : this.customExpClazzList) {
                 List<Class<Exception>> expClazzList = (List<Class<Exception>>) map.get(YmlResponseOutput.CLAZZ);
                 if (expClazzList.stream().anyMatch(expClazz -> expClazz.isInstance(e))) {
-                    YmlResponseOutput.output(map, result, null, e, true);
+                    YmlResponseOutput.output(map, result, null, (Exception) e, true);
                     return ResponseEntity.status(Integer.parseInt(status.toString())).body(result);
                 }
             }
         }
 
         // 500异常
-       return handleInnerErrorExceptionResponse(e, response, status.toString());
+       return handleInnerErrorExceptionResponse((Exception) e, response, status.toString());
     }
 
     /**

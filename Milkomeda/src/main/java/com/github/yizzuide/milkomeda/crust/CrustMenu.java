@@ -81,6 +81,6 @@ public class CrustMenu implements Ordered {
     public static CrustMenu buildOf(CrustPermission perm) {
         return CrustMenu.builder().name(perm.getLabel()).icon(perm.getIcon())
                 .routeName(perm.getRouteName()).routePath(perm.getRoutePath())
-                .componentPath(perm.getUrl()).order(perm.getOrder()).build();
+                .componentPath(perm.getComponentPath()).order(perm.getOrder()).build();
     }
 }

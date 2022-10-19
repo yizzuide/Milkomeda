@@ -373,12 +373,12 @@ public class Crust {
     }
 
     /**
-     * Custom permission any match.
+     * Custom for permission any match.
      * @param permissions permission list.
      * @return  ture if match
      * @since 3.14.0
      */
-    public boolean permAny(String ...permissions) {
+    public boolean permitAny(String ...permissions) {
         Authentication authentication = getAuthentication();
         Assert.notNull(authentication, "Authentication must be not null.");
         CrustUserInfo<CrustEntity, CrustPermission> loginUserInfo = getCurrentLoginUserInfo(authentication, null);
