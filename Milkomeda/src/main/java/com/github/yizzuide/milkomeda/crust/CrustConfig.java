@@ -21,14 +21,12 @@
 
 package com.github.yizzuide.milkomeda.crust;
 
-import com.github.yizzuide.milkomeda.light.Cache;
-import com.github.yizzuide.milkomeda.light.LightCache;
-import com.github.yizzuide.milkomeda.light.LightCacheAspect;
-import com.github.yizzuide.milkomeda.light.LightProperties;
+import com.github.yizzuide.milkomeda.light.*;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -57,6 +55,7 @@ import javax.annotation.Resource;
  * Create at 2019/11/11 14:56
  */
 @Configuration
+@AutoConfigureAfter(LightConfig.class)
 @ConditionalOnClass({AuthenticationManager.class})
 @EnableConfigurationProperties({CrustProperties.class, LightProperties.class})
 public class CrustConfig {
@@ -97,6 +96,12 @@ public class CrustConfig {
         lightCache.setOnlyCacheL2(false);
         lightCache.setEnableSuperCache(lightProps.isEnableSuperCache());
         return lightCache;
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public LightCacheCleanAstrolabeHandler lightCacheCleanAstrolabeHandler(@Autowired(required = false) LightThreadLocalScope scope) {
+        return new LightCacheCleanAstrolabeHandler(scope);
     }
 
     @Configuration(proxyBeanMethods = false)

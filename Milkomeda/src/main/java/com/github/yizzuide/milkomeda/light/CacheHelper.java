@@ -190,7 +190,7 @@ public class CacheHelper {
                 fastSpot = get(cache);
                 if (fastSpot != null) {
                     data = fastSpot.getData();
-                    if (data != null) {
+                    if (data != null && id.equals(fastSpot.getView())) {
                         return data;
                     }
                 } else {
