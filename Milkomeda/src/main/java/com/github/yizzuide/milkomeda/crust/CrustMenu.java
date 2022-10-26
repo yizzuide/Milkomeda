@@ -39,6 +39,11 @@ import java.util.List;
 @Data
 public class CrustMenu implements Ordered {
     /**
+     * Menu id.
+     */
+    private Long id;
+
+    /**
      * Menu name.
      */
     private String name;
@@ -79,7 +84,7 @@ public class CrustMenu implements Ordered {
      * @return  CrustMenu
      */
     public static CrustMenu buildOf(CrustPermission perm) {
-        return CrustMenu.builder().name(perm.getLabel()).icon(perm.getIcon())
+        return CrustMenu.builder().id(perm.getId()).name(perm.getLabel()).icon(perm.getIcon())
                 .routeName(perm.getRouteName()).routePath(perm.getRoutePath())
                 .componentPath(perm.getComponentPath()).order(perm.getOrder()).build();
     }

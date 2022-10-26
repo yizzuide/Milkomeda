@@ -36,12 +36,12 @@ import java.lang.annotation.*;
  * <br>
  * Create at 2019/11/11 15:14
  */
+@Import(CrustConfig.class)
+@EnableWebSecurity
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Inherited
-@EnableWebSecurity
-@EnableGlobalMethodSecurity(prePostEnabled = true)
-@Import(CrustConfig.class)
 public @interface EnableCrust {
 }

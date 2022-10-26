@@ -55,6 +55,7 @@ public class LightConfig {
     }
 
     @Bean
+    @ConditionalOnMissingBean
     public LightCacheCleanAstrolabeHandler lightCacheCleanAstrolabeHandler(@Autowired(required = false) LightThreadLocalScope scope) {
         return new LightCacheCleanAstrolabeHandler(scope);
     }

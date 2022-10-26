@@ -125,9 +125,11 @@ public class YmlParser {
             value = defaultValue;
         } else if (value instanceof Map) { // 别名替换
             Map<String, Object> valueMap = (Map<String, Object>) value;
-            key = String.valueOf(valueMap.keySet().toArray()[0]);
-            value = valueMap.get(key);
-            hasAliasNode = true;
+            if (valueMap.size() > 0) {
+                key = String.valueOf(valueMap.keySet().toArray()[0]);
+                value = valueMap.get(key);
+                hasAliasNode = true;
+            }
         }
 
         // 配置中未添加该返回的字段，不计入返回结果

@@ -40,16 +40,16 @@ import java.util.Map;
  * Create at 2022/10/12 15:37
  */
 // Spring boot 2.x 提供了@ControllerEndpoint和@RestControllerEndpoint实现仅由 Spring MVC 或 Spring WebFlux 公开的端点
-//@RestControllerEndpoint(id = "ice-job")
+//@RestControllerEndpoint(id = "ice")
 // @WebEndpoint exposed only over HTTP and not over JMX.
-@WebEndpoint(id = "ice-job")
+@WebEndpoint(id = "ice")
 //@Endpoint
 public class JobInspectEndpoint {
 
     @Autowired
     private Ice ice;
 
-    // GET http://host:port/actuator/ice-job?topic=xxx&jobId=xxx
+    // GET http://host:port/actuator/ice?topic=xxx&jobId=xxx
     @ReadOperation
     public Map<String, Object> info(String topic, String jobId) {
         Map<String, Object> result = new HashMap<>();
@@ -69,7 +69,7 @@ public class JobInspectEndpoint {
         return result;
     }
 
-    // POST http://host:port/actuator/ice-job
+    // POST http://host:port/actuator/ice
     // body {"topic": "check_order","jobId": "100112345"}
     @WriteOperation
     public Map<String, Object> push(String topic, String jobId) {
@@ -86,7 +86,7 @@ public class JobInspectEndpoint {
         return result;
     }
 
-    // DELETE http://host:port/actuator/ice-job?topic=xxx&jobId=xxx
+    // DELETE http://host:port/actuator/ice?topic=xxx&jobId=xxx
     @DeleteOperation
     public Map<String, Object> remove(String topic, String jobId) {
         JobWrapper jobInspectInfo = ice.getJobInspectInfo(topic, jobId);

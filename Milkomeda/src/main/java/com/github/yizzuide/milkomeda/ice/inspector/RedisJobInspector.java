@@ -55,13 +55,13 @@ public class RedisJobInspector extends AbstractJobInspector implements Initializ
     private StringRedisTemplate redisTemplate;
 
     private String jobInspectorCursorKey = IceKeys.JOB_INSPECTOR_CURSOR_KEY_PREFIX;
-    private String jobInspectorDataKey = IceKeys.JOB_INSPECTOR_CURSOR_KEY_PREFIX;
+    private String jobInspectorDataKey = IceKeys.JOB_INSPECTOR_DATA_KEY_PREFIX;
 
     public RedisJobInspector(IceProperties props) {
         this.props = props;
         if (!IceProperties.DEFAULT_INSTANCE_NAME.equals(props.getInstanceName())) {
             this.jobInspectorCursorKey = IceKeys.JOB_INSPECTOR_CURSOR_KEY_PREFIX + ":" + props.getInstanceName();
-            this.jobInspectorDataKey = IceKeys.JOB_INSPECTOR_Data_KEY_PREFIX + ":" + props.getInstanceName();
+            this.jobInspectorDataKey = IceKeys.JOB_INSPECTOR_DATA_KEY_PREFIX + ":" + props.getInstanceName();
         }
     }
 
@@ -96,6 +96,7 @@ public class RedisJobInspector extends AbstractJobInspector implements Initializ
     @Async
     @Override
     public void finish(List<String> jobIds) {
+        super.finish(jobIds);
         redisTemplate.boundZSetOps(jobInspectorCursorKey).remove(jobIds.toArray());
         redisTemplate.boundHashOps(jobInspectorDataKey).delete(jobIds.toArray());
     }
@@ -121,7 +122,7 @@ public class RedisJobInspector extends AbstractJobInspector implements Initializ
     @Override
     public void onApplicationEvent(IceInstanceChangeEvent event) {
         String instanceName = event.getSource().toString();
-        jobInspectorCursorKey = IceKeys.JOB_INSPECTOR_CURSOR_KEY_PREFIX + ":" + instanceName;
-        this.jobInspectorDataKey = IceKeys.JOB_INSPECTOR_Data_KEY_PREFIX + ":" + instanceName;
+        this.jobInspectorCursorKey = IceKeys.JOB_INSPECTOR_CURSOR_KEY_PREFIX + ":" + instanceName;
+        this.jobInspectorDataKey = IceKeys.JOB_INSPECTOR_DATA_KEY_PREFIX + ":" + instanceName;
     }
 }

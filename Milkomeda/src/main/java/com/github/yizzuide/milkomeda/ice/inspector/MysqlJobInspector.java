@@ -78,6 +78,7 @@ public class MysqlJobInspector extends AbstractJobInspector {
     @Async
     @Override
     public void finish(List<String> jobIds) {
+        super.finish(jobIds);
         jobIds.forEach(jobId -> jobInspectionMapper.deleteById(Long.valueOf(Ice.getId(jobId))));
     }
 

@@ -167,7 +167,7 @@ public interface CrustPermission extends Ordered {
     List<CrustPermission> getChildren();
 
     /**
-     * build perm tree from permission list.
+     * Build perm tree from permission list.
      * @param permissionList    permission list
      * @param parentId          build start parent id
      * @return menu tree
@@ -192,7 +192,7 @@ public interface CrustPermission extends Ordered {
     }
 
     /**
-     * build menu tree from permission list.
+     * Build menu tree from permission list.
      * @param permissionList    permission list
      * @param parentId          build start parent id
      * @return menu tree

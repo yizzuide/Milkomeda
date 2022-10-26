@@ -24,6 +24,7 @@ package com.github.yizzuide.milkomeda.ice;
 import com.github.yizzuide.milkomeda.ice.inspector.JobInspector;
 import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
@@ -44,6 +45,8 @@ public class IceHolder {
 
     private static IceProperties props;
 
+    private static StringRedisTemplate redisTemplate;
+
     private static Ice ice;
 
     private static DeadQueue deadQueue;
@@ -63,8 +66,12 @@ public class IceHolder {
         return props;
     }
 
-    static void setIce(Ice ice) {
-        IceHolder.ice = ice;
+    public static StringRedisTemplate getRedisTemplate() {
+        return redisTemplate;
+    }
+
+    static void setRedisTemplate(StringRedisTemplate redisTemplate) {
+        IceHolder.redisTemplate = redisTemplate;
     }
 
     static void setDeadQueue(DeadQueue deadQueue) {
@@ -89,6 +96,10 @@ public class IceHolder {
 
     public static String getApplicationName() {
         return applicationName;
+    }
+
+    static void setIce(Ice ice) {
+        IceHolder.ice = ice;
     }
 
     /**

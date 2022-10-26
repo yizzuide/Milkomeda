@@ -40,7 +40,8 @@ public class IceKeys {
     public static final String READY_QUEUE_KEY_PREFIX = "ice:ready_queue";
     public static final String DEAD_QUEUE_KEY_PREFIX = "ice:dead_queue";
     public static final String JOB_INSPECTOR_CURSOR_KEY_PREFIX = "ice:job_inspect:cursor";
-    public static final String JOB_INSPECTOR_Data_KEY_PREFIX = "ice:job_inspect:data";
+    public static final String JOB_INSPECTOR_DATA_KEY_PREFIX = "ice:job_inspect:data";
+    public static final String JOB_STAT_KEY_PREFIX = "ice:job_stat";
 
     /**
      * Resolve the key according to the JobWrapper object.

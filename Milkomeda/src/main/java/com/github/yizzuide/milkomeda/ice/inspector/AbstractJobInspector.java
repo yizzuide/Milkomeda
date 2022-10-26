@@ -39,6 +39,8 @@ import java.util.stream.Collectors;
  */
 public abstract class AbstractJobInspector implements JobInspector {
 
+    private final JobStat jobStat = new JobStat();
+
     @Override
     public void add(JobWrapper jobWrapper, boolean update) {
         if (update) {
@@ -52,6 +54,8 @@ public abstract class AbstractJobInspector implements JobInspector {
     public void initJobInspection(JobWrapper jobWrapper, Integer index) {
         jobWrapper.setBucketIndex(index);
         this.add(jobWrapper, false);
+        // record stat
+        jobStat.addJob(jobWrapper);
     }
 
     @Async
@@ -84,6 +88,18 @@ public abstract class AbstractJobInspector implements JobInspector {
 
         // do update list action!
         doUpdate(jobWrappers);
+
+        // record stat
+        jobWrappers.forEach(jobStat::update);
+    }
+
+    @Override
+    public void finish(List<String> jobIds) {
+        jobIds.forEach(jobId -> {
+            JobWrapper jobWrapper = this.get(jobId);
+            // record stat
+            jobStat.finishJob(jobWrapper);
+        });
     }
 
     /**

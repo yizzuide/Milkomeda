@@ -29,6 +29,7 @@ import org.jetbrains.annotations.NotNull;
 import org.mybatis.spring.mapper.MapperScannerConfigurer;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
@@ -90,10 +91,9 @@ public class IntrospectConfig {
                 innerJobInspector = new MongoJobInspector();
                 break;
             case AUTO_CHECK:
-                innerJobInspector =  jobInspector;
+                innerJobInspector = jobInspector;
                 break;
         }
-        IceHolder.setJobInspector(innerJobInspector);
         return innerJobInspector;
     }
 
@@ -131,6 +131,18 @@ public class IntrospectConfig {
                 builder.addPropertyValue("defaultScope", "${mybatis.mapper-default-scope:}");
             }
             registry.registerBeanDefinition(MapperScannerConfigurer.class.getName() + "#jobInterospector", builder.getBeanDefinition());
+        }
+    }
+
+    @Configuration
+    static class ExtendedConfig implements InitializingBean {
+
+        @Autowired
+        private JobInspector jobInspector;
+
+        @Override
+        public void afterPropertiesSet() throws Exception {
+            IceHolder.setJobInspector(jobInspector);
         }
     }
 }

@@ -128,6 +128,7 @@ public class RedisJobPool implements JobPool, InitializingBean, ApplicationListe
     @Override
     public void afterPropertiesSet() {
         redisTemplate = ApplicationContextHolder.get().getBean(StringRedisTemplate.class);
+        IceHolder.setRedisTemplate(redisTemplate);
     }
 
     @Override

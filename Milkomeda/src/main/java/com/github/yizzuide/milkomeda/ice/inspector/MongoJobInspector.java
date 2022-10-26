@@ -99,6 +99,7 @@ public class MongoJobInspector extends AbstractJobInspector {
 
     @Override
     public void finish(List<String> jobIds) {
+        super.finish(jobIds);
         jobIds.forEach(jobId -> {
             Query query = Query.query(Criteria.where("id").is(Ice.getId(jobId)));
             mongoTemplate.remove(query, JobInspectionDocument.class);
