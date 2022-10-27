@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 yizzuide All rights Reserved.
+ * Copyright (c) 2022 yizzuide All rights Reserved.
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -19,62 +19,74 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.ice;
+package com.github.yizzuide.milkomeda.ice.inspector;
 
-import org.springframework.data.redis.core.RedisOperations;
+import lombok.Data;
 
-import java.util.List;
+import java.util.Map;
 
 /**
- * DeadQueue
+ * JobStatInfo
  *
+ * @since 3.14.0
  * @author yizzuide
- * @since 3.0.8
- * @version 3.14.0
  * <br>
- * Create at 2020/04/17 00:40
+ * Create at 2022/10/27 18:23
  */
-public interface DeadQueue {
+@Data
+public class JobStatInfo {
+    /**
+     * Total of jobs added number.
+     */
+    private Long total;
 
     /**
-     * 放入Dead Queue
-     * @param operations Pipelined操作
-     * @param delayJob DelayJob
-     * @since 3.12.0
+     * Total of has executed completely number.
      */
-    void add(RedisOperations<String, String> operations, DelayJob delayJob);
+    private Long finishTotal;
 
     /**
-     * remove with delay job.
-     * @param delayJob  DelayJob
-     * @since 3.14.0
+     * Count of today jobs added number.
      */
-    void remove(DelayJob delayJob);
+    private Long todayCount;
 
     /**
-     * 获取TTR Overload的DelayJob
-     * @return  DelayJob
+     * Count of today jobs executed completely number.
      */
-    DelayJob pop();
+    private Long finishTodayCount;
 
     /**
-     * 获取指定延迟Job个数
-     * @param count 获取数量
-     * @return  延迟Job列表
+     * Count of job pool.
      */
-    List<DelayJob> pop(long count);
+    private Long jobPoolCount;
 
     /**
-     * 获得所有TTR Overload的DelayJob
-     *
-     * @return DelayJob数组
+     * Count of ready queue.
      */
-    List<DelayJob> popALL();
+    private Long readyQueueCount;
 
     /**
-     * Get dead queue size.
-     * @return  job pool size
-     * @since 3.14.0
+     * Count of dead queue.
      */
-    Long size();
+    private Long deadQueueCount;
+
+    /**
+     * Count of delay bucket..
+     */
+    private Long delayBucketCount;
+
+    /**
+     * Count of topics added number.
+     */
+    private Map<String, Long> topics;
+
+    /**
+     * Count of successful processing within five days.
+     */
+    private Map<String, Long> successDaysCount;
+
+    /**
+     * Count of failure processing within five days.
+     */
+    private Map<String, Long> failDaysCount;
 }

@@ -41,7 +41,7 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 1.15.0
- * @version 3.12.0
+ * @version 3.14.0
  * <br>
  * Create at 2019/11/16 15:45
  */
@@ -57,7 +57,7 @@ public class RedisJobPool implements JobPool, InitializingBean, ApplicationListe
         }
     }
 
-    private BoundHashOperations<String, String, String> getPool () {
+    private BoundHashOperations<String, String, String> getPool() {
         return redisTemplate.boundHashOps(jobPoolKey);
     }
 
@@ -123,6 +123,11 @@ public class RedisJobPool implements JobPool, InitializingBean, ApplicationListe
     @Override
     public void remove(RedisOperations<String, String> operations, Object... jobIds) {
         operations.boundHashOps(jobPoolKey).delete(jobIds);
+    }
+
+    @Override
+    public Long size() {
+        return getPool().size();
     }
 
     @Override

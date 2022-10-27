@@ -3,6 +3,7 @@ package com.github.yizzuide.milkomeda.demo.ice.controller;
 import com.github.yizzuide.milkomeda.ice.Ice;
 import com.github.yizzuide.milkomeda.ice.Job;
 import com.github.yizzuide.milkomeda.ice.inspector.JobInspectPage;
+import com.github.yizzuide.milkomeda.ice.inspector.JobStatInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -80,6 +81,15 @@ public class JobController {
     public ResponseEntity<Void> rePushJob(String jobId, String topic) {
         ice.rePushJob(jobId, topic);
         return ResponseEntity.ok(null);
+    }
+
+    /**
+     * 获取job统计数据
+     * @return JobStatInfo
+     */
+    @GetMapping("getJobStat")
+    public ResponseEntity<JobStatInfo> getJobStat() {
+        return ResponseEntity.ok(ice.getStatInfo());
     }
 
     /**

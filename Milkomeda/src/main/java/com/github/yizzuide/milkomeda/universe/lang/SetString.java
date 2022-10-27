@@ -19,35 +19,52 @@
  * SOFTWARE.
  */
 
-@file:JvmName("Dates")
-package com.github.yizzuide.milkomeda.util
+package com.github.yizzuide.milkomeda.universe.lang;
 
-import java.time.Instant
-import java.time.LocalDate
-import java.time.ZoneId
-import java.util.*
+import lombok.Data;
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
- * DateExtensionsKt
+ * String type of set.
  *
- *
- * @author yizzuide
  * @since 3.14.0
+ * @author yizzuide
  * <br>
- * Create at 2022/09/27 00:57
+ * Create at 2022/10/27 15:12
  */
-class DateExtensionsKt {
-}
+@Data
+public class SetString {
 
-fun timestamp2Date(timestamp: Long): Date? {
-    if (timestamp < 0) {
-        return null
+    private String source;
+
+    public SetString(String source) {
+        this.source = source;
     }
-    val instant = Instant.ofEpochMilli(timestamp)
-    return Date.from(instant)
+
+    public boolean add(String item) {
+        if (this.source.contains(item)) {
+            return false;
+        }
+        if (StringUtils.isEmpty(this.source)) {
+            this.source = item;
+            return true;
+        }
+        this.source = this.source.concat(",").concat(item);
+        return true;
+    }
+
+    public Set<String> toSet() {
+        String[] items = this.source.split(",");
+        Set<String> set = new HashSet<>();
+        Collections.addAll(set, items);
+        return set;
+    }
+
+    public String toString() {
+        return this.source;
+    }
 }
-
-fun date2Timestamp(date: Date?): Long = date?.time ?: -1
-
-fun timestampOfDays(days: Long): Long = LocalDate.now().plusDays(days).
-    atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli() - System.currentTimeMillis()

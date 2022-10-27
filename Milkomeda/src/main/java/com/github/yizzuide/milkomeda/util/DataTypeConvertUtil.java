@@ -32,6 +32,7 @@ import java.lang.reflect.Method;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.LongStream;
 
 /**
  * DataTypeConvertUtil
@@ -39,7 +40,7 @@ import java.util.regex.Pattern;
  *
  * @author yizzuide
  * @since 1.13.0
- * @version 3.8.0
+ * @version 3.14.0
  * <br>
  * Create at 2019/09/21 17:23
  */
@@ -113,6 +114,19 @@ public class DataTypeConvertUtil {
      */
     public static Integer intVal(Long num) {
         return Math.toIntExact(num);
+    }
+
+    /**
+     * Long to Stream
+     * @param count count of number
+     * @return  Stream
+     */
+    public static <T> LongStream countToStream(int count) {
+        long[] arr = new long[count];
+        for (int i = 0; i < count; i++) {
+            arr[i] = i;
+        }
+        return Arrays.stream(arr);
     }
 
     /**

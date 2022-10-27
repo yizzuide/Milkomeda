@@ -81,4 +81,12 @@ public interface DelayBucket {
      * @since 3.12.0
      */
     void remove(RedisOperations<String, String> operations, Integer index, DelayJob delayJob);
+
+    /**
+     * Get delay bucket size.
+     * @param index bucket index
+     * @return  job pool size
+     * @since 3.14.0
+     */
+    Long size(Integer index);
 }

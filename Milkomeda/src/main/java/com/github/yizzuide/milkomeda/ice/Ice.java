@@ -22,6 +22,7 @@
 package com.github.yizzuide.milkomeda.ice;
 
 import com.github.yizzuide.milkomeda.ice.inspector.JobInspectPage;
+import com.github.yizzuide.milkomeda.ice.inspector.JobStatInfo;
 import com.github.yizzuide.milkomeda.ice.inspector.JobWrapper;
 import com.github.yizzuide.milkomeda.universe.lang.Tuple;
 import org.jetbrains.annotations.NotNull;
@@ -154,6 +155,13 @@ public interface Ice {
      * @since 3.14.0
      */
     Map<String, String> getCacheKey(String jobId, String topic);
+
+    /**
+     * Get jobs stat info.
+     * @return  JobStatInfo
+     * @since 3.14.0
+     */
+    JobStatInfo getStatInfo();
 
     /**
      * Pull number of jobs.

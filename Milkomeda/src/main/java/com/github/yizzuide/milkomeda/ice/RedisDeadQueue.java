@@ -93,6 +93,11 @@ public class RedisDeadQueue implements DeadQueue, InitializingBean {
         return members.stream().map(s -> JSONUtil.parse(s, DelayJob.class)).collect(Collectors.toList());
     }
 
+    @Override
+    public Long size() {
+        return getDeadQueue(this.deadQueueKey).size();
+    }
+
     private BoundSetOperations<String, String> getDeadQueue(String key) {
         return redisTemplate.boundSetOps(key);
     }

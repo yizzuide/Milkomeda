@@ -22,10 +22,9 @@
 package com.github.yizzuide.milkomeda.ice;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.github.yizzuide.milkomeda.ice.inspector.JobInspectPage;
-import com.github.yizzuide.milkomeda.ice.inspector.JobInspector;
-import com.github.yizzuide.milkomeda.ice.inspector.JobWrapper;
+import com.github.yizzuide.milkomeda.ice.inspector.*;
 import com.github.yizzuide.milkomeda.universe.polyfill.RedisPolyfill;
+import com.github.yizzuide.milkomeda.util.DataTypeConvertUtil;
 import com.github.yizzuide.milkomeda.util.RedisUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -210,6 +209,21 @@ public class RedisIce implements Ice, ApplicationListener<IceInstanceChangeEvent
             return Collections.emptyMap();
         }
         return IceKeys.resolve(jobWrapper);
+    }
+
+    @Override
+    public JobStatInfo getStatInfo() {
+        if (jobInspector == null) {
+            return null;
+        }
+        JobStat jobStat = new JobStat();
+        JobStatInfo data = jobStat.getData();
+        data.setJobPoolCount(jobPool.size());
+        data.setDelayBucketCount(DataTypeConvertUtil.countToStream(IceHolder.getProps().getDelayBucketCount())
+                .map(i -> delayBucket.size((int)i)).reduce(0, Long::sum));
+        data.setReadyQueueCount(data.getTopics().keySet().stream().map(readyQueue::size).reduce(0L, Long::sum));
+        data.setDeadQueueCount(deadQueue.size());
+        return data;
     }
 
     @Override

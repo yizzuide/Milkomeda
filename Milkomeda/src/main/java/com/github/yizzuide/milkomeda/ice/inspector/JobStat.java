@@ -23,13 +23,17 @@ package com.github.yizzuide.milkomeda.ice.inspector;
 
 import com.github.yizzuide.milkomeda.ice.IceHolder;
 import com.github.yizzuide.milkomeda.ice.IceKeys;
+import com.github.yizzuide.milkomeda.universe.lang.SetString;
+import com.github.yizzuide.milkomeda.util.Dates;
 import org.springframework.data.redis.core.BoundHashOperations;
 import org.springframework.data.redis.core.BoundValueOperations;
 
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
+
+import static com.github.yizzuide.milkomeda.util.DataTypeConvertUtil.toLong;
 
 /**
  * Job stat record on inspector is enabled.
@@ -39,21 +43,74 @@ import java.util.concurrent.TimeUnit;
  * <br>
  * Create at 2022/10/26 20:00
  */
-public class JobStat {
+public final class JobStat {
+    public static final String JOB_STAT_COUNT_TOTAL_KEY = "total";
+    public static final String JOB_STAT_COUNT_FINISH_TOTAL_KEY = "finish_total";
+    public static final String JOB_STAT_COUNT_TOPICS_KEY = "topics";
+    public static final String JOB_STAT_COUNT_TODAY_KEY_PREFIX = ":count_today";
+    public static final String JOB_STAT_COUNT_FINISH_TODAY_KEY_PREFIX = ":count_finish_today";
+    public static final String JOB_STAT_COUNT_TOPIC_KEY_PREFIX = "topic:";
+    public static final String JOB_STAT_COUNT_SUCCESS_DAY_KEY_PREFIX = ":success_day_";
+    public static final String JOB_STAT_COUNT_FAIL_DAY_KEY_PREFIX = ":fail_day_";
+
+    public JobStatInfo getData() {
+        BoundHashOperations<String, Object, Object> hOps = getCountHOps();
+        JobStatInfo data = new JobStatInfo();
+        Object total = hOps.get(JOB_STAT_COUNT_TOTAL_KEY);
+        data.setTotal(toLong(total));
+
+        Object finishTotal = hOps.get(JOB_STAT_COUNT_FINISH_TOTAL_KEY);
+        data.setFinishTotal(toLong(finishTotal));
+
+        Object topics = hOps.get(JOB_STAT_COUNT_TOPICS_KEY);
+        Map<String, Long> topicsMap = new HashMap<>();
+        if (topics != null) {
+            Set<String> topicSet = new SetString(topics.toString()).toSet();
+            topicSet.forEach(topic -> topicsMap.put(topic, toLong(hOps.get(JOB_STAT_COUNT_TOPIC_KEY_PREFIX + topic))));
+        }
+        data.setTopics(topicsMap);
+
+        Object todayCount = getCountValOps(JOB_STAT_COUNT_TODAY_KEY_PREFIX).get();
+        data.setTodayCount(toLong(todayCount));
+
+        Object finishTodayCount = getCountValOps(JOB_STAT_COUNT_FINISH_TODAY_KEY_PREFIX).get();
+        data.setFinishTodayCount(toLong(finishTodayCount));
+
+        // count five days period
+        Map<String, Long> successDaysCount = new LinkedHashMap<>();
+        Map<String, Long> failDaysCount = new LinkedHashMap<>();
+        genFiveDaysCount(JOB_STAT_COUNT_SUCCESS_DAY_KEY_PREFIX, successDaysCount);
+        genFiveDaysCount(JOB_STAT_COUNT_FAIL_DAY_KEY_PREFIX, failDaysCount);
+        data.setSuccessDaysCount(successDaysCount);
+        data.setFailDaysCount(failDaysCount);
+        return data;
+    }
 
     public void addJob(JobWrapper jobWrapper) {
-        totalCount("total", ":count_today");
+        // count total
+        totalCount(JOB_STAT_COUNT_TOTAL_KEY, JOB_STAT_COUNT_TODAY_KEY_PREFIX);
 
         // count topic
         BoundHashOperations<String, Object, Object> hOps = getCountHOps();
-        hOps.increment("topic:" + jobWrapper.getTopic(), 1);
+        hOps.increment(JOB_STAT_COUNT_TOPIC_KEY_PREFIX + jobWrapper.getTopic(), 1);
+
+        // count topics
+        Object topics = hOps.get(JOB_STAT_COUNT_TOPICS_KEY);
+        if (topics == null) {
+            hOps.put(JOB_STAT_COUNT_TOPICS_KEY, jobWrapper.getTopic());
+        } else {
+            SetString setString = new SetString(topics.toString());
+            if (setString.add(jobWrapper.getTopic())) {
+                hOps.put(JOB_STAT_COUNT_TOPICS_KEY, setString);
+            }
+        }
     }
 
     public void update(JobWrapper jobWrapper) {
         if (jobWrapper.getQueueType() == JobQueueType.NoneQueue ||
                 jobWrapper.getQueueType() == JobQueueType.DeadQueue) {
             // count fail today
-            dayCount(false);
+            dayCount(buildToDayKey(JOB_STAT_COUNT_FAIL_DAY_KEY_PREFIX), 5L);
         }
     }
 
@@ -62,18 +119,41 @@ public class JobStat {
         if (jobWrapper == null) {
             return;
         }
-
-        totalCount("finish_total", ":count_finish_today");
+        // count total
+        totalCount(JOB_STAT_COUNT_FINISH_TOTAL_KEY, JOB_STAT_COUNT_FINISH_TODAY_KEY_PREFIX);
 
         // count topic
         BoundHashOperations<String, Object, Object> hOps = getCountHOps();
-        Object topicVal = hOps.get("topic:" + jobWrapper.getTopic());
+        Object topicVal = hOps.get(JOB_STAT_COUNT_TOPIC_KEY_PREFIX + jobWrapper.getTopic());
         if (topicVal != null) {
-            hOps.put("topic:" + jobWrapper.getTopic(), String.valueOf(Long.parseLong(topicVal.toString()) - 1));
+            hOps.put(JOB_STAT_COUNT_TOPIC_KEY_PREFIX + jobWrapper.getTopic(), String.valueOf(Long.parseLong(topicVal.toString()) - 1));
         }
 
         // count success today
-        dayCount(true);
+        dayCount(buildToDayKey(JOB_STAT_COUNT_SUCCESS_DAY_KEY_PREFIX), 5L);
+    }
+
+    private void genFiveDaysCount(String key, Map<String, Long> container) {
+        for (int i = 4; i >= 0; i--) {
+            String day = buildDay(-i);
+            String dayKey = key + day;
+            String count = getCountValOps(dayKey).get();
+            container.put(day, toLong(count));
+        }
+    }
+
+    private String buildDay(long daysToAdd) {
+        LocalDate localDate;
+        if (daysToAdd == 0) {
+            localDate = LocalDate.now();
+        } else {
+            localDate = LocalDate.now().plusDays(daysToAdd);
+        }
+        return localDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+    }
+
+    private String buildToDayKey(String keyPrefix) {
+        return keyPrefix + buildDay(0);
     }
 
     private void totalCount(String totalKey, String todayKey) {
@@ -83,26 +163,20 @@ public class JobStat {
         if (!Boolean.TRUE.equals(success)) {
             hOps.increment(totalKey, 1);
         }
-
         // count jobs today
-        BoundValueOperations<String, String> valueOps = IceHolder.getRedisTemplate().boundValueOps(IceKeys.JOB_STAT_KEY_PREFIX + todayKey);
-        long tomorrowMill = LocalDate.now().plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
-        success = valueOps.setIfAbsent("1", tomorrowMill - System.currentTimeMillis(), TimeUnit.MILLISECONDS);
+        dayCount(todayKey, 1L);
+    }
+
+    private void dayCount(String key, Long daysOfExpire) {
+        BoundValueOperations<String, String> valueOps = getCountValOps(key);
+        Boolean success = valueOps.setIfAbsent("1", Dates.timestampOfDays(daysOfExpire), TimeUnit.MILLISECONDS);
         if (!Boolean.TRUE.equals(success)) {
             valueOps.increment();
         }
     }
 
-    private void dayCount(boolean isSuccess) {
-        LocalDate now = LocalDate.now();
-        String day = now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-        String key = isSuccess ? ":success_day_" + day : ":fail_day_" + day;
-        BoundValueOperations<String, String> valueOps = IceHolder.getRedisTemplate().boundValueOps(IceKeys.JOB_STAT_KEY_PREFIX + key);
-        long fiveDayMill = now.plusDays(5).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
-        Boolean success = valueOps.setIfAbsent("1", fiveDayMill - System.currentTimeMillis(), TimeUnit.MILLISECONDS);
-        if (!Boolean.TRUE.equals(success)) {
-            valueOps.increment();
-        }
+    private BoundValueOperations<String, String> getCountValOps(String key) {
+        return IceHolder.getRedisTemplate().boundValueOps(IceKeys.JOB_STAT_KEY_PREFIX + key);
     }
 
     private BoundHashOperations<String, Object, Object> getCountHOps() {

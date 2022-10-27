@@ -112,4 +112,11 @@ public interface JobPool {
      * @since 3.12.0
      */
     void remove(RedisOperations<String, String> operations, Object... jobIds);
+
+    /**
+     * Get job pool size.
+     * @return  job pool size
+     * @since 3.14.0
+     */
+    Long size();
 }
