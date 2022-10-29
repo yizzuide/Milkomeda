@@ -19,74 +19,32 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.ice.inspector;
+package com.github.yizzuide.milkomeda.hydrogen.uniform;
 
 import lombok.Data;
 
-import java.util.Map;
+import java.util.List;
 
 /**
- * JobStatInfo
+ * Page data for {@link UniformResult}.
  *
  * @since 3.14.0
  * @author yizzuide
  * <br>
- * Create at 2022/10/27 18:23
+ * Create at 2022/10/29 19:35
  */
 @Data
-public class JobStatInfo {
+public class UniformPage<T> {
     /**
-     * Total of jobs added number.
+     * Record row total size.
      */
-    private Long total;
-
+    private Long totalSize;
     /**
-     * Total of has executed completely number.
+     * Total number of pages.
      */
-    private Long finishTotal;
-
+    private Long pageCount;
     /**
-     * Count of today jobs added number.
+     * Record rows list.
      */
-    private Long todayCount;
-
-    /**
-     * Count of today jobs executed completely number.
-     */
-    private Long finishTodayCount;
-
-    /**
-     * Count of job pool.
-     */
-    private Long jobPoolCount;
-
-    /**
-     * Count of ready queue.
-     */
-    private Long readyQueueCount;
-
-    /**
-     * Count of dead queue.
-     */
-    private Long deadQueueCount;
-
-    /**
-     * Count of delay buckets.
-     */
-    private Map<String, Long> delayBuckets;
-
-    /**
-     * Count of topics added number.
-     */
-    private Map<String, Long> topics;
-
-    /**
-     * Count of successful processing within five days.
-     */
-    private Map<String, Long> successDaysCount;
-
-    /**
-     * Count of failure processing within five days.
-     */
-    private Map<String, Long> failDaysCount;
+    private List<T> list;
 }

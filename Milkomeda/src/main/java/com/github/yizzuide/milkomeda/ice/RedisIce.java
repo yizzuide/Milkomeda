@@ -34,10 +34,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.CollectionUtils;
 
 import java.time.Duration;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -219,8 +216,10 @@ public class RedisIce implements Ice, ApplicationListener<IceInstanceChangeEvent
         JobStat jobStat = new JobStat();
         JobStatInfo data = jobStat.getData();
         data.setJobPoolCount(jobPool.size());
-        data.setDelayBucketCount(DataTypeConvertUtil.countToStream(IceHolder.getProps().getDelayBucketCount())
-                .map(i -> delayBucket.size((int)i)).reduce(0, Long::sum));
+        Map<String, Long> buckets = new HashMap<>();
+        DataTypeConvertUtil.countToStream(IceHolder.getProps().getDelayBucketCount())
+                        .forEach(i -> buckets.put("#" + i, delayBucket.size((int)i)));
+        data.setDelayBuckets(buckets);
         data.setReadyQueueCount(data.getTopics().keySet().stream().map(readyQueue::size).reduce(0L, Long::sum));
         data.setDeadQueueCount(deadQueue.size());
         return data;

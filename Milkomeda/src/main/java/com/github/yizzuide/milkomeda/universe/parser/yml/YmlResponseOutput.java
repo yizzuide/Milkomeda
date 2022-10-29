@@ -73,7 +73,10 @@ public class YmlResponseOutput {
                     .forEach(k ->  YmlParser.parseAliasMapPath(nodeMap, result, k, null, exMap));
         } else { // 非自定义异常基本信息写出，支持默认值源
             YmlParser.parseAliasMapPath(nodeMap, result, CODE, defValMap == null ? -1 : defValMap.get(CODE), null);
-            YmlParser.parseAliasMapPath(nodeMap, result, MESSAGE, defValMap == null ? "Server busy，try again！" : defValMap.get(MESSAGE), null);
+            YmlParser.parseAliasMapPath(nodeMap, result, MESSAGE, defValMap == null ? "Server Internal error！" : defValMap.get(MESSAGE), null);
+            // 其它自定义key默认写出
+            nodeMap.keySet().stream().filter(k -> !Arrays.asList(CLAZZ, STATUS, CODE, MESSAGE, ADDITION).contains(k) && !result.containsKey(k))
+                    .forEach(k ->  YmlParser.parseAliasMapPath(nodeMap, result, k, null, null));
         }
         // 内部异常详情写出
         if (e != null && !customException) {
@@ -83,7 +86,7 @@ public class YmlResponseOutput {
             if (stackTrace.length > 0) {
                 StringBuilder errorStack = new StringBuilder("exception thrown at: ");
                 for (int i = 0; i < 3; i++) {
-                    errorStack.append(String.format("%s \n", stackTrace[i]));
+                    errorStack.append(String.format("%s ", stackTrace[i]));
                 }
                 errorStack.append("omit...");
                 YmlParser.parseAliasMapPath(nodeMap, result, ERROR_STACK, null, errorStack.toString());

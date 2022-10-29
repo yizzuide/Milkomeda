@@ -101,7 +101,7 @@ public final class JobStat {
         } else {
             SetString setString = new SetString(topics.toString());
             if (setString.add(jobWrapper.getTopic())) {
-                hOps.put(JOB_STAT_COUNT_TOPICS_KEY, setString);
+                hOps.put(JOB_STAT_COUNT_TOPICS_KEY, setString.toString());
             }
         }
     }

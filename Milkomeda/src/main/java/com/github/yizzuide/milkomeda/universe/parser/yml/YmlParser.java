@@ -22,7 +22,7 @@
 package com.github.yizzuide.milkomeda.universe.parser.yml;
 
 import com.github.yizzuide.milkomeda.universe.extend.env.CollectionsPropertySource;
-import com.github.yizzuide.milkomeda.util.Strings;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -121,7 +121,7 @@ public class YmlParser {
         // 判定别名节点flag
         boolean hasAliasNode = false;
         // 未指定的配置字段，如果有默认值
-        if (value == null && defaultValue != null) {
+        if ((value == null || StringUtils.isBlank(value.toString())) && defaultValue != null) {
             value = defaultValue;
         } else if (value instanceof Map) { // 别名替换
             Map<String, Object> valueMap = (Map<String, Object>) value;
@@ -157,9 +157,11 @@ public class YmlParser {
             return;
         }
         // 替换是指定的值
-        if (Strings.isEmpty(String.valueOf(value)) && replaceData != null) {
+        if (StringUtils.isBlank(value.toString()) && replaceData != null) {
             ymlAliasNode.setValue(replaceData);
         }
+        // Replace empty token
+        ymlAliasNode.setValue(CollectionsPropertySource.of(ymlAliasNode.getValue()));
         aliasNodeMap.put(ownerAliasKey,  ymlAliasNode);
     }
 }
