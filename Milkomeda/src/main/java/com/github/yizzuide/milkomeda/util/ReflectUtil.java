@@ -26,6 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
@@ -36,6 +37,7 @@ import java.math.BigDecimal;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
@@ -455,21 +457,55 @@ public class ReflectUtil {
             return new BigDecimal(value);
         }
         ResolvableType resolvableType = ResolvableType.forField(field);
-        if (Map.class.equals(type)) {
+        return parseResolvableType(resolvableType, type, value, null);
+    }
+
+    /**
+     * Get param value from type.
+     * @param methodParameter   MethodParameter
+     * @param rawType           param type
+     * @param value             request string value
+     * @param wrapperBody       get body from wrapper
+     * @param wipeWrapperBody   set body with wrapper
+     * @return Object
+     * @since 3.14.0
+     */
+    public static Object getParamsTypeValue(MethodParameter methodParameter, Class<?> rawType, String value, Function<Object, Object> wrapperBody, BiConsumer<Object, Object> wipeWrapperBody) {
+        ResolvableType resolvableType = ResolvableType.forMethodParameter(methodParameter);
+        return parseResolvableType(resolvableType, rawType, value, () -> {
+            ResolvableType[] wrapperGenerics = resolvableType.getGenerics();
+            Class<?> firstGenericType = wrapperGenerics.length > 0 ? wrapperGenerics[0].resolve() : String.class;
+            Object wrapper = JSONUtil.parse(value, rawType);
+            Object entity = JSONUtil.parse(JSONUtil.serialize(wrapperBody.apply(wrapper)), firstGenericType);
+            wipeWrapperBody.accept(wrapper, entity);
+            return wrapper;
+        });
+    }
+
+    private static Object parseResolvableType(ResolvableType resolvableType, Class<?> rawType, String value, Supplier<?> additionHandle) {
+        if (Map.class.equals(rawType)) {
             ResolvableType[] wrapperGenerics = resolvableType.getGenerics();
             Class<?> firstGenericType = wrapperGenerics.length > 0 ? wrapperGenerics[0].resolve() : String.class;
             Class<?> secondGenericType = wrapperGenerics.length > 1 ? wrapperGenerics[1].resolve() : Object.class;
             return JSONUtil.parseMap(value, firstGenericType, secondGenericType);
         }
-        if (List.class.equals(type)) {
+        if (List.class.equals(rawType)) {
             ResolvableType[] wrapperGenerics = resolvableType.getGenerics();
             if (wrapperGenerics.length > 0 && wrapperGenerics[0].resolve() == Map.class) {
                 return JSONUtil.parseList(value, Map.class);
             }
-            return JSONUtil.parseList(value, type);
+            return JSONUtil.parseList(value, rawType);
         }
+
+        if (additionHandle != null) {
+            Object result = additionHandle.get();
+            if (result != null) {
+                return result;
+            }
+        }
+
         // Entity
-        return JSONUtil.parse(value, type);
+        return JSONUtil.parse(value, rawType);
     }
 
     /**

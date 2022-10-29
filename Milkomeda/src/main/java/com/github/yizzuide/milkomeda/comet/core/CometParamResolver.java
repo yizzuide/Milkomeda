@@ -21,9 +21,11 @@
 
 package com.github.yizzuide.milkomeda.comet.core;
 
+import com.github.yizzuide.milkomeda.hydrogen.uniform.QueryData;
 import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import com.github.yizzuide.milkomeda.universe.context.WebContext;
 import com.github.yizzuide.milkomeda.util.JSONUtil;
+import com.github.yizzuide.milkomeda.util.ReflectUtil;
 import org.springframework.core.MethodParameter;
 import org.springframework.lang.NonNull;
 import org.springframework.util.StringUtils;
@@ -55,6 +57,7 @@ public class CometParamResolver implements HandlerMethodArgumentResolver {
         return methodParameter.hasParameterAnnotation(CometParam.class);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Object resolveArgument(@NonNull MethodParameter methodParameter, ModelAndViewContainer modelAndViewContainer,
                                   @NonNull NativeWebRequest nativeWebRequest, WebDataBinderFactory webDataBinderFactory) throws Exception {
@@ -65,10 +68,12 @@ public class CometParamResolver implements HandlerMethodArgumentResolver {
         }
         CometAspect.resolveThreadLocal.set(params);
         Class<?> parameterType = methodParameter.getParameterType();
-        // Is matched String
+
+        // is matched String?
         if (String.class.isAssignableFrom(parameterType)) {
             return params;
         }
+
         // Map
         if (Map.class.isAssignableFrom(parameterType)) {
             Map<String, Object> map = JSONUtil.parseMap(params, String.class, Object.class);
@@ -81,10 +86,18 @@ public class CometParamResolver implements HandlerMethodArgumentResolver {
             CometParamDecrypt cometParamDecrypt = ApplicationContextHolder.get().getBean(cometParam.decrypt());
             return cometParamDecrypt.decrypt(map);
         }
+
         // List
         if (List.class.isAssignableFrom(parameterType)) {
             return JSONUtil.parseList(params, Map.class);
         }
+
+        // parse QueryData from Uniform
+        if (QueryData.class.isAssignableFrom(parameterType)) {
+            return ReflectUtil.getParamsTypeValue(methodParameter, parameterType, params,
+                    (wrapper) -> ((QueryData<?>)wrapper).getEntity(), (wrapper, entity) -> ((QueryData<Object>)wrapper).setEntity(entity));
+        }
+
         // custom object
         return JSONUtil.parse(params, parameterType);
     }
