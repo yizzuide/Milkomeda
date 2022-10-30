@@ -21,7 +21,7 @@
 
 package com.github.yizzuide.milkomeda.comet.core;
 
-import com.github.yizzuide.milkomeda.hydrogen.uniform.QueryData;
+import com.github.yizzuide.milkomeda.hydrogen.uniform.UniformQueryData;
 import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import com.github.yizzuide.milkomeda.universe.context.WebContext;
 import com.github.yizzuide.milkomeda.util.JSONUtil;
@@ -93,9 +93,9 @@ public class CometParamResolver implements HandlerMethodArgumentResolver {
         }
 
         // parse QueryData from Uniform
-        if (QueryData.class.isAssignableFrom(parameterType)) {
+        if (UniformQueryData.class.isAssignableFrom(parameterType)) {
             return ReflectUtil.getParamsTypeValue(methodParameter, parameterType, params,
-                    (wrapper) -> ((QueryData<?>)wrapper).getEntity(), (wrapper, entity) -> ((QueryData<Object>)wrapper).setEntity(entity));
+                    (wrapper) -> ((UniformQueryData<?>)wrapper).getEntity(), (wrapper, entity) -> ((UniformQueryData<Object>)wrapper).setEntity(entity));
         }
 
         // custom object

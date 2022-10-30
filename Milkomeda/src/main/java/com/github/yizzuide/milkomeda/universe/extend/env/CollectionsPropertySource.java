@@ -27,6 +27,7 @@ import org.springframework.core.env.PropertySource;
 import org.springframework.core.env.StandardEnvironment;
 
 import java.util.Collections;
+import java.util.Date;
 
 /**
  * CollectionsPropertySource
@@ -49,6 +50,8 @@ public class CollectionsPropertySource extends PropertySource<Object> {
 
     public static final String COLLECTIONS_EMPTY_LIST = "[]";
 
+    public static final String COLLECTIONS_OBJECT_DATE = "{date}";
+
     private static final String PREFIX = "collections.";
 
     public CollectionsPropertySource() {
@@ -70,24 +73,30 @@ public class CollectionsPropertySource extends PropertySource<Object> {
         if ("emptyList".equals(type)) {
             return COLLECTIONS_EMPTY_LIST;
         }
+        if ("dateObject".equals(type)) {
+            return COLLECTIONS_OBJECT_DATE;
+        }
         return null;
     }
 
     /**
      * Get empty object with token
-     * @param token token string which express empty type
+     * @param psValue token string
      * @return  empty object
      * @since 3.14.0
      */
-    public static Object of(Object token) {
-        if (token == null) return null;
-        if (token.equals(COLLECTIONS_EMPTY_MAP)) {
+    public static Object of(Object psValue) {
+        if (psValue == null) return null;
+        if (psValue.equals(COLLECTIONS_EMPTY_MAP)) {
             return Collections.emptyMap();
         }
-        if (token.equals(COLLECTIONS_EMPTY_LIST)) {
+        if (psValue.equals(COLLECTIONS_EMPTY_LIST)) {
             return Collections.emptyList();
         }
-        return token;
+        if (psValue.equals(COLLECTIONS_OBJECT_DATE)) {
+            return new Date();
+        }
+        return psValue;
     }
 
     public static void addToEnvironment(ConfigurableEnvironment environment) {

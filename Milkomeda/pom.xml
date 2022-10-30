@@ -16,6 +16,7 @@
         <spring-boot.version>2.6.12</spring-boot.version>
         <spring-cloud.version>2021.0.4</spring-cloud.version>
         <mybatis.starter.version>2.2.2</mybatis.starter.version>
+        <mybatis-plus.version>3.5.2</mybatis-plus.version>
         <redission.version>3.17.7</redission.version>
         <jsqlparser.version>4.5</jsqlparser.version>
         <jwt.version>0.9.1</jwt.version>
@@ -166,6 +167,12 @@
             <groupId>com.github.jsqlparser</groupId>
             <artifactId>jsqlparser</artifactId>
             <version>${jsqlparser.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-boot-starter</artifactId>
+            <version>${mybatis-plus.version}</version>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.redisson</groupId>

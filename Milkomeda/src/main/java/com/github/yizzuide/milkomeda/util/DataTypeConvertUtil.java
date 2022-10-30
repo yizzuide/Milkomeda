@@ -47,6 +47,7 @@ import java.util.stream.LongStream;
 public class DataTypeConvertUtil {
 
     private static final Pattern linePattern = Pattern.compile("_(\\w)");
+    private static final Pattern humpPattern = Pattern.compile("[A-Z]");
 
     /**
      * 下划线转驼峰
@@ -63,6 +64,23 @@ public class DataTypeConvertUtil {
         matcher.appendTail(sb);
         return sb.toString();
     }
+
+    /**
+     * 驼峰转下划线
+     * @param str   源字符串
+     * @return  下划线风格字符串
+     * @since 3.14.0
+     */
+    public static String humpToLine(String str) {
+        Matcher matcher = humpPattern.matcher(str);
+        StringBuffer sb = new StringBuffer();
+        while (matcher.find()) {
+            matcher.appendReplacement(sb, "_" + matcher.group(0).toLowerCase());
+        }
+        matcher.appendTail(sb);
+        return sb.toString();
+    }
+
 
     /**
      * Object 转 String

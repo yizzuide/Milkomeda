@@ -122,7 +122,7 @@ public class MultiDataSourceTransaction implements Transaction {
         // 非Spring事务管理的回滚处理
         if (this.mainConnection != null && !this.isConnectionTransactional && !this.autoCommit) {
             if (Environment.isShowLog()) {
-                log.debug("Sundial Rolling back JDBC Connection [" + this.mainConnection + "]");
+                log.debug("Sundial rolling back JDBC Connection [" + this.mainConnection + "]");
             }
             this.mainConnection.rollback();
             for (Connection connection : otherConnectionMap.values()) {
