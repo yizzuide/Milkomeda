@@ -3,12 +3,16 @@ package com.github.yizzuide.milkomeda.sirius;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.core.metadata.TableFieldInfo;
+import com.baomidou.mybatisplus.core.metadata.TableInfo;
+import com.baomidou.mybatisplus.core.metadata.TableInfoHelper;
 import com.baomidou.mybatisplus.core.toolkit.ReflectionKit;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.yizzuide.milkomeda.hydrogen.uniform.UniformPage;
 import com.github.yizzuide.milkomeda.hydrogen.uniform.UniformQueryPageData;
 import com.github.yizzuide.milkomeda.util.DataTypeConvertUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.OrderComparator;
 import org.springframework.core.Ordered;
 import org.springframework.util.CollectionUtils;
@@ -55,6 +59,7 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
         QueryWrapper<T> queryWrapper = new QueryWrapper<>();
         Class<T> tClass = currentModelClass();
         T target = queryPageData.getEntity();
+        TableInfo tableInfo = TableInfoHelper.getTableInfo(entityClass);
         Field[] fields = tClass.getDeclaredFields();
         boolean postOrderByASC = true;
         boolean needPostOrderBy = false;
@@ -64,21 +69,42 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
             if (queryMatcher == null) {
                 continue;
             }
-            TableField tableField = field.getDeclaredAnnotation(TableField.class);
-            String columnName;
-            if (tableField != null) {
-                columnName = tableField.value();
-            } else {
-                columnName = DataTypeConvertUtil.humpToLine(field.getName());
+            String columnName = null;
+            // find from table info
+            for (TableFieldInfo tableFieldInfo : tableInfo.getFieldList()) {
+                if (field.getName().equals(tableFieldInfo.getProperty())) {
+                    columnName = tableFieldInfo.getColumn();
+                    break;
+                }
+            }
+            // get from @TableField or convert it
+            if (columnName == null) {
+                TableField tableField = field.getDeclaredAnnotation(TableField.class);
+                if (tableField != null) {
+                    columnName = tableField.value();
+                } else {
+                    columnName = DataTypeConvertUtil.humpToLine(field.getName());
+                }
             }
 
-            ReflectionUtils.makeAccessible(field);
-            Object fieldValue = ReflectionUtils.getField(field, target);
+            Object fieldValue = null;
+            if (target != null) {
+                // can get field value from getter method？
+                tableInfo.getPropertyValue(target, field.getName());
+                // reflect it!
+                if (fieldValue == null) {
+                    ReflectionUtils.makeAccessible(field);
+                    fieldValue = ReflectionUtils.getField(field, target);
+                }
+            }
+
             boolean fieldNonNull = Objects.nonNull(target) && Objects.nonNull(fieldValue);
             if (queryMatcher.prefect() == PrefectType.EQ) {
                 queryWrapper.eq(fieldNonNull, columnName, fieldValue);
             } else if (queryMatcher.prefect() == PrefectType.LIKE) {
-                queryWrapper.like(fieldNonNull, columnName, fieldValue);
+                if (StringUtils.isNotBlank(fieldValue.toString())) {
+                    queryWrapper.like(fieldNonNull, columnName, fieldValue);
+                }
             } else if (queryMatcher.prefect() == PrefectType.PageDate) {
                 queryWrapper.ge(Objects.nonNull(queryPageData.getStartDate()), columnName, queryPageData.getStartDate());
                 queryWrapper.le(Objects.nonNull(queryPageData.getEndDate()), columnName, queryPageData.getEndDate());
@@ -88,6 +114,8 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
                 needPostOrderBy = true;
                 postOrderByASC = queryMatcher.forward();
                 orderField = field;
+            } else {
+                additionParseQueryMatcher(queryWrapper, queryMatcher.prefectString(), columnName, fieldNonNull, fieldValue);
             }
         }
 
@@ -102,9 +130,16 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
                 records = records.stream()
                         .sorted(OrderComparator.INSTANCE.withSourceProvider(t -> t)).collect(Collectors.toList());
             } else {
-                // reflect from field
                 Field finalOrderField = orderField;
-                records.sort(Comparator.comparingInt(t -> (Integer) ReflectionUtils.getField(finalOrderField, t)));
+                records.sort(Comparator.comparingInt(t -> {
+                    // can get field value from getter method？
+                    Object propertyValue = tableInfo.getPropertyValue(t, finalOrderField.getName());
+                    if (propertyValue != null) {
+                        return (Integer) propertyValue;
+                    }
+                    // reflect it!
+                    return (Integer) ReflectionUtils.getField(finalOrderField, t);
+                }));
             }
             // need desc?
             if (!postOrderByASC) {
@@ -113,5 +148,16 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
         }
         uniformPage.setList(records);
         return uniformPage;
+    }
+
+    /**
+     * Addition parse query matcher with {@link QueryMatcher#prefectString()}
+     * @param queryWrapper      QueryWrapper
+     * @param prefectString     type for match query
+     * @param columnName        table column name
+     * @param isFieldNonNull    false if field value
+     * @param fieldValue         entity field value
+     */
+    protected void additionParseQueryMatcher(QueryWrapper<T> queryWrapper, String prefectString, String columnName, boolean isFieldNonNull, Object fieldValue) {
     }
 }
