@@ -84,9 +84,10 @@ public class RedisJobInspector extends AbstractJobInspector implements Initializ
     public List<JobWrapper> getPage(int start, int size, int order) {
         // [-1, 1]
         order = Math.min(1, Math.max(-1, order));
-        int pageCount = start * size;
+        // 累计页数量
+        int pageNumTotalSize = (start - 1) * size;
         BoundZSetOperations<String, String> ops = redisTemplate.boundZSetOps(jobInspectorCursorKey);
-        Set<String> jobIds = order < 0 ? ops.reverseRange(pageCount, pageCount + size) : ops.range(pageCount, pageCount + size);
+        Set<String> jobIds = order < 0 ? ops.reverseRange(pageNumTotalSize, pageNumTotalSize + size) : ops.range(pageNumTotalSize, pageNumTotalSize + size);
         if (CollectionUtils.isEmpty(jobIds)) {
             return Collections.emptyList();
         }

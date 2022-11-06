@@ -21,7 +21,7 @@
 
 package com.github.yizzuide.milkomeda.ice;
 
-import com.github.yizzuide.milkomeda.ice.inspector.JobInspectPage;
+import com.github.yizzuide.milkomeda.hydrogen.uniform.UniformPage;
 import com.github.yizzuide.milkomeda.ice.inspector.JobStatInfo;
 import com.github.yizzuide.milkomeda.ice.inspector.JobWrapper;
 import com.github.yizzuide.milkomeda.universe.lang.Tuple;
@@ -127,7 +127,7 @@ public interface Ice {
      * @return job Inspection page data
      * @since 3.14.0
      */
-    JobInspectPage getJobInspectPage(int start, int size, int order);
+    UniformPage<JobWrapper> getJobInspectPage(int start, int size, int order);
 
     /**
      * Get job inspect info with topic and job id.

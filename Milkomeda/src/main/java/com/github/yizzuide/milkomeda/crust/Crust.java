@@ -39,6 +39,7 @@ import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationServiceException;
+import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
@@ -320,7 +321,12 @@ public class Crust {
         try {
             // Token方式下开启缓存时清空
             if (getProps().isStateless()) {
-                AopContextHolder.self(this.getClass()).removeTokenCache(getUserInfo(null).getToken());
+                String token = getAuthentication() == null ? getToken(false) :
+                        getUserInfo(null).getToken();
+                if (Strings.isEmpty(token)) {
+                    throw new InsufficientAuthenticationException("Token is not exists.");
+                }
+                AopContextHolder.self(this.getClass()).removeTokenCache(token);
             }
         } finally {
             SecurityContextHolder.clearContext();

@@ -22,6 +22,7 @@
 package com.github.yizzuide.milkomeda.sirius;
 
 import com.baomidou.mybatisplus.annotation.DbType;
+import com.baomidou.mybatisplus.annotation.FieldFill;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
@@ -62,8 +63,8 @@ public class SiriusProperties {
          */
         private String psValue;
         /**
-         * When to need interpolated.
+         * Field fill type (current support insert and update).
          */
-        private ModifyType modifyType;
+        private FieldFill fieldFill;
     }
 }

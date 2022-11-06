@@ -65,9 +65,8 @@ public class MongoJobInspector extends AbstractJobInspector {
     public List<JobWrapper> getPage(int start, int size, int order) {
         // [-1, 1]
         order = Math.min(1, Math.max(-1, order));
-        int pageCount = start * size;
         boolean useUpdate = IceHolder.getProps().getIntrospect().getIndexType() == IndexType.UPDATE_TIME;
-        Pageable pageable = PageRequest.of(pageCount, size);
+        Pageable pageable = PageRequest.of(start - 1, size);
         Sort sort = Sort.by(order == -1 ? Sort.Direction.DESC : Sort.Direction.ASC, useUpdate ? "updateTime" : "pushTime");
         Query query = new Query();
         query.with(pageable).with(sort);

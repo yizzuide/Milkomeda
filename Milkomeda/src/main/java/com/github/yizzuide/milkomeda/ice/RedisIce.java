@@ -22,6 +22,7 @@
 package com.github.yizzuide.milkomeda.ice;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.github.yizzuide.milkomeda.hydrogen.uniform.UniformPage;
 import com.github.yizzuide.milkomeda.ice.inspector.*;
 import com.github.yizzuide.milkomeda.universe.polyfill.RedisPolyfill;
 import com.github.yizzuide.milkomeda.util.DataTypeConvertUtil;
@@ -161,18 +162,20 @@ public class RedisIce implements Ice, ApplicationListener<IceInstanceChangeEvent
     }
 
     @Override
-    public JobInspectPage getJobInspectPage(int start, int size, int order) {
-        JobInspectPage page = new JobInspectPage();
+    public UniformPage<JobWrapper> getJobInspectPage(int start, int size, int order) {
+        UniformPage<JobWrapper> page = new UniformPage<>();
         if (jobInspector == null) {
-            page.setTotalSize(0);
-            page.setItems(Collections.emptyList());
+            page.setTotalSize(0L);
+            page.setList(Collections.emptyList());
             return page;
         }
         page.setTotalSize(jobInspector.size());
+        long pageCount = page.getTotalSize() / size;
+        page.setPageCount(page.getTotalSize() % size > 0 ? pageCount + 1 : pageCount);
         List<JobWrapper> jobWrappers = jobInspector.getPage(start, size, order);
         // merge jobId -> jobId
         jobWrappers.forEach(jobWrapper -> jobWrapper.setId(Ice.getId(jobWrapper.getId())));
-        page.setItems(jobWrappers);
+        page.setList(jobWrappers);
         return page;
     }
 

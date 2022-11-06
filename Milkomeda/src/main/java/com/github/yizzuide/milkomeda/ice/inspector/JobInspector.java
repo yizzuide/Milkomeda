@@ -96,7 +96,7 @@ public interface JobInspector {
 
     /**
      * Get job wrapper list from cache.
-     * @param start page start index
+     * @param start page start index, begin at 1
      * @param size size of pre page
      * @param order sorting of corresponding column, 1 is asc and -1 is desc
      * @return JobWrapper list

@@ -21,6 +21,7 @@
 
 package com.github.yizzuide.milkomeda.sirius;
 
+import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.autoconfigure.ConfigurationCustomizer;
 import com.baomidou.mybatisplus.autoconfigure.MybatisPlusAutoConfiguration;
 import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
@@ -96,37 +97,37 @@ public class SiriusConfig {
                 return;
             }
             autoInterpolates.forEach(autoInterpolate -> {
-                if (autoInterpolate.getModifyType() == ModifyType.INSERT) {
+                if (autoInterpolate.getFieldFill() == FieldFill.INSERT) {
                     insertFields = autoInterpolate.getFields();
                     insertValueProvider = () -> CollectionsPropertySource.of(autoInterpolate.getPsValue());
-                } else {
+                } else if (autoInterpolate.getFieldFill() == FieldFill.UPDATE) {
                     updateFields = autoInterpolate.getFields();
                     updateValueProvider = () -> CollectionsPropertySource.of(autoInterpolate.getPsValue());
                 }
             });
         }
 
-        @SuppressWarnings("unchecked")
         @Override
         public void insertFill(MetaObject metaObject) {
-            if (CollectionUtils.isEmpty(insertFields)) {
-                return;
-            }
-            insertFields.forEach(fieldName -> {
-                Object value = insertValueProvider.get();
-                Class<Object> aClass = (Class<Object>) value.getClass();
-                this.strictInsertFill(metaObject, fieldName, aClass, value);
-            });
+            executeFill(metaObject, insertFields, insertValueProvider);
+        }
+
+
+        @Override
+        public void updateFill(MetaObject metaObject) {
+            executeFill(metaObject, updateFields, updateValueProvider);
         }
 
         @SuppressWarnings("unchecked")
-        @Override
-        public void updateFill(MetaObject metaObject) {
-            if (CollectionUtils.isEmpty(updateFields)) {
+        private void executeFill(MetaObject metaObject, List<String> fields, Supplier<?> valueProvider) {
+            if (CollectionUtils.isEmpty(fields)) {
                 return;
             }
-            updateFields.forEach(fieldName -> {
-                Object value = updateValueProvider.get();
+            fields.forEach(fieldName -> {
+                if(!metaObject.hasGetter(fieldName)) {
+                    return;
+                }
+                Object value = valueProvider.get();
                 Class<Object> aClass = (Class<Object>) value.getClass();
                 this.strictInsertFill(metaObject, fieldName, aClass, value);
             });

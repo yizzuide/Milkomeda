@@ -64,9 +64,8 @@ public class MysqlJobInspector extends AbstractJobInspector {
     public List<JobWrapper> getPage(int start, int size, int order) {
         // [-1, 1]
         order = Math.min(1, Math.max(-1, order));
-        int pageCount = start * size;
         JobInspection condition = null;
-        Pageable pageable = PageRequest.of(pageCount, size);
+        Pageable pageable = PageRequest.of(start - 1, size);
         boolean useUpdate = IceHolder.getProps().getIntrospect().getIndexType() == IndexType.UPDATE_TIME;
         List<JobInspection> jobInspections = jobInspectionMapper.queryAllByLimit(condition, pageable, useUpdate, order);
         if (CollectionUtils.isEmpty(jobInspections)) {

@@ -1,9 +1,12 @@
 package com.github.yizzuide.milkomeda.demo.ice.controller;
 
+import com.github.yizzuide.milkomeda.hydrogen.uniform.ResultVO;
+import com.github.yizzuide.milkomeda.hydrogen.uniform.UniformPage;
+import com.github.yizzuide.milkomeda.hydrogen.uniform.UniformResult;
 import com.github.yizzuide.milkomeda.ice.Ice;
 import com.github.yizzuide.milkomeda.ice.Job;
-import com.github.yizzuide.milkomeda.ice.inspector.JobInspectPage;
 import com.github.yizzuide.milkomeda.ice.inspector.JobStatInfo;
+import com.github.yizzuide.milkomeda.ice.inspector.JobWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,7 +32,7 @@ public class JobController {
     private Ice ice;
 
     /**
-     * 延迟一个Job
+     * 添加Job延迟任务
      * @param job 必需设置属性：id（唯一id), topic（消费Topic标识）, delay（延迟ms), ttr（消费执行超时ms）, retryCount（重试次数）, body（JSON业务数据）
      */
     @RequestMapping("push")
@@ -39,14 +42,14 @@ public class JobController {
 
     /**
      * 获取job页数据
-     * @param start page num
+     * @param start page num, begin at 1
      * @param size  size of pre page
      * @param order sorting of corresponding column, 1 is asc and -1 is desc
      * @return  job Inspection page data
      */
     @GetMapping("getPage")
-    public JobInspectPage getJobPage(int start, int size, int order) {
-        return ice.getJobInspectPage(start, size, order);
+    public ResultVO<UniformPage<JobWrapper>> getJobPage(Integer start, Integer size, Integer order) {
+        return UniformResult.ok(ice.getJobInspectPage(start, size, order));
     }
 
     /**
