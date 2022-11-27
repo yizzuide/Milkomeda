@@ -19,34 +19,50 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.hydrogen.uniform;
+package com.github.yizzuide.milkomeda.sirius;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import java.lang.annotation.*;
 
 /**
- * Request query page type data.
+ * Reference matcher using for {@link IPageableService}.
  *
  * @since 3.14.0
  * @author yizzuide
  * <br>
- * Create at 2022/10/29 19:10
+ * Create at 2022/11/10 21:55
  */
-@EqualsAndHashCode(callSuper = true)
-@Data
-public class UniformQueryPageData<T> extends UniformQueryData<T> {
+@Documented
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.FIELD, ElementType.TYPE, ElementType.ANNOTATION_TYPE})
+public @interface RefMatcher {
     /**
-     * 查询当前页
+     * Reference type.
+     * @return  self type by default
      */
-    private Integer pageStart;
+    RefType type() default RefType.SELF;
 
     /**
-     * 每页记录数
+     * Foreign field referenced it, must add on mapper type.
+     * @return reference field
      */
-    private Integer pageSize;
+    String foreignField() default "";
 
     /**
-     * 排序
+     * Foreign mapper class, must add on mapper type.
+     * @return mapper class
      */
-    private Integer order;
+    Class<?> foreignMapper() default BaseMapper.class;
+
+    enum RefType {
+        /**
+         * Referenced by self, used on entity field.
+         */
+        SELF,
+
+        /**
+         * Foreign Reference, used on mapper type.
+         */
+        FOREIGN
+    }
 }

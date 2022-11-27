@@ -22,6 +22,7 @@
 package com.github.yizzuide.milkomeda.ice;
 
 import com.github.yizzuide.milkomeda.hydrogen.uniform.UniformPage;
+import com.github.yizzuide.milkomeda.hydrogen.uniform.UniformQueryPageData;
 import com.github.yizzuide.milkomeda.ice.inspector.JobStatInfo;
 import com.github.yizzuide.milkomeda.ice.inspector.JobWrapper;
 import com.github.yizzuide.milkomeda.universe.lang.Tuple;
@@ -120,14 +121,12 @@ public interface Ice {
     boolean rePushJob(String jobId, String topic);
 
     /**
-     * Get all job inspect info list.
-     * @param start page start index
-     * @param size size of per page
-     * @param order sorting of corresponding column, 1 is asc and -1 is desc
-     * @return job Inspection page data
+     * Get job inspect info list.
+     * @param queryPageData page data for query
+     * @return UniformPage inspection page data
      * @since 3.14.0
      */
-    UniformPage<JobWrapper> getJobInspectPage(int start, int size, int order);
+    UniformPage<JobWrapper> getJobInspectPage(UniformQueryPageData<JobWrapper> queryPageData);
 
     /**
      * Get job inspect info with topic and job id.

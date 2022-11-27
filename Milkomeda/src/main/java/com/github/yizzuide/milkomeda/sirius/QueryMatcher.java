@@ -3,7 +3,7 @@ package com.github.yizzuide.milkomeda.sirius;
 import java.lang.annotation.*;
 
 /**
- * Query matcher using for {@link}
+ * Query matcher using for {@link IPageableService}.
  *
  * @since 3.14.0
  * @author yizzuide

@@ -54,15 +54,15 @@ public class Job<T> implements Serializable, Cloneable {
     /**
      * 延迟时间，单位ms
      */
-    private long delay;
+    private Long delay;
     /**
      * 执行超时时间，单位ms（超时后重新投入了待处理（READY）队列）
      */
-    private long ttr;
+    private Long ttr;
     /**
      * 初始重试次数
      */
-    private int retryCount;
+    private Integer retryCount;
     /**
      * 业务数据
      */
@@ -81,7 +81,7 @@ public class Job<T> implements Serializable, Cloneable {
         this.status = status;
     }
 
-    public Job(String id, String topic, long delay, long ttr, int retryCount, T body) {
+    public Job(String id, String topic, Long delay, Long ttr, Integer retryCount, T body) {
         this.id = id;
         this.topic = topic;
         this.delay = delay;

@@ -23,11 +23,16 @@ package com.github.yizzuide.milkomeda.ice;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.github.yizzuide.milkomeda.hydrogen.uniform.UniformPage;
-import com.github.yizzuide.milkomeda.ice.inspector.*;
+import com.github.yizzuide.milkomeda.hydrogen.uniform.UniformQueryPageData;
+import com.github.yizzuide.milkomeda.ice.inspector.JobInspector;
+import com.github.yizzuide.milkomeda.ice.inspector.JobStat;
+import com.github.yizzuide.milkomeda.ice.inspector.JobStatInfo;
+import com.github.yizzuide.milkomeda.ice.inspector.JobWrapper;
 import com.github.yizzuide.milkomeda.universe.polyfill.RedisPolyfill;
 import com.github.yizzuide.milkomeda.util.DataTypeConvertUtil;
 import com.github.yizzuide.milkomeda.util.RedisUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.data.redis.core.RedisOperations;
@@ -91,6 +96,12 @@ public class RedisIce implements Ice, ApplicationListener<IceInstanceChangeEvent
     public boolean add(Job job, boolean mergeIdWithTopic, boolean replaceWhenExists) {
         if (mergeIdWithTopic) {
             job.setId(job.getTopic() + IceProperties.MERGE_ID_SEPARATOR + job.getId());
+        }
+        if (job.getTtr() == null) {
+            job.setTtr(props.getTtr().toMillis());
+        }
+        if (job.getRetryCount() == null) {
+            job.setRetryCount(props.getRetryCount());
         }
 
         DelayJob delayJob = new DelayJob(job);
@@ -162,13 +173,27 @@ public class RedisIce implements Ice, ApplicationListener<IceInstanceChangeEvent
     }
 
     @Override
-    public UniformPage<JobWrapper> getJobInspectPage(int start, int size, int order) {
+    public UniformPage<JobWrapper> getJobInspectPage(UniformQueryPageData<JobWrapper> queryPageData) {
         UniformPage<JobWrapper> page = new UniformPage<>();
         if (jobInspector == null) {
             page.setTotalSize(0L);
+            page.setPageCount(1L);
             page.setList(Collections.emptyList());
             return page;
         }
+        // find entity by id?
+        JobWrapper entity = queryPageData.getEntity();
+        if (entity != null && StringUtils.isNotBlank(entity.getId())) {
+            JobWrapper jobWrapper = getJobInspectInfo(entity.getTopic(), entity.getId());
+            page.setTotalSize(1L);
+            page.setPageCount(1L);
+            page.setList(jobWrapper == null ? Collections.emptyList() : Collections.singletonList(jobWrapper));
+            return page;
+        }
+
+        int start = queryPageData.getPageStart();
+        int size = queryPageData.getPageSize();
+        int order = queryPageData.getOrder();
         page.setTotalSize(jobInspector.size());
         long pageCount = page.getTotalSize() / size;
         page.setPageCount(page.getTotalSize() % size > 0 ? pageCount + 1 : pageCount);
