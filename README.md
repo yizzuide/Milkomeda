@@ -51,6 +51,8 @@ The inspiration for this project name is the Milky Way and the Andromeda will me
   * Depends on: Spring IoC, SpringBoot Data Redis
 - [x] Orbit: Add method interceptor only with yml config or using `@Orbit`. *3.13.0+*
   * Depends on: Spring AOP
+- [x] Sirius: Mybatis-plus addition support, such as: page query with `@QueryMatcher`, remove before check ref with `@RefMatcher`. *3.14.0+*
+  * * Depends on: Mybatis-plus
     
 ## Requirements
 * Java 8
@@ -58,9 +60,13 @@ The inspiration for this project name is the Milky Way and the Andromeda will me
 * SpringBoot 2.x
 
 ## Version control guidelines
-- 1.16.0+ for Spring Boot 2.1+
-- Dalston.1.11.0-Dalston.1.12.0 for Spring Boot 1.5.x
-- Others for Spring Boot 2.0.x
+|  Milkomeda   | Spring Boot  |
+|  ----  | ----  |
+| 3.14.x  | 2.6.x |
+| 3.13.x  | 2.4.x - 2.5.x |
+| 3.0 - 3.12.x | 2.2.x - 2.3.x |
+| 1.16.x - 2.x | 2.1.x |
+| Dalston.1.11.0-Dalston.1.12.0 | Spring Boot 1.5.x |
 
 ## Installation
 ```xml
