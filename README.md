@@ -51,8 +51,8 @@ The inspiration for this project name is the Milky Way and the Andromeda will me
   * Depends on: Spring IoC, SpringBoot Data Redis
 - [x] Orbit: Add method interceptor only with yml config or using `@Orbit`. *3.13.0+*
   * Depends on: Spring AOP
-- [x] Sirius: Mybatis-plus addition support, such as: page query with `@QueryMatcher`, remove before check ref with `@RefMatcher`. *3.14.0+*
-  * * Depends on: Mybatis-plus
+- [x] Sirius: Mybatis-plus addition support, such as page query with `@QueryMatcher`, remove before check ref with `@RefMatcher`. *3.14.0+*
+  * Depends on: Mybatis-plus
     
 ## Requirements
 * Java 8
