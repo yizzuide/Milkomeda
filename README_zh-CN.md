@@ -67,6 +67,10 @@
 - [x] Metal（金属）：用于实现基于KV数据的分布式动态配置刷新，支持属性绑定注入。*3.6.0+*
   * 依赖技术：Spring IoC、SpringBoot Data Redis
   * 设计模式：观察者模式、门面模式
+- [x] Orbit: 零代码添加方法切面，可以使用yml配置或通过注解`@Orbit`. *3.13.0+*
+  * 依赖技术: Spring AOP
+- [x] Sirius: Mybatis-plus功能扩展支持, 如：在模型类属性上添加`@QueryMatcher`作为页查询条件, 删除前检查引用通过在Mapper上添加`@RefMatcher`. *3.14.0+*
+  * 依赖技术: Mybatis-plus
     
 ## Requirements
 * Java 8
@@ -74,9 +78,13 @@
 * SpringBoot 2.x
 
 ## Version control guidelines
-- 1.16.0+ for Spring Boot 2.1+
-- Dalston.1.11.0-Dalston.1.12.0 for Spring Boot 1.5.x
-- Others for Spring Boot 2.0.x
+|  Milkomeda   | Spring Boot  |
+|  ----  | ----  |
+| 3.14.x  | 2.6.x |
+| 3.13.x  | 2.4.x - 2.5.x |
+| 3.0 - 3.12.x | 2.2.x - 2.3.x |
+| 1.16.x - 2.x | 2.1.x |
+| Dalston.1.11.0-Dalston.1.12.0 | Spring Boot 1.5.x |
 
 ## Installation
 ```xml
@@ -129,4 +137,3 @@ Milkomeda is available under the MIT license. See the LICENSE file for more info
 <a href="https://www.jetbrains.com/idea/" target="_blank">
   <img width="64px" src="./logo/idea.png" alt="IntelliJ IDEA">
 </a>
-
