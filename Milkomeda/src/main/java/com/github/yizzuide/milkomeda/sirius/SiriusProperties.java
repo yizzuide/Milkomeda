@@ -30,7 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * SiriusProperties
+ * Sirius module properties
  *
  * @since 3.14.0
  * @author yizzuide

@@ -31,8 +31,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * OrbitDataSourceAdvice
- * 数据源切面实现
+ * Dynamic route advice impl of {@link OrbitAdvice}
  *
  * @author yizzuide
  * @since 3.4.0

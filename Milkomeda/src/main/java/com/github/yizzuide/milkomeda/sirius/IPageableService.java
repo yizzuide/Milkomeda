@@ -33,7 +33,7 @@ public interface IPageableService<T> extends IService<T> {
     boolean removeBeforeCheckRef(T entity);
 
     /**
-     * Assign authority for owner
+     * Assign authority for owner.
      * @param ownerId   owner id
      * @param itemIds   authority item id list
      * @param conditionProvider condition which find owner

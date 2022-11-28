@@ -34,8 +34,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * OrbitAdditionSource
- * Orbit配置扩展
+ * Orbit config extension of {@link OrbitSource}
  *
  * @author yizzuide
  * @since 3.13.0

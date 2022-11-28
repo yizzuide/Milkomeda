@@ -42,7 +42,7 @@ import java.util.List;
 import java.util.function.Supplier;
 
 /**
- * SiriusConfig
+ * Sirius module config
  *
  * @author yizzuide
  * <br>
