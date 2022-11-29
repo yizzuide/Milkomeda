@@ -6,7 +6,7 @@
 
     <groupId>com.github.yizzuide</groupId>
     <artifactId>milkomeda-spring-boot-starter</artifactId>
-    <version>3.14.1-SNAPSHOT</version>
+    <version>${project.release.version}</version>
     <packaging>jar</packaging>
 
     <properties>
@@ -42,7 +42,7 @@
         <connection>scm:git:git@github.com:yizzuide/Milkomeda.git</connection>
         <developerConnection>scm:git:git@github.com:yizzuide/Milkomeda.git</developerConnection>
         <url>git@github.com:yizzuide/Milkomeda.git</url>
-        <tag>v3.14.1</tag>
+        <tag>v${project.release.version}</tag>
     </scm>
 
     <developers>
