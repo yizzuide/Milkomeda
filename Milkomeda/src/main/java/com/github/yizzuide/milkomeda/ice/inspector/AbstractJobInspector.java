@@ -25,6 +25,7 @@ import com.github.yizzuide.milkomeda.ice.DelayJob;
 import com.github.yizzuide.milkomeda.ice.JobStatus;
 import org.springframework.scheduling.annotation.Async;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -34,6 +35,7 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 3.14.0
+ * @version 3.14.1
  * <br>
  * Create at 2022/09/26 00:12
  */
@@ -72,6 +74,7 @@ public abstract class AbstractJobInspector implements JobInspector {
             if (index != null) {
                 jobWrapper.setBucketIndex(index);
             }
+            jobWrapper.setUpdateTime(System.currentTimeMillis());
             jobWrapper.setExecutionTime(delayJob.getDelayTime());
             jobWrapper.setHadRetryCount(delayJob.getRetryCount());
             if (status == null) {
@@ -86,7 +89,7 @@ public abstract class AbstractJobInspector implements JobInspector {
             return jobWrapper;
         }).collect(Collectors.toList());
 
-        // do update list action!
+        // do update list action
         doUpdate(jobWrappers);
 
         // record stat
@@ -95,8 +98,24 @@ public abstract class AbstractJobInspector implements JobInspector {
 
     @Override
     public void finish(List<String> jobIds) {
+        finishRecord(jobIds, null);
+    }
+
+    protected void finishAndRetain(List<String> jobIds) {
+        finishRecord(jobIds, jobWrapper -> {
+            jobWrapper.setUpdateTime(System.currentTimeMillis());
+            jobWrapper.changeQueueType(JobStatus.DELETED);
+            // do update action
+            doUpdate(Collections.singletonList(jobWrapper));
+        });
+    }
+
+    protected void finishRecord(List<String> jobIds, Consumer<JobWrapper> handler) {
         jobIds.forEach(jobId -> {
             JobWrapper jobWrapper = this.get(jobId);
+            if (handler != null) {
+                handler.accept(jobWrapper);
+            }
             // record stat
             jobStat.finishJob(jobWrapper);
         });

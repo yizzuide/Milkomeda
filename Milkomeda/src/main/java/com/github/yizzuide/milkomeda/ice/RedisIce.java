@@ -35,12 +35,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
-import org.springframework.data.redis.core.RedisOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.CollectionUtils;
 
 import java.time.Duration;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -49,7 +51,7 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 1.15.0
- * @version 3.14.0
+ * @version 3.14.1
  * <br>
  * Create at 2019/11/16 15:20
  */
@@ -110,6 +112,7 @@ public class RedisIce implements Ice, ApplicationListener<IceInstanceChangeEvent
         if (replaceWhenExists && (hadSetStatus || jobPool.exists(job.getId()))) {
             // Using serialized job to test
             Job<?> serializedJob = hadSetStatus ? job : jobPool.get(job.getId());
+            isUsedActive = serializedJob.getStatus() == JobStatus.IDLE;
             if (serializedJob.getStatus() == JobStatus.DELAY ||
                     serializedJob.getStatus() == JobStatus.READY ||
                     serializedJob.getStatus() == JobStatus.RESERVED) {
@@ -123,13 +126,12 @@ public class RedisIce implements Ice, ApplicationListener<IceInstanceChangeEvent
                 deadQueue.remove(delayJob);
                 // Update delay time.
                 delayJob.updateDelayTime();
-                isUsedActive = true;
             }
         }
 
         job.setStatus(JobStatus.DELAY);
         JobWrapper jobWrapper = JobWrapper.buildFrom(job);
-        boolean activeFromDeadQueue = isUsedActive;
+        boolean recordForUpdate = isUsedActive;
         RedisUtil.batchOps((operations) -> {
             jobPool.remove(operations, job.getId());
             jobPool.push(operations, job);
@@ -137,7 +139,7 @@ public class RedisIce implements Ice, ApplicationListener<IceInstanceChangeEvent
 
             // Record job
             if (jobInspector != null) {
-                if (activeFromDeadQueue) {
+                if (recordForUpdate) {
                     jobInspector.updateJobInspection(Collections.singletonList(delayJob), index);
                 } else {
                     jobInspector.initJobInspection(jobWrapper, index);
@@ -264,7 +266,7 @@ public class RedisIce implements Ice, ApplicationListener<IceInstanceChangeEvent
         } else {
             jobs = pop(topic, count);
         }
-        // 标记完成，清除元数据
+        // remove job from pool
         finish(jobs);
         return jobs.stream().map(Job::clone).collect(Collectors.toList());
     }
@@ -348,45 +350,22 @@ public class RedisIce implements Ice, ApplicationListener<IceInstanceChangeEvent
         if (CollectionUtils.isEmpty(jobs)) {
             return;
         }
-
         // Remove from job pool.
         delete(jobs);
-
-        // Record job
-        if (jobInspector != null) {
-            jobInspector.finish(jobs.stream().map(Job::getId).collect(Collectors.toList()));
-        }
     }
 
     @Override
     public void finish(Object... jobIds) {
         delete(jobIds);
-        // Record job
-        if (jobInspector != null) {
-            jobInspector.finish(Arrays.stream(jobIds).map(Object::toString).collect(Collectors.toList()));
-        }
     }
 
-    @Override
-    public <T> void delete(List<Job<T>> jobs) {
+    private <T> void delete(List<Job<T>> jobs) {
         List<String> jobIds = jobs.stream().map(Job::getId).collect(Collectors.toList());
         delete(jobIds.toArray(new Object[]{}));
     }
 
-    @Override
-    public <T> void delete(RedisOperations<String, String> operations, List<Job<T>> jobs) {
-        List<String> jobIds = jobs.stream().map(Job::getId).collect(Collectors.toList());
-        delete(operations, jobIds.toArray(new Object[]{}));
-    }
-
-    @Override
-    public void delete(Object... jobIds) {
+    private void delete(Object... jobIds) {
         jobPool.remove(jobIds);
-    }
-
-    @Override
-    public void delete(RedisOperations<String, String> operations, Object... jobIds) {
-        jobPool.remove(operations, jobIds);
     }
 
     @Override

@@ -38,7 +38,7 @@ create table job_inspection
     id bigint(32) not null,
     topic varchar(32) not null,
     application_name varchar(20) not null,
-    queue_type tinyint(1) not null comment '0: DelayQueue, 1: ReadyQueue, 2: NoneQueue, 3: DeadQueue',
+    queue_type tinyint(1) not null comment '0: DelayQueue, 1: ReadyQueue, 2: NoneQueue, 3: DeadQueue, 4: JobPool',
     bucket_index tinyint(1) default -1 null,
     had_retry_count tinyint(1) default 0 null,
     need_re_push tinyint(1) default 0 null comment '0: No, 1: Yes',

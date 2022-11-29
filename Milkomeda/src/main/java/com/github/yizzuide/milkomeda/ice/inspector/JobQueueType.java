@@ -39,11 +39,16 @@ public enum JobQueueType {
      */
     ReadyQueue,
     /**
-     * The job is executed fail, need to re-push.
+     * The job is executed success and finish.
      */
     NoneQueue,
     /**
-     * The job consumption error, and over maximum number of retries exceeded.
+     * The job consumption error, over maximum number of retries exceeded and need to re-push.
      */
-    DeadQueue
+    DeadQueue,
+    /**
+     * The job consumption error, back init to job pool and need to re-push.
+     * @since 3.14.1
+     */
+    JobPool,
 }

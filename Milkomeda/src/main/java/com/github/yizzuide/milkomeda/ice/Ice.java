@@ -27,7 +27,6 @@ import com.github.yizzuide.milkomeda.ice.inspector.JobStatInfo;
 import com.github.yizzuide.milkomeda.ice.inspector.JobWrapper;
 import com.github.yizzuide.milkomeda.universe.lang.Tuple;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.data.redis.core.RedisOperations;
 
 import java.time.Duration;
 import java.util.List;
@@ -39,7 +38,7 @@ import java.util.Map;
  *
  * @author yizzuide
  * @since 1.15.0
- * @version 3.14.0
+ * @version 3.14.1
  * <br>
  * Create at 2019/11/16 15:11
  */
@@ -189,47 +188,17 @@ public interface Ice {
     <T> List<Job<T>> pop(String topic, int count);
 
     /**
-     * 完成任务
-     * @param jobs    任务列表
+     * Finish job list, remove it from pool.
+     * @param jobs    job list
      * @param <T>   业务数据
      */
     <T> void finish(List<Job<T>> jobs);
 
     /**
-     * finish job list.
+     * Finish job list, remove it from pool.
      * @param jobIds job id list
      */
     void finish(Object... jobIds);
-
-    /**
-     * 删除任务
-     * @param jobs    任务列表
-     * @param <T>   业务数据
-     */
-    <T> void delete(List<Job<T>> jobs);
-
-    /**
-     * 删除任务
-     * @param operations Pipelined操作
-     * @param jobs    任务列表
-     * @param <T>   业务数据
-     * @since 3.12.0
-     */
-    <T> void delete(RedisOperations<String, String> operations, List<Job<T>> jobs);
-
-    /**
-     * 删除任务
-     * @param jobIds    任务id列表
-     */
-    void delete(Object... jobIds);
-
-    /**
-     * 删除任务
-     * @param operations Pipelined操作
-     * @param jobIds    任务id列表
-     * @since 3.12.0
-     */
-    void delete(RedisOperations<String, String> operations, Object... jobIds);
 
     /**
      * Extract job id.

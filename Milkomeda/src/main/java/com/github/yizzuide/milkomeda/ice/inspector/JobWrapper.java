@@ -35,6 +35,7 @@ import java.io.Serializable;
  *
  * @author yizzuide
  * @since 3.14.0
+ * @version 3.14.1
  * <br>
  * Create at 2022/09/14 00:47
  */
@@ -131,15 +132,19 @@ public class JobWrapper implements Serializable {
             }
             case IDLE: {
                 this.setQueueType(IceHolder.getProps().isEnableRetainToDeadQueueWhenTtrOverload() ?
-                        JobQueueType.DeadQueue : JobQueueType.NoneQueue);
+                        JobQueueType.DeadQueue : JobQueueType.JobPool);
                 this.setNeedRePush(true);
                 this.setExecutionTime(-1);
                 this.setBucketIndex(-1);
                 break;
             }
-            case DELETED:
-                // This status is unused now!
+            case DELETED: {
+                this.setQueueType(JobQueueType.NoneQueue);
+                this.setNeedRePush(false);
+                this.setExecutionTime(-1);
+                this.setBucketIndex(-1);
                 break;
+            }
         }
     }
 }

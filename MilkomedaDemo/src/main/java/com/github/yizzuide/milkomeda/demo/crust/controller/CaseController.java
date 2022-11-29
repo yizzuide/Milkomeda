@@ -35,7 +35,8 @@ public class CaseController {
 
     // Spring Security提供的方法级权限注解(返回false，抛出安全性异常），开启：@EnableGlobalMethodSecurity(prePostEnabled = true)
     //@PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    @PreAuthorize("hasRole('ADMIN')") // 和上面等同
+    //@PreAuthorize("hasRole('ADMIN')") // 和上面等同
+    @PreAuthorize("@crust.permitAny('ADMIN')")
     @GetMapping("info")
     public Map<String, Object> info() {
         CrustUserInfo<User, CrustPermission> userInfo = CrustContext.getUserInfo(User.class);

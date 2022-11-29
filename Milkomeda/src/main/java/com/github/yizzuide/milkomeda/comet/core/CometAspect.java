@@ -47,6 +47,7 @@ import org.springframework.web.util.WebUtils;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
@@ -221,12 +222,15 @@ public class CometAspect {
         } else {
             // 通过HttpServletResponse写出的，需要读取包装的Response消息体
             if (CometHolder.getCollectorProps() != null && CometHolder.getCollectorProps().isEnable()) {
-                CometResponseWrapper responseWrapper =
-                        WebUtils.getNativeResponse(WebContext.getResponse(), CometResponseWrapper.class);
-                if (responseWrapper != null) {
-                    cometData.setStatus(WebContext.getResponse().getStatus() == HttpStatus.OK.value() ? cometProperties.getStatusSuccessCode() : cometProperties.getStatusFailCode());
-                    String content = new String(responseWrapper.getContentAsByteArray(), StandardCharsets.UTF_8);
-                    cometData.setResponseData(content);
+                HttpServletResponse response = WebContext.getResponse();
+                if (response != null) {
+                    CometResponseWrapper responseWrapper =
+                            WebUtils.getNativeResponse(response, CometResponseWrapper.class);
+                    if (responseWrapper != null) {
+                        cometData.setStatus(response.getStatus() == HttpStatus.OK.value() ? cometProperties.getStatusSuccessCode() : cometProperties.getStatusFailCode());
+                        String content = new String(responseWrapper.getContentAsByteArray(), StandardCharsets.UTF_8);
+                        cometData.setResponseData(content);
+                    }
                 }
             }
         }

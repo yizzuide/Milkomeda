@@ -35,7 +35,7 @@ import java.time.temporal.ChronoUnit;
  *
  * @author yizzuide
  * @since 1.15.0
- * @version 3.14.0
+ * @version 3.14.1
  * <br>
  * Create at 2019/11/16 19:02
  */
@@ -173,6 +173,12 @@ public class IceProperties {
          *  Select strategy which for job inspection store.
          */
         private JobInspector.InspectorType inspectorType = JobInspector.InspectorType.REDIS;
+
+        /**
+         * Delete job inspection record row when delay job has finished (not support inspector type is REDIS).
+         * @since 3.14.1
+         */
+        protected boolean deleteOnFinished = false;
     }
 
 

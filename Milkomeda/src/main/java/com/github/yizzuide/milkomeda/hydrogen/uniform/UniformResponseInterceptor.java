@@ -70,7 +70,7 @@ public class UniformResponseInterceptor implements CometResponseInterceptor {
                 outputStream.writeTo(rawResponse.getOutputStream());
                 return true;
             } catch (Exception e) {
-                log.error("uniform response error with msg: {}", e.getMessage());
+                log.error("uniform response error with msg: {}", e.getMessage(), e);
                 return false;
             }
         }

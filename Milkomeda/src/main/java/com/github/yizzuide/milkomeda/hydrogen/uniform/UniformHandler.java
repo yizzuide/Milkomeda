@@ -60,7 +60,7 @@ import java.util.*;
  *
  * @author yizzuide
  * @since 3.0.0
- * @version 3.14.0
+ * @version 3.14.1
  * @see org.springframework.boot.SpringApplication#run(java.lang.String...)
  * #see org.springframework.boot.SpringApplication#registerLoggedException(java.lang.Throwable)
  * #see org.springframework.boot.SpringBootExceptionHandler.LoggedExceptionHandlerThreadLocal#initialValue()
@@ -284,7 +284,7 @@ public class UniformHandler extends ResponseEntityExceptionHandler {
     private static Map<String, Object> createInitResolveMap() {
         Map<String, Object> resolveMap = new HashMap<>(7);
         resolveMap.put(YmlResponseOutput.STATUS, HttpStatus.OK.value());
-        resolveMap.put(YmlResponseOutput.CODE, "");
+        resolveMap.put(YmlResponseOutput.CODE, "0");
         resolveMap.put(YmlResponseOutput.MESSAGE, "");
         resolveMap.put(YmlResponseOutput.DATA, Collections.emptyMap());
         return resolveMap;

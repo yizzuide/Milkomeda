@@ -100,6 +100,7 @@ public class JobController {
      */
     @GetMapping("pull")
     public ResultVO<List<Job<Map<String, Object>>>> pull(String topic, Integer count) {
-        return UniformResult.ok(ice.pull(topic, count));
+        List<Job<Map<String, Object>>> jobs = ice.pull(topic, count);
+        return UniformResult.ok(jobs);
     }
 }

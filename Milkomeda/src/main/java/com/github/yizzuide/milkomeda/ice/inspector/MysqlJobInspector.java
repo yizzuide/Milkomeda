@@ -41,6 +41,7 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 3.14.0
+ * @version 3.14.1
  * <br>
  * Create at 2022/09/25 16:12
  */
@@ -77,8 +78,12 @@ public class MysqlJobInspector extends AbstractJobInspector {
     @Async
     @Override
     public void finish(List<String> jobIds) {
-        super.finish(jobIds);
-        jobIds.forEach(jobId -> jobInspectionMapper.deleteById(Long.valueOf(Ice.getId(jobId))));
+        if(IceHolder.getProps().getIntrospect().isDeleteOnFinished()) {
+            super.finish(jobIds);
+            jobIds.forEach(jobId -> jobInspectionMapper.deleteById(Long.valueOf(Ice.getId(jobId))));
+            return;
+        }
+        super.finishAndRetain(jobIds);
     }
 
     @Override
@@ -89,7 +94,6 @@ public class MysqlJobInspector extends AbstractJobInspector {
 
     @Override
     protected void doUpdate(List<JobWrapper> jobWrappers) {
-        jobWrappers.forEach(jobWrapper -> jobWrapper.setUpdateTime(System.currentTimeMillis()));
         List<JobInspection> jobInspectionList = jobWrappers.stream().map(this::convertToEntity).collect(Collectors.toList());
         jobInspectionMapper.insertOrUpdateBatch(jobInspectionList);
     }

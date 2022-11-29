@@ -32,6 +32,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
+import org.springframework.scheduling.annotation.Async;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -41,6 +42,7 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 3.14.0
+ * @version 3.14.1
  * <br>
  * Create at 2022/09/26 23:02
  */
@@ -82,7 +84,6 @@ public class MongoJobInspector extends AbstractJobInspector {
 
     @Override
     protected void doUpdate(List<JobWrapper> jobWrappers) {
-        jobWrappers.forEach(jobWrapper -> jobWrapper.setUpdateTime(System.currentTimeMillis()));
         jobWrappers.stream().map(this::convertToEntity)
                 .forEach(jobInspectionDocument -> {
                     Query query = Query.query(Criteria.where("id").is(jobInspectionDocument.getId()));
@@ -96,13 +97,18 @@ public class MongoJobInspector extends AbstractJobInspector {
                 });
     }
 
+    @Async
     @Override
     public void finish(List<String> jobIds) {
-        super.finish(jobIds);
-        jobIds.forEach(jobId -> {
-            Query query = Query.query(Criteria.where("id").is(Ice.getId(jobId)));
-            mongoTemplate.remove(query, JobInspectionDocument.class);
-        });
+        if(IceHolder.getProps().getIntrospect().isDeleteOnFinished()) {
+            super.finish(jobIds);
+            jobIds.forEach(jobId -> {
+                Query query = Query.query(Criteria.where("id").is(Ice.getId(jobId)));
+                mongoTemplate.remove(query, JobInspectionDocument.class);
+            });
+            return;
+        }
+        super.finishAndRetain(jobIds);
     }
 
     private JobInspectionDocument convertToEntity(JobWrapper jobWrapper) {

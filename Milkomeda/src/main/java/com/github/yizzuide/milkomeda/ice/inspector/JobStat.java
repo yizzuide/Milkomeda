@@ -107,7 +107,7 @@ public final class JobStat {
     }
 
     public void update(JobWrapper jobWrapper) {
-        if (jobWrapper.getQueueType() == JobQueueType.NoneQueue ||
+        if (jobWrapper.getQueueType() == JobQueueType.JobPool ||
                 jobWrapper.getQueueType() == JobQueueType.DeadQueue) {
             // count fail today
             dayCount(buildToDayKey(JOB_STAT_COUNT_FAIL_DAY_KEY_PREFIX), 5L);

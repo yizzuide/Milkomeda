@@ -60,6 +60,7 @@ public class IceKeys {
                 keyMap.put("readyQueue", READY_QUEUE_KEY_PREFIX.concat(":" + applicationName + ":" + jobWrapper.getTopic()));
                 break;
             case NoneQueue:
+            case JobPool:
                 break;
             case DeadQueue:
                 keyMap.put("deadQueue", IceKeys.DEAD_QUEUE_KEY_PREFIX.concat(":" + applicationName));
