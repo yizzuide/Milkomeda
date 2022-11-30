@@ -31,17 +31,20 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.BeanIds;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
@@ -60,18 +63,17 @@ import java.io.IOException;
 import java.util.*;
 
 /**
- * CrustConfigurerAdapter
- * Spring Security配置器适配器
+ * Spring Security config adapter, need impl with {@link org.springframework.context.annotation.Configuration}.
  *
  * @see org.springframework.security.web.session.SessionManagementFilter
  * @see org.springframework.security.config.annotation.web.configurers.SessionManagementConfigurer
  * @author yizzuide
  * @since 1.14.0
- * @version 3.11.2
+ * @version 3.15.0
  * <br>
  * Create at 2019/11/11 18:25
  */
-public class CrustConfigurerAdapter extends WebSecurityConfigurerAdapter {
+public abstract class CrustConfigurerAdapter {
 
     @Autowired
     private CrustProperties props;
@@ -82,18 +84,24 @@ public class CrustConfigurerAdapter extends WebSecurityConfigurerAdapter {
     @Autowired
     private ApplicationContextHolder applicationContextHolder;
 
-    @Override
-    public void configure(AuthenticationManagerBuilder auth) {
+    @Bean
+    public AuthenticationProvider authenticationProvider(AuthenticationManagerBuilder auth) {
         // 使用继承自DaoAuthenticationProvider
         CrustAuthenticationProvider authenticationProvider = new CrustAuthenticationProvider(props, passwordEncoder);
         // 扩展配置（UserDetailsService、PasswordEncoder）
         configureProvider(authenticationProvider);
         // 添加自定义身份验证组件
         auth.authenticationProvider(authenticationProvider);
+        return authenticationProvider;
     }
 
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
+    @Bean(name = BeanIds.AUTHENTICATION_MANAGER)
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+        return authenticationConfiguration.getAuthenticationManager();
+    }
+
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         List<String> allowURLs = new ArrayList<>(props.getPermitURLs());
         // 登录
         allowURLs.add(props.getLoginUrl());
@@ -122,11 +130,11 @@ public class CrustConfigurerAdapter extends WebSecurityConfigurerAdapter {
         DefaultFailureHandler failureHandler = new DefaultFailureHandler(this);
         http.csrf()
                 .disable()
-            .sessionManagement().sessionCreationPolicy(props.isStateless() ?
-                SessionCreationPolicy.STATELESS : SessionCreationPolicy.IF_REQUIRED).and()
-            .formLogin().disable()
-            // 支持跨域，从CorsConfigurationSource中取跨域配置
-            .cors()
+                .sessionManagement().sessionCreationPolicy(props.isStateless() ?
+                        SessionCreationPolicy.STATELESS : SessionCreationPolicy.IF_REQUIRED).and()
+                .formLogin().disable()
+                // 支持跨域，从CorsConfigurationSource中取跨域配置
+                .cors()
                 .and()
                 // 禁用iframe跨域
                 .headers()
@@ -163,7 +171,7 @@ public class CrustConfigurerAdapter extends WebSecurityConfigurerAdapter {
                     .sessionFixation().changeSessionId()
                     .sessionAuthenticationErrorUrl(props.getLoginUrl())
                     .sessionAuthenticationFailureHandler(failureHandler).and()
-            .logout()
+                    .logout()
                     .logoutUrl(props.getLogoutUrl())
                     .addLogoutHandler((req, res, auth) -> CrustContext.invalidate())
                     .logoutSuccessUrl(props.getLoginUrl())
@@ -177,18 +185,14 @@ public class CrustConfigurerAdapter extends WebSecurityConfigurerAdapter {
 
         // add others http configure
         additionalConfigure(http, props.isStateless());
+        return http.build();
     }
 
-    /**
-     * 配置Web资源，资源根路径需要配置静态资源映射<br>
-     * @param web   WebSecurity
-     */
-    @Override
-    public void configure(WebSecurity web) {
+    // 配置Web资源，资源根路径需要配置静态资源映射
+    @Bean
+    public WebSecurityCustomizer webSecurityCustomizer() {
         // 放开静态资源的限制
-        if (!CollectionUtils.isEmpty(props.getAllowStaticUrls())) {
-            web.ignoring().antMatchers(HttpMethod.GET, props.getAllowStaticUrls().toArray(new String[0]));
-        }
+        return (web) -> web.ignoring().antMatchers(HttpMethod.GET, props.getAllowStaticUrls().toArray(new String[0]));
     }
 
     /**
@@ -209,6 +213,12 @@ public class CrustConfigurerAdapter extends WebSecurityConfigurerAdapter {
     }
 
     /**
+     * Must implement this method with annotation of <code>@Bean</code>.
+     * @return UserDetailsService
+     */
+    protected abstract UserDetailsService userDetailsService();
+
+    /**
      * Custom response for auth or access failure handler.
      * @param isAuth    true if is auth type
      * @param request   http request
@@ -221,12 +231,6 @@ public class CrustConfigurerAdapter extends WebSecurityConfigurerAdapter {
         response.setStatus(HttpStatus.OK.value());
         ResultVO<?> source = UniformResult.error(props.getAuthFailCode(), exception.getMessage());
         UniformHandler.matchStatusToWrite(response, source.toMap());
-    }
-
-    @Bean(name = BeanIds.AUTHENTICATION_MANAGER)
-    @Override
-    public AuthenticationManager authenticationManager() throws Exception {
-        return super.authenticationManager();
     }
 
     @Bean

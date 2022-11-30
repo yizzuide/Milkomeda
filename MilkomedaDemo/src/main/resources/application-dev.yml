@@ -25,6 +25,9 @@ spring:
 
   redis:
     host: 127.0.0.1
+    # Springboot 2.7: Support for specifying a username for authenticating to Sentinel(s)
+    #sentinel:
+      #username:
 
   # Springboot 2.6: To use embedded mongo, the spring.mongodb.embedded.version property must now be set.
   #mongodb:
@@ -100,6 +103,9 @@ management:
     # Springboot 2.6: The env info contributor is now disabled by default. It would like them to appear them in the InfoEndpoint.
     env:
       enabled: true
-    # Springboot 2.6:  Expose Java Runtime information under the java key.
+    # Springboot 2.6: Expose Java Runtime information under the java key.
     java:
       enabled: true
+    # Springboot 2.7: An OsInfoContributor can expose some information about the Operating System the application is running on.
+    os:
+      enabled: on

@@ -27,8 +27,11 @@ server:
     include-binding-errors: never
     include-message: never
     include-stacktrace: never
-
-
+  # Springboot 2.7: Embedded web servers can be configured to use SSL with PEM-encoded certificate and private key files
+  #  Management endpoints can be secured using similar management.server.ssl.* properties
+  #ssl:
+    #certificate:
+    #certificate-private-key:
 spring:
   # Springboot 2.3: 优雅关机等待时间
   lifecycle:

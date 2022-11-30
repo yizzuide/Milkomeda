@@ -46,7 +46,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * RedisIce
  * 基于Redis的延迟队列实现
  *
  * @author yizzuide

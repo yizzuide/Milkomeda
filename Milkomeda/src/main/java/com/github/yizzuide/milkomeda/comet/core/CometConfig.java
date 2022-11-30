@@ -99,6 +99,8 @@ public class CometConfig {
         @Autowired
         private RequestMappingHandlerAdapter adapter;
 
+        // Springboot 2.7: Since Spring Framework 5.1, Spring MVC has supported multiple RequestMappingHandlerMapping beans.
+        //  Spring Boot 2.7 no longer defines MVC’s main requestMappingHandlerMapping bean as @Primary.
         @Qualifier("requestMappingHandlerMapping")
         @Autowired
         private RequestMappingHandlerMapping requestMappingHandlerMapping;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 yizzuide All rights Reserved.
+ * Copyright (c) 2022 yizzuide All rights Reserved.
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -19,27 +19,24 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.universe.config;
+package com.github.yizzuide.milkomeda.demo.ice.polyfill;
 
-import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.annotation.Import;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.github.yizzuide.milkomeda.hydrogen.uniform.UniformPage;
+import org.springframework.boot.jackson.JsonMixin;
 
 /**
- * MilkomedaAutoConfiguration
+ * UniformPageMixin
  *
  * @author yizzuide
- * @since 0.2.1
- * @version 3.15.0
- * @see org.springframework.core.io.support.SpringFactoriesLoader
- * @see org.springframework.boot.SpringApplication
  * <br>
- * Create at 2019/04/12 11:29
+ * Create at 2022/11/30 19:06
  */
-// Springboot 2.7: @AutoConfiguration should be used to annotate top-level auto-configuration classes,
-//    Configuration classes that are nested within or imported by an @AutoConfiguration class should continue to use @Configuration as before.
-@AutoConfiguration
-@Import(MilkomedaContextConfig.class)
-@EnableConfigurationProperties(MilkomedaProperties.class)
-public class MilkomedaAutoConfiguration {
+// Springboot 2.7: Spring Boot的Jackson自动配置将扫描应用程序的包以查找带有@JsonMixin注释的类，并将它们注册到自动配置的ObjectMapper，
+//  注册动作由Spring Boot的JsonMixinModule执行
+@JsonMixin(UniformPage.class)
+public abstract class UniformPageMixin {
+    // 混入属性并定制的新名称
+    @JsonProperty("pageTotalSize")
+    Long pageCount;
 }

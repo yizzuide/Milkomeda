@@ -27,8 +27,6 @@ import org.springframework.util.Assert;
 import org.springframework.util.PathMatcher;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-import org.springframework.web.util.UrlPathHelper;
-import org.springframework.web.util.pattern.PathPatternParser;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -50,16 +48,6 @@ public final class WebContext {
      */
     private static PathMatcher mvcPathMatcher;
 
-    /**
-     * HTTP URL匹配器
-     */
-    private static PathPatternParser mvcPatternParser;
-
-    /**
-     * URL路径帮助类
-     */
-    private static UrlPathHelper urlPathHelper;
-
     public static void setMvcPathMatcher(PathMatcher mvcPathMatcher) {
         WebContext.mvcPathMatcher = mvcPathMatcher;
     }
@@ -70,30 +58,6 @@ public final class WebContext {
      */
     public static PathMatcher getMvcPathMatcher() {
         return mvcPathMatcher;
-    }
-
-    public static void setMvcPatternParser(PathPatternParser mvcPatternParser) {
-        WebContext.mvcPatternParser = mvcPatternParser;
-    }
-
-    /**
-     * HTTP URL匹配器
-     * @return PathPatternParser
-     */
-    public static PathPatternParser getMvcPatternParser() {
-        return mvcPatternParser;
-    }
-
-    public static void setUrlPathHelper(UrlPathHelper urlPathHelper) {
-        WebContext.urlPathHelper = urlPathHelper;
-    }
-
-    /**
-     * 请求路径帮助类
-     * @return  UrlPathHelper
-     */
-    public static UrlPathHelper getUrlPathHelper() {
-        return urlPathHelper;
     }
 
     /**

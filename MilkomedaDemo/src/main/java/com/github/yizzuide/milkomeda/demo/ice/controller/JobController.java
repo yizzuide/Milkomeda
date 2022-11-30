@@ -49,6 +49,12 @@ public class JobController {
         return UniformResult.ok(ice.getJobInspectPage(queryPageData));
     }
 
+    // 由于上面ResultVO有框架内部自己的处理，这里用于测试@JsonMinix
+    @GetMapping("jobPage")
+    public UniformPage<JobWrapper> jobPage(@CometParam UniformQueryPageData<JobWrapper> queryPageData) {
+        return ice.getJobInspectPage(queryPageData);
+    }
+
     /**
      * 获取当前job的详情信息
      * @param jobId job id
