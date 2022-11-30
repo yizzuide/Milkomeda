@@ -67,9 +67,9 @@
 - [x] Metal（金属）：用于实现基于KV数据的分布式动态配置刷新，支持属性绑定注入。*3.6.0+*
   * 依赖技术：Spring IoC、SpringBoot Data Redis
   * 设计模式：观察者模式、门面模式
-- [x] Orbit: 零代码添加方法切面，可以使用yml配置或通过注解`@Orbit`. *3.13.0+*
+- [x] Orbit（轨道）: 零代码添加方法切面，可以使用yml配置或通过注解`@Orbit`. *3.13.0+*
   * 依赖技术: Spring AOP
-- [x] Sirius: Mybatis-plus功能扩展支持, 如：在模型类属性上添加`@QueryMatcher`作为页查询条件, 删除前检查引用通过在Mapper上添加`@RefMatcher`. *3.14.0+*
+- [x] Sirius（天狼星）: Mybatis-plus功能扩展支持, 如：在模型类属性上添加`@QueryMatcher`作为页查询条件, 删除前检查引用通过在Mapper上添加`@RefMatcher`. *3.14.0+*
   * 依赖技术: Mybatis-plus
     
 ## Requirements
