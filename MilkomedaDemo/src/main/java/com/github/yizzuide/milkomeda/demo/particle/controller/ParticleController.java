@@ -59,8 +59,6 @@ public class ParticleController {
             if (particle.isLimited()) {
                 return ResponseEntity.status(406).body("请求勿重复请求");
             }
-            // 模拟业务处理耗时
-            Thread.sleep(5000);
             return ResponseEntity.ok("ok");
         });
     }
@@ -75,8 +73,6 @@ public class ParticleController {
         if (particle.isLimited()) {
             return ResponseEntity.status(406).body("请求勿重复请求");
         }
-        // 模拟业务处理耗时
-        Thread.sleep(5000);
         return ResponseEntity.ok("ok");
     }
 
@@ -90,10 +86,6 @@ public class ParticleController {
         if (particle.isLimited()) {
             return ResponseEntity.status(406).body("请求勿重复请求");
         }
-        
-        // 模拟业务处理耗时
-        Thread.sleep(5000);
-        
         return ResponseEntity.ok("ok");
     }
 
@@ -135,9 +127,6 @@ public class ParticleController {
                 if (p.isLimited()) {
                     return ResponseEntity.status(406).body("超过使用次数：" + p.getValue() + "次");
                 }
-                // 模拟业务处理耗时
-                Thread.sleep(5000);
-
                 return ResponseEntity.ok("发送成功，当前次数：" + p.getValue());
             });
 
@@ -157,8 +146,6 @@ public class ParticleController {
                     return ResponseEntity.status(406).body("超过使用次数：" + particle.getValue() + "次");
                 }
             }
-            // 模拟业务处理耗时
-            Thread.sleep(6000);
 
             return ResponseEntity.ok("发送成功，当前次数：" + particle.getValue());
         });
@@ -179,9 +166,6 @@ public class ParticleController {
             }
         }
 
-        // 模拟业务处理耗时
-        Thread.sleep(5000);
-
         return ResponseEntity.ok("发送成功，当前次数：" + particle.getValue());
     }
 
@@ -195,9 +179,6 @@ public class ParticleController {
             return;
         }
 
-        // 模拟业务处理耗时
-        Thread.sleep(5000);
-
         resp.setStatus(200);
         resp.getWriter().println("OK");
         resp.getWriter().flush();
@@ -205,7 +186,6 @@ public class ParticleController {
 
     @RequestMapping("pay")
     public String pay(String orderNo) throws InterruptedException {
-        Thread.sleep(5000);
         return "OK";
     }
 }

@@ -35,11 +35,11 @@ public class TOrderService {
         // int i = 1/0;
 
         // 模拟事务超时
-        try {
+        /*try {
             Thread.sleep(5200);
         } catch (InterruptedException e) {
             e.printStackTrace();
-        }
+        }*/
 
         TOrder tOrder2 = new TOrder();
         tOrder2.setUserId(102L);
