@@ -31,6 +31,7 @@ import java.util.Map;
  *
  * @author yizzuide
  * @since 3.14.0
+ * @version 3.14.1
  * <br>
  * Create at 2022/09/14 23:50
  */
@@ -60,6 +61,8 @@ public class IceKeys {
                 keyMap.put("readyQueue", READY_QUEUE_KEY_PREFIX.concat(":" + applicationName + ":" + jobWrapper.getTopic()));
                 break;
             case NoneQueue:
+                keyMap.remove("jobPool");
+                break;
             case JobPool:
                 break;
             case DeadQueue:

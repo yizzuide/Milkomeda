@@ -62,7 +62,7 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 1.14.0
- * @version 3.12.10
+ * @version 3.14.1
  * <br>
  * Create at 2019/11/11 15:48
  */
@@ -389,7 +389,11 @@ public class Crust {
         Assert.notNull(authentication, "Authentication must be not null.");
         CrustUserInfo<CrustEntity, CrustPermission> loginUserInfo = getCurrentLoginUserInfo(authentication, null);
         List<String> perms = authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList());
-        return loginUserInfo.getIsAdmin() || Arrays.stream(permissions).anyMatch(perms::contains);
+        Boolean isAdmin = loginUserInfo.getIsAdmin();
+        if (isAdmin == null) {
+            return Arrays.stream(permissions).anyMatch(perms::contains);
+        }
+        return isAdmin || Arrays.stream(permissions).anyMatch(perms::contains);
     }
 
     /**

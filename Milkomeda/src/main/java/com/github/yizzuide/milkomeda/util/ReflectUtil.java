@@ -46,7 +46,7 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 0.2.0
- * @version 3.12.10
+ * @version 3.14.1
  * <br>
  * Create at 2019/04/11 19:55
  */
@@ -476,7 +476,8 @@ public class ReflectUtil {
             ResolvableType[] wrapperGenerics = resolvableType.getGenerics();
             Class<?> firstGenericType = wrapperGenerics.length > 0 ? wrapperGenerics[0].resolve() : String.class;
             Object wrapper = JSONUtil.parse(value, rawType);
-            Object entity = JSONUtil.parse(JSONUtil.serialize(wrapperBody.apply(wrapper)), firstGenericType);
+            Object body = Optional.ofNullable(wrapperBody.apply(wrapper)).orElse("{}");
+            Object entity = JSONUtil.parse(JSONUtil.serialize(body), firstGenericType);
             wipeWrapperBody.accept(wrapper, entity);
             return wrapper;
         });
