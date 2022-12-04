@@ -33,6 +33,7 @@ import java.util.List;
  * Sirius module properties
  *
  * @since 3.14.0
+ * @version 3.15.0
  * @author yizzuide
  * <br>
  * Create at 2022/10/30 17:52
@@ -48,6 +49,12 @@ public class SiriusProperties {
     private DbType dbType = DbType.MYSQL;
 
     /**
+     * Automatically identify entity fill attributes without adding `@TableField(fill = xxx)` annotations
+     * @since 3.15.0
+     */
+    private boolean autoAddFill = true;
+
+    /**
      * Auto value interpolation.
      */
     private List<AutoInterpolate> autoInterpolates = new ArrayList<>();
@@ -58,13 +65,21 @@ public class SiriusProperties {
          * What common field need interpolate to data table.
          */
         private List<String> fields;
+
         /**
-         * Property source value.
+         * Property source value, Spring EL using `el(xxx)` which root is crust type of object.
          */
         private String psValue;
+
         /**
-         * Field fill type (current support insert and update).
+         * What type of value, must be set if using spring EL.
+         * @since 3.15.0
          */
-        private FieldFill fieldFill;
+        private Class<?> type;
+
+        /**
+         * Field fill type.
+         */
+        private FieldFill fieldFill = FieldFill.INSERT;
     }
 }

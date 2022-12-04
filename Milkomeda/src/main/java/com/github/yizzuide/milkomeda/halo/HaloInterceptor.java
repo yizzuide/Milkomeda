@@ -60,6 +60,7 @@ import java.util.regex.Pattern;
  * <br>
  * Create at 2020/01/30 20:38
  */
+@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 @Slf4j
 @Intercepts({
         @Signature(type = Executor.class, method = "update", args = {MappedStatement.class, Object.class}),

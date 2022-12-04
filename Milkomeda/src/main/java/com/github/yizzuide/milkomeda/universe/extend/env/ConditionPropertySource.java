@@ -75,7 +75,7 @@ public class ConditionPropertySource extends PropertySource<Object> {
         return parts[0].equals(parts[1]);
     }
 
-    private String getRange(String type, String prefix) {
+    public static String getRange(String type, String prefix) {
         if (type.startsWith(prefix)) {
             int startIndex = prefix.length() + 1;
             if (type.length() > startIndex) {

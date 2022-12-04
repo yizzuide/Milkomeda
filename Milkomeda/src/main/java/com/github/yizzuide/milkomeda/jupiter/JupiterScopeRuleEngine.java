@@ -41,6 +41,7 @@ import java.util.Map;
  * <br>
  * Create at 2020/05/19 14:39
  */
+@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 @Slf4j
 public class JupiterScopeRuleEngine extends AbstractJupiterRuleEngine {
 

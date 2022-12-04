@@ -109,9 +109,9 @@ milkomeda:
         enable-super-cache: false
         l1-expire: 1m
         l2-expire: 1m
-        #smsMoonCache:
+      #smsMoonCache:
         #only-cache-l2: true
-        #abTestMoonCache:
+      #abTestMoonCache:
         #only-cache-l2: true
 
   echo:

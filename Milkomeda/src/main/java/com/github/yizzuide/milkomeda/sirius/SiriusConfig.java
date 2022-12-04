@@ -24,31 +24,54 @@ package com.github.yizzuide.milkomeda.sirius;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.autoconfigure.ConfigurationCustomizer;
 import com.baomidou.mybatisplus.autoconfigure.MybatisPlusAutoConfiguration;
+import com.baomidou.mybatisplus.autoconfigure.MybatisPlusPropertiesCustomizer;
+import com.baomidou.mybatisplus.core.MybatisConfiguration;
+import com.baomidou.mybatisplus.core.MybatisSqlSessionFactoryBuilder;
+import com.baomidou.mybatisplus.core.MybatisXMLConfigBuilder;
 import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
+import com.baomidou.mybatisplus.core.handlers.StrictFill;
+import com.baomidou.mybatisplus.core.metadata.TableFieldInfo;
+import com.baomidou.mybatisplus.core.metadata.TableInfo;
 import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.BlockAttackInnerInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
+import com.baomidou.mybatisplus.extension.spring.MybatisSqlSessionFactoryBean;
+import com.github.yizzuide.milkomeda.crust.Crust;
+import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
+import com.github.yizzuide.milkomeda.universe.engine.el.SimpleElParser;
 import com.github.yizzuide.milkomeda.universe.extend.env.CollectionsPropertySource;
+import com.github.yizzuide.milkomeda.universe.extend.env.ConditionPropertySource;
+import com.github.yizzuide.milkomeda.util.ReflectUtil;
+import lombok.Getter;
 import org.apache.ibatis.reflection.MetaObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.AutoConfigureAfter;
+import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 
 import javax.annotation.PostConstruct;
-import java.util.List;
-import java.util.function.Supplier;
+import java.io.IOException;
+import java.util.*;
 
 /**
- * Sirius module config
+ * Sirius module config.
  *
+ * @since 3.14.0
+ * @version 3.15.0
  * @author yizzuide
  * <br>
  * Create at 2022/10/30 17:52
+ * @see MybatisConfiguration
+ * @see MybatisSqlSessionFactoryBean
+ * @see MybatisSqlSessionFactoryBuilder
  */
-@AutoConfigureAfter(MybatisPlusAutoConfiguration.class)
+@AutoConfigureBefore(MybatisPlusAutoConfiguration.class)
 @EnableConfigurationProperties(SiriusProperties.class)
 @Configuration
 public class SiriusConfig {
@@ -66,10 +89,36 @@ public class SiriusConfig {
         return mybatisPlusInterceptor;
     }
 
-    // 自定义mybatis配置
+    // 属性自定义配置，在Mybatis-plus自动配置前执行
+    @Bean
+    public MybatisPlusPropertiesCustomizer propertiesCustomizer(ResourceLoader resourceLoader) throws IOException {
+        return properties -> {
+            if (properties.getConfiguration() == null) {
+                // 如果有设置XML配置
+                if (properties.getConfigLocation() != null) {
+                    Resource resource = resourceLoader.getResource(properties.getConfigLocation());
+                    MybatisXMLConfigBuilder xmlConfigBuilder;
+                    try {
+                        xmlConfigBuilder = new MybatisXMLConfigBuilder(resource.getInputStream(), null,
+                                properties.getConfigurationProperties());
+                    } catch (IOException e) {
+                        throw new RuntimeException("Sirius load mybatis xml config error", e);
+                    }
+                    // ConfigLocation -> Mybatis Configuration
+                    properties.setConfigLocation(null);
+                    properties.setConfiguration((MybatisConfiguration) xmlConfigBuilder.getConfiguration());
+                    return;
+                }
+                // 没有设置过，创建默认配置
+                properties.setConfiguration(new MybatisConfiguration());
+            }
+        };
+    }
+
+    // 扩展Mybatis Configuration配置，开发者可照样在应用层定义多个ConfigurationCustomizer Bean（优先级大于XML配置）
     @Bean
     public ConfigurationCustomizer configurationCustomizer() {
-        return configuration -> configuration.setMapUnderscoreToCamelCase(true);
+        return configuration -> configuration.setDefaultScriptingLanguage(SiriusMybatisXMLLanguageDriver.class);
     }
 
     @Bean
@@ -77,18 +126,17 @@ public class SiriusConfig {
         return new MybatisPlusMetaObjectHandler();
     }
 
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     static class MybatisPlusMetaObjectHandler implements MetaObjectHandler {
 
         @Autowired
         private SiriusProperties props;
 
+        @Getter
         private List<String> insertFields;
 
+        @Getter
         private List<String> updateFields;
-
-        private Supplier<Object> insertValueProvider;
-
-        private Supplier<Object> updateValueProvider;
 
         @PostConstruct
         public void init() {
@@ -96,30 +144,42 @@ public class SiriusConfig {
             if (CollectionUtils.isEmpty(autoInterpolates)) {
                 return;
             }
-            autoInterpolates.forEach(autoInterpolate -> {
-                if (autoInterpolate.getFieldFill() == FieldFill.INSERT) {
-                    insertFields = autoInterpolate.getFields();
-                    insertValueProvider = () -> CollectionsPropertySource.of(autoInterpolate.getPsValue());
-                } else if (autoInterpolate.getFieldFill() == FieldFill.UPDATE) {
-                    updateFields = autoInterpolate.getFields();
-                    updateValueProvider = () -> CollectionsPropertySource.of(autoInterpolate.getPsValue());
+            autoInterpolates.forEach(autoInterpolate -> appendFields(
+                    autoInterpolate.getFieldFill() != FieldFill.UPDATE,
+                    autoInterpolate.getFieldFill() == FieldFill.UPDATE ||
+                            autoInterpolate.getFieldFill() == FieldFill.INSERT_UPDATE, autoInterpolate));
+        }
+
+        private void appendFields(boolean insertFill, boolean updateFill, SiriusProperties.AutoInterpolate autoInterpolate) {
+            if (insertFill) {
+                if (insertFields == null) {
+                    insertFields = new ArrayList<>(autoInterpolate.getFields());
+                } else {
+                    insertFields.addAll(autoInterpolate.getFields());
                 }
-            });
+            }
+            if (updateFill) {
+                if (updateFields == null) {
+                    updateFields = new ArrayList<>(autoInterpolate.getFields());
+                } else {
+                    updateFields.addAll(autoInterpolate.getFields());
+                }
+            }
         }
 
         @Override
         public void insertFill(MetaObject metaObject) {
-            executeFill(metaObject, insertFields, insertValueProvider);
+            executeFill(true, metaObject, insertFields);
         }
 
 
         @Override
         public void updateFill(MetaObject metaObject) {
-            executeFill(metaObject, updateFields, updateValueProvider);
+            executeFill(false, metaObject, updateFields);
         }
 
         @SuppressWarnings("unchecked")
-        private void executeFill(MetaObject metaObject, List<String> fields, Supplier<?> valueProvider) {
+        private void executeFill(boolean insertFill, MetaObject metaObject, List<String> fields) {
             if (CollectionUtils.isEmpty(fields)) {
                 return;
             }
@@ -127,10 +187,90 @@ public class SiriusConfig {
                 if(!metaObject.hasGetter(fieldName)) {
                     return;
                 }
-                Object value = valueProvider.get();
-                Class<Object> aClass = (Class<Object>) value.getClass();
-                this.strictInsertFill(metaObject, fieldName, aClass, value);
+                Optional<Object> valueOp = Optional.ofNullable(findPsValue(fieldName));
+                if (valueOp.isPresent()) {
+                    Object value = valueOp.get();
+                    Class<Object> aClass = (Class<Object>) value.getClass();
+                    if (insertFill) {
+                        this.strictInsertFill(metaObject, fieldName, aClass, value);
+                    } else {
+                        this.strictUpdateFill(metaObject, fieldName, aClass, value);
+                    }
+                }
             });
+        }
+
+        @Override
+        public MetaObjectHandler strictFill(boolean insertFill, TableInfo tableInfo, MetaObject metaObject, List<StrictFill<?, ?>> strictFills) {
+            if (props.isAutoAddFill()) {
+                strictFills.forEach(i -> {
+                    final String fieldName = i.getFieldName();
+                    final Class<?> fieldType = i.getFieldType();
+                    tableInfo.getFieldList().stream()
+                            .filter(j -> j.getProperty().equals(fieldName) && fieldType.equals(j.getPropertyType())).findFirst()
+                            .ifPresent(j -> {
+                                conditionFill(insertFill, j);
+                                strictFillStrategy(metaObject, fieldName, i.getFieldVal());
+                            });
+                });
+                return this;
+            }
+            return MetaObjectHandler.super.strictFill(insertFill, tableInfo, metaObject, strictFills);
+        }
+
+        @Nullable
+        public Object findPsValue(@NonNull String fieldName) {
+            List<SiriusProperties.AutoInterpolate> autoInterpolates = props.getAutoInterpolates();
+            SiriusProperties.AutoInterpolate selectAutoInterpolate = null;
+            for (SiriusProperties.AutoInterpolate autoInterpolate : autoInterpolates) {
+                if(autoInterpolate.getFields().contains(fieldName)) {
+                    selectAutoInterpolate = autoInterpolate;
+                    Object psValue = CollectionsPropertySource.of(autoInterpolate.getPsValue());
+                    if (!psValue.equals(autoInterpolate.getPsValue())) {
+                        return psValue;
+                    }
+                    if (autoInterpolate.getPsValue().startsWith("el(")) {
+                        String express = ConditionPropertySource.getRange(autoInterpolate.getPsValue(), "el");
+                        Crust root = ApplicationContextHolder.get().getBean(Crust.class);
+                        return SimpleElParser.parse(express, root, autoInterpolate.getType());
+                    }
+                }
+            }
+            if (selectAutoInterpolate != null) {
+                return selectAutoInterpolate.getPsValue();
+            }
+            return null;
+        }
+
+        public void conditionFill(boolean insertFill, @NonNull Object target) {
+            String key = "withUpdateFill";
+            List<String> fillFields = this.getUpdateFields();
+            if (insertFill) {
+                key = "withInsertFill";
+                fillFields = this.getInsertFields();
+            }
+            if (target instanceof TableInfo) {
+                TableInfo tableInfo = (TableInfo) target;
+                for (TableFieldInfo fieldInfo: tableInfo.getFieldList()) {
+                    if (fillFields.contains(fieldInfo.getProperty())) {
+                        Map<String, Object> props = new HashMap<>();
+                        props.put(key, true);
+                        ReflectUtil.setField(target, props);
+                        return;
+                    }
+                }
+            } else {
+                TableFieldInfo tableFieldInfo = (TableFieldInfo)target;
+                if (fillFields.contains(tableFieldInfo.getProperty())) {
+                    Map<String, Object> props = new HashMap<>();
+                    props.put(key, true);
+                    ReflectUtil.setField(target, props);
+                }
+            }
+        }
+
+        public SiriusProperties getProps() {
+            return props;
         }
     }
 }

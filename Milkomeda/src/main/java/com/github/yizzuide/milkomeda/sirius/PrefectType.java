@@ -12,23 +12,23 @@ import com.github.yizzuide.milkomeda.hydrogen.uniform.UniformQueryPageData;
  */
 public enum PrefectType {
     /**
-     * equals field.
+     * Equals field.
      */
     EQ,
     /**
-     * sql like field.
+     * Sql like field.
      */
     LIKE,
     /**
-     * sql order by.
+     * Sql order by.
      */
     OrderByPre,
     /**
-     * page result list order by.
+     * Page result list order by.
      */
     OrderByPost,
     /**
-     * using for `startDate` and `endDate` of {@link UniformQueryPageData} query.
+     * Using for `startDate` and `endDate` of {@link UniformQueryPageData} query.
      */
     PageDate
 }
