@@ -213,7 +213,7 @@ public abstract class CrustConfigurerAdapter {
     }
 
     /**
-     * Must implement this method with annotation of <code>@Bean</code>.
+     * Must implement this method used for {@link DaoAuthenticationProvider}.
      * @return UserDetailsService
      */
     protected abstract UserDetailsService userDetailsService();

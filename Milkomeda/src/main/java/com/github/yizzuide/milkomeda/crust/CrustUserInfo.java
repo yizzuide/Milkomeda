@@ -145,6 +145,9 @@ public class CrustUserInfo<T, P> implements Serializable {
      */
     @SuppressWarnings("unchecked")
     public T getEntity() {
+        if (CrustContext.get().getProps().isEnableLoadEntityLazy() && this.entity == null) {
+            this.entity = CrustContext.get().loadEntity(this.getUid());
+        }
         if (this.entity instanceof Map) {
             if (this.getEntityClass() == null) {
                 return this.entity;

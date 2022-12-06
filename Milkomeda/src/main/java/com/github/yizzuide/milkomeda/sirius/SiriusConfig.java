@@ -28,7 +28,9 @@ import com.baomidou.mybatisplus.autoconfigure.MybatisPlusPropertiesCustomizer;
 import com.baomidou.mybatisplus.core.MybatisConfiguration;
 import com.baomidou.mybatisplus.core.MybatisSqlSessionFactoryBuilder;
 import com.baomidou.mybatisplus.core.MybatisXMLConfigBuilder;
+import com.baomidou.mybatisplus.core.config.GlobalConfig;
 import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
+import com.baomidou.mybatisplus.core.handlers.MybatisEnumTypeHandler;
 import com.baomidou.mybatisplus.core.handlers.StrictFill;
 import com.baomidou.mybatisplus.core.metadata.TableFieldInfo;
 import com.baomidou.mybatisplus.core.metadata.TableInfo;
@@ -61,6 +63,7 @@ import java.util.*;
 
 /**
  * Sirius module config.
+ * 基于YML配置零代码全自动式Mybatis-plus字段填充插件，再也不用添加属性注解@TableField
  *
  * @since 3.14.0
  * @version 3.15.0
@@ -93,6 +96,8 @@ public class SiriusConfig {
     @Bean
     public MybatisPlusPropertiesCustomizer propertiesCustomizer(ResourceLoader resourceLoader) throws IOException {
         return properties -> {
+            GlobalConfig globalConfig = properties.getGlobalConfig();
+            globalConfig.setBanner(false);
             if (properties.getConfiguration() == null) {
                 // 如果有设置XML配置
                 if (properties.getConfigLocation() != null) {
@@ -110,7 +115,9 @@ public class SiriusConfig {
                     return;
                 }
                 // 没有设置过，创建默认配置
-                properties.setConfiguration(new MybatisConfiguration());
+                MybatisConfiguration configuration = new MybatisConfiguration();
+                configuration.setDefaultEnumTypeHandler(MybatisEnumTypeHandler.class);
+                properties.setConfiguration(configuration);
             }
         };
     }
@@ -243,10 +250,10 @@ public class SiriusConfig {
         }
 
         public void conditionFill(boolean insertFill, @NonNull Object target) {
-            String key = "withUpdateFill";
+            String propKey = "withUpdateFill";
             List<String> fillFields = this.getUpdateFields();
             if (insertFill) {
-                key = "withInsertFill";
+                propKey = "withInsertFill";
                 fillFields = this.getInsertFields();
             }
             if (target instanceof TableInfo) {
@@ -254,7 +261,7 @@ public class SiriusConfig {
                 for (TableFieldInfo fieldInfo: tableInfo.getFieldList()) {
                     if (fillFields.contains(fieldInfo.getProperty())) {
                         Map<String, Object> props = new HashMap<>();
-                        props.put(key, true);
+                        props.put(propKey, true);
                         ReflectUtil.setField(target, props);
                         return;
                     }
@@ -263,7 +270,7 @@ public class SiriusConfig {
                 TableFieldInfo tableFieldInfo = (TableFieldInfo)target;
                 if (fillFields.contains(tableFieldInfo.getProperty())) {
                     Map<String, Object> props = new HashMap<>();
-                    props.put(key, true);
+                    props.put(propKey, true);
                     ReflectUtil.setField(target, props);
                 }
             }

@@ -49,14 +49,27 @@ public class CrustProperties {
     private boolean stateless = true;
 
     /**
+     * Set is false if you need custom config via {@link CrustConfigurerAdapter}.
+     * @since 3.15.0
+     */
+    private boolean useAutoConfig = true;
+
+    /**
      * 查询认证信息缓存（Session方式下仅开启超级缓存，因为Session本身有Session级缓存）
      */
     private boolean enableCache = true;
+
     /**
      * Token方式情况下，并且 <code>enableCache=true</code>，是否缓存到Redis <br>
      * 注意：这个配置将覆盖缓存模块 {@link LightCache#getOnlyCacheL2()} 配置的值
      */
     private boolean enableCacheL2 = true;
+
+    /**
+     * Set is false if you need get entity of user info immediately.
+     * @since 3.15.0
+     */
+    private boolean enableLoadEntityLazy = true;
 
     /**
      * 使用非对称方式（默认为false)<br>

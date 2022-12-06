@@ -114,7 +114,11 @@ public class CrustAuthenticationFilter extends OncePerRequestFilter {
             unsuccessfulAuthentication(request, response, failed);
             return;
         }
-        chain.doFilter(request, response);
+        try {
+            chain.doFilter(request, response);
+        } finally {
+            crust.clearContext();
+        }
     }
 
     protected void unsuccessfulAuthentication(HttpServletRequest request,

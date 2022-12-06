@@ -54,10 +54,10 @@ import javax.annotation.Resource;
  * <br>
  * Create at 2019/11/11 14:56
  */
-@Configuration
-@AutoConfigureAfter(LightConfig.class)
 @ConditionalOnClass({AuthenticationManager.class})
 @EnableConfigurationProperties({CrustProperties.class, LightProperties.class})
+@AutoConfigureAfter(LightConfig.class)
+@Configuration
 public class CrustConfig {
 
     @Autowired

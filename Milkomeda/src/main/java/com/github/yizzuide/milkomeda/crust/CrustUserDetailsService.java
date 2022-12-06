@@ -64,7 +64,7 @@ public abstract class CrustUserDetailsService implements UserDetailsService {
             userInfo.setPermissionList(permissionList);
             grantedAuthorities = CrustPerm.buildAuthorities(permissionList);
         }
-        userInfo.setEntity(entity);
+        userInfo.setEntity(CrustContext.get().getProps().isEnableLoadEntityLazy() ? null : entity);
         userInfo.setUid(entity.getUid());
         userInfo.setUsername(entity.getUsername());
         return new CrustUserDetails(userInfo.getUid(), userInfo.getUsername(), entity.getPassword(),

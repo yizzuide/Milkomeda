@@ -66,6 +66,7 @@ import java.util.stream.Collectors;
  * <br>
  * Create at 2019/11/11 15:48
  */
+@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 @Slf4j
 public class Crust {
     /**
@@ -189,7 +190,16 @@ public class Crust {
     }
 
     /**
-     * 获取当前用户信息（外面API调用）
+     * 获取登录的基本信息，如：uid, username, roleId等
+     * @return  CrustUserInfo
+     * @since 3.15.0
+     */
+    public CrustUserInfo<?, CrustPermission> getUserInfo() {
+        return getUserInfo(null);
+    }
+
+    /**
+     * 获取当前用户详细信息
      *
      * @param entityClazz 实体类型
      * @param <T> 实体类型
@@ -214,6 +224,17 @@ public class Crust {
 
         // Session方式开启超级缓存
         return CacheHelper.getFastLevel(lightCacheCrust, spot -> getCurrentLoginUserInfo(authentication, entityClazz));
+    }
+
+    /**
+     * 从Token获取用户登录信息
+     * @param token 请求令牌
+     * @return CrustUserInfo
+     * @since 3.15.0
+     */
+    @SuppressWarnings("rawtypes")
+    public CrustUserInfo getUserInfoFromToken(String token) {
+        return getAuthInfoFromToken(token);
     }
 
     /**
@@ -249,7 +270,7 @@ public class Crust {
         if (RoleIdsObj != null) {
             roleIds = Arrays.stream(((String) RoleIdsObj).split(",")).map(Long::parseLong).collect(Collectors.toList());
         }
-        CrustEntity entity = getCrustUserDetailsService().findEntityById(uid);
+        CrustEntity entity = getProps().isEnableLoadEntityLazy() ? null : loadEntity(uid);
         CrustUserInfo userInfo = new CrustUserInfo<>(uid, username, token, roleIds, entity);
         userInfo.setTokenExpire(expire);
         // active!
@@ -346,6 +367,14 @@ public class Crust {
     }
 
     /**
+     * 清空当前线程的登录信息
+     * @since 3.15.0
+     */
+    public void clearContext() {
+        SecurityContextHolder.clearContext();
+    }
+
+    /**
      * 获取Spring Security上下文
      * @return SecurityContext
      */
@@ -394,6 +423,11 @@ public class Crust {
             return Arrays.stream(permissions).anyMatch(perms::contains);
         }
         return isAdmin || Arrays.stream(permissions).anyMatch(perms::contains);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> T loadEntity(Serializable uid) {
+        return (T) getCrustUserDetailsService().findEntityById(uid);
     }
 
     /**

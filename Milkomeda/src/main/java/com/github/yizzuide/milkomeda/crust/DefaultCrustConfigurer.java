@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 yizzuide All rights Reserved.
+ * Copyright (c) 2022 yizzuide All rights Reserved.
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -21,27 +21,24 @@
 
 package com.github.yizzuide.milkomeda.crust;
 
-import org.springframework.context.annotation.Import;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-
-import java.lang.annotation.*;
+import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.core.userdetails.UserDetailsService;
 
 /**
- * EnableCrust
+ * Default impl of CrustConfigurerAdapter with {@link UserDetailsService}.
  *
+ * @since 3.15.0
  * @author yizzuide
- * @since 1.14.0
- * @version 1.16.2
  * <br>
- * Create at 2019/11/11 15:14
+ * Create at 2022/12/06 19:39
  */
-@Import({CrustConfig.class, DefaultCrustConfigurer.class})
-@EnableGlobalMethodSecurity(prePostEnabled = true)
-@EnableWebSecurity
-@Target({ElementType.TYPE})
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
-@Inherited
-public @interface EnableCrust {
+@ConditionalOnProperty(value = "use-auto-config", prefix = "milkomeda.crust", havingValue = "true", matchIfMissing = true)
+@Configuration
+public class DefaultCrustConfigurer extends CrustConfigurerAdapter {
+    @Override
+    protected UserDetailsService userDetailsService() {
+        return ApplicationContextHolder.get().getBean(CrustUserDetailsService.class);
+    }
 }

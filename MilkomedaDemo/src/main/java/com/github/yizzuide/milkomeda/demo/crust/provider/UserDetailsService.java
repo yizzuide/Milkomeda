@@ -5,6 +5,7 @@ import com.github.yizzuide.milkomeda.crust.CrustPerm;
 import com.github.yizzuide.milkomeda.crust.CrustUserDetailsService;
 import com.github.yizzuide.milkomeda.demo.crust.pojo.User;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.stereotype.Service;
 
 import java.io.Serializable;
 import java.util.Collections;
@@ -16,6 +17,7 @@ import java.util.Collections;
  * <br>
  * Create at 2019/11/11 23:44
  */
+@Service
 public class UserDetailsService extends CrustUserDetailsService {
 
     @Override
