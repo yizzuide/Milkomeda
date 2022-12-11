@@ -43,6 +43,7 @@ import java.util.Map;
  * <br>
  * Create at 2020/05/05 16:23
  */
+@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 @Slf4j
 public class FusionRegistration {
 

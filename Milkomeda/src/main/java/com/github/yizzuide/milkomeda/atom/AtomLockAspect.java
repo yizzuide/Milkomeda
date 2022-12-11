@@ -41,6 +41,7 @@ import java.time.Duration;
  * <br>
  * Create at 2020/04/30 16:26
  */
+@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 @Slf4j
 @Order
 @Aspect

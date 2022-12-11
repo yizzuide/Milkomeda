@@ -21,36 +21,37 @@
 
 package com.github.yizzuide.milkomeda.crust;
 
+import com.github.yizzuide.milkomeda.universe.metadata.BeanIds;
 import com.github.yizzuide.milkomeda.universe.polyfill.SpringMvcPolyfill;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
-import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
-import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 /**
- * Crust config for microservice.
+ * Crust config used for microservice.
  *
  * @since 3.15.0
  * @author yizzuide
  * <br>
  * Create at 2022/12/07 00:12
  */
-@ConditionalOnClass(AuthenticationManager.class)
 @EnableConfigurationProperties(CrustProperties.class)
 @Configuration
 public class CrustMicroConfig {
+
     @Bean
-    public Crust crust() {
-        return new Crust();
+    public CrustTokenResolver crustTokenResolver(CrustProperties props) {
+        return new CrustTokenResolver(props);
     }
 
     @Bean
@@ -58,23 +59,29 @@ public class CrustMicroConfig {
         return new CrustInterceptor();
     }
 
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Configuration
     static class ExtendedConfig implements InitializingBean {
-        @Resource
-        private Crust crust;
 
-        @Resource
+        @Autowired
         private CrustInterceptor crustInterceptor;
 
-        @Qualifier("requestMappingHandlerMapping")
+        @Autowired
+        private CrustProperties crustProperties;
+
+        @Qualifier(BeanIds.REQUEST_MAPPING_HANDLER_MAPPING)
         @Autowired
         private RequestMappingHandlerMapping requestMappingHandlerMapping;
 
         @Override
         public void afterPropertiesSet() throws Exception {
-            CrustContext.set(crust);
+            List<String> allowURLs = new ArrayList<>(crustProperties.getPermitURLs());
+                List<String> additionPermitUrls = crustProperties.getAdditionPermitUrls();
+            if (!CollectionUtils.isEmpty(additionPermitUrls)) {
+                allowURLs.addAll(additionPermitUrls);
+            }
             SpringMvcPolyfill.addDynamicInterceptor(crustInterceptor,  Ordered.HIGHEST_PRECEDENCE + 1, Collections.singletonList("/**"),
-                    null, requestMappingHandlerMapping);
+                    allowURLs, requestMappingHandlerMapping);
         }
     }
 }

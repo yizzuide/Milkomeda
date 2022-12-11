@@ -101,9 +101,9 @@ public abstract class CrustConfigurerAdapter {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         List<String> allowURLs = new ArrayList<>(props.getPermitURLs());
-        // 登录
+        // 允许登录
         allowURLs.add(props.getLoginUrl());
         // 额外添加的排除项
         if (!CollectionUtils.isEmpty(props.getAdditionPermitUrls())) {
@@ -112,7 +112,8 @@ public abstract class CrustConfigurerAdapter {
         // 标记匿名访问
         // Find URL method map
         Map<RequestMappingInfo, HandlerMethod> handlerMethodMap = applicationContextHolder.getApplicationContext()
-                .getBean(RequestMappingHandlerMapping.class).getHandlerMethods();
+                .getBean(com.github.yizzuide.milkomeda.universe.metadata.BeanIds.REQUEST_MAPPING_HANDLER_MAPPING,
+                        RequestMappingHandlerMapping.class).getHandlerMethods();
         Set<String> anonUrls = new HashSet<>();
         for (Map.Entry<RequestMappingInfo, HandlerMethod> infoEntry : handlerMethodMap.entrySet()) {
             HandlerMethod handlerMethod = infoEntry.getValue();
@@ -180,7 +181,7 @@ public abstract class CrustConfigurerAdapter {
 
         // 认证用户无权限访问处理
         http.exceptionHandling().accessDeniedHandler(failureHandler)
-                // 匿名用户无权限访问处理
+                // 认证异常或匿名用户无权限访问处理
                 .authenticationEntryPoint(failureHandler);
 
         // add others http configure
@@ -255,20 +256,20 @@ public abstract class CrustConfigurerAdapter {
 
         // 认证失败处理器
         @Override
-        public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
-            configurerAdapter.doFailure(true, request, response, exception);
+        public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
+            configurerAdapter.doFailure(true, request, response, authException);
+        }
+
+        // 认证异常或匿名用户无权限访问处理器
+        @Override
+        public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
+            this.onAuthenticationFailure(request, response, authException);
         }
 
         // 认证用户无权限访问拒绝处理器
         @Override
         public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException, ServletException {
             configurerAdapter.doFailure(false, request, response, accessDeniedException);
-        }
-
-        // 匿名用户无权限访问拒绝处理器
-        @Override
-        public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
-            configurerAdapter.doFailure(false, request, response, authException);
         }
     }
 }

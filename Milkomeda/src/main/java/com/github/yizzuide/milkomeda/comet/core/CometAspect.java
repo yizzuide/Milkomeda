@@ -64,6 +64,7 @@ import java.util.function.Function;
  * <br>
  * Create at 2019/04/11 19:48
  */
+@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 @Slf4j
 @Aspect
 @Order(-99)

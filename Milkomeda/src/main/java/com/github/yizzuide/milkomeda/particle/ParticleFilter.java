@@ -58,6 +58,7 @@ import static com.github.yizzuide.milkomeda.particle.ParticleProperties.Limiter.
  * <br>
  * Create at 2020/04/08 11:41
  */
+@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 public class ParticleFilter implements Filter {
 
     @Autowired

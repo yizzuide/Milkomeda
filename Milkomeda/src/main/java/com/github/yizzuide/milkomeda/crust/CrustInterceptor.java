@@ -21,14 +21,12 @@
 
 package com.github.yizzuide.milkomeda.crust;
 
-import com.github.yizzuide.milkomeda.hydrogen.uniform.ResultVO;
-import com.github.yizzuide.milkomeda.hydrogen.uniform.UniformHandler;
-import com.github.yizzuide.milkomeda.hydrogen.uniform.UniformResult;
-import org.springframework.http.HttpStatus;
+import com.github.yizzuide.milkomeda.light.LightContext;
 import org.springframework.lang.NonNull;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.HandlerInterceptor;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -41,30 +39,40 @@ import javax.servlet.http.HttpServletResponse;
  * Create at 2022/12/07 00:44
  */
 public class CrustInterceptor implements HandlerInterceptor {
+    public static final String LIGHT_CONTEXT_ID = "crustLightContext";
+
+    @Resource
+    private CrustTokenResolver tokenResolver;
+
+    private LightContext<?, CrustUserInfo<?, ?>> lightContext;
+
     @Override
     public boolean preHandle(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull Object handler) throws Exception {
-        Crust crust = CrustContext.get();
-        String token = crust.getToken(false);
-        boolean isAuthed = false;
+        String token = tokenResolver.getRequestToken();
+        boolean isAuthedSuccess = false;
         String errorMsg = "Required token is not set.";
         if (StringUtils.hasText(token)) {
-            CrustUserInfo<?, ?> userInfo = crust.getAuthInfoFromToken(token);
-            isAuthed = userInfo != null;
+            CrustUserInfo<?, ?> userInfo = tokenResolver.resolve(token, null);
             if (userInfo == null) {
                 errorMsg = "Token is invalid.";
+            } else {
+                isAuthedSuccess = true;
+                if (lightContext == null) {
+                    lightContext = LightContext.setValue(null, LIGHT_CONTEXT_ID);
+                }
+                lightContext.setData(userInfo);
             }
         }
-        if (!isAuthed) {
-            response.setStatus(HttpStatus.OK.value());
-            ResultVO<?> source = UniformResult.error(crust.getProps().getAuthFailCode(), errorMsg);
-            UniformHandler.matchStatusToWrite(response, source.toMap());
-            return false;
+        if (!isAuthedSuccess) {
+            throw new CrustException(errorMsg);
         }
         return true;
     }
 
     @Override
     public void afterCompletion(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull Object handler, Exception ex) throws Exception {
-        CrustContext.get().clearContext();
+        if (lightContext != null) {
+            lightContext.remove();
+        }
     }
 }

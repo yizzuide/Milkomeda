@@ -11,13 +11,13 @@
 
     <properties>
         <java.version>1.8</java.version>
-        <kotlin.version>1.5.32</kotlin.version>
+        <kotlin.version>1.6.21</kotlin.version>
         <project.release.version>3.15.0-SNAPSHOT</project.release.version>
         <spring-boot.version>2.7.6</spring-boot.version>
         <spring-cloud.version>2021.0.5</spring-cloud.version>
-        <mybatis.starter.version>2.2.2</mybatis.starter.version>
+        <mybatis.starter.version>3.0.0</mybatis.starter.version>
         <mybatis-plus.version>3.5.2</mybatis-plus.version>
-        <redission.version>3.17.7</redission.version>
+        <redission.version>3.18.0</redission.version>
         <jsqlparser.version>4.5</jsqlparser.version>
         <jwt.version>0.9.1</jwt.version>
         <commons-beanutils.version>1.9.4</commons-beanutils.version>
@@ -112,6 +112,12 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-aop</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.yaml</groupId>
+                    <artifactId>snakeyaml</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -179,6 +185,12 @@
             <artifactId>redisson</artifactId>
             <version>${redission.version}</version>
             <optional>true</optional>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.yaml</groupId>
+                    <artifactId>snakeyaml</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.curator</groupId>
@@ -202,6 +214,12 @@
             <groupId>commons-beanutils</groupId>
             <artifactId>commons-beanutils</artifactId>
             <version>${commons-beanutils.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-collections</groupId>
+                    <artifactId>commons-collections</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <!-- Springboot 2.6: Redis (both Jedis and Lettuce) will now automatically enable pooling when commons-pool2 is on the classpath. -->
         <dependency>

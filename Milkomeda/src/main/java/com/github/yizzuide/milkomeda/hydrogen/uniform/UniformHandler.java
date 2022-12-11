@@ -60,7 +60,7 @@ import java.util.*;
  *
  * @author yizzuide
  * @since 3.0.0
- * @version 3.14.1
+ * @version 3.15.0
  * @see org.springframework.boot.SpringApplication#run(java.lang.String...)
  * #see org.springframework.boot.SpringApplication#registerLoggedException(java.lang.Throwable)
  * #see org.springframework.boot.SpringBootExceptionHandler.LoggedExceptionHandlerThreadLocal#initialValue()
@@ -69,6 +69,7 @@ import java.util.*;
  * <br>
  * Create at 2020/03/25 22:47
  */
+@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 @Slf4j
 // 可以用于定义@ExceptionHandler、@InitBinder、@ModelAttribute, 并应用到所有@RequestMapping中
 //@ControllerAdvice // 这种方式默认就会扫描并加载到Ioc，不好动态控制是否加载，但好处是外部API对未来版本的兼容性强
@@ -248,20 +249,35 @@ public class UniformHandler extends ResponseEntityExceptionHandler {
     }
 
     /**
+     * Try match response resolve with code before write.
+     * @param code  response status code
+     * @return  true if matched
+     * @since 3.15.0
+     */
+    public static boolean tryMatch(int code) {
+        UniformProperties props = Binder.get(ApplicationContextHolder.get().getEnvironment()).bind(UniformProperties.PREFIX, UniformProperties.class).get();
+        if (props == null) {
+            return false;
+        }
+        Map<?, ?> resolveMap = (Map<?, ?>) props.getResponse().get(String.valueOf(code));
+        return resolveMap != null;
+    }
+
+    /**
      * Used for external match with status code to get response result.
-     * @param response  response object
+     * @param statusCode  response status
      * @param source    replace data
      * @return tuple(yml node map, response content)
-     * @since 3.14.0
+     * @since 3.15.0
      */
     @SuppressWarnings("unchecked")
-    public static Tuple<Map<String, Object>, Map<String, Object>> matchStatusResult(HttpServletResponse response, Map<String, Object> source) {
+    public static Tuple<Map<String, Object>, Map<String, Object>> matchStatusResult(int statusCode, Map<String, Object> source) {
         UniformProperties props = Binder.get(ApplicationContextHolder.get().getEnvironment()).bind(UniformProperties.PREFIX, UniformProperties.class).get();
         Map<String, Object> resolveMap;
         if (props == null) {
             resolveMap = createInitResolveMap();
         } else {
-            resolveMap = (Map<String, Object>) props.getResponse().get(String.valueOf(response.getStatus()));
+            resolveMap = (Map<String, Object>) props.getResponse().get(String.valueOf(statusCode));
             if (resolveMap == null) {
                 resolveMap = createInitResolveMap();
             }
@@ -269,15 +285,30 @@ public class UniformHandler extends ResponseEntityExceptionHandler {
 
         Map<String, Object> result = new HashMap<>();
         // status == 200?
-        if (response.getStatus() == HttpStatus.OK.value()) {
+        if (statusCode == HttpStatus.OK.value()) {
             YmlParser.parseAliasMapPath(resolveMap, result, YmlResponseOutput.CODE, null, source);
             YmlParser.parseAliasMapPath(resolveMap, result, YmlResponseOutput.MESSAGE, null, source);
             YmlParser.parseAliasMapPath(resolveMap, result, YmlResponseOutput.DATA, null, source);
             resultFilter(result);
         } else { // status != 200
+            if (source.get(YmlResponseOutput.CODE) == null) {
+                source.put(YmlResponseOutput.CODE, resolveMap.get(YmlResponseOutput.CODE));
+            }
             YmlResponseOutput.output(resolveMap, result, source, null, false);
         }
         return Tuple.build(resolveMap, result);
+    }
+
+    /**
+     * Used for external match with status code to get response result.
+     * @param response  response object
+     * @param source    replace data
+     * @return tuple(yml node map, response content)
+     * @since 3.14.0
+     */
+
+    public static Tuple<Map<String, Object>, Map<String, Object>> matchStatusResult(HttpServletResponse response, Map<String, Object> source) {
+        return matchStatusResult(response.getStatus(), source);
     }
 
     @NotNull

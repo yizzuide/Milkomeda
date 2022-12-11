@@ -48,6 +48,7 @@ import java.util.List;
  * <br>
  * Create at 2020/04/01 18:19
  */
+@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 @Slf4j
 public class TomcatFilterLoader extends AbstractFilterLoader<FilterProperties.Filters> {
     /**

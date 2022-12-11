@@ -69,6 +69,11 @@ public class CrustConfig {
     }
 
     @Bean
+    public CrustTokenResolver crustTokenResolver() {
+        return new CrustTokenResolver(crustProps);
+    }
+
+    @Bean
     @ConditionalOnMissingBean
     @ConditionalOnProperty(prefix = "milkomeda.crust", name = "use-bcrypt", havingValue = "true", matchIfMissing = true)
     public BCryptPasswordEncoder bCryptPasswordEncoder() {

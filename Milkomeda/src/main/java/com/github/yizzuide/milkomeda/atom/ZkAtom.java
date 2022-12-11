@@ -39,6 +39,7 @@ import java.util.concurrent.TimeUnit;
  * <br>
  * Create at 2020/05/01 12:26
  */
+@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 public class ZkAtom implements Atom {
     // 节点分隔符
     private final static String SEPARATOR = "/";

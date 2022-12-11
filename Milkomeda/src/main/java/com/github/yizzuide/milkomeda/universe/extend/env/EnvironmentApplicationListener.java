@@ -74,7 +74,7 @@ public class EnvironmentApplicationListener implements ApplicationListener<Appli
 
         // bind property
         boolean logEnable = Binder.get(environment).bind("milkomeda.show-log", Boolean.class).orElseGet(() -> false);
-        log.info("milkomeda log: {}", logEnable ? "enable" : "disable");
+        log.info("milkomeda log is {}", logEnable ? "enable" : "disable");
     }
 
     @Override

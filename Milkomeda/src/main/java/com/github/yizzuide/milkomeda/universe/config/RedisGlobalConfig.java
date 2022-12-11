@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 yizzuide All rights Reserved.
+ * Copyright (c) 2022 yizzuide All rights Reserved.
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -19,39 +19,39 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.hydrogen.interceptor;
+package com.github.yizzuide.milkomeda.universe.config;
 
-import com.github.yizzuide.milkomeda.universe.metadata.BeanIds;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
+import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
+
+import java.io.Serializable;
 
 /**
- * InterceptorConfig
+ * Redis global config.
  *
+ * @since 3.15.0
  * @author yizzuide
- * @since 3.0.0
  * <br>
- * Create at 2020/03/28 00:23
+ * Create at 2022/12/08 01:53
  */
-@Slf4j
+@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
+@AutoConfigureAfter(RedisAutoConfiguration.class)
 @Configuration
-@EnableConfigurationProperties(InterceptorProperties.class)
-@AutoConfigureAfter(WebMvcAutoConfiguration.class)
-@ConditionalOnProperty(prefix = "milkomeda.hydrogen.interceptor", name = "enable", havingValue = "true")
-public class InterceptorConfig {
-
+public class RedisGlobalConfig {
     @Bean
-    @ConditionalOnClass(name = "org.springframework.web.servlet.HandlerInterceptor")
-    public InterceptorLoader interceptorHandler(InterceptorProperties interceptorProperties,
-           @Qualifier(BeanIds.REQUEST_MAPPING_HANDLER_MAPPING) RequestMappingHandlerMapping requestMappingHandlerMapping) {
-        return new WebMvcInterceptorLoader(interceptorProperties, requestMappingHandlerMapping);
+    @ConditionalOnClass(name = "org.springframework.data.redis.core.RedisTemplate")
+    public RedisTemplate<String, Serializable> jsonRedisTemplate(LettuceConnectionFactory redisConnectionFactory) {
+        RedisTemplate<String, Serializable> template = new RedisTemplate<>();
+        template.setKeySerializer(new StringRedisSerializer());
+        template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
+        template.setConnectionFactory(redisConnectionFactory);
+        return template;
     }
 }

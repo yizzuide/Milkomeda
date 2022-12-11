@@ -23,6 +23,7 @@ package com.github.yizzuide.milkomeda.comet.core;
 
 import com.github.yizzuide.milkomeda.pulsar.PulsarConfig;
 import com.github.yizzuide.milkomeda.universe.config.MilkomedaProperties;
+import com.github.yizzuide.milkomeda.universe.metadata.BeanIds;
 import com.github.yizzuide.milkomeda.universe.polyfill.SpringMvcPolyfill;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -96,12 +97,13 @@ public class CometConfig {
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Configuration
     static class ExtendedConfig implements InitializingBean {
+
         @Autowired
         private RequestMappingHandlerAdapter adapter;
 
         // Springboot 2.7: Since Spring Framework 5.1, Spring MVC has supported multiple RequestMappingHandlerMapping beans.
         //  Spring Boot 2.7 no longer defines MVC’s main requestMappingHandlerMapping bean as @Primary.
-        @Qualifier("requestMappingHandlerMapping")
+        @Qualifier(BeanIds.REQUEST_MAPPING_HANDLER_MAPPING)
         @Autowired
         private RequestMappingHandlerMapping requestMappingHandlerMapping;
 

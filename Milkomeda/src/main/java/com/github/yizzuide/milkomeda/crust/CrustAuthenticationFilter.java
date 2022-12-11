@@ -48,9 +48,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * CrustAuthenticationFilter
- * 安全拦截过滤器
+ * Parse token to authentication filter.
  *
+ * @see org.springframework.security.web.context.SecurityContextHolderFilter
+ * @see org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
+ * @see org.springframework.security.web.authentication.www.BasicAuthenticationFilter
+ * @see org.springframework.security.web.authentication.AnonymousAuthenticationFilter
+ * @see org.springframework.security.web.access.ExceptionTranslationFilter
+ * @see org.springframework.security.web.access.intercept.FilterSecurityInterceptor
  * @author yizzuide
  * @since 1.14.0
  * @version 3.12.9
@@ -114,11 +119,8 @@ public class CrustAuthenticationFilter extends OncePerRequestFilter {
             unsuccessfulAuthentication(request, response, failed);
             return;
         }
-        try {
-            chain.doFilter(request, response);
-        } finally {
-            crust.clearContext();
-        }
+        chain.doFilter(request, response);
+        // Next clear `SecurityContext` within `SecurityContextHolderFilter`
     }
 
     protected void unsuccessfulAuthentication(HttpServletRequest request,

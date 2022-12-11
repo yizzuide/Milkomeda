@@ -36,6 +36,7 @@ import javax.servlet.ServletException;
  * <br>
  * Create at 2020/04/01 18:18
  */
+@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 public class ServletContextListener implements ServletContextInitializer {
 
     @Autowired

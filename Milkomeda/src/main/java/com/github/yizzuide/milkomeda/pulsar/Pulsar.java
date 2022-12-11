@@ -55,6 +55,7 @@ import static com.github.yizzuide.milkomeda.util.ReflectUtil.*;
  * <br>
  * Create at 2019/03/29 10:36
  */
+@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 @Slf4j
 @Aspect
 @Order(66)

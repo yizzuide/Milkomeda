@@ -65,6 +65,21 @@ public class UniformResult<T> implements ResultVO<T> {
     }
 
     /**
+     * Return success with code and empty message.
+     * @param data  success data
+     * @param <T>   data type
+     * @return  ResultVO
+     * @since 3.15.0
+     */
+    public static <T> ResultVO<T> ok(String code, T data) {
+        UniformResult<T> resultVo = new UniformResult<>();
+        resultVo.setCode(code);
+        resultVo.setMessage("");
+        resultVo.setData(data);
+        return resultVo;
+    }
+
+    /**
      * Return failure.
      * @param code      failure code
      * @param message   failure message

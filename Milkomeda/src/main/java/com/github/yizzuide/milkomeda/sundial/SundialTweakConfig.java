@@ -38,6 +38,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
  * <br>
  * Create at 2020/05/31 14:57
  */
+@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 @ConditionalOnClass(MybatisAutoConfiguration.class)
 @AutoConfigureAfter(MybatisAutoConfiguration.class)
 public class SundialTweakConfig {

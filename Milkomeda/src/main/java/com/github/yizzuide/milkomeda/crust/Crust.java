@@ -28,9 +28,7 @@ import com.github.yizzuide.milkomeda.light.LightCacheable;
 import com.github.yizzuide.milkomeda.universe.context.AopContextHolder;
 import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import com.github.yizzuide.milkomeda.universe.context.WebContext;
-import com.github.yizzuide.milkomeda.util.JwtUtil;
 import com.github.yizzuide.milkomeda.util.Strings;
-import io.jsonwebtoken.Claims;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,9 +49,8 @@ import org.springframework.util.DigestUtils;
 import org.springframework.util.StringUtils;
 
 import java.io.Serializable;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -62,7 +59,7 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 1.14.0
- * @version 3.14.1
+ * @version 3.15.0
  * <br>
  * Create at 2019/11/11 15:48
  */
@@ -77,22 +74,6 @@ public class Crust {
      * 缓存标识
      */
     static final String CATCH_NAME = "lightCacheCrust";
-    /**
-     * 用户id
-     */
-    private static final String UID = "uid";
-    /**
-     * 用户名称
-     */
-    private static final String USERNAME = Claims.SUBJECT;
-    /**
-     * 创建时间
-     */
-    private static final String CREATED = Claims.ISSUED_AT;
-    /**
-     * 角色id
-     */
-    private static final String ROLE_IDS = "roles";
 
     @Getter
     @Autowired
@@ -101,6 +82,9 @@ public class Crust {
     @Qualifier(Crust.CATCH_NAME)
     @Autowired(required = false)
     private Cache lightCacheCrust;
+
+    @Autowired
+    private CrustTokenResolver tokenResolver;
 
     private CrustUserDetailsService crustUserDetailsService;
 
@@ -144,22 +128,14 @@ public class Crust {
      */
     @NonNull
     private <T extends CrustEntity> CrustUserInfo<T, CrustPermission> generateToken(@NonNull Authentication authentication, @NonNull Class<T> entityClazz) {
-        Map<String, Object> claims = new HashMap<>(6);
         CrustUserInfo<T, CrustPermission> userInfo = getCurrentLoginUserInfo(authentication, entityClazz);
-        claims.put(UID, userInfo.getUidLong());
-        claims.put(USERNAME, userInfo.getUsername());
-        claims.put(CREATED, new Date());
         Object principal = authentication.getPrincipal();
+        String roleIds = null;
         if (principal instanceof CrustUserDetails) {
-            List<Long> roleIds = ((CrustUserDetails) principal).getRoleIds();
-            if (!CollectionUtils.isEmpty(roleIds)) {
-                claims.put(ROLE_IDS, StringUtils.arrayToCommaDelimitedString(roleIds.toArray()));
-            }
+            List<Long> roleIdList = ((CrustUserDetails) principal).getRoleIds();
+            roleIds = CollectionUtils.isEmpty(roleIdList) ? null : StringUtils.arrayToCommaDelimitedString(roleIdList.toArray());
         }
-        long expire = LocalDateTime.now().plusMinutes(props.getExpire().toMinutes()).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-        String token = JwtUtil.generateToken(claims, getSignKey(), expire, props.isUseRsa());
-        userInfo.setToken(token);
-        userInfo.setTokenExpire(expire);
+        String token = tokenResolver.generate(userInfo, roleIds);
         // help cache the auth info，that synchronize with the expired token.
         AopContextHolder.self(this.getClass()).getAuthInfoFromToken(token);
         return userInfo;
@@ -227,17 +203,6 @@ public class Crust {
     }
 
     /**
-     * 从Token获取用户登录信息
-     * @param token 请求令牌
-     * @return CrustUserInfo
-     * @since 3.15.0
-     */
-    @SuppressWarnings("rawtypes")
-    public CrustUserInfo getUserInfoFromToken(String token) {
-        return getAuthInfoFromToken(token);
-    }
-
-    /**
      * 根据请求令牌获取登录认证信息
      * @param token 请求令牌
      * @return CrustUserInfo
@@ -251,28 +216,9 @@ public class Crust {
         if (authentication != null) {
             return getCurrentLoginUserInfo(authentication, null);
         }
-
         // invoke from CrustAuthenticationFilter.doFilterInternal()
-        String unSignKey = getUnSignKey();
-        Claims claims = JwtUtil.parseToken(token, unSignKey);
-        if (claims == null) {
-            return null;
-        }
-        String username = claims.getSubject();
-        if (username == null) {
-            return null;
-        }
-        Serializable uid = (Serializable) claims.get(UID);
-        //long issuedAt = (long) claims.get(CREATED);
-        long expire = claims.getExpiration().getTime();
-        Object RoleIdsObj = claims.get(ROLE_IDS);
-        List<Long> roleIds = null;
-        if (RoleIdsObj != null) {
-            roleIds = Arrays.stream(((String) RoleIdsObj).split(",")).map(Long::parseLong).collect(Collectors.toList());
-        }
-        CrustEntity entity = getProps().isEnableLoadEntityLazy() ? null : loadEntity(uid);
-        CrustUserInfo userInfo = new CrustUserInfo<>(uid, username, token, roleIds, entity);
-        userInfo.setTokenExpire(expire);
+        CrustUserInfo userInfo = tokenResolver.resolve(token, this::loadEntity);
+        if (userInfo == null) return null;
         // active!
         activeAuthentication(userInfo);
         return userInfo;
@@ -316,14 +262,9 @@ public class Crust {
         if (!props.isStateless()) { return null; }
         String refreshedToken;
         try {
-            String token = getToken(false);
-            Claims claims = JwtUtil.parseToken(token, getUnSignKey());
-            claims.put(CREATED, new Date());
-            long expire = LocalDateTime.now().plusMinutes(props.getExpire().toMinutes()).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-            refreshedToken = JwtUtil.generateToken(claims, getSignKey(), expire, props.isUseRsa());
             CrustUserInfo<?, CrustPermission> loginUserInfo = getCurrentLoginUserInfo(getAuthentication(), null);
-            loginUserInfo.setToken(refreshedToken);
-            loginUserInfo.setTokenExpire(expire);
+            String token = getToken(false);
+            refreshedToken = tokenResolver.refresh(token, loginUserInfo);
             // remove cache (old token with user auth info)
             AopContextHolder.self(this.getClass()).removeTokenCache(token);
             // re-cache user auth info with refreshed token, not need change it.
@@ -339,18 +280,14 @@ public class Crust {
      * 使登录信息失效
      */
     public void invalidate() {
-        try {
-            // Token方式下开启缓存时清空
-            if (getProps().isStateless()) {
-                String token = getAuthentication() == null ? getToken(false) :
-                        getUserInfo(null).getToken();
-                if (Strings.isEmpty(token)) {
-                    throw new InsufficientAuthenticationException("Token is not exists.");
-                }
-                AopContextHolder.self(this.getClass()).removeTokenCache(token);
+        // Token方式下开启缓存时清空
+        if (getProps().isStateless()) {
+            String token = getAuthentication() == null ? getToken(false) :
+                    getUserInfo(null).getToken();
+            if (Strings.isEmpty(token)) {
+                throw new InsufficientAuthenticationException("Token is not exists.");
             }
-        } finally {
-            SecurityContextHolder.clearContext();
+            AopContextHolder.self(this.getClass()).removeTokenCache(token);
         }
     }
 
@@ -364,14 +301,6 @@ public class Crust {
             return null;
         }
         return SecurityContextHolder.getContext().getAuthentication();
-    }
-
-    /**
-     * 清空当前线程的登录信息
-     * @since 3.15.0
-     */
-    public void clearContext() {
-        SecurityContextHolder.clearContext();
     }
 
     /**
@@ -391,13 +320,7 @@ public class Crust {
     @Nullable
     public String getToken(boolean checkIsExists) {
         if (!props.isStateless()) { return null; }
-        String token = WebContext.getRequestNonNull().getHeader(props.getTokenName());
-        if (Strings.isEmpty(token)) { return null; }
-        // 一般请求头Authorization的值会添加Bearer
-        String tokenHead = "Bearer ";
-        if (token.contains(tokenHead)) {
-            token = token.substring(tokenHead.length());
-        }
+        String token = tokenResolver.getRequestToken();
         if (checkIsExists && props.isEnableCache()) {
             String cacheKey = CATCH_KEY_PREFIX + DigestUtils.md5DigestAsHex(token.getBytes());
             if (!lightCacheCrust.isCacheL2Exists(cacheKey)) {
@@ -417,39 +340,17 @@ public class Crust {
         Authentication authentication = getAuthentication();
         Assert.notNull(authentication, "Authentication must be not null.");
         CrustUserInfo<CrustEntity, CrustPermission> loginUserInfo = getCurrentLoginUserInfo(authentication, null);
-        List<String> perms = authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList());
         Boolean isAdmin = loginUserInfo.getIsAdmin();
-        if (isAdmin == null) {
-            return Arrays.stream(permissions).anyMatch(perms::contains);
+        if (isAdmin != null && isAdmin) {
+            return true;
         }
-        return isAdmin || Arrays.stream(permissions).anyMatch(perms::contains);
+        List<String> perms = authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList());
+        return Arrays.stream(permissions).anyMatch(perms::contains);
     }
 
     @SuppressWarnings("unchecked")
     public <T> T loadEntity(Serializable uid) {
         return (T) getCrustUserDetailsService().findEntityById(uid);
-    }
-
-    /**
-     * 获取加密key
-     * @return sign key
-     */
-    private String getSignKey() {
-        if (props.isUseRsa()) {
-            return props.getPriKey();
-        }
-        return props.getSecureKey();
-    }
-
-    /**
-     * 获取解密key
-     * @return unSign key
-     */
-    private String getUnSignKey() {
-        if (props.isUseRsa()) {
-            return props.getPubKey();
-        }
-        return props.getSecureKey();
     }
 
     /**

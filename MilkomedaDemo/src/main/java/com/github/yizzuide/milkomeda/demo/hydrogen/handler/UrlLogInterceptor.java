@@ -18,6 +18,7 @@ import javax.servlet.http.HttpServletResponse;
  * <br>
  * Create at 2020/03/28 01:08
  */
+@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 @Slf4j
 public class UrlLogInterceptor implements AsyncHandlerInterceptor, InitializingBean {
 

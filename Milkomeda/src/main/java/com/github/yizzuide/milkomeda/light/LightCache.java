@@ -54,6 +54,7 @@ import java.util.concurrent.TimeUnit;
  * <br>
  * Create at 2019/06/28 13:33
  */
+@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 @Slf4j
 public class LightCache implements Cache {
     /**

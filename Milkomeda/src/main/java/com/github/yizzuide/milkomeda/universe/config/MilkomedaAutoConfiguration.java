@@ -36,7 +36,7 @@ import org.springframework.context.annotation.Import;
  * <br>
  * Create at 2019/04/12 11:29
  */
-// Springboot 2.7: @AutoConfiguration should be used to annotate top-level auto-configuration classes,
+// Springboot 2.7: @AutoConfiguration should be used to annotate top-level autoconfiguration classes,
 //    Configuration classes that are nested within or imported by an @AutoConfiguration class should continue to use @Configuration as before.
 @AutoConfiguration
 @Import(MilkomedaContextConfig.class)

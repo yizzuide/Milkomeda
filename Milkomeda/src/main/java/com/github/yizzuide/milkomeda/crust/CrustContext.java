@@ -21,7 +21,9 @@
 
 package com.github.yizzuide.milkomeda.crust;
 
+import com.github.yizzuide.milkomeda.light.LightContext;
 import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 
 /**
  * CrustContext
@@ -29,7 +31,7 @@ import org.springframework.lang.NonNull;
  *
  * @author yizzuide
  * @since 1.14.0
- * @version 2.0.4
+ * @version 3.15.0
  * <br>
  * Create at 2019/11/11 17:53
  */
@@ -43,9 +45,17 @@ public class CrustContext {
         INSTANCE = crust;
     }
 
-    @NonNull
     public static Crust get() {
         return INSTANCE;
+    }
+
+    /**
+     * 获取登录的基本信息，如：uid, username, roleId等
+     * @return  CrustUserInfo
+     * @since 3.15.0
+     */
+    public static CrustUserInfo<?, ?> getUserInfo() {
+        return getUserInfo(null);
     }
 
     /**
@@ -56,12 +66,22 @@ public class CrustContext {
      * @return  CrustUserInfo
      */
     @NonNull
-    public static <T extends CrustEntity> CrustUserInfo<T, CrustPermission> getUserInfo(@NonNull Class<T> entityClass) { return get().getUserInfo(entityClass); }
+    public static <T extends CrustEntity> CrustUserInfo<T, CrustPermission> getUserInfo(@Nullable Class<T> entityClass) {
+        Crust crust = get();
+        // invoke from microservice
+        if (crust == null) {
+            return LightContext.getValue(CrustInterceptor.LIGHT_CONTEXT_ID);
+        }
+        return crust.getUserInfo(entityClass);
+    }
 
     /**
      * 使登录信息失效，清空当前用户的缓存
      */
     public static void invalidate() {
-        get().invalidate();
+        Crust crust = get();
+        if (crust != null) {
+            crust.invalidate();
+        }
     }
 }

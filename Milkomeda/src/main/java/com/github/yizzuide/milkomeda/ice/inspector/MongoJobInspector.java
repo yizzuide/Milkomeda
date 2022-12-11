@@ -46,6 +46,7 @@ import java.util.stream.Collectors;
  * <br>
  * Create at 2022/09/26 23:02
  */
+@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 public class MongoJobInspector extends AbstractJobInspector {
 
     @Autowired

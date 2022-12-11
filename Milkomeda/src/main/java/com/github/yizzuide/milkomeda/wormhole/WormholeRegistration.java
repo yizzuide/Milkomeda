@@ -44,6 +44,7 @@ import java.util.Map;
  * <br>
  * Create at 2020/05/05 14:15
  */
+@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 public class WormholeRegistration {
 
     private static Map<String, List<HandlerMetaData>> actionMap = new HashMap<>();

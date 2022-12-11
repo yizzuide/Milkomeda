@@ -21,6 +21,7 @@
 
 package com.github.yizzuide.milkomeda.ice;
 
+import com.github.yizzuide.milkomeda.universe.config.RedisGlobalConfig;
 import org.springframework.context.annotation.Import;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
@@ -96,6 +97,6 @@ import java.lang.annotation.*;
 @Target({ElementType.TYPE})
 @Inherited
 @EnableScheduling
-@Import({IceConfig.class, IceScheduleConfig.class})
+@Import({RedisGlobalConfig.class, IceConfig.class, IceScheduleConfig.class})
 public @interface EnableIce {
 }

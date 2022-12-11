@@ -15,6 +15,7 @@ import java.io.IOException;
  * <br>
  * Create at 2020/04/02 18:14
  */
+@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 @Slf4j
 public class IPLimiterFilter implements Filter {
     @Autowired

@@ -30,14 +30,14 @@ import java.io.Serializable;
 
 /**
  * LightContext
- *
+ * <p>
  * 线程缓存上下文，可以配合<code>LightCache</code>当作超级缓存，也可以单独使用
- *
+ * </p>
  * I：上下文id
  * E：上下文数据
  *
  * @since 1.9.0
- * @version 3.13.0
+ * @version 3.15.0
  * @author yizzuide
  * <br>
  * Create at 2019/06/30 18:57
@@ -63,6 +63,17 @@ public class LightContext<ID, V> {
     public void setId(ID id) {
         Spot<ID, V> spot = new Spot<>();
         spot.setView(id);
+        set(spot);
+    }
+
+    /**
+     * 设置上下文数据
+     * @param data  上下文数据
+     * @since 3.15.0
+     */
+    public void setData(V data) {
+        Spot<ID, V> spot = new Spot<>();
+        spot.setData(data);
         set(spot);
     }
 
@@ -98,11 +109,12 @@ public class LightContext<ID, V> {
      * @since 3.13.0
      */
     @SuppressWarnings("unchecked")
-    public static <V> void setValue(V value, String identifier) {
+    public static <V> LightContext<Serializable, V> setValue(V value, String identifier) {
         LightContext<Serializable, V> lightContext = SpringContext.registerBean((ConfigurableApplicationContext) ApplicationContextHolder.get(), identifier, LightContext.class);
         Spot<Serializable, V> spot = new Spot<>();
         spot.setData(value);
         lightContext.set(spot);
+        return lightContext;
     }
 
 
