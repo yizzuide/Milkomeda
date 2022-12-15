@@ -65,6 +65,11 @@ public class YmlResponseOutput {
         // 自定义异常基本信息写出
         if (e != null && customException) {
             Map<String, Object> exMap = DataTypeConvertUtil.beanToMap(e);
+            // 如果yml有默认配置，重置到异常message
+            Object messageDefaultValue = YmlParser.extractAliasNode(nodeMap, MESSAGE).getT2();
+            if (messageDefaultValue != null && exMap.get(MESSAGE) != null) {
+                exMap.put(MESSAGE, messageDefaultValue);
+            }
             // 自定义异常的信息值使用自定义异常属性值替换
             YmlParser.parseAliasMapPath(nodeMap, result, CODE, null, exMap);
             YmlParser.parseAliasMapPath(nodeMap, result, MESSAGE, null, exMap);
@@ -73,7 +78,7 @@ public class YmlResponseOutput {
                     .forEach(k ->  YmlParser.parseAliasMapPath(nodeMap, result, k, null, exMap));
         } else { // 非自定义异常基本信息写出，支持默认值源
             YmlParser.parseAliasMapPath(nodeMap, result, CODE, defValMap == null ? -1 : defValMap.get(CODE), null);
-            YmlParser.parseAliasMapPath(nodeMap, result, MESSAGE, defValMap == null ? "Server Internal error！" : defValMap.get(MESSAGE), null);
+            YmlParser.parseAliasMapPath(nodeMap, result, MESSAGE, defValMap == null ? "Server internal error！" : defValMap.get(MESSAGE), null);
             YmlParser.parseAliasMapPath(nodeMap, result, DATA, null, null);
         }
         // 内部异常详情写出
