@@ -133,16 +133,40 @@ public class Crust {
     /**
      * 登录认证
      * @param account 帐号
-     * @param credentials 登录凭证（如密码，手机验/邮箱验证码）
+     * @param credentials 登录凭证
      * @param entityClazz 实体类型
      * @param <T> 实体类型
      * @return CrustUserInfo
      */
     @NonNull
     public <T extends CrustEntity> CrustUserInfo<T, CrustPermission> login(@NonNull String account, @NonNull String credentials, @NonNull Class<T> entityClazz) {
-        // CrustAuthenticationToken继承了UsernamePasswordAuthenticationToken
-        AbstractAuthenticationToken authenticationToken = props.isUseCodeMode() ?
-                new CrustCodeAuthenticationToken(account, credentials) : new CrustAuthenticationToken(account, credentials);
+        return login(account, credentials, entityClazz, CrustLoginType.Config);
+    }
+
+    /**
+     * 登录认证
+     * @param account 帐号
+     * @param credentials 登录凭证（如密码，手机验/邮箱验证码）
+     * @param entityClazz 实体类型
+     * @param loginType 登录类型
+     * @param <T> 实体类型
+     * @return CrustUserInfo
+     * @since 3.15.0
+     */
+    public <T extends CrustEntity> CrustUserInfo<T, CrustPermission> login(@NonNull String account, @NonNull String credentials, @NonNull Class<T> entityClazz, CrustLoginType loginType) {
+        AbstractAuthenticationToken authenticationToken = null;
+        switch (loginType) {
+            case NORMAL:
+                authenticationToken = new CrustAuthenticationToken(account, credentials);
+                break;
+            case CODE:
+                authenticationToken = new CrustCodeAuthenticationToken(account, credentials);
+                break;
+            case Config:
+                authenticationToken = props.isUseCodeMode() ?
+                        new CrustCodeAuthenticationToken(account, credentials) : new CrustAuthenticationToken(account, credentials);
+                break;
+        }
         // 设置请求信息
         authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(WebContext.getRequest()));
         AuthenticationManager authenticationManager = ApplicationContextHolder.get().getBean(AuthenticationManager.class);
