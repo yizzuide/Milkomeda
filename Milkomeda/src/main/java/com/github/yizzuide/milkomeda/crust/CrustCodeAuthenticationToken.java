@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 yizzuide All rights Reserved.
+ * Copyright (c) 2022 yizzuide All rights Reserved.
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -21,44 +21,48 @@
 
 package com.github.yizzuide.milkomeda.crust;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.springframework.security.authentication.AbstractAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
 
-import java.io.Serializable;
+import java.util.Collection;
 
 /**
- * CrustEntity
- * 需要用户实体实现的适配接口
+ * Supported for code type login.
  *
+ * @since 3.15.0
  * @author yizzuide
- * @since 1.14.0
- * @version 2.0.4
  * <br>
- * Create at 2019/11/11 18:47
+ * Create at 2022/12/31 20:34
  */
-public interface CrustEntity extends Serializable {
-    /**
-     * 用户id
-     * @return user id
-     */
-    Serializable getUid();
+public class CrustCodeAuthenticationToken extends AbstractAuthenticationToken {
 
-    /**
-     * 帐号（用户名，手机号等）
-     * @return username
-     */
-    String getUsername();
+    private static final long serialVersionUID = 2459037569753551026L;
 
-    /**
-     * 登录密码
-     * @return password
-     */
-    String getPassword();
+    private final Object account;
 
-    /**
-     * 如果设置了<code>milkomeda.crust.use_bCrypt</code>为<code>true</code>(默认为true)，
-     * 那个这个字段不需要实现，否则需要实现
-     * @return salt
-     */
-    @JsonIgnore
-    default String getSalt() {return null;}
+    private final Object code;
+
+    public CrustCodeAuthenticationToken(Object account, Object code) {
+        super(null);
+        this.account = account;
+        this.code = code;
+        setAuthenticated(false);
+    }
+
+    public CrustCodeAuthenticationToken(Object account, Object code, Collection<? extends GrantedAuthority> authorities) {
+        super(authorities);
+        this.account = account;
+        this.code = code;
+        super.setAuthenticated(true);
+    }
+
+    @Override
+    public Object getCredentials() {
+        return code;
+    }
+
+    @Override
+    public Object getPrincipal() {
+        return account;
+    }
 }

@@ -89,7 +89,7 @@ public class CrustConfig {
 
     @Bean(Crust.CATCH_NAME)
     @ConditionalOnProperty(prefix = "milkomeda.crust", name = "enable-cache", havingValue = "true", matchIfMissing = true)
-    public Cache lightCache(LightProperties lightProps) {
+    public Cache lightCacheCrust(LightProperties lightProps) {
         LightCache lightCache = new LightCache();
         lightCache.setL1MaxCount(lightProps.getL1MaxCount());
         lightCache.setL1DiscardPercent(lightProps.getL1DiscardPercent());
@@ -98,6 +98,16 @@ public class CrustConfig {
         lightCache.setStrategyClass(lightProps.getStrategyClass());
         lightCache.setL2Expire(crustProps.getExpire().getSeconds());
         lightCache.setEnableSuperCache(lightProps.isEnableSuperCache());
+        return lightCache;
+    }
+
+    @Bean(Crust.CODE_CATCH_NAME)
+    @ConditionalOnProperty(prefix = "milkomeda.crust", name = "use-code-mode", havingValue = "true")
+    public Cache lightCacheCrustCode() {
+        LightCache lightCache = new LightCache();
+        lightCache.setEnableSuperCache(false);
+        lightCache.setOnlyCacheL2(true);
+        lightCache.setL2Expire(crustProps.getCodeExpire().getSeconds());
         return lightCache;
     }
 

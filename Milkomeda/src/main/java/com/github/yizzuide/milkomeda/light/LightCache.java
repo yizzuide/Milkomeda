@@ -42,14 +42,14 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * LightCache
- *
+ * <p>
  * 缓存方式：超级缓存（ThreadLocal）| 一级缓存（内存缓存池，缓存个数可控）| 二级缓存（Redis）
- *
+ * </p>
  * V：标识数据
  * E：缓存业务数据
  *
  * @since 1.8.0
- * @version 3.14.0
+ * @version 3.15.0
  * @author yizzuide
  * <br>
  * Create at 2019/06/28 13:33
@@ -202,8 +202,8 @@ public class LightCache implements Cache {
     @SuppressWarnings("unchecked")
     @Override
     public void set(String key, Spot<Serializable, ?> spot) {
-        // 如果是父类型，需要向下转型（会触发初始化排序状态字段）
-        if (spot.getClass() == Spot.class) {
+        // 一级缓存下，如果是父类型，需要向下转型（会触发初始化排序状态字段）
+        if (spot.getClass() == Spot.class && !onlyCacheL2) {
             spot = discardStrategy.deform(key, (Spot<Serializable, Object>) spot, l1Expire);
         }
 
@@ -284,7 +284,7 @@ public class LightCache implements Cache {
     @Override
     public  <E> Spot<Serializable, E> get(String key, Class<Serializable> vClazz, Class<E> eClazz) {
         JavaType javaType = TypeFactory.defaultInstance()
-                .constructParametricType(discardStrategy.spotClazz(), vClazz, eClazz);
+                .constructParametricType(onlyCacheL2 ? Spot.class : discardStrategy.spotClazz(), vClazz, eClazz);
         return get(key, javaType);
     }
 

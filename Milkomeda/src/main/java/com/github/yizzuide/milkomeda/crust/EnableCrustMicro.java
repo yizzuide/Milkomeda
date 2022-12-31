@@ -26,7 +26,7 @@ import org.springframework.context.annotation.Import;
 import java.lang.annotation.*;
 
 /**
- * Enable crust to use in microservice.
+ * Enable crust used in microservice that not need spring security environment, it just parses token to login info.
  *
  * @since 3.15.0
  * @author yizzuide

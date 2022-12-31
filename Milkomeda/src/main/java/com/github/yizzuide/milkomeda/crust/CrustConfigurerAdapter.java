@@ -90,8 +90,11 @@ public abstract class CrustConfigurerAdapter {
         CrustAuthenticationProvider authenticationProvider = new CrustAuthenticationProvider(props, passwordEncoder);
         // 扩展配置（UserDetailsService、PasswordEncoder）
         configureProvider(authenticationProvider);
+        // 验证码登录Provider
+        CrustCodeAuthenticationProvider codeAuthenticationProvider = new CrustCodeAuthenticationProvider(userDetailsService());
         // 添加自定义身份验证组件
-        auth.authenticationProvider(authenticationProvider);
+        auth.authenticationProvider(authenticationProvider)
+                .authenticationProvider(codeAuthenticationProvider);
         return authenticationProvider;
     }
 
@@ -102,7 +105,7 @@ public abstract class CrustConfigurerAdapter {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        List<String> allowURLs = new ArrayList<>(props.getPermitURLs());
+        List<String> allowURLs = new ArrayList<>(props.getPermitUrls());
         // 允许登录
         allowURLs.add(props.getLoginUrl());
         // 额外添加的排除项
@@ -195,7 +198,11 @@ public abstract class CrustConfigurerAdapter {
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
         // 放开静态资源的限制
-        return (web) -> web.ignoring().antMatchers(HttpMethod.GET, props.getAllowStaticUrls().toArray(new String[0]));
+        return (web) -> {
+            if (props.getAllowStaticUrls() != null) {
+                web.ignoring().antMatchers(HttpMethod.GET, props.getAllowStaticUrls().toArray(new String[0]));
+            }
+        };
     }
 
     /**

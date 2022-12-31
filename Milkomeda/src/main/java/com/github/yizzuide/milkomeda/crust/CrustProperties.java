@@ -48,6 +48,19 @@ public class CrustProperties {
     private boolean stateless = true;
 
     /**
+     * Enable code login type: account + code.
+     * @since 3.15.0
+     */
+    private boolean useCodeMode = false;
+
+    /**
+     * Login code verify expire time, must set true with property of {@link CrustProperties#useCodeMode}.
+     * @since 3.15.0
+     */
+    @DurationUnit(ChronoUnit.SECONDS)
+    private Duration codeExpire = Duration.ofSeconds(60);
+
+    /**
      * Set is false if you need custom config via {@link CrustConfigurerAdapter}.
      * @since 3.15.0
      */
@@ -132,7 +145,7 @@ public class CrustProperties {
      * 默认允许访问的URL
      * @since 3.5.0
      */
-    private List<String> permitURLs = Arrays.asList("/favicon.ico", "/druid/**", "/doc.html", "/webjars/**",
+    private List<String> permitUrls = Arrays.asList("/favicon.ico", "/druid/**", "/doc.html", "/webjars/**",
             "/swagger-resources/**", "/swagger-ui.html");
 
     /**

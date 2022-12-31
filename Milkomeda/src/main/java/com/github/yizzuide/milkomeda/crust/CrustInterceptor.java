@@ -21,7 +21,11 @@
 
 package com.github.yizzuide.milkomeda.crust;
 
+import com.github.yizzuide.milkomeda.hydrogen.uniform.ResultVO;
+import com.github.yizzuide.milkomeda.hydrogen.uniform.UniformHandler;
+import com.github.yizzuide.milkomeda.hydrogen.uniform.UniformResult;
 import com.github.yizzuide.milkomeda.light.LightContext;
+import org.springframework.http.HttpStatus;
 import org.springframework.lang.NonNull;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -64,7 +68,10 @@ public class CrustInterceptor implements HandlerInterceptor {
             }
         }
         if (!isAuthedSuccess) {
-            throw new CrustException(errorMsg);
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+            ResultVO<?> source = UniformResult.error(String.valueOf(response.getStatus()), errorMsg);
+            UniformHandler.matchStatusToWrite(response, source.toMap());
+            return false;
         }
         return true;
     }

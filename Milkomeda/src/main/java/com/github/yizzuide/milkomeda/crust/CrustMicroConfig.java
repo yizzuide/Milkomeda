@@ -75,7 +75,7 @@ public class CrustMicroConfig {
 
         @Override
         public void afterPropertiesSet() throws Exception {
-            List<String> allowURLs = new ArrayList<>(crustProperties.getPermitURLs());
+            List<String> allowURLs = new ArrayList<>(crustProperties.getPermitUrls());
                 List<String> additionPermitUrls = crustProperties.getAdditionPermitUrls();
             if (!CollectionUtils.isEmpty(additionPermitUrls)) {
                 allowURLs.addAll(additionPermitUrls);

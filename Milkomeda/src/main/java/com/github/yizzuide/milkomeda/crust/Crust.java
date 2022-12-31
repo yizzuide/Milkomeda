@@ -21,20 +21,19 @@
 
 package com.github.yizzuide.milkomeda.crust;
 
-import com.github.yizzuide.milkomeda.light.Cache;
-import com.github.yizzuide.milkomeda.light.CacheHelper;
-import com.github.yizzuide.milkomeda.light.LightCacheEvict;
-import com.github.yizzuide.milkomeda.light.LightCacheable;
+import com.github.yizzuide.milkomeda.light.*;
 import com.github.yizzuide.milkomeda.universe.context.AopContextHolder;
 import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import com.github.yizzuide.milkomeda.universe.context.WebContext;
 import com.github.yizzuide.milkomeda.util.Strings;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
+import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
@@ -67,13 +66,21 @@ import java.util.stream.Collectors;
 @Slf4j
 public class Crust {
     /**
-     * 缓存前辍
+     * 用户信息缓存前辍
      */
     private static final String CATCH_KEY_PREFIX = "crust:user:";
+    /**
+     * 帐号验证码缓存前辍
+     */
+    private static final String CATCH_CODE_KEY_PREFIX = "crust:code:";
     /**
      * 缓存标识
      */
     static final String CATCH_NAME = "lightCacheCrust";
+    /**
+     * 验证码缓存标识
+     */
+    static final String CODE_CATCH_NAME = "lightCacheCrustCode";
 
     @Getter
     @Autowired
@@ -83,24 +90,59 @@ public class Crust {
     @Autowired(required = false)
     private Cache lightCacheCrust;
 
+    @Qualifier(Crust.CODE_CATCH_NAME)
+    @Autowired(required = false)
+    private Cache lightCacheCrustCode;
+
     @Autowired
     private CrustTokenResolver tokenResolver;
 
     private CrustUserDetailsService crustUserDetailsService;
 
     /**
+     * Generate verily code for login action.
+     * @param account   account name(phone, email, etc.)
+     * @return verily code
+     * @since 3.15.0
+     */
+    public String generateCode(String account) {
+        String code = RandomStringUtils.randomNumeric(6);
+        String cacheKey = CATCH_CODE_KEY_PREFIX + account;
+        // if enableCode is false
+        if (lightCacheCrustCode == null) {
+            return null;
+        }
+        lightCacheCrustCode.set(cacheKey, new Spot<>(code));
+        return code;
+    }
+
+    /**
+     * Get cached code.
+     * @param account   account name(phone, email, etc.)
+     * @return  verily code
+     */
+    public String getCode(String account) {
+        String cacheKey = CATCH_CODE_KEY_PREFIX + account;
+        if(!lightCacheCrustCode.isCacheL2Exists(cacheKey)) {
+            return null;
+        }
+        Spot<Serializable, String> spot = lightCacheCrustCode.get(cacheKey, Serializable.class, String.class);
+        return spot == null ? null : spot.getData();
+    }
+
+    /**
      * 登录认证
-     *
-     * @param username 用户名
-     * @param password 密码
+     * @param account 帐号
+     * @param credentials 登录凭证（如密码，手机验/邮箱验证码）
      * @param entityClazz 实体类型
      * @param <T> 实体类型
      * @return CrustUserInfo
      */
     @NonNull
-    public <T extends CrustEntity> CrustUserInfo<T, CrustPermission> login(@NonNull String username, @NonNull String password, @NonNull Class<T> entityClazz) {
-        // CrustAuthenticationToken封装了UsernamePasswordAuthenticationToken
-        CrustAuthenticationToken authenticationToken = new CrustAuthenticationToken(username, password);
+    public <T extends CrustEntity> CrustUserInfo<T, CrustPermission> login(@NonNull String account, @NonNull String credentials, @NonNull Class<T> entityClazz) {
+        // CrustAuthenticationToken继承了UsernamePasswordAuthenticationToken
+        AbstractAuthenticationToken authenticationToken = props.isUseCodeMode() ?
+                new CrustCodeAuthenticationToken(account, credentials) : new CrustAuthenticationToken(account, credentials);
         // 设置请求信息
         authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(WebContext.getRequest()));
         AuthenticationManager authenticationManager = ApplicationContextHolder.get().getBean(AuthenticationManager.class);
@@ -251,7 +293,8 @@ public class Crust {
         }
         CrustUserDetails userDetails = new CrustUserDetails(userInfo.getUid(), userInfo.getUsername(), authorities, userInfo.getRoleIds());
         userDetails.setUserInfo(userInfo);
-        Authentication authentication = new CrustAuthenticationToken(userDetails, null, authorities, userInfo.getToken());
+        Authentication authentication = props.isUseCodeMode() ? new CrustCodeAuthenticationToken(userDetails, null, authorities)
+                : new CrustAuthenticationToken(userDetails, null, authorities, userInfo.getToken());
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 
