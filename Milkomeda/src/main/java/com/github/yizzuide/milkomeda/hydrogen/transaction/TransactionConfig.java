@@ -35,6 +35,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionManager;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.interceptor.NameMatchTransactionAttributeSource;
 import org.springframework.transaction.interceptor.RollbackRuleAttribute;
 import org.springframework.transaction.interceptor.RuleBasedTransactionAttribute;
@@ -55,8 +56,9 @@ import java.util.stream.Collectors;
  */
 @Aspect
 @Configuration
-@EnableConfigurationProperties(TransactionProperties.class)
+@EnableTransactionManagement
 @AutoConfigureAfter(TransactionAutoConfiguration.class)
+@EnableConfigurationProperties(TransactionProperties.class)
 @ConditionalOnProperty(prefix = "milkomeda.hydrogen.transaction", name = "enable", havingValue = "true")
 public class TransactionConfig {
 

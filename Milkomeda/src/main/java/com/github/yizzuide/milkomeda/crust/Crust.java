@@ -218,14 +218,15 @@ public class Crust {
         }
         // invoke from CrustAuthenticationFilter.doFilterInternal()
         CrustUserInfo userInfo = tokenResolver.resolve(token, this::loadEntity);
-        if (userInfo == null) return null;
+        if (userInfo == null) {
+            return null;
+        }
         // active!
         activeAuthentication(userInfo);
         return userInfo;
     }
 
     // #token 与 args[0] 等价
-    // #target 与 @crust、#this.object、#root.object等价（#this在表达式不同部分解析过程中可能会改变，但是#root总是指向根，object为自定义root对象属性）
     @LightCacheEvict(value = Crust.CATCH_NAME, keyPrefix = CATCH_KEY_PREFIX, key = "T(org.springframework.util.DigestUtils).md5DigestAsHex(#token?.bytes)", condition = "#target.props.enableCache")
     public void removeTokenCache(String token) {
     }
@@ -332,7 +333,7 @@ public class Crust {
 
     /**
      * Custom for permission any match.
-     * @param permissions permission list.
+     * @param permissions permission list
      * @return  ture if match
      * @since 3.14.0
      */
@@ -353,10 +354,6 @@ public class Crust {
         return (T) getCrustUserDetailsService().findEntityById(uid);
     }
 
-    /**
-     * 从IoC容器查找UserDetailsService
-     * @return CrustUserDetailsService
-     */
     private CrustUserDetailsService getCrustUserDetailsService() {
         if (crustUserDetailsService == null) {
             crustUserDetailsService = ApplicationContextHolder.get().getBean(CrustUserDetailsService.class);

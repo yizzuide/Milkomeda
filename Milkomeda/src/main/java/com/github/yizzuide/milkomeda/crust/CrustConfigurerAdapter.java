@@ -174,11 +174,13 @@ public abstract class CrustConfigurerAdapter {
                     .sessionAuthenticationFailureHandler(failureHandler).and()
                     .logout()
                     .logoutUrl(props.getLogoutUrl())
-                    .addLogoutHandler((req, res, auth) -> CrustContext.invalidate())
                     .logoutSuccessUrl(props.getLoginUrl())
+                    .addLogoutHandler((req, res, auth) -> CrustContext.invalidate())
+                    .clearAuthentication(true)
                     .invalidateHttpSession(true);
         }
 
+        // 异常处理器（如果开启了Hydrogen/Uniform模块，则交由Uniform模块处理）
         // 认证用户无权限访问处理
         http.exceptionHandling().accessDeniedHandler(failureHandler)
                 // 认证异常或匿名用户无权限访问处理
@@ -229,8 +231,8 @@ public abstract class CrustConfigurerAdapter {
      * @since 3.14.0
      */
     protected void doFailure(boolean isAuth, HttpServletRequest request, HttpServletResponse response, RuntimeException exception) throws IOException {
-        response.setStatus(HttpStatus.OK.value());
-        ResultVO<?> source = UniformResult.error(props.getAuthFailCode(), exception.getMessage());
+        response.setStatus(isAuth ? HttpStatus.UNAUTHORIZED.value(): HttpStatus.FORBIDDEN.value());
+        ResultVO<?> source = UniformResult.error(String.valueOf(response.getStatus()), exception.getMessage());
         UniformHandler.matchStatusToWrite(response, source.toMap());
     }
 

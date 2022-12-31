@@ -82,7 +82,7 @@ public class LightCache implements Cache {
      */
     @Setter
     @Getter
-    private Boolean onlyCacheL1;
+    private boolean onlyCacheL1;
 
     /**
      * 一级缓存丢弃策略
@@ -114,7 +114,7 @@ public class LightCache implements Cache {
      */
     @Setter
     @Getter
-    private Boolean onlyCacheL2;
+    private boolean onlyCacheL2;
 
     /**
      * 开启超缓存
@@ -150,7 +150,9 @@ public class LightCache implements Cache {
      */
     @Override
     public void set(Serializable id) {
-        if (null == id) return;
+        if (null == id) {
+            return;
+        }
         // 如果一级缓存没有数据，创建新的缓存数据对象
         if (cacheMap.size() == 0) {
             superCache.setId(id);
@@ -415,9 +417,9 @@ public class LightCache implements Cache {
         this.setL1Expire(other.getL1Expire());
         this.setStrategy(other.getStrategy());
         this.setStrategyClass(other.getStrategyClass());
-        this.setOnlyCacheL1(other.getOnlyCacheL1());
+        this.setOnlyCacheL1(other.isOnlyCacheL1());
         this.setL2Expire(other.getL2Expire());
-        this.setOnlyCacheL2(other.getOnlyCacheL2());
+        this.setOnlyCacheL2(other.isOnlyCacheL2());
         this.setEnableSuperCache(other.isEnableSuperCache());
     }
 

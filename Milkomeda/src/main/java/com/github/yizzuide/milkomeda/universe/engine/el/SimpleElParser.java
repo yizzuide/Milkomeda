@@ -21,27 +21,28 @@
 
 package com.github.yizzuide.milkomeda.universe.engine.el;
 
-import org.springframework.expression.Expression;
-import org.springframework.expression.ExpressionParser;
-import org.springframework.expression.spel.standard.SpelExpressionParser;
-
 /**
- * SimpleElParser
+ * Simple object based impl of El parser.
  *
- * @author yizzuide
  * @since 3.8.0
+ * @version 3.15.0
+ * @author yizzuide
  * <br>
  * Create at 2020/06/16 10:25
  */
 public class SimpleElParser {
 
-    private static final ExpressionParser EL_PARSER = new SpelExpressionParser();
+    private static final ObjectExpressionEvaluator EVALUATOR = new ObjectExpressionEvaluator();
 
-    public static <T> T parse(String expression, Object root, Class<T> resultType) {
-        Expression expressionWrapper = EL_PARSER.parseExpression(expression);
-        if (root == null) {
-            return expressionWrapper.getValue(resultType);
-        }
-        return expressionWrapper.getValue(root, resultType);
+    /**
+     * Parse spring EL expression and return value.
+     * @param expression  EL expression
+     * @param object    root object
+     * @param resultType    result class type
+     * @return  value of result type
+     * @param <T>   result type
+     */
+    public static <T> T parse(String expression, Object object, Class<T> resultType) {
+        return EVALUATOR.condition(expression, object, resultType);
     }
 }

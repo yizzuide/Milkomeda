@@ -58,14 +58,14 @@ import java.util.*;
 /**
  * UniformHandler
  *
- * @author yizzuide
- * @since 3.0.0
- * @version 3.15.0
  * @see org.springframework.boot.SpringApplication#run(java.lang.String...)
  * #see org.springframework.boot.SpringApplication#registerLoggedException(java.lang.Throwable)
  * #see org.springframework.boot.SpringBootExceptionHandler.LoggedExceptionHandlerThreadLocal#initialValue()
  * @see org.springframework.boot.SpringApplication#setRegisterShutdownHook(boolean)
  * @see org.springframework.context.support.AbstractApplicationContext#registerShutdownHook()
+ * @author yizzuide
+ * @since 3.0.0
+ * @version 3.15.0
  * <br>
  * Create at 2020/03/25 22:47
  */
@@ -116,7 +116,9 @@ public class UniformHandler extends ResponseEntityExceptionHandler {
     }
 
     private Class<?> createExceptionClass(Object clazz) {
-        if (!(clazz instanceof String)) return null;
+        if (!(clazz instanceof String)) {
+            return null;
+        }
         Class<?> expClazz = null;
         try {
             expClazz = Class.forName(clazz.toString());

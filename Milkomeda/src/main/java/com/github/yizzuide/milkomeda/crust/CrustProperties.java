@@ -21,7 +21,6 @@
 
 package com.github.yizzuide.milkomeda.crust;
 
-import com.github.yizzuide.milkomeda.light.LightCache;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.convert.DurationUnit;
@@ -36,7 +35,7 @@ import java.util.List;
  *
  * @author yizzuide
  * @since 1.14.0
- * @version 3.12.10
+ * @version 3.15.0
  * <br>
  * Create at 2019/11/11 15:51
  */
@@ -58,12 +57,6 @@ public class CrustProperties {
      * 查询认证信息缓存（Session方式下仅开启超级缓存，因为Session本身有Session级缓存）
      */
     private boolean enableCache = true;
-
-    /**
-     * Token方式情况下，并且 <code>enableCache=true</code>，是否缓存到Redis <br>
-     * 注意：这个配置将覆盖缓存模块 {@link LightCache#getOnlyCacheL2()} 配置的值
-     */
-    private boolean enableCacheL2 = true;
 
     /**
      * Set is false if you need get entity of user info immediately.
@@ -124,12 +117,6 @@ public class CrustProperties {
      * Token刷新响应字段
      */
     private String refreshTokenName = "Authorization";
-
-    /**
-     * default auth fail code.
-     * @since 3.14.0
-     */
-    private String authFailCode = "401";
 
     /**
      * 登录页面路径（仅在stateless=false时有效，默认/login）

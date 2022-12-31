@@ -142,20 +142,24 @@ public class CrustAuthenticationFilter extends OncePerRequestFilter {
     }
 
     protected boolean permissiveRequest(HttpServletRequest request) {
-        if (permissiveRequestMatchers == null)
+        if (permissiveRequestMatchers == null) {
             return false;
+        }
         for (RequestMatcher permissiveMatcher : permissiveRequestMatchers) {
-            if (permissiveMatcher.matches(request))
+            if (permissiveMatcher.matches(request)) {
                 return true;
+            }
         }
         return false;
     }
 
     public void setPermissiveUrl(String... urls) {
-        if (permissiveRequestMatchers == null)
+        if (permissiveRequestMatchers == null) {
             permissiveRequestMatchers = new ArrayList<>();
-        for (String url : urls)
+        }
+        for (String url : urls) {
             permissiveRequestMatchers.add(new AntPathRequestMatcher(url));
+        }
     }
 
     public void setAuthenticationSuccessHandler(AuthenticationSuccessHandler successHandler) {

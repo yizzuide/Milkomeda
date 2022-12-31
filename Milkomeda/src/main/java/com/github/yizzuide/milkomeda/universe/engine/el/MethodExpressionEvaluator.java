@@ -21,20 +21,11 @@
 
 package com.github.yizzuide.milkomeda.universe.engine.el;
 
-import com.github.yizzuide.milkomeda.metal.MetalHolder;
-import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
-import com.github.yizzuide.milkomeda.universe.context.WebContext;
-import com.github.yizzuide.milkomeda.universe.extend.env.Environment;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.context.expression.AnnotatedElementKey;
-import org.springframework.context.expression.CachedExpressionEvaluator;
 import org.springframework.context.expression.MethodBasedEvaluationContext;
-import org.springframework.core.DefaultParameterNameDiscoverer;
-import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.expression.EvaluationContext;
-import org.springframework.expression.Expression;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.lang.reflect.Method;
 import java.util.Map;
@@ -46,18 +37,11 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @author yizzuide
  * @since 1.5.0
- * @version 3.13.0
+ * @version 3.15.0
  * <br>
  * Create at 2019/05/30 22:24
  */
-public class ExpressionEvaluator<T> extends CachedExpressionEvaluator {
-
-    // 共享的参数名，基于内部缓存数据
-    private final ParameterNameDiscoverer paramNameDiscoverer =
-            new DefaultParameterNameDiscoverer();
-
-    // 条件缓存
-    private final Map<ExpressionKey, Expression> conditionCache = new ConcurrentHashMap<>(64);
+public class MethodExpressionEvaluator<T> extends AbstractExpressionEvaluator {
 
     // 目标方法缓存（提升查询性能）
     private final Map<AnnotatedElementKey, Method> targetMethodCache = new ConcurrentHashMap<>(64);
@@ -73,26 +57,11 @@ public class ExpressionEvaluator<T> extends CachedExpressionEvaluator {
     public StandardEvaluationContext createEvaluationContext(Object object, Class<?> targetClass,
                                                              Method method, Object[] args) {
         Method targetMethod = getTargetMethod(targetClass, method);
-        // 创建自定义EL Root
+        // 创建自定义EL Root（EL获取： #this.object，#root.object）
         ExpressionRootObject root = new ExpressionRootObject(object, args);
         // 创建基于方法的执行上下文
         MethodBasedEvaluationContext evaluationContext = new MethodBasedEvaluationContext(root, targetMethod, args, this.paramNameDiscoverer);
-        // 添加变量引用
-        Environment env = ApplicationContextHolder.getEnvironment();
-        if (env != null) {
-            evaluationContext.setVariable("env", env.getProperties());
-        }
-        // 添加Metal配置
-        Map<String, String> metalSourceMap = MetalHolder.getSourceMap();
-        if (metalSourceMap != null) {
-            evaluationContext.setVariable("metal", metalSourceMap);
-        }
-        evaluationContext.setVariable("target", object);
-        ServletRequestAttributes requestAttributes = WebContext.getRequestAttributes();
-        if (requestAttributes != null) {
-            evaluationContext.setVariable("request", requestAttributes.getRequest());
-            evaluationContext.setVariable("reqParams", requestAttributes.getRequest().getParameterMap());
-        }
+        configContext(evaluationContext, root);
         return evaluationContext;
     }
 
@@ -106,7 +75,7 @@ public class ExpressionEvaluator<T> extends CachedExpressionEvaluator {
      */
     public T condition(String conditionExpression, AnnotatedElementKey elementKey,
                        EvaluationContext evalContext, Class<T> clazz) {
-        return getExpression(this.conditionCache, elementKey, conditionExpression)
+        return getExpression(this.expressionKeyCache, elementKey, conditionExpression)
                 .getValue(evalContext, clazz);
     }
 

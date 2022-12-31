@@ -54,6 +54,7 @@ public class OgnlMemberAccess implements MemberAccess {
         this.allowPackageProtectedAccess = allowPackageProtectedAccess;
     }
 
+    @Override
     public Object setup(Map context, Object target, Member member, String propertyName) {
         Object result = null;
         if (isAccessible(context, target, member, propertyName)) {

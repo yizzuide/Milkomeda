@@ -96,9 +96,7 @@ public class CrustConfig {
         lightCache.setL1Expire(crustProps.getExpire().getSeconds());
         lightCache.setStrategy(lightProps.getStrategy());
         lightCache.setStrategyClass(lightProps.getStrategyClass());
-        lightCache.setOnlyCacheL1(!crustProps.isEnableCacheL2());
         lightCache.setL2Expire(crustProps.getExpire().getSeconds());
-        lightCache.setOnlyCacheL2(false);
         lightCache.setEnableSuperCache(lightProps.isEnableSuperCache());
         return lightCache;
     }

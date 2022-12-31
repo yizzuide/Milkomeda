@@ -23,6 +23,7 @@ package com.github.yizzuide.milkomeda.universe.config;
 
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.Import;
 
 /**
@@ -41,5 +42,6 @@ import org.springframework.context.annotation.Import;
 @AutoConfiguration
 @Import(MilkomedaContextConfig.class)
 @EnableConfigurationProperties(MilkomedaProperties.class)
+@EnableAspectJAutoProxy(proxyTargetClass = true, exposeProxy = true)
 public class MilkomedaAutoConfiguration {
 }
