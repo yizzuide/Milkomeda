@@ -48,13 +48,13 @@ public class CrustProperties {
     private boolean stateless = true;
 
     /**
-     * Enable code login type: account + code.
+     * Login type config for used with {@link Crust#login(String, String, Class)}.
      * @since 3.15.0
      */
-    private boolean useCodeMode = false;
+    private CrustLoginType loginType = CrustLoginType.PASSWORD;
 
     /**
-     * Login code verify expire time, must set true with property of {@link CrustProperties#useCodeMode}.
+     * Code verify expire time, must set `CrustLoginType.CODE` with property of {@link CrustProperties#loginType}.
      * @since 3.15.0
      */
     @DurationUnit(ChronoUnit.SECONDS)

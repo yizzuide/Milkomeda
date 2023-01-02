@@ -29,9 +29,9 @@ import java.io.Serializable;
  * CrustEntity
  * 需要用户实体实现的适配接口
  *
- * @author yizzuide
  * @since 1.14.0
  * @version 2.0.4
+ * @author yizzuide
  * <br>
  * Create at 2019/11/11 18:47
  */

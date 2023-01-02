@@ -21,6 +21,8 @@
 
 package com.github.yizzuide.milkomeda.crust;
 
+import java.util.function.Supplier;
+
 /**
  * Crust login type.
  *
@@ -33,13 +35,13 @@ public enum CrustLoginType {
     /**
      * Username and password type.
      */
-    NORMAL,
+    PASSWORD,
     /**
      * Verify code type.
      */
     CODE,
     /**
-     * Fellow config with {@link CrustProperties#isUseCodeMode()}
+     * Custom login type used with {@link Crust#login(String, String, Class, CrustLoginType, Supplier)}.
      */
-    Config
+    CUSTOM
 }

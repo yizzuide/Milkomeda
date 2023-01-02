@@ -95,6 +95,10 @@ public abstract class CrustConfigurerAdapter {
         // 添加自定义身份验证组件
         auth.authenticationProvider(authenticationProvider)
                 .authenticationProvider(codeAuthenticationProvider);
+        Map<String, AuthenticationProvider> customAuthenticationProviderMap = ApplicationContextHolder.get().getBeansOfType(AuthenticationProvider.class, false, true);
+        if (!CollectionUtils.isEmpty(customAuthenticationProviderMap)) {
+            customAuthenticationProviderMap.values().forEach(auth::authenticationProvider);
+        }
         return authenticationProvider;
     }
 

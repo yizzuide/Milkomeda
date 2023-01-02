@@ -36,7 +36,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
  */
 @ConditionalOnProperty(value = "use-auto-config", prefix = "milkomeda.crust", havingValue = "true", matchIfMissing = true)
 @Configuration
-public class DefaultCrustConfigurer extends CrustConfigurerAdapter {
+public class CrustAutoConfigurer extends CrustConfigurerAdapter {
     @Override
     protected UserDetailsService userDetailsService() {
         return ApplicationContextHolder.get().getBean(CrustUserDetailsService.class);

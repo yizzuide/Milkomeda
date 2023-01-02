@@ -50,6 +50,7 @@ import org.springframework.util.StringUtils;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
@@ -76,11 +77,11 @@ public class Crust {
     /**
      * 缓存标识
      */
-    static final String CATCH_NAME = "lightCacheCrust";
+    static final String CATCH_NAME = "crustLightCache";
     /**
      * 验证码缓存标识
      */
-    static final String CODE_CATCH_NAME = "lightCacheCrustCode";
+    static final String CODE_CATCH_NAME = "crustCodeLightCache";
 
     @Getter
     @Autowired
@@ -88,11 +89,11 @@ public class Crust {
 
     @Qualifier(Crust.CATCH_NAME)
     @Autowired(required = false)
-    private Cache lightCacheCrust;
+    private Cache crustLightCache;
 
     @Qualifier(Crust.CODE_CATCH_NAME)
     @Autowired(required = false)
-    private Cache lightCacheCrustCode;
+    private Cache crustCodeLightCache;
 
     @Autowired
     private CrustTokenResolver tokenResolver;
@@ -109,10 +110,10 @@ public class Crust {
         String code = RandomStringUtils.randomNumeric(6);
         String cacheKey = CATCH_CODE_KEY_PREFIX + account;
         // if enableCode is false
-        if (lightCacheCrustCode == null) {
+        if (crustCodeLightCache == null) {
             return null;
         }
-        lightCacheCrustCode.set(cacheKey, new Spot<>(code));
+        crustCodeLightCache.set(cacheKey, new Spot<>(code));
         return code;
     }
 
@@ -121,26 +122,26 @@ public class Crust {
      * @param account   account name(phone, email, etc.)
      * @return  verily code
      */
-    public String getCode(String account) {
+    String getCode(String account) {
         String cacheKey = CATCH_CODE_KEY_PREFIX + account;
-        if(!lightCacheCrustCode.isCacheL2Exists(cacheKey)) {
+        if(crustCodeLightCache == null || !crustCodeLightCache.isCacheL2Exists(cacheKey)) {
             return null;
         }
-        Spot<Serializable, String> spot = lightCacheCrustCode.get(cacheKey, Serializable.class, String.class);
+        Spot<Serializable, String> spot = crustCodeLightCache.get(cacheKey, Serializable.class, String.class);
         return spot == null ? null : spot.getData();
     }
 
     /**
      * 登录认证
      * @param account 帐号
-     * @param credentials 登录凭证
+     * @param credentials 登录凭证（如密码，手机验/邮箱验证码）
      * @param entityClazz 实体类型
      * @param <T> 实体类型
      * @return CrustUserInfo
      */
     @NonNull
     public <T extends CrustEntity> CrustUserInfo<T, CrustPermission> login(@NonNull String account, @NonNull String credentials, @NonNull Class<T> entityClazz) {
-        return login(account, credentials, entityClazz, CrustLoginType.Config);
+        return login(account, credentials, entityClazz, props.getLoginType(), null);
     }
 
     /**
@@ -149,22 +150,22 @@ public class Crust {
      * @param credentials 登录凭证（如密码，手机验/邮箱验证码）
      * @param entityClazz 实体类型
      * @param loginType 登录类型
+     * @param customAuthenticationTokenSupplier Custom authentication token
      * @param <T> 实体类型
      * @return CrustUserInfo
      * @since 3.15.0
      */
-    public <T extends CrustEntity> CrustUserInfo<T, CrustPermission> login(@NonNull String account, @NonNull String credentials, @NonNull Class<T> entityClazz, CrustLoginType loginType) {
+    public <T extends CrustEntity> CrustUserInfo<T, CrustPermission> login(@NonNull String account, @NonNull String credentials, @NonNull Class<T> entityClazz, CrustLoginType loginType, Supplier<AbstractAuthenticationToken> customAuthenticationTokenSupplier) {
         AbstractAuthenticationToken authenticationToken = null;
         switch (loginType) {
-            case NORMAL:
+            case PASSWORD:
                 authenticationToken = new CrustAuthenticationToken(account, credentials);
                 break;
             case CODE:
                 authenticationToken = new CrustCodeAuthenticationToken(account, credentials);
                 break;
-            case Config:
-                authenticationToken = props.isUseCodeMode() ?
-                        new CrustCodeAuthenticationToken(account, credentials) : new CrustAuthenticationToken(account, credentials);
+            case CUSTOM:
+                authenticationToken = customAuthenticationTokenSupplier.get();
                 break;
         }
         // 设置请求信息
@@ -265,7 +266,7 @@ public class Crust {
         }
 
         // Session方式开启超级缓存
-        return CacheHelper.getFastLevel(lightCacheCrust, spot -> getCurrentLoginUserInfo(authentication, entityClazz));
+        return CacheHelper.getFastLevel(crustLightCache, spot -> getCurrentLoginUserInfo(authentication, entityClazz));
     }
 
     /**
@@ -294,7 +295,7 @@ public class Crust {
 
     // #token 与 args[0] 等价
     @LightCacheEvict(value = Crust.CATCH_NAME, keyPrefix = CATCH_KEY_PREFIX, key = "T(org.springframework.util.DigestUtils).md5DigestAsHex(#token?.bytes)", condition = "#target.props.enableCache")
-    public void removeTokenCache(String token) {
+    void removeTokenCache(String token) {
     }
 
     /**
@@ -317,8 +318,7 @@ public class Crust {
         }
         CrustUserDetails userDetails = new CrustUserDetails(userInfo.getUid(), userInfo.getUsername(), authorities, userInfo.getRoleIds());
         userDetails.setUserInfo(userInfo);
-        Authentication authentication = props.isUseCodeMode() ? new CrustCodeAuthenticationToken(userDetails, null, authorities)
-                : new CrustAuthenticationToken(userDetails, null, authorities, userInfo.getToken());
+        Authentication authentication = new CrustAuthenticationToken(userDetails, null, authorities, userInfo.getToken());
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 
@@ -386,12 +386,12 @@ public class Crust {
      * @return Token
      */
     @Nullable
-    public String getToken(boolean checkIsExists) {
+    String getToken(boolean checkIsExists) {
         if (!props.isStateless()) { return null; }
         String token = tokenResolver.getRequestToken();
         if (checkIsExists && props.isEnableCache()) {
             String cacheKey = CATCH_KEY_PREFIX + DigestUtils.md5DigestAsHex(token.getBytes());
-            if (!lightCacheCrust.isCacheL2Exists(cacheKey)) {
+            if (!crustLightCache.isCacheL2Exists(cacheKey)) {
                 return null;
             }
         }
@@ -417,7 +417,7 @@ public class Crust {
     }
 
     @SuppressWarnings("unchecked")
-    public <T> T loadEntity(Serializable uid) {
+    <T> T loadEntity(Serializable uid) {
         return (T) getCrustUserDetailsService().findEntityById(uid);
     }
 
