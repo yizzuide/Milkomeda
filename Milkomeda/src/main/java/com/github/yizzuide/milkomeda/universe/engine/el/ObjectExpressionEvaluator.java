@@ -22,6 +22,7 @@
 package com.github.yizzuide.milkomeda.universe.engine.el;
 
 import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.expression.AnnotatedElementKey;
 import org.springframework.context.expression.BeanFactoryResolver;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
@@ -37,8 +38,11 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 public class ObjectExpressionEvaluator extends AbstractExpressionEvaluator {
     public <T> T condition(String expression, Object object, Class<T> resultType) {
         StandardEvaluationContext evaluationContext = new StandardEvaluationContext();
-        BeanFactoryResolver beanFactoryResolver = new BeanFactoryResolver(ApplicationContextHolder.get());
-        evaluationContext.setBeanResolver(beanFactoryResolver);
+        ApplicationContext beanFactory = ApplicationContextHolder.get();
+        if (beanFactory != null) {
+            BeanFactoryResolver beanFactoryResolver = new BeanFactoryResolver(beanFactory);
+            evaluationContext.setBeanResolver(beanFactoryResolver);
+        }
         // 创建自定义EL Root（EL获取： #this.object，#root.object）
         ExpressionRootObject root = new ExpressionRootObject(object, null);
         evaluationContext.setRootObject(root);

@@ -27,6 +27,7 @@ import lombok.Getter;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.lang.NonNull;
 
 /**
@@ -55,10 +56,11 @@ public class ApplicationContextHolder implements ApplicationContextAware {
     @Override
     public void setApplicationContext(@NonNull ApplicationContext applicationContext) {
         this.applicationContext = applicationContext;
-        // 设置应用上下文到EL解析环境
+        // 设置应用上下文到方法EL解析环境
         ELContext.setApplicationContext(applicationContext);
         if (applicationContext instanceof ConfigurableApplicationContext) {
-            ApplicationContextHolder.environment.setConfigurableEnvironment(((ConfigurableApplicationContext) applicationContext).getEnvironment());
+            ConfigurableEnvironment configurableEnvironment = (ConfigurableEnvironment) applicationContext.getEnvironment();
+            ApplicationContextHolder.environment.setConfigurableEnvironment(configurableEnvironment);
         }
     }
 
@@ -67,6 +69,9 @@ public class ApplicationContextHolder implements ApplicationContextAware {
      * @return ApplicationContext
      */
     public static ApplicationContext get() {
+        if (INSTANCE == null) {
+            return null;
+        }
         return INSTANCE.getApplicationContext();
     }
 

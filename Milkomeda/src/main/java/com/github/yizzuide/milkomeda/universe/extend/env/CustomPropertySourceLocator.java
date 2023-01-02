@@ -31,7 +31,7 @@ import org.springframework.core.env.ConfigurableEnvironment;
  *
  * @author yizzuide
  * @since 3.0.1
- * @version 3.2.1
+ * @version 3.15.0
  * <br>
  * Create at 2020/04/11 10:48
  */
@@ -51,5 +51,6 @@ public class CustomPropertySourceLocator implements /*PropertySourceLocator,*/ E
     public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
         CollectionsPropertySource.addToEnvironment(environment);
         ConditionPropertySource.addToEnvironment(environment);
+        SpELPropertySource.addToEnvironment(environment);
     }
 }

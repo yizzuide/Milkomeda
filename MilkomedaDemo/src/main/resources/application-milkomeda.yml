@@ -303,7 +303,10 @@ milkomeda:
     filter:
       #enable: true
       # 测试表达式计算
-      enable: ${condition.equals(${spring.application.name}, milkomeda-demo)}
+      # condition仅支持简单方法（内部非表达达解析）：equals, diff
+      #enable: ${condition.equals(${spring.application.name}, milkomeda-demo)}
+      # el用于支持SpEL复杂语句解析，但不支持获取Bean来调用方法（受限于YML解析比创建Bean实例早的问题）
+      enable: ${el.parse('milkomeda-demo'.equals('${spring.application.name}'), BOOL)}
       filters:
         - name: ipLimiterFilter
           clazz: com.github.yizzuide.milkomeda.demo.hydrogen.handler.IPLimiterFilter
