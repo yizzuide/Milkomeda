@@ -38,7 +38,7 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 public class ObjectExpressionEvaluator extends AbstractExpressionEvaluator {
     public <T> T condition(String expression, Object object, Class<T> resultType) {
         StandardEvaluationContext evaluationContext = new StandardEvaluationContext();
-        ApplicationContext beanFactory = ApplicationContextHolder.get();
+        ApplicationContext beanFactory = ApplicationContextHolder.tryGet();
         if (beanFactory != null) {
             BeanFactoryResolver beanFactoryResolver = new BeanFactoryResolver(beanFactory);
             evaluationContext.setBeanResolver(beanFactoryResolver);

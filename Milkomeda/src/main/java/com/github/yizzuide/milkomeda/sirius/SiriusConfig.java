@@ -38,11 +38,8 @@ import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.BlockAttackInnerInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
 import com.baomidou.mybatisplus.extension.spring.MybatisSqlSessionFactoryBean;
-import com.github.yizzuide.milkomeda.crust.Crust;
-import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
-import com.github.yizzuide.milkomeda.universe.engine.el.SimpleElParser;
 import com.github.yizzuide.milkomeda.universe.extend.env.CollectionsPropertySource;
-import com.github.yizzuide.milkomeda.universe.extend.env.ConditionPropertySource;
+import com.github.yizzuide.milkomeda.universe.extend.env.SpELPropertySource;
 import com.github.yizzuide.milkomeda.util.ReflectUtil;
 import lombok.Getter;
 import org.apache.ibatis.reflection.MetaObject;
@@ -65,14 +62,14 @@ import java.util.*;
  * Sirius module config.
  * 基于YML配置零代码全自动式Mybatis-plus字段填充插件，再也不用添加属性注解@TableField
  *
+ * @see MybatisConfiguration
+ * @see MybatisSqlSessionFactoryBean
+ * @see MybatisSqlSessionFactoryBuilder
  * @since 3.14.0
  * @version 3.15.0
  * @author yizzuide
  * <br>
  * Create at 2022/10/30 17:52
- * @see MybatisConfiguration
- * @see MybatisSqlSessionFactoryBean
- * @see MybatisSqlSessionFactoryBuilder
  */
 @AutoConfigureBefore(MybatisPlusAutoConfiguration.class)
 @EnableConfigurationProperties(SiriusProperties.class)
@@ -236,10 +233,9 @@ public class SiriusConfig {
                     if (!psValue.equals(autoInterpolate.getPsValue())) {
                         return psValue;
                     }
-                    if (autoInterpolate.getPsValue().startsWith("el(")) {
-                        String express = ConditionPropertySource.getRange(autoInterpolate.getPsValue(), "el");
-                        Crust root = ApplicationContextHolder.get().getBean(Crust.class);
-                        return SimpleElParser.parse(express, root, autoInterpolate.getType());
+                    psValue = SpELPropertySource.parseElFun(autoInterpolate.getPsValue());
+                    if (psValue != null) {
+                        return psValue;
                     }
                 }
             }

@@ -67,15 +67,9 @@ public class SiriusProperties {
         private List<String> fields;
 
         /**
-         * Property source value, Spring EL using `el(xxx)` which root is crust type of object.
+         * Property source value, can be with Spring EL using `el(condition, type)`.
          */
         private String psValue;
-
-        /**
-         * What type of value, must be set if using spring EL.
-         * @since 3.15.0
-         */
-        private Class<?> type;
 
         /**
          * Field fill type.

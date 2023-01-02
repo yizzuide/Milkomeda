@@ -86,7 +86,9 @@ public class CollectionsPropertySource extends PropertySource<Object> {
      * @since 3.14.0
      */
     public static Object of(Object psValue) {
-        if (psValue == null) return null;
+        if (psValue == null) {
+            return null;
+        }
         if (psValue.equals(COLLECTIONS_EMPTY_MAP)) {
             return Collections.emptyMap();
         }

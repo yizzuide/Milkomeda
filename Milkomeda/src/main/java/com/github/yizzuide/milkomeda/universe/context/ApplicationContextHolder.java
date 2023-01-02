@@ -65,13 +65,22 @@ public class ApplicationContextHolder implements ApplicationContextAware {
     }
 
     /**
+     * Try to get Spring Ioc Context.
+     * @return null if `ApplicationContext` not created yet.
+     * @since 3.15.0
+     */
+    public static ApplicationContext tryGet() {
+        if (INSTANCE == null) {
+            return null;
+        }
+        return get();
+    }
+
+    /**
      * 获取Spring Ioc上下文
      * @return ApplicationContext
      */
     public static ApplicationContext get() {
-        if (INSTANCE == null) {
-            return null;
-        }
         return INSTANCE.getApplicationContext();
     }
 

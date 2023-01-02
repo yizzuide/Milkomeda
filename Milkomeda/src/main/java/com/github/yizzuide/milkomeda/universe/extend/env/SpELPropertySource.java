@@ -51,11 +51,11 @@ public class SpELPropertySource extends PropertySource<Object> {
 
     public static final Map<String, Class<?>> TYPE_MAP = new HashMap<>();
 
-    private final Object root;
+    private static Object ROOT;
 
     public SpELPropertySource(Object root) {
         super(EL_PROPERTY_SOURCE_NAME);
-        this.root = root;
+        ROOT = root;
         if (!CollectionUtils.isEmpty(TYPE_MAP)) {
             return;
         }
@@ -72,10 +72,18 @@ public class SpELPropertySource extends PropertySource<Object> {
         if (!name.startsWith(PREFIX)) {
             return null;
         }
-        Class<?> type = String.class;
         String fun = name.substring(PREFIX.length());
-        if (fun.startsWith(FUN_PARSE)) {
-            String condition = ConditionPropertySource.getRange(fun, FUN_PARSE);
+        return parseFun(fun, FUN_PARSE);
+    }
+
+    public static Object parseElFun(String fun) {
+        return parseFun(fun, EL_PROPERTY_SOURCE_NAME);
+    }
+
+    private static Object parseFun(String fun, String funPrefix) {
+        Class<?> type = String.class;
+        if (fun.startsWith(funPrefix)) {
+            String condition = ConditionPropertySource.getRange(fun, funPrefix);
             if (condition == null) {
                 return null;
             }
@@ -85,9 +93,9 @@ public class SpELPropertySource extends PropertySource<Object> {
                 if (StringUtils.hasText(typeKey)) {
                     type = TYPE_MAP.get(typeKey);
                 }
-                return SimpleElParser.parse(parts[0], root, type);
+                return SimpleElParser.parse(parts[0], ROOT, type);
             }
-            return SimpleElParser.parse(condition, root, type);
+            return SimpleElParser.parse(condition, ROOT, type);
         }
         return null;
     }
