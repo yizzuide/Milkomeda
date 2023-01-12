@@ -161,7 +161,9 @@ public class CometRequestWrapper extends HttpServletRequestWrapper {
         return new ServletInputStream() {
             @Override
             public int read() throws IOException {
-                if (body.length == 0) return -1;
+                if (body.length == 0) {
+                    return -1;
+                }
                 return inputStream.read();
             }
 

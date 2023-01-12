@@ -21,6 +21,10 @@
 
 package com.github.yizzuide.milkomeda.halo;
 
+import com.github.yizzuide.milkomeda.universe.aop.invoke.args.ArgumentDefinition;
+import com.github.yizzuide.milkomeda.universe.aop.invoke.args.ArgumentMatchType;
+import com.github.yizzuide.milkomeda.universe.aop.invoke.args.ArgumentSources;
+import com.github.yizzuide.milkomeda.universe.aop.invoke.args.MethodArgumentBinder;
 import com.github.yizzuide.milkomeda.universe.metadata.HandlerMetaData;
 import com.github.yizzuide.milkomeda.util.MybatisUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -37,7 +41,6 @@ import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
-import org.apache.ibatis.session.defaults.DefaultSqlSession;
 import org.apache.ibatis.type.TypeHandlerRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
@@ -159,7 +162,7 @@ public class HaloInterceptor implements Interceptor {
         }
 
         // Mybatis map参数获取不存在时会抛异常，转为普通map
-        if (param instanceof DefaultSqlSession.StrictMap || param instanceof MapperMethod.ParamMap) {
+        if (/*param instanceof DefaultSqlSession.StrictMap || */param instanceof MapperMethod.ParamMap) {
             param = new HashMap((Map) param);
         }
 
@@ -209,22 +212,13 @@ public class HaloInterceptor implements Interceptor {
                 HaloMeta haloMeta = new HaloMeta(sqlCommandType, tableName, param, result);
                 method.invoke(target, haloMeta);
             } else if (parameterTypes.length > 1) {
-                // 检测参数是否有SqlCommandType
-                if (parameterTypes[0] == SqlCommandType.class) {
-                    if (result == null) {
-                        method.invoke(target, sqlCommandType, param);
-                    } else {
-                        method.invoke(target, sqlCommandType, param, result);
-                    }
-                } else {
-                    if (result == null) {
-                        method.invoke(target, param, sqlCommandType);
-                    } else {
-                        method.invoke(target, param, result, sqlCommandType);
-                    }
-                }
-            } else {
-                method.invoke(target, param);
+                // invoke and bind args dynamically
+                ArgumentSources argumentSources = new ArgumentSources();
+                argumentSources.add(new ArgumentDefinition(ArgumentMatchType.BY_NAME_PREFIX,"param", Object.class, param));
+                argumentSources.add(new ArgumentDefinition(ArgumentMatchType.BY_TYPE,null, SqlCommandType.class, sqlCommandType));
+                argumentSources.add(new ArgumentDefinition(ArgumentMatchType.Residual,null, Object.class, result));
+                Object[] args = MethodArgumentBinder.bind(argumentSources, method);
+                method.invoke(target, args);
             }
         } catch (Exception e) {
             log.error("Halo invoke handler [{}] error: {}, with stmt id: {} and sql: {}", handlerMetaData.getTarget(), e.getMessage(), mappedStatement.getId(), sql, e);

@@ -2,7 +2,11 @@ package com.github.yizzuide.milkomeda.demo.hydrogen.service;
 
 import com.github.yizzuide.milkomeda.demo.halo.domain.TOrder;
 import com.github.yizzuide.milkomeda.demo.halo.mapper.TOrderMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 import javax.annotation.Resource;
 import java.util.Date;
@@ -18,6 +22,9 @@ import java.util.Date;
 public class TOrderService {
     @Resource
     private TOrderMapper tOrderMapper;
+
+    @Autowired
+    private PlatformTransactionManager transactionManager;
 
     public void testTx() {
         TOrder tOrder = new TOrder();
@@ -50,5 +57,11 @@ public class TOrderService {
         tOrder2.setCreateTime(now);
         tOrder2.setUpdateTime(now);
         tOrderMapper.insert(tOrder2);
+    }
+
+    public void testTransactionByManual() {
+        TransactionStatus transaction = transactionManager.getTransaction(new DefaultTransactionDefinition());
+        transactionManager.commit(transaction);
+        //transactionManager.rollback(transaction);
     }
 }

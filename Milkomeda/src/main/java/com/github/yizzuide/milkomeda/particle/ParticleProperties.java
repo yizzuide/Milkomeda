@@ -46,7 +46,7 @@ import java.util.Map;
 @ConfigurationProperties("milkomeda.particle")
 public class ParticleProperties {
     /**
-     * 开启请求过滤
+     * 开启请求过滤（使用配置URL添加拦截时必须开启）
      */
     private boolean enableFilter = false;
 

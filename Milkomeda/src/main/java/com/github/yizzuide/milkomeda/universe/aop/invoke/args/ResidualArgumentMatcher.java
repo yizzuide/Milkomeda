@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 yizzuide All rights Reserved.
+ * Copyright (c) 2023 yizzuide All rights Reserved.
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -19,35 +19,42 @@
  * SOFTWARE.
  */
 
-// 顶级属性和方法指定生成Java调用类名
-@file:JvmName("Strings")
+package com.github.yizzuide.milkomeda.universe.aop.invoke.args;
 
-package com.github.yizzuide.milkomeda.util
-
-import com.github.yizzuide.milkomeda.universe.polyfill.SpringPolyfill
+import java.lang.reflect.Method;
 
 /**
- * StringExtent
- * 字符串扩展
+ * A flag impl to tall argument binder full this last one.
  *
+ * @since 3.15.0
  * @author yizzuide
  * <br>
- * Create at 2022/08/06 17:55
- * @since 3.13.0
+ * Create at 2023/01/12 02:54
  */
-class StringExtensionsKt {
+public class ResidualArgumentMatcher implements ArgumentMatcher {
+
+    /**
+     * index is flag that indicate last one to add.
+     */
+   static final Integer RESIDUAL_PLACEHOLDER_INDEX = -2;
+
+    @Override
+    public boolean support(ArgumentDefinition argumentDefinition) {
+        return ArgumentMatchType.Residual.equals(argumentDefinition.getMatchType());
+    }
+
+    @Override
+    public int matchIndex(Method method, ArgumentDefinition argumentDefinition) {
+        return RESIDUAL_PLACEHOLDER_INDEX;
+    }
+
+    @Override
+    public void matchToAdd(Object[] args, Method method, ArgumentDefinition argumentDefinition) {
+        for (int i = 0; i < args.length; i++) {
+            if (args[i] == null) {
+                args[i] = argumentDefinition.getValue();
+                break;
+            }
+        }
+    }
 }
-
-/**
- * 判断字符串是否为空
- * @since 3.13.0
- */
-fun isEmpty(str : String?) = SpringPolyfill.isEmpty(str)
-
-/**
- * Object to String，return self if null.
- * @param obj object value
- * @return string value
- * @since 3.13.0
- */
-fun toNullableString(obj : Any?) : String? = obj?.toString()

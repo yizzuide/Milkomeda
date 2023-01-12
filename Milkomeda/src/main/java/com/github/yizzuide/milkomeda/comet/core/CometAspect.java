@@ -166,6 +166,7 @@ public class CometAspect {
         cometData.setResponseData(null);
         cometData.setDuration(String.valueOf(duration));
         cometData.setErrorInfo(e.getMessage());
+        // TODO Upgrade: StackTraceElement使用Java 9的StackWalker
         StackTraceElement[] stackTrace = e.getStackTrace();
         if (stackTrace.length > 0) {
             String errorStack = String.format("exception happened: %s \n invoke root: %s", stackTrace[0], stackTrace[stackTrace.length - 1]);

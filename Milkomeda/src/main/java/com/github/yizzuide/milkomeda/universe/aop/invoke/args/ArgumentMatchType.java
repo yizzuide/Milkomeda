@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 yizzuide All rights Reserved.
+ * Copyright (c) 2023 yizzuide All rights Reserved.
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -19,35 +19,44 @@
  * SOFTWARE.
  */
 
-// 顶级属性和方法指定生成Java调用类名
-@file:JvmName("Strings")
-
-package com.github.yizzuide.milkomeda.util
-
-import com.github.yizzuide.milkomeda.universe.polyfill.SpringPolyfill
+package com.github.yizzuide.milkomeda.universe.aop.invoke.args;
 
 /**
- * StringExtent
- * 字符串扩展
+ * A strategy match type for find what impl of {@link ArgumentMatcher}.
  *
+ * @since 3.15.0
  * @author yizzuide
  * <br>
- * Create at 2022/08/06 17:55
- * @since 3.13.0
+ * Create at 2023/01/11 19:35
  */
-class StringExtensionsKt {
+public enum ArgumentMatchType {
+    /**
+     * Match with name using {@link String#contains(CharSequence)}.
+     */
+    BY_NAME_CONTAINS,
+
+    /**
+     * Match with name using {@link String#startsWith(String)}.
+     */
+    BY_NAME_PREFIX,
+
+    /**
+     * Match with name using {@link String#endsWith(String)}.
+     */
+    BY_NAME_POSTFIX,
+
+    /**
+     * Match by type using {@link ArgumentDefinition#getMatchType()}.
+     */
+    BY_TYPE,
+
+    /**
+     * Match with name using regex of JDK API.
+     */
+    REGEX,
+
+    /**
+     * match last with imp of {@link ResidualArgumentMatcher}.
+     */
+    Residual,
 }
-
-/**
- * 判断字符串是否为空
- * @since 3.13.0
- */
-fun isEmpty(str : String?) = SpringPolyfill.isEmpty(str)
-
-/**
- * Object to String，return self if null.
- * @param obj object value
- * @return string value
- * @since 3.13.0
- */
-fun toNullableString(obj : Any?) : String? = obj?.toString()

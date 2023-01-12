@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 yizzuide All rights Reserved.
+ * Copyright (c) 2023 yizzuide All rights Reserved.
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -19,35 +19,34 @@
  * SOFTWARE.
  */
 
-// 顶级属性和方法指定生成Java调用类名
-@file:JvmName("Strings")
+package com.github.yizzuide.milkomeda.universe.aop.invoke.args;
 
-package com.github.yizzuide.milkomeda.util
+import com.github.yizzuide.milkomeda.util.Strings;
 
-import com.github.yizzuide.milkomeda.universe.polyfill.SpringPolyfill
+import java.util.regex.Pattern;
 
 /**
- * StringExtent
- * 字符串扩展
+ * Regex match using from JDK API.
  *
+ * @since 3.15.0
  * @author yizzuide
  * <br>
- * Create at 2022/08/06 17:55
- * @since 3.13.0
+ * Create at 2023/01/11 19:29
  */
-class StringExtensionsKt {
+public class JDKRegexArgumentMatcher extends AbstractArgumentMatcher {
+    @Override
+    public boolean support(ArgumentDefinition argumentDefinition) {
+        return ArgumentMatchType.REGEX.equals(argumentDefinition.getMatchType()) &&
+                (argumentDefinition.getIdentifier() != null && !Strings.isEmpty(argumentDefinition.getIdentifier().toString()));
+    }
+
+    @Override
+    protected int doMatchIndex(String[] parameterNames, Class<?>[] parameterTypes, ArgumentDefinition argumentDefinition) {
+        for (int i = 0; i < parameterNames.length; i++) {
+            if (Pattern.matches(argumentDefinition.getIdentifier().toString(), parameterNames[i])) {
+                return i;
+            }
+        }
+        return -1;
+    }
 }
-
-/**
- * 判断字符串是否为空
- * @since 3.13.0
- */
-fun isEmpty(str : String?) = SpringPolyfill.isEmpty(str)
-
-/**
- * Object to String，return self if null.
- * @param obj object value
- * @return string value
- * @since 3.13.0
- */
-fun toNullableString(obj : Any?) : String? = obj?.toString()

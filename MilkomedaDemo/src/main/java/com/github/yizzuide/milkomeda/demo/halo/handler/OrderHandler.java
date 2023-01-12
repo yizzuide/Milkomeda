@@ -23,15 +23,15 @@ public class OrderHandler {
     // 前置监听
     @Async // 异步执行
     @HaloListener(tableName = "t_order", type = HaloType.PRE)
-    public void handlePre(Object param, SqlCommandType commandType) {// 散装参数方式
+    public void handlePre(Object param, SqlCommandType commandType) { // 散装参数方式
         // param可能是实体类型、简单数据类型或Map
-        log.info("监听到【t_order】表操作：{}，参数：{}", commandType, param);
+        log.info("handlePre - 监听到【t_order】表操作：{}，参数：{}", commandType, param);
     }
 
     // 默认监听所有的表
     @HaloListener(type = HaloType.PRE)
     public void handlePreAll(HaloMeta haloMeta) {
-        log.info("监听到【{}】表操作：{}，参数：{}", haloMeta.getTableName(), haloMeta.getSqlCommandType(),
+        log.info("handlePreAll - 监听到【*{}】表操作：{}，参数：{}", haloMeta.getTableName(), haloMeta.getSqlCommandType(),
                 haloMeta.getParam());
     }
 
@@ -39,7 +39,7 @@ public class OrderHandler {
     // 默认type = HaloType.POST
     @HaloListener
     public void handlePostAll(HaloMeta haloMeta) { // 推荐使用封装的参数类型
-        log.info("监听到【{}】表操作：{}，参数：{}, 结果:{}", haloMeta.getTableName(), haloMeta.getSqlCommandType(),
+        log.info("handlePostAll - 监听到【{}】表操作：{}，参数：{}, 结果:{}", haloMeta.getTableName(), haloMeta.getSqlCommandType(),
                 haloMeta.getParam(), haloMeta.getResult());
     }
 }

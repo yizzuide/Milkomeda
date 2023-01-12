@@ -51,12 +51,14 @@ public class HaloContext implements ApplicationListener<ContextRefreshedEvent> {
 
     private static Map<String, List<HandlerMetaData>> tableNameMap = new HashMap<>();
 
-    private static final Map<String, List<HandlerMetaData>> preTableNameMap = new HashMap<>();
+    private static Map<String, List<HandlerMetaData>> preTableNameMap;
 
-    private static final Map<String, List<HandlerMetaData>> postTableNameMap = new HashMap<>();
+    private static Map<String, List<HandlerMetaData>> postTableNameMap;
 
     @Override
     public void onApplicationEvent(@NonNull ContextRefreshedEvent event) {
+        preTableNameMap = new HashMap<>();
+        postTableNameMap = new HashMap<>();
         tableNameMap = SpringContext.getHandlerMetaData(HaloHandler.class, HaloListener.class, (annotation, handlerAnnotation, metaData) -> {
             HaloListener haloListener = (HaloListener) annotation;
             // 设置其它属性方法的值

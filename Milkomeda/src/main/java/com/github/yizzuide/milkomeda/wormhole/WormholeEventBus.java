@@ -86,7 +86,7 @@ public class WormholeEventBus {
                 if (hangType == WormholeTransactionHangType.NONE) {
                     execute(isAsync, handler, event, action, callback);
                 } else {
-                    // 注删事务回调
+                    // 注册事务回调
                     TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
                         @Override
                         public void beforeCommit(boolean readOnly) {
