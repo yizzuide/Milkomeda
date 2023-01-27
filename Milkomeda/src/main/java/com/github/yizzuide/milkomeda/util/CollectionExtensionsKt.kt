@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 yizzuide All rights Reserved.
+ * Copyright (c) 2023 yizzuide All rights Reserved.
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -18,22 +18,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+@file:JvmName("CollectionsKt")
+package com.github.yizzuide.milkomeda.util
 
-package com.github.yizzuide.milkomeda.atom;
-
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
+import kotlin.reflect.jvm.internal.impl.load.kotlin.JvmType
 
 /**
- * AtomConfig
+ * Collection util
  *
+ * @since 3.15.0
  * @author yizzuide
- * @since 3.3.0
- * @version 3.15.0
  * <br>
- * Create at 2020/04/30 15:13
+ * Create at 2023/01/27 19:10
  */
-@Configuration
-@Import({RedisAtomConfig.class, ZkAtomConfig.class})
-public class AtomConfig {
+class CollectionExtensionsKt {
 }
+
+fun singletonMap(key: String, value: Any): Map<String, Any> = mapOf(key to value)

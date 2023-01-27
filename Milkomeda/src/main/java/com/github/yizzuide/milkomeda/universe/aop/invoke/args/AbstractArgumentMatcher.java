@@ -35,6 +35,7 @@ import java.lang.reflect.Method;
  * Create at 2023/01/12 02:21
  */
 public abstract class AbstractArgumentMatcher implements ArgumentMatcher {
+
     private final LocalVariableTableParameterNameDiscoverer discoverer = new LocalVariableTableParameterNameDiscoverer();
 
     @Override
@@ -49,6 +50,13 @@ public abstract class AbstractArgumentMatcher implements ArgumentMatcher {
         return doMatchIndex(parameterNames, parameterTypes, argumentDefinition);
     }
 
+    /**
+     * Extension hook that subclasses can override to match index at position of parameters.
+     * @param parameterNames    parameter name list of method which invoked
+     * @param parameterTypes    parameter type of parameter name list
+     * @param argumentDefinition    argument meta data
+     * @return position of parameters
+     */
     protected abstract int doMatchIndex(String[] parameterNames, Class<?>[] parameterTypes, ArgumentDefinition argumentDefinition);
 
     @Override

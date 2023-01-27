@@ -26,8 +26,7 @@ import org.springframework.core.env.Environment;
 import java.util.List;
 
 /**
- * OrbitSource
- * 切面节点来源扩展接口
+ * The OrbitSource interface used for other module to register advisor.
  *
  * @author yizzuide
  * @since 3.13.0

@@ -36,7 +36,7 @@ public class NamedTypeArgumentMatcher extends AbstractArgumentMatcher {
     public boolean support(ArgumentDefinition argumentDefinition) {
         ArgumentMatchType type = argumentDefinition.getMatchType();
         if (type == ArgumentMatchType.BY_TYPE) {
-            return argumentDefinition.getArgClass() != null;
+            return argumentDefinition.getArgClassRef() != null;
         }
         if (type == ArgumentMatchType.BY_NAME_CONTAINS ||
                 type == ArgumentMatchType.BY_NAME_PREFIX ||
@@ -51,7 +51,8 @@ public class NamedTypeArgumentMatcher extends AbstractArgumentMatcher {
         // by type
         if (argumentDefinition.getMatchType() == ArgumentMatchType.BY_TYPE) {
             for (int i = 0; i < parameterTypes.length; i++) {
-                if (argumentDefinition.getArgClass().equals(parameterTypes[i])) {
+                Class<?> argClass = argumentDefinition.getArgClassRef().get();
+                if (argClass != null && argClass.equals(parameterTypes[i])) {
                     return i;
                 }
             }

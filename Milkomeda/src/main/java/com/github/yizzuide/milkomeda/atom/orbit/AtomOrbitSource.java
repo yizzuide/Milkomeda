@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 yizzuide All rights Reserved.
+ * Copyright (c) 2023 yizzuide All rights Reserved.
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -19,41 +19,30 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.sundial.orbit;
+package com.github.yizzuide.milkomeda.atom.orbit;
 
+import com.github.yizzuide.milkomeda.atom.AtomLock;
+import com.github.yizzuide.milkomeda.orbit.AnnotationOrbitNode;
+import com.github.yizzuide.milkomeda.orbit.OrbitNode;
+import com.github.yizzuide.milkomeda.orbit.OrbitSource;
+import com.github.yizzuide.milkomeda.orbit.OrbitSourceProvider;
+import org.springframework.core.env.Environment;
 
-import com.github.yizzuide.milkomeda.orbit.OrbitAdvice;
-import com.github.yizzuide.milkomeda.orbit.OrbitInvocation;
-import com.github.yizzuide.milkomeda.sundial.DynamicRouteDataSource;
-import com.github.yizzuide.milkomeda.sundial.SundialHolder;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import java.util.Collections;
+import java.util.List;
 
 /**
- * Dynamic route advice impl of {@link OrbitAdvice}
+ * Provide {@link OrbitNode} for Orbit module to register advisor.
  *
+ * @since 3.15.0
  * @author yizzuide
- * @since 3.4.0
- * @version 3.13.0
  * <br>
- * Create at 2020/05/11 16:29
+ * Create at 2023/01/27 19:34
  */
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-public class OrbitDataSourceAdvice implements OrbitAdvice {
-
-    private String keyName = DynamicRouteDataSource.MASTER_KEY;
-
+@OrbitSourceProvider
+public class AtomOrbitSource implements OrbitSource {
     @Override
-    public Object invoke(OrbitInvocation invocation) throws Throwable {
-        try {
-            // 调用方法前，选择数据源
-            SundialHolder.setDataSourceType(getKeyName());
-            return invocation.proceed();
-        } finally {
-            SundialHolder.clearDataSourceType();
-        }
+    public List<OrbitNode> createNodes(Environment environment) {
+        return Collections.singletonList(AnnotationOrbitNode.forMethod(AtomLock.class, "atom", AtomOrbitAdvice.class, null));
     }
 }

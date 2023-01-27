@@ -25,6 +25,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.lang.ref.WeakReference;
+
 /**
  * Argument meta data set.
  *
@@ -38,19 +40,41 @@ import lombok.NoArgsConstructor;
 @Data
 public class ArgumentDefinition {
     /**
-     * Matching type is used to match the processor.
+     * this is used to match the processor.
      */
     private ArgumentMatchType matchType;
+
+    /**
+     * Custom type is used for extent argument matcher.
+     */
+    private String customTypeName;
+
     /**
      * Argument identifier which can be param name.
      */
     private Object identifier;
+
     /**
      * Class type of Argument.
      */
-    private Class<?> argClass;
+    private WeakReference<? extends Class<?>> argClassRef;
+
     /**
      * Argument value need invoke.
      */
     private Object value;
+
+    public ArgumentDefinition(ArgumentMatchType matchType, Object identifier, Class<?> argClass, Object value) {
+        this.matchType = matchType;
+        this.identifier = identifier;
+        this.argClassRef = new WeakReference<>(argClass);
+        this.value = value;
+    }
+
+    public ArgumentDefinition(String customTypeName, Object identifier, Class<?> argClass, Object value) {
+        this.customTypeName = customTypeName;
+        this.identifier = identifier;
+        this.argClassRef = new WeakReference<>(argClass);
+        this.value = value;
+    }
 }

@@ -21,28 +21,40 @@
 
 package com.github.yizzuide.milkomeda.orbit;
 
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import org.springframework.aop.aspectj.AspectJExpressionPointcutAdvisor;
+import org.springframework.beans.factory.support.BeanDefinitionBuilder;
+
+import java.util.Map;
 
 /**
- * The top level interface for assemble advisor.
+ * AspectJ impl of orbit node which support set pointcut expression.
  *
+ * @see org.springframework.aop.aspectj.AspectJExpressionPointcut
  * @since 3.15.0
  * @author yizzuide
  * <br>
- * Create at 2023/01/27 18:35
+ * Create at 2023/01/27 16:12
  */
-public interface OrbitNode {
-    /**
-     * The advisor id for register in spring context.
-     * @return advisor id
-     */
-    String getAdvisorId();
+@EqualsAndHashCode(callSuper = true)
+@Data
+public class AspectJOrbitNode extends AbstractOrbitNode {
 
     /**
-     * A method factory that create advisor bean definition for register and discovered with {@link org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator}.
-     * @param beanFactory Spring Ioc context
-     * @return advisor bean definition
+     * The pointcut expression value is an AspectJ expression.
      */
-    BeanDefinition createAdvisorBeanDefinition(ConfigurableListableBeanFactory beanFactory);
+    private String pointcutExpression;
+
+    public AspectJOrbitNode(String pointcutExpression, String id, Class<? extends OrbitAdvice> adviceClass, Map<String, Object> props) {
+        super(id, adviceClass, props);
+        this.pointcutExpression = pointcutExpression;
+    }
+
+    @Override
+    public BeanDefinitionBuilder createAdvisorBeanDefinitionBuilder() {
+        return BeanDefinitionBuilder.rootBeanDefinition(AspectJExpressionPointcutAdvisor.class)
+                .addPropertyValue("location", String.format("$$%s##", this.getAdvisorId())) // Set the location for debugging.
+                .addPropertyValue("expression", this.getPointcutExpression());
+    }
 }

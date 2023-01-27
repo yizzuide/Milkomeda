@@ -28,8 +28,7 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import java.lang.reflect.Method;
 
 /**
- * OrbitInvocation
- * 调用对象
+ * Method invoked meta info.
  *
  * @author yizzuide
  * @since 3.13.0
@@ -43,14 +42,17 @@ public class OrbitInvocation {
      * 连接点
      */
     private ProceedingJoinPoint pjp;
+
     /**
      * 目标对象
      */
     private Object target;
+
     /**
      * 切面方法
      */
     private Method method;
+
     /**
      * 调用参数
      */

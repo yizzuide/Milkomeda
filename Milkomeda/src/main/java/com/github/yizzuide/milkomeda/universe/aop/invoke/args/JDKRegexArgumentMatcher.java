@@ -26,7 +26,7 @@ import com.github.yizzuide.milkomeda.util.Strings;
 import java.util.regex.Pattern;
 
 /**
- * Regex match using from JDK API.
+ * Regex match impl of argument matcher which using from JDK API.
  *
  * @since 3.15.0
  * @author yizzuide

@@ -21,10 +21,9 @@
 
 package com.github.yizzuide.milkomeda.sundial.orbit;
 
-import com.github.yizzuide.milkomeda.orbit.OrbitNode;
-import com.github.yizzuide.milkomeda.orbit.OrbitSource;
-import com.github.yizzuide.milkomeda.orbit.OrbitSourceProvider;
+import com.github.yizzuide.milkomeda.orbit.*;
 import com.github.yizzuide.milkomeda.sundial.SundialProperties;
+import com.github.yizzuide.milkomeda.util.CollectionsKt;
 import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.core.env.Environment;
 import org.springframework.util.CollectionUtils;
@@ -34,17 +33,18 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Orbit config extension of {@link OrbitSource}
+ * Orbit config extension of {@link OrbitSource}.
  *
  * @author yizzuide
  * @since 3.13.0
+ * @version 3.15.0
  * <br>
  * Create at 2022/02/23 02:11
  */
 // 虽然@OrbitSourceProvider有添加`@Component`注解，但由于默认的用户业务应用并不扫描这个路径，所以不会被Spring IoC所识别。
 // 但是Orbit模块在BeanDefinition阶段注册了回调，通过手动依赖查找扫描的方式找到*.orbit路径下的这个注解。
 @OrbitSourceProvider
-public class OrbitAdditionSource implements OrbitSource {
+public class SundialOrbitSource implements OrbitSource {
 
     @Override
     public List<OrbitNode> createNodes(Environment environment) {
@@ -52,19 +52,16 @@ public class OrbitAdditionSource implements OrbitSource {
         try {
             sundialProperties = Binder.get(environment).bind(SundialProperties.PREFIX, SundialProperties.class).get();
         } catch (Exception ignore) {
-            // 获取当前模块没有配置，直接返回
+            // not config, back!
             return Collections.emptyList();
         }
         if (CollectionUtils.isEmpty(sundialProperties.getStrategy())) {
             return Collections.emptyList();
         }
-        // 构建配置源
+        // convert strategy config to orbit node
         return sundialProperties.getStrategy().stream()
-                .map(strategy -> OrbitNode.builder()
-                        .id(strategy.getKeyName())
-                        .pointcutExpression(strategy.getPointcutExpression())
-                        .adviceClass(OrbitDataSourceAdvice.class)
-                        .build().putPropKV(SundialProperties.Strategy.KEY_NAME, strategy.getKeyName()))
+                .map(strategy -> new AspectJOrbitNode(strategy.getPointcutExpression(), strategy.getKeyName(),
+                        DataSourceOrbitAdvice.class, CollectionsKt.singletonMap(SundialProperties.Strategy.KEY_NAME, strategy.getKeyName())))
                 .collect(Collectors.toList());
     }
 }

@@ -9,8 +9,7 @@ import org.springframework.aop.aspectj.MethodInvocationProceedingJoinPoint;
 import java.lang.reflect.Method;
 
 /**
- * OrbitAdvice
- * 拦截切面
+ * Extension subclass of {@link MethodInterceptor}.
  *
  * @see org.springframework.aop.aspectj.AspectJAroundAdvice
  * @author yizzuide

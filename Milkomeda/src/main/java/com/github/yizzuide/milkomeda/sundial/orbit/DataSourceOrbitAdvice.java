@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 yizzuide All rights Reserved.
+ * Copyright (c) 2022 yizzuide All rights Reserved.
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -19,21 +19,41 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.atom;
+package com.github.yizzuide.milkomeda.sundial.orbit;
 
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
+
+import com.github.yizzuide.milkomeda.orbit.OrbitAdvice;
+import com.github.yizzuide.milkomeda.orbit.OrbitInvocation;
+import com.github.yizzuide.milkomeda.sundial.DynamicRouteDataSource;
+import com.github.yizzuide.milkomeda.sundial.SundialHolder;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
- * AtomConfig
+ * Dynamic route advice impl of {@link OrbitAdvice}.
  *
+ * @since 3.4.0
+ * @version 3.13.0
  * @author yizzuide
- * @since 3.3.0
- * @version 3.15.0
  * <br>
- * Create at 2020/04/30 15:13
+ * Create at 2020/05/11 16:29
  */
-@Configuration
-@Import({RedisAtomConfig.class, ZkAtomConfig.class})
-public class AtomConfig {
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class DataSourceOrbitAdvice implements OrbitAdvice {
+
+    private String keyName = DynamicRouteDataSource.MASTER_KEY;
+
+    @Override
+    public Object invoke(OrbitInvocation invocation) throws Throwable {
+        try {
+            // 调用方法前，选择数据源
+            SundialHolder.setDataSourceType(getKeyName());
+            return invocation.proceed();
+        } finally {
+            SundialHolder.clearDataSourceType();
+        }
+    }
 }

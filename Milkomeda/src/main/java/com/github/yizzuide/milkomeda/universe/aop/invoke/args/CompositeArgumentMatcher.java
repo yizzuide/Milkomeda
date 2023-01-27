@@ -55,7 +55,7 @@ public class CompositeArgumentMatcher implements ArgumentMatcher {
 
     @Override
     public void matchToAdd(Object[] args, Method method, ArgumentDefinition argumentDefinition) {
-        Optional<ArgumentMatcher> selectedArgumentMatcher = argumentMatchers.stream().filter(a -> a.support(argumentDefinition)).findFirst();
-        selectedArgumentMatcher.ifPresent(a -> a.matchToAdd(args, method, argumentDefinition));
+        argumentMatchers.stream().filter(a -> a.support(argumentDefinition))
+                .findFirst().ifPresent(a -> a.matchToAdd(args, method, argumentDefinition));
     }
 }

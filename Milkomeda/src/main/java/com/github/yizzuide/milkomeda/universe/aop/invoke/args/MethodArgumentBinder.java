@@ -35,8 +35,14 @@ import java.util.List;
  */
 public class MethodArgumentBinder {
 
-    private static CompositeArgumentMatcher argumentMatchers;
+    private static volatile CompositeArgumentMatcher argumentMatchers;
 
+    /**
+     * Get bind args from argument definition list.
+     * @param argumentSources   argument definition list
+     * @param method    target method
+     * @return args
+     */
     public static Object[] bind(ArgumentSources argumentSources, Method method) {
         CompositeArgumentMatcher argumentMatchers = getArgumentMatchers();
         List<ArgumentDefinition> argumentDefinitions = argumentSources.getList();
@@ -50,13 +56,25 @@ public class MethodArgumentBinder {
         return args;
     }
 
-    public synchronized static CompositeArgumentMatcher getArgumentMatchers() {
+    /**
+     * Register argument matcher to match special argument definition.
+     * @param argumentMatcher   ArgumentMatcher
+     */
+    public static void register(ArgumentMatcher argumentMatcher) {
+        getArgumentMatchers().addMatcher(argumentMatcher);
+    }
+
+    private static CompositeArgumentMatcher getArgumentMatchers() {
         // for lazy init
         if (argumentMatchers == null) {
-            argumentMatchers = new CompositeArgumentMatcher();
-            argumentMatchers.addMatcher(new NamedTypeArgumentMatcher());
-            argumentMatchers.addMatcher(new JDKRegexArgumentMatcher());
-            argumentMatchers.addMatcher(new ResidualArgumentMatcher());
+            synchronized (MethodArgumentBinder.class) {
+                if (argumentMatchers == null) {
+                    argumentMatchers = new CompositeArgumentMatcher();
+                    argumentMatchers.addMatcher(new NamedTypeArgumentMatcher());
+                    argumentMatchers.addMatcher(new JDKRegexArgumentMatcher());
+                    argumentMatchers.addMatcher(new ResidualArgumentMatcher());
+                }
+            }
         }
         return argumentMatchers;
     }

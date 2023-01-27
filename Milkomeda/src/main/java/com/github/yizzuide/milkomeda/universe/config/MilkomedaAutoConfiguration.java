@@ -42,6 +42,6 @@ import org.springframework.context.annotation.Import;
 @AutoConfiguration
 @Import(MilkomedaContextConfig.class)
 @EnableConfigurationProperties(MilkomedaProperties.class)
-@EnableAspectJAutoProxy(proxyTargetClass = true, exposeProxy = true)
+@EnableAspectJAutoProxy(exposeProxy = true)
 public class MilkomedaAutoConfiguration {
 }

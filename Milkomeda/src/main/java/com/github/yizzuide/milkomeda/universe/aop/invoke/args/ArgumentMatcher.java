@@ -24,7 +24,8 @@ package com.github.yizzuide.milkomeda.universe.aop.invoke.args;
 import java.lang.reflect.Method;
 
 /**
- * Argument matcher interface for indicate what matcher support and calculate matched index.
+ * Base interface for indicate what can support and calculate matched index. The ArgumentMatcher interface allows
+ * support for different types of ArgumentDefinition.
  *
  * @since 3.15.0
  * @author yizzuide

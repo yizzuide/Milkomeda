@@ -44,6 +44,7 @@ import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.type.TypeHandlerRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.Method;
 import java.time.Instant;
@@ -59,7 +60,7 @@ import java.util.regex.Pattern;
  *
  * @author yizzuide
  * @since 2.5.0
- * @version 3.11.4
+ * @version 3.15.0
  * <br>
  * Create at 2020/01/30 20:38
  */
@@ -208,6 +209,7 @@ public class HaloInterceptor implements Interceptor {
             Object target = handlerMetaData.getTarget();
             // 获取参数类型
             Class<?>[] parameterTypes = method.getParameterTypes();
+            ReflectionUtils.makeAccessible(method);
             if (parameterTypes.length == 1 && parameterTypes[0] == HaloMeta.class) {
                 HaloMeta haloMeta = new HaloMeta(sqlCommandType, tableName, param, result);
                 method.invoke(target, haloMeta);

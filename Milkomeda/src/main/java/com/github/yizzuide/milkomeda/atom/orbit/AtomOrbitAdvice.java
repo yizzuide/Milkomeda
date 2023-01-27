@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 yizzuide All rights Reserved.
+ * Copyright (c) 2023 yizzuide All rights Reserved.
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -19,49 +19,48 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.atom;
+package com.github.yizzuide.milkomeda.atom.orbit;
 
+import com.github.yizzuide.milkomeda.atom.*;
+import com.github.yizzuide.milkomeda.orbit.OrbitAdvice;
+import com.github.yizzuide.milkomeda.orbit.OrbitInvocation;
+import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import com.github.yizzuide.milkomeda.universe.engine.el.ELContext;
 import com.github.yizzuide.milkomeda.util.ReflectUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.annotation.Around;
-import org.aspectj.lang.annotation.Aspect;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.annotation.Order;
+import org.springframework.core.annotation.AnnotationUtils;
 
 import java.time.Duration;
 
 /**
- * AtomLockAspect
+ * This advice listen which {@link AtomLock} on method has invoked.
  *
+ * @since 3.15.0
  * @author yizzuide
- * @since 3.3.0
- * @version 3.7.0
  * <br>
- * Create at 2020/04/30 16:26
+ * Create at 2023/01/27 19:38
  */
-@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 @Slf4j
-@Order
-@Aspect
-public class AtomLockAspect {
+public class AtomOrbitAdvice implements OrbitAdvice {
 
-    @Autowired
-    private Atom atom;
+    private volatile Atom atom;
 
-    @Around("@annotation(atomLock) && execution(public * *(..))")
-    public Object pointCut(ProceedingJoinPoint joinPoint, AtomLock atomLock) throws Throwable {
+    @Override
+    public Object invoke(OrbitInvocation invocation) throws Throwable {
+        ProceedingJoinPoint joinPoint = invocation.getPjp();
+        AtomLock atomLock = AnnotationUtils.findAnnotation(invocation.getMethod(), AtomLock.class);
+        assert atomLock != null;
         String keyPath = ELContext.getValue(joinPoint, atomLock.key());
         Object lock = null;
         boolean isLocked = false;
         try {
             if (atomLock.waitTime() > 0) {
-                AtomLockInfo lockInfo = atom.tryLock(keyPath, atomLock.type(), atomLock.readOnly());
+                AtomLockInfo lockInfo = this.getAtom().tryLock(keyPath, atomLock.type(), atomLock.readOnly());
                 isLocked = lockInfo.isLocked();
                 lock = lockInfo.getLock();
                 if (!isLocked) {
-                    lockInfo = atom.tryLock(keyPath, Duration.ofMillis(atomLock.waitTime()), Duration.ofMillis(atomLock.leaseTime()), atomLock.type(), atomLock.readOnly());
+                    lockInfo = this.getAtom().tryLock(keyPath, Duration.ofMillis(atomLock.waitTime()), Duration.ofMillis(atomLock.leaseTime()), atomLock.type(), atomLock.readOnly());
                     isLocked = lockInfo.isLocked();
                     lock = lockInfo.getLock();
                 }
@@ -76,7 +75,7 @@ public class AtomLockAspect {
                 }
                 // here is AtomLockWaitTimeoutType.WAIT_INFINITE
             }
-            AtomLockInfo lockInfo = atom.lock(keyPath, Duration.ofMillis(atomLock.leaseTime()), atomLock.type(), atomLock.readOnly());
+            AtomLockInfo lockInfo = this.getAtom().lock(keyPath, Duration.ofMillis(atomLock.leaseTime()), atomLock.type(), atomLock.readOnly());
             lock = lockInfo.getLock();
             isLocked = lockInfo.isLocked();
             return joinPoint.proceed();
@@ -84,12 +83,22 @@ public class AtomLockAspect {
             log.error("Atom try lock error with msg: {}", e.getMessage(), e);
         } finally {
             // 只有加锁的线程需要解锁
-            if (isLocked && lock != null && atom.isLocked(lock)) {
-                atom.unlock(lock);
+            if (isLocked && lock != null && this.getAtom().isLocked(lock)) {
+                this.getAtom().unlock(lock);
             }
         }
         // unreachable code!
         return null;
     }
 
+    private Atom getAtom() {
+        if (atom == null) {
+            synchronized (this) {
+                if (atom == null) {
+                    atom = ApplicationContextHolder.get().getBean(Atom.class);
+                }
+            }
+        }
+        return atom;
+    }
 }
