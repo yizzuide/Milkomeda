@@ -24,11 +24,12 @@ package com.github.yizzuide.milkomeda.atom.orbit;
 import com.github.yizzuide.milkomeda.atom.*;
 import com.github.yizzuide.milkomeda.orbit.OrbitAdvice;
 import com.github.yizzuide.milkomeda.orbit.OrbitInvocation;
-import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import com.github.yizzuide.milkomeda.universe.engine.el.ELContext;
 import com.github.yizzuide.milkomeda.util.ReflectUtil;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.AnnotationUtils;
 
 import java.time.Duration;
@@ -41,10 +42,13 @@ import java.time.Duration;
  * <br>
  * Create at 2023/01/27 19:38
  */
+@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 @Slf4j
+@Data
 public class AtomOrbitAdvice implements OrbitAdvice {
 
-    private volatile Atom atom;
+    @Autowired
+    private Atom atom;
 
     @Override
     public Object invoke(OrbitInvocation invocation) throws Throwable {
@@ -89,16 +93,5 @@ public class AtomOrbitAdvice implements OrbitAdvice {
         }
         // unreachable code!
         return null;
-    }
-
-    private Atom getAtom() {
-        if (atom == null) {
-            synchronized (this) {
-                if (atom == null) {
-                    atom = ApplicationContextHolder.get().getBean(Atom.class);
-                }
-            }
-        }
-        return atom;
     }
 }

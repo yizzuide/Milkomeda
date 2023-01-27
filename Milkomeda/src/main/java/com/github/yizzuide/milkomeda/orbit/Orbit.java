@@ -39,7 +39,6 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE})
 @Inherited
-@Component
 public @interface Orbit {
     /**
      * 等同YAML方式的key-name
