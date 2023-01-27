@@ -22,6 +22,7 @@
 package com.github.yizzuide.milkomeda.orbit;
 
 import com.github.yizzuide.milkomeda.universe.context.SpringContext;
+import com.github.yizzuide.milkomeda.util.ReflectUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -49,6 +50,7 @@ import java.util.Map;
  * @see org.springframework.aop.aspectj.AspectJExpressionPointcutAdvisor
  * @see org.springframework.beans.factory.config.BeanPostProcessor
  * @since 3.13.0
+ * @version 3.15.0
  * @author yizzuide
  * <br>
  * Create at 2022/02/21 01:14
@@ -79,7 +81,21 @@ public class OrbitRegistrar implements ImportBeanDefinitionRegistrar {
         }
         List<OrbitProperties.Item> orbitItems = orbitProperties.getInstances();
         if (!CollectionUtils.isEmpty(orbitItems)) {
-            orbitItems.forEach(item -> orbitNodes.add(new AspectJOrbitNode(item.getPointcutExpression(), item.getKeyName(), item.getAdviceClassName(), item.getProps())));
+            orbitItems.forEach(item -> {
+                AbstractOrbitNode orbitNode = (AbstractOrbitNode) ReflectUtil.newInstance(item.getStrategyClazz());
+                if (orbitNode != null) {
+                    orbitNode.setAdvisorId(item.getKeyName());
+                    orbitNode.setAdviceClass(item.getAdviceClassName());
+                    orbitNode.setProps(item.getProps());
+                    if (item.getPointcutExpression() != null && orbitNode instanceof AspectJOrbitNode) {
+                        ((AspectJOrbitNode) orbitNode).setPointcutExpression(item.getPointcutExpression());
+                    }
+                    if (!CollectionUtils.isEmpty(item.getStrategyProps())) {
+                        ReflectUtil.setField(orbitNode, item.getStrategyProps());
+                    }
+                    orbitNodes.add(orbitNode);
+                }
+            });
         }
 
         // 2.框架其它模块桥接切面源提供者

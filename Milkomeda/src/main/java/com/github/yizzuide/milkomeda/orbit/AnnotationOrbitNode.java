@@ -23,6 +23,7 @@ package com.github.yizzuide.milkomeda.orbit;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.support.annotation.AnnotationMatchingPointcut;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
@@ -40,6 +41,7 @@ import java.util.Map;
  * <br>
  * Create at 2023/01/27 16:14
  */
+@NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class AnnotationOrbitNode extends AbstractOrbitNode {

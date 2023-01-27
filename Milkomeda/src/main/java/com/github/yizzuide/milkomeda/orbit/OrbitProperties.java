@@ -34,6 +34,7 @@ import java.util.Map;
  *
  * @author yizzuide
  * @since 3.13.0
+ * @version 3.15.0
  * <br>
  * Create at 2022/02/21 01:27
  */
@@ -55,19 +56,31 @@ public class OrbitProperties {
         private String keyName;
 
         /**
-         * 切点表达式，如应用给Mapper的query方法：execution(* com..mapper.*.query*(..))
-         */
-        private String pointcutExpression;
-
-        /**
          * 方法切面实现类
          */
         private Class<? extends OrbitAdvice> adviceClassName;
 
         /**
-         * 切面实现属性注入
+         * OrbitAdvice属性注入
          */
         private Map<String, Object> props = new HashMap<>();
+
+        /**
+         * 切点表达式，如应用给Mapper的query方法：execution(* com..mapper.*.query*(..))
+         */
+        private String pointcutExpression;
+
+        /**
+         * 使用策略类型（默认为AspectJ)
+         * @since 3.15.0
+         */
+        private Class<? extends OrbitNode> strategyClazz = AspectJOrbitNode.class;
+
+        /**
+         * 策略配置属性
+         * @since 3.15.0
+         */
+        private Map<String, Object> strategyProps;
     }
 
 }

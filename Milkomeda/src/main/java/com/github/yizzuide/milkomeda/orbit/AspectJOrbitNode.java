@@ -23,6 +23,7 @@ package com.github.yizzuide.milkomeda.orbit;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import org.springframework.aop.aspectj.AspectJExpressionPointcutAdvisor;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 
@@ -37,6 +38,7 @@ import java.util.Map;
  * <br>
  * Create at 2023/01/27 16:12
  */
+@NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class AspectJOrbitNode extends AbstractOrbitNode {
