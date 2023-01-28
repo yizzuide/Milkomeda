@@ -22,7 +22,9 @@
 package com.github.yizzuide.milkomeda.orbit;
 
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+
+import java.util.Map;
 
 /**
  * The top level interface for assemble advisor.
@@ -32,7 +34,7 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
  * <br>
  * Create at 2023/01/27 18:35
  */
-public interface OrbitNode {
+public interface OrbitAdvisor {
     /**
      * The advisor id for register in spring context.
      * @return advisor id
@@ -40,9 +42,27 @@ public interface OrbitNode {
     String getAdvisorId();
 
     /**
+     * The advice bind with this advisor.
+     * @return advice class
+     */
+    Class<? extends OrbitAdvice> getAdviceClass();
+
+    /**
+     * Advice property values.
+     * @return property map
+     */
+    Map<String, Object> getProps();
+
+    /**
+     * Init meta data from config item.
+     * @param orbitItem orbit config item
+     */
+    void initFrom(OrbitProperties.Item orbitItem);
+
+    /**
      * A method factory that create advisor bean definition for register and discovered with {@link org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator}.
-     * @param beanFactory Spring Ioc context
+     * @param registry bean definition registry
      * @return advisor bean definition
      */
-    BeanDefinition createAdvisorBeanDefinition(ConfigurableListableBeanFactory beanFactory);
+    BeanDefinition createAdvisorBeanDefinition(BeanDefinitionRegistry registry);
 }

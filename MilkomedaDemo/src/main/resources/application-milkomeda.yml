@@ -396,6 +396,6 @@ milkomeda:
       - key-name: pay-log
         advice-class-name: com.github.yizzuide.milkomeda.demo.orbit.RecordAdvice
         # 该策略为方法注解类型（基于Spring Aop底层API实现，解析性能比AspectJ高）
-        strategy-clazz: com.github.yizzuide.milkomeda.orbit.AnnotationOrbitNode
+        strategy-clazz: com.github.yizzuide.milkomeda.orbit.AnnotationOrbitAdvisor
         strategy-props:
           methodAnnotationType: com.github.yizzuide.milkomeda.demo.orbit.RecordLog

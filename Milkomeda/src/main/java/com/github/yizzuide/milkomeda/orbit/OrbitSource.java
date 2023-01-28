@@ -36,9 +36,9 @@ import java.util.List;
 @FunctionalInterface
 public interface OrbitSource {
     /**
-     * 初始化配置
-     * @param environment   Environment
-     * @return Orbit node list
+     * Create advisor list.
+     * @param environment   spring environment
+     * @return orbit advisor list
      */
-    List<OrbitNode> createNodes(Environment environment);
+    List<OrbitAdvisor> createAdvisors(Environment environment);
 }

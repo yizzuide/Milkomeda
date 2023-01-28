@@ -41,16 +41,24 @@ import java.util.Map;
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class AspectJOrbitNode extends AbstractOrbitNode {
+public class AspectJOrbitAdvisor extends AbstractOrbitAdvisor {
 
     /**
      * The pointcut expression value is an AspectJ expression.
      */
     private String pointcutExpression;
 
-    public AspectJOrbitNode(String pointcutExpression, String id, Class<? extends OrbitAdvice> adviceClass, Map<String, Object> props) {
+    public AspectJOrbitAdvisor(String pointcutExpression, String id, Class<? extends OrbitAdvice> adviceClass, Map<String, Object> props) {
         super(id, adviceClass, props);
         this.pointcutExpression = pointcutExpression;
+    }
+
+    @Override
+    public void initFrom(OrbitProperties.Item orbitItem) {
+        if (orbitItem.getPointcutExpression() != null) {
+            this.setPointcutExpression(orbitItem.getPointcutExpression());
+        }
+        super.initFrom(orbitItem);
     }
 
     @Override

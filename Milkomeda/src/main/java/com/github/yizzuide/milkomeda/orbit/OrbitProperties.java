@@ -74,7 +74,7 @@ public class OrbitProperties {
          * 使用策略类型（默认为AspectJ)
          * @since 3.15.0
          */
-        private Class<? extends OrbitNode> strategyClazz = AspectJOrbitNode.class;
+        private Class<? extends OrbitAdvisor> strategyClazz = AspectJOrbitAdvisor.class;
 
         /**
          * 策略配置属性

@@ -44,7 +44,7 @@ import java.util.Map;
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class AnnotationOrbitNode extends AbstractOrbitNode {
+public class AnnotationOrbitAdvisor extends AbstractOrbitAdvisor {
 
     /**
      * The annotation type to look for at the class level.
@@ -56,19 +56,19 @@ public class AnnotationOrbitNode extends AbstractOrbitNode {
      */
     private Class<? extends Annotation> methodAnnotationType;
 
-    public AnnotationOrbitNode(Class<? extends Annotation> classAnnotationType, Class<? extends Annotation> methodAnnotationType,
-                               String advisorId, Class<? extends OrbitAdvice> adviceClass, Map<String, Object> props) {
+    public AnnotationOrbitAdvisor(Class<? extends Annotation> classAnnotationType, Class<? extends Annotation> methodAnnotationType,
+                                  String advisorId, Class<? extends OrbitAdvice> adviceClass, Map<String, Object> props) {
         super(advisorId, adviceClass, props);
         this.classAnnotationType = classAnnotationType;
         this.methodAnnotationType = methodAnnotationType;
     }
 
-    public static AnnotationOrbitNode forClass(Class<? extends Annotation> classAnnotationType, String advisorId, Class<? extends OrbitAdvice> adviceClass, Map<String, Object> props) {
-        return new AnnotationOrbitNode(classAnnotationType, null, advisorId, adviceClass, props);
+    public static AnnotationOrbitAdvisor forClass(Class<? extends Annotation> classAnnotationType, String advisorId, Class<? extends OrbitAdvice> adviceClass, Map<String, Object> props) {
+        return new AnnotationOrbitAdvisor(classAnnotationType, null, advisorId, adviceClass, props);
     }
 
-    public static AnnotationOrbitNode forMethod(Class<? extends Annotation> methodAnnotationType, String advisorId, Class<? extends OrbitAdvice> adviceClass, Map<String, Object> props) {
-        return new AnnotationOrbitNode(null, methodAnnotationType, advisorId, adviceClass, props);
+    public static AnnotationOrbitAdvisor forMethod(Class<? extends Annotation> methodAnnotationType, String advisorId, Class<? extends OrbitAdvice> adviceClass, Map<String, Object> props) {
+        return new AnnotationOrbitAdvisor(null, methodAnnotationType, advisorId, adviceClass, props);
     }
 
     @Override

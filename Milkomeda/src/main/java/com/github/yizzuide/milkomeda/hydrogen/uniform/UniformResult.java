@@ -44,6 +44,7 @@ public class UniformResult<T> implements ResultVO<T> {
 
     private T data;
 
+    @Override
     public Map<String, Object> toMap() {
         Map<String, Object> map = new HashMap<>(5);
         map.put(YmlResponseOutput.CODE, getCode());

@@ -22,8 +22,8 @@
 package com.github.yizzuide.milkomeda.atom.orbit;
 
 import com.github.yizzuide.milkomeda.atom.AtomLock;
-import com.github.yizzuide.milkomeda.orbit.AnnotationOrbitNode;
-import com.github.yizzuide.milkomeda.orbit.OrbitNode;
+import com.github.yizzuide.milkomeda.orbit.AnnotationOrbitAdvisor;
+import com.github.yizzuide.milkomeda.orbit.OrbitAdvisor;
 import com.github.yizzuide.milkomeda.orbit.OrbitSource;
 import com.github.yizzuide.milkomeda.orbit.OrbitSourceProvider;
 import org.springframework.core.env.Environment;
@@ -32,7 +32,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Provide {@link OrbitNode} for Orbit module to register advisor.
+ * Provide {@link OrbitAdvisor} for Orbit module to register advisor.
  *
  * @since 3.15.0
  * @author yizzuide
@@ -42,7 +42,7 @@ import java.util.List;
 @OrbitSourceProvider
 public class AtomOrbitSource implements OrbitSource {
     @Override
-    public List<OrbitNode> createNodes(Environment environment) {
-        return Collections.singletonList(AnnotationOrbitNode.forMethod(AtomLock.class, "atom", AtomOrbitAdvice.class, null));
+    public List<OrbitAdvisor> createAdvisors(Environment environment) {
+        return Collections.singletonList(AnnotationOrbitAdvisor.forMethod(AtomLock.class, "atom", AtomOrbitAdvice.class, null));
     }
 }

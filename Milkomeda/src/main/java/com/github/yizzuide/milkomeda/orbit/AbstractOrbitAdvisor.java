@@ -21,25 +21,24 @@
 
 package com.github.yizzuide.milkomeda.orbit;
 
+import com.github.yizzuide.milkomeda.util.ReflectUtil;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.aop.support.AbstractGenericPointcutAdvisor;
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.util.ClassUtils;
+import org.springframework.util.CollectionUtils;
 
-import java.beans.Introspector;
 import java.util.Map;
 
 /**
- * The base abstract class of orbit node.
+ * The base abstract class that orbit advisor subclasses need to extend.
  *
  * @see org.springframework.aop.framework.autoproxy.AbstractAdvisorAutoProxyCreator
  * @see org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator
+ * @see org.springframework.beans.factory.config.RuntimeBeanReference
  * @since 3.15.0
  * @author yizzuide
  * <br>
@@ -48,7 +47,7 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-public abstract class AbstractOrbitNode implements OrbitNode {
+public abstract class AbstractOrbitAdvisor implements OrbitAdvisor {
     /**
      * 通知器唯一标识
      */
@@ -65,21 +64,18 @@ public abstract class AbstractOrbitNode implements OrbitNode {
     private Map<String, Object> props;
 
     @Override
-    public BeanDefinition createAdvisorBeanDefinition(ConfigurableListableBeanFactory beanFactory) {
-        BeanDefinitionRegistry registry = (BeanDefinitionRegistry) beanFactory;
-        AbstractBeanDefinition orbitAdviceFactoryBeanDefinition = BeanDefinitionBuilder.rootBeanDefinition(OrbitAdviceFactoryBean.class)
-                .addPropertyValue("beanFactory", beanFactory)
-                .addPropertyValue("adviceClass", this.getAdviceClass())
-                .addPropertyValue("props", this.getProps())
-                .getBeanDefinition();
-        // 根据BeanDefinition生成beanName
-        //String adviceBeanName = AnnotationBeanNameGenerator.INSTANCE.generateBeanName(beanDefinition, (BeanDefinitionRegistry) beanFactory);
-        String shortClassName = ClassUtils.getShortName(this.getAdviceClass());
-        String adviceBeanName = Introspector.decapitalize(shortClassName);
-        registry.registerBeanDefinition(adviceBeanName, orbitAdviceFactoryBeanDefinition);
+    public void initFrom(OrbitProperties.Item orbitItem) {
+        this.setAdvisorId(orbitItem.getKeyName());
+        this.setAdviceClass(orbitItem.getAdviceClassName());
+        this.setProps(orbitItem.getProps());
+        if (!CollectionUtils.isEmpty(orbitItem.getStrategyProps())) {
+            ReflectUtil.setField(this, orbitItem.getStrategyProps());
+        }
+    }
 
-        // 默认的自动代理会添加配置的Advisor Bean: AnnotationAwareAspectJAutoProxyCreator.findCandidateAdvisors() -> AbstractAdvisorAutoProxyCreator.getAdvicesAndAdvisorsForBean() -> findEligibleAdvisors() ->
-        //  findCandidateAdvisors() -> BeanFactoryAdvisorRetrievalHelper.findAdvisor()
+    @Override
+    public BeanDefinition createAdvisorBeanDefinition(BeanDefinitionRegistry registry) {
+        String adviceBeanName = OrbitAdviceRegisterHelper.register(this, registry);
         return this.createAdvisorBeanDefinitionBuilder()
                 // 使用Bean引用，内部创建RuntimeBeanReference，延迟对Advice Bean的创建（在其它自动配置都初始化完成后）
                 .addPropertyReference("advice", adviceBeanName)

@@ -47,7 +47,7 @@ import java.util.stream.Collectors;
 public class SundialOrbitSource implements OrbitSource {
 
     @Override
-    public List<OrbitNode> createNodes(Environment environment) {
+    public List<OrbitAdvisor> createAdvisors(Environment environment) {
         SundialProperties sundialProperties;
         try {
             sundialProperties = Binder.get(environment).bind(SundialProperties.PREFIX, SundialProperties.class).get();
@@ -60,7 +60,7 @@ public class SundialOrbitSource implements OrbitSource {
         }
         // convert strategy config to orbit node
         return sundialProperties.getStrategy().stream()
-                .map(strategy -> new AspectJOrbitNode(strategy.getPointcutExpression(), strategy.getKeyName(),
+                .map(strategy -> new AspectJOrbitAdvisor(strategy.getPointcutExpression(), strategy.getKeyName(),
                         DataSourceOrbitAdvice.class, CollectionsKt.singletonMap(SundialProperties.Strategy.KEY_NAME, strategy.getKeyName())))
                 .collect(Collectors.toList());
     }

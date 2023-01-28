@@ -70,7 +70,7 @@ public class OrbitRegistrar implements ImportBeanDefinitionRegistrar {
     @SuppressWarnings("unchecked")
     @Override
     public void registerBeanDefinitions(@NonNull AnnotationMetadata importingClassMetadata, @NonNull BeanDefinitionRegistry registry) {
-        List<OrbitNode> orbitNodes = new ArrayList<>();
+        List<OrbitAdvisor> orbitAdvisors = new ArrayList<>();
         // 1.YAML配置方式
         OrbitProperties orbitProperties;
         try {
@@ -82,25 +82,17 @@ public class OrbitRegistrar implements ImportBeanDefinitionRegistrar {
         List<OrbitProperties.Item> orbitItems = orbitProperties.getInstances();
         if (!CollectionUtils.isEmpty(orbitItems)) {
             orbitItems.forEach(item -> {
-                AbstractOrbitNode orbitNode = (AbstractOrbitNode) ReflectUtil.newInstance(item.getStrategyClazz());
-                if (orbitNode != null) {
-                    orbitNode.setAdvisorId(item.getKeyName());
-                    orbitNode.setAdviceClass(item.getAdviceClassName());
-                    orbitNode.setProps(item.getProps());
-                    if (item.getPointcutExpression() != null && orbitNode instanceof AspectJOrbitNode) {
-                        ((AspectJOrbitNode) orbitNode).setPointcutExpression(item.getPointcutExpression());
-                    }
-                    if (!CollectionUtils.isEmpty(item.getStrategyProps())) {
-                        ReflectUtil.setField(orbitNode, item.getStrategyProps());
-                    }
-                    orbitNodes.add(orbitNode);
+                OrbitAdvisor orbitAdvisor = ReflectUtil.newInstance(item.getStrategyClazz());
+                if (orbitAdvisor != null) {
+                    orbitAdvisor.initFrom(item);
+                    orbitAdvisors.add(orbitAdvisor);
                 }
             });
         }
 
         // 2.框架其它模块桥接切面源提供者
         Collection<OrbitSource> orbitSources = SpringContext.scanBeans(registry, OrbitSourceProvider.class, ORBIT_SOURCE_PROVIDER_SCAN_BASE_PACKAGES);
-        orbitSources.forEach(orbitSource -> orbitNodes.addAll(orbitSource.createNodes(this.environment)));
+        orbitSources.forEach(orbitSource -> orbitAdvisors.addAll(orbitSource.createAdvisors(this.environment)));
 
         // 3.注解注册方式
         ConfigurableListableBeanFactory beanFactory = (ConfigurableListableBeanFactory) registry;
@@ -109,17 +101,19 @@ public class OrbitRegistrar implements ImportBeanDefinitionRegistrar {
             Class<OrbitAdvice> adviceClass = (Class<OrbitAdvice>) value.getClass();
             Orbit orbit = AnnotationUtils.findAnnotation(adviceClass, Orbit.class);
             if (orbit != null) {
-                orbitNodes.add(new AspectJOrbitNode(orbit.pointcutExpression(), id, adviceClass, null));
+                orbitAdvisors.add(new AspectJOrbitAdvisor(orbit.pointcutExpression(), id, adviceClass, null));
             }
         });
 
-        // 注册Advisor
-        if (CollectionUtils.isEmpty(orbitNodes)) {
+        if (CollectionUtils.isEmpty(orbitAdvisors)) {
             return;
         }
-        for (OrbitNode orbitNode : orbitNodes) {
-            BeanDefinition beanDefinition = orbitNode.createAdvisorBeanDefinition(beanFactory);
-            String beanName = "mk_orbit_advisor_" + orbitNode.getAdvisorId();
+        // register advisor
+        // 默认的自动代理会添加配置的Advisor Bean: AnnotationAwareAspectJAutoProxyCreator.findCandidateAdvisors() -> AbstractAdvisorAutoProxyCreator.getAdvicesAndAdvisorsForBean() -> findEligibleAdvisors() ->
+        //  findCandidateAdvisors() -> BeanFactoryAdvisorRetrievalHelper.findAdvisor()
+        for (OrbitAdvisor orbitAdvisor : orbitAdvisors) {
+            BeanDefinition beanDefinition = orbitAdvisor.createAdvisorBeanDefinition(registry);
+            String beanName = "mk_orbit_advisor_" + orbitAdvisor.getAdvisorId();
             registry.registerBeanDefinition(beanName, beanDefinition);
         }
     }
