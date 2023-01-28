@@ -155,7 +155,7 @@ public class Moon<T> {
     }
 
     /**
-     * 基于分布式锁获取，需要添加 <code>@EnableAspectJAutoProxy(exposeProxy=true)</code>（分布式并发安全）
+     * 基于分布式锁获取（分布式并发安全）
      * @param key   缓存key，一个环对应一个key
      * @return  当前环的当前阶段值
      */

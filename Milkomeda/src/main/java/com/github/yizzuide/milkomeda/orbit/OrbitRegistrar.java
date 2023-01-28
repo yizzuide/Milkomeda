@@ -24,7 +24,6 @@ package com.github.yizzuide.milkomeda.orbit;
 import com.github.yizzuide.milkomeda.universe.context.SpringContext;
 import com.github.yizzuide.milkomeda.util.ReflectUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.boot.context.properties.bind.Binder;
@@ -109,12 +108,11 @@ public class OrbitRegistrar implements ImportBeanDefinitionRegistrar {
             return;
         }
         // register advisor
-        // 默认的自动代理会添加配置的Advisor Bean: AnnotationAwareAspectJAutoProxyCreator.findCandidateAdvisors() -> AbstractAdvisorAutoProxyCreator.getAdvicesAndAdvisorsForBean() -> findEligibleAdvisors() ->
+        // 默认的自动代理会添加配置的Advisor Bean: AnnotationAwareAspectJAutoProxyCreator.findCandidateAdvisors() ->
+        //  AbstractAdvisorAutoProxyCreator.getAdvicesAndAdvisorsForBean() -> findEligibleAdvisors() ->
         //  findCandidateAdvisors() -> BeanFactoryAdvisorRetrievalHelper.findAdvisor()
-        for (OrbitAdvisor orbitAdvisor : orbitAdvisors) {
-            BeanDefinition beanDefinition = orbitAdvisor.createAdvisorBeanDefinition(registry);
-            String beanName = "mk_orbit_advisor_" + orbitAdvisor.getAdvisorId();
-            registry.registerBeanDefinition(beanName, beanDefinition);
-        }
+        orbitAdvisors.forEach(orbitAdvisor ->
+                registry.registerBeanDefinition("mk_orbit_advisor_" + orbitAdvisor.getAdvisorId(),
+                        orbitAdvisor.createAdvisorBeanDefinition(registry)));
     }
 }

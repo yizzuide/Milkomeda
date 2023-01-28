@@ -38,7 +38,7 @@ import java.util.Map;
  *
  * @see org.springframework.aop.framework.autoproxy.AbstractAdvisorAutoProxyCreator
  * @see org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator
- * @see org.springframework.beans.factory.config.RuntimeBeanReference
+ * @see org.springframework.beans.factory.config.RuntimeBeanNameReference
  * @since 3.15.0
  * @author yizzuide
  * <br>
@@ -77,7 +77,7 @@ public abstract class AbstractOrbitAdvisor implements OrbitAdvisor {
     public BeanDefinition createAdvisorBeanDefinition(BeanDefinitionRegistry registry) {
         String adviceBeanName = OrbitAdviceRegisterHelper.register(this, registry);
         return this.createAdvisorBeanDefinitionBuilder()
-                // 使用Bean引用，内部创建RuntimeBeanReference，延迟对Advice Bean的创建（在其它自动配置都初始化完成后）
+                // 使用Bean引用，内部创建RuntimeBeanNameReference，延迟对Advice Bean的创建（在其它自动配置都初始化完成后）
                 .addPropertyReference("advice", adviceBeanName)
                 .getBeanDefinition();
     }
@@ -85,7 +85,6 @@ public abstract class AbstractOrbitAdvisor implements OrbitAdvisor {
     /**
      * Extension hook that subclasses should create an advisor bean definition builder.
      * @return  the advisor must be extended of {@link AbstractGenericPointcutAdvisor}
-     * @since 3.15.0
      */
     protected abstract BeanDefinitionBuilder createAdvisorBeanDefinitionBuilder();
 }

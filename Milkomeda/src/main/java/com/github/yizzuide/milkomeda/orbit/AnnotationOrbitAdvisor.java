@@ -32,7 +32,7 @@ import java.lang.annotation.Annotation;
 import java.util.Map;
 
 /**
- * Simple orbit node that Looks for a specific Java 5 annotation being present on a class or method.
+ * Simple orbit advisor metadata that Looks for a specific Java 5 annotation being present on a class or method.
  *
  * @see org.springframework.aop.support.AbstractGenericPointcutAdvisor
  * @see org.springframework.aop.support.annotation.AnnotationMatchingPointcut
