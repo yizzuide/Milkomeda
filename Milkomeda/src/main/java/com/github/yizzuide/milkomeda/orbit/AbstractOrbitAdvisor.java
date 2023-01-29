@@ -77,8 +77,10 @@ public abstract class AbstractOrbitAdvisor implements OrbitAdvisor {
     public BeanDefinition createAdvisorBeanDefinition(BeanDefinitionRegistry registry) {
         String adviceBeanName = OrbitAdviceRegisterHelper.register(this, registry);
         return this.createAdvisorBeanDefinitionBuilder()
-                // 使用Bean引用，内部创建RuntimeBeanNameReference，延迟对Advice Bean的创建（在其它自动配置都初始化完成后）
+                // 添加Bean引用，内部创建RuntimeBeanNameReference，延迟对Advice Bean的创建
                 .addPropertyReference("advice", adviceBeanName)
+                // 将Advisor作为基础设施Bean，不会对它再应用自动代理
+                .setRole(BeanDefinition.ROLE_INFRASTRUCTURE)
                 .getBeanDefinition();
     }
 

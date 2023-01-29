@@ -24,7 +24,7 @@ package com.github.yizzuide.milkomeda.orbit;
 import java.util.Map;
 
 /**
- * The top level interface with metadata to assemble advisor.
+ * The top level interface with metadata to assemble advisor, all subclasses need provide a parameterless constructor.
  *
  * @since 3.15.0
  * @author yizzuide

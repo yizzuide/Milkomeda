@@ -22,12 +22,16 @@
 package com.github.yizzuide.milkomeda.orbit;
 
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.util.ClassUtils;
 
 import java.beans.Introspector;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Simple helper class to register advice from advisor, it used {@link FactoryBean} for create bean.
@@ -39,9 +43,14 @@ import java.beans.Introspector;
  */
 public class OrbitAdviceRegisterHelper {
     /**
-     * Register advice from advisor with {@link BeanDefinitionRegistry}.
-     * @param orbitAdvisor  advisor
-     * @param registry  bean definition registry
+     * Bean name counter.
+     */
+    public static final Map<String, AtomicInteger> counterMap = new HashMap<>();
+
+    /**
+     * Register advice from OrbitAdvisor with {@link BeanDefinitionRegistry}.
+     * @param orbitAdvisor  OrbitAdvisor
+     * @param registry  BeanDefinitionRegistry
      * @return advice bean name
      */
     public static String register(OrbitAdvisor orbitAdvisor, BeanDefinitionRegistry registry) {
@@ -50,6 +59,16 @@ public class OrbitAdviceRegisterHelper {
         // 根据类名生成beanName
         String shortClassName = ClassUtils.getShortName(orbitAdvisor.getAdviceClass());
         String adviceBeanName = Introspector.decapitalize(shortClassName);
+        if (registry.containsBeanDefinition(adviceBeanName)) {
+            BeanDefinition beanDefinition = registry.getBeanDefinition(adviceBeanName);
+            Object adviceClass = beanDefinition.getPropertyValues().get("adviceClass");
+            if (adviceClass == null || orbitAdvisor.getAdviceClass() == adviceClass) {
+                return adviceBeanName;
+            }
+            return adviceBeanName + "$" + counterMap.get(adviceBeanName).getAndIncrement();
+        } else {
+            counterMap.put(adviceBeanName, new AtomicInteger(0));
+        }
         AbstractBeanDefinition orbitAdviceFactoryBeanDefinition = BeanDefinitionBuilder.rootBeanDefinition(OrbitAdviceFactoryBean.class)
                 .addPropertyValue("beanFactory", registry)
                 .addPropertyValue("adviceClass", orbitAdvisor.getAdviceClass())

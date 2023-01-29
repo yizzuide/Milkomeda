@@ -21,6 +21,9 @@
 
 package com.github.yizzuide.milkomeda.orbit;
 
+import org.springframework.core.annotation.AliasFor;
+import org.springframework.stereotype.Component;
+
 import java.lang.annotation.*;
 
 /**
@@ -35,11 +38,13 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE})
 @Inherited
+@Component
 public @interface Orbit {
     /**
      * 等同YAML方式的key-name
      * @return  key-name
      */
+    @AliasFor(annotation = Component.class)
     String value() default "";
 
     /**

@@ -32,6 +32,7 @@ import java.lang.reflect.Method;
  *
  * @author yizzuide
  * @since 3.13.0
+ * @version 3.15.0
  * <br>
  * Create at 2022/02/23 17:08
  */
@@ -47,6 +48,12 @@ public class OrbitInvocation {
      * 目标对象
      */
     private Object target;
+
+    /**
+     * 被代理目标类
+     * @since 3.15.0
+     */
+    private Class<?> targetClass;
 
     /**
      * 切面方法
