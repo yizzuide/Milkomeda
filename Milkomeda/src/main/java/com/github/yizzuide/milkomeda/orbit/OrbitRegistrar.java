@@ -81,7 +81,7 @@ public class OrbitRegistrar implements ImportBeanDefinitionRegistrar {
         List<OrbitProperties.Item> orbitItems = orbitProperties.getInstances();
         if (!CollectionUtils.isEmpty(orbitItems)) {
             orbitItems.forEach(item -> {
-                OrbitAdvisor orbitAdvisor = ReflectUtil.newInstance(item.getStrategyClazz());
+                OrbitAdvisor orbitAdvisor = ReflectUtil.newInstance(item.getAdvisorClazz());
                 if (orbitAdvisor != null) {
                     orbitAdvisor.initFrom(item);
                     orbitAdvisors.add(orbitAdvisor);

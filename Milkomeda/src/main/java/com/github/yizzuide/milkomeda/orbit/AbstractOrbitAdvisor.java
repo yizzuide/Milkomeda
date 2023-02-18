@@ -66,10 +66,10 @@ public abstract class AbstractOrbitAdvisor implements OrbitAdvisor {
     @Override
     public void initFrom(OrbitProperties.Item orbitItem) {
         this.setAdvisorId(orbitItem.getKeyName());
-        this.setAdviceClass(orbitItem.getAdviceClassName());
+        this.setAdviceClass(orbitItem.getAdviceClazz());
         this.setProps(orbitItem.getProps());
-        if (!CollectionUtils.isEmpty(orbitItem.getStrategyProps())) {
-            ReflectUtil.setField(this, orbitItem.getStrategyProps());
+        if (!CollectionUtils.isEmpty(orbitItem.getAdvisorProps())) {
+            ReflectUtil.setField(this, orbitItem.getAdvisorProps());
         }
     }
 
