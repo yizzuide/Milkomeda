@@ -60,9 +60,9 @@ public class OrbitProperties {
         private Class<? extends OrbitAdvice> adviceClazz;
 
         /**
-         * OrbitAdvice属性注入
+         * Advice property values.
          */
-        private Map<String, Object> props = new HashMap<>();
+        private Map<String, Object> adviceProps = new HashMap<>();
 
         /**
          * AspectJ pointcut expression，such as "execution(* com..mapper.*.query*(..))".

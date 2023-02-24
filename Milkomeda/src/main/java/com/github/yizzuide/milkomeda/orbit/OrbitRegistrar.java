@@ -40,10 +40,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 环绕切面注册
- * <br><br>
- * ImportBeanDefinitionRegistrar是Bean定义阶段注册器，适用于动态注册一个AspectJExpressionPointcutAdvisor <br>
- * BeanPostProcessor是Bean的创建完成后置处理器，然后给它包装一个代理，但这里不适用
+ * Register orbit advisor.
  *
  * @see org.springframework.aop.support.AbstractExpressionPointcut
  * @see org.springframework.aop.aspectj.AspectJExpressionPointcutAdvisor

@@ -47,9 +47,9 @@ public class OrbitAdviceFactoryBean implements FactoryBean<OrbitAdvice> {
     private Class<? extends OrbitAdvice> adviceClass;
 
     /**
-     * Property values of orbit advice.
+     * Orbit advice property values.
      */
-    private Map<String, Object> props;
+    private Map<String, Object> adviceProps;
 
     /**
      * Spring context.
@@ -65,8 +65,8 @@ public class OrbitAdviceFactoryBean implements FactoryBean<OrbitAdvice> {
         // autowire it's fields!
         beanFactory.autowireBean(advice);
         // reflect and set custom props
-        if (!CollectionUtils.isEmpty(this.getProps())) {
-            ReflectUtil.setField(advice, this.getProps());
+        if (!CollectionUtils.isEmpty(this.getAdviceProps())) {
+            ReflectUtil.setField(advice, this.getAdviceProps());
         }
         return advice;
     }

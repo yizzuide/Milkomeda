@@ -48,7 +48,7 @@ public interface OrbitAdvisor extends AdvisorBeanDefinitionFactory {
      * Advice property values.
      * @return property map
      */
-    Map<String, Object> getProps();
+    Map<String, Object> getAdviceProps();
 
     /**
      * Init meta data from config item.

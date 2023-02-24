@@ -72,7 +72,7 @@ public class OrbitAdviceRegisterHelper {
         AbstractBeanDefinition orbitAdviceFactoryBeanDefinition = BeanDefinitionBuilder.rootBeanDefinition(OrbitAdviceFactoryBean.class)
                 .addPropertyValue("beanFactory", registry)
                 .addPropertyValue("adviceClass", orbitAdvisor.getAdviceClass())
-                .addPropertyValue("props", orbitAdvisor.getProps())
+                .addPropertyValue("adviceProps", orbitAdvisor.getAdviceProps())
                 .getBeanDefinition();
         registry.registerBeanDefinition(adviceBeanName, orbitAdviceFactoryBeanDefinition);
         return adviceBeanName;

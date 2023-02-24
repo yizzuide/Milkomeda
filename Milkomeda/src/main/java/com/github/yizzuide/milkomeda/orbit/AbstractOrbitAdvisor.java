@@ -49,25 +49,25 @@ import java.util.Map;
 @Data
 public abstract class AbstractOrbitAdvisor implements OrbitAdvisor {
     /**
-     * 通知器唯一标识
+     * The advisor id for register in spring context.
      */
     private String advisorId;
 
     /**
-     * 通知类
+     * The advice bind with this advisor.
      */
     private Class<? extends OrbitAdvice> adviceClass;
 
     /**
-     * 通知属性列表
+     * Advice property values.
      */
-    private Map<String, Object> props;
+    private Map<String, Object> adviceProps;
 
     @Override
     public void initFrom(OrbitProperties.Item orbitItem) {
         this.setAdvisorId(orbitItem.getKeyName());
         this.setAdviceClass(orbitItem.getAdviceClazz());
-        this.setProps(orbitItem.getProps());
+        this.setAdviceProps(orbitItem.getAdviceProps());
         if (!CollectionUtils.isEmpty(orbitItem.getAdvisorProps())) {
             ReflectUtil.setField(this, orbitItem.getAdvisorProps());
         }
@@ -79,7 +79,7 @@ public abstract class AbstractOrbitAdvisor implements OrbitAdvisor {
         return this.createAdvisorBeanDefinitionBuilder()
                 // 添加Bean引用，内部创建RuntimeBeanNameReference，延迟对Advice Bean的创建
                 .addPropertyReference("advice", adviceBeanName)
-                // 将Advisor作为基础设施Bean，不会对它再应用自动代理
+                // 将Advisor作为基础设施Bean，不添加自动代理
                 .setRole(BeanDefinition.ROLE_INFRASTRUCTURE)
                 .getBeanDefinition();
     }
