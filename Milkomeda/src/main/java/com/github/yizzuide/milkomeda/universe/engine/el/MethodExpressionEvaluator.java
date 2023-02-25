@@ -57,11 +57,9 @@ public class MethodExpressionEvaluator<T> extends AbstractExpressionEvaluator {
     public StandardEvaluationContext createEvaluationContext(Object object, Class<?> targetClass,
                                                              Method method, Object[] args) {
         Method targetMethod = getTargetMethod(targetClass, method);
-        // 创建自定义EL Root（EL获取： #this.object，#root.object）
-        ExpressionRootObject root = new ExpressionRootObject(object, args);
         // 创建基于方法的执行上下文
-        MethodBasedEvaluationContext evaluationContext = new MethodBasedEvaluationContext(root, targetMethod, args, this.paramNameDiscoverer);
-        configContext(evaluationContext, root);
+        MethodBasedEvaluationContext evaluationContext = new MethodBasedEvaluationContext(object, targetMethod, args, this.paramNameDiscoverer);
+        configContext(evaluationContext, object);
         return evaluationContext;
     }
 

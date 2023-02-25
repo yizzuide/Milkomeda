@@ -43,11 +43,9 @@ public class ObjectExpressionEvaluator extends AbstractExpressionEvaluator {
             BeanFactoryResolver beanFactoryResolver = new BeanFactoryResolver(beanFactory);
             evaluationContext.setBeanResolver(beanFactoryResolver);
         }
-        // 创建自定义EL Root（EL获取： #this.object，#root.object）
-        ExpressionRootObject root = new ExpressionRootObject(object, null);
-        evaluationContext.setRootObject(root);
-        configContext(evaluationContext, root);
-        AnnotatedElementKey elementKey = new AnnotatedElementKey(root.getClass(), null);
+        evaluationContext.setRootObject(object);
+        configContext(evaluationContext, object);
+        AnnotatedElementKey elementKey = new AnnotatedElementKey(object.getClass(), null);
         return getExpression(this.expressionKeyCache, elementKey, expression)
                 .getValue(evaluationContext, resultType);
     }

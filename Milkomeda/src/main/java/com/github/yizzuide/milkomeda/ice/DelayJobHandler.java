@@ -106,7 +106,9 @@ public class DelayJobHandler implements Runnable, ApplicationListener<IceInstanc
         // 延迟桶处理锁住资源，防止同一桶索引分布式并发执行时出现相同记录问题
         if (props.isEnableJobTimerDistributed()) {
             boolean hasObtainLock = RedisUtil.setIfAbsent(this.lockKey, props.getJobTimerLockTimeoutSeconds().getSeconds(), redisTemplate);
-            if (!hasObtainLock) return;
+            if (!hasObtainLock) {
+                return;
+            }
         }
 
         DelayJob delayJob = null;

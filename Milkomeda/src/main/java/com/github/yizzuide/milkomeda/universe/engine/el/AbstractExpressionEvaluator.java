@@ -57,11 +57,11 @@ public abstract class AbstractExpressionEvaluator extends CachedExpressionEvalua
     /**
      * Config evaluation context variables.
      * @param evaluationContext StandardEvaluationContext
-     * @param rootObject    ExpressionRootObject
+     * @param root  root object
      */
-    protected void configContext(StandardEvaluationContext evaluationContext, ExpressionRootObject rootObject) {
+    protected void configContext(StandardEvaluationContext evaluationContext, Object root) {
         // 目标对象：#target
-        evaluationContext.setVariable("target", rootObject.getObject());
+        evaluationContext.setVariable("target", root);
         // 添加变量引用：#env[key]
         Environment env = ApplicationContextHolder.getEnvironment();
         if (env != null) {

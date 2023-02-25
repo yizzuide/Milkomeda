@@ -169,9 +169,9 @@ milkomeda:
   ice:
     # 在分布式布署时，需要设置实例名
     instance-name: ${spring.application.name}
-    # 开启Job作业（作为消费端使用时，设置为false）
+    # 开启Job服务（作为消费端使用时，设置为false）
     #enable-job-timer: false
-    # 是否用于分布式job作业
+    # 是否用于分布式job服务（当服务端采用分布式时）
     #enable-job-timer-distributed: true
     # Job作业频率（默认5s）
     delay-bucket-poll-rate: 2s
@@ -187,7 +187,7 @@ milkomeda:
     task-topic-pop-max-size: 5
     # 消费轮询间隔（默认5s）
     task-execute-rate: 2s
-    # 消费处理器支持多个监听器
+    # 消费处理器支持多个监听器（模拟订阅模式）
     multi-topic-listener-per-handler: true
     # TTR超载任务进入Dead queue
     enable-retain-to-dead-queue-when-ttr-overload: true
@@ -196,7 +196,7 @@ milkomeda:
       enable: true
       # 查询监测数据使用的时间排序类型（默认为update_time：每次状态修改都更新时间）
       index-type: update_time
-      # 监测数据存储方案（默认为redis）
+      # 监测数据存储方案（默认为redis，只有redis方案不支持在任务结束后保存记录）
       inspector-type: mongodb
 
   moon:
