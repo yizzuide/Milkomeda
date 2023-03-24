@@ -44,6 +44,7 @@ public abstract class AbstractJupiterRuleEngine implements JupiterRuleEngine {
         return run(ruleName);
     }
 
+    @Override
     public void addRule(String ruleName, List<JupiterRuleItem> ruleItemList) {
         int incr = 0;
         for (JupiterRuleItem ruleItem : ruleItemList) {
