@@ -21,8 +21,6 @@
 @file:JvmName("CollectionsKt")
 package com.github.yizzuide.milkomeda.util
 
-import kotlin.reflect.jvm.internal.impl.load.kotlin.JvmType
-
 /**
  * Collection util
  *

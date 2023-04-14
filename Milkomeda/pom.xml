@@ -330,7 +330,7 @@
                     </execution>
                 </executions>
             </plugin>
-            <!-- Kotlin Maven插件 -->
+            <!-- Kotlin -->
             <plugin>
                 <groupId>org.jetbrains.kotlin</groupId>
                 <artifactId>kotlin-maven-plugin</artifactId>

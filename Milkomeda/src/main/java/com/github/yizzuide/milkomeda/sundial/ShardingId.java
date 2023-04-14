@@ -59,9 +59,9 @@ public class ShardingId {
 
     /**
      * 获取序列号
-     * @param workerId      机器id，当前业务布署的机器序号，范围[0, 8)
-     * @param businessId    业务id，范围[0, 128)
-     * @param sharding      拆分序号，范围[0, 16)
+     * @param workerId      机器id，当前业务布署的机器序号，范围：[0, 8)
+     * @param businessId    业务id，范围：[0, 128)
+     * @param sharding      拆分序号，范围：[0, 16)
      * @return 唯一序列号
      */
     public static long nextId(long workerId, long businessId, long sharding) {

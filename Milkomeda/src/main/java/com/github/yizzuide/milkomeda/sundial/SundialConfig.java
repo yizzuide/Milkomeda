@@ -61,11 +61,6 @@ public class SundialConfig {
     private SundialProperties props;
 
     @Bean
-    public DataSourceAspect dataSourceAspect(){
-        return new DataSourceAspect();
-    }
-
-    @Bean
     public DataSourceFactory dataSourceFactory(){
         return new DataSourceFactory();
     }

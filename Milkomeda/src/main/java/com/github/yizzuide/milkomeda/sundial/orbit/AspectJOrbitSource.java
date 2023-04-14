@@ -33,7 +33,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Orbit config extension of {@link OrbitSource}.
+ * Register Orbit node from yml config with aspectJ.
  *
  * @author yizzuide
  * @since 3.13.0
@@ -44,7 +44,7 @@ import java.util.stream.Collectors;
 // 虽然@OrbitSourceProvider有添加`@Component`注解，但由于默认的用户业务应用并不扫描这个路径，所以不会被Spring IoC所识别。
 // 但是Orbit模块在BeanDefinition阶段注册了回调，通过手动依赖查找扫描的方式找到*.orbit路径下的这个注解。
 @OrbitSourceProvider
-public class SundialOrbitSource implements OrbitSource {
+public class AspectJOrbitSource implements OrbitSource {
 
     @Override
     public List<OrbitAdvisor> createAdvisors(Environment environment) {
@@ -61,7 +61,7 @@ public class SundialOrbitSource implements OrbitSource {
         // convert strategy config to orbit node
         return sundialProperties.getStrategy().stream()
                 .map(strategy -> new AspectJOrbitAdvisor(strategy.getPointcutExpression(), strategy.getKeyName(),
-                        DataSourceOrbitAdvice.class, CollectionsKt.singletonMap(SundialProperties.Strategy.KEY_NAME, strategy.getKeyName())))
+                        AspectJDataSourceOrbitAdvice.class, CollectionsKt.singletonMap(SundialProperties.Strategy.KEY_NAME, strategy.getKeyName())))
                 .collect(Collectors.toList());
     }
 }

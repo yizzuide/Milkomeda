@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 yizzuide All rights Reserved.
+ * Copyright (c) 2023 yizzuide All rights Reserved.
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -19,46 +19,29 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.hydrogen.uniform;
+package com.github.yizzuide.milkomeda.sundial.orbit;
 
-import lombok.Data;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-
-import java.util.HashMap;
-import java.util.Map;
+import com.github.yizzuide.milkomeda.orbit.OrbitAdvice;
+import com.github.yizzuide.milkomeda.orbit.OrbitInvocation;
+import com.github.yizzuide.milkomeda.sundial.DynamicRouteDataSource;
+import com.github.yizzuide.milkomeda.sundial.Sundial;
+import org.springframework.core.annotation.AnnotationUtils;
 
 /**
- * UniformProperties
+ * Dynamic route advice impl of {@link OrbitAdvice} with Annotation.
  *
+ * @since 3.15.0
  * @author yizzuide
- * @since 3.0.0
  * <br>
- * Create at 2020/04/06 00:06
+ * Create at 2023/04/15 03:07
  */
-@Data
-@ConfigurationProperties(UniformProperties.PREFIX)
-public class UniformProperties {
-    public static final String PREFIX = "milkomeda.hydrogen.uniform";
-
-    /**
-     * 启用统一响应处理
-     */
-    private boolean enable = false;
-
-    /**
-     * 添加统一请求访问路径前缀
-     * @since 3.15.0
-     */
-    private String requestPathPrefix;
-
-    /**
-     * Response code type.
-     * @since 3.14.0
-     */
-    private ResultVO.CodeType codeType = ResultVO.CodeType.INT;
-
-    /**
-     * 响应数据
-     */
-    private Map<String, Object> response = new HashMap<>();
+public class AnnotationDataSourceOrbitAdvice extends AbstractDataSourceOrbitAdvice {
+    @Override
+    protected String getRouteKey(OrbitInvocation invocation) {
+        Sundial sundial = AnnotationUtils.findAnnotation(invocation.getMethod(), Sundial.class);
+        if (sundial == null) {
+            return DynamicRouteDataSource.MASTER_KEY;
+        }
+        return sundial.key();
+    }
 }

@@ -22,12 +22,11 @@
 package com.github.yizzuide.milkomeda.universe.algorithm.hash;
 
 /**
- * BloomHashWrapper
- * 布隆过滤器特点：
+ * 布隆过滤器，有以下特点：
  * 1. 如果该元素被判断不存在，那么一定不存在（该特性可用于防缓存穿透（击穿）问题）
  * 2. 如果该元素被判断存在，那么很可能存在
- * @author yizzuide
  * @since 3.9.0
+ * @author yizzuide
  * <br>
  * Create at 2020/06/23 15:17
  */

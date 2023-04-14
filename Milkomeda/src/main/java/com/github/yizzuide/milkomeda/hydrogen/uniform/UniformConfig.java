@@ -37,8 +37,12 @@ import org.springframework.boot.web.servlet.error.ErrorAttributes;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.lang.NonNull;
+import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.HandlerExceptionResolver;
+import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.stream.Collectors;
 
@@ -104,6 +108,21 @@ public class UniformConfig {
         // 动态添加异常切面
         private void configExceptionAdvice() {
             SpringMvcPolyfill.addDynamicExceptionAdvice(handlerExceptionResolver, applicationContextHolder.getApplicationContext(),  "uniformHandler");
+        }
+    }
+
+    @Configuration(proxyBeanMethods = false)
+    @EnableConfigurationProperties(UniformProperties.class)
+    public static class RequestMappingConfigurer implements WebMvcConfigurer {
+
+        @Autowired
+        private UniformProperties props;
+
+        @Override
+        public void configurePathMatch(@NonNull PathMatchConfigurer configurer) {
+            if (StringUtils.hasText(props.getRequestPathPrefix())) {
+                configurer.addPathPrefix(props.getRequestPathPrefix(), p -> true);
+            }
         }
     }
 }

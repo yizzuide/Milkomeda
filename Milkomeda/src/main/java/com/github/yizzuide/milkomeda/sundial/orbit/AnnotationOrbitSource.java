@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 yizzuide All rights Reserved.
+ * Copyright (c) 2023 yizzuide All rights Reserved.
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -21,39 +21,29 @@
 
 package com.github.yizzuide.milkomeda.sundial.orbit;
 
+import com.github.yizzuide.milkomeda.orbit.AnnotationOrbitAdvisor;
+import com.github.yizzuide.milkomeda.orbit.OrbitAdvisor;
+import com.github.yizzuide.milkomeda.orbit.OrbitSource;
+import com.github.yizzuide.milkomeda.orbit.OrbitSourceProvider;
+import com.github.yizzuide.milkomeda.sundial.Sundial;
+import org.springframework.core.env.Environment;
 
-import com.github.yizzuide.milkomeda.orbit.OrbitAdvice;
-import com.github.yizzuide.milkomeda.orbit.OrbitInvocation;
-import com.github.yizzuide.milkomeda.sundial.DynamicRouteDataSource;
-import com.github.yizzuide.milkomeda.sundial.SundialHolder;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import java.util.Collections;
+import java.util.List;
 
 /**
- * Dynamic route advice impl of {@link OrbitAdvice}.
+ * Register Orbit node from yml config with annotation.
  *
- * @since 3.4.0
- * @version 3.13.0
+ * @since 3.15.0
  * @author yizzuide
  * <br>
- * Create at 2020/05/11 16:29
+ * Create at 2023/04/15 02:45
  */
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-public class DataSourceOrbitAdvice implements OrbitAdvice {
-
-    private String keyName = DynamicRouteDataSource.MASTER_KEY;
-
+@OrbitSourceProvider
+public class AnnotationOrbitSource implements OrbitSource {
     @Override
-    public Object invoke(OrbitInvocation invocation) throws Throwable {
-        try {
-            // 调用方法前，选择数据源
-            SundialHolder.setDataSourceType(getKeyName());
-            return invocation.proceed();
-        } finally {
-            SundialHolder.clearDataSourceType();
-        }
+    public List<OrbitAdvisor> createAdvisors(Environment environment) {
+        AnnotationOrbitAdvisor annotationOrbitAdvisor = new AnnotationOrbitAdvisor(Sundial.class, Sundial.class, "sundial", AnnotationDataSourceOrbitAdvice.class, null);
+        return Collections.singletonList(annotationOrbitAdvisor);
     }
 }

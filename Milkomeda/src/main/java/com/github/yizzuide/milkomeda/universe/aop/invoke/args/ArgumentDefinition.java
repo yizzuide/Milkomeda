@@ -28,7 +28,7 @@ import lombok.NoArgsConstructor;
 import java.lang.ref.WeakReference;
 
 /**
- * Argument meta data set.
+ * Argument metadata used with {@link ArgumentSources}.
  *
  * @since 3.15.0
  * @author yizzuide
@@ -40,7 +40,7 @@ import java.lang.ref.WeakReference;
 @Data
 public class ArgumentDefinition {
     /**
-     * this is used to match the processor.
+     * The match type is used to match the processor.
      */
     private ArgumentMatchType matchType;
 
@@ -50,17 +50,17 @@ public class ArgumentDefinition {
     private String customTypeName;
 
     /**
-     * Argument identifier which can be param name.
+     * Argument identifier (such as param name etc.).
      */
     private Object identifier;
 
     /**
-     * Class type of Argument.
+     * Class type of argument value.
      */
     private WeakReference<? extends Class<?>> argClassRef;
 
     /**
-     * Argument value need invoke.
+     * Argument value which need invoke.
      */
     private Object value;
 
