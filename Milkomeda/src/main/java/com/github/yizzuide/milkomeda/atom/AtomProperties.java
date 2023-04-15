@@ -37,8 +37,11 @@ import java.time.temporal.ChronoUnit;
  * Create at 2020/04/30 15:26
  */
 @Data
-@ConfigurationProperties("milkomeda.atom")
+@ConfigurationProperties(AtomProperties.PREFIX)
 public class AtomProperties {
+
+   public static final String PREFIX = "milkomeda.atom";
+
     /**
      * 策略方式
      */

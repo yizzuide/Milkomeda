@@ -88,7 +88,12 @@ public class OrbitRegistrar implements ImportBeanDefinitionRegistrar {
 
         // 2.框架其它模块桥接切面源提供者
         Collection<OrbitSource> orbitSources = SpringContext.scanBeans(registry, OrbitSourceProvider.class, ORBIT_SOURCE_PROVIDER_SCAN_BASE_PACKAGES);
-        orbitSources.forEach(orbitSource -> orbitAdvisors.addAll(orbitSource.createAdvisors(this.environment)));
+        orbitSources.forEach(orbitSource -> {
+            List<OrbitAdvisor> advisors = orbitSource.createAdvisors(this.environment);
+            if (!CollectionUtils.isEmpty(advisors)) {
+                orbitAdvisors.addAll(advisors);
+            }
+        });
 
         // 3.注解注册方式
         ConfigurableListableBeanFactory beanFactory = (ConfigurableListableBeanFactory) registry;
