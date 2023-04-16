@@ -27,6 +27,7 @@ import com.github.yizzuide.milkomeda.orbit.AnnotationOrbitAdvisor;
 import com.github.yizzuide.milkomeda.orbit.OrbitAdvisor;
 import com.github.yizzuide.milkomeda.orbit.OrbitSource;
 import com.github.yizzuide.milkomeda.orbit.OrbitSourceProvider;
+import org.springframework.boot.context.properties.bind.BindResult;
 import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.core.env.Environment;
 
@@ -47,7 +48,10 @@ public class AtomOrbitSource implements OrbitSource {
     public List<OrbitAdvisor> createAdvisors(Environment environment) {
         try {
             // 根据配置文件是否加载来判断当前模块是否加载
-            Binder.get(environment).bind(AtomProperties.PREFIX, AtomProperties.class);
+            BindResult<AtomProperties> bindResult = Binder.get(environment).bind(AtomProperties.PREFIX, AtomProperties.class);
+            if (bindResult == null) {
+                return null;
+            }
         } catch (Exception ignore) {
             return null;
         }

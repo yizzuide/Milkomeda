@@ -27,6 +27,7 @@ import com.github.yizzuide.milkomeda.orbit.OrbitSource;
 import com.github.yizzuide.milkomeda.orbit.OrbitSourceProvider;
 import com.github.yizzuide.milkomeda.sundial.Sundial;
 import com.github.yizzuide.milkomeda.sundial.SundialProperties;
+import org.springframework.boot.context.properties.bind.BindResult;
 import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.core.env.Environment;
 
@@ -47,7 +48,10 @@ public class AnnotationOrbitSource implements OrbitSource {
     public List<OrbitAdvisor> createAdvisors(Environment environment) {
         try {
             // 根据配置文件是否加载来判断当前模块是否加载
-            Binder.get(environment).bind(SundialProperties.PREFIX, SundialProperties.class);
+            BindResult<SundialProperties> bindResult = Binder.get(environment).bind(SundialProperties.PREFIX, SundialProperties.class);
+            if (bindResult == null) {
+                return null;
+            }
         } catch (Exception ignore) {
             return null;
         }

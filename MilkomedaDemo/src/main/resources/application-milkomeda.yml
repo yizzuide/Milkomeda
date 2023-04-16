@@ -316,7 +316,11 @@ milkomeda:
 
   # 分布式锁
   atom:
-    strategy: redis # 默认的策略为redis
+    # 使用方案类型，支持Redis和Zookeeper
+    strategy: redis
+    redis:
+      # 是否使用集群
+      use-cluster: false
 
   ## 数据源配置
   sundial:
