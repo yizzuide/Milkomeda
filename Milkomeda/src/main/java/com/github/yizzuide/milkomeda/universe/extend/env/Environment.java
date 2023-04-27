@@ -33,7 +33,7 @@ import java.util.Map;
 import java.util.Properties;
 
 /**
- * Environment
+ * Environment that include {@link ConfigurableEnvironment} and addition {@link Properties}.
  *
  * @author yizzuide
  * @since 3.1.0

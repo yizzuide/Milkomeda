@@ -21,6 +21,7 @@
 
 package com.github.yizzuide.milkomeda.universe.extend.env;
 
+import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import com.github.yizzuide.milkomeda.universe.extend.converter.MapToCollectionConverter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.config.ConfigDataEnvironmentPostProcessor;
@@ -55,6 +56,7 @@ public class EnvironmentApplicationListener implements ApplicationListener<Appli
         }
 
         // StandardServletEnvironment or StandardReactiveEnvironment
+        ApplicationContextHolder.setPendingConfigurableEnvironment(environment);
 
         // BeanWrapper binding ConversionService process:
         // 1.SpringBoot start setting ConversionService

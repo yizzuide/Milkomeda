@@ -21,6 +21,7 @@
 
 package com.github.yizzuide.milkomeda.universe.extend.processor;
 
+import com.github.yizzuide.milkomeda.universe.config.MilkomedaProperties;
 import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -28,8 +29,13 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.context.annotation.AnnotationBeanNameGenerator;
+import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.lang.NonNull;
+import org.springframework.util.CollectionUtils;
+
+import java.util.List;
 
 /**
  * The processor used for registry bean definition early.
@@ -49,6 +55,21 @@ public class EarlyLoadBeanDefinitionRegistryPostProcessor implements BeanDefinit
         BeanDefinition beanDefinition = new RootBeanDefinition(ApplicationContextHolder.class);
         String beanName = AnnotationBeanNameGenerator.INSTANCE.generateBeanName(beanDefinition, registry);
         registry.registerBeanDefinition(beanName, beanDefinition);
+
+        // 加载其它配置的早期注册的Bean
+        ConfigurableEnvironment configurableEnvironment = ApplicationContextHolder.getPendingConfigurableEnvironment();
+        if(configurableEnvironment != null) {
+            MilkomedaProperties milkomedaProperties = Binder.get(configurableEnvironment).bind(MilkomedaProperties.PREFIX, MilkomedaProperties.class).get();
+            List<Class<?>> earlyRegisterBeans = milkomedaProperties.getEarlyRegisterBeans();
+            if (CollectionUtils.isEmpty(earlyRegisterBeans)) {
+                return;
+            }
+            earlyRegisterBeans.forEach(clazz -> {
+                BeanDefinition earlyBeanDefinition = new RootBeanDefinition(clazz);
+                String earlyBeanName = AnnotationBeanNameGenerator.INSTANCE.generateBeanName(earlyBeanDefinition, registry);
+                registry.registerBeanDefinition(earlyBeanName, earlyBeanDefinition);
+            });
+        }
     }
 
     @Override

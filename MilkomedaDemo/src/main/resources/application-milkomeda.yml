@@ -9,6 +9,8 @@ milkomeda:
   # 自定义业务参数配置（可选，非框架使用）
   env:
     version: 1.0
+  early-register-beans:
+    - com.github.yizzuide.milkomeda.demo.universe.EarlyConfigLoader
 
   comet:
     # 读取请求body里的json数据需要开启（默认不开启）

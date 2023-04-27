@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 yizzuide All rights Reserved.
+ * Copyright (c) 2023 yizzuide All rights Reserved.
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -19,41 +19,23 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.universe.config;
+package com.github.yizzuide.milkomeda.demo.universe;
 
-import lombok.Data;
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import lombok.extern.slf4j.Slf4j;
 
-import java.util.List;
-import java.util.Map;
+import javax.annotation.PostConstruct;
 
 /**
- * EchoProperties
+ * EarlyConfigLoader
  *
  * @author yizzuide
- * @since 1.13.2
  * <br>
- * Create at 2019/09/27 18:36
+ * Create at 2023/04/27 22:54
  */
-@Data
-@ConfigurationProperties(MilkomedaProperties.PREFIX)
-public class MilkomedaProperties {
-
-    public static final String PREFIX = "milkomeda";
-
-    /**
-     * 是否显示日志，默认为false
-     */
-    private boolean showLog = false;
-
-    /**
-     * 自定义参数配置，用于SpEl的<code>#env</code>读取
-     */
-    private Map<String, String> env;
-
-    /**
-     * 提前注册的Bean（可以在其它@Bean之前注册）
-     * @since 3.15.0
-     */
-    private List<Class<?>> earlyRegisterBeans;
+@Slf4j
+public class EarlyConfigLoader {
+    @PostConstruct
+    public void init() {
+        log.info("早期注册Bean初始化");
+    }
 }
