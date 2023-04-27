@@ -21,7 +21,6 @@
 
 package com.github.yizzuide.milkomeda.universe.config;
 
-import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import com.github.yizzuide.milkomeda.universe.context.WebContext;
 import com.github.yizzuide.milkomeda.universe.extend.env.Environment;
 import com.github.yizzuide.milkomeda.universe.extend.web.handler.DelegatingContextFilter;
@@ -60,14 +59,6 @@ public class MilkomedaContextConfig {
         Environment environment = new Environment();
         environment.putAll(properties.getEnv());
         return environment;
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public ApplicationContextHolder applicationContextHolder(Environment env) {
-        ApplicationContextHolder applicationContextHolder = new ApplicationContextHolder();
-        ApplicationContextHolder.setEnvironment(env);
-        return applicationContextHolder;
     }
 
     @Autowired

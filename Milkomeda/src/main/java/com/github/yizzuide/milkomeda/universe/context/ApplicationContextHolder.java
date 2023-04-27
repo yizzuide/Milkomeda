@@ -48,8 +48,8 @@ public class ApplicationContextHolder implements ApplicationContextAware {
     @Getter
     private ApplicationContext applicationContext;
 
-
-    public ApplicationContextHolder() {
+    public ApplicationContextHolder(Environment environment) {
+        ApplicationContextHolder.environment = environment;
         INSTANCE = this;
     }
 

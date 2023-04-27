@@ -1,6 +1,9 @@
 # Auto Configure
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=com.github.yizzuide.milkomeda.universe.config.MilkomedaAutoConfiguration
 
+# Context Initializer
+org.springframework.context.ApplicationContextInitializer=com.github.yizzuide.milkomeda.universe.config.MilkomedaContextInitializer
+
 # Environment Post Processors
 org.springframework.boot.env.EnvironmentPostProcessor=\
 com.github.yizzuide.milkomeda.universe.extend.env.CustomPropertySourceLocator

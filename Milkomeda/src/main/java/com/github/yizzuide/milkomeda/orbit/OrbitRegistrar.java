@@ -58,7 +58,7 @@ public class OrbitRegistrar implements ImportBeanDefinitionRegistrar {
 
     private final Environment environment;
 
-    // Spring会自动传入Environment参数，调用这个构造器
+    // 注入Environment
     OrbitRegistrar(Environment environment) {
         this.environment = environment;
     }

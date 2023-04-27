@@ -37,7 +37,7 @@ import java.util.Set;
 
 /**
  * MetalContainer
- * 配置容器，不推荐直接使用该类API，因为有线程安全问题，应该使用 {@link MetalHolder}
+ * 配置信息容器，不推荐直接使用该类API，因为有线程安全问题，应该使用 {@link MetalHolder}
  *
  * @author yizzuide
  * @since 3.6.0

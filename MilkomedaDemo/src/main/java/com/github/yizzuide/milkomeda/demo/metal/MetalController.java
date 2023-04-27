@@ -48,7 +48,7 @@ public class MetalController {
         return "OK";
     }
 
-    // 监听平台名修改
+    // 监听配置的修改
     @EventListener(condition = "event.key == 'platform'")
     public void handlePlatformChange(MetalChangeEvent event) {
         log.info("handlePlatformChange: {}", event);
