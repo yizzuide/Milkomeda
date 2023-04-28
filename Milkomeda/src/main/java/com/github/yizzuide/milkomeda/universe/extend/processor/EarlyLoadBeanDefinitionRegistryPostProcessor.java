@@ -40,18 +40,22 @@ import java.util.List;
 /**
  * The processor used for registry bean definition early.
  *
+ * @see org.springframework.context.annotation.ConfigurationClassPostProcessor
+ * @see org.springframework.beans.factory.config.BeanFactoryPostProcessor
+ * @see org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor
  * @since 3.15.0
  * @author yizzuide
  * <br>
  * Create at 2023/04/27 20:44
  */
 // BeanDefinitionRegistryPostProcessor是BeanFactoryPostProcessor子接口，而postProcessBeanDefinitionRegistry方法比postProcessBeanFactory调用更早，
-//  BeanDefinitionRegistryPostProcessor用于自定义注册BeanDefinition。
+//  处理BeanFactoryPostProcessor流程：AbstractApplicationContext.refresh() ->
+//      invokeBeanFactoryPostProcessors() -> PostProcessorRegistrationDelegate.invokeBeanFactoryPostProcessors()
 public class EarlyLoadBeanDefinitionRegistryPostProcessor implements BeanDefinitionRegistryPostProcessor {
 
     @Override
     public void postProcessBeanDefinitionRegistry(@NonNull BeanDefinitionRegistry registry) throws BeansException {
-        // 将ApplicationContextHolder提前到四个Spring内部Bean后加载
+        // 将ApplicationContextHolder排在四个Spring内部Processor Bean后面注册
         BeanDefinition beanDefinition = new RootBeanDefinition(ApplicationContextHolder.class);
         String beanName = AnnotationBeanNameGenerator.INSTANCE.generateBeanName(beanDefinition, registry);
         registry.registerBeanDefinition(beanName, beanDefinition);

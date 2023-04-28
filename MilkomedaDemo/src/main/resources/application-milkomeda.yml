@@ -351,7 +351,7 @@ milkomeda:
       original-name-as-index-zero: true
       # 分库、分库分表需要的节点配置（仅分表不需要配置）
       nodes:
-        # 一个主、从配置为一个节点，节点名与拆分key相关（从库可选配置）
+        # 一个主、从配置为一个节点(节点索引以0开始)，节点索引与路由key相关（从库可选配置）
         node_0:
           # spring.datasource配置的默认会生成master数据源实例
           leader: master

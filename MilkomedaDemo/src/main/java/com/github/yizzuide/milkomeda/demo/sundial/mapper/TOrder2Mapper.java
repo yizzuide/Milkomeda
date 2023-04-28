@@ -16,8 +16,8 @@ import java.util.List;
 public interface TOrder2Mapper {
 
     // ShardingType.TABLE：仅分表
-    // partExp：分表表达式
-    //  - table: 内部会解析表名
+    // partExp/nodeExp：分表/分库表达式
+    //  - table: 表名占位符，内部会解析真实的表名（仅用于分表）
     //  - p为参数:
     //      - 当只一个参数，p为这个对象的引用
     //      - 当为多个参数时，p为一个Map，通过p['key']来获到值
@@ -26,8 +26,9 @@ public interface TOrder2Mapper {
     //      - 自定义序列号截取：seq
     //      - 定制序列号截取: id（需要通过ShardingId类生成）
     //      - 一致性Hash函数：ketama、fnv、murmur
+    //          参数：key（路由Key）、nodeCount（节点总数）、replicas（复制的虚拟节点）
     //      - 自定义Hash函数：hash
-    //          1. 调用前注册：CachedConsistentHashRing.getInstance().register("hashName", HashFunc实现);
+    //          1. 调用前注册：CachedConsistentHashRing.getInstance().register("hashName", HashFunc实例);
     //          2. 表达式调用：fn.hash("hashName", key, nodeCount, replicas)
 //    @Sundial(shardingType = ShardingType.TABLE, partExp = "fn.format(table + '_%03d', fn.ketama(p.orderNo, 2, 4))")
     // ShardingType.SCHEMA：仅分库
