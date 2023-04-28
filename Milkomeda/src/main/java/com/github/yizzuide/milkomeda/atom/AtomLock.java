@@ -45,19 +45,19 @@ public @interface AtomLock {
     String key() default "";
 
     /**
-     * 等待获取锁时间ms
+     * 等待获取锁时间ms（ETCD不支持设置）
      * @return -1等待直到获取锁
      */
     long waitTime() default -1;
 
     /**
-     * 自动释放锁时间ms（ZK不需要这个特性）
+     * 自动释放锁时间ms（ZK不需要这个特性，断开就删除节点）
      * @return -1不自动释放锁
      */
     long leaseTime() default 60000;
 
     /**
-     * 加锁类型（ZK仅支持公平锁、读写锁）
+     * 加锁类型（ZK仅支持公平锁、读写锁，ETCD不支持设置）
      * @return AtomLockType
      */
     AtomLockType type() default AtomLockType.FAIR;

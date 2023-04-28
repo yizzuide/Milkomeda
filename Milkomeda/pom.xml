@@ -18,6 +18,7 @@
         <mybatis.starter.version>3.0.0</mybatis.starter.version>
         <mybatis-plus.version>3.5.2</mybatis-plus.version>
         <redission.version>3.18.0</redission.version>
+        <jetcd.version>0.7.5</jetcd.version>
         <jsqlparser.version>4.5</jsqlparser.version>
         <jwt.version>0.9.1</jwt.version>
         <commons-beanutils.version>1.9.4</commons-beanutils.version>
@@ -195,6 +196,12 @@
         <dependency>
             <groupId>org.apache.curator</groupId>
             <artifactId>curator-recipes</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>io.etcd</groupId>
+            <artifactId>jetcd-core</artifactId>
+            <version>${jetcd.version}</version>
             <optional>true</optional>
         </dependency>
         <dependency>

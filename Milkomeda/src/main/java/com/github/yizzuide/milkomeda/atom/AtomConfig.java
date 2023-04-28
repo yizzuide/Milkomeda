@@ -35,6 +35,6 @@ import org.springframework.context.annotation.Import;
  * Create at 2020/04/30 15:13
  */
 @Configuration
-@Import({RedisAtomConfig.class, ZkAtomConfig.class, OrbitConfig.class})
+@Import({EtcdAtomConfig.class, RedisAtomConfig.class, ZkAtomConfig.class, OrbitConfig.class})
 public class AtomConfig {
 }

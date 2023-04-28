@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 yizzuide All rights Reserved.
+ * Copyright (c) 2023 yizzuide All rights Reserved.
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -21,17 +21,45 @@
 
 package com.github.yizzuide.milkomeda.atom;
 
+import io.etcd.jetcd.Client;
+import io.etcd.jetcd.Lease;
+import io.etcd.jetcd.Lock;
+import lombok.Data;
+
 /**
- * Distributed lock strategy type which can support.
+ * Simple warp with Etcd client and addition info.
  *
+ * @see 3.15.0
  * @author yizzuide
- * @since 3.3.0
- * @version
  * <br>
- * Create at 2020/04/30 15:26
+ * Create at 2023/04/29 01:50
  */
-public enum AtomStrategyType {
-    ETCD,
-    REDIS,
-    ZK
+@Data
+public class EtcdClientInfo {
+    /**
+     * Etcd client.
+     */
+    private Client client;
+
+    /**
+     * Etcd lock client.
+     */
+    private Lock lockClient;
+
+    /**
+     * Etcd lease client.
+     */
+    private Lease leaseClient;
+
+    /**
+     * Etcd root lock key.
+     */
+    private String rootLockNode;
+
+    public EtcdClientInfo(Client client, String rootLockNode) {
+        this.client = client;
+        this.lockClient = client.getLockClient();
+        this.leaseClient = client.getLeaseClient();
+        this.rootLockNode = rootLockNode;
+    }
 }
