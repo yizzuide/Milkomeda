@@ -319,15 +319,16 @@ milkomeda:
   # 分布式锁
   atom:
     # 使用方案类型，支持目前的主流方案：Etcd、Redis、Zookeeper
-    strategy: redis
-    redis:
+    #strategy: redis
+    # 策略配置（Redis的连接使用Springboot的配置）
+    #redis:
       # 是否使用集群
-      use-cluster: false
+      #use-cluster: false
 
-    #strategy: etcd
-    #etcd:
-      #endpoint-url: http://127.0.0.1:3379
-      #root-lock-node: /mk/lock
+    strategy: etcd
+    etcd:
+      endpoint-url: http://127.0.0.1:3379
+      root-lock-node: /mk/lock
 
   ## 数据源配置
   sundial:

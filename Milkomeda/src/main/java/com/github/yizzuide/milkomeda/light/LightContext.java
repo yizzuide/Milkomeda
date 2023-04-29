@@ -23,18 +23,14 @@ package com.github.yizzuide.milkomeda.light;
 
 import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import com.github.yizzuide.milkomeda.universe.context.SpringContext;
+import io.netty.util.concurrent.FastThreadLocal;
 import lombok.Data;
 import org.springframework.context.ConfigurableApplicationContext;
 
 import java.io.Serializable;
 
 /**
- * LightContext
- * <p>
- * 线程缓存上下文，可以配合<code>LightCache</code>当作超级缓存，也可以单独使用
- * </p>
- * I：上下文id
- * E：上下文数据
+ * 线程缓存上下文，可以配合<code>LightCache</code>当作超级缓存，也可以单独使用。
  *
  * @since 1.9.0
  * @version 3.15.0
@@ -44,15 +40,14 @@ import java.io.Serializable;
  */
 @Data
 public class LightContext<ID, V> {
-    // 每个Thread对应ThreadLocalMap<ThreadLocal, value>
-    // 每个缓存实例都有自己的超级缓存
-    private final ThreadLocal<Spot<ID, V>> context;
+
+    private final FastThreadLocal<Spot<ID, V>> context;
 
     public LightContext() {
-        context = new ThreadLocal<>();
+        context = new FastThreadLocal<>();
     }
 
-    public LightContext(ThreadLocal<Spot<ID, V>> threadLocal) {
+    public LightContext(FastThreadLocal<Spot<ID, V>> threadLocal) {
         this.context = threadLocal;
     }
 

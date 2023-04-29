@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 yizzuide All rights Reserved.
+ * Copyright (c) 2023 yizzuide All rights Reserved.
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -22,32 +22,17 @@
 package com.github.yizzuide.milkomeda.atom;
 
 /**
- * Distributed lock strategy type which can support.
+ * Unlock exception.
  *
+ * @since 3.15.0
  * @author yizzuide
- * @since 3.3.0
- * @version 3.15.0
  * <br>
- * Create at 2020/04/30 15:26
+ * Create at 2023/04/29 16:36
  */
-public enum AtomStrategyType {
-    /**
-     * Redis strategy which is default.
-     */
-    REDIS,
+public class AtomUnLockException extends RuntimeException {
+    private static final long serialVersionUID = 1818244101533374602L;
 
-    /**
-     * Zookeeper strategy.
-     */
-    ZK,
-
-    /**
-     * Etcd strategy.
-     */
-    ETCD,
-
-    /**
-     * Custom strategy which need impl of {@link Atom} and register as bean.
-     */
-    Custom
+    public AtomUnLockException(String message) {
+        super(message);
+    }
 }

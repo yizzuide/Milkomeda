@@ -21,9 +21,10 @@
 
 package com.github.yizzuide.milkomeda.atom;
 
+import com.github.yizzuide.milkomeda.light.LightContext;
+import com.github.yizzuide.milkomeda.light.Spot;
 import com.github.yizzuide.milkomeda.universe.extend.env.Environment;
 import io.etcd.jetcd.ByteSequence;
-import io.etcd.jetcd.Lease;
 import io.etcd.jetcd.lock.LockResponse;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -33,8 +34,6 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -54,12 +53,12 @@ public class EtcdAtom implements Atom {
     @Autowired
     private EtcdClientInfo clientInfo;
 
-    // 监听线程池
+    // Lock监控线程池调度器
     @Autowired
     private ThreadPoolTaskScheduler taskScheduler;
 
-    // 本地线程锁
-    private final ConcurrentMap<Thread, LockData> threadLockData = new ConcurrentHashMap<>();
+    // 线程锁上下文
+    private final LightContext<String, LockData> lockLightContext = new LightContext<>();
 
     @Override
     public AtomLockInfo lock(String keyPath, Duration leaseTime, AtomLockType type, boolean readOnly) throws Exception {
@@ -68,9 +67,8 @@ public class EtcdAtom implements Atom {
 
     @Override
     public AtomLockInfo tryLock(String keyPath, AtomLockType type, boolean readOnly) throws Exception {
-        Thread currentThread = Thread.currentThread();
-        LockData existsLockData = threadLockData.get(currentThread);
-        // 支持可重入锁
+        Spot<String, LockData> lockDataSpot = lockLightContext.get();
+        LockData existsLockData = lockDataSpot == null ? null : lockDataSpot.getData();
         if (existsLockData != null && existsLockData.isLockSuccess()) {
             int lockCount = existsLockData.getLockCount().incrementAndGet();
             if (lockCount < 0) {
@@ -83,18 +81,16 @@ public class EtcdAtom implements Atom {
 
     @Override
     public AtomLockInfo tryLock(String keyPath, Duration waitTime, Duration leaseTime, AtomLockType type, boolean readOnly) throws Exception {
-        Thread currentThread = Thread.currentThread();
         String lockKey = clientInfo.getRootLockNode() + "/" + keyPath;
-        // 租约Id
-        long leaseId;
         // 租约时间
         long leaseTTL = leaseTime.getSeconds();
         try {
-            leaseId = clientInfo.getLeaseClient().grant(leaseTTL).get().getID();
+            // 租约Id
+            long leaseId = clientInfo.getLeaseClient().grant(leaseTTL).get().getID();
             // 续租心跳周期
             long period = leaseTTL - leaseTTL / 5;
-            // 启动定时续约
-            ScheduledFuture<?> scheduledFuture = taskScheduler.scheduleAtFixedRate(new KeepAliveTask(clientInfo.getLeaseClient(), leaseId),
+            // 启动续约监控
+            ScheduledFuture<?> scheduledFuture = taskScheduler.scheduleAtFixedRate(() -> clientInfo.getLeaseClient().keepAliveOnce(leaseId),
                     Instant.ofEpochMilli(0L),
                     Duration.ofSeconds(period));
             // 加锁
@@ -103,15 +99,16 @@ public class EtcdAtom implements Atom {
             if (lockResponse != null) {
                 lockPath = lockResponse.getKey().toString(StandardCharsets.UTF_8);
             }
+            Thread currentThread = Thread.currentThread();
             LockData lockData = new LockData(lockKey, currentThread);
             int lockCount = lockData.getLockCount().incrementAndGet();
             lockData.setLeaseId(leaseId);
-            lockData.setLockKeyPath(lockPath);
-            threadLockData.put(currentThread, lockData);
+            lockData.setLockedKeyPath(lockPath);
+            lockLightContext.set(new Spot<>(lockKey, lockData));
             lockData.setLockSuccess(true);
             lockData.setScheduledFuture(scheduledFuture);
             if (Environment.isShowLog()) {
-                log.info("thread[{}] locked on key: {}, lock count: {}", currentThread.getName(), lockData.getKey(), lockCount);
+                log.info("thread[{}] locked on key: {}, lock count: {}", currentThread.getName(), lockData.getLockedKey(), lockCount);
             }
             return AtomLockInfo.builder().isLocked(true).lock(lockData).build();
         } catch (InterruptedException | ExecutionException e) {
@@ -123,37 +120,35 @@ public class EtcdAtom implements Atom {
     @Override
     public void unlock(Object lock) throws Exception {
         LockData lockData = (LockData) lock;
-        Thread currentThread = lockData.getCurrentThread();
         int lockCount = lockData.getLockCount().decrementAndGet();
         if (lockCount > 0) {
             return;
         }
         if (lockCount < 0) {
-            // 如果有超过的解锁，设置默认值
-            lockData.getLockCount().set(0);
-            return;
+            throw new AtomUnLockException("Abnormal unlocking status for ETCD locks");
         }
         try {
-            // 正常释放锁
+            // 解锁
             String lockKey = lockData.getLockKey();
             if (lockKey != null) {
                 clientInfo.getLockClient().unlock(ByteSequence.from(lockKey.getBytes())).get();
             }
-            // 关闭续约的定时任务
+            // 关闭续约监控
             lockData.getScheduledFuture().cancel(true);
-            // 删除租约
+            // 删除锁
             if (lockData.getLeaseId() != 0L) {
                 clientInfo.getLeaseClient().revoke(lockData.getLeaseId());
             }
             lockData.setLockSuccess(false);
             if (Environment.isShowLog()) {
-                log.info("Thread[{}] closed lock with key: {}, lock count: {}", currentThread.getName(), lockData.getKey(), lockCount);
+                Thread currentThread = lockData.getCurrentThread();
+                log.info("Thread[{}] closed lock with key: {}, lock count: {}", currentThread.getName(), lockData.getLockedKey(), lockCount);
             }
         } catch (InterruptedException | ExecutionException e) {
             log.error("Etcd unlock error with msg: {}", e.getMessage(), e);
         } finally {
-            // 清空本地线程记录
-            threadLockData.remove(currentThread);
+            // 清空线程上下文
+            lockLightContext.remove();
         }
     }
 
@@ -164,43 +159,19 @@ public class EtcdAtom implements Atom {
     }
 
     @Data
-    static class KeepAliveTask implements Runnable {
-        /**
-         * 租约Client
-         */
-        private Lease leaseClient;
-
-        /**
-         * 租约ID
-         */
-        private long leaseId;
-
-        KeepAliveTask(Lease leaseClient, long leaseId) {
-            this.leaseClient = leaseClient;
-            this.leaseId = leaseId;
-        }
-
-        @Override
-        public void run() {
-            leaseClient.keepAliveOnce(leaseId);
-        }
-    }
-
-
-    @Data
     static class LockData {
         /**
-         * 加锁次数
+         * Remark lock count for support reentrant lock.
          */
         private AtomicInteger lockCount = new AtomicInteger(0);
 
         /**
-         * 当前锁线程
+         * Local thread which hold lock.
          */
         private Thread currentThread;
 
         /**
-         * 租约ID
+         * Etcd lease ID.
          */
         private long leaseId;
 
@@ -212,15 +183,15 @@ public class EtcdAtom implements Atom {
         /**
          * Etcd locked key path.
          */
-        private String lockKeyPath;
+        private String lockedKeyPath;
 
         /**
-         * 加锁是否成功
+         * Lock status for check lock is success.
          */
         private boolean lockSuccess;
 
         /**
-         * 线程调度引用
+         * Thread pool for watch and lease lock.
          */
         private ScheduledFuture<?> scheduledFuture;
 
@@ -229,8 +200,8 @@ public class EtcdAtom implements Atom {
             this.currentThread = currentThread;
         }
 
-        public String getKey() {
-            return lockKeyPath == null ? lockKey : lockKeyPath;
+        public String getLockedKey() {
+            return lockedKeyPath == null ? lockKey : lockedKeyPath;
         }
     }
 }
