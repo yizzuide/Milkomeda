@@ -21,6 +21,8 @@
 
 package com.github.yizzuide.milkomeda.universe.engine.el;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.context.expression.AnnotatedElementKey;
 import org.springframework.context.expression.MethodBasedEvaluationContext;
@@ -57,8 +59,11 @@ public class MethodExpressionEvaluator<T> extends AbstractExpressionEvaluator {
     public StandardEvaluationContext createEvaluationContext(Object object, Class<?> targetClass,
                                                              Method method, Object[] args) {
         Method targetMethod = getTargetMethod(targetClass, method);
+        // 封装方法根对象数据，表达式引用通过：root.* 和 args[x]
+        MethodBasedRootObject rootObject = new MethodBasedRootObject(object, args);
         // 创建基于方法的执行上下文
-        MethodBasedEvaluationContext evaluationContext = new MethodBasedEvaluationContext(object, targetMethod, args, this.paramNameDiscoverer);
+        MethodBasedEvaluationContext evaluationContext = new MethodBasedEvaluationContext(rootObject, targetMethod, args, this.paramNameDiscoverer);
+        // 注入其它变量
         configContext(evaluationContext, object);
         return evaluationContext;
     }
@@ -91,5 +96,22 @@ public class MethodExpressionEvaluator<T> extends AbstractExpressionEvaluator {
             this.targetMethodCache.put(methodKey, targetMethod);
         }
         return targetMethod;
+    }
+
+    /**
+     * Root object for method which current invoked.
+     * @since 3.15.0
+     */
+    @AllArgsConstructor
+    @Data
+    static class MethodBasedRootObject {
+        /**
+         * The root object is current method's target object.
+         */
+        private Object root;
+        /**
+         * The args is current method invoked.
+         */
+        private Object[] args;
     }
 }  

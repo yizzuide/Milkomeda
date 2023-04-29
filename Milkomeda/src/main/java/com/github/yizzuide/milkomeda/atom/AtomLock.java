@@ -45,7 +45,7 @@ public @interface AtomLock {
     String key() default "";
 
     /**
-     * 等待获取锁时间ms（ETCD不支持设置）
+     * 等待获取锁时间ms
      * @return -1等待直到获取锁
      */
     long waitTime() default -1;

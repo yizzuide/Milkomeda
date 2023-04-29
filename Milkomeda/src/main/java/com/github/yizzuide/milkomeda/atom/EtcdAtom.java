@@ -34,8 +34,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -72,7 +71,7 @@ public class EtcdAtom implements Atom {
         if (existsLockData != null && existsLockData.isLockSuccess()) {
             int lockCount = existsLockData.getLockCount().incrementAndGet();
             if (lockCount < 0) {
-                throw new Error("Exceeded the limit of reentrant times for ETCD locks");
+                throw new Error("Maximum lock count exceeded for ETCD locks");
             }
             return AtomLockInfo.builder().isLocked(true).lock(existsLockData).build();
         }
@@ -90,11 +89,14 @@ public class EtcdAtom implements Atom {
             // 续租心跳周期
             long period = leaseTTL - leaseTTL / 5;
             // 启动续约监控
+            // Etcd分布式锁的有效时间是租约的有效时间，在等待获取锁的过程中可能租约会过期，所以得在获取租约后就得开启守护线程
             ScheduledFuture<?> scheduledFuture = taskScheduler.scheduleAtFixedRate(() -> clientInfo.getLeaseClient().keepAliveOnce(leaseId),
                     Instant.ofEpochMilli(0L),
                     Duration.ofSeconds(period));
             // 加锁
-            LockResponse lockResponse = clientInfo.getLockClient().lock(ByteSequence.from(lockKey.getBytes()), leaseId).get();
+            CompletableFuture<LockResponse> future = clientInfo.getLockClient().lock(ByteSequence.from(lockKey.getBytes()), leaseId);
+            LockResponse lockResponse = waitTime == null ? future.get() : future.get(waitTime.toMillis(), TimeUnit.MILLISECONDS);
+
             String lockPath = null;
             if (lockResponse != null) {
                 lockPath = lockResponse.getKey().toString(StandardCharsets.UTF_8);
@@ -113,6 +115,7 @@ public class EtcdAtom implements Atom {
             return AtomLockInfo.builder().isLocked(true).lock(lockData).build();
         } catch (InterruptedException | ExecutionException e) {
             log.error("Etcd lock error with msg: {}", e.getMessage(), e);
+        } catch (TimeoutException ignore) { // fast fail!
         }
         return AtomLockInfo.builder().isLocked(false).lock(null).build();
     }
