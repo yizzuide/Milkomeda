@@ -67,12 +67,12 @@ public class CometCollectorProperties {
         /**
          * 匹配包含的路径
          */
-        private List<String> include;
+        private List<String> includeUrls;
 
         /**
          * 排除路径
          */
-        private List<String> exclude;
+        private List<String> excludeUrls;
 
 
         /**

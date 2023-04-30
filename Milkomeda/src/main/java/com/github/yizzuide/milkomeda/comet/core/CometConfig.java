@@ -29,6 +29,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
@@ -87,6 +88,12 @@ public class CometConfig {
     @Bean
     public CometInterceptor cometInterceptor() {
         return new CometInterceptor();
+    }
+
+    @Bean
+    @ConditionalOnProperty(prefix = "milkomeda.comet.xss", name = "prevent", havingValue = "true")
+    public CometXssRequestInterceptor cometXssRequestInterceptor() {
+        return new CometXssRequestInterceptor();
     }
 
     @Bean

@@ -35,7 +35,7 @@ import org.springframework.core.annotation.AnnotationUtils;
 import java.time.Duration;
 
 /**
- * This advice listen which {@link AtomLock} on method has invoked.
+ * This advice listen on method which annotated {@link AtomLock} has invoked.
  *
  * @since 3.15.0
  * @author yizzuide

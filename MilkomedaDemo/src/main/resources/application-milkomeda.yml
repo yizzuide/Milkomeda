@@ -17,6 +17,12 @@ milkomeda:
     enable-read-request-body: true
     # 读取Response直接写出的内容时需要开启
     enable-read-response-body: true
+    # 开启XSS保护
+    xss:
+      prevent: true
+      # Form表单字段名白名单
+      #white-field-names: ["content", "*WithHtml"]
+      include-urls: ["/collect/usage"]
     # 统一请求日志打印
     logger:
       enable: true
@@ -40,7 +46,7 @@ milkomeda:
       enable-tag: true
       tags:
         product-tag:
-          include: ["/collect/product/*"]
+          include-urls: ["/collect/product/*"]
           # 异常监控：由于异常可能被 @ControllerAdvice 吞没，拦截器就获取不到异常
           exception-monitor:
             # 忽略正常的响应，业务标识字段为code

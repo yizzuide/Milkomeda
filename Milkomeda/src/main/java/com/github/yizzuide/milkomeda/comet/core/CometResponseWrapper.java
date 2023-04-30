@@ -79,7 +79,7 @@ public class CometResponseWrapper extends HttpServletResponseWrapper {
             beanProvider.forEach(INTERCEPTOR_LIST::add);
             if (!CollectionUtils.isEmpty(INTERCEPTOR_LIST)) {
                 INTERCEPTOR_LIST = INTERCEPTOR_LIST.stream()
-                        .sorted(OrderComparator.INSTANCE.withSourceProvider(inter -> inter)).collect(Collectors.toList());
+                        .sorted(OrderComparator.INSTANCE.withSourceProvider(itr -> itr)).collect(Collectors.toList());
             }
         }
     }

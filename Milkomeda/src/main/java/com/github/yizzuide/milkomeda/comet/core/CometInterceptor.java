@@ -308,12 +308,12 @@ public class CometInterceptor implements AsyncHandlerInterceptor, ApplicationCon
         String selectTag = null;
         Map<String, CometCollectorProperties.Tag> tagMap = cometCollectorProperties.getTags();
         for (Map.Entry<String, CometCollectorProperties.Tag> tag : tagMap.entrySet()) {
-            if (!CollectionUtils.isEmpty(tag.getValue().getExclude())) {
-                if (URLPathMatcher.match(tag.getValue().getExclude(), request.getRequestURI())) {
+            if (!CollectionUtils.isEmpty(tag.getValue().getExcludeUrls())) {
+                if (URLPathMatcher.match(tag.getValue().getExcludeUrls(), request.getRequestURI())) {
                     continue;
                 }
             }
-            if (URLPathMatcher.match(tag.getValue().getInclude(), request.getRequestURI())) {
+            if (URLPathMatcher.match(tag.getValue().getIncludeUrls(), request.getRequestURI())) {
                 selectTag = tag.getKey();
                 break;
             }

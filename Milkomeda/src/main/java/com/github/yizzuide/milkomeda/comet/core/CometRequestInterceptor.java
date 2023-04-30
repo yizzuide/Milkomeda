@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 yizzuide All rights Reserved.
+ * Copyright (c) 2023 yizzuide All rights Reserved.
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -19,40 +19,29 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.util;
+package com.github.yizzuide.milkomeda.comet.core;
+
+import org.springframework.core.PriorityOrdered;
+import org.springframework.lang.Nullable;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
- * HttpServletUtil
+ * Comet request wrapper interceptor.
  *
+ * @since 3.15.0
  * @author yizzuide
- * @since 0.2.0
- * @version 3.0.0
  * <br>
- * Create at 2019/04/11 20:10
+ * Create at 2023/05/01 02:59
  */
-public class HttpServletUtil {
+public interface CometRequestInterceptor extends PriorityOrdered {
     /**
-     * 获取请求参数 转换成 json字符串
-     *
-     * @param request HttpServletRequest
-     * @return json字符串
+     * Invoked when read value from request.
+     * @param originalRequest   HttpServletRequest
+     * @param formName single form name
+     * @param formValue single form value
+     * @param body  request body
+     * @return modify value
      */
-    public static String getRequestData(HttpServletRequest request) {
-        Map<String, Object> inputs = new HashMap<>();
-        for (Map.Entry<String, String[]> paramEntry : request.getParameterMap().entrySet()) {
-            String[] value = paramEntry.getValue();
-            if (value == null) {
-                inputs.put(paramEntry.getKey(), "");
-            } else if (value.length == 1) {
-                inputs.put(paramEntry.getKey(), value[0]);
-            } else {
-                inputs.put(paramEntry.getKey(), value);
-            }
-        }
-        return JSONUtil.serialize(inputs);
-    }
+    String readFromRequest(HttpServletRequest originalRequest, @Nullable String formName, @Nullable String formValue, @Nullable String body);
 }

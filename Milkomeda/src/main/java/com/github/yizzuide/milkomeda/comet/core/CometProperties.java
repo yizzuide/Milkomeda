@@ -24,6 +24,9 @@ package com.github.yizzuide.milkomeda.comet.core;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+import java.util.Collections;
+import java.util.List;
+
 /**
  * CometProperties
  *
@@ -57,4 +60,33 @@ public class CometProperties {
      * 失败状态码
      */
     private String statusFailCode = "2";
+
+    /**
+     * Web XSS protection.
+     * @since 3.15.0
+     */
+    private Xss xss = new Xss();
+
+    @Data
+    static class Xss {
+        /**
+         * Enable XSS prevent.
+         */
+        private boolean prevent = false;
+
+        /**
+         * White filed names is not prevent (only support form submit type).
+         */
+        private List<String> whiteFieldNames;
+
+        /**
+         * URL list need prevent.
+         */
+        private List<String> includeUrls = Collections.singletonList("/**");
+
+        /**
+         * URL list not prevent.
+         */
+        private List<String> excludeUrls;
+    }
 }

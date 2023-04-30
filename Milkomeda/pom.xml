@@ -22,6 +22,7 @@
         <jsqlparser.version>4.5</jsqlparser.version>
         <jwt.version>0.9.1</jwt.version>
         <commons-beanutils.version>1.9.4</commons-beanutils.version>
+        <jsoup.version>1.9.2</jsoup.version>
         <ognl.version>3.3.4</ognl.version>
     </properties>
 
@@ -232,6 +233,11 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-pool2</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jsoup</groupId>
+            <artifactId>jsoup</artifactId>
+            <version>${jsoup.version}</version>
         </dependency>
         <dependency>
             <groupId>ognl</groupId>

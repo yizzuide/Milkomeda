@@ -21,10 +21,14 @@
 
 package com.github.yizzuide.milkomeda.comet.core;
 
+import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import com.github.yizzuide.milkomeda.util.HttpServletUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.catalina.connector.ClientAbortException;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.core.OrderComparator;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.util.WebUtils;
 
 import javax.servlet.ReadListener;
@@ -35,6 +39,11 @@ import javax.servlet.http.HttpServletRequestWrapper;
 import java.io.*;
 import java.net.SocketTimeoutException;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * CometRequestWrapper
@@ -42,7 +51,7 @@ import java.nio.charset.Charset;
  *
  * @author yizzuide
  * @since 2.0.0
- * @version 3.5.0
+ * @version 3.15.0
  * @see org.springframework.web.util.ContentCachingRequestWrapper
  * <br>
  * Create at 2019/12/12 17:37
@@ -50,104 +59,83 @@ import java.nio.charset.Charset;
 @Slf4j
 public class CometRequestWrapper extends HttpServletRequestWrapper {
     /**
-     * 用于可重复获取
+     * Cache request body data.
      */
-    private final byte[] body;
+    private byte[] body;
 
-    public CometRequestWrapper(HttpServletRequest request) throws IOException {
-        super(request);
-        // 将body数据存储起来
-        String bodyStr = getBodyString(request);
-        if (StringUtils.isEmpty(bodyStr)) {
-            body = new byte[0];
-            return;
-        }
-        body = bodyStr.getBytes(Charset.defaultCharset());
-    }
+    private final HttpServletRequest originalRequest;
+
+    // 请求拦截器
+    private static List<CometRequestInterceptor> INTERCEPTOR_LIST;
 
     /**
-     * 获取请求参数
+     * Create Request wrapper for intercept or cache body.
      * @param request   HttpServletRequest
-     * @param formBody  是否从消息体获取
-     * @return  JSON格式化字符串
-     * @since 3.0.3
+     * @param cacheBody enable cache body
      */
-    public static String resolveRequestParams(HttpServletRequest request, boolean formBody) {
-        String requestData = HttpServletUtil.getRequestData(request);
-        // 如果form方式获取为空，取消息体内容
-        if (formBody && "{}".equals(requestData)) {
-            CometRequestWrapper requestWrapper = WebUtils.getNativeRequest(request, CometRequestWrapper.class);
-            if (requestWrapper == null) {
-                return requestData;
+    public CometRequestWrapper(HttpServletRequest request, boolean cacheBody) {
+        super(request);
+        originalRequest = request;
+        // 将body数据存储起来
+        if (cacheBody) {
+            String bodyStr = getBodyString(request);
+            if (StringUtils.isEmpty(bodyStr)) {
+                body = new byte[0];
+                return;
             }
-            // 从请求包装里获取
-            String body = requestWrapper.getBodyString();
-            // 删除换行符
-            body = body == null ? "" : body.replaceAll("\\n?\\t?", "");
-           return body;
+            body = bodyStr.getBytes(Charset.defaultCharset());
         }
-        return requestData;
-    }
 
-    /**
-     * 获取请求Body
-     *
-     * @param request request
-     * @return String
-     */
-    public String getBodyString(final ServletRequest request) {
-        try {
-            return inputStream2String(request.getInputStream());
-        } catch (IOException e) {
-            log.error("Comet get input stream error:{}", e.getMessage(), e);
-            throw new RuntimeException(e);
+        // 加载请求拦截器
+        if (INTERCEPTOR_LIST == null) {
+            INTERCEPTOR_LIST = new ArrayList<>();
+            ObjectProvider<CometRequestInterceptor> beanProvider = ApplicationContextHolder.get().getBeanProvider(CometRequestInterceptor.class);
+            beanProvider.forEach(INTERCEPTOR_LIST::add);
+            if (!CollectionUtils.isEmpty(INTERCEPTOR_LIST)) {
+                INTERCEPTOR_LIST = INTERCEPTOR_LIST.stream()
+                        .sorted(OrderComparator.INSTANCE.withSourceProvider(itr -> itr)).collect(Collectors.toList());
+            }
         }
     }
 
-    /**
-     * 获取请求Body
-     *
-     * @return String
-     */
-    public String getBodyString() {
-        final InputStream inputStream = new ByteArrayInputStream(body);
-        return inputStream2String(inputStream);
+    @Override
+    public String getParameter(String name) {
+        String value = super.getParameter(name);
+        if (CollectionUtils.isEmpty(INTERCEPTOR_LIST)) {
+            return value;
+        }
+        return interceptRequest(name, value, null);
     }
 
-    /**
-     * 将流里的数据读取出来并转换成字符串
-     *
-     * @param inputStream inputStream
-     * @return String
-     */
-    private String inputStream2String(InputStream inputStream) {
-        StringBuilder sb = new StringBuilder();
-        BufferedReader reader = null;
-        try {
-            // 如果消息体没有数据
-            if (inputStream == null) {
-                return null;
-            }
-            reader = new BufferedReader(new InputStreamReader(inputStream, Charset.defaultCharset()));
-            String line;
-            while ((line = reader.readLine()) != null) {
-                sb.append(line);
-            }
-        } catch (ClientAbortException | SocketTimeoutException ignore) {
-            return null;
-        } catch (IOException e) {
-            log.error("Comet read input stream error:{}", e.getMessage(), e);
-            throw new RuntimeException(e);
-        } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (IOException e) {
-                    log.error("Comet close input stream error:{}", e.getMessage(), e);
-                }
-            }
+    @Override
+    public String[] getParameterValues(String name) {
+        String[] values = super.getParameterValues(name);
+        if (values == null || CollectionUtils.isEmpty(INTERCEPTOR_LIST)) {
+            return values;
         }
-        return sb.toString();
+        for (int i=0; i < values.length; i++) {
+            values[i] = interceptRequest(name, values[i], null);
+        }
+        return values;
+    }
+
+    @Override
+    public Map<String, String[]> getParameterMap() {
+        Map<String, String[]> parameterMap = super.getParameterMap();
+        if (CollectionUtils.isEmpty(parameterMap) || CollectionUtils.isEmpty(INTERCEPTOR_LIST)) {
+            return parameterMap;
+        }
+        Map<String, String[]> modifyParamMap = new HashMap<>(parameterMap);
+        modifyParamMap.keySet().forEach(key -> modifyParamMap.replace(key, getParameterValues(key)));
+        return modifyParamMap;
+    }
+
+    // 在返回值前拦截
+    private String interceptRequest(String name, String value, String body) {
+        for (CometRequestInterceptor interceptor: INTERCEPTOR_LIST) {
+            value = interceptor.readFromRequest(originalRequest, name, value, body);
+        }
+        return value;
     }
 
     @Override
@@ -181,5 +169,87 @@ public class CometRequestWrapper extends HttpServletRequestWrapper {
             public void setReadListener(ReadListener readListener) {
             }
         };
+    }
+
+    /**
+     * 获取请求参数
+     * @param request   HttpServletRequest
+     * @param formBody  是否从消息体获取
+     * @return  JSON格式化字符串
+     * @since 3.0.3
+     */
+    public static String resolveRequestParams(HttpServletRequest request, boolean formBody) {
+        CometRequestWrapper requestWrapper = WebUtils.getNativeRequest(request, CometRequestWrapper.class);
+        if (requestWrapper == null) {
+            request = new CometRequestWrapper(request, false);
+        }
+        String requestData = HttpServletUtil.getRequestData(request);
+        // 如果form方式获取为空，取消息体内容
+        if (formBody && "{}".equals(requestData)) {
+            if (requestWrapper == null) {
+                return requestData;
+            }
+            // 从请求包装里获取
+            String body = requestWrapper.getBodyString();
+            // 删除换行符
+            body = body == null ? "" : body.replaceAll("\\n?\\t?", "");
+            return body;
+        }
+        return requestData;
+    }
+
+    /**
+     * 获取请求Body
+     *
+     * @return String
+     */
+    public String getBodyString() {
+        final InputStream inputStream = new ByteArrayInputStream(body);
+        return inputStream2String(inputStream);
+    }
+
+    /**
+     * 获取请求Body
+     *
+     * @param request request
+     * @return String
+     */
+    private String getBodyString(final ServletRequest request) {
+        try {
+            return inputStream2String(request.getInputStream());
+        } catch (IOException e) {
+            log.error("Comet get input stream error:{}", e.getMessage(), e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * 将流里的数据读取出来并转换成字符串
+     *
+     * @param inputStream inputStream
+     * @return String
+     */
+    private String inputStream2String(InputStream inputStream) {
+        // 如果消息体没有数据
+        if (inputStream == null) {
+            return null;
+        }
+        StringBuilder sb = new StringBuilder();
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, Charset.defaultCharset()))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                sb.append(line);
+            }
+        } catch (ClientAbortException | SocketTimeoutException ignore) {
+            return null;
+        } catch (IOException e) {
+            log.error("Comet read input stream error with msg: {}", e.getMessage(), e);
+            throw new RuntimeException(e);
+        }
+        String body = sb.toString();
+        if (CollectionUtils.isEmpty(INTERCEPTOR_LIST)) {
+            return body;
+        }
+        return interceptRequest(null, null, body);
     }
 }

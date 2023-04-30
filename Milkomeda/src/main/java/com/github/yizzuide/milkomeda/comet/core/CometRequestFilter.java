@@ -58,7 +58,7 @@ public class CometRequestFilter implements Filter {
         if (CometHolder.shouldWrapRequest()) {
             // 如果有Form表单数据则不读取body，交给SpringMVC框架处理（但@CometParam功能仍然有效）
             if (CollectionUtils.isEmpty(servletRequest.getParameterMap())) {
-                requestWrapper = new CometRequestWrapper((HttpServletRequest) servletRequest);
+                requestWrapper = new CometRequestWrapper((HttpServletRequest) servletRequest, true);
             }
         }
         boolean enableAddResponseWrapper = CometHolder.shouldWrapResponse();
