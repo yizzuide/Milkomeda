@@ -21,12 +21,10 @@
 
 package com.github.yizzuide.milkomeda.comet.core;
 
-import com.github.yizzuide.milkomeda.universe.parser.url.URLPathMatcher;
+import lombok.Setter;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.safety.Whitelist;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.Ordered;
 import org.springframework.util.CollectionUtils;
 
 import javax.servlet.http.HttpServletRequest;
@@ -40,11 +38,10 @@ import java.util.List;
  * <br>
  * Create at 2023/05/01 04:28
  */
-@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
-public class CometXssRequestInterceptor implements CometRequestInterceptor {
+public class CometXssRequestInterceptor extends AbstractCometRequestInterceptor {
 
-    @Autowired
-    private CometProperties cometProperties;
+    // 拦截器名
+    public static final String INTERCEPTOR_NAME = "xss";
 
     // 允许常用显示型html标签
     private static final Whitelist whitelist = Whitelist.basicWithImages();
@@ -52,29 +49,22 @@ public class CometXssRequestInterceptor implements CometRequestInterceptor {
     // 输出不格式化
     private static final Document.OutputSettings outputSettings = new Document.OutputSettings().prettyPrint(false);
 
+    /**
+     * White filed names is not prevent (only support form submit type).
+     */
+    @Setter
+    private List<String> whiteFieldNames;
+
     static {
         // 标签可以带有style属性
         whitelist.addAttributes(":all", "style");
     }
 
     @Override
-    public String readFromRequest(HttpServletRequest originalRequest, String formName, String formValue, String body) {
-        String originalValue = formValue == null ? body : formValue;
-        if (originalValue == null) {
-            return originalValue;
-        }
-        if (!CollectionUtils.isEmpty(cometProperties.getXss().getExcludeUrls())) {
-            if (URLPathMatcher.match(cometProperties.getXss().getExcludeUrls(), originalRequest.getRequestURI())) {
-                return originalValue;
-            }
-        }
-        if (!URLPathMatcher.match(cometProperties.getXss().getIncludeUrls(), originalRequest.getRequestURI())) {
-            return originalValue;
-        }
+    protected String doReadRequest(HttpServletRequest request, String formName, String formValue, String body) {
         // 过滤Form表单项
         if (formValue != null) {
             // 匹配字段名，过滤白名单
-            List<String> whiteFieldNames = cometProperties.getXss().getWhiteFieldNames();
             if (!CollectionUtils.isEmpty(whiteFieldNames)) {
                 for (String whiteFieldName : whiteFieldNames) {
                     if (whiteFieldName.equals(formName)) {
@@ -88,7 +78,6 @@ public class CometXssRequestInterceptor implements CometRequestInterceptor {
                     }
                 }
             }
-
             return Jsoup.clean(formValue, "", whitelist, outputSettings);
         }
         // 过滤请求body
@@ -96,7 +85,7 @@ public class CometXssRequestInterceptor implements CometRequestInterceptor {
     }
 
     @Override
-    public int getOrder() {
-        return Ordered.HIGHEST_PRECEDENCE;
+    protected String interceptorName() {
+        return INTERCEPTOR_NAME;
     }
 }

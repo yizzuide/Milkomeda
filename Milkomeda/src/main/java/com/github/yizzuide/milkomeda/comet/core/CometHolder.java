@@ -24,12 +24,14 @@ package com.github.yizzuide.milkomeda.comet.core;
 import com.github.yizzuide.milkomeda.comet.collector.CometCollectorProperties;
 import com.github.yizzuide.milkomeda.comet.logger.CometLoggerProperties;
 
+import java.util.List;
+
 /**
  * CometHolder
  *
  * @author yizzuide
  * @since 3.0.0
- * @version 3.11.0
+ * @version 3.15.0
  * <br>
  * Create at 2020/03/28 12:42
  */
@@ -39,6 +41,8 @@ public class CometHolder {
     private static CometLoggerProperties logProps;
 
     private static CometCollectorProperties collectorProps;
+
+    private static List<CometRequestInterceptor> requestInterceptors;
 
     static void setProps(CometProperties props) {
         CometHolder.props = props;
@@ -62,6 +66,14 @@ public class CometHolder {
 
     static CometLoggerProperties getLogProps() {
         return logProps;
+    }
+
+    static void setRequestInterceptors(List<CometRequestInterceptor> requestInterceptors) {
+        CometHolder.requestInterceptors = requestInterceptors;
+    }
+
+    static List<CometRequestInterceptor> getRequestInterceptors() {
+        return requestInterceptors;
     }
 
     /**

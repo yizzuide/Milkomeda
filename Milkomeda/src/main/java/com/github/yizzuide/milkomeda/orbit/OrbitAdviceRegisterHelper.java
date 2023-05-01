@@ -21,14 +21,13 @@
 
 package com.github.yizzuide.milkomeda.orbit;
 
+import com.github.yizzuide.milkomeda.util.RecognizeUtil;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.util.ClassUtils;
 
-import java.beans.Introspector;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -57,8 +56,7 @@ public class OrbitAdviceRegisterHelper {
         // 根据BeanDefinition生成beanName
         //String adviceBeanName = AnnotationBeanNameGenerator.INSTANCE.generateBeanName(beanDefinition, (BeanDefinitionRegistry) beanFactory);
         // 根据类名生成beanName
-        String shortClassName = ClassUtils.getShortName(orbitAdvisor.getAdviceClass());
-        String adviceBeanName = Introspector.decapitalize(shortClassName);
+        String adviceBeanName = RecognizeUtil.getBeanName(orbitAdvisor.getAdviceClass());
         if (registry.containsBeanDefinition(adviceBeanName)) {
             BeanDefinition beanDefinition = registry.getBeanDefinition(adviceBeanName);
             Object adviceClass = beanDefinition.getPropertyValues().get("adviceClass");

@@ -17,12 +17,20 @@ milkomeda:
     enable-read-request-body: true
     # 读取Response直接写出的内容时需要开启
     enable-read-response-body: true
-    # 开启XSS保护
-    xss:
-      prevent: true
-      # Form表单字段名白名单
-      #white-field-names: ["content", "*WithHtml"]
-      include-urls: ["/collect/usage"]
+    request-interceptors:
+      # XSS注入过滤
+      xss:
+        enable: true
+        order: 1
+        include-urls: [ "/collect/usage" ]
+        props:
+          # Form表单字段名白名单
+          whiteFieldNames: ["content", "*WithHtml"]
+      # SQL注入过滤
+      sql-inject:
+        enable: true
+        order: 2
+        include-urls: [ "/collect/usage" ]
     # 统一请求日志打印
     logger:
       enable: true

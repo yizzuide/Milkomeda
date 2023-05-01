@@ -21,27 +21,37 @@
 
 package com.github.yizzuide.milkomeda.comet.core;
 
-import org.springframework.core.PriorityOrdered;
-import org.springframework.lang.Nullable;
-
 import javax.servlet.http.HttpServletRequest;
+import java.util.regex.Pattern;
 
 /**
- * Comet request wrapper interceptor.
+ * This request interceptor provide web sql inject protection.
  *
  * @since 3.15.0
  * @author yizzuide
  * <br>
- * Create at 2023/05/01 02:59
+ * Create at 2023/05/01 21:21
  */
-public interface CometRequestInterceptor extends PriorityOrdered {
-    /**
-     * Invoked when read value from request.
-     * @param request   HttpServletRequest
-     * @param formName single form name
-     * @param formValue single form value
-     * @param body  request body
-     * @return modify value
-     */
-    String readRequest(HttpServletRequest request, @Nullable String formName, @Nullable String formValue, @Nullable String body);
+public class CometSqlInjectRequestInterceptor extends AbstractCometRequestInterceptor {
+    public static final String INTERCEPTOR_NAME = "sql-inject";
+
+    private static final String SQL_REG_EXP = "\\b(and|or)\\b.{1,6}?(=|>|<|\\bin\\b|\\blike\\b)|\\/\\*.+?\\*\\/|<\\s*script\\b|\\bEXEC\\b|UNION.+?SELECT|UPDATE.+?SET|INSERT\\s+INTO.+?VALUES|(SELECT|DELETE).+?FROM|(CREATE|ALTER|DROP|TRUNCATE)\\s+(TABLE|DATABASE)";
+
+    @Override
+    protected String doReadRequest(HttpServletRequest request, String formName, String formValue, String body) {
+        String value = formValue == null ? body : formValue;
+        if (value == null) {
+            return value;
+        }
+        Pattern sqlPattern = Pattern.compile(SQL_REG_EXP, Pattern.CASE_INSENSITIVE);
+        if (sqlPattern.matcher(value.toLowerCase()).find()) {
+            throw new RuntimeException("Detected SQL injection with value: " + value);
+        }
+        return value;
+    }
+
+    @Override
+    protected String interceptorName() {
+        return INTERCEPTOR_NAME;
+    }
 }

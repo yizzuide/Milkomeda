@@ -21,11 +21,16 @@
 
 package com.github.yizzuide.milkomeda.util;
 
+import org.springframework.util.ClassUtils;
+
+import java.beans.Introspector;
+
 /**
- * RecognizeUtil
+ * 类型识别工具类
  *
  * @author yizzuide
  * @since 1.13.9
+ * @version 1.15.0
  * <br>
  * Create at 2019/10/29 15:49
  */
@@ -39,5 +44,16 @@ public class RecognizeUtil {
         return !(obj instanceof Byte || obj instanceof Boolean || obj instanceof CharSequence ||
                 obj instanceof Short || obj instanceof Integer || obj instanceof Long ||
                 obj instanceof Double || obj instanceof Float);
+    }
+
+    /**
+     * Get bean name from class.
+     * @param beanClass bean class
+     * @return  bean name
+     * @since 3.15.0
+     */
+    public static String getBeanName(Class<?> beanClass) {
+        String shortClassName = ClassUtils.getShortName(beanClass);
+        return Introspector.decapitalize(shortClassName);
     }
 }

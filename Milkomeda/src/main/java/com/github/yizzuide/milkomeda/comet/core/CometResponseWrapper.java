@@ -26,6 +26,7 @@ import com.github.yizzuide.milkomeda.universe.context.WebContext;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.core.OrderComparator;
+import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.FastByteArrayOutputStream;
@@ -69,19 +70,13 @@ public class CometResponseWrapper extends HttpServletResponseWrapper {
     @Nullable
     private Integer contentLength;
 
-    private static List<CometResponseInterceptor> INTERCEPTOR_LIST;
+    private static volatile List<CometResponseInterceptor> INTERCEPTOR_LIST;
 
     public CometResponseWrapper(HttpServletResponse response) {
         super(response);
-        if (INTERCEPTOR_LIST == null) {
-            INTERCEPTOR_LIST = new ArrayList<>();
-            ObjectProvider<CometResponseInterceptor> beanProvider = ApplicationContextHolder.get().getBeanProvider(CometResponseInterceptor.class);
-            beanProvider.forEach(INTERCEPTOR_LIST::add);
-            if (!CollectionUtils.isEmpty(INTERCEPTOR_LIST)) {
-                INTERCEPTOR_LIST = INTERCEPTOR_LIST.stream()
-                        .sorted(OrderComparator.INSTANCE.withSourceProvider(itr -> itr)).collect(Collectors.toList());
-            }
-        }
+
+        // 加载请求拦截器
+        loadInterceptors();
     }
 
     @Override
@@ -267,7 +262,7 @@ public class CometResponseWrapper extends HttpServletResponseWrapper {
         }
 
         @Override
-        public void write(byte[] b, int off, int len) throws IOException {
+        public void write(@NonNull byte[] b, int off, int len) throws IOException {
             content.write(b, off, len);
         }
 
@@ -313,6 +308,22 @@ public class CometResponseWrapper extends HttpServletResponseWrapper {
         public void write(int c) {
             super.write(c);
             super.flush();
+        }
+    }
+
+    private static void loadInterceptors() {
+        if (INTERCEPTOR_LIST == null) {
+            synchronized(CometResponseWrapper.class) {
+                if (INTERCEPTOR_LIST == null) {
+                    INTERCEPTOR_LIST = new ArrayList<>();
+                    ObjectProvider<CometResponseInterceptor> beanProvider = ApplicationContextHolder.get().getBeanProvider(CometResponseInterceptor.class);
+                    beanProvider.forEach(INTERCEPTOR_LIST::add);
+                    if (!CollectionUtils.isEmpty(INTERCEPTOR_LIST)) {
+                        INTERCEPTOR_LIST = INTERCEPTOR_LIST.stream()
+                                .sorted(OrderComparator.INSTANCE.withSourceProvider(itr -> itr)).collect(Collectors.toList());
+                    }
+                }
+            }
         }
     }
 }

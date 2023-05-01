@@ -21,14 +21,12 @@
 
 package com.github.yizzuide.milkomeda.comet.core;
 
-import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import com.github.yizzuide.milkomeda.util.HttpServletUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.catalina.connector.ClientAbortException;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.core.OrderComparator;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 import org.springframework.web.util.WebUtils;
 
 import javax.servlet.ReadListener;
@@ -38,12 +36,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import java.io.*;
 import java.net.SocketTimeoutException;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * CometRequestWrapper
@@ -63,10 +58,12 @@ public class CometRequestWrapper extends HttpServletRequestWrapper {
      */
     private byte[] body;
 
-    private final HttpServletRequest originalRequest;
+    private final boolean cacheBody;
 
-    // 请求拦截器
-    private static List<CometRequestInterceptor> INTERCEPTOR_LIST;
+    // 文件上传标识
+    private boolean fileUpload = false;
+
+    private final HttpServletRequest originalRequest;
 
     /**
      * Create Request wrapper for intercept or cache body.
@@ -75,7 +72,14 @@ public class CometRequestWrapper extends HttpServletRequestWrapper {
      */
     public CometRequestWrapper(HttpServletRequest request, boolean cacheBody) {
         super(request);
-        originalRequest = request;
+        this.originalRequest = request;
+        this.cacheBody = cacheBody;
+
+        CommonsMultipartResolver commonsMultipartResolver = new CommonsMultipartResolver(request.getSession().getServletContext());
+        if (commonsMultipartResolver.isMultipart(request)) {
+            fileUpload = true;
+        }
+
         // 将body数据存储起来
         if (cacheBody) {
             String bodyStr = getBodyString(request);
@@ -83,25 +87,14 @@ public class CometRequestWrapper extends HttpServletRequestWrapper {
                 body = new byte[0];
                 return;
             }
-            body = bodyStr.getBytes(Charset.defaultCharset());
-        }
-
-        // 加载请求拦截器
-        if (INTERCEPTOR_LIST == null) {
-            INTERCEPTOR_LIST = new ArrayList<>();
-            ObjectProvider<CometRequestInterceptor> beanProvider = ApplicationContextHolder.get().getBeanProvider(CometRequestInterceptor.class);
-            beanProvider.forEach(INTERCEPTOR_LIST::add);
-            if (!CollectionUtils.isEmpty(INTERCEPTOR_LIST)) {
-                INTERCEPTOR_LIST = INTERCEPTOR_LIST.stream()
-                        .sorted(OrderComparator.INSTANCE.withSourceProvider(itr -> itr)).collect(Collectors.toList());
-            }
+            body = bodyStr.getBytes(StandardCharsets.UTF_8);
         }
     }
 
     @Override
     public String getParameter(String name) {
         String value = super.getParameter(name);
-        if (CollectionUtils.isEmpty(INTERCEPTOR_LIST)) {
+        if (CollectionUtils.isEmpty(CometHolder.getRequestInterceptors())) {
             return value;
         }
         return interceptRequest(name, value, null);
@@ -110,10 +103,10 @@ public class CometRequestWrapper extends HttpServletRequestWrapper {
     @Override
     public String[] getParameterValues(String name) {
         String[] values = super.getParameterValues(name);
-        if (values == null || CollectionUtils.isEmpty(INTERCEPTOR_LIST)) {
+        if (values == null || CollectionUtils.isEmpty(CometHolder.getRequestInterceptors())) {
             return values;
         }
-        for (int i=0; i < values.length; i++) {
+        for (int i = 0; i < values.length; i++) {
             values[i] = interceptRequest(name, values[i], null);
         }
         return values;
@@ -122,7 +115,7 @@ public class CometRequestWrapper extends HttpServletRequestWrapper {
     @Override
     public Map<String, String[]> getParameterMap() {
         Map<String, String[]> parameterMap = super.getParameterMap();
-        if (CollectionUtils.isEmpty(parameterMap) || CollectionUtils.isEmpty(INTERCEPTOR_LIST)) {
+        if (CollectionUtils.isEmpty(parameterMap) || CollectionUtils.isEmpty(CometHolder.getRequestInterceptors())) {
             return parameterMap;
         }
         Map<String, String[]> modifyParamMap = new HashMap<>(parameterMap);
@@ -132,8 +125,8 @@ public class CometRequestWrapper extends HttpServletRequestWrapper {
 
     // 在返回值前拦截
     private String interceptRequest(String name, String value, String body) {
-        for (CometRequestInterceptor interceptor: INTERCEPTOR_LIST) {
-            value = interceptor.readFromRequest(originalRequest, name, value, body);
+        for (CometRequestInterceptor interceptor: CometHolder.getRequestInterceptors()) {
+            value = interceptor.readRequest(originalRequest, name, value, body);
         }
         return value;
     }
@@ -145,6 +138,9 @@ public class CometRequestWrapper extends HttpServletRequestWrapper {
 
     @Override
     public ServletInputStream getInputStream() throws IOException {
+        if (!cacheBody) {
+            return super.getInputStream();
+        }
         final ByteArrayInputStream inputStream = new ByteArrayInputStream(body);
         return new ServletInputStream() {
             @Override
@@ -179,13 +175,10 @@ public class CometRequestWrapper extends HttpServletRequestWrapper {
      * @since 3.0.3
      */
     public static String resolveRequestParams(HttpServletRequest request, boolean formBody) {
-        CometRequestWrapper requestWrapper = WebUtils.getNativeRequest(request, CometRequestWrapper.class);
-        if (requestWrapper == null) {
-            request = new CometRequestWrapper(request, false);
-        }
         String requestData = HttpServletUtil.getRequestData(request);
         // 如果form方式获取为空，取消息体内容
         if (formBody && "{}".equals(requestData)) {
+            CometRequestWrapper requestWrapper = WebUtils.getNativeRequest(request, CometRequestWrapper.class);
             if (requestWrapper == null) {
                 return requestData;
             }
@@ -235,7 +228,7 @@ public class CometRequestWrapper extends HttpServletRequestWrapper {
             return null;
         }
         StringBuilder sb = new StringBuilder();
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, Charset.defaultCharset()))) {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 sb.append(line);
@@ -247,7 +240,7 @@ public class CometRequestWrapper extends HttpServletRequestWrapper {
             throw new RuntimeException(e);
         }
         String body = sb.toString();
-        if (CollectionUtils.isEmpty(INTERCEPTOR_LIST)) {
+        if (fileUpload || CollectionUtils.isEmpty(CometHolder.getRequestInterceptors())) {
             return body;
         }
         return interceptRequest(null, null, body);

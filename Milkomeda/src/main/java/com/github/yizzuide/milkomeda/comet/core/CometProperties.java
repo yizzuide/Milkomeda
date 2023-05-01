@@ -26,6 +26,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  * CometProperties
@@ -62,31 +63,36 @@ public class CometProperties {
     private String statusFailCode = "2";
 
     /**
-     * Web XSS protection.
+     * Config request parameter interceptor.
      * @since 3.15.0
      */
-    private Xss xss = new Xss();
+    private Map<String, RequestInterceptor> requestInterceptors;
 
     @Data
-    static class Xss {
+    static class RequestInterceptor {
         /**
-         * Enable XSS prevent.
+         * Enable this interceptor.
          */
-        private boolean prevent = false;
+        private boolean enable = false;
 
         /**
-         * White filed names is not prevent (only support form submit type).
+         * Order in interceptor list.
          */
-        private List<String> whiteFieldNames;
+        private int order = 0;
 
         /**
-         * URL list need prevent.
+         * URL list need include.
          */
         private List<String> includeUrls = Collections.singletonList("/**");
 
         /**
-         * URL list not prevent.
+         * URL list need ignore.
          */
         private List<String> excludeUrls;
+
+        /**
+         * Other property value for interceptor.
+         */
+        private Map<String, Object> props;
     }
 }
