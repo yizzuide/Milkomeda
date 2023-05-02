@@ -9,7 +9,8 @@ milkomeda:
   # 自定义业务参数配置（可选，非框架使用）
   env:
     version: 1.0
-  early-register-beans:
+  # 配置需要早期注册的Bean
+  register-early-beans:
     - com.github.yizzuide.milkomeda.demo.universe.EarlyConfigLoader
 
   comet:

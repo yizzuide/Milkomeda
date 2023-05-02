@@ -23,6 +23,7 @@ package com.github.yizzuide.milkomeda.universe.config;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.core.convert.converter.GenericConverter;
 
 import java.util.List;
 import java.util.Map;
@@ -52,8 +53,14 @@ public class MilkomedaProperties {
     private Map<String, String> env;
 
     /**
-     * 提前注册的Bean（可以在其它@Bean之前注册）
+     * Register early bean when load bean definition list.
      * @since 3.15.0
      */
-    private List<Class<?>> earlyRegisterBeans;
+    private List<Class<?>> registerEarlyBeans;
+
+    /**
+     * Register converter used with conversion service.
+     * @since 3.15.0
+     */
+    private List<Class<GenericConverter>> registerConverters;
 }

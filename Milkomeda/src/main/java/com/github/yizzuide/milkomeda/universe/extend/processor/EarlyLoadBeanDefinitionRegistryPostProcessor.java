@@ -64,7 +64,7 @@ public class EarlyLoadBeanDefinitionRegistryPostProcessor implements BeanDefinit
         ConfigurableEnvironment configurableEnvironment = ApplicationContextHolder.getPendingConfigurableEnvironment();
         if(configurableEnvironment != null) {
             MilkomedaProperties milkomedaProperties = Binder.get(configurableEnvironment).bind(MilkomedaProperties.PREFIX, MilkomedaProperties.class).get();
-            List<Class<?>> earlyRegisterBeans = milkomedaProperties.getEarlyRegisterBeans();
+            List<Class<?>> earlyRegisterBeans = milkomedaProperties.getRegisterEarlyBeans();
             if (CollectionUtils.isEmpty(earlyRegisterBeans)) {
                 return;
             }

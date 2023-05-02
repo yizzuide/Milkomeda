@@ -21,18 +21,25 @@
 
 package com.github.yizzuide.milkomeda.universe.extend.env;
 
+import com.github.yizzuide.milkomeda.universe.config.MilkomedaProperties;
 import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import com.github.yizzuide.milkomeda.universe.extend.converter.MapToCollectionConverter;
+import com.github.yizzuide.milkomeda.util.ReflectUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.config.ConfigDataEnvironmentPostProcessor;
 import org.springframework.boot.context.event.ApplicationEnvironmentPreparedEvent;
 import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.context.ApplicationListener;
 import org.springframework.core.Ordered;
+import org.springframework.core.convert.converter.GenericConverter;
 import org.springframework.core.convert.support.ConfigurableConversionService;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.lang.NonNull;
+import org.springframework.util.CollectionUtils;
+
+import java.util.List;
+import java.util.Objects;
 
 /**
  * Environment Prepared Listener
@@ -71,6 +78,11 @@ public class EnvironmentApplicationListener implements ApplicationListener<Appli
         // Register Converter
         ConfigurableConversionService conversionService = environment.getConversionService();
         conversionService.addConverter(new MapToCollectionConverter(conversionService));
+        MilkomedaProperties milkomedaProperties = Binder.get(environment).bind(MilkomedaProperties.PREFIX, MilkomedaProperties.class).get();
+        List<Class<GenericConverter>> converters = milkomedaProperties.getRegisterConverters();
+        if (!CollectionUtils.isEmpty(converters)) {
+            converters.stream().map(ReflectUtil::newInstance).filter(Objects::nonNull).forEach(conversionService::addConverter);
+        }
         // Get and check conversionService
         // ((ConfigurableApplicationContext)ApplicationContextHolder.get()).getBeanFactory().getConversionService()
 
