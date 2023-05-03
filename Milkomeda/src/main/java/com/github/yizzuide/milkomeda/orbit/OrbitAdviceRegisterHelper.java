@@ -63,9 +63,9 @@ public class OrbitAdviceRegisterHelper {
             if (adviceClass == null || orbitAdvisor.getAdviceClass() == adviceClass) {
                 return adviceBeanName;
             }
-            return adviceBeanName + "$" + counterMap.get(adviceBeanName).getAndIncrement();
+            adviceBeanName = adviceBeanName + "$" + counterMap.get(adviceBeanName).getAndIncrement();
         } else {
-            counterMap.put(adviceBeanName, new AtomicInteger(0));
+            counterMap.putIfAbsent(adviceBeanName, new AtomicInteger(0));
         }
         AbstractBeanDefinition orbitAdviceFactoryBeanDefinition = BeanDefinitionBuilder.rootBeanDefinition(OrbitAdviceFactoryBean.class)
                 .addPropertyValue("beanFactory", registry)

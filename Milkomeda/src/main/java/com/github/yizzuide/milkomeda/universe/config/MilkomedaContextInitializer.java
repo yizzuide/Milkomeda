@@ -26,14 +26,18 @@ import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.lang.NonNull;
 
+import java.util.Collection;
+
 /**
  * Custom add config spring context initializer.
  *
+ * @see org.springframework.boot.SpringApplication#setInitializers(Collection)
  * @since 3.15.0
  * @author yizzuide
  * <br>
  * Create at 2023/04/27 20:50
  */
+// spring容器在刷新之前初始化ConfigurableApplicationContext的回调接口，这时候的Bean Class还没被类加载器加载。
 public class MilkomedaContextInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
     @Override
     public void initialize(@NonNull ConfigurableApplicationContext applicationContext) {
