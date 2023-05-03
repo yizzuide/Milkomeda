@@ -119,7 +119,7 @@ milkomeda:
     enable-light-thread-local-scope: true
     instances:
       # 缓存实例配置（没有配置的使用默认值）
-      order:
+      orderLight:
         # 缓存策略
         strategy: LazyExpire
         # 不需要ThreadLocal缓存

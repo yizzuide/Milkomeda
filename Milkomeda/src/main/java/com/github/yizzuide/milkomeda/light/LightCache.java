@@ -272,8 +272,9 @@ public class LightCache implements Cache {
             return false;
         }
 
-        // 添加到一级缓存池（如果当前key有缓存，返回失败）
-        return cacheMap.putIfAbsent(key, spot) == null;
+        // 添加到一级缓存池
+        cacheMap.put(key, spot);
+        return  true;
     }
 
     @Override
