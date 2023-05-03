@@ -36,6 +36,7 @@ import java.util.Comparator;
  */
 public class LazyExpireDiscard extends SortDiscard {
 
+    @SuppressWarnings("rawtypes")
     @Override
     public Class<? extends SortSpot> spotClazz() {
         return LazyExpireSpot.class;

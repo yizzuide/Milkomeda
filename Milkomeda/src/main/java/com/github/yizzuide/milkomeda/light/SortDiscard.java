@@ -32,7 +32,6 @@ import java.util.stream.Collectors;
 
 /**
  * SortDiscard
- *
  * 抽象的字段排序方案
  *
  * @since 1.8.0
@@ -75,7 +74,7 @@ public abstract class SortDiscard implements Discard {
         int size = list.size();
         int discardCount = Math.round(size * l1DiscardPercent);
         // 一级缓存百分比太小，直接返回
-        if (discardCount == 0) {
+        if (discardCount < 1) {
             return;
         }
         if (discardCount >= size) {

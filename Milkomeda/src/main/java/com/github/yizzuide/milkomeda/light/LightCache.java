@@ -45,8 +45,6 @@ import java.util.concurrent.TimeUnit;
  * <p>
  * 缓存方式：超级缓存（ThreadLocal）| 一级缓存（内存缓存池，缓存个数可控）| 二级缓存（Redis）
  * </p>
- * V：标识数据
- * E：缓存业务数据
  *
  * @since 1.8.0
  * @version 3.15.0
@@ -62,7 +60,7 @@ public class LightCache implements Cache {
      */
     @Setter
     @Getter
-    private Integer l1MaxCount;
+    private volatile Integer l1MaxCount;
 
     /**
      * 一级缓存一次性移除百分比
@@ -130,7 +128,7 @@ public class LightCache implements Cache {
     private final LightContext<Serializable, Object> superCache = new LightContext<>();
 
     /**
-     * 一级缓存容器（内存池）
+     * 一级缓存容器（内存池，跳表算法复杂度O(logN)，高并发操作效率高，范围数据查找快）
      */
     private final Map<String, Spot<Serializable, Object>> cacheMap = new ConcurrentSkipListMap<>();
 
@@ -142,9 +140,7 @@ public class LightCache implements Cache {
 
 
     /**
-     * 设置超级缓存
-     *
-     * 如果在一级缓存池里根据缓存标识符可以取得缓存数据，则不会创建新的缓存数据对象
+     * 设置超级缓存（如果在一级缓存池里根据缓存标识符可以取得缓存数据，则不会创建新的缓存数据对象）
      *
      * @param id    缓存标识符
      */
@@ -202,7 +198,7 @@ public class LightCache implements Cache {
     @SuppressWarnings("unchecked")
     @Override
     public void set(String key, Spot<Serializable, ?> spot) {
-        // 一级缓存下，如果是父类型，需要向下转型（会触发初始化排序状态字段）
+        // 一级缓存下，如果是父类型，需要向下转型（会触发初始化排序字段）
         if (spot.getClass() == Spot.class && !onlyCacheL2) {
             spot = discardStrategy.deform(key, (Spot<Serializable, Object>) spot, l1Expire);
         }
@@ -256,8 +252,13 @@ public class LightCache implements Cache {
     private boolean cacheL1(String key, Spot<Serializable, Object> spot) {
         // 一级缓存超出最大个数
         if ((cacheMap.size() + 1) > l1MaxCount) {
-            // 根据选择的策略来丢弃数据
-            discardStrategy.discard(cacheMap, l1DiscardPercent);
+            // 使用双重检测确保在条件满足时只执行一次
+            synchronized (this) {
+                if ((cacheMap.size() + 1) > l1MaxCount) {
+                    // 根据选择的策略来丢弃数据
+                    discardStrategy.discard(cacheMap, l1DiscardPercent);
+                }
+            }
         }
 
         // 排行加分
@@ -271,9 +272,8 @@ public class LightCache implements Cache {
             return false;
         }
 
-        // 添加到一级缓存池
-        cacheMap.put(key, spot);
-        return true;
+        // 添加到一级缓存池（如果当前key有缓存，返回失败）
+        return cacheMap.putIfAbsent(key, spot) == null;
     }
 
     @Override
