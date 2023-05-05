@@ -122,6 +122,16 @@ public class CometConfig implements ApplicationListener<ApplicationStartedEvent>
             return;
         }
         CometHolder.setRequestInterceptors(NamedHandler.sortedList(requestInterceptorMap, requestInterceptors::get));
+
+        Map<String, HotHttpHandlerProperty> responseInterceptors = cometProperties.getResponseInterceptors();
+        if (CollectionUtils.isEmpty(responseInterceptors)) {
+            return;
+        }
+        Map<String, CometResponseInterceptor> responseInterceptorMap = ApplicationContextHolder.get().getBeansOfType(CometResponseInterceptor.class);
+        if (CollectionUtils.isEmpty(responseInterceptorMap)) {
+            return;
+        }
+        CometHolder.setResponseInterceptors(NamedHandler.sortedList(responseInterceptorMap, responseInterceptors::get));
     }
 
 

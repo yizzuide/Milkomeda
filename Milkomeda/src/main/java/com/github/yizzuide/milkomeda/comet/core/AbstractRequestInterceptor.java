@@ -38,14 +38,14 @@ import javax.servlet.http.HttpServletRequest;
  * Create at 2023/05/01 18:35
  */
 @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
-public abstract class AbstractCometRequestInterceptor implements CometRequestInterceptor {
+public abstract class AbstractRequestInterceptor implements CometRequestInterceptor {
+
+    @Setter @Getter
+    private int order;
 
     @Getter
     @Autowired
     private CometProperties cometProperties;
-
-    @Setter @Getter
-    private int order;
 
     @Override
     public String readRequest(HttpServletRequest request, String formName, String formValue, String body) {

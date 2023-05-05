@@ -44,6 +44,8 @@ public class CometHolder {
 
     private static List<CometRequestInterceptor> requestInterceptors;
 
+    private static List<CometResponseInterceptor> responseInterceptors;
+
     static void setProps(CometProperties props) {
         CometHolder.props = props;
     }
@@ -74,6 +76,14 @@ public class CometHolder {
 
     static List<CometRequestInterceptor> getRequestInterceptors() {
         return requestInterceptors;
+    }
+
+    static void setResponseInterceptors(List<CometResponseInterceptor> responseInterceptors) {
+        CometHolder.responseInterceptors = responseInterceptors;
+    }
+
+    static List<CometResponseInterceptor> getResponseInterceptors() {
+        return responseInterceptors;
     }
 
     /**

@@ -18,7 +18,7 @@ milkomeda:
     enable-read-request-body: true
     # 读取Response直接写出的内容时需要开启
     enable-read-response-body: true
-    # 请求过滤器（过滤器名是通过@Alias("xxx")，且实现
+    # 请求拦截器（拦截器名是通过@Alias("xxx"))
     request-interceptors:
       # XSS注入过滤
       xss:
@@ -33,6 +33,11 @@ milkomeda:
         enable: true
         order: 2
         include-urls: [ "/collect/usage" ]
+    # 响应拦截器（拦截器名是通过@Alias("xxx"))
+    response-interceptors:
+      uniform:
+        enable: true
+
     # 统一请求日志打印
     logger:
       enable: true

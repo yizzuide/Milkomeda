@@ -21,8 +21,8 @@
 
 package com.github.yizzuide.milkomeda.comet.core;
 
+import com.github.yizzuide.milkomeda.universe.extend.web.handler.NamedHandler;
 import com.mongodb.lang.Nullable;
-import org.springframework.core.Ordered;
 import org.springframework.util.FastByteArrayOutputStream;
 
 import javax.servlet.http.HttpServletResponse;
@@ -31,13 +31,14 @@ import javax.servlet.http.HttpServletResponse;
  * Comet response wrapper interceptor.
  *
  * @since 3.14.0
+ * @version 3.15.0
  * @author yizzuide
  * <br>
  * Create at 2022/10/10 17:22
  */
-public interface CometResponseInterceptor extends Ordered {
+public interface CometResponseInterceptor extends NamedHandler {
     /**
-     * Start write content to response.
+     * Change and write content to response.
      * @param outputStream  content of response
      * @param wrapperResponse  wrapper response object
      * @param rawResponse   real response object

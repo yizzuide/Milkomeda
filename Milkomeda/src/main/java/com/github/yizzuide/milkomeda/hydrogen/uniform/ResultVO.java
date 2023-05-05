@@ -21,10 +21,21 @@
 
 package com.github.yizzuide.milkomeda.hydrogen.uniform;
 
+import com.github.yizzuide.milkomeda.comet.core.CometResponseInterceptor;
+import com.github.yizzuide.milkomeda.universe.parser.yml.YmlResponseOutput;
+
+import java.util.HashMap;
 import java.util.Map;
 
 /**
- * View Object interface.
+ * This interface is specification as a response. The default implementation is {@link UniformResult}, its used with
+ * {@link CometResponseInterceptor} of comet module which default implementation is {@link UniformResponseInterceptor}.
+ * If used this type to declare response, must config the follow:
+ * <pre>
+ *     1. Enable response wrapper with config: <code>milkomeda.comet.enable-read-response-body=true</code>.
+ *     2. Add response interceptor with config: <code>milkomeda.comet.response-interceptors.uniform.enable=true</code>.
+ *     3. (Optional) If you need change the response field name, such as change `message` to `msg` with config: <code>milkomeda.hydrogen.uniform.response.200.message[msg]=""</code>.
+ * </pre>
  *
  * @since 3.14.0
  * @author yizzuide
@@ -33,7 +44,7 @@ import java.util.Map;
  */
 public interface ResultVO<T> {
     /**
-     * code field type.
+     * Code field type.
      */
     enum CodeType {
         INT,
@@ -57,8 +68,14 @@ public interface ResultVO<T> {
     T getData();
 
     /**
-     * Convert to map.
+     * Convert to standard response map with filed: code, message, data.
      * @return Map
      */
-    Map<String, Object> toMap();
+    default Map<String, Object> toMap() {
+        Map<String, Object> map = new HashMap<>(6);
+        map.put(YmlResponseOutput.CODE, getCode());
+        map.put(YmlResponseOutput.MESSAGE, getMessage());
+        map.put(YmlResponseOutput.DATA, getData());
+        return map;
+    }
 }

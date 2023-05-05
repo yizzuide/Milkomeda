@@ -67,4 +67,10 @@ public class CometProperties {
      * @since 3.15.0
      */
     private Map<String, HotHttpHandlerProperty> requestInterceptors;
+
+    /**
+     * Config response interceptor.
+     * @since 3.15.0
+     */
+    private Map<String, HotHttpHandlerProperty> responseInterceptors;
 }

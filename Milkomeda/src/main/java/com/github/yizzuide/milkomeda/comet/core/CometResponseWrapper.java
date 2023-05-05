@@ -21,11 +21,8 @@
 
 package com.github.yizzuide.milkomeda.comet.core;
 
-import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import com.github.yizzuide.milkomeda.universe.context.WebContext;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.core.OrderComparator;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
@@ -40,9 +37,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * CometResponseWrapper
@@ -70,13 +64,8 @@ public class CometResponseWrapper extends HttpServletResponseWrapper {
     @Nullable
     private Integer contentLength;
 
-    private static volatile List<CometResponseInterceptor> INTERCEPTOR_LIST;
-
     public CometResponseWrapper(HttpServletResponse response) {
         super(response);
-
-        // 加载请求拦截器
-        loadInterceptors();
     }
 
     @Override
@@ -225,8 +214,8 @@ public class CometResponseWrapper extends HttpServletResponseWrapper {
             }
             boolean intercepted = false;
             if (complete) {
-                if (!CollectionUtils.isEmpty(INTERCEPTOR_LIST)) {
-                    for (CometResponseInterceptor interceptor: INTERCEPTOR_LIST) {
+                if (!CollectionUtils.isEmpty(CometHolder.getResponseInterceptors())) {
+                    for (CometResponseInterceptor interceptor: CometHolder.getResponseInterceptors()) {
                         HttpServletRequest request = WebContext.getRequest();
                         Object body = request == null ? null : request.getAttribute(CometResponseBodyAdvice.REQUEST_ATTRIBUTE_BODY);
                         intercepted = interceptor.writeToResponse(this.content, this, rawResponse, body);
@@ -308,22 +297,6 @@ public class CometResponseWrapper extends HttpServletResponseWrapper {
         public void write(int c) {
             super.write(c);
             super.flush();
-        }
-    }
-
-    private static void loadInterceptors() {
-        if (INTERCEPTOR_LIST == null) {
-            synchronized(CometResponseWrapper.class) {
-                if (INTERCEPTOR_LIST == null) {
-                    INTERCEPTOR_LIST = new ArrayList<>();
-                    ObjectProvider<CometResponseInterceptor> beanProvider = ApplicationContextHolder.get().getBeanProvider(CometResponseInterceptor.class);
-                    beanProvider.forEach(INTERCEPTOR_LIST::add);
-                    if (!CollectionUtils.isEmpty(INTERCEPTOR_LIST)) {
-                        INTERCEPTOR_LIST = INTERCEPTOR_LIST.stream()
-                                .sorted(OrderComparator.INSTANCE.withSourceProvider(itr -> itr)).collect(Collectors.toList());
-                    }
-                }
-            }
         }
     }
 }

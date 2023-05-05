@@ -25,7 +25,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 /**
- * Hot handler means that need enable first when used.
+ * Hot handler means that need enable first before used.
  *
  * @since 3.15.0
  * @author yizzuide

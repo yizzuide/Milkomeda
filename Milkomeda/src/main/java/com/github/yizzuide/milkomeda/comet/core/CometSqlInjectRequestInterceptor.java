@@ -35,7 +35,7 @@ import java.util.regex.Pattern;
  * Create at 2023/05/01 21:21
  */
 @Alias("sql-inject")
-public class CometSqlInjectRequestInterceptor extends AbstractCometRequestInterceptor {
+public class CometSqlInjectRequestInterceptor extends AbstractRequestInterceptor {
 
     private static final String SQL_REG_EXP = "\\b(and|or)\\b.{1,6}?(=|>|<|\\bin\\b|\\blike\\b)|\\/\\*.+?\\*\\/|<\\s*script\\b|\\bEXEC\\b|UNION.+?SELECT|UPDATE.+?SET|INSERT\\s+INTO.+?VALUES|(SELECT|DELETE).+?FROM|(CREATE|ALTER|DROP|TRUNCATE)\\s+(TABLE|DATABASE)";
 

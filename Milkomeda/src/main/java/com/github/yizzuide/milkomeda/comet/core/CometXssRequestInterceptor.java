@@ -40,7 +40,7 @@ import java.util.List;
  * Create at 2023/05/01 04:28
  */
 @Alias("xss")
-public class CometXssRequestInterceptor extends AbstractCometRequestInterceptor {
+public class CometXssRequestInterceptor extends AbstractRequestInterceptor {
 
     // 允许常用显示型html标签
     private static final Whitelist whitelist = Whitelist.basicWithImages();
