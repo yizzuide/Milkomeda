@@ -21,6 +21,7 @@
 
 package com.github.yizzuide.milkomeda.comet.core;
 
+import com.github.yizzuide.milkomeda.universe.extend.annotation.Alias;
 import lombok.Setter;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -38,10 +39,8 @@ import java.util.List;
  * <br>
  * Create at 2023/05/01 04:28
  */
+@Alias("xss")
 public class CometXssRequestInterceptor extends AbstractCometRequestInterceptor {
-
-    // 拦截器名
-    public static final String INTERCEPTOR_NAME = "xss";
 
     // 允许常用显示型html标签
     private static final Whitelist whitelist = Whitelist.basicWithImages();
@@ -82,10 +81,5 @@ public class CometXssRequestInterceptor extends AbstractCometRequestInterceptor 
         }
         // 过滤请求body
         return Jsoup.clean(body, "", whitelist, outputSettings);
-    }
-
-    @Override
-    protected String interceptorName() {
-        return INTERCEPTOR_NAME;
     }
 }

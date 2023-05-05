@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 yizzuide All rights Reserved.
+ * Copyright (c) 2023 yizzuide All rights Reserved.
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -19,32 +19,26 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.universe.extend.web.handler;
+package com.github.yizzuide.milkomeda.universe.extend.annotation;
 
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+import java.lang.annotation.*;
 
 /**
- * AstrolabeHandler
- * 星盘处理器（轻量级请求过滤器，类似线程之上的协程）
+ * Add alias bind to bean, but this name can not find in spring context (so its can repeat in each other module). it's just
+ * used for link and find easily in yml config.
  *
- * @see DelegatingContextFilter
+ * @since 3.15.0
  * @author yizzuide
- * @since 3.3.0
  * <br>
- * Create at 2020/05/06 11:38
+ * Create at 2023/05/05 21:54
  */
-public interface AstrolabeHandler extends NamedHandler {
+@Documented
+@Target({ElementType.TYPE})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface Alias {
     /**
-     * 请求前置
-     * @param request  ServletRequest
+     * Set bean alias.
+     * @return bean alias.
      */
-    default void preHandle(ServletRequest request) {}
-
-    /**
-     * 请求后置
-     * @param request   ServletRequest
-     * @param response  ServletResponse
-     */
-    default void postHandle(ServletRequest request, ServletResponse response) {}
+    String value();
 }

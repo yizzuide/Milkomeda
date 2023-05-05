@@ -21,6 +21,8 @@
 
 package com.github.yizzuide.milkomeda.comet.core;
 
+import com.github.yizzuide.milkomeda.universe.extend.annotation.Alias;
+
 import javax.servlet.http.HttpServletRequest;
 import java.util.regex.Pattern;
 
@@ -32,8 +34,8 @@ import java.util.regex.Pattern;
  * <br>
  * Create at 2023/05/01 21:21
  */
+@Alias("sql-inject")
 public class CometSqlInjectRequestInterceptor extends AbstractCometRequestInterceptor {
-    public static final String INTERCEPTOR_NAME = "sql-inject";
 
     private static final String SQL_REG_EXP = "\\b(and|or)\\b.{1,6}?(=|>|<|\\bin\\b|\\blike\\b)|\\/\\*.+?\\*\\/|<\\s*script\\b|\\bEXEC\\b|UNION.+?SELECT|UPDATE.+?SET|INSERT\\s+INTO.+?VALUES|(SELECT|DELETE).+?FROM|(CREATE|ALTER|DROP|TRUNCATE)\\s+(TABLE|DATABASE)";
 
@@ -48,10 +50,5 @@ public class CometSqlInjectRequestInterceptor extends AbstractCometRequestInterc
             throw new RuntimeException("Detected SQL injection with value: " + value);
         }
         return value;
-    }
-
-    @Override
-    protected String interceptorName() {
-        return INTERCEPTOR_NAME;
     }
 }

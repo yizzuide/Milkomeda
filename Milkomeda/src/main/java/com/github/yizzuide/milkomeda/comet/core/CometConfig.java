@@ -24,10 +24,10 @@ package com.github.yizzuide.milkomeda.comet.core;
 import com.github.yizzuide.milkomeda.pulsar.PulsarConfig;
 import com.github.yizzuide.milkomeda.universe.config.MilkomedaProperties;
 import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
+import com.github.yizzuide.milkomeda.universe.extend.web.handler.HotHttpHandlerProperty;
+import com.github.yizzuide.milkomeda.universe.extend.web.handler.NamedHandler;
 import com.github.yizzuide.milkomeda.universe.metadata.BeanIds;
 import com.github.yizzuide.milkomeda.universe.polyfill.SpringMvcPolyfill;
-import com.github.yizzuide.milkomeda.util.RecognizeUtil;
-import com.github.yizzuide.milkomeda.util.ReflectUtil;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -40,7 +40,6 @@ import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.OrderComparator;
 import org.springframework.core.Ordered;
 import org.springframework.lang.NonNull;
 import org.springframework.util.CollectionUtils;
@@ -50,7 +49,6 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * CometConfig
@@ -115,38 +113,15 @@ public class CometConfig implements ApplicationListener<ApplicationStartedEvent>
 
     @Override
     public void onApplicationEvent(@NonNull ApplicationStartedEvent event) {
-        Map<String, CometProperties.RequestInterceptor> requestInterceptors = cometProperties.getRequestInterceptors();
+        Map<String, HotHttpHandlerProperty> requestInterceptors = cometProperties.getRequestInterceptors();
         if (CollectionUtils.isEmpty(requestInterceptors)) {
             return;
         }
-        // 拦截器名映射
-        Map<String, String> interceptorNameMap = new HashMap<>();
-        interceptorNameMap.put(CometXssRequestInterceptor.INTERCEPTOR_NAME, RecognizeUtil.getBeanName(CometXssRequestInterceptor.class));
-        interceptorNameMap.put(CometSqlInjectRequestInterceptor.INTERCEPTOR_NAME, RecognizeUtil.getBeanName(CometSqlInjectRequestInterceptor.class));
-        // 配置并排序拦截器
-        requestInterceptors.keySet().forEach(interceptorName -> {
-            CometProperties.RequestInterceptor requestInterceptorConfig = requestInterceptors.get(interceptorName);
-            String foundInterceptorName = interceptorNameMap.get(interceptorName);
-            if (foundInterceptorName != null) {
-                interceptorName = foundInterceptorName;
-            }
-            CometRequestInterceptor requestInterceptor = ApplicationContextHolder.get().getBean(interceptorName, CometRequestInterceptor.class);
-            List<CometRequestInterceptor> requestInterceptorList = new ArrayList<>();
-            if (requestInterceptorConfig.isEnable()) {
-                if (requestInterceptor instanceof AbstractCometRequestInterceptor) {
-                    ((AbstractCometRequestInterceptor) requestInterceptor).setOrder(requestInterceptorConfig.getOrder());
-                }
-                if (requestInterceptorConfig.getProps() != null) {
-                    ReflectUtil.setField(requestInterceptor, requestInterceptorConfig.getProps());
-                }
-                requestInterceptorList.add(requestInterceptor);
-            }
-            if (!CollectionUtils.isEmpty(requestInterceptorList)) {
-                requestInterceptorList = requestInterceptorList.stream()
-                        .sorted(OrderComparator.INSTANCE.withSourceProvider(itr -> itr)).collect(Collectors.toList());
-                CometHolder.setRequestInterceptors(requestInterceptorList);
-            }
-        });
+        Map<String, CometRequestInterceptor> requestInterceptorMap = ApplicationContextHolder.get().getBeansOfType(CometRequestInterceptor.class);
+        if (CollectionUtils.isEmpty(requestInterceptorMap)) {
+            return;
+        }
+        CometHolder.setRequestInterceptors(NamedHandler.sortedList(requestInterceptorMap, requestInterceptors::get));
     }
 
 

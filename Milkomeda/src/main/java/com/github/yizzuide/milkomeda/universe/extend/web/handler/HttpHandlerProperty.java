@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 yizzuide All rights Reserved.
+ * Copyright (c) 2023 yizzuide All rights Reserved.
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -21,30 +21,31 @@
 
 package com.github.yizzuide.milkomeda.universe.extend.web.handler;
 
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+import java.util.Collections;
+import java.util.List;
 
 /**
- * AstrolabeHandler
- * 星盘处理器（轻量级请求过滤器，类似线程之上的协程）
+ * This handler provide URL filter with {@link HandlerProperty}.
  *
- * @see DelegatingContextFilter
+ * @since 3.15.0
  * @author yizzuide
- * @since 3.3.0
  * <br>
- * Create at 2020/05/06 11:38
+ * Create at 2023/05/06 00:12
  */
-public interface AstrolabeHandler extends NamedHandler {
-    /**
-     * 请求前置
-     * @param request  ServletRequest
-     */
-    default void preHandle(ServletRequest request) {}
+@EqualsAndHashCode(callSuper = true)
+@Data
+public class HttpHandlerProperty extends HandlerProperty {
 
     /**
-     * 请求后置
-     * @param request   ServletRequest
-     * @param response  ServletResponse
+     * URL list need include.
      */
-    default void postHandle(ServletRequest request, ServletResponse response) {}
+    private List<String> includeUrls = Collections.singletonList("/**");
+
+    /**
+     * URL list need ignore.
+     */
+    private List<String> excludeUrls;
 }

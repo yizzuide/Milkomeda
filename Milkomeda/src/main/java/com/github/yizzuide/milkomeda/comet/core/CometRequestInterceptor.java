@@ -21,7 +21,7 @@
 
 package com.github.yizzuide.milkomeda.comet.core;
 
-import org.springframework.core.PriorityOrdered;
+import com.github.yizzuide.milkomeda.universe.extend.web.handler.NamedHandler;
 import org.springframework.lang.Nullable;
 
 import javax.servlet.http.HttpServletRequest;
@@ -34,7 +34,7 @@ import javax.servlet.http.HttpServletRequest;
  * <br>
  * Create at 2023/05/01 02:59
  */
-public interface CometRequestInterceptor extends PriorityOrdered {
+public interface CometRequestInterceptor extends NamedHandler {
     /**
      * Invoked when read value from request.
      * @param request   HttpServletRequest
@@ -44,4 +44,6 @@ public interface CometRequestInterceptor extends PriorityOrdered {
      * @return modify value
      */
     String readRequest(HttpServletRequest request, @Nullable String formName, @Nullable String formValue, @Nullable String body);
+
+
 }

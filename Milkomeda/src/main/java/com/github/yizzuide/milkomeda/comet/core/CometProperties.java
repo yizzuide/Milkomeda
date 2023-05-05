@@ -21,11 +21,10 @@
 
 package com.github.yizzuide.milkomeda.comet.core;
 
+import com.github.yizzuide.milkomeda.universe.extend.web.handler.HotHttpHandlerProperty;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -48,6 +47,7 @@ public class CometProperties {
 
     /**
      * 允许开启响应包装类读取响应消息体（获取通过注入HttpServletResponse直接写出响应数据则必须开启）
+     *
      * @see CometProperties#enableReadRequestBody
      */
     private boolean enableReadResponseBody = false;
@@ -66,33 +66,5 @@ public class CometProperties {
      * Config request parameter interceptor.
      * @since 3.15.0
      */
-    private Map<String, RequestInterceptor> requestInterceptors;
-
-    @Data
-    static class RequestInterceptor {
-        /**
-         * Enable this interceptor.
-         */
-        private boolean enable = false;
-
-        /**
-         * Order in interceptor list.
-         */
-        private int order = 0;
-
-        /**
-         * URL list need include.
-         */
-        private List<String> includeUrls = Collections.singletonList("/**");
-
-        /**
-         * URL list need ignore.
-         */
-        private List<String> excludeUrls;
-
-        /**
-         * Other property value for interceptor.
-         */
-        private Map<String, Object> props;
-    }
+    private Map<String, HotHttpHandlerProperty> requestInterceptors;
 }

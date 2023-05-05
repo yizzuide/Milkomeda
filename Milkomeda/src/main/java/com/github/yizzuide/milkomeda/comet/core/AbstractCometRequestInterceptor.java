@@ -21,12 +21,11 @@
 
 package com.github.yizzuide.milkomeda.comet.core;
 
-import com.github.yizzuide.milkomeda.universe.parser.url.URLPathMatcher;
-import com.github.yizzuide.milkomeda.util.RecognizeUtil;
+import com.github.yizzuide.milkomeda.universe.extend.web.handler.HotHttpHandlerProperty;
+import com.github.yizzuide.milkomeda.universe.extend.web.handler.NamedHandler;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.CollectionUtils;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -54,24 +53,11 @@ public abstract class AbstractCometRequestInterceptor implements CometRequestInt
         if (originalValue == null) {
             return originalValue;
         }
-        CometProperties.RequestInterceptor requestInterceptor = cometProperties.getRequestInterceptors().get(interceptorName());
-        if (!CollectionUtils.isEmpty(requestInterceptor.getExcludeUrls())) {
-            if (URLPathMatcher.match(requestInterceptor.getExcludeUrls(), request.getRequestURI())) {
-                return originalValue;
-            }
-        }
-        if (!URLPathMatcher.match(requestInterceptor.getIncludeUrls(), request.getRequestURI())) {
+        HotHttpHandlerProperty requestInterceptor = cometProperties.getRequestInterceptors().get(handlerName());
+        if (!NamedHandler.canHandle(request, requestInterceptor)) {
             return originalValue;
         }
         return doReadRequest(request, formName, formValue, body);
-    }
-
-    /**
-     * Hook method for get bean name of this interceptor.
-     * @return bean name
-     */
-    protected String interceptorName() {
-        return RecognizeUtil.getBeanName(this.getClass());
     }
 
     /**
