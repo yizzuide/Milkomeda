@@ -31,7 +31,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
- * Abstract job inspector with common code.
+ * Abstract job inspector for persistence storage.
  *
  * @author yizzuide
  * @since 3.14.0

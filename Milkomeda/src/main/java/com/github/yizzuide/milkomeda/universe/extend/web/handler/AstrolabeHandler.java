@@ -21,12 +21,13 @@
 
 package com.github.yizzuide.milkomeda.universe.extend.web.handler;
 
+import org.springframework.web.context.request.WebRequestInterceptor;
+
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
 /**
- * AstrolabeHandler
- * 星盘处理器（轻量级请求过滤器，类似线程之上的协程）
+ * Request aspect handler that implements with {@link WebRequestInterceptor}.
  *
  * @see DelegatingContextFilter
  * @author yizzuide

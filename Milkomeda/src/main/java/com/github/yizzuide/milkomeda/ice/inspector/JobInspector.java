@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 /**
- *  Inspect accessor for job.
+ * Inspect accessor for job.
  *
  * @author yizzuide
  * @since 3.14.0
