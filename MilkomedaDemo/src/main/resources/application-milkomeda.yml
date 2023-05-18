@@ -96,6 +96,19 @@ milkomeda:
           message[msg]: 请求超过次数，请稍后再试！
           addition:
             data: ${collections.emptyMap}
+      # 滑动窗口限制器，比timesLimiter更精准
+      - name: rollLimiter
+        type: roll_window
+        # 60秒内只允许访问一次
+        props:
+          expire: 60
+          limitTimes: 1
+        key-tpl: limit_sms_{$params.phone}
+        include-urls: [ "/particle/sendSMS" ]
+        response:
+          status: 200
+          code: -1
+          message[msg]: 请求超过次数，请稍后再试！
       - name: barrierLimiter
         type: barrier
         props:

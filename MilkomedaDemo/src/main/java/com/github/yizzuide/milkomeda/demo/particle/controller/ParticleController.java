@@ -188,4 +188,9 @@ public class ParticleController {
     public String pay(String orderNo) throws InterruptedException {
         return "OK";
     }
+
+    @RequestMapping("sendSMS")
+    public String sendSMS(String phone) {
+        return "OK";
+    }
 }

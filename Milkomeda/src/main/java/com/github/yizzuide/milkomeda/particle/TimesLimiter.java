@@ -21,6 +21,7 @@
 
 package com.github.yizzuide.milkomeda.particle;
 
+import com.github.yizzuide.milkomeda.universe.extend.loader.LuaLoader;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -45,7 +46,7 @@ import java.util.Collections;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class TimesLimiter extends LimitHandler {
+public class TimesLimiter extends LimitHandler implements LuaLoader {
     /**
      * 限制时间类型
      */
@@ -59,11 +60,13 @@ public class TimesLimiter extends LimitHandler {
     @Setter
     private Long limitTimes;
 
+    /**
+     * lua脚本
+     */
+    private String luaScript;
+
     // 装饰后缀
     private static final String POSTFIX = ":times";
-
-    // lua 脚本
-    private static String luaScript;
 
     public TimesLimiter() { }
 
@@ -107,7 +110,8 @@ public class TimesLimiter extends LimitHandler {
         return next(particle, key, process);
     }
 
-    static void setLuaScript(String luaScript) {
-        TimesLimiter.luaScript = luaScript;
+    @Override
+    public String filename() {
+        return "particle_times_limiter.lua";
     }
 }

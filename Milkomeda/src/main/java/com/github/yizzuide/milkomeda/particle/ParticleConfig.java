@@ -22,7 +22,7 @@
 package com.github.yizzuide.milkomeda.particle;
 
 import com.github.yizzuide.milkomeda.universe.context.SpringContext;
-import com.github.yizzuide.milkomeda.util.IOUtils;
+import com.github.yizzuide.milkomeda.universe.extend.loader.LuaLoader;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
@@ -120,6 +120,9 @@ public class ParticleConfig implements ApplicationContextAware {
                     case TIMES:
                         limiter.setHandlerClazz(TimesLimiter.class);
                         break;
+                    case ROLL_WINDOW:
+                        limiter.setHandlerClazz(RollWindowLimiter.class);
+                        break;
                     case BARRIER:
                         limiter.setHandlerClazz(BarrierLimiter.class);
                         break;
@@ -135,7 +138,12 @@ public class ParticleConfig implements ApplicationContextAware {
                 barrierLimiters.add(limiter);
             }
             // 缓存并设置属性
-            cacheHandlerBeans.put(limiterName, limitHandler);
+            if(null == cacheHandlerBeans.putIfAbsent(limiterName, limitHandler)) {
+                // 仅读取配置限制器的lua脚本
+                if (limitHandler instanceof LuaLoader) {
+                    ((LuaLoader) limitHandler).load();
+                }
+            }
         }
 
         // 创建barrierLimiter类型限制器链
@@ -157,10 +165,6 @@ public class ParticleConfig implements ApplicationContextAware {
         List<ParticleProperties.Limiter> orderLimiters = limiters.stream()
                 .sorted(OrderComparator.INSTANCE.withSourceProvider(limiter -> limiter)).collect(Collectors.toList());
         particleProperties.setLimiters(orderLimiters);
-
-        // 读取lua脚本
-        String luaScript = IOUtils.loadLua(IOUtils.LUA_PATH, "particle_times_limiter.lua");
-        TimesLimiter.setLuaScript(luaScript);
     }
 
     static Map<String, LimitHandler> getCacheHandlerBeans() {

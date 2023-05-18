@@ -134,6 +134,9 @@ public interface NamedHandler extends PriorityOrdered {
      * @return  true if handle success
      */
     static boolean canHandle(HttpServletRequest request, List<String> includeUrls, List<String> excludeUrls) {
+        if (request == null) {
+            return false;
+        }
         String url = request.getRequestURI();
         if (CollectionUtils.isEmpty(includeUrls)) {
             return false;

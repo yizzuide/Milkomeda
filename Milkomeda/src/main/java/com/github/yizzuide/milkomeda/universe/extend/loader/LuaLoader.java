@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 yizzuide All rights Reserved.
+ * Copyright (c) 2023 yizzuide All rights Reserved.
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -19,41 +19,50 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.particle;
+package com.github.yizzuide.milkomeda.universe.extend.loader;
+
+import com.github.yizzuide.milkomeda.util.IOUtils;
+
+import java.io.IOException;
 
 /**
- * LimiterType
- * 限制器类型
+ * The loader Specify loading lua file.
  *
+ * @since 3.15.0
  * @author yizzuide
- * @since 3.1.2
- * @version 3.15.0
  * <br>
- * Create at 2020/04/22 14:14
+ * Create at 2023/05/19 03:20
  */
-public enum LimiterType {
+public interface LuaLoader {
     /**
-     * 幂等去重限制器
+     * Lua script path.
      */
-    IDEMPOTENT,
+    default String resourcePath() {
+        return IOUtils.LUA_PATH;
+    }
 
     /**
-     * 次数限制器
+     * Lua script file name.
+     * @return file name
      */
-    TIMES,
+    String filename();
 
     /**
-     * 滚动窗口
+     * Setter of hold content filed.
      */
-    ROLL_WINDOW,
+    void setLuaScript(String luaScript);
 
     /**
-     * 布隆限制器
+     * Getter of hold content filed.
+     * @return script content
      */
-    BLOOM,
+    String getLuaScript();
 
     /**
-     * 组合限制器
+     * Start load lua script.
      */
-    BARRIER
+    default void load() throws IOException {
+        String luaScript = IOUtils.loadLua(resourcePath(), filename());
+        setLuaScript(luaScript);
+    }
 }
