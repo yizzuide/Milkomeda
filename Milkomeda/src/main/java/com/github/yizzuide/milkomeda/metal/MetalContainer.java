@@ -21,6 +21,7 @@
 
 package com.github.yizzuide.milkomeda.metal;
 
+import com.github.yizzuide.milkomeda.universe.extend.env.Environment;
 import com.github.yizzuide.milkomeda.util.DataTypeConvertUtil;
 import com.github.yizzuide.milkomeda.util.ReflectUtil;
 import com.github.yizzuide.milkomeda.util.Strings;
@@ -116,7 +117,9 @@ public class MetalContainer {
         }
         for (VirtualNode vNode : cacheSet) {
             vNode.update(newVal);
-            log.info("Metal update vnode '{}' with key '{}' from old value '{}' to '{}'", vNode.getSignature(), key, oldVal, newVal);
+            if (Environment.isShowLog()) {
+                log.info("Metal update vnode '{}' with key '{}' from old value '{}' to '{}'", vNode.getSignature(), key, oldVal, newVal);
+            }
         }
     }
 

@@ -59,18 +59,19 @@ public class AtomOrbitAdvice implements OrbitAdvice {
         Object lock = null;
         boolean isLocked = false;
         try {
-            if (atomLock.waitTime() > 0) {
-                AtomLockInfo lockInfo = this.getAtom().tryLock(keyPath, atomLock.type(), atomLock.readOnly());
+            AtomLockInfo lockInfo = this.getAtom().tryLock(keyPath, atomLock.type(), atomLock.readOnly());
+            isLocked = lockInfo.isLocked();
+            lock = lockInfo.getLock();
+            if (!isLocked) {
+                lockInfo = this.getAtom().tryLock(keyPath, Duration.ofMillis(atomLock.waitTime()), Duration.ofMillis(atomLock.leaseTime()), atomLock.type(), atomLock.readOnly());
                 isLocked = lockInfo.isLocked();
                 lock = lockInfo.getLock();
-                if (!isLocked) {
-                    lockInfo = this.getAtom().tryLock(keyPath, Duration.ofMillis(atomLock.waitTime()), Duration.ofMillis(atomLock.leaseTime()), atomLock.type(), atomLock.readOnly());
-                    isLocked = lockInfo.isLocked();
-                    lock = lockInfo.getLock();
-                }
-                if (isLocked) {
-                    return joinPoint.proceed();
-                }
+            }
+            if (isLocked) {
+                return joinPoint.proceed();
+            }
+            // has set wait time?
+            if (atomLock.waitTime() > 0) {
                 if (atomLock.waitTimeoutType() == AtomLockWaitTimeoutType.THROW_EXCEPTION) {
                     throw new AtomLockWaitTimeoutException();
                 } else if (atomLock.waitTimeoutType() == AtomLockWaitTimeoutType.FALLBACK) {
@@ -79,19 +80,15 @@ public class AtomOrbitAdvice implements OrbitAdvice {
                 }
                 // here is AtomLockWaitTimeoutType.WAIT_INFINITE
             }
-            AtomLockInfo lockInfo = this.getAtom().lock(keyPath, Duration.ofMillis(atomLock.leaseTime()), atomLock.type(), atomLock.readOnly());
+            lockInfo = this.getAtom().lock(keyPath, Duration.ofMillis(atomLock.leaseTime()), atomLock.type(), atomLock.readOnly());
             lock = lockInfo.getLock();
             isLocked = lockInfo.isLocked();
             return joinPoint.proceed();
-        } catch (InterruptedException e) {
-            log.error("Atom try lock error with msg: {}", e.getMessage(), e);
         } finally {
             // 只有加锁的线程需要解锁
             if (isLocked && lock != null && this.getAtom().isLocked(lock)) {
                 this.getAtom().unlock(lock);
             }
         }
-        // unreachable code!
-        return null;
     }
 }

@@ -61,7 +61,11 @@ public class TOrderService {
 
     public void testTransactionByManual() {
         TransactionStatus transaction = transactionManager.getTransaction(new DefaultTransactionDefinition());
-        transactionManager.commit(transaction);
-        //transactionManager.rollback(transaction);
+        try {
+            // do something...
+            transactionManager.commit(transaction);
+        } catch (Exception e) {
+            transactionManager.rollback(transaction);
+        }
     }
 }

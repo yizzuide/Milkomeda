@@ -61,18 +61,19 @@ public class CrustProperties {
     private Duration codeExpire = Duration.ofSeconds(60);
 
     /**
-     * Set is false if you need custom config via {@link CrustConfigurerAdapter}.
+     * Set false if you need custom config via {@link CrustConfigurerAdapter}.
      * @since 3.15.0
      */
     private boolean useAutoConfig = true;
 
     /**
-     * 查询认证信息缓存（Session方式下仅开启超级缓存，因为Session本身有Session级缓存）
+     * Set false if you use stateless token.
+     * 认证缓存（Session方式下仅开启超级缓存，因为Session本身有Session级缓存）
      */
     private boolean enableCache = true;
 
     /**
-     * Set is false if you need get entity of user info immediately.
+     * Set false if you need get entity of user info immediately.
      * @since 3.15.0
      */
     private boolean enableLoadEntityLazy = true;
@@ -121,7 +122,7 @@ public class CrustProperties {
     private boolean enableAutoRefreshToken = true;
 
     /**
-     * Token刷新间隔（默认5分钟，单位：分）
+     * Token访问即将过期的刷新间隔
      */
     @DurationUnit(ChronoUnit.MINUTES)
     private Duration refreshTokenInterval = Duration.ofMinutes(5);

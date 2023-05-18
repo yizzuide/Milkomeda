@@ -22,6 +22,7 @@
 package com.github.yizzuide.milkomeda.ice;
 
 import com.github.yizzuide.milkomeda.ice.inspector.JobInspector;
+import com.github.yizzuide.milkomeda.universe.extend.env.Environment;
 import com.github.yizzuide.milkomeda.universe.metadata.HandlerMetaData;
 import com.github.yizzuide.milkomeda.universe.polyfill.RedisPolyfill;
 import com.github.yizzuide.milkomeda.util.RedisUtil;
@@ -146,7 +147,7 @@ public class DelayJobHandler implements Runnable, ApplicationListener<IceInstanc
                 processDelayJob(delayJob, job);
             }
         } catch (Exception e) {
-            log.error("Ice Timer处理延迟Job {} 异常：{}", delayJob != null ?
+            log.error("Ice Timer处理延迟Job[{}]异常：{}", delayJob != null ?
                     delayJob.getJodId()  : "[任务数据获取失败]", e.getMessage(), e);
         } finally {
             if (props.isEnableJobTimerDistributed()) {
@@ -162,11 +163,11 @@ public class DelayJobHandler implements Runnable, ApplicationListener<IceInstanc
     @SuppressWarnings({"unchecked", "rawtypes"})
     private void processTtrJob(DelayJob delayJob, Job<?> job) {
         if (delayJob.getRetryCount() > Integer.MAX_VALUE - 1) {
-            log.error("Ice处理TTR的Job {}, 重试次数超过Integer.MAX_VALUE，放弃重试", delayJob.getJodId());
+            log.error("Ice处理TTR的Job[{}], 重试次数超过Integer.MAX_VALUE，放弃重试", delayJob.getJodId());
             return;
         }
         int currentRetryCount = delayJob.getRetryCount() + 1;
-        log.warn("Ice处理TTR的Job {}，当前重试次数为{}", delayJob.getJodId(), currentRetryCount);
+        log.warn("Ice处理TTR的Job[{}]，当前重试次数为{}", delayJob.getJodId(), currentRetryCount);
         // 检测重试次数过载
         boolean overload = delayJob.getRetryCount() >= job.getRetryCount();
 
@@ -187,7 +188,7 @@ public class DelayJobHandler implements Runnable, ApplicationListener<IceInstanc
         }
 
         if (overload) {
-            log.error("Ice检测到 Job {} 的TTR超过预设的{}次!", job.getId(), job.getRetryCount());
+            log.error("Ice检测到Job[{}]的TTR超过预设的{}次!", job.getId(), job.getRetryCount());
             // 调用TTR Overload监听器
             List<HandlerMetaData> ttrOverloadMetaDataList = IceContext.getTopicTtrOverloadMap().get(job.getTopic());
             if (!CollectionUtils.isEmpty(ttrOverloadMetaDataList)) {
@@ -215,7 +216,7 @@ public class DelayJobHandler implements Runnable, ApplicationListener<IceInstanc
                     delayJob.setRetryCount(0);
                     // 添加dead queue
                     deadQueue.add(operations, delayJob);
-                    log.warn("Ice处理TTR Overload的 Job {} 进入Dead queue", job.getId());
+                    log.warn("Ice处理TTR Overload的Job[{}]进入Dead queue", job.getId());
                 }
 
                 // Record job
@@ -264,7 +265,9 @@ public class DelayJobHandler implements Runnable, ApplicationListener<IceInstanc
      * 处理延时任务
      */
     private void processDelayJob(DelayJob delayJob, Job<?> job) {
-        log.info("Ice正在处理延迟的Job {}，当前状态为：{}", delayJob.getJodId(), job.getStatus());
+        if(Environment.isShowLog()) {
+            log.info("Ice正在处理延迟的Job[{}]，当前状态为：{}", delayJob.getJodId(), job.getStatus());
+        }
         RedisUtil.batchOps((operations) -> {
             // 修改任务池状态
             job.setStatus(JobStatus.READY);

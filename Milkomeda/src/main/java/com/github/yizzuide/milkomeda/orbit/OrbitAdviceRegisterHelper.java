@@ -44,6 +44,9 @@ public class OrbitAdviceRegisterHelper {
     /**
      * Bean name counter.
      */
+    // ++操作符包含三条指令：
+    // 1.把变量count从内存加载到CPU的寄存器；2.在寄存器中执行+1操作；3.把结果写回内存(缓存)。
+    // 注：CPU只能保证指令级别的原子操作，而不是高级语言的操作符。
     public static final Map<String, AtomicInteger> counterMap = new HashMap<>();
 
     /**

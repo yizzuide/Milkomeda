@@ -39,7 +39,7 @@ import java.util.Map;
  *
  * @author yizzuide
  * @since 1.14.0
- * @version 1.17.3
+ * @version 3.14.0
  * <br>
  * Create at 2019/11/11 21:51
  */
@@ -48,43 +48,49 @@ import java.util.Map;
 @NoArgsConstructor
 public class CrustUserInfo<T, P> implements Serializable {
     private static final long serialVersionUID = -3849153553850107966L;
+
     /**
      * 用户id
      */
     private Serializable uid;
+
     /**
      * 用户名
      */
     private String username;
+
     /**
      * 认证token（stateless=true时有值）
      */
     private String token;
+
     /**
      * token过期时间
      * @since 3.14.0
      */
     private Long tokenExpire;
+
     /**
      * Check is admin user.
      * @since 3.14.0
      */
     private Boolean isAdmin;
+
     /**
      * 角色id列表
      */
     private List<Long> roleIds;
+
     /**
      * 权限列表
      * @since 3.14.0
      */
     private List<P> permissionList;
+
     /**
-     * 用户实体对象
-     * <br>
-     * 注意，这个有没有值根据下面条件：<br>
-     * 如果stateless=false，那么是使用session方式，这个一定有实体对象<br>
-     * 如果stateless=true，那么是无状态token认证方式，该值默认为null，如果想要有值，可实现：<br>
+     * 用户实体对象，它的值根据以下条件确定：<br>
+     * 1.如果stateless=false，那么使用的是session方式，这个一定有实体对象<br>
+     * 2.如果stateless=true，那么是无状态token认证方式，该值默认为null，如果想要有值，可实现：<br>
      * <pre class="code">
      * public class XXXDetailsService extends CrustUserDetailsService {
      *   protected CrustEntity findEntityById(String uid) {
@@ -107,8 +113,6 @@ public class CrustUserInfo<T, P> implements Serializable {
      * @since 3.14.0
      */
     private Class<?> permClass;
-
-
 
     public CrustUserInfo(Serializable uid, String username, String token, List<Long> roleIds, T entity) {
         this.uid = uid;

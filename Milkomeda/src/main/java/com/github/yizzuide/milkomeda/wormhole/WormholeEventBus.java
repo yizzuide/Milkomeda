@@ -25,6 +25,7 @@ import com.github.yizzuide.milkomeda.universe.metadata.HandlerMetaData;
 import com.github.yizzuide.milkomeda.util.ReflectUtil;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.CollectionUtils;
@@ -37,6 +38,8 @@ import java.util.concurrent.Future;
  * WormholeEventBus
  * 事件总线
  *
+ * @see org.springframework.transaction.interceptor.TransactionInterceptor#invoke(MethodInvocation)
+ * @see org.springframework.transaction.interceptor.TransactionAspectSupport
  * @author yizzuide
  * @since 3.3.0
  * @version 3.11.4
