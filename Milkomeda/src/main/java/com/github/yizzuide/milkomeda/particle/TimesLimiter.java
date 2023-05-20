@@ -48,6 +48,11 @@ import java.util.Collections;
 @EqualsAndHashCode(callSuper = true)
 public class TimesLimiter extends LimitHandler implements LuaLoader {
     /**
+     * Decorated postfix for limiter key.
+     */
+    private static final String POSTFIX = ":times";
+
+    /**
      * 限制时间类型
      */
     @Setter
@@ -61,12 +66,9 @@ public class TimesLimiter extends LimitHandler implements LuaLoader {
     private Long limitTimes;
 
     /**
-     * lua脚本
+     * Lua script list.
      */
-    private String luaScript;
-
-    // 装饰后缀
-    private static final String POSTFIX = ":times";
+    private String[] luaScripts;
 
     public TimesLimiter() { }
 
@@ -101,7 +103,7 @@ public class TimesLimiter extends LimitHandler implements LuaLoader {
             default:
                 throw new IllegalStateException("Unexpected value: " + timesType);
         }
-        RedisScript<Long> redisScript = new DefaultRedisScript<>(luaScript, Long.class);
+        RedisScript<Long> redisScript = new DefaultRedisScript<>(luaScripts[0], Long.class);
         Long times = redisTemplate.execute(redisScript, Collections.singletonList(decoratedKey), limitTimes, expireSeconds);
         assert times != null;
         // 判断是否超过次数
@@ -111,7 +113,7 @@ public class TimesLimiter extends LimitHandler implements LuaLoader {
     }
 
     @Override
-    public String filename() {
-        return "particle_times_limiter.lua";
+    public String[] luaFilenames() {
+        return new String[]{"particle_times_limiter.lua"};
     }
 }

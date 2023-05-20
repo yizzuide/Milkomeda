@@ -81,7 +81,7 @@ public class ParticleProperties {
         static final String RESPONSE_CONTENT = "content";
 
         /**
-         * 限制处理器Bean名（用于注解方式或lazy注入，Bean名不可重复）
+         * 限制处理器自动注册的Bean名（用于注解方式或lazy注入，Bean名不可重复）
          */
         private String name;
 
@@ -106,7 +106,13 @@ public class ParticleProperties {
         private Map<String, Object> props;
 
         /**
-         * 分布式key模板（固定占位符：uri、method、params；请求参数域/自定义解析参数：$params.name；请求头域：$header.name；cookie域：$cookie.name）
+         * 分布式key模板：
+         * <pre>
+         *  固定占位符：uri、method、params
+         *  请求参数域/自定义解析参数：$params.name
+         *  请求头域：$header.name
+         *  cookie域：$cookie.name
+         * </pre>
          */
         private String keyTpl = "limit_{method}_{uri}_{$header.token}";
 

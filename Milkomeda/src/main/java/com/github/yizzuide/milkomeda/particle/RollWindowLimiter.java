@@ -42,21 +42,25 @@ import java.util.Collections;
 public class RollWindowLimiter extends LimitHandler implements LuaLoader {
 
     /**
+     * Decorated postfix for limiter key.
+     */
+    private static final String POSTFIX = ":roll";
+
+    /**
      * Max limit count.
      */
     private Long limitTimes = 1L;
 
     /**
-     * Lua script content.
+     * Lua script list.
      */
-    private String luaScript;
+    private String[] luaScripts;
 
-    private static final String POSTFIX = ":roll";
 
     @Override
     public <R> R limit(String key, Process<R> process) throws Throwable {
         String decoratedKey = key + POSTFIX;
-        RedisScript<Long> redisScript = new DefaultRedisScript<>(getLuaScript(), Long.class);
+        RedisScript<Long> redisScript = new DefaultRedisScript<>(luaScripts[0], Long.class);
         long currentTimeMillis = System.currentTimeMillis();
         Long times =  getJsonRedisTemplate().execute(redisScript, Collections.singletonList(decoratedKey), expire, currentTimeMillis, limitTimes);
         assert times != null;
@@ -67,7 +71,7 @@ public class RollWindowLimiter extends LimitHandler implements LuaLoader {
     }
 
     @Override
-    public String filename() {
-        return "particle_rollwindow_limiter.lua";
+    public String[] luaFilenames() {
+        return new String[]{"particle_rollWindow_limiter.lua"};
     }
 }

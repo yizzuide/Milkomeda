@@ -22,12 +22,11 @@
 package com.github.yizzuide.milkomeda.particle;
 
 /**
- * LimiterType
- * 限制器类型
+ * Used to specify the type of limiter.
  *
- * @author yizzuide
  * @since 3.1.2
  * @version 3.15.0
+ * @author yizzuide
  * <br>
  * Create at 2020/04/22 14:14
  */
@@ -44,8 +43,15 @@ public enum LimiterType {
 
     /**
      * 滚动窗口
+     * @since 3.15.0
      */
     ROLL_WINDOW,
+
+    /**
+     * 令牌桶
+     * @since 3.15.0
+     */
+    TOKEN_BUCKET,
 
     /**
      * 布隆限制器

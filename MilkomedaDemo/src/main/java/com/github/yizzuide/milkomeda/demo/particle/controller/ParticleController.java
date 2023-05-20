@@ -193,4 +193,9 @@ public class ParticleController {
     public String sendSMS(String phone) {
         return "OK";
     }
+
+    @RequestMapping("quota")
+    public String quota() {
+        return "OK";
+    }
 }

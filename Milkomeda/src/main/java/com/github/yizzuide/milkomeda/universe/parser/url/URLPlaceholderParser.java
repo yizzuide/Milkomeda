@@ -22,9 +22,9 @@
 package com.github.yizzuide.milkomeda.universe.parser.url;
 
 import com.github.yizzuide.milkomeda.comet.core.CometRequestWrapper;
+import com.github.yizzuide.milkomeda.universe.parser.placeholder.PlaceholderExtractor;
 import com.github.yizzuide.milkomeda.util.DataTypeConvertUtil;
 import com.github.yizzuide.milkomeda.util.JSONUtil;
-import com.github.yizzuide.milkomeda.universe.parser.placeholder.PlaceholderExtractor;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 

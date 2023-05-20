@@ -53,7 +53,7 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 1.14.0
- * @version 3.12.10
+ * @version 3.15.0
  * <br>
  * Create at 2019/11/11 11:26
  */
@@ -123,6 +123,9 @@ public class ParticleConfig implements ApplicationContextAware {
                     case ROLL_WINDOW:
                         limiter.setHandlerClazz(RollWindowLimiter.class);
                         break;
+                    case TOKEN_BUCKET:
+                        limiter.setHandlerClazz(TokenBucketLimiter.class);
+                        break;
                     case BARRIER:
                         limiter.setHandlerClazz(BarrierLimiter.class);
                         break;
@@ -132,17 +135,17 @@ public class ParticleConfig implements ApplicationContextAware {
                 }
             }
             LimitHandler limitHandler = SpringContext.registerBean((ConfigurableApplicationContext) applicationContext, limiterName, limiter.getHandlerClazz(), limiter.getProps());
+            applicationContext.getAutowireCapableBeanFactory().autowireBean(limitHandler);
             limitHandler.setExpire(limiter.getKeyExpire().getSeconds());
             limiter.setLimitHandler(limitHandler);
             if (limiter.getHandlerClazz() == BarrierLimiter.class) {
                 barrierLimiters.add(limiter);
             }
             // 缓存并设置属性
-            if(null == cacheHandlerBeans.putIfAbsent(limiterName, limitHandler)) {
+            if(null == cacheHandlerBeans.putIfAbsent(limiterName, limitHandler) &&
+                    limitHandler instanceof LuaLoader) {
                 // 仅读取配置限制器的lua脚本
-                if (limitHandler instanceof LuaLoader) {
-                    ((LuaLoader) limitHandler).load();
-                }
+                ((LuaLoader) limitHandler).load();
             }
         }
 

@@ -35,34 +35,35 @@ import java.io.IOException;
  */
 public interface LuaLoader {
     /**
-     * Lua script path.
+     * Lua script dir path.
      */
-    default String resourcePath() {
+    default String resourceDirPath() {
         return IOUtils.LUA_PATH;
     }
 
     /**
-     * Lua script file name.
-     * @return file name
+     * Lua script file name list.
+     * @return list file name
      */
-    String filename();
+    String[] luaFilenames();
 
     /**
      * Setter of hold content filed.
      */
-    void setLuaScript(String luaScript);
-
-    /**
-     * Getter of hold content filed.
-     * @return script content
-     */
-    String getLuaScript();
+    void setLuaScripts(String[] luaScript);
 
     /**
      * Start load lua script.
      */
     default void load() throws IOException {
-        String luaScript = IOUtils.loadLua(resourcePath(), filename());
-        setLuaScript(luaScript);
+        String[] luaFilenames = luaFilenames();
+        if (luaFilenames == null || luaFilenames.length == 0) {
+            return;
+        }
+        String[] luaScripts = new String[luaFilenames.length];
+        for (int i = 0; i < luaFilenames.length; i++) {
+            luaScripts[i] = IOUtils.loadLua(resourceDirPath(), luaFilenames[i]);
+        }
+        setLuaScripts(luaScripts);
     }
 }
