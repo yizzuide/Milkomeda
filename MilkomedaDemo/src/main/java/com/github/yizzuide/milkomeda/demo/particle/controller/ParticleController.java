@@ -198,4 +198,9 @@ public class ParticleController {
     public String quota() {
         return "OK";
     }
+
+    @RequestMapping("pull")
+    public String pull() {
+        return "OK";
+    }
 }

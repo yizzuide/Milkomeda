@@ -37,7 +37,8 @@ import java.util.Collections;
 import java.util.concurrent.CountDownLatch;
 
 /**
- * The token bucket not be pre consumed and solved the problem of double traffic per unit time which relative to {@link TimesLimiter}.
+ * The token bucket can solve the problem of double traffic per unit time which relative to {@link TimesLimiter} and sudden request rejected with {@link LeakyBucketLimiter}.
+ * At begin, full tokens in bucket before request come in.
  *
  * @since 3.15.0
  * @author yizzuide
@@ -84,17 +85,17 @@ public class TokenBucketLimiter extends LimitHandler implements LuaLoader {
     /**
      * Bucket size.
      */
-    private int bucketCapacity;
+    private long bucketCapacity;
 
     /**
      * Each time of put token count in bucket.
      */
-    private int tokensPerTime;
+    private long tokensPerTime;
 
     /**
      * Interval of put token in bucket (second unit).
      */
-    private int interval;
+    private long interval;
 
     @Override
     public <R> R limit(String key, Process<R> process) throws Throwable {

@@ -54,6 +54,12 @@ public enum LimiterType {
     TOKEN_BUCKET,
 
     /**
+     * 漏桶
+     * @since 3.15.0
+     */
+    LEAKY_BUCKET,
+
+    /**
      * 布隆限制器
      */
     BLOOM,

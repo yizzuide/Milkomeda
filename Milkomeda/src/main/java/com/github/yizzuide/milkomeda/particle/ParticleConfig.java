@@ -126,6 +126,9 @@ public class ParticleConfig implements ApplicationContextAware {
                     case TOKEN_BUCKET:
                         limiter.setHandlerClazz(TokenBucketLimiter.class);
                         break;
+                    case LEAKY_BUCKET:
+                        limiter.setHandlerClazz(LeakyBucketLimiter.class);
+                        break;
                     case BARRIER:
                         limiter.setHandlerClazz(BarrierLimiter.class);
                         break;
