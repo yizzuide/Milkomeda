@@ -101,6 +101,7 @@ public class LightContext<ID, V> {
      * @param value 任意对象
      * @param identifier 唯一标识
      * @param <V>   对象类型
+     * @return LightContext
      * @since 3.13.0
      */
     @SuppressWarnings("unchecked")

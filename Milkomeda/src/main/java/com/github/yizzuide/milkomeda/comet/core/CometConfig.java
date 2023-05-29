@@ -55,7 +55,7 @@ import java.util.*;
  *
  * @author yizzuide
  * @since 2.0.0
- * @version 3.14.0
+ * @version 3.15.0
  * <br>
  * Create at 2019/12/12 18:10
  */
@@ -114,14 +114,12 @@ public class CometConfig implements ApplicationListener<ApplicationStartedEvent>
     @Override
     public void onApplicationEvent(@NonNull ApplicationStartedEvent event) {
         Map<String, HotHttpHandlerProperty> requestInterceptors = cometProperties.getRequestInterceptors();
-        if (CollectionUtils.isEmpty(requestInterceptors)) {
-            return;
+        if (!CollectionUtils.isEmpty(requestInterceptors)) {
+            Map<String, CometRequestInterceptor> requestInterceptorMap = ApplicationContextHolder.get().getBeansOfType(CometRequestInterceptor.class);
+            if (!CollectionUtils.isEmpty(requestInterceptorMap)) {
+                CometHolder.setRequestInterceptors(NamedHandler.sortedList(requestInterceptorMap, requestInterceptors::get));
+            }
         }
-        Map<String, CometRequestInterceptor> requestInterceptorMap = ApplicationContextHolder.get().getBeansOfType(CometRequestInterceptor.class);
-        if (CollectionUtils.isEmpty(requestInterceptorMap)) {
-            return;
-        }
-        CometHolder.setRequestInterceptors(NamedHandler.sortedList(requestInterceptorMap, requestInterceptors::get));
 
         Map<String, HotHttpHandlerProperty> responseInterceptors = cometProperties.getResponseInterceptors();
         if (CollectionUtils.isEmpty(responseInterceptors)) {

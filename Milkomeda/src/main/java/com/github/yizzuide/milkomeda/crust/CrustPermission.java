@@ -169,6 +169,7 @@ public interface CrustPermission extends Ordered {
     /**
      * Build perm tree from permission list.
      * @param permissionList    permission list
+     * @param permClass         permission class
      * @param parentId          build start parent id
      * @return menu tree
      */

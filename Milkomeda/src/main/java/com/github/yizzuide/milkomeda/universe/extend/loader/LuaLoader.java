@@ -36,6 +36,7 @@ import java.io.IOException;
 public interface LuaLoader {
     /**
      * Lua script dir path.
+     * @return lua source dir.
      */
     default String resourceDirPath() {
         return IOUtils.LUA_PATH;
@@ -49,11 +50,13 @@ public interface LuaLoader {
 
     /**
      * Setter of hold content filed.
+     * @param luaScripts lua script file list
      */
-    void setLuaScripts(String[] luaScript);
+    void setLuaScripts(String[] luaScripts);
 
     /**
      * Start load lua script.
+     * @throws IOException if load file not exists.
      */
     default void load() throws IOException {
         String[] luaFilenames = luaFilenames();

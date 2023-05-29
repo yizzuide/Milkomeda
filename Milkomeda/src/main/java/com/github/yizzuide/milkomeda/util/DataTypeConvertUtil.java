@@ -139,7 +139,7 @@ public class DataTypeConvertUtil {
      * @param count count of number
      * @return  Stream
      */
-    public static <T> LongStream countToStream(int count) {
+    public static LongStream countToStream(int count) {
         long[] arr = new long[count];
         for (int i = 0; i < count; i++) {
             arr[i] = i;

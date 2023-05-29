@@ -23,9 +23,12 @@ package com.github.yizzuide.milkomeda.hydrogen.uniform;
 
 import com.github.yizzuide.milkomeda.comet.core.AbstractResponseInterceptor;
 import com.github.yizzuide.milkomeda.universe.extend.annotation.Alias;
+import com.github.yizzuide.milkomeda.universe.parser.yml.YmlResponseOutput;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.servlet.http.HttpServletResponse;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Uniform implementation of response interceptor. It works when response type is subclass of {@link ResultVO}.
@@ -42,7 +45,12 @@ public class UniformResponseInterceptor extends AbstractResponseInterceptor {
     @Override
     protected Object doResponse(HttpServletResponse response, Object body) {
         if (body instanceof ResultVO) {
-            return UniformHandler.matchStatusResult(response, ((ResultVO<?>) body).toMap()).getT2();
+            ResultVO<?> resultVO = (ResultVO<?>) body;
+            Map<String, Object> source = new HashMap<>(8);
+            source.put(YmlResponseOutput.CODE, resultVO.getCode());
+            source.put(YmlResponseOutput.MESSAGE, resultVO.getMessage());
+            source.put(YmlResponseOutput.DATA, resultVO.getData());
+            return UniformHandler.matchStatusResult(response, source).getT2();
         }
         return null;
     }

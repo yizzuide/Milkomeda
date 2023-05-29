@@ -63,6 +63,7 @@ public class UniformResult<T> implements ResultVO<T> {
 
     /**
      * Return success with code and empty message.
+     * @param code  result code
      * @param data  success data
      * @param <T>   data type
      * @return  ResultVO

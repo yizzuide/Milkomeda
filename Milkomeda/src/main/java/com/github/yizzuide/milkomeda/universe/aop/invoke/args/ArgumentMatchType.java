@@ -46,7 +46,7 @@ public enum ArgumentMatchType {
     BY_NAME_POSTFIX,
 
     /**
-     * Match by type using {@link ArgumentDefinition#getMatchType()}.
+     * Match by type using {@link com.github.yizzuide.milkomeda.universe.aop.invoke.args.ArgumentDefinition}.
      */
     BY_TYPE,
 

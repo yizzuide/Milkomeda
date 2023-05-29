@@ -45,7 +45,7 @@ public class DelayJob implements Serializable {
     private static final long serialVersionUID = -1408197881231593037L;
 
     /**
-     * 延迟任务的唯一标识（当长度都小于64字节时，可用于Redis ZSet数据结构SkipList -> ZipList的存储优化）
+     * 延迟任务的唯一标识（当长度都小于64字节时，可用于Redis ZSet数据结构SkipList到ZipList的存储优化）
      * 内部存储格式：jodId#retryCount
      */
     private String jodId;
