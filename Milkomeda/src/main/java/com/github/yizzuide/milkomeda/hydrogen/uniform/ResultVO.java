@@ -72,7 +72,7 @@ public interface ResultVO<T> {
      * @return Map
      */
     default Map<String, Object> toMap() {
-        Map<String, Object> map = new HashMap<>(6);
+        Map<String, Object> map = new HashMap<>(8);
         map.put(YmlResponseOutput.CODE, getCode());
         map.put(YmlResponseOutput.MESSAGE, getMessage());
         map.put(YmlResponseOutput.DATA, getData());

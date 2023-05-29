@@ -56,7 +56,7 @@ public class PillarEntryContext implements ApplicationListener<ContextRefreshedE
                 tag = pillarEntryPoint.tag();
             }
             // 设置其它属性方法的值
-            Map<String, Object> attrs = new HashMap<>(2);
+            Map<String, Object> attrs = new HashMap<>(4);
             attrs.put(ATTR_CODE, pillarEntryPoint.code());
             metaData.setAttributes(attrs);
             return tag;

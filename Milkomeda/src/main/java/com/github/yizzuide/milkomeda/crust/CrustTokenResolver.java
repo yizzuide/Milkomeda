@@ -78,7 +78,7 @@ public class CrustTokenResolver {
      * @param <T>   entity type
      */
     public <T extends CrustEntity> String generate(CrustUserInfo<T, CrustPermission> userInfo, String roleIds) {
-        Map<String, Object> claims = new HashMap<>(6);
+        Map<String, Object> claims = new HashMap<>(8);
         claims.put(UID, userInfo.getUidLong());
         claims.put(USERNAME, userInfo.getUsername());
         claims.put(CREATED, new Date());

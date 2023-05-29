@@ -315,7 +315,7 @@ public class UniformHandler extends ResponseEntityExceptionHandler {
 
     @NotNull
     private static Map<String, Object> createInitResolveMap() {
-        Map<String, Object> resolveMap = new HashMap<>(7);
+        Map<String, Object> resolveMap = new HashMap<>(8);
         resolveMap.put(YmlResponseOutput.STATUS, HttpStatus.OK.value());
         resolveMap.put(YmlResponseOutput.CODE, "0");
         resolveMap.put(YmlResponseOutput.MESSAGE, "");

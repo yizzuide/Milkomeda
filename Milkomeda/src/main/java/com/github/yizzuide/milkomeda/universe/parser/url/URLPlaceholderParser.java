@@ -95,7 +95,7 @@ public class URLPlaceholderParser {
      */
     public Map<String, List<String>> grabPlaceHolders(String tpl) {
         List<String> placeHolders = placeholderExtractor.getPlaceHolders(tpl);
-        Map<String, List<String>> keyMap = new HashMap<>(6);
+        Map<String, List<String>> keyMap = new HashMap<>(8);
         keyMap.put(KEY_HEAD, placeHolders.stream().filter(s -> s.startsWith(headerStartToken)).collect(Collectors.toList()));
         keyMap.put(KEY_COOKIE, placeHolders.stream().filter(s -> s.startsWith(cookieStartToken)).collect(Collectors.toList()));
         keyMap.put(KEY_PARAMS, placeHolders.stream().filter(s -> s.startsWith(paramsStartToken)).collect(Collectors.toList()));

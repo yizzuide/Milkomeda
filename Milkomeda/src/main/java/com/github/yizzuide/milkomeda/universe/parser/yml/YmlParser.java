@@ -99,7 +99,7 @@ public class YmlParser {
      * @param replaceData   如果值存在，使用替换的源强制替换配置的字段
      */
     public static void parseAliasMapPath(Map<String, Object> nodeMap, Map<String, Object> result, String ownerAliasKey, Object defaultValue, Object replaceData) {
-        Map<String, YmlAliasNode> aliasNodeMap = new HashMap<>(2);
+        Map<String, YmlAliasNode> aliasNodeMap = new HashMap<>(4);
         parseAliasNodePath(nodeMap, aliasNodeMap, ownerAliasKey, defaultValue, replaceData);
         if (aliasNodeMap.isEmpty()) {
             return;

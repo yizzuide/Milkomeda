@@ -80,7 +80,7 @@ public class SpringMvcPolyfill {
                     // TODO <mark> 由于使用底层API, 这个exceptionHandlerAdviceCache属性在未来版本中可能会改
                     Map<ControllerAdviceBean, ExceptionHandlerMethodResolver> resolverMap = ReflectUtil.invokeFieldPath(exceptionResolver, "exceptionHandlerAdviceCache");
                     if (resolverMap == null) {
-                        resolverMap = new HashMap<>(2);
+                        resolverMap = new HashMap<>(4);
                     }
                     // 仿Spring MVC源码创建advice
                     ControllerAdviceBean adviceBean = new ControllerAdviceBean(beanName, ApplicationContextHolder.get(), null);
