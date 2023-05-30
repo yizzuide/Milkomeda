@@ -88,14 +88,15 @@ public class CrustConfig {
     }
 
     @Bean(Crust.CATCH_NAME)
+    @ConditionalOnMissingBean
     @ConditionalOnProperty(prefix = "milkomeda.crust", name = "enable-cache", havingValue = "true", matchIfMissing = true)
     public Cache crustLightCache(LightProperties lightProps) {
         LightCache lightCache = new LightCache();
         lightCache.setL1MaxCount(lightProps.getL1MaxCount());
         lightCache.setL1DiscardPercent(lightProps.getL1DiscardPercent());
         lightCache.setL1Expire(crustProps.getExpire().getSeconds());
-        lightCache.setStrategy(lightProps.getStrategy());
-        lightCache.setStrategyClass(lightProps.getStrategyClass());
+        lightCache.setStrategy(LightDiscardStrategy.LazyExpire);
+        lightCache.setOnlyCacheL1(crustProps.isCacheInMemory());
         lightCache.setL2Expire(crustProps.getExpire().getSeconds());
         lightCache.setEnableSuperCache(lightProps.isEnableSuperCache());
         return lightCache;

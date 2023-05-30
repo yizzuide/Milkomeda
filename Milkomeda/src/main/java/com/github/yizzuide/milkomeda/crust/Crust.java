@@ -389,6 +389,9 @@ public class Crust {
     String getToken(boolean checkIsExists) {
         if (!props.isStateless()) { return null; }
         String token = tokenResolver.getRequestToken();
+        if (props.isCacheInMemory()) {
+            return token;
+        }
         if (checkIsExists && props.isEnableCache()) {
             String cacheKey = CATCH_KEY_PREFIX + DigestUtils.md5DigestAsHex(token.getBytes());
             if (!crustLightCache.isCacheL2Exists(cacheKey)) {

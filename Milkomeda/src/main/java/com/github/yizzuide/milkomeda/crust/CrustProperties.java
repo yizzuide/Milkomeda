@@ -73,6 +73,11 @@ public class CrustProperties {
     private boolean enableCache = true;
 
     /**
+     * Set true if cache only used memory.
+     */
+    private boolean cacheInMemory = false;
+
+    /**
      * Set false if you need get entity of user info immediately.
      * @since 3.15.0
      */
