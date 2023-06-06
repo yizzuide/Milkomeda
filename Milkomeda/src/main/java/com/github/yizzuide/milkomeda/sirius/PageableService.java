@@ -107,6 +107,8 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
             boolean fieldNonNull = Objects.nonNull(target) && Objects.nonNull(fieldValue);
             if (queryMatcher.prefect() == PrefectType.EQ) {
                 queryWrapper.eq(fieldNonNull, columnName, fieldValue);
+            } else if (queryMatcher.prefect() == PrefectType.NEQ) {
+                queryWrapper.ne(fieldNonNull, columnName, fieldValue);
             } else if (queryMatcher.prefect() == PrefectType.LIKE) {
                     queryWrapper.like(fieldNonNull && StringUtils.isNotBlank(fieldValue.toString()), columnName, fieldValue);
             } else if (queryMatcher.prefect() == PrefectType.PageDate) {

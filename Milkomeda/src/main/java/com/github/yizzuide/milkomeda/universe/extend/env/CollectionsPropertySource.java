@@ -52,6 +52,8 @@ public class CollectionsPropertySource extends PropertySource<Object> {
 
     public static final String COLLECTIONS_OBJECT_DATE = "{date}";
 
+    public static final String COLLECTIONS_OBJECT_MILLS = "{mills}";
+
     private static final String PREFIX = "collections.";
 
     public CollectionsPropertySource() {
@@ -76,6 +78,9 @@ public class CollectionsPropertySource extends PropertySource<Object> {
         if ("dateObject".equals(type)) {
             return COLLECTIONS_OBJECT_DATE;
         }
+        if ("millsObject".equals(type)) {
+            return COLLECTIONS_OBJECT_MILLS;
+        }
         return null;
     }
 
@@ -97,6 +102,9 @@ public class CollectionsPropertySource extends PropertySource<Object> {
         }
         if (psValue.equals(COLLECTIONS_OBJECT_DATE)) {
             return new Date();
+        }
+        if (psValue.equals(COLLECTIONS_OBJECT_MILLS)) {
+            return System.currentTimeMillis();
         }
         return psValue;
     }

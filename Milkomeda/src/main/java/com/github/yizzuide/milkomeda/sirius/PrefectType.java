@@ -16,6 +16,10 @@ public enum PrefectType {
      */
     EQ,
     /**
+     * Not Equals field.
+     */
+    NEQ,
+    /**
      * Sql like field.
      */
     LIKE,

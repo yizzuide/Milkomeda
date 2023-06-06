@@ -74,6 +74,9 @@ public class SiriusMybatisParameterHandler extends MybatisParameterHandler {
         }
         if (entity != null) {
             TableInfo tableInfo = TableInfoHelper.getTableInfo(entity.getClass());
+            if (tableInfo == null) {
+                return;
+            }
             for (TableFieldInfo tableFieldInfo : tableInfo.getFieldList()) {
                 if (mappedStatement.getSqlCommandType() == SqlCommandType.INSERT) {
                     if (this.getMetaObjectHandler().getInsertFields().contains(tableFieldInfo.getProperty())) {
