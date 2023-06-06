@@ -19,28 +19,45 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.universe.config;
+package com.github.yizzuide.milkomeda.sirius;
 
-import com.github.yizzuide.milkomeda.universe.extend.processor.EarlyLoadBeanDefinitionRegistryPostProcessor;
-import org.springframework.context.ApplicationContextInitializer;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.lang.NonNull;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
-import java.util.Collection;
+import java.lang.annotation.*;
 
 /**
- * Custom add config spring context initializer.
+ * Query linker using for {@link IPageableService}.
  *
- * @see org.springframework.boot.SpringApplication#setInitializers(Collection)
  * @since 3.15.0
  * @author yizzuide
  * <br>
- * Create at 2023/04/27 20:50
+ * Create at 2023/06/07 01:58
  */
-// SpringBoot在调用refresh()之前加载上下文初始化器，这时候的Bean Class还没被类加载器加载。
-public class MilkomedaContextInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
-    @Override
-    public void initialize(@NonNull ConfigurableApplicationContext applicationContext) {
-        applicationContext.addBeanFactoryPostProcessor(new EarlyLoadBeanDefinitionRegistryPostProcessor());
-    }
+@Documented
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.FIELD, ElementType.ANNOTATION_TYPE})
+public @interface QueryLinker {
+    /**
+     * Setter field for set name.
+     * @return set field
+     */
+    String setNameField();
+
+    /**
+     * link name field.
+     * @return link name
+     */
+    String namedField();
+
+    /**
+     * link field referenced at.
+     * @return reference field
+     */
+    String linkField() default "id";
+
+    /**
+     * Link mapper class.
+     * @return mapper class
+     */
+    Class<?> linkMapper() default BaseMapper.class;
 }

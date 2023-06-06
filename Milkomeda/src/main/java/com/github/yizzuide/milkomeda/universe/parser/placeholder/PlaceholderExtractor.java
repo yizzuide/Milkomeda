@@ -85,7 +85,7 @@ public class PlaceholderExtractor extends PropertyPlaceholderHelper {
     }
 
     /**
-     * Create PlaceholderResolver with placeholderPrefix, the default placeholderSuffix is "}"
+     * Create PlaceholderResolver with placeholderPrefix.
      * @param placeholderPrefix placeholder prefix
      * @return PlaceholderResolver
      * @since 3.13.0

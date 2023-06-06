@@ -24,10 +24,7 @@ import org.springframework.util.ReflectionUtils;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -56,7 +53,7 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
         return (Class<T>) ReflectionKit.getSuperClassGenericType(this.getClass(), PageableService.class, 1);
     }
 
-    @SuppressWarnings("ConstantConditions")
+    @SuppressWarnings({"ConstantConditions", "rawtypes", "unchecked"})
     public UniformPage<T> selectByPage(UniformQueryPageData<T> queryPageData) {
         Page<T> page = new Page<>();
         page.setCurrent(queryPageData.getPageStart());
@@ -70,6 +67,7 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
         boolean postOrderByASC = true;
         boolean needPostOrderBy = false;
         Field orderField = null;
+        List<Field> linkerFields = new ArrayList<>();
         for (Field field : fields) {
             QueryMatcher queryMatcher = field.getDeclaredAnnotation(QueryMatcher.class);
             if (queryMatcher == null) {
@@ -123,6 +121,12 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
             } else {
                 additionParseQueryMatcher(queryWrapper, queryMatcher.prefectString(), columnName, fieldNonNull, fieldValue);
             }
+
+            // collect query linker
+            QueryLinker queryLinker = field.getDeclaredAnnotation(QueryLinker.class);
+            if (queryLinker != null) {
+                linkerFields.add(field);
+            }
         }
 
         Page<T> recordPage = this.baseMapper.selectPage(page, queryWrapper);
@@ -150,6 +154,33 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
             // need desc?
             if (!postOrderByASC) {
                 Collections.reverse(records);
+            }
+        }
+
+        // handle query link name
+        if (!CollectionUtils.isEmpty(linkerFields) && !CollectionUtils.isEmpty(records)) {
+            for (Field linkerField : linkerFields) {
+                QueryLinker queryLinker = linkerField.getDeclaredAnnotation(QueryLinker.class);
+                List<Serializable> idValues = records.stream()
+                        .map(e -> (Serializable) tableInfo.getPropertyValue(e, linkerField.getName()))
+                        .collect(Collectors.toList());
+                BaseMapper linkMapper = (BaseMapper) ApplicationContextHolder.get().getBean(queryLinker.linkMapper());
+                QueryWrapper<T> linkQueryWrapper = new QueryWrapper<>();
+                linkQueryWrapper.in(queryLinker.linkField(), idValues);
+                List<?> linkEntityList = linkMapper.selectList(linkQueryWrapper);
+                if (!CollectionUtils.isEmpty(linkEntityList)) {
+                    // get link entity table info
+                    TableInfo LinkTableInfo = TableInfoHelper.getTableInfo(linkEntityList.get(0).getClass());
+                    for (T record : records) {
+                        linkEntityList.forEach(le -> {
+                            Object id = LinkTableInfo.getPropertyValue(le, queryLinker.linkField());
+                            String name = (String) LinkTableInfo.getPropertyValue(le, queryLinker.namedField());
+                            if (tableInfo.getPropertyValue(record, linkerField.getName()).equals(id)) {
+                                tableInfo.setPropertyValue(record, queryLinker.setNameField(), name);
+                            }
+                        });
+                    }
+                }
             }
         }
         uniformPage.setList(records);
