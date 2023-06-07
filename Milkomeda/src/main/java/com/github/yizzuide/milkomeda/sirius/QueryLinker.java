@@ -56,8 +56,14 @@ public @interface QueryLinker {
     String linkIdField() default "id";
 
     /**
+     * Link id value should ignore.
+     * @return id value
+     */
+    long linkIdIgnore() default 0L;
+
+    /**
      * Link mapper class.
      * @return mapper class
      */
-    Class<BaseMapper<?>> linkMapper();
+    @SuppressWarnings("rawtypes") Class<? extends BaseMapper> linkMapper();
 }

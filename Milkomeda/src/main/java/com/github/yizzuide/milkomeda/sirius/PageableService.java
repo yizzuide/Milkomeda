@@ -163,6 +163,7 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
                 QueryLinker queryLinker = linkerField.getDeclaredAnnotation(QueryLinker.class);
                 List<Serializable> idValues = records.stream()
                         .map(e -> (Serializable) tableInfo.getPropertyValue(e, linkerField.getName()))
+                        .filter(e -> !Long.valueOf(e.toString()).equals(queryLinker.linkIdIgnore()))
                         .collect(Collectors.toList());
                 BaseMapper linkMapper = ApplicationContextHolder.get().getBean(queryLinker.linkMapper());
                 QueryWrapper<T> linkQueryWrapper = new QueryWrapper<>();

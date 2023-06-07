@@ -52,7 +52,7 @@ public @interface RefMatcher {
      * Foreign mapper class, must add on mapper type.
      * @return mapper class
      */
-    Class<?> foreignMapper() default BaseMapper.class;
+    Class<? extends BaseMapper> foreignMapper() default BaseMapper.class;
 
     enum RefType {
         /**
