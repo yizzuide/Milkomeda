@@ -129,11 +129,20 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
             }
         }
 
-        Page<T> recordPage = this.baseMapper.selectPage(page, queryWrapper);
         UniformPage<T> uniformPage = new UniformPage<>();
-        uniformPage.setTotalSize(recordPage.getTotal());
-        uniformPage.setPageCount(recordPage.getPages());
-        List<T> records = recordPage.getRecords();
+        List<T> records;
+        // 如果页记录数为-1，则不分页
+        if (page.getSize() == -1) {
+            Long totalSize = this.baseMapper.selectCount(queryWrapper);
+            records = this.baseMapper.selectList(queryWrapper);
+            uniformPage.setTotalSize(totalSize);
+            uniformPage.setPageCount(1L);
+        } else {
+            Page<T> recordPage = this.baseMapper.selectPage(page, queryWrapper);
+            records = recordPage.getRecords();
+            uniformPage.setTotalSize(recordPage.getTotal());
+            uniformPage.setPageCount(recordPage.getPages());
+        }
         if (!CollectionUtils.isEmpty(records) && needPostOrderBy) {
             // impl of Ordered
             if (target instanceof Ordered) {
