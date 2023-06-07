@@ -85,7 +85,7 @@ public class CollectionsPropertySource extends PropertySource<Object> {
     }
 
     /**
-     * Get empty object with token
+     * Get value object with token.
      * @param psValue token string
      * @return  empty object
      * @since 3.14.0

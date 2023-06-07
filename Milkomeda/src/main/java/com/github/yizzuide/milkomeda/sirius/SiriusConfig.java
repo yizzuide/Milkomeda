@@ -48,6 +48,8 @@ import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.core.convert.converter.GenericConverter;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.lang.NonNull;
@@ -195,6 +197,24 @@ public class SiriusConfig {
                 if (valueOp.isPresent()) {
                     Object value = valueOp.get();
                     Class<Object> aClass = (Class<Object>) value.getClass();
+                    // convert value type
+                    SiriusProperties.AutoInterpolate interpolate = findInterpolate(fieldName);
+                    if (interpolate != null && interpolate.getConverterClazz() != null) {
+                        GenericConverter converter = ReflectUtil.newInstance(interpolate.getConverterClazz());
+                        if (converter != null) {
+                            TableInfo tableInfo = this.findTableInfo(metaObject);
+                            for (TableFieldInfo fieldInfo : tableInfo.getFieldList()) {
+                                if (fieldInfo.getProperty().equals(fieldName)) {
+                                    Class<?> targetType = fieldInfo.getPropertyType();
+                                    value = converter.convert(value, TypeDescriptor.valueOf(aClass), TypeDescriptor.valueOf(targetType));
+                                    if (value != null) {
+                                        aClass = (Class<Object>) value.getClass();
+                                    }
+                                }
+                            }
+                        }
+                    }
+
                     if (insertFill) {
                         this.strictInsertFill(metaObject, fieldName, aClass, value);
                     } else {
@@ -222,24 +242,28 @@ public class SiriusConfig {
             return MetaObjectHandler.super.strictFill(insertFill, tableInfo, metaObject, strictFills);
         }
 
-        @Nullable
-        public Object findPsValue(@NonNull String fieldName) {
+        private SiriusProperties.AutoInterpolate findInterpolate(@NonNull String fieldName) {
             List<SiriusProperties.AutoInterpolate> autoInterpolates = props.getAutoInterpolates();
-            SiriusProperties.AutoInterpolate selectAutoInterpolate = null;
             for (SiriusProperties.AutoInterpolate autoInterpolate : autoInterpolates) {
-                if(autoInterpolate.getFields().contains(fieldName)) {
-                    selectAutoInterpolate = autoInterpolate;
-                    Object psValue = CollectionsPropertySource.of(autoInterpolate.getPsValue());
-                    if (!psValue.equals(autoInterpolate.getPsValue())) {
-                        return psValue;
-                    }
-                    psValue = SpELPropertySource.parseElFun(autoInterpolate.getPsValue());
-                    if (psValue != null) {
-                        return psValue;
-                    }
+                if (autoInterpolate.getFields().contains(fieldName)) {
+                    return autoInterpolate;
                 }
             }
+            return null;
+        }
+
+        @Nullable
+        public Object findPsValue(@NonNull String fieldName) {
+            SiriusProperties.AutoInterpolate selectAutoInterpolate = findInterpolate(fieldName);
             if (selectAutoInterpolate != null) {
+                Object psValue = CollectionsPropertySource.of(selectAutoInterpolate.getPsValue());
+                if (!psValue.equals(selectAutoInterpolate.getPsValue())) {
+                    return psValue;
+                }
+                psValue = SpELPropertySource.parseElFun(selectAutoInterpolate.getPsValue());
+                if (psValue != null) {
+                    return psValue;
+                }
                 return selectAutoInterpolate.getPsValue();
             }
             return null;

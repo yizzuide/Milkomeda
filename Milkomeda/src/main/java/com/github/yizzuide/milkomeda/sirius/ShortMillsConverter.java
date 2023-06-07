@@ -21,43 +21,39 @@
 
 package com.github.yizzuide.milkomeda.sirius;
 
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.core.convert.converter.GenericConverter;
+import org.springframework.lang.NonNull;
 
-import java.lang.annotation.*;
+import java.util.Collections;
+import java.util.Set;
 
 /**
- * Query linker using for {@link IPageableService}.
+ * Convert milliseconds to seconds value.
  *
  * @since 3.15.0
  * @author yizzuide
- * <br>
- * Create at 2023/06/07 01:58
+ * Create at 2023/06/07 11:56
  */
-@Documented
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.FIELD, ElementType.ANNOTATION_TYPE})
-public @interface QueryLinker {
-    /**
-     * Target field for set name.
-     * @return set field
-     */
-    String targetNameField();
+public class ShortMillsConverter implements GenericConverter {
 
-    /**
-     * Link name field.
-     * @return link name
-     */
-    String linkNameField();
+    @Override
+    public Set<ConvertiblePair> getConvertibleTypes() {
+        return Collections.singleton(new ConvertiblePair(Long.class, Integer.class));
+    }
 
-    /**
-     * Link id field referenced at.
-     * @return reference field
-     */
-    String linkIdField() default "id";
-
-    /**
-     * Link mapper class.
-     * @return mapper class
-     */
-    Class<BaseMapper<?>> linkMapper();
+    @Override
+    public Object convert(Object source, @NonNull TypeDescriptor sourceType, @NonNull TypeDescriptor targetType) {
+        if (sourceType.getType() != Long.class) {
+            return source;
+        }
+        Class<?> typeType = targetType.getType();
+        if (typeType == Long.class) {
+            return source;
+        }
+        if (typeType == Integer.class) {
+            return Long.valueOf((long) source / 1000).intValue();
+        }
+        return null;
+    }
 }

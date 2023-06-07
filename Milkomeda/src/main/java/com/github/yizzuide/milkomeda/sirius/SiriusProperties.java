@@ -25,6 +25,7 @@ import com.baomidou.mybatisplus.annotation.DbType;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.core.convert.converter.GenericConverter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -70,6 +71,11 @@ public class SiriusProperties {
          * Property source value, can be with Spring EL using `el(condition, type)`.
          */
         private String psValue;
+
+        /**
+         * convert property source value.
+         */
+        private Class<GenericConverter> converterClazz;
 
         /**
          * Field fill type.

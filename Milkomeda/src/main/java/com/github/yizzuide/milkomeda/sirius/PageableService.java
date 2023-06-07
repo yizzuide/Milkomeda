@@ -164,21 +164,23 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
                 List<Serializable> idValues = records.stream()
                         .map(e -> (Serializable) tableInfo.getPropertyValue(e, linkerField.getName()))
                         .collect(Collectors.toList());
-                BaseMapper linkMapper = (BaseMapper) ApplicationContextHolder.get().getBean(queryLinker.linkMapper());
+                BaseMapper linkMapper = ApplicationContextHolder.get().getBean(queryLinker.linkMapper());
                 QueryWrapper<T> linkQueryWrapper = new QueryWrapper<>();
-                linkQueryWrapper.in(queryLinker.linkField(), idValues);
+                linkQueryWrapper.in(queryLinker.linkIdField(), idValues);
                 List<?> linkEntityList = linkMapper.selectList(linkQueryWrapper);
                 if (!CollectionUtils.isEmpty(linkEntityList)) {
                     // get link entity table info
                     TableInfo LinkTableInfo = TableInfoHelper.getTableInfo(linkEntityList.get(0).getClass());
                     for (T record : records) {
-                        linkEntityList.forEach(le -> {
-                            Object id = LinkTableInfo.getPropertyValue(le, queryLinker.linkField());
-                            String name = (String) LinkTableInfo.getPropertyValue(le, queryLinker.namedField());
-                            if (tableInfo.getPropertyValue(record, linkerField.getName()).equals(id)) {
-                                tableInfo.setPropertyValue(record, queryLinker.setNameField(), name);
+                        for (Object le : linkEntityList) {
+                            Object id = LinkTableInfo.getPropertyValue(le, queryLinker.linkIdField());
+                            String name = (String) LinkTableInfo.getPropertyValue(le, queryLinker.linkNameField());
+                            Object matchIdValue = tableInfo.getPropertyValue(record, linkerField.getName());
+                            if (id.equals(matchIdValue)) {
+                                tableInfo.setPropertyValue(record, queryLinker.targetNameField(), name);
+                                break;
                             }
-                        });
+                        }
                     }
                 }
             }
