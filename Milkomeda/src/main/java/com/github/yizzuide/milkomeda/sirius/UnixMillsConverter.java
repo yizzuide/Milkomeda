@@ -22,26 +22,16 @@
 package com.github.yizzuide.milkomeda.sirius;
 
 import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.core.convert.converter.GenericConverter;
 import org.springframework.lang.NonNull;
 
-import java.util.Collections;
-import java.util.Set;
-
 /**
- * Convert milliseconds to seconds value.
+ * Unix timestamp converter.
  *
- * @since 3.15.0
+ * @since 3.5.0
  * @author yizzuide
- * Create at 2023/06/07 11:56
+ * Create at 2023/06/09 19:05
  */
-public class ShortMillsConverter implements GenericConverter {
-
-    @Override
-    public Set<ConvertiblePair> getConvertibleTypes() {
-        return Collections.singleton(new ConvertiblePair(Long.class, Integer.class));
-    }
-
+public class UnixMillsConverter extends SmartMillsConverter {
     @Override
     public Object convert(Object source, @NonNull TypeDescriptor sourceType, @NonNull TypeDescriptor targetType) {
         if (sourceType.getType() != Long.class) {
@@ -49,7 +39,7 @@ public class ShortMillsConverter implements GenericConverter {
         }
         Class<?> typeType = targetType.getType();
         if (typeType == Long.class) {
-            return source;
+            return (long)source / 1000;
         }
         if (typeType == Integer.class) {
             return Long.valueOf((long) source / 1000).intValue();
