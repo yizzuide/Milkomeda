@@ -69,6 +69,12 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
         Field orderField = null;
         List<Field> linkerFields = new ArrayList<>();
         for (Field field : fields) {
+            // collect query linker
+            QueryLinker queryLinker = field.getDeclaredAnnotation(QueryLinker.class);
+            if (queryLinker != null) {
+                linkerFields.add(field);
+            }
+
             QueryMatcher queryMatcher = field.getDeclaredAnnotation(QueryMatcher.class);
             if (queryMatcher == null) {
                 continue;
@@ -120,12 +126,6 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
                 orderField = field;
             } else {
                 additionParseQueryMatcher(queryWrapper, queryMatcher.prefectString(), columnName, fieldNonNull, fieldValue);
-            }
-
-            // collect query linker
-            QueryLinker queryLinker = field.getDeclaredAnnotation(QueryLinker.class);
-            if (queryLinker != null) {
-                linkerFields.add(field);
             }
         }
 
@@ -189,7 +189,7 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
                             Object id = LinkTableInfo.getPropertyValue(le, queryLinker.linkIdField());
                             String name = (String) LinkTableInfo.getPropertyValue(le, queryLinker.linkNameField());
                             Object matchIdValue = tableInfo.getPropertyValue(record, linkerField.getName());
-                            if (id.equals(matchIdValue)) {
+                            if (String.valueOf(matchIdValue).equals(String.valueOf(id))) {
                                 tableInfo.setPropertyValue(record, queryLinker.targetNameField(), name);
                                 break;
                             }

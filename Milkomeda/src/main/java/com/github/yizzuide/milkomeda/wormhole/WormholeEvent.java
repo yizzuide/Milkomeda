@@ -73,7 +73,7 @@ public class WormholeEvent<T> extends EventObject {
     private T data;
 
     /**
-     * create with event source
+     * Create with event source.
      * @param source event source
      */
     public WormholeEvent(Object source) {
@@ -83,7 +83,7 @@ public class WormholeEvent<T> extends EventObject {
     }
 
     /**
-     * Common create with event source, tag, data
+     * Common create with event source, tag, data.
      * @param source    event source
      * @param tag       event tag
      * @param data      event data
