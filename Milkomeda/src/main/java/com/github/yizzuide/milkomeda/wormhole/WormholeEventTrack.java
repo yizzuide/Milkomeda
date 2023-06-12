@@ -22,7 +22,6 @@
 package com.github.yizzuide.milkomeda.wormhole;
 
 /**
- * WormholeEventTrack
  * 领域事件流跟踪
  *
  * @author yizzuide

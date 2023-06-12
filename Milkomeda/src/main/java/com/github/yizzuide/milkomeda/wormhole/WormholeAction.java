@@ -26,7 +26,6 @@ import org.springframework.core.annotation.AliasFor;
 import java.lang.annotation.*;
 
 /**
- * DomainAction
  * 领域事件动作
  *
  * @author yizzuide
@@ -51,6 +50,13 @@ public @interface WormholeAction {
      */
     @AliasFor("value")
     String name() default "";
+
+    /**
+     * Ordered execute on event handler.
+     * @return order in list
+     * @since 3.15.0
+     */
+    int order() default 0;
 
     /**
      * 事务回调执行

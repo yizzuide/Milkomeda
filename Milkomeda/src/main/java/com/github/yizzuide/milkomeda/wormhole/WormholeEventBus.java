@@ -120,7 +120,7 @@ public class WormholeEventBus {
             }
         }
 
-        // write into event store
+        // write event data into infrastructure
         if (trackers != null) {
             for (WormholeEventTrack<WormholeEvent<?>> tracker : trackers) {
                 tracker.track(event);

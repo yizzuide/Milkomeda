@@ -26,7 +26,6 @@ import org.springframework.stereotype.Component;
 import java.lang.annotation.*;
 
 /**
- * WormholeEventTracker
  * 领域事件跟踪器注解
  *
  * @author yizzuide

@@ -30,7 +30,6 @@ import java.util.EventObject;
 import java.util.UUID;
 
 /**
- * DomainEvent
  * 领域事件
  *
  * @author yizzuide

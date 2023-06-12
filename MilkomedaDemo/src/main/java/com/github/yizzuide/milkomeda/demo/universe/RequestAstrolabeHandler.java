@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.ServletRequest;
+import java.util.Objects;
 
 /**
  * RequestAstrolabeHandler
@@ -20,6 +21,6 @@ public class RequestAstrolabeHandler implements AstrolabeHandler {
     @Override
     public void preHandle(ServletRequest request) {
         // ((HttpServletRequest)request).getRequestURI()
-        log.info("AstrolabeHandler请求前：{}", WebContext.getRequest().getRequestURI());
+        log.info("AstrolabeHandler请求前：{}", Objects.requireNonNull(WebContext.getRequest()).getRequestURI());
     }
 }

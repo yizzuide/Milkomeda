@@ -30,9 +30,11 @@ import org.springframework.lang.NonNull;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.util.CollectionUtils;
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * DomainRegistration
@@ -59,6 +61,11 @@ public class WormholeRegistration {
      */
     public static final String ATTR_ASYNC = "async";
 
+    /**
+     * Event handler order name.
+     */
+    private static final String ATTR_ORDER = "order";
+
     @Autowired
     private WormholeEventBus eventBus;
 
@@ -70,9 +77,20 @@ public class WormholeRegistration {
             Map<String, Object> attrs = new HashMap<>(4);
             attrs.put(ATTR_HANG_TYPE, wormholeAction.transactionHang());
             attrs.put(ATTR_ASYNC, isAsyncPresentOn);
+            attrs.put(ATTR_ORDER, wormholeAction.order());
             metaData.setAttributes(attrs);
             return wormholeAction.value();
         }, false);
+
+        // 排序事件处理器
+        if (!CollectionUtils.isEmpty(actionMap)) {
+            actionMap.keySet().forEach(action -> {
+                List<HandlerMetaData> sortedList = actionMap.get(action).stream()
+                        .sorted(Comparator.comparingInt(metaData -> (Integer) metaData.getAttributes().get(ATTR_ORDER)))
+                        .collect(Collectors.toList());
+                actionMap.put(action, sortedList);
+            });
+        }
 
         // 领域事件跟踪处理器
         List<WormholeEventTrack<WormholeEvent<?>>> trackers = SpringContext.getTypeHandlers(WormholeEventTracker.class);

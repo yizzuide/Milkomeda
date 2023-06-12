@@ -26,7 +26,6 @@ import org.springframework.stereotype.Component;
 import java.lang.annotation.*;
 
 /**
- * DomainEventHandler
  * 领域事件处理器
  *
  * @author yizzuide
