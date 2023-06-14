@@ -21,57 +21,18 @@
 
 package com.github.yizzuide.milkomeda.sirius;
 
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-
 import java.lang.annotation.*;
 
 /**
- * Query linker using for {@link IPageableService}.
+ * Support repeatable of {@link QueryMatcher}.
  *
- * @since 3.15.0
  * @author yizzuide
- * <br>
- * Create at 2023/06/07 01:58
+ * Create at 2023/06/12 23:38
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.ANNOTATION_TYPE})
 @Inherited
-@Repeatable(QueryLinkers.class)
-public @interface QueryLinker {
-    /**
-     * Target field for set name.
-     * @return set field
-     */
-    String targetNameField();
-
-    /**
-     * Link name field.
-     * @return link name
-     */
-    String linkNameField();
-
-    /**
-     * Link id field referenced at.
-     * @return reference field
-     */
-    String linkIdField() default "id";
-
-    /**
-     * Link id value should ignore.
-     * @return id value
-     */
-    long linkIdIgnore() default 0L;
-
-    /**
-     * Link mapper class.
-     * @return mapper class
-     */
-    @SuppressWarnings("rawtypes") Class<? extends BaseMapper> linkMapper();
-
-    /**
-     * Bundle conditions in group.
-     * @return  group name
-     */
-    String[] group() default { "default" };
+public @interface QueryMatchers {
+    QueryMatcher[] value();
 }

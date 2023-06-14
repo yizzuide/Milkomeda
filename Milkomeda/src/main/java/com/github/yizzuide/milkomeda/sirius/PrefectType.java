@@ -15,22 +15,32 @@ public enum PrefectType {
      * Equals field.
      */
     EQ,
+
     /**
      * Not Equals field.
      */
     NEQ,
+
+    /**
+     * Sql in field.
+     */
+    IN,
+
     /**
      * Sql like field.
      */
     LIKE,
+
     /**
      * Sql order by.
      */
     OrderByPre,
+
     /**
      * Page result list order by.
      */
     OrderByPost,
+
     /**
      * Using for `startDate` and `endDate` of {@link UniformQueryPageData} query.
      */

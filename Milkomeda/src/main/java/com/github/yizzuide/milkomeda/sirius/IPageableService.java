@@ -7,6 +7,7 @@ import com.github.yizzuide.milkomeda.hydrogen.uniform.UniformQueryPageData;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
 /**
@@ -24,6 +25,34 @@ public interface IPageableService<T> extends IService<T> {
      * @return  UniformPage
      */
     UniformPage<T> selectByPage(UniformQueryPageData<T> queryPageData);
+
+    /**
+     * Query by page data and match group.
+     * @param queryPageData page data
+     * @param group match group name
+     * @return  UniformPage
+     * @since 3.15.0
+     */
+    UniformPage<T> selectByPage(UniformQueryPageData<T> queryPageData, String group);
+
+    /**
+     * Query by page data and match data.
+     * @param queryPageData page data
+     * @param queryMatchData match data
+     * @return  UniformPage
+     * @since 3.15.0
+     */
+    UniformPage<T> selectByPage(UniformQueryPageData<T> queryPageData, Map<String, Object> queryMatchData);
+
+    /**
+     * Query by page data, match data and group name.
+     * @param queryPageData page data
+     * @param queryMatchData match data
+     * @param group match group name
+     * @return  UniformPage
+     * @since 3.15.0
+     */
+    UniformPage<T> selectByPage(UniformQueryPageData<T> queryPageData, Map<String, Object> queryMatchData, String group);
 
     /**
      * Remove record row before check it reference.
