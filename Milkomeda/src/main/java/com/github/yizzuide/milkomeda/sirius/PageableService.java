@@ -134,7 +134,7 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
                 boolean fieldNonNull = Objects.nonNull(target) && Objects.nonNull(fieldValue);
                 if (queryMatcher.prefect() == PrefectType.EQ) {
                     if (!fieldNonNull && StringUtils.isNotEmpty(queryMatcher.matchDataField())) {
-                        fieldValue = findLinkerValue(queryMatcher, linkerFields, queryPageData.getEntity(), tableInfo);
+                        fieldValue = findLinkerValue(queryMatcher, linkerFields, queryPageData.getEntity(), field, tableInfo);
                         fieldNonNull = fieldValue != null;
                     }
                     queryWrapper.eq(fieldNonNull, columnName, fieldValue);
@@ -153,7 +153,7 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
                         }
                     }
                     if (!condition && StringUtils.isNotEmpty(queryMatcher.matchDataField())) {
-                        valueObjects = (Collection<Object>) findLinkerValue(queryMatcher, linkerFields, queryPageData.getEntity(), tableInfo);
+                        valueObjects = (Collection<Object>) findLinkerValue(queryMatcher, linkerFields, queryPageData.getEntity(), field, tableInfo);
                         condition = valueObjects != null;
                     }
                     queryWrapper.in(condition, columnName, valueObjects);
@@ -314,7 +314,7 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
-    private Object findLinkerValue(QueryMatcher queryMatcher, List<Field> linkerFields, Object entity, TableInfo tableInfo) {
+    private Object findLinkerValue(QueryMatcher queryMatcher, List<Field> linkerFields, Object entity, Field field, TableInfo tableInfo) {
         Object searchValue = tableInfo.getPropertyValue(entity, queryMatcher.matchDataField());
         if (searchValue == null) {
             return null;
@@ -342,7 +342,7 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
                 queryExample.like(column, searchValue);
                 List<?> linkRecordlist = linkMapper.selectList(queryExample);
                 if (CollectionUtils.isEmpty(linkRecordlist)) {
-                    return null;
+                    return genNonFoundValue(field, queryMatcher.prefect());
                 }
                 // collect and return link entity id list
                 return linkRecordlist.stream()
@@ -353,10 +353,20 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
                 queryExample.eq(column, searchValue);
                 Object linkRecord = linkMapper.selectOne(queryExample);
                 if (linkRecord == null) {
-                    return null;
+                    return genNonFoundValue(field, queryMatcher.prefect());
                 }
                 return linkTableInfo.getPropertyValue(linkRecord, matchQueryLinker.linkIdField());
             }
+        }
+        return null;
+    }
+
+    private Object genNonFoundValue(Field field, PrefectType type) {
+        if (field.getType() == Integer.class || field.getType() == Long.class) {
+            return type == PrefectType.EQ ? -1 : Collections.singletonList(-1);
+        }
+        if (field.getType() == String.class) {
+            return type == PrefectType.EQ ? "-1" : Collections.singletonList("-1");
         }
         return null;
     }
