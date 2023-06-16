@@ -34,6 +34,7 @@ import java.util.stream.Collectors;
  * A pageable service impl extends from ServiceImpl.
  *
  * @since 3.14.0
+ * @version 3.15.0
  * @author yizzuide
  * <br>
  * Create at 2022/10/30 14:59
@@ -90,12 +91,12 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
         for (Field field : fields) {
             // collect query linker
             Set<QueryLinker> queryLinkers = AnnotatedElementUtils.getMergedRepeatableAnnotations(field, QueryLinker.class, QueryLinkers.class);
-            if (queryLinkers != null) {
+            if (!CollectionUtils.isEmpty(queryLinkers)) {
                 linkerFields.add(field);
             }
 
             Set<QueryMatcher> queryMatchers = AnnotatedElementUtils.getMergedRepeatableAnnotations(field, QueryMatcher.class, QueryMatchers.class);
-            if (queryMatchers == null) {
+            if (CollectionUtils.isEmpty(queryMatchers)) {
                 continue;
             }
             for (QueryMatcher queryMatcher : queryMatchers) {
@@ -234,10 +235,10 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
                         for (T record : records) {
                             for (Object le : linkEntityList) {
                                 Object id = LinkTableInfo.getPropertyValue(le, queryLinker.linkIdField());
-                                String name = (String) LinkTableInfo.getPropertyValue(le, queryLinker.linkNameField());
+                                Object nameValue = LinkTableInfo.getPropertyValue(le, queryLinker.linkNameField());
                                 Object matchIdValue = tableInfo.getPropertyValue(record, linkerField.getName());
                                 if (String.valueOf(matchIdValue).equals(String.valueOf(id))) {
-                                    tableInfo.setPropertyValue(record, queryLinker.targetNameField(), name);
+                                    tableInfo.setPropertyValue(record, queryLinker.targetNameField(), nameValue);
                                     break;
                                 }
                             }
