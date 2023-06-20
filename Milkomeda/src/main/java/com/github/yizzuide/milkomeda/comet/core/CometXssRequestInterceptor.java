@@ -25,14 +25,14 @@ import com.github.yizzuide.milkomeda.universe.extend.annotation.Alias;
 import lombok.Setter;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.safety.Whitelist;
+import org.jsoup.safety.Safelist;
 import org.springframework.util.CollectionUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**
- * This request interceptor provide web XSS protection.
+ * This request interceptor provides web XSS protection.
  *
  * @since 3.15.0
  * @author yizzuide
@@ -43,13 +43,13 @@ import java.util.List;
 public class CometXssRequestInterceptor extends AbstractRequestInterceptor {
 
     // 允许常用显示型html标签
-    private static final Whitelist whitelist = Whitelist.basicWithImages();
+    private static final Safelist whitelist = Safelist.basicWithImages();
 
     // 输出不格式化
     private static final Document.OutputSettings outputSettings = new Document.OutputSettings().prettyPrint(false);
 
     /**
-     * White filed names is not prevent (only support form submit type).
+     * White-filed names are not preventing (support form submit type only).
      */
     @Setter
     private List<String> whiteFieldNames;

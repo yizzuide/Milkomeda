@@ -116,7 +116,8 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
                     TableField tableField = field.getDeclaredAnnotation(TableField.class);
                     if (tableField != null) {
                         columnName = tableField.value();
-                    } else {
+                    }
+                    if (StringUtils.isEmpty(columnName)) {
                         columnName = DataTypeConvertUtil.humpToLine(field.getName());
                     }
                 }
@@ -124,7 +125,7 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
                 Object fieldValue = null;
                 if (target != null) {
                     // can get field value from getter method？
-                    tableInfo.getPropertyValue(target, field.getName());
+                    fieldValue = tableInfo.getPropertyValue(target, field.getName());
                     // reflect it!
                     if (fieldValue == null) {
                         ReflectionUtils.makeAccessible(field);
@@ -218,10 +219,10 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
                     if (!Arrays.asList(queryLinker.group()).contains(group)) {
                         continue;
                     }
-                    List<Serializable> idValues = records.stream()
+                    Set<Serializable> idValues = records.stream()
                             .map(e -> (Serializable) tableInfo.getPropertyValue(e, linkerField.getName()))
                             .filter(e -> !Long.valueOf(e.toString()).equals(queryLinker.linkIdIgnore()))
-                            .collect(Collectors.toList());
+                            .collect(Collectors.toSet());
                     if (CollectionUtils.isEmpty(idValues)) {
                         continue;
                     }
@@ -285,7 +286,7 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
                 break;
             }
         }
-        // check RefMatcher on mapper type
+        // check RefMatcher has annotated on a mapper
         RefMatcher refMatcher = this.mapperClass.getDeclaredAnnotation(RefMatcher.class);
         if(refMatcher != null &&  BaseMapper.class.isAssignableFrom(refMatcher.foreignMapper())) {
             QueryWrapper foreignQueryWrapper = new QueryWrapper();
@@ -321,7 +322,7 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
             return null;
         }
         for (Field linkerField : linkerFields) {
-            // find linker field which match `matchDataField` from QueryMatcher
+            // find linker field which matches `matchDataField` from QueryMatcher
             Optional<QueryLinker> queryLinkerOptional = AnnotatedElementUtils.getMergedRepeatableAnnotations(linkerField, QueryLinker.class, QueryLinkers.class).stream()
                     .filter(linker -> linker.targetNameField().equals(queryMatcher.matchDataField())).findFirst();
             if (!queryLinkerOptional.isPresent()) {
@@ -329,7 +330,7 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
             }
             QueryLinker matchQueryLinker = queryLinkerOptional.get();
             Class<? extends BaseMapper> linkMapperClass = matchQueryLinker.linkMapper();
-            // find generic type of BaseMapper<Type>
+            // find a generic type of BaseMapper<Type>
             Class<?> linkClass = ResolvableType.forClass(linkMapperClass).getInterfaces()[0].getGenerics()[0].resolve();
             TableInfo linkTableInfo = TableInfoHelper.getTableInfo(linkClass);
             if (linkTableInfo == null) {
@@ -348,7 +349,7 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
                 // collect and return link entity id list
                 return linkRecordlist.stream()
                         .map(record -> linkTableInfo.getPropertyValue(record, matchQueryLinker.linkIdField()))
-                        .collect(Collectors.toList());
+                        .collect(Collectors.toSet());
             }
             if (queryMatcher.prefect() == PrefectType.EQ) {
                 queryExample.eq(column, searchValue);
