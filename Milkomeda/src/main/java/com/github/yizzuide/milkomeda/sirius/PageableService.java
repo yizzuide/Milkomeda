@@ -214,22 +214,31 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
         // handle query link name
         if (!CollectionUtils.isEmpty(linkerFields) && !CollectionUtils.isEmpty(records)) {
             for (Field linkerField : linkerFields) {
+                // cache link entity list with the field
+                Map<String, List<?>> linkEntityListCacheMap = new HashMap<>();
                 Set<QueryLinker> queryLinkers = AnnotatedElementUtils.getMergedRepeatableAnnotations(linkerField, QueryLinker.class, QueryLinkers.class);
                 for (QueryLinker queryLinker : queryLinkers) {
                     if (!Arrays.asList(queryLinker.group()).contains(group)) {
                         continue;
                     }
-                    Set<Serializable> idValues = records.stream()
-                            .map(e -> (Serializable) tableInfo.getPropertyValue(e, linkerField.getName()))
-                            .filter(e -> !Long.valueOf(e.toString()).equals(queryLinker.linkIdIgnore()))
-                            .collect(Collectors.toSet());
-                    if (CollectionUtils.isEmpty(idValues)) {
-                        continue;
-                    }
                     BaseMapper linkMapper = ApplicationContextHolder.get().getBean(queryLinker.linkMapper());
-                    QueryWrapper<T> linkQueryWrapper = new QueryWrapper<>();
-                    linkQueryWrapper.in(queryLinker.linkIdField(), idValues);
-                    List<?> linkEntityList = linkMapper.selectList(linkQueryWrapper);
+                    List<?> linkEntityList;
+                    String linkMapperClassName = linkMapper.getClass().getName();
+                    if (linkEntityListCacheMap.containsKey(linkMapperClassName)) {
+                        linkEntityList = linkEntityListCacheMap.get(linkMapperClassName);
+                    } else {
+                        Set<Serializable> idValues = records.stream()
+                                .map(e -> (Serializable) tableInfo.getPropertyValue(e, linkerField.getName()))
+                                .filter(e -> !Long.valueOf(e.toString()).equals(queryLinker.linkIdIgnore()))
+                                .collect(Collectors.toSet());
+                        if (CollectionUtils.isEmpty(idValues)) {
+                            continue;
+                        }
+                        QueryWrapper<T> linkQueryWrapper = new QueryWrapper<>();
+                        linkQueryWrapper.in(queryLinker.linkIdField(), idValues);
+                        linkEntityList = linkMapper.selectList(linkQueryWrapper);
+                        linkEntityListCacheMap.put(linkMapperClassName, linkEntityList);
+                    }
                     if (!CollectionUtils.isEmpty(linkEntityList)) {
                         // get link entity table info
                         TableInfo LinkTableInfo = TableInfoHelper.getTableInfo(linkEntityList.get(0).getClass());
