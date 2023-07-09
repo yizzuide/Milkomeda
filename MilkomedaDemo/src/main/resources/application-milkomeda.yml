@@ -51,7 +51,7 @@ milkomeda:
           tpl: url->{uri},userId:{$x.uid},token:{$header.token:0},method->{method},parameters->{params},dataId->{$params.data.id}
         - paths: ["/collect/usage"]
           type: response # 设置打印为响应类型（默认为请求类型）
-          tpl: "{\"url\": \"{uri}\", \"resp\": {resp}}"
+          tpl: '{url:"{uri}",resp:{resp}}'
         - paths: ["/error/**"]
           tpl: url->{uri},method->{method}
     # 日志收集器

@@ -19,7 +19,6 @@ import com.github.yizzuide.milkomeda.util.DataTypeConvertUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.OrderComparator;
 import org.springframework.core.Ordered;
-import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ReflectionUtils;
@@ -221,7 +220,7 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
                     if (!Arrays.asList(queryLinker.group()).contains(group)) {
                         continue;
                     }
-                    BaseMapper linkMapper = ApplicationContextHolder.get().getBean(queryLinker.linkMapper());
+                    BaseMapper linkMapper = SiriusInspector.getMapper(queryLinker.linkEntityType());
                     List<?> linkEntityList;
                     String linkMapperClassName = linkMapper.getClass().getName();
                     if (linkEntityListCacheMap.containsKey(linkMapperClassName)) {
@@ -324,7 +323,7 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
         return AopContextHolder.self(this.getClass()).saveBatch(Authorities);
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
+    @SuppressWarnings("unchecked")
     private Object findLinkerValue(QueryMatcher queryMatcher, List<Field> linkerFields, Object entity, Field field, TableInfo tableInfo) {
         Object searchValue = tableInfo.getPropertyValue(entity, queryMatcher.matchDataField());
         if (searchValue == null) {
@@ -338,17 +337,15 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
                 continue;
             }
             QueryLinker matchQueryLinker = queryLinkerOptional.get();
-            Class<? extends BaseMapper> linkMapperClass = matchQueryLinker.linkMapper();
-            // find a generic type of BaseMapper<Type>
-            Class<?> linkClass = ResolvableType.forClass(linkMapperClass).getInterfaces()[0].getGenerics()[0].resolve();
+            Class<?> linkClass = matchQueryLinker.linkEntityType();
             TableInfo linkTableInfo = TableInfoHelper.getTableInfo(linkClass);
             if (linkTableInfo == null) {
                 return null;
             }
             // find link entity with linker mapper
+            BaseMapper<T> linkMapper = (BaseMapper<T>) SiriusInspector.getMapper(matchQueryLinker.linkEntityType());
             String column = findColumnName(linkTableInfo, matchQueryLinker.linkNameField());
-            BaseMapper linkMapper = ApplicationContextHolder.get().getBean(linkMapperClass);
-            QueryWrapper<?> queryExample = new QueryWrapper<>();
+            QueryWrapper<T> queryExample = new QueryWrapper<>();
             if (queryMatcher.prefect() == PrefectType.IN) {
                 queryExample.like(column, searchValue);
                 List<?> linkRecordlist = linkMapper.selectList(queryExample);

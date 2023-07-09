@@ -21,55 +21,34 @@
 
 package com.github.yizzuide.milkomeda.sirius;
 
-import java.lang.annotation.*;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.extension.toolkit.SqlHelper;
+import org.apache.ibatis.session.SqlSession;
 
 /**
- * Query linker using for {@link IPageableService}.
+ * An inspector for mybatis and mybatis-plus.
  *
+ * @see org.springframework.transaction.support.TransactionSynchronizationManager
+ * @see org.apache.ibatis.session.SqlSession
+ * @see org.apache.ibatis.session.SqlSessionManager
+ * @see com.baomidou.mybatisplus.core.MybatisMapperRegistry
+ * @see org.mybatis.spring.SqlSessionUtils
+ * @see com.baomidou.mybatisplus.core.toolkit.GlobalConfigUtils
  * @since 3.15.0
  * @author yizzuide
- * <br>
- * Create at 2023/06/07 01:58
+ * Create at 2023/07/09 15:52
  */
-@Documented
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.FIELD, ElementType.ANNOTATION_TYPE})
-@Inherited
-@Repeatable(QueryLinkers.class)
-public @interface QueryLinker {
-    /**
-     * Target field for set name.
-     * @return set field
-     */
-    String targetNameField();
+public class SiriusInspector {
 
     /**
-     * Link name field.
-     * @return link name
+     * Get mapper with entity class when sql session has opened before.
+     * @param entityClass   entity class
+     * @return  mapper
+     * @param <T>   entity type
      */
-    String linkNameField();
+    public static  <T> BaseMapper<T> getMapper(Class<T> entityClass) {
+        SqlSession sqlSession = SqlHelper.sqlSession(entityClass);
+        return SqlHelper.getMapper(entityClass, sqlSession);
+    }
 
-    /**
-     * Link id field referenced at.
-     * @return reference field
-     */
-    String linkIdField() default "id";
-
-    /**
-     * Link id value should ignore.
-     * @return id value
-     */
-    long linkIdIgnore() default 0L;
-
-    /**
-     * Link entity class.
-     * @return mapper class
-     */
-    Class<?> linkEntityType();
-
-    /**
-     * Bind conditions in query group.
-     * @return  group name
-     */
-    String[] group() default { "default" };
 }

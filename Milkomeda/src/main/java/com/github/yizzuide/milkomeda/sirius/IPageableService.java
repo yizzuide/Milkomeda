@@ -62,11 +62,11 @@ public interface IPageableService<T> extends IService<T> {
     boolean removeBeforeCheckRef(T entity);
 
     /**
-     * Assign authority for owner.
+     * Assign authority for the owner.
      * @param ownerId   owner id
      * @param itemIds   authority item id list
-     * @param conditionProvider condition which find owner
-     * @param generator create authority item row to owner
+     * @param conditionProvider condition which find linked with the owner
+     * @param generator create authority item row linked with the owner
      * @return  true if success
      */
     boolean assignAuthority(Serializable ownerId, List<? extends Serializable> itemIds,

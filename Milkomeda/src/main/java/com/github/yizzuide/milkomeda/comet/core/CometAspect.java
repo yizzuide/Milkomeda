@@ -26,7 +26,6 @@ import com.github.yizzuide.milkomeda.universe.context.WebContext;
 import com.github.yizzuide.milkomeda.util.JSONUtil;
 import com.github.yizzuide.milkomeda.util.NetworkUtil;
 import com.github.yizzuide.milkomeda.util.ReflectUtil;
-import com.github.yizzuide.milkomeda.util.Strings;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -60,7 +59,7 @@ import java.util.function.Function;
  *
  * @author yizzuide
  * @since 0.2.0
- * @version 3.0.3
+ * @version 3.15.0
  * <br>
  * Create at 2019/04/11 19:48
  */
@@ -121,7 +120,6 @@ public class CometAspect {
         HttpServletRequest request = WebContext.getRequest();
         WebCometData cometData = WebCometData.createFormRequest(request, comet.prototype(), cometProperties.isEnableReadRequestBody());
         cometData.setApiCode(comet.apiCode());
-        cometData.setDescription(Strings.isEmpty(comet.name()) ? comet.description() : comet.name());
         cometData.setRequestType(comet.requestType());
         return applyAround(cometData, threadLocal, joinPoint, request, requestTime, comet.name(), comet.tag(), (returnData) -> {
             if (returnData.getClass() == DeferredResult.class) {
