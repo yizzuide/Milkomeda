@@ -21,11 +21,18 @@
 
 package com.github.yizzuide.milkomeda.universe.extend.web.handler;
 
+import com.github.yizzuide.milkomeda.hydrogen.uniform.ResultVO;
+import com.github.yizzuide.milkomeda.hydrogen.uniform.UniformHandler;
+import com.github.yizzuide.milkomeda.hydrogen.uniform.UniformResult;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.OrderComparator;
+import org.springframework.core.annotation.AnnotationAwareOrderComparator;
+import org.springframework.util.CollectionUtils;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.*;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,30 +50,50 @@ import java.util.stream.Collectors;
  * <br>
  * Create at 2020/05/06 11:12
  */
+@Slf4j
 public class DelegatingContextFilter implements Filter {
+
+    public static final int EXCEPTION_CODE = 5000;
 
     @Autowired(required = false)
     private List<AstrolabeHandler> astrolabeHandlers = new ArrayList<>();
 
     @PostConstruct
     public void init() {
+        if (CollectionUtils.isEmpty(astrolabeHandlers)) {
+            return;
+        }
         // 根据@Order注解排序
-        //AnnotationAwareOrderComparator.sort(astrolabeHandlers);
+        AnnotationAwareOrderComparator.sort(astrolabeHandlers);
         // 根据Order接口排序
-        astrolabeHandlers = astrolabeHandlers.stream()
-                .sorted(OrderComparator.INSTANCE.withSourceProvider(ha -> ha)).collect(Collectors.toList());
+        if (astrolabeHandlers.stream().anyMatch(a -> a.getOrder() != 0)) {
+            astrolabeHandlers = astrolabeHandlers.stream()
+                    .sorted(OrderComparator.INSTANCE.withSourceProvider(ha -> ha)).collect(Collectors.toList());
+        }
     }
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         for (AstrolabeHandler astrolabeHandler : astrolabeHandlers) {
-            astrolabeHandler.preHandle(request);
+            try {
+                astrolabeHandler.preHandle(request);
+            } catch (Exception e) {
+                HttpServletResponse httpServletResponse = (HttpServletResponse) response;
+                httpServletResponse.setStatus(EXCEPTION_CODE);
+                ResultVO<?> source = UniformResult.error(String.valueOf(httpServletResponse.getStatus()), e.getMessage());
+                UniformHandler.matchStatusToWrite(httpServletResponse, source.toMap());
+                return;
+            }
         }
         try {
             chain.doFilter(request, response);
         } finally {
-            for (AstrolabeHandler astrolabeHandler : astrolabeHandlers) {
-                astrolabeHandler.postHandle(request, response);
+            try {
+                for (AstrolabeHandler astrolabeHandler : astrolabeHandlers) {
+                    astrolabeHandler.postHandle(request, response);
+                }
+            } catch (Exception e) {
+                log.error("astrolabe handler post handle with error msg: {}", e.getMessage(), e);
             }
         }
     }

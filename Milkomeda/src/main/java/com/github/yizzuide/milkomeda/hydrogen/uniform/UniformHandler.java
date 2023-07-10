@@ -266,7 +266,7 @@ public class UniformHandler extends ResponseEntityExceptionHandler {
     }
 
     /**
-     * Used for external match with status code to get response result.
+     * Used for external match with status code to get the response result.
      * @param statusCode  response status
      * @param source    replace data
      * @return tuple(yml node map, response content)
@@ -302,7 +302,7 @@ public class UniformHandler extends ResponseEntityExceptionHandler {
     }
 
     /**
-     * Used for external match with status code to get response result.
+     * Used for external match with status code to get the response result.
      * @param response  response object
      * @param source    replace data
      * @return tuple(yml node map, response content)

@@ -27,7 +27,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
 /**
- * Request aspect handler that implements with {@link WebRequestInterceptor}.
+ * Request aspect handler that impl used filter which compare with {@link WebRequestInterceptor} impl used interceptor.
  *
  * @see DelegatingContextFilter
  * @author yizzuide

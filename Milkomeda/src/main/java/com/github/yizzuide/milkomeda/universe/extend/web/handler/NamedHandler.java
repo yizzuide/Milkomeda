@@ -36,7 +36,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- * This handler interface provide named and ordered in list. it always used with {@link Alias} and {@link AliasWrapper}.
+ * This handler interface provides named and ordered in a list.
+ * It always used with {@link Alias} and {@link AliasWrapper}.
  *
  * @since 3.15.0
  * @author yizzuide
@@ -45,14 +46,14 @@ import java.util.stream.Collectors;
  */
 public interface NamedHandler extends PriorityOrdered {
     /**
-     * Set order in list.
-     * @param order the order used sort in list
+     * Set order in the list.
+     * @param order the order used sort in the list
      */
     default void setOrder(int order) {}
 
     /**
-     * Get order in list.
-     * @return the order used sort in list
+     * Get order in the list.
+     * @return the order used sort in the list
      */
     @Override
     default int getOrder() {
@@ -73,7 +74,7 @@ public interface NamedHandler extends PriorityOrdered {
 
     /**
      * Convert bean map to {@link AliasWrapper} map.
-     * @param beanMap bean map that bean name bind bean instance
+     * @param beanMap bean map that bean name binds bean instance
      * @return  {@link AliasWrapper} map
      * @param <T> handler class type
      */
@@ -85,7 +86,7 @@ public interface NamedHandler extends PriorityOrdered {
 
     /**
      * Build sorted handler list from bean map.
-     * @param beanMap   bean map that bean name bind bean instance
+     * @param beanMap   bean map that bean name binds bean instance
      * @param get   get handler property from handler name
      * @return  handler list
      * @param <T>   handler class type
@@ -129,7 +130,7 @@ public interface NamedHandler extends PriorityOrdered {
     /**
      * Check can handle with request URL.
      * @param request   http request
-     * @param includeUrls   need include URL
+     * @param includeUrls   need to include URL
      * @param excludeUrls   must ignore URL
      * @return  true if handle success
      */
