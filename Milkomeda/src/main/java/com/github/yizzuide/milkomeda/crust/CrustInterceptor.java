@@ -35,7 +35,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * Intercept to check token before request handle.
+ * Intercept and check token before at the request handle.
  *
  * @since 3.15.0
  * @author yizzuide

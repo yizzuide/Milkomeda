@@ -26,6 +26,7 @@ import com.github.yizzuide.milkomeda.universe.extend.env.CollectionsPropertySour
 import com.github.yizzuide.milkomeda.util.DataTypeConvertUtil;
 import lombok.NonNull;
 import org.springframework.lang.Nullable;
+import org.springframework.util.StringUtils;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -67,7 +68,8 @@ public class YmlResponseOutput {
             Map<String, Object> exMap = DataTypeConvertUtil.beanToMap(e);
             // 如果yml有默认配置，重置到异常message
             Object messageDefaultValue = YmlParser.extractAliasNode(nodeMap, MESSAGE).getT2();
-            if (messageDefaultValue != null && exMap.get(MESSAGE) != null) {
+            if ((messageDefaultValue != null && StringUtils.hasText(messageDefaultValue.toString()))
+                    && (exMap.get(MESSAGE) != null && StringUtils.hasText(exMap.get(MESSAGE).toString()))) {
                 exMap.put(MESSAGE, messageDefaultValue);
             }
             // 自定义异常的信息值使用自定义异常属性值替换
