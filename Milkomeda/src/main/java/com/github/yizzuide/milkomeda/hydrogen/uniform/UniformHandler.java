@@ -26,6 +26,7 @@ import com.github.yizzuide.milkomeda.universe.context.WebContext;
 import com.github.yizzuide.milkomeda.universe.lang.Tuple;
 import com.github.yizzuide.milkomeda.universe.parser.yml.YmlParser;
 import com.github.yizzuide.milkomeda.universe.parser.yml.YmlResponseOutput;
+import com.github.yizzuide.milkomeda.util.DataTypeConvertUtil;
 import com.github.yizzuide.milkomeda.util.JSONUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -37,6 +38,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -74,6 +76,8 @@ import java.util.*;
 // 可以用于定义@ExceptionHandler、@InitBinder、@ModelAttribute, 并应用到所有@RequestMapping中
 //@ControllerAdvice // 这种方式默认就会扫描并加载到Ioc，不好动态控制是否加载，但好处是外部API对未来版本的兼容性强
 public class UniformHandler extends ResponseEntityExceptionHandler {
+
+    public static final int REQUEST_BEFORE_EXCEPTION_CODE = 5000;
 
     @Autowired
     private UniformProperties props;
@@ -293,7 +297,10 @@ public class UniformHandler extends ResponseEntityExceptionHandler {
             YmlParser.parseAliasMapPath(resolveMap, result, YmlResponseOutput.DATA, null, source);
             resultFilter(result);
         } else { // status != 200
-            if (source.get(YmlResponseOutput.CODE) == null) {
+            // 源Code字段为空或已配置了Code的值，就使用配置的值
+            Object code = source.get(YmlResponseOutput.CODE);
+            Object configCode = resolveMap.get(YmlResponseOutput.CODE);
+            if (code == null || (configCode != null && StringUtils.hasText(configCode.toString()))) {
                 source.put(YmlResponseOutput.CODE, resolveMap.get(YmlResponseOutput.CODE));
             }
             YmlResponseOutput.output(resolveMap, result, source, null, false);
@@ -321,6 +328,27 @@ public class UniformHandler extends ResponseEntityExceptionHandler {
         resolveMap.put(YmlResponseOutput.MESSAGE, "");
         resolveMap.put(YmlResponseOutput.DATA, Collections.emptyMap());
         return resolveMap;
+    }
+
+    /**
+     * Used for external match with status code to write.
+     * @param response  response object
+     * @param status    http status code
+     * @param e         exception
+     * @throws IOException if an input or output exception occurred
+     * @since 3.15.0
+     */
+    public static void matchStatusToWrite(HttpServletResponse response, Integer status, Exception e) throws IOException {
+        response.setStatus(status == null ? REQUEST_BEFORE_EXCEPTION_CODE : status);
+        ResultVO<?> source;
+        if (e != null) {
+            Map<String, Object> exMap = DataTypeConvertUtil.beanToMap(e);
+            Object code = exMap.get(YmlResponseOutput.CODE);
+            source = UniformResult.error(String.valueOf(code != null ? code : response.getStatus()), e.getMessage());
+        } else {
+            source = UniformResult.error(String.valueOf(response.getStatus()), "");
+        }
+        UniformHandler.matchStatusToWrite(response, source.toMap());
     }
 
     /**
