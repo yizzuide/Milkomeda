@@ -148,7 +148,7 @@ public class EtcdAtom implements Atom {
                 log.info("Thread[{}] closed lock with key: {}, lock count: {}", currentThread.getName(), lockData.getLockedKey(), lockCount);
             }
         } catch (InterruptedException | ExecutionException e) {
-            log.error("Etcd unlock error with msg: {}", e.getMessage(), e);
+            log.error("ETCD unlock error with msg: {}", e.getMessage(), e);
         } finally {
             // 清空线程上下文
             lockLightContext.remove();
@@ -169,7 +169,7 @@ public class EtcdAtom implements Atom {
         private AtomicInteger lockCount = new AtomicInteger(0);
 
         /**
-         * Local thread which hold lock.
+         * Local thread which holds lock.
          */
         private Thread currentThread;
 
@@ -184,12 +184,12 @@ public class EtcdAtom implements Atom {
         private String lockKey;
 
         /**
-         * Etcd locked key path.
+         * Etcd locked the key path.
          */
         private String lockedKeyPath;
 
         /**
-         * Lock status for check lock is success.
+         * Lock status for check lock has success.
          */
         private boolean lockSuccess;
 

@@ -23,6 +23,7 @@ package com.github.yizzuide.milkomeda.comet.collector;
 
 import com.github.yizzuide.milkomeda.comet.core.CometData;
 import com.github.yizzuide.milkomeda.comet.core.CometRecorder;
+import com.github.yizzuide.milkomeda.comet.core.EventDrivenWebCometData;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.servlet.http.HttpServletRequest;
@@ -33,7 +34,7 @@ import javax.servlet.http.HttpServletRequest;
  *
  * @author yizzuide
  * @since 1.15.0
- * @version 3.0.0
+ * @version 3.15.0
  * <br>
  * Create at 2019/11/13 19:18
  */
@@ -60,6 +61,10 @@ public class CollectorRecorder implements CometRecorder {
     @Override
     public Object onReturn(CometData cometData, Object returnData) {
         try {
+            // ignore event driven comet data
+            if (cometData instanceof EventDrivenWebCometData) {
+                return returnData;
+            }
             collectorFactory.get(cometData.getTag()).onSuccess(cometData);
         } catch (IllegalArgumentException e) {
             if (!e.getMessage().startsWith("type")) throw e;

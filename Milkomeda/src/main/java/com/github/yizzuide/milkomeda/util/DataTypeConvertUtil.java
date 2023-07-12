@@ -40,7 +40,7 @@ import java.util.stream.LongStream;
  *
  * @author yizzuide
  * @since 1.13.0
- * @version 3.14.0
+ * @version 3.15.0
  * <br>
  * Create at 2019/09/21 17:23
  */
@@ -334,7 +334,7 @@ public class DataTypeConvertUtil {
     /**
      * 从源对象采集key路径的值
      * @param keyPath       采集key
-     * @param source        源Map
+     * @param source        采集数据源（支持类型有：Map，Object，JSON字符串）
      * @param defaultValue  默认值
      * @return 采集到的字符串
      * @since 3.0.3
@@ -426,7 +426,7 @@ public class DataTypeConvertUtil {
      * @since 3.0.3
      */
     public static boolean isSugarType(Object obj) {
-        return !(obj instanceof List) && !(obj instanceof Map);
+        return !(obj instanceof Collection) && !(obj instanceof Map);
     }
 
 

@@ -19,7 +19,7 @@ import java.lang.annotation.*;
 @Repeatable(QueryMatchers.class)
 public @interface QueryMatcher {
     /**
-     * Type to match query.
+     * Type to match and query.
      * @return PrefectType
      * @since 3.15.0
      */
@@ -27,7 +27,7 @@ public @interface QueryMatcher {
     PrefectType value() default PrefectType.EQ;
 
     /**
-     * Type to match query.
+     * Type to match and query.
      * @return PrefectType
      *
      */
@@ -36,7 +36,7 @@ public @interface QueryMatcher {
 
     /**
      * Custom type of query match with {@link PageableService#additionParseQueryMatcher(com.baomidou.mybatisplus.core.conditions.query.QueryWrapper, java.lang.String, java.lang.String, boolean, java.lang.Object)}.
-     * @return string of prefect type
+     * @return string of a prefect type
      */
     String prefectString() default "";
 
@@ -53,7 +53,7 @@ public @interface QueryMatcher {
     String matchDataField() default "";
 
     /**
-     * Bundle conditions in group.
+     * Bundle conditions in a group.
      * @return  group name
      * @since 3.15.0
      */

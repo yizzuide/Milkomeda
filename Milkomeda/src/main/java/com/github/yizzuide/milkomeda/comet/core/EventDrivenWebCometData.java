@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 yizzuide All rights Reserved.
+ * Copyright (c) 2023 yizzuide All rights Reserved.
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -19,35 +19,20 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.universe.extend.web.handler;
+package com.github.yizzuide.milkomeda.comet.core;
 
-import org.springframework.web.context.request.WebRequestInterceptor;
-
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
- * Request aspect handler that impl used filter which compare with {@link WebRequestInterceptor} impl used interceptor.
+ * An identification class which used indicate for event driven.
  *
- * @see DelegatingContextFilter
+ * @since 3.15.0
  * @author yizzuide
- * @since 3.3.0
- * <br>
- * Create at 2020/05/06 11:38
+ * Create at 2023/07/12 20:29
  */
-public interface AstrolabeHandler extends NamedHandler {
-    /**
-     * Handle request before mapping into controller.
-     * Just throw {@link com.github.yizzuide.milkomeda.hydrogen.uniform.UniformException} if you need intercept request.
-     *
-     * @param request  ServletRequest
-     */
-    default void preHandle(ServletRequest request) {}
-
-    /**
-     * 请求后置
-     * @param request   ServletRequest
-     * @param response  ServletResponse
-     */
-    default void postHandle(ServletRequest request, ServletResponse response) {}
+@Data
+@EqualsAndHashCode(callSuper = true)
+public class EventDrivenWebCometData extends WebCometData {
+    private static final long serialVersionUID = 9122488246826621150L;
 }
