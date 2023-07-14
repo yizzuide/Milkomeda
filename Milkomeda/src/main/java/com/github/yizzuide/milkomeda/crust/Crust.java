@@ -101,7 +101,7 @@ public class Crust {
     private CrustUserDetailsService crustUserDetailsService;
 
     /**
-     * Generate verily code for login action.
+     * Generate verify code for login action.
      * @param account   account name(phone, email, etc.)
      * @return verily code
      * @since 3.15.0

@@ -38,6 +38,7 @@ import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.BlockAttackInnerInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
 import com.baomidou.mybatisplus.extension.spring.MybatisSqlSessionFactoryBean;
+import com.github.yizzuide.milkomeda.sirius.wormhole.SiriusInspector;
 import com.github.yizzuide.milkomeda.universe.extend.env.CollectionsPropertySource;
 import com.github.yizzuide.milkomeda.universe.extend.env.SpELPropertySource;
 import com.github.yizzuide.milkomeda.util.ReflectUtil;
@@ -80,6 +81,16 @@ public class SiriusConfig {
 
     @Autowired
     private SiriusProperties props;
+
+    @Bean
+    public SiriusInspector siriusInspector() {
+        return new SiriusInspector();
+    }
+
+    @Bean
+    public BatchInjector batchInjector() {
+        return new BatchInjector();
+    }
 
     @Bean
     public MybatisPlusInterceptor mybatisPlusInterceptor() {

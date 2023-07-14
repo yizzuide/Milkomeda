@@ -22,33 +22,38 @@
 package com.github.yizzuide.milkomeda.sirius;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.baomidou.mybatisplus.extension.toolkit.SqlHelper;
-import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 /**
- * An inspector for mybatis and mybatis-plus.
+ * Extend base mapper to support batch insert and update. <br>
+ * Note: Must add `allowMultiQueries=true` in datasource connect url params.
  *
- * @see org.springframework.transaction.support.TransactionSynchronizationManager
- * @see org.apache.ibatis.session.SqlSession
- * @see org.apache.ibatis.session.SqlSessionManager
- * @see com.baomidou.mybatisplus.core.MybatisMapperRegistry
- * @see org.mybatis.spring.SqlSessionUtils
- * @see com.baomidou.mybatisplus.core.toolkit.GlobalConfigUtils
  * @since 3.15.0
  * @author yizzuide
- * Create at 2023/07/09 15:52
+ * Create at 2023/07/13 14:30
  */
-public class SiriusInspector {
+public interface BatchMapper<T> extends BaseMapper<T> {
 
     /**
-     * Get mapper with entity class when sql session has opened before.
-     * @param entityClass   entity class
-     * @return  mapper
-     * @param <T>   entity type
+     * Batch insert record with the primary key.
+     * @param list  record list
+     * @return  insert effect count
      */
-    public static  <T> BaseMapper<T> getMapper(Class<T> entityClass) {
-        SqlSession sqlSession = SqlHelper.sqlSession(entityClass);
-        return SqlHelper.getMapper(entityClass, sqlSession);
-    }
+    int insertKeyBatch(@Param("list") List<T> list);
 
+    /**
+     * Batch insert record without the primary key.
+     * @param list  record list
+     * @return  insert effect count
+     */
+    int insertBatch(@Param("list") List<T> list);
+
+    /**
+     * Batch update record with id key.
+     * @param list  record list
+     * @return  update effect count
+     */
+    int updateBatchById(@Param("list") List<T> list);
 }
