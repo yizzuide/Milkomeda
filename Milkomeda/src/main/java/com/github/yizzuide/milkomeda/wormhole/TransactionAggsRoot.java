@@ -21,26 +21,29 @@
 
 package com.github.yizzuide.milkomeda.wormhole;
 
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+
 /**
- * A simple interface which indicates as an application service in Domain-Driver Design.
- *
- * @param <R> the repository type
+ * A base aggregates root of the domain model which provides access {@link TransactionWorkBus}.
  *
  * @since 3.15.0
  * @author yizzuide
- * Create at 2023/07/14 03:31
+ * Create at 2023/07/15 17:44
  */
-public interface ApplicationService<R> {
+@NoArgsConstructor
+@AllArgsConstructor
+public abstract class TransactionAggsRoot {
+    /**
+     * The {@link TransactionWorkBus} is associated with the application service.
+     */
+    protected TransactionWorkBus transactionWorkBus;
 
     /**
-     * Link {@link TransactionWorkBus} belong this application service.
+     * Get {@link TransactionWorkBus} to link application service.
      * @return TransactionWorkBus
      */
-    TransactionWorkBus getTransactionWorkBus();
-
-    /**
-     * Get repository proxy which accessed under this application service.
-     * @return repository type
-     */
-    R getRepositoryProxy();
+    protected TransactionWorkBus getTransactionWorkBus() {
+        return transactionWorkBus;
+    }
 }

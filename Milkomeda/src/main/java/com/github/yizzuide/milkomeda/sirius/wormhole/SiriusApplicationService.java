@@ -25,22 +25,35 @@ import com.github.yizzuide.milkomeda.wormhole.ApplicationService;
 import com.github.yizzuide.milkomeda.wormhole.TransactionWorkBus;
 
 /**
- * Mybatis plus impl of application service with transaction work bus.
+ * Mybatis plus extend of application service which provide {@link TransactionWorkBus}.
+ *
+ * @param <R> the repository type
  *
  * @since 3.15.0
  * @author yizzuide
  * Create at 2023/07/14 03:48
  */
-public class SiriusApplicationService implements ApplicationService {
+public abstract class SiriusApplicationService<R> implements ApplicationService<R> {
 
+    /**
+     * Link {@link TransactionWorkBus} belong this application service.
+     */
     private final TransactionWorkBus transactionWorkBus;
 
     public SiriusApplicationService() {
-        transactionWorkBus = new SiriusTransactionWorkBus();
+        transactionWorkBus = new SiriusTransactionWorkBus(false);
         transactionWorkBus.setApplicationService(this);
     }
 
-    protected TransactionWorkBus getTransactionWorkBus() {
+    public TransactionWorkBus getTransactionWorkBus() {
         return transactionWorkBus;
+    }
+
+    /**
+     * Change and enable batch insert with the primary key.
+     * @param enable    true if batch insert with the primary key
+     */
+    public void setUseBatchInsertWithKey(boolean enable) {
+        ((SiriusTransactionWorkBus)transactionWorkBus).setUseBatchInsertWithKey(enable);
     }
 }

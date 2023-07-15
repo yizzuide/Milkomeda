@@ -25,7 +25,8 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * A transaction work bus in with domain-driven design.
+ * The {@link TransactionWorkBus} interface link to {@link ApplicationService},
+ * which provide transaction operation for support single user case business in domain.
  *
  * @since 3.15.0
  * @author yizzuide
@@ -82,12 +83,12 @@ public interface TransactionWorkBus {
      * Set application service which work with.
      * @param applicationService application service
      */
-    void setApplicationService(ApplicationService applicationService);
+    void setApplicationService(ApplicationService<?> applicationService);
 
     /**
      * Get application service which work with.
      * @return  application service
      * @param <A> application service type
      */
-    <A extends ApplicationService> A getApplicationService();
+    <A extends ApplicationService<?>> A getApplicationService();
 }

@@ -35,21 +35,32 @@ import java.util.List;
 /**
  * Mybatis plus impl of {@link TransactionWorkBus}.
  *
+ *
  * @since 3.15.0
  * @author yizzuide
  * Create at 2023/07/13 11:44
  */
 public class SiriusTransactionWorkBus implements TransactionWorkBus {
 
+    /**
+     * Batch insert operation with primary key.
+     */
     @Setter
-    private boolean useInsertBatchKey = false;
+    private boolean useBatchInsertWithKey;
 
+    /**
+     * Link application service which belong to.
+     */
     @Setter
-    private ApplicationService applicationService;
+    private ApplicationService<?> applicationService;
+
+    public SiriusTransactionWorkBus(boolean useBatchInsertWithKey) {
+        this.useBatchInsertWithKey = useBatchInsertWithKey;
+    }
 
     @SuppressWarnings("unchecked")
     @Override
-    public <A extends ApplicationService> A getApplicationService() {
+    public <A extends ApplicationService<?>> A getApplicationService() {
         return (A) applicationService;
     }
 
@@ -92,7 +103,7 @@ public class SiriusTransactionWorkBus implements TransactionWorkBus {
         BatchMapper<T> batchMapper = (BatchMapper<T>) mapper;
         switch (operation) {
             case TRANSACTION_OPERATION_SAVE:
-                return useInsertBatchKey ? batchMapper.insertKeyBatch(entities) : batchMapper.insertBatch(entities);
+                return useBatchInsertWithKey ? batchMapper.insertKeyBatch(entities) : batchMapper.insertBatch(entities);
             case TRANSACTION_OPERATION_UPDATE:
                 return batchMapper.updateBatchById(entities);
         }
