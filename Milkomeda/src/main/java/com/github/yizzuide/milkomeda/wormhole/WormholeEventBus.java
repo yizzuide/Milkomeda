@@ -90,6 +90,9 @@ public class WormholeEventBus {
                     execute(isAsync, handler, event, action, callback);
                 } else {
                     // 注册事务回调
+                    if (!TransactionSynchronizationManager.isActualTransactionActive()) {
+                        log.error("Action[{}] on transaction is not active!", action);
+                    }
                     TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
                         @Override
                         public void beforeCommit(boolean readOnly) {

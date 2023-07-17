@@ -54,6 +54,6 @@ public abstract class SiriusApplicationService<R> implements ApplicationService<
      * @param enable    true if batch insert with the primary key
      */
     public void setUseBatchInsertWithKey(boolean enable) {
-        ((SiriusTransactionWorkBus)transactionWorkBus).setUseBatchInsertWithKey(enable);
+        ((SiriusTransactionWorkBus) transactionWorkBus).setUseBatchInsertWithKey(enable);
     }
 }

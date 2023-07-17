@@ -28,6 +28,7 @@ import com.github.yizzuide.milkomeda.universe.exception.NotImplementException;
 import com.github.yizzuide.milkomeda.wormhole.ApplicationService;
 import com.github.yizzuide.milkomeda.wormhole.TransactionWorkBus;
 import lombok.Setter;
+import org.springframework.util.CollectionUtils;
 
 import java.io.Serializable;
 import java.util.List;
@@ -96,6 +97,9 @@ public class SiriusTransactionWorkBus implements TransactionWorkBus {
     @SuppressWarnings("unchecked")
     @Override
     public <T> int performBatch(int operation, List<T> entities) {
+        if (CollectionUtils.isEmpty(entities)) {
+            return 0;
+        }
         BaseMapper<T> mapper = (BaseMapper<T>) SiriusInspector.getMapper(entities.get(0).getClass());
         if (!(mapper instanceof BatchMapper)) {
             throw new NotImplementException("The mapper must impl with BatchMapper for batch operation.");

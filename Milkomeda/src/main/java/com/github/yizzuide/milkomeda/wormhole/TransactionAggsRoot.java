@@ -38,12 +38,4 @@ public abstract class TransactionAggsRoot {
      * The {@link TransactionWorkBus} is associated with the application service.
      */
     protected TransactionWorkBus transactionWorkBus;
-
-    /**
-     * Get {@link TransactionWorkBus} to link application service.
-     * @return TransactionWorkBus
-     */
-    protected TransactionWorkBus getTransactionWorkBus() {
-        return transactionWorkBus;
-    }
 }
