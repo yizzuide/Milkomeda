@@ -25,7 +25,7 @@ import java.lang.reflect.Method;
 import java.util.List;
 
 /**
- * A method based argument binder for reflection invoke which auto bind args value at corresponding index with {@link ArgumentDefinition} config.
+ * A method-based argument binder for reflection invoke which auto bind args value at corresponding index with {@link ArgumentDefinition} config.
  *
  * @see org.springframework.aop.aspectj.AbstractAspectJAdvice#calculateArgumentBindings()
  * @since 3.15.0

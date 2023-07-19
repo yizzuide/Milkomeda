@@ -34,6 +34,7 @@ import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.mapping.ParameterMapping;
 import org.apache.ibatis.mapping.SqlCommandType;
 import org.apache.ibatis.reflection.MetaObject;
+import org.springframework.util.StringUtils;
 
 import java.sql.PreparedStatement;
 import java.util.HashMap;
@@ -59,6 +60,12 @@ public class SiriusMybatisParameterHandler extends MybatisParameterHandler {
 
         if (!this.getMetaObjectHandler().getProps().isAutoAddFill() ||
                 SqlCommandType.SELECT == mappedStatement.getSqlCommandType()) {
+            return;
+        }
+
+        String ignoreLogicDelete = this.getMetaObjectHandler().getProps().getIgnoreLogicDelete();
+        if ( (StringUtils.hasLength(ignoreLogicDelete) &&
+                boundSql.getSql().contains(String.format("SET %s", ignoreLogicDelete)))) {
             return;
         }
 

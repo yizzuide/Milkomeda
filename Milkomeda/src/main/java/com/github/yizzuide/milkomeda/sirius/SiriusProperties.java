@@ -56,6 +56,12 @@ public class SiriusProperties {
     private boolean autoAddFill = true;
 
     /**
+     * Recognize and ignore delete type operation if uses logic delete.
+     * @since 3.15.0
+     */
+    private String ignoreLogicDelete = "is_delete=1";
+
+    /**
      * Auto value interpolation.
      */
     private List<AutoInterpolate> autoInterpolates = new ArrayList<>();
@@ -63,12 +69,12 @@ public class SiriusProperties {
     @Data
     static class AutoInterpolate {
         /**
-         * What common field need interpolate to data table.
+         * What common field needs interpolate to data table?
          */
         private List<String> fields;
 
         /**
-         * Property source value, can be with Spring EL using `el(condition, type)`.
+         * Property source value which can be with Spring EL using `el(condition, type)`.
          */
         private String psValue;
 

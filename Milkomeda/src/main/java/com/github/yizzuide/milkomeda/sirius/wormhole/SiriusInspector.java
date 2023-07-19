@@ -22,6 +22,10 @@
 package com.github.yizzuide.milkomeda.sirius.wormhole;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.core.toolkit.LambdaUtils;
+import com.baomidou.mybatisplus.core.toolkit.support.LambdaMeta;
+import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
+import org.apache.ibatis.reflection.property.PropertyNamer;
 import org.jetbrains.annotations.NotNull;
 import org.mybatis.spring.mapper.MapperFactoryBean;
 import org.springframework.beans.BeansException;
@@ -83,6 +87,17 @@ public class SiriusInspector implements SmartInstantiationAwareBeanPostProcessor
     @SuppressWarnings("unchecked")
     public static  <T> BaseMapper<T> getMapper(Class<T> entityClass) {
         return (BaseMapper<T>) mapperInstanceTypes.get(entityClass.getName());
+    }
+
+    /**
+     * Get field name with method reference
+     * @param methodRef method reference
+     * @return  field name
+     * @param <T> Object type
+     */
+    public static <T> String getFieldName(SFunction<T, ?> methodRef) {
+        LambdaMeta meta = LambdaUtils.extract(methodRef);
+        return PropertyNamer.methodToProperty(meta.getImplMethodName());
     }
 
 }

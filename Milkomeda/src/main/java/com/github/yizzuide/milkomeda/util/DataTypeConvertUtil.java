@@ -23,6 +23,7 @@ package com.github.yizzuide.milkomeda.util;
 
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.cglib.beans.BeanCopier;
 import org.springframework.util.CollectionUtils;
 
 import java.beans.BeanInfo;
@@ -135,7 +136,7 @@ public class DataTypeConvertUtil {
     }
 
     /**
-     * Long to Stream
+     * Create counter stream
      * @param count count of number
      * @return  Stream
      */
@@ -221,6 +222,17 @@ public class DataTypeConvertUtil {
             }
         }
         return map;
+    }
+
+    /**
+     * Copy field values from source to target.
+     * @param source    source object
+     * @param target    target object
+     * @since 3.15.0
+     */
+    public static void copy(Object source, Object target) {
+        BeanCopier beanCopier = BeanCopier.create(source.getClass(), target.getClass(), false);
+        beanCopier.copy(source, target, null);
     }
 
     /**

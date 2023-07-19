@@ -43,14 +43,14 @@ public @interface RefMatcher {
     RefType type() default RefType.SELF;
 
     /**
-     * Foreign field referenced at, must add on mapper type.
+     * Foreign field referenced at, must add on the mapper type.
      * @return reference field
      */
     String foreignField() default "";
 
     /**
-     * Foreign mapper class, must add on mapper type.
-     * @return mapper class
+     * Foreign mapper type referenced at, must add on the mapper type.
+     * @return entity class
      */
     Class<? extends BaseMapper> foreignMapper() default BaseMapper.class;
 
