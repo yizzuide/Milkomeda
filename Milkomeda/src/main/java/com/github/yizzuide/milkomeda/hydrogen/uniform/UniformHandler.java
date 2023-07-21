@@ -206,9 +206,11 @@ public class UniformHandler extends ResponseEntityExceptionHandler {
     private ResponseEntity<Object> handleValidBeanExceptionResponse(Exception ex, BindingResult bindingResult) {
         ObjectError objectError = bindingResult.getAllErrors().get(0);
         String message = objectError.getDefaultMessage();
-        if (objectError.getArguments() != null && objectError.getArguments().length > 0) {
-            FieldError fieldError = (FieldError) objectError;
-            message = WebContext.getRequestNonNull().getRequestURI() + " [" + fieldError.getField() + "=" + fieldError.getRejectedValue() + "] " + message;
+        if (!props.isIgnoreAddFieldOnValidFail()) {
+            if (objectError.getArguments() != null && objectError.getArguments().length > 0) {
+                FieldError fieldError = (FieldError) objectError;
+                message = WebContext.getRequestNonNull().getRequestURI() + " [" + fieldError.getField() + "=" + fieldError.getRejectedValue() + "] " + message;
+            }
         }
         log.warn("Hydrogen uniform valid response exception with msg: {} ", message);
         return handleExceptionResponse(ex, HttpStatus.BAD_REQUEST.value(), message);
