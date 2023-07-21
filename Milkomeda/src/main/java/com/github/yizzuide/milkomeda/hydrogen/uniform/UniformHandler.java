@@ -147,8 +147,13 @@ public class UniformHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<Object> constraintViolationException(ConstraintViolationException e) {
         ConstraintViolation<?> constraintViolation = e.getConstraintViolations().iterator().next();
         String value = String.valueOf(constraintViolation.getInvalidValue());
-        String message = WebContext.getRequestNonNull().getRequestURI() +
+        String message;
+        if (props.isIgnoreAddFieldOnValidFail()) {
+            message = constraintViolation.getMessage();
+        } else {
+            message = WebContext.getRequestNonNull().getRequestURI() +
                 " [" + constraintViolation.getPropertyPath() + "=" + value + "] " + constraintViolation.getMessage();
+        }
         log.warn("Hydrogen uniform valid response exception with msg: {} ", message);
         ResponseEntity<Object> responseEntity = handleExceptionResponse(e, HttpStatus.BAD_REQUEST.value(), message);
         return responseEntity == null ? ResponseEntity.status(HttpStatus.BAD_REQUEST.value()).body(null) : responseEntity;

@@ -58,6 +58,12 @@ public class UniformProperties {
     private ResultVO.CodeType codeType = ResultVO.CodeType.INT;
 
     /**
+     * Ignore add field to message when valid fail.
+     * @since 3.15.0
+     */
+    private boolean ignoreAddFieldOnValidFail = false;
+
+    /**
      * 响应数据
      */
     private Map<String, Object> response = new HashMap<>();
