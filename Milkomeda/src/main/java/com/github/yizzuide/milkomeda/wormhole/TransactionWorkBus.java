@@ -25,7 +25,7 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * The {@link TransactionWorkBus} interface link to {@link ApplicationService},
+ * The {@link TransactionWorkBus} interface bridge link {@link ApplicationService},
  * which provide transaction operation for support single user case business in domain.
  *
  * @since 3.15.0
@@ -42,6 +42,11 @@ public interface TransactionWorkBus {
      * An update type of transaction.
      */
     int TRANSACTION_OPERATION_UPDATE = 2;
+
+    /**
+     * A deleted type of transaction.
+     */
+    int TRANSACTION_OPERATION_DELETE = 3;
 
     /**
      * Find record with key id.

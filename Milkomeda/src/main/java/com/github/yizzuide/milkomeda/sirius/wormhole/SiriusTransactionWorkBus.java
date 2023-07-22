@@ -36,7 +36,6 @@ import java.util.List;
 /**
  * Mybatis plus impl of {@link TransactionWorkBus}.
  *
- *
  * @since 3.15.0
  * @author yizzuide
  * Create at 2023/07/13 11:44
@@ -90,6 +89,8 @@ public class SiriusTransactionWorkBus implements TransactionWorkBus {
                 return mapper.insert(entity);
             case TRANSACTION_OPERATION_UPDATE:
                 return mapper.updateById(entity);
+            case TRANSACTION_OPERATION_DELETE:
+                return mapper.deleteById(entity);
         }
         return 0;
     }
@@ -110,6 +111,8 @@ public class SiriusTransactionWorkBus implements TransactionWorkBus {
                 return useBatchInsertWithKey ? batchMapper.insertKeyBatch(entities) : batchMapper.insertBatch(entities);
             case TRANSACTION_OPERATION_UPDATE:
                 return batchMapper.updateBatchById(entities);
+            case TRANSACTION_OPERATION_DELETE:
+                return batchMapper.deleteBatchIds(entities);
         }
         return 0;
     }

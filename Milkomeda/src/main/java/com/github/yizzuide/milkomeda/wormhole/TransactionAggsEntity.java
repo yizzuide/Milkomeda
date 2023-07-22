@@ -25,7 +25,7 @@ import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
 /**
- * A base aggregates root of the domain model which provides access {@link TransactionWorkBus}.
+ * A base aggregates object of the domain model which provides access to {@link TransactionWorkBus}.
  *
  * @since 3.15.0
  * @author yizzuide
@@ -33,7 +33,7 @@ import lombok.NoArgsConstructor;
  */
 @NoArgsConstructor
 @AllArgsConstructor
-public abstract class TransactionAggsRoot {
+public abstract class TransactionAggsEntity {
     /**
      * The {@link TransactionWorkBus} is associated with the application service.
      */

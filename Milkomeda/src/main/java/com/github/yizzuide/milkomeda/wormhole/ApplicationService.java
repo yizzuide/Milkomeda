@@ -33,7 +33,7 @@ package com.github.yizzuide.milkomeda.wormhole;
 public interface ApplicationService<R> {
 
     /**
-     * Link {@link TransactionWorkBus} belong this application service.
+     * Get {@link TransactionWorkBus} belong this application service.
      * @return TransactionWorkBus
      */
     TransactionWorkBus getTransactionWorkBus();
