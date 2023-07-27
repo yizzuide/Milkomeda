@@ -71,13 +71,13 @@ public class MethodArgumentBinder {
 
     private static CompositeArgumentMatcher getArgumentMatchers() {
         if (argumentMatchers == null) {
-            // 每个Object都关联一个Monitor（存在于对象头Mark Word），它记录被哪个线程获取、重入次数、block队列、wait队列等，同时notify/notifyAll/wait等方法会使用到Monitor锁对象，所以必须在同步代码块中使用。
+            // 每个Object都关联一个Monitor（存在于对象头Mark Word），它记录被哪个线程持有、重入次数、block队列、wait队列等，同时notify/notifyAll/wait等方法会使用到Monitor锁对象，所以必须在同步代码块中使用。
             // Synchronized的同步是可重入、非公平抢占方式，在JVM里的实现都是基于MonitorEnter和MonitorExit指令进入退出Monitor对象来实现方法同步和代码块同步。
             synchronized (MethodArgumentBinder.class) {
                 if (argumentMatchers == null) {
                     // new操作包含了三条指令：
                     // 1.分配对象内存M；2.在内存M上初始化对象；3.将M的地址赋值给变量。
-                    // 如果指令优化重排，可能导致其它线程赋使用变量时是一个未初始化的对象而触发空指针异常。
+                    // 如果指令优化重排（1->3->2），可能导致其它线程赋使用变量时是一个未初始化的对象而触发空指针异常。
                     argumentMatchers = new CompositeArgumentMatcher();
                     argumentMatchers.addMatcher(new NamedTypeArgumentMatcher());
                     argumentMatchers.addMatcher(new JDKRegexArgumentMatcher());

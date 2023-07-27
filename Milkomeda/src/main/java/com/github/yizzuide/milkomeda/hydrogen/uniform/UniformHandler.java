@@ -22,7 +22,6 @@
 package com.github.yizzuide.milkomeda.hydrogen.uniform;
 
 import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
-import com.github.yizzuide.milkomeda.universe.context.WebContext;
 import com.github.yizzuide.milkomeda.universe.lang.Tuple;
 import com.github.yizzuide.milkomeda.universe.parser.yml.YmlParser;
 import com.github.yizzuide.milkomeda.universe.parser.yml.YmlResponseOutput;
@@ -151,8 +150,7 @@ public class UniformHandler extends ResponseEntityExceptionHandler {
         if (props.isIgnoreAddFieldOnValidFail()) {
             message = constraintViolation.getMessage();
         } else {
-            message = WebContext.getRequestNonNull().getRequestURI() +
-                " [" + constraintViolation.getPropertyPath() + "=" + value + "] " + constraintViolation.getMessage();
+            message = "[" + constraintViolation.getPropertyPath() + "=" + value + "] " + constraintViolation.getMessage();
         }
         log.warn("Hydrogen uniform valid response exception with msg: {} ", message);
         ResponseEntity<Object> responseEntity = handleExceptionResponse(e, HttpStatus.BAD_REQUEST.value(), message);
@@ -209,7 +207,7 @@ public class UniformHandler extends ResponseEntityExceptionHandler {
         if (!props.isIgnoreAddFieldOnValidFail()) {
             if (objectError.getArguments() != null && objectError.getArguments().length > 0) {
                 FieldError fieldError = (FieldError) objectError;
-                message = WebContext.getRequestNonNull().getRequestURI() + " [" + fieldError.getField() + "=" + fieldError.getRejectedValue() + "] " + message;
+                message = "[" + fieldError.getField() + "=" + fieldError.getRejectedValue() + "] " + message;
             }
         }
         log.warn("Hydrogen uniform valid response exception with msg: {} ", message);

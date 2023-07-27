@@ -165,6 +165,10 @@ public class CrustUserInfo<T, P> implements Serializable {
     @SuppressWarnings("unchecked")
     public void setPermissionList(List<P> permissionList) {
         if (!CollectionUtils.isEmpty(permissionList)) {
+            // user has no permissions!
+            if (permissionList.get(0) == null) {
+                return;
+            }
             boolean isMap = permissionList.get(0) instanceof Map;
             if (isMap && this.permClass != null) {
                 this.permissionList = (List<P>) JSONUtil.parseList(JSONUtil.serialize(permissionList), this.permClass);
