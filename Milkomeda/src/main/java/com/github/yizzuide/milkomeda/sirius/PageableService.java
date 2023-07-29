@@ -17,6 +17,7 @@ import com.github.yizzuide.milkomeda.sirius.wormhole.SiriusInspector;
 import com.github.yizzuide.milkomeda.universe.context.AopContextHolder;
 import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import com.github.yizzuide.milkomeda.util.DataTypeConvertUtil;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.OrderComparator;
 import org.springframework.core.Ordered;
@@ -142,6 +143,8 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
                     queryWrapper.eq(fieldNonNull, columnName, fieldValue);
                 } else if (queryMatcher.prefect() == PrefectType.NEQ) {
                     queryWrapper.ne(fieldNonNull, columnName, fieldValue);
+                } else if (queryMatcher.prefect() == PrefectType.EMPTY) {
+                    queryWrapper.eq(ObjectUtils.isEmpty(fieldValue), columnName, fieldValue);
                 } else if (queryMatcher.prefect() == PrefectType.LIKE) {
                     queryWrapper.like(fieldNonNull && StringUtils.isNotBlank(fieldValue.toString()), columnName, fieldValue);
                 } else if (queryMatcher.prefect() == PrefectType.IN) {

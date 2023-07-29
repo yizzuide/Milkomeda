@@ -192,7 +192,7 @@ public class CometAspect {
         String host = NetworkUtil.getHost();
         cometData.setHost(host);
         if (milkomedaProperties.isShowLog()) {
-            log.info("Comet:- before: {}", JSONUtil.serialize(cometData));
+            log.info("method[{}] invoke before: {}", signature.getName(), JSONUtil.serialize(cometData));
         }
         // 外部可以扩展记录自定义数据
         recorder.onRequest(cometData, cometData.getTag(), request, joinPoint.getArgs());
@@ -240,7 +240,7 @@ public class CometAspect {
         // 是否有修改返回值
         returnObj = returnObj == null ? returnData : returnObj;
         if (milkomedaProperties.isShowLog()) {
-            log.info("Comet:- afterReturn: {}", JSONUtil.serialize(cometData));
+            log.info("method[{}] invoke afterReturn: {}", signature.getName(), JSONUtil.serialize(cometData));
         }
         threadLocal.remove();
         return returnObj;

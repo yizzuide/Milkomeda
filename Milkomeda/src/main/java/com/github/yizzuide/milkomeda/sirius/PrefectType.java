@@ -22,6 +22,11 @@ public enum PrefectType {
     NEQ,
 
     /**
+     * Match empty field (null or '').
+     */
+    EMPTY,
+
+    /**
      * Sql in field.
      */
     IN,
