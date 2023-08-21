@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 yizzuide All rights Reserved.
+ * Copyright (c) 2023 yizzuide All rights Reserved.
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -19,34 +19,26 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.pulsar;
+package com.github.yizzuide.milkomeda.quark;
 
-import org.springframework.boot.autoconfigure.AutoConfigureAfter;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
-import org.springframework.boot.autoconfigure.task.TaskExecutionAutoConfiguration;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.web.context.request.async.DeferredResult;
-import org.springframework.web.servlet.DispatcherServlet;
+import com.lmax.disruptor.EventHandler;
+import com.lmax.disruptor.WorkHandler;
 
 /**
- * PulsarConfig
+ * This event handler is empty, just let subclass keeps the event type.
  *
+ * @since 3.15.0
  * @author yizzuide
- * @since 1.14.0
- * @version 3.15.0
- * <br>
- * Create at 2019/11/11 11:34
+ * Create at 2023/08/19 14:05
  */
-@Configuration
-@ConditionalOnWebApplication
-@ConditionalOnClass({DispatcherServlet.class, DeferredResult.class})
-@AutoConfigureAfter(TaskExecutionAutoConfiguration.class)
-public class PulsarConfig {
+public class QuarkEventHandler<T> implements EventHandler<QuarkEvent<T>>, WorkHandler<QuarkEvent<T>> {
 
-    @Bean
-    public Pulsar pulsar() {
-        return new Pulsar();
+    @Override
+    public void onEvent(QuarkEvent<T> event, long sequence, boolean endOfBatch) throws Exception {
+        onEvent(event);
+    }
+
+    @Override
+    public void onEvent(QuarkEvent<T> event) throws Exception {
     }
 }

@@ -21,7 +21,7 @@
 
 package com.github.yizzuide.milkomeda.pulsar;
 
-import com.github.yizzuide.milkomeda.util.ThreadUtil;
+import com.github.yizzuide.milkomeda.util.Strings;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -31,10 +31,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-import com.github.yizzuide.milkomeda.util.Strings;
 import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.context.request.async.WebAsyncTask;
-import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer;
 
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -51,7 +49,7 @@ import static com.github.yizzuide.milkomeda.util.ReflectUtil.*;
  *
  * @author yizzuide
  * @since 0.1.0
- * @version 3.12.10
+ * @version 3.15.0
  * <br>
  * Create at 2019/03/29 10:36
  */
@@ -140,35 +138,6 @@ public class Pulsar {
      */
     public <T> Future<T> postForResult(Callable<T> callable) {
         return applicationTaskExecutor.submit(callable);
-    }
-
-    /**
-     * 配置默认的Spring MVC异步支持
-     *
-     * @param configurer 配置对象
-     * @param timeout    超时时间，ms
-     * @deprecated since 1.16.0，因为SpringBoot 2.1.0版本开始默认已装配
-     */
-    public void configure(AsyncSupportConfigurer configurer, long timeout) {
-        configure(configurer, 5, 10, 200, 100, timeout);
-    }
-
-    /**
-     * 自定义配置的异步支持
-     *
-     * @param configurer       配置对象
-     * @param corePoolSize     核心池大小
-     * @param maxPoolSize      最大线程池数
-     * @param queueCapacity    队列容量
-     * @param keepAliveSeconds 线程保存存活时间
-     * @param timeout          超时时间，ms
-     * @deprecated since 1.16.0，因为SpringBoot 2.1.0版本开始默认已装配
-     */
-    public void configure(AsyncSupportConfigurer configurer, int corePoolSize, int maxPoolSize, int queueCapacity, int keepAliveSeconds, long timeout) {
-        // 默认超时时间
-        configurer.setDefaultTimeout(timeout);
-        ThreadUtil.configTaskExecutor(applicationTaskExecutor, "pulsar-", corePoolSize, maxPoolSize, queueCapacity, keepAliveSeconds);
-        configurer.setTaskExecutor(applicationTaskExecutor);
     }
 
     /**

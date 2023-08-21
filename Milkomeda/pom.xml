@@ -19,8 +19,10 @@
         <mybatis-plus.version>3.5.2</mybatis-plus.version>
         <redission.version>3.18.0</redission.version>
         <jetcd.version>0.7.5</jetcd.version>
+        <disruptor.version>3.4.4</disruptor.version>
         <jsqlparser.version>4.5</jsqlparser.version>
         <jwt.version>0.9.1</jwt.version>
+        <commons-fileupload.version>1.5</commons-fileupload.version>
         <commons-beanutils.version>1.9.4</commons-beanutils.version>
         <jsoup.version>1.15.3</jsoup.version>
         <ognl.version>3.3.4</ognl.version>
@@ -213,6 +215,16 @@
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt</artifactId>
             <version>${jwt.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.lmax</groupId>
+            <artifactId>disruptor</artifactId>
+            <version>${disruptor.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-fileupload</groupId>
+            <artifactId>commons-fileupload</artifactId>
+            <version>${commons-fileupload.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>

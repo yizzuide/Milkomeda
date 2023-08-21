@@ -224,6 +224,8 @@ milkomeda:
       - /metal/**
       - /pillar/**
       - /orbit/**
+      - /chat/**
+
     # 放开static资源访问
     allow-static-urls:
       - /build/*

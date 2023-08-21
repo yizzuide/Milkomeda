@@ -85,7 +85,7 @@ public class SiriusInspector implements SmartInstantiationAwareBeanPostProcessor
      * @param <T>   entity type
      */
     @SuppressWarnings("unchecked")
-    public static  <T> BaseMapper<T> getMapper(Class<T> entityClass) {
+    public static <T> BaseMapper<T> getMapper(Class<T> entityClass) {
         return (BaseMapper<T>) mapperInstanceTypes.get(entityClass.getName());
     }
 
