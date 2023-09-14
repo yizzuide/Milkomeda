@@ -128,12 +128,12 @@
             <artifactId>spring-boot-starter-web</artifactId>
             <optional>true</optional>
         </dependency>
-        <!-- springboot 2.3.x: No longer included in web starters -->
+        <!-- Spring Boot 2.3.x: No longer included in web starters -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
-        <!-- springboot 2.3.x: A number of properties have been renamed or deprecated. You can use the spring-boot-properties-migrator module to identify those properties.  -->
+        <!-- Spring Boot 2.3.x: A number of properties have been renamed or deprecated. You can use the spring-boot-properties-migrator module to identify those properties.  -->
         <!--<dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-properties-migrator</artifactId>

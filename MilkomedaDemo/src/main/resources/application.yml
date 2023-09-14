@@ -1,14 +1,14 @@
 spring:
   application:
     name: @spring.application.name@
-  # Springboot2.4：不能用在指定配置环境，但仍然可以用于激活环境及命令行激活，如：--spring.profiles.active=prod
+  # Spring Boot 2.4：不能用在指定配置环境，但仍然可以用于激活环境及命令行激活，如：--spring.profiles.active=prod
   profiles:
     active: @spring.profiles.active@
-    # Springboot2.4：include不能用于指定配置环境（一般用于无环境依赖的必须配置），不能用在指定配置环境文件里
+    # Spring Boot 2.4：include不能用于指定配置环境（一般用于无环境依赖的必须配置），不能用在指定配置环境文件里
     include: web
-    # Springboot2.4：group可以多环境配置多个子配置，子配置需要声明：spring.config.activate.on-profile
+    # Spring Boot 2.4：group可以多环境配置多个子配置，子配置需要声明：spring.config.activate.on-profile
     group:
       dev: milkomeda
-  # Springboot 2.4: 使用了新配置文件合并机制，以下可以配置为2.3以前的方式
+  # Spring Boot 2.4: 使用了新配置文件合并机制，以下可以配置为2.3以前的方式
   #config:
     #use-legacy-processing: true

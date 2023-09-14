@@ -66,11 +66,11 @@ public class EnvironmentApplicationListener implements ApplicationListener<Appli
         ApplicationContextHolder.setPendingConfigurableEnvironment(environment);
 
         // BeanWrapper binding ConversionService process:
-        // 1.SpringBoot start setting ConversionService
+        // 1.Spring Boot start setting ConversionService
         // org.springframework.boot.SpringApplication.configureEnvironment()
         //  -> environment.setConversionService(new ApplicationConversionService());
         //  -> context.getBeanFactory().setConversionService(context.getEnvironment().getConversionService());
-        // 2.SpringBoot create BeanWrapper and set ConversionService
+        // 2.Spring Boot create BeanWrapper and set ConversionService
         // org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.instantiateBean()
         //  -> AbstractBeanFactory.initBeanWrapper()
         //      -> bw.setConversionService(getConversionService());

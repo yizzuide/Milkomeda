@@ -27,17 +27,22 @@ public enum PrefectType {
     EMPTY,
 
     /**
-     * Sql in field.
+     * Match using sql `in`.
      */
     IN,
 
     /**
-     * Sql like field.
+     * Match full words with {@link QueryLinker} and using sql `in`.
+     */
+    LINK_EQ_IN,
+
+    /**
+     * Match using sql `like`.
      */
     LIKE,
 
     /**
-     * Sql order by.
+     * Match using sql `order by`.
      */
     OrderByPre,
 

@@ -110,7 +110,7 @@ public class CollectionsPropertySource extends PropertySource<Object> {
     }
 
     public static void addToEnvironment(ConfigurableEnvironment environment) {
-        // 添加在SystemEnvironmentPropertySource后面，而SpringCloud（bootstrap.yml，比application.yml优化级高）和SpringBoot（application.yml）环境里的配置可以读取
+        // 添加在SystemEnvironmentPropertySource后面，而SpringCloud（bootstrap.yml，比application.yml优化级高）和Spring Boot（application.yml）环境里的配置可以读取
         environment.getPropertySources().addAfter(StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME,
                 new CollectionsPropertySource());
         log.trace("CollectionsPropertySource add to Environment");

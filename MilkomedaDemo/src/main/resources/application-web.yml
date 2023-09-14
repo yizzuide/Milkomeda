@@ -1,5 +1,5 @@
 server:
-  # Springboot 2.6: spring.webflux.session property group move to server.reactive.session
+  # Spring Boot 2.6: spring.webflux.session property group move to server.reactive.session
   reactive:
     session:
       timeout: 120m
@@ -13,36 +13,36 @@ server:
         http-only: true
         # 自定义sessionId，用于后台登录唯一标识，防止被第三方平台覆盖
         name: mk-sessionId
-        # Springboot 2.6: SameSite Cookie Attribute Servlet Support
+        # Spring Boot 2.6: SameSite Cookie Attribute Servlet Support
         same-site: lax # strict: 完全禁止第三方获取cookie lax: 第三方请求只有<a|link href='xxx'>和GET表单发送Cookie none: 只能通过https发送
     # Spring Boot 2.4: No longer register the DefaultServlet provided by your servlet container.
     register-default-servlet: true
-    # Springboot 2.3: 设置服务器编码
+    # Spring Boot 2.3: 设置服务器编码
     encoding:
       charset: UTF-8
-  # Springboot 2.3: 优雅关机，拒绝新请求，等正在执行的请求完成
+  # Spring Boot 2.3: 优雅关机，拒绝新请求，等正在执行的请求完成
   shutdown: graceful
-  # Springboot 2.3: 不再响应默认的错误信息
+  # Spring Boot 2.3: 不再响应默认的错误信息
   error:
     include-binding-errors: never
     include-message: never
     include-stacktrace: never
-  # Springboot 2.7: Embedded web servers can be configured to use SSL with PEM-encoded certificate and private key files
+  # Spring Boot 2.7: Embedded web servers can be configured to use SSL with PEM-encoded certificate and private key files
   #  Management endpoints can be secured using similar management.server.ssl.* properties
   #ssl:
     #certificate:
     #certificate-private-key:
 spring:
-  # Springboot 2.3: 优雅关机等待时间
+  # Spring Boot 2.3: 优雅关机等待时间
   lifecycle:
     timeout-per-shutdown-phase: 20s
   main:
-    # Springboot 2.1: Bean重复定义是否覆盖
+    # Spring Boot 2.1: Bean重复定义是否覆盖
     allow-bean-definition-overriding: false
-    # Springboot 2.6: Circular references between beans are now prohibited by default.
+    # Spring Boot 2.6: Circular references between beans are now prohibited by default.
     #allow-circular-references: true
   web:
-    # Springboot 2.4: 资源不生成mapping映射
+    # Spring Boot 2.4: 资源不生成mapping映射
     resources:
       add-mappings: false
 
@@ -51,7 +51,7 @@ spring:
     async:
       request-timeout: 20s
 
-    # Springboot 2.6: 默认的路径匹配器由AntPathMatcher改为PathPatternParser（包括Actuator，但matching-strategy不作用于Actuator），匹配根路径必须添加"/"
+    # Spring Boot 2.6: 默认的路径匹配器由AntPathMatcher改为PathPatternParser（包括Actuator，但matching-strategy不作用于Actuator），匹配根路径必须添加"/"
     #pathmatch:
       #matching-strategy: ant_path_matcher
 

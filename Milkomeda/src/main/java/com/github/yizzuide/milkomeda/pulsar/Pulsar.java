@@ -21,13 +21,16 @@
 
 package com.github.yizzuide.milkomeda.pulsar;
 
+import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import com.github.yizzuide.milkomeda.util.Strings;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.boot.context.event.ApplicationStartedEvent;
+import org.springframework.context.ApplicationListener;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -57,17 +60,16 @@ import static com.github.yizzuide.milkomeda.util.ReflectUtil.*;
 @Slf4j
 @Aspect
 @Order(66)
-public class Pulsar {
+public class Pulsar implements ApplicationListener<ApplicationStartedEvent> {
     /**
      * DeferredResult容器
      */
     private final Map<String, PulsarDeferredResult> deferredResultMap;
 
     /**
-     * 线程池执行器（从SpringBoot 2.1.0开始默认已经装配）
+     * 线程池执行器（从Spring Boot 2.1.0 开始默认已经装配）
      * @see org.springframework.boot.autoconfigure.task.TaskExecutionAutoConfiguration
      */
-    @Autowired
     private ThreadPoolTaskExecutor applicationTaskExecutor;
 
     /**
@@ -78,6 +80,16 @@ public class Pulsar {
     Pulsar() {
         deferredResultMap = new ConcurrentHashMap<>(DEFAULT_CAPACITY);
         PulsarHolder.setPulsar(this);
+    }
+
+    @Override
+    public void onApplicationEvent(@NotNull ApplicationStartedEvent event) {
+        Map<String, ThreadPoolTaskExecutor> threadPoolTaskExecutorMap = ApplicationContextHolder.get().getBeansOfType(ThreadPoolTaskExecutor.class);
+        if (threadPoolTaskExecutorMap.containsKey("applicationTaskExecutor")) {
+            applicationTaskExecutor = threadPoolTaskExecutorMap.get("applicationTaskExecutor");
+        } else {
+            applicationTaskExecutor = threadPoolTaskExecutorMap.values().stream().findFirst().orElse(null);
+        }
     }
 
     /**

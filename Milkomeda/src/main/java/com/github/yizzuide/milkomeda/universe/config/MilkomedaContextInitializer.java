@@ -37,7 +37,7 @@ import java.util.Collection;
  * <br>
  * Create at 2023/04/27 20:50
  */
-// SpringBoot在调用refresh()之前加载上下文初始化器，这时候的Bean Class还没被类加载器加载。
+// Spring Boot在调用refresh()之前加载上下文初始化器，这时候的Bean Class还没被类加载器加载。
 public class MilkomedaContextInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
     @Override
     public void initialize(@NonNull ConfigurableApplicationContext applicationContext) {

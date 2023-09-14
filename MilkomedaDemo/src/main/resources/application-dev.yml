@@ -1,20 +1,20 @@
 server:
   port: 8091
   tomcat:
-    # Springboot 2.3: 设置服务器工作线程
+    # Spring Boot 2.3: 设置服务器工作线程
     threads:
       max: 120
-    # Springboot 2.4: Configure how long Tomcat will wait for another request before closing a keep-alive connection.
+    # Spring Boot 2.4: Configure how long Tomcat will wait for another request before closing a keep-alive connection.
     keep-alive-timeout: 30s
-    # Springboot 2.4: Control the maximum number of requests that can be made on a keep-alive connection before it is closed
+    # Spring Boot 2.4: Control the maximum number of requests that can be made on a keep-alive connection before it is closed
     max-keep-alive-requests: 120
 
 spring:
   config:
-    # Springboot 2.4: 根据当前环境变量来激活当前配置
+    # Spring Boot 2.4: 根据当前环境变量来激活当前配置
     activate:
       on-profile: dev
-    # Springboot 2.4: 导入数据配置文件给当前配置
+    # Spring Boot 2.4: 导入数据配置文件给当前配置
     import: "classpath:develop.properties"
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -25,11 +25,11 @@ spring:
 
   redis:
     host: 127.0.0.1
-    # Springboot 2.7: Support for specifying a username for authenticating to Sentinel(s)
+    # Spring Boot 2.7: Support for specifying a username for authenticating to Sentinel(s)
     #sentinel:
       #username:
 
-  # Springboot 2.6: To use embedded mongo, the spring.mongodb.embedded.version property must now be set.
+  # Spring Boot 2.6: To use embedded mongo, the spring.mongodb.embedded.version property must now be set.
   #mongodb:
     #embedded:
       #version: 3.6
@@ -41,7 +41,7 @@ spring:
       port: 27017
 
 
-  # Pulsar模块异步线程池（Async异步任务线程池，SpringBoot 2.1.0+在这里配置）
+  # Pulsar模块异步线程池（Async异步任务线程池，Spring Boot 2.1.0+在这里配置）
   task:
     execution:
       thread-name-prefix: pulsar-
@@ -51,7 +51,7 @@ spring:
         max-size: 12
         keep-alive: 100s
 
-    # Ice模块的调度线程池（Spring Task调度线程池，SpringBoot 2.1.0+在这里配置）
+    # Ice模块的调度线程池（Spring Task调度线程池，Spring Boot 2.1.0+在这里配置）
     scheduling:
       thread-name-prefix: ice-
       pool:
@@ -75,7 +75,7 @@ logging:
   level:
     com.github.yizzuide.milkomeda.demo.sundial.mapper: DEBUG
     com.github.yizzuide.milkomeda.ice.inspector.mapper: DEBUG
-  # Springboot 2.4: The charsets used to by Logback and Log4j logging can now be configured
+  # Spring Boot 2.4: The charsets used to by Logback and Log4j logging can now be configured
   charset:
     console: UTF-8
     file: UTF-8
@@ -88,24 +88,24 @@ management:
       enabled: false
     health:
       show-details: always
-    # Springboot 2.4: A new startup actuator endpoint is now available that shows information about your application startup.
+    # Spring Boot 2.4: A new startup actuator endpoint is now available that shows information about your application startup.
     startup:
       enabled: true
   endpoints:
     web:
       exposure:
         include: '*'
-  # Springboot 2.4: HTTP traces no longer include cookie headers by default.
+  # Spring Boot 2.4: HTTP traces no longer include cookie headers by default.
   #trace:
     #http:
       #include: cookies, errors, request-headers, response-headers
   info:
-    # Springboot 2.6: The env info contributor is now disabled by default. It would like them to appear them in the InfoEndpoint.
+    # Spring Boot 2.6: The env info contributor is now disabled by default. It would like them to appear them in the InfoEndpoint.
     env:
       enabled: true
-    # Springboot 2.6: Expose Java Runtime information under the java key.
+    # Spring Boot 2.6: Expose Java Runtime information under the java key.
     java:
       enabled: true
-    # Springboot 2.7: An OsInfoContributor can expose some information about the Operating System the application is running on.
+    # Spring Boot 2.7: An OsInfoContributor can expose some information about the Operating System the application is running on.
     os:
       enabled: on

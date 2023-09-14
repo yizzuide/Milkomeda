@@ -59,7 +59,7 @@ public @interface QueryLinker {
      * Link id value should ignore.
      * @return id value
      */
-    long linkIdIgnore() default 0L;
+    String linkIdIgnore() default "0";
 
     /**
      * Link entity class.
