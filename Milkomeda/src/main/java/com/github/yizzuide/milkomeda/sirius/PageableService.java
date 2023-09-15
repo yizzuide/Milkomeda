@@ -17,11 +17,14 @@ import com.github.yizzuide.milkomeda.sirius.wormhole.SiriusInspector;
 import com.github.yizzuide.milkomeda.universe.context.AopContextHolder;
 import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import com.github.yizzuide.milkomeda.util.DataTypeConvertUtil;
+import lombok.Data;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.OrderComparator;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ReflectionUtils;
 
@@ -90,7 +93,7 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
         Field orderField = null;
         List<Field> linkerFields = new ArrayList<>();
         // 需要在linker关联结果过滤条件
-        Map<String, Object> filterMap = new HashMap<>();
+        Map<String, LinkNode> filterMap = new HashMap<>();
         for (Field field : fields) {
             // collect query linker
             Set<QueryLinker> queryLinkers = AnnotatedElementUtils.getMergedRepeatableAnnotations(field, QueryLinker.class, QueryLinkers.class);
@@ -179,6 +182,32 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
             }
         }
 
+        // 设置查询字段
+        List<String> includeColumns = new ArrayList<>();
+        List<String> excludeColumns = new ArrayList<>();
+        for (TableFieldInfo tableFieldInfo : tableInfo.getFieldList()) {
+            QueryFieldInclude fieldInclude = AnnotationUtils.findAnnotation(tableFieldInfo.getField(), QueryFieldInclude.class);
+            if (fieldInclude != null && ArrayUtils.contains(fieldInclude.group(), group)) {
+                includeColumns.add(tableFieldInfo.getColumn());
+                continue;
+            }
+            QueryFieldExclude fieldExclude = AnnotationUtils.findAnnotation(tableFieldInfo.getField(), QueryFieldExclude.class);
+            if (fieldExclude != null && ArrayUtils.contains(fieldExclude.group(), group)) {
+                excludeColumns.add(tableFieldInfo.getColumn());
+            }
+        }
+        if (!includeColumns.isEmpty() && !includeColumns.contains(tableInfo.getKeyColumn())) {
+            includeColumns.add(tableInfo.getKeyColumn());
+        }
+        if (!includeColumns.isEmpty() || !excludeColumns.isEmpty()) {
+            queryWrapper.select(getEntityClass(), fi -> {
+                if (includeColumns.contains(fi.getColumn())) {
+                    return true;
+                }
+                return !excludeColumns.contains(fi.getColumn());
+            });
+        }
+
         UniformPage<T> uniformPage = new UniformPage<>();
         List<T> records;
         // 如果页记录数为-1，则不分页
@@ -243,21 +272,37 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
                         }
                         QueryWrapper<T> linkQueryWrapper = new QueryWrapper<>();
                         boolean isSameIdNamed = queryLinker.linkIdField().equals(linkTableInfo.getKeyColumn());
-                        linkQueryWrapper.in(isSameIdNamed ? queryLinker.linkIdField() : findColumnName(linkTableInfo, queryLinker.linkIdField()), idValues);
-                        linkEntityList = linkMapper.selectList(linkQueryWrapper);
-                        // 如果有需要过滤的字段
-                        if (!CollectionUtils.isEmpty(linkEntityList) && !filterMap.isEmpty()) {
-                            linkEntityList = linkEntityList.stream().filter(le -> {
-                                boolean match = true;
-                                for (String key : filterMap.keySet()) {
-                                    if (!Objects.equals(linkTableInfo.getPropertyValue(le, key), filterMap.get(key))) {
-                                        match = false;
-                                        break;
-                                    }
+                        String linkIdColumn = isSameIdNamed ? queryLinker.linkIdField() : findColumnName(linkTableInfo, queryLinker.linkIdField());
+                        linkQueryWrapper.in(linkIdColumn, idValues);
+
+                        // 如果有需要过滤的link字段
+                        if (!filterMap.isEmpty()) {
+                            for (String key : filterMap.keySet()) {
+                                LinkNode linkNode = filterMap.get(key);
+                                String linkNameColumn = findColumnName(linkTableInfo, linkNode.getLinkFieldName());
+                                if (linkNode.getPrefectType() == PrefectType.IN) {
+                                    linkQueryWrapper.like(linkNameColumn, linkNode.getTargetFieldValue());
+                                } else {
+                                    linkQueryWrapper.eq(linkNameColumn, linkNode.getTargetFieldValue());
                                 }
-                                return match;
-                            }).collect(Collectors.toList());
+                            }
                         }
+
+                        // 设置查询的字段
+                        List<String> queryColumns = new ArrayList<>();
+                        queryColumns.add(linkTableInfo.getKeyColumn());
+                        // 所有当前类型的linkId和LinkName
+                        List<String> linkColumns = queryLinkers.stream()
+                                .filter(ql -> ql.linkEntityType() == queryLinker.linkEntityType())
+                                .map(ql -> new String[] { ql.linkIdField(), ql.linkNameField() })
+                                .flatMap(Arrays::stream)
+                                .distinct()
+                                .filter(f -> !queryColumns.contains(f))
+                                .map(f -> findColumnName(linkTableInfo, f))
+                                .collect(Collectors.toList());
+                        queryColumns.addAll(linkColumns);
+                        linkQueryWrapper.select(queryColumns.toArray(new String[]{}));
+                        linkEntityList = linkMapper.selectList(linkQueryWrapper);
                         linkEntityListCacheMap.put(linkMapperClassName, linkEntityList);
                     }
                     if (!CollectionUtils.isEmpty(linkEntityList)) {
@@ -343,7 +388,7 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
     }
 
     @SuppressWarnings("unchecked")
-    private Object findLinkerValue(QueryMatcher queryMatcher, List<Field> linkerFields, Object entity, Field field, TableInfo tableInfo, Map<String, Object> filterMap) {
+    private Object findLinkerValue(QueryMatcher queryMatcher, List<Field> linkerFields, Object entity, Field field, TableInfo tableInfo, Map<String, LinkNode> filterMap) {
         Object searchValue = tableInfo.getPropertyValue(entity, queryMatcher.matchDataField());
         if (searchValue == null) {
             return null;
@@ -363,18 +408,24 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
             }
 
             // add this linker field name and value as condition for the link query
-            filterMap.put(matchQueryLinker.linkNameField(), searchValue);
-
+            LinkNode linkNode = new LinkNode();
+            linkNode.setPrefectType(queryMatcher.prefect());
+            linkNode.setTargetFieldValue(searchValue);
+            linkNode.setTargetFieldName(matchQueryLinker.targetNameField());
+            linkNode.setLinkFieldName(matchQueryLinker.linkNameField());
+            filterMap.put(matchQueryLinker.linkNameField(), linkNode);
             // find link entity with linker mapper
             BaseMapper<T> linkMapper = (BaseMapper<T>) SiriusInspector.getMapper(linkClass);
-            String column = findColumnName(linkTableInfo, matchQueryLinker.linkNameField());
+            String linkNameColumn = findColumnName(linkTableInfo, matchQueryLinker.linkNameField());
             QueryWrapper<T> queryExample = new QueryWrapper<>();
             if (queryMatcher.prefect() == PrefectType.IN || queryMatcher.prefect() == PrefectType.LINK_EQ_IN) {
                 if (queryMatcher.prefect() == PrefectType.IN) {
-                    queryExample.like(column, searchValue);
+                    queryExample.like(linkNameColumn, searchValue);
                 } else {
-                    queryExample.eq(column, searchValue);
+                    queryExample.eq(linkNameColumn, searchValue);
                 }
+                String linkIdColumn =findColumnName(linkTableInfo, matchQueryLinker.linkIdField());
+                queryExample.select(linkTableInfo.getKeyColumn(), linkNameColumn, linkIdColumn);
                 List<?> linkRecordlist = linkMapper.selectList(queryExample);
                 if (CollectionUtils.isEmpty(linkRecordlist)) {
                     return genNonFoundValue(field, queryMatcher.prefect());
@@ -385,7 +436,8 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
                         .collect(Collectors.toSet());
             }
             if (queryMatcher.prefect() == PrefectType.EQ) {
-                queryExample.eq(column, searchValue);
+                queryExample.eq(linkNameColumn, searchValue);
+                queryExample.select(linkTableInfo.getKeyColumn(), linkNameColumn);
                 Object linkRecord = linkMapper.selectOne(queryExample);
                 if (linkRecord == null) {
                     return genNonFoundValue(field, queryMatcher.prefect());
@@ -413,5 +465,13 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
             }
         }
         return null;
+    }
+
+    @Data
+    static class LinkNode {
+        private PrefectType prefectType;
+        private Object targetFieldValue;
+        private String targetFieldName;
+        private String linkFieldName;
     }
 }
