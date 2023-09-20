@@ -46,7 +46,7 @@ import java.util.Objects;
  *
  * @author yizzuide
  * @since 3.0.1
- * @version 3.13.0
+ * @version 3.15.0
  * @see org.springframework.boot.context.config.ConfigDataEnvironmentPostProcessor
  * @see org.springframework.boot.context.config.AnsiOutputApplicationListener
  * <br>
@@ -87,7 +87,10 @@ public class EnvironmentApplicationListener implements ApplicationListener<Appli
         // ((ConfigurableApplicationContext)ApplicationContextHolder.get()).getBeanFactory().getConversionService()
 
         // bind property
-        boolean logEnable = Binder.get(environment).bind("milkomeda.show-log", Boolean.class).orElseGet(() -> false);
+        boolean logEnable = false;
+        try {
+            logEnable = Binder.get(environment).bind("milkomeda.show-log", Boolean.class).orElseGet(() -> false);
+        } catch (Exception ignore) {}
         log.info("milkomeda log is {}", logEnable ? "enable" : "disable");
     }
 

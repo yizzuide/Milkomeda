@@ -92,6 +92,7 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
         boolean needPostOrderBy = false;
         Field orderField = null;
         List<Field> linkerFields = new ArrayList<>();
+        Map<String, MappingNode> mappingFields = new HashMap<>();
         // 需要在linker关联结果过滤条件
         Map<String, LinkNode> filterMap = new HashMap<>();
         for (Field field : fields) {
@@ -99,6 +100,36 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
             Set<QueryLinker> queryLinkers = AnnotatedElementUtils.getMergedRepeatableAnnotations(field, QueryLinker.class, QueryLinkers.class);
             if (!CollectionUtils.isEmpty(queryLinkers)) {
                 linkerFields.add(field);
+
+                // collect mappings
+                QueryLinker mappingQl = queryLinkers.stream().filter(ql -> StringUtils.isNotEmpty(ql.mappings())).findFirst().orElse(null);
+                if (mappingQl != null) {
+                    String[] mappings;
+                    if (mappingQl.mappings().contains(",")) {
+                        mappings = mappingQl.mappings().split(",");
+                    } else {
+                        mappings = new String[]{ mappingQl.mappings() };
+                    }
+                    Arrays.stream(mappings)
+                            .map(StringUtils::strip)
+                            .map(m -> m.split("\\s*->\\s*"))
+                            .forEach(m -> {
+                                String mappingFieldName = m[0];
+                                Object mappingFieldValue = tableInfo.getPropertyValue(target, mappingFieldName);
+                                MappingNode mappingNode = new MappingNode();
+                                mappingNode.setFieldName(mappingFieldName);
+                                mappingNode.setFieldValue(mappingFieldValue);
+                                mappingNode.setPrefectType(PrefectType.EQ);
+                                TableFieldInfo fieldInfo = tableInfo.getFieldList().stream().filter(fi -> fi.getField().getName().equals(mappingFieldName)).findFirst().orElse(null);
+                                if (fieldInfo != null) {
+                                    QueryMatcher mappingQueryMatcher = AnnotationUtils.findAnnotation(fieldInfo.getField(), QueryMatcher.class);
+                                    if (mappingQueryMatcher != null) {
+                                        mappingNode.setPrefectType(mappingQueryMatcher.prefect());
+                                    }
+                                }
+                                mappingFields.put(mappingFieldName, mappingNode);
+                            });
+                }
             }
 
             Set<QueryMatcher> queryMatchers = AnnotatedElementUtils.getMergedRepeatableAnnotations(field, QueryMatcher.class, QueryMatchers.class);
@@ -226,7 +257,8 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
             // impl of Ordered
             if (target instanceof Ordered) {
                 records = records.stream()
-                        .sorted(OrderComparator.INSTANCE.withSourceProvider(t -> t)).collect(Collectors.toList());
+                        .sorted(OrderComparator.INSTANCE.withSourceProvider(t -> t))
+                        .collect(Collectors.toList());
             } else {
                 Field finalOrderField = orderField;
                 records.sort(Comparator.comparingInt(t -> {
@@ -245,7 +277,7 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
             }
         }
 
-        // handle query link name
+        // query link name
         if (!CollectionUtils.isEmpty(linkerFields) && !CollectionUtils.isEmpty(records)) {
             for (Field linkerField : linkerFields) {
                 // cache link entity list with the field
@@ -274,6 +306,24 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
                         boolean isSameIdNamed = queryLinker.linkIdField().equals(linkTableInfo.getKeyColumn());
                         String linkIdColumn = isSameIdNamed ? queryLinker.linkIdField() : findColumnName(linkTableInfo, queryLinker.linkIdField());
                         linkQueryWrapper.in(linkIdColumn, idValues);
+                        // add condition of mappings
+                        if (!CollectionUtils.isEmpty(mappingFields)) {
+                            mappingFields.forEach((mappingFieldName, mappingNode) -> {
+                                String colName = findColumnName(linkTableInfo ,mappingFieldName);
+                                Object mappingFieldValue = mappingNode.getFieldValue();
+                                if (mappingNode.getPrefectType() == PrefectType.EQ) {
+                                    linkQueryWrapper.eq(colName, mappingFieldValue);
+                                } else if (mappingNode.getPrefectType() == PrefectType.NEQ) {
+                                    linkQueryWrapper.ne(colName, mappingFieldValue);
+                                } else if (mappingNode.getPrefectType() == PrefectType.EMPTY) {
+                                    linkQueryWrapper.eq(ObjectUtils.isEmpty(mappingFieldValue), colName, mappingFieldValue);
+                                }  else if (mappingNode.getPrefectType() == PrefectType.IN) {
+                                    linkQueryWrapper.in(colName, mappingFieldValue);
+                                } else if (mappingNode.getPrefectType() == PrefectType.LIKE) {
+                                    linkQueryWrapper.like(colName, mappingFieldValue);
+                                }
+                            });
+                        }
 
                         // 如果有需要过滤的link字段
                         if (!filterMap.isEmpty()) {
@@ -473,5 +523,12 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
         private Object targetFieldValue;
         private String targetFieldName;
         private String linkFieldName;
+    }
+
+    @Data
+    static class MappingNode {
+        private PrefectType prefectType;
+        private Object fieldValue;
+        private String fieldName;
     }
 }

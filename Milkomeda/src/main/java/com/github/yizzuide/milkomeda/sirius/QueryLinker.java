@@ -62,6 +62,12 @@ public @interface QueryLinker {
     String linkIdIgnore() default "0";
 
     /**
+     * Mapping fields from target to linker.
+     * @return such as userId -> userId
+     */
+    String mappings() default "";
+
+    /**
      * Link entity class.
      * @return mapper class
      */

@@ -100,7 +100,7 @@ public class TokenBucketLimiter extends LimitHandler implements LuaLoader {
     @Override
     public <R> R limit(String key, Process<R> process) throws Throwable {
         limiterKey = key + POSTFIX;
-        // first time, wait tokens added in bucket.
+        // first time, wait tokens added in the bucket.
         if (startState == 0) {
             synchronized (this) {
                 if (startState == 0) {

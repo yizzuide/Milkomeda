@@ -32,8 +32,8 @@ import org.springframework.data.redis.core.script.RedisScript;
 import java.util.Collections;
 
 /**
- * The leaky bucket limiter used fixed size bucket, fixed rate outflow, receive requests at any rate.
- * But reject all requests if the bucket is full.
+ * The leaky bucket limiter used fixed size bucket, fixed rate outflow, and receive requests at any rate,
+ * but reject all requests if the bucket is full.
  *
  * @since 3.15.0
  * @author yizzuide
@@ -45,7 +45,7 @@ import java.util.Collections;
 public class LeakyBucketLimiter extends LimitHandler implements LuaLoader {
 
     /**
-     * Decorated postfix for limiter key.
+     * Decorated postfix for a limiter key.
      */
     private static final String POSTFIX = ":leaky_bucket";
 
