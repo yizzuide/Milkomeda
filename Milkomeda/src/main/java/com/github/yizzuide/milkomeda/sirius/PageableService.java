@@ -114,20 +114,21 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
                             .map(StringUtils::strip)
                             .map(m -> m.split("\\s*->\\s*"))
                             .forEach(m -> {
-                                String mappingFieldName = m[0];
-                                Object mappingFieldValue = tableInfo.getPropertyValue(target, mappingFieldName);
+                                String targetFieldName = m[0];
+                                String fieldName = m[1];
+                                Object fieldValue = tableInfo.getPropertyValue(target, targetFieldName);
                                 MappingNode mappingNode = new MappingNode();
-                                mappingNode.setFieldName(mappingFieldName);
-                                mappingNode.setFieldValue(mappingFieldValue);
+                                mappingNode.setFieldName(fieldName);
+                                mappingNode.setFieldValue(fieldValue);
                                 mappingNode.setPrefectType(PrefectType.EQ);
-                                TableFieldInfo fieldInfo = tableInfo.getFieldList().stream().filter(fi -> fi.getField().getName().equals(mappingFieldName)).findFirst().orElse(null);
+                                TableFieldInfo fieldInfo = tableInfo.getFieldList().stream().filter(fi -> fi.getField().getName().equals(targetFieldName)).findFirst().orElse(null);
                                 if (fieldInfo != null) {
                                     QueryMatcher mappingQueryMatcher = AnnotationUtils.findAnnotation(fieldInfo.getField(), QueryMatcher.class);
                                     if (mappingQueryMatcher != null) {
                                         mappingNode.setPrefectType(mappingQueryMatcher.prefect());
                                     }
                                 }
-                                mappingFields.put(mappingFieldName, mappingNode);
+                                mappingFields.put(fieldName, mappingNode);
                             });
                 }
             }
