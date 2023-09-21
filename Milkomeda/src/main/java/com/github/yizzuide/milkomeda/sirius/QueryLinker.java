@@ -50,8 +50,8 @@ public @interface QueryLinker {
     String linkNameField();
 
     /**
-     * Link id field referenced at.
-     * @return reference field
+     * Reference id field name.
+     * @return field name
      */
     String linkIdField() default "id";
 

@@ -43,6 +43,12 @@ public @interface QueryAutoLinker {
     String links();
 
     /**
+     * Reference id field name.
+     * @return field name
+     */
+    String linkIdField() default "id";
+
+    /**
      * Bind link expression in query group.
      * @return  group name
      */

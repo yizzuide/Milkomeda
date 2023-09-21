@@ -543,7 +543,7 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
                 String[] linkerPart = linkerParts[i].split("\\s*->\\s*");
                 String targetFieldName = linkerPart[0];
                 String linkFieldName = linkerPart[1];
-                String linkIdName = linkerPart.length == 3 ? linkerPart[2]: "id";
+                String linkIdName = linkerPart.length == 3 ? linkerPart[2]: queryAutoLinker.linkIdField();
                 String linkIdIgnore = "0";
                 if (linkIdName.contains("!")) {
                     linkIdName = linkIdName.substring(0, linkIdName.indexOf('!'));
