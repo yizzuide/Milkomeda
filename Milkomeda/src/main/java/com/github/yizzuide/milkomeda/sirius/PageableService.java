@@ -92,45 +92,30 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
         boolean needPostOrderBy = false;
         Field orderField = null;
         List<Field> linkerFields = new ArrayList<>();
+        Map<String, Set<QueryLinkerNode>> linkerNodes = new HashMap<>();
         Map<String, MappingNode> mappingFields = new HashMap<>();
         // 需要在linker关联结果过滤条件
-        Map<String, LinkNode> filterMap = new HashMap<>();
+        Map<String, PrefectLinkNode> filterMap = new HashMap<>();
         for (Field field : fields) {
-            // collect query linker
+            // convert QueryAutoLinker to QueryLinkerNode
+            QueryAutoLinker queryAutoLinker = AnnotationUtils.findAnnotation(field, QueryAutoLinker.class);
+            if (queryAutoLinker != null) {
+                Set<QueryLinkerNode> nodes = QueryLinkerNode.build(queryAutoLinker);
+                linkerNodes.put(field.getName(), nodes);
+                linkerFields.add(field);
+            }
+
+            // convert QueryLinker to QueryLinkerNode
             Set<QueryLinker> queryLinkers = AnnotatedElementUtils.getMergedRepeatableAnnotations(field, QueryLinker.class, QueryLinkers.class);
             if (!CollectionUtils.isEmpty(queryLinkers)) {
+                Set<QueryLinkerNode> nodes = QueryLinkerNode.build(queryLinkers);
+                linkerNodes.put(field.getName(), nodes);
                 linkerFields.add(field);
+            }
 
-                // collect mappings
-                QueryLinker mappingQl = queryLinkers.stream().filter(ql -> StringUtils.isNotEmpty(ql.mappings())).findFirst().orElse(null);
-                if (mappingQl != null) {
-                    String[] mappings;
-                    if (mappingQl.mappings().contains(",")) {
-                        mappings = mappingQl.mappings().split(",");
-                    } else {
-                        mappings = new String[]{ mappingQl.mappings() };
-                    }
-                    Arrays.stream(mappings)
-                            .map(StringUtils::strip)
-                            .map(m -> m.split("\\s*->\\s*"))
-                            .forEach(m -> {
-                                String targetFieldName = m[0];
-                                String fieldName = m[1];
-                                Object fieldValue = tableInfo.getPropertyValue(target, targetFieldName);
-                                MappingNode mappingNode = new MappingNode();
-                                mappingNode.setFieldName(fieldName);
-                                mappingNode.setFieldValue(fieldValue);
-                                mappingNode.setPrefectType(PrefectType.EQ);
-                                TableFieldInfo fieldInfo = tableInfo.getFieldList().stream().filter(fi -> fi.getField().getName().equals(targetFieldName)).findFirst().orElse(null);
-                                if (fieldInfo != null) {
-                                    QueryMatcher mappingQueryMatcher = AnnotationUtils.findAnnotation(fieldInfo.getField(), QueryMatcher.class);
-                                    if (mappingQueryMatcher != null) {
-                                        mappingNode.setPrefectType(mappingQueryMatcher.prefect());
-                                    }
-                                }
-                                mappingFields.put(fieldName, mappingNode);
-                            });
-                }
+            // collect mappings
+            if (!linkerNodes.isEmpty() && linkerNodes.containsKey(field.getName())) {
+                MappingNode.construct(linkerNodes.get(field.getName()), mappingFields, tableInfo, target);
             }
 
             Set<QueryMatcher> queryMatchers = AnnotatedElementUtils.getMergedRepeatableAnnotations(field, QueryMatcher.class, QueryMatchers.class);
@@ -174,7 +159,7 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
                 boolean fieldNonNull = Objects.nonNull(target) && Objects.nonNull(fieldValue);
                 if (queryMatcher.prefect() == PrefectType.EQ) {
                     if (!fieldNonNull && StringUtils.isNotEmpty(queryMatcher.matchDataField())) {
-                        fieldValue = findLinkerValue(queryMatcher, linkerFields, queryPageData.getEntity(), field, tableInfo, filterMap);
+                        fieldValue = findLinkerValue(linkerNodes, queryMatcher, linkerFields, queryPageData.getEntity(), field, tableInfo, filterMap);
                         fieldNonNull = fieldValue != null;
                     }
                     queryWrapper.eq(fieldNonNull, columnName, fieldValue);
@@ -195,7 +180,7 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
                         }
                     }
                     if (!condition && StringUtils.isNotEmpty(queryMatcher.matchDataField())) {
-                        valueObjects = (Collection<Object>) findLinkerValue(queryMatcher, linkerFields, queryPageData.getEntity(), field, tableInfo, filterMap);
+                        valueObjects = (Collection<Object>) findLinkerValue(linkerNodes, queryMatcher, linkerFields, queryPageData.getEntity(), field, tableInfo, filterMap);
                         condition = valueObjects != null;
                     }
                     queryWrapper.in(condition, columnName, valueObjects);
@@ -283,29 +268,29 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
             for (Field linkerField : linkerFields) {
                 // cache link entity list with the field
                 Map<String, List<?>> linkEntityListCacheMap = new HashMap<>();
-                Set<QueryLinker> queryLinkers = AnnotatedElementUtils.getMergedRepeatableAnnotations(linkerField, QueryLinker.class, QueryLinkers.class);
-                for (QueryLinker queryLinker : queryLinkers) {
-                    if (!Arrays.asList(queryLinker.group()).contains(group)) {
+                Set<QueryLinkerNode> queryLinkerNodes = linkerNodes.get(linkerField.getName());
+                for (QueryLinkerNode linkerNode : queryLinkerNodes) {
+                    if (!Arrays.asList(linkerNode.getGroup()).contains(group)) {
                         continue;
                     }
-                    BaseMapper linkMapper = SiriusInspector.getMapper(queryLinker.linkEntityType());
+                    BaseMapper linkMapper = SiriusInspector.getMapper(linkerNode.getLinkEntityType());
                     List<?> linkEntityList;
                     String linkMapperClassName = linkMapper.getClass().getName();
                     // get link entity table info
-                    TableInfo linkTableInfo = TableInfoHelper.getTableInfo(queryLinker.linkEntityType());
+                    TableInfo linkTableInfo = TableInfoHelper.getTableInfo(linkerNode.getLinkEntityType());
                     if (linkEntityListCacheMap.containsKey(linkMapperClassName)) {
                         linkEntityList = linkEntityListCacheMap.get(linkMapperClassName);
                     } else {
                         Set<Serializable> idValues = records.stream()
                                 .map(e -> (Serializable) tableInfo.getPropertyValue(e, linkerField.getName()))
-                                .filter(e -> !queryLinker.linkIdIgnore().equals(e.toString()))
+                                .filter(e -> !linkerNode.getLinkIdIgnore().equals(e.toString()))
                                 .collect(Collectors.toSet());
                         if (CollectionUtils.isEmpty(idValues)) {
                             continue;
                         }
                         QueryWrapper<T> linkQueryWrapper = new QueryWrapper<>();
-                        boolean isSameIdNamed = queryLinker.linkIdField().equals(linkTableInfo.getKeyColumn());
-                        String linkIdColumn = isSameIdNamed ? queryLinker.linkIdField() : findColumnName(linkTableInfo, queryLinker.linkIdField());
+                        boolean isSameIdNamed = linkerNode.getLinkIdFieldName().equals(linkTableInfo.getKeyColumn());
+                        String linkIdColumn = isSameIdNamed ? linkerNode.getLinkIdFieldName() : findColumnName(linkTableInfo, linkerNode.getLinkIdFieldName());
                         linkQueryWrapper.in(linkIdColumn, idValues);
                         // add condition of mappings
                         if (!CollectionUtils.isEmpty(mappingFields)) {
@@ -329,12 +314,12 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
                         // 如果有需要过滤的link字段
                         if (!filterMap.isEmpty()) {
                             for (String key : filterMap.keySet()) {
-                                LinkNode linkNode = filterMap.get(key);
-                                String linkNameColumn = findColumnName(linkTableInfo, linkNode.getLinkFieldName());
-                                if (linkNode.getPrefectType() == PrefectType.IN) {
-                                    linkQueryWrapper.like(linkNameColumn, linkNode.getTargetFieldValue());
+                                PrefectLinkNode prefectLinkNode = filterMap.get(key);
+                                String linkNameColumn = findColumnName(linkTableInfo, prefectLinkNode.getLinkFieldName());
+                                if (prefectLinkNode.getPrefectType() == PrefectType.IN) {
+                                    linkQueryWrapper.like(linkNameColumn, prefectLinkNode.getTargetFieldValue());
                                 } else {
-                                    linkQueryWrapper.eq(linkNameColumn, linkNode.getTargetFieldValue());
+                                    linkQueryWrapper.eq(linkNameColumn, prefectLinkNode.getTargetFieldValue());
                                 }
                             }
                         }
@@ -343,9 +328,9 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
                         List<String> queryColumns = new ArrayList<>();
                         queryColumns.add(linkTableInfo.getKeyColumn());
                         // 所有当前类型的linkId和LinkName
-                        List<String> linkColumns = queryLinkers.stream()
-                                .filter(ql -> ql.linkEntityType() == queryLinker.linkEntityType())
-                                .map(ql -> new String[] { ql.linkIdField(), ql.linkNameField() })
+                        List<String> linkColumns = queryLinkerNodes.stream()
+                                .filter(ql -> ql.getLinkEntityType() == linkerNode.getLinkEntityType())
+                                .map(ql -> new String[] { ql.getLinkIdFieldName(), ql.getLinkFieldName() })
                                 .flatMap(Arrays::stream)
                                 .distinct()
                                 .filter(f -> !queryColumns.contains(f))
@@ -359,11 +344,11 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
                     if (!CollectionUtils.isEmpty(linkEntityList)) {
                         for (T record : records) {
                             for (Object le : linkEntityList) {
-                                Object linkId = linkTableInfo.getPropertyValue(le, queryLinker.linkIdField());
-                                Object nameValue = linkTableInfo.getPropertyValue(le, queryLinker.linkNameField());
+                                Object linkId = linkTableInfo.getPropertyValue(le, linkerNode.getLinkIdFieldName());
+                                Object nameValue = linkTableInfo.getPropertyValue(le, linkerNode.getLinkFieldName());
                                 Object matchIdValue = tableInfo.getPropertyValue(record, linkerField.getName());
                                 if (String.valueOf(matchIdValue).equals(String.valueOf(linkId))) {
-                                    tableInfo.setPropertyValue(record, queryLinker.targetNameField(), nameValue);
+                                    tableInfo.setPropertyValue(record, linkerNode.getTargetFieldName(), nameValue);
                                     break;
                                 }
                             }
@@ -439,35 +424,38 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
     }
 
     @SuppressWarnings("unchecked")
-    private Object findLinkerValue(QueryMatcher queryMatcher, List<Field> linkerFields, Object entity, Field field, TableInfo tableInfo, Map<String, LinkNode> filterMap) {
+    private Object findLinkerValue(Map<String, Set<QueryLinkerNode>> linkerNodes, QueryMatcher queryMatcher, List<Field> linkerFields, Object entity, Field field, TableInfo tableInfo, Map<String, PrefectLinkNode> filterMap) {
         Object searchValue = tableInfo.getPropertyValue(entity, queryMatcher.matchDataField());
         if (searchValue == null) {
             return null;
         }
         for (Field linkerField : linkerFields) {
             // find linker field which matches `matchDataField` from QueryMatcher
-            Optional<QueryLinker> queryLinkerOptional = AnnotatedElementUtils.getMergedRepeatableAnnotations(linkerField, QueryLinker.class, QueryLinkers.class).stream()
-                    .filter(linker -> linker.targetNameField().equals(queryMatcher.matchDataField())).findFirst();
-            if (!queryLinkerOptional.isPresent()) {
+            Set<QueryLinkerNode> queryLinkerNodes = linkerNodes.get(linkerField.getName());
+            if (queryLinkerNodes == null) {
                 continue;
             }
-            QueryLinker matchQueryLinker = queryLinkerOptional.get();
-            Class<?> linkClass = matchQueryLinker.linkEntityType();
+            QueryLinkerNode linkerNode = queryLinkerNodes.stream()
+                    .filter(node -> node.getTargetFieldName().equals(queryMatcher.matchDataField())).findFirst().orElse(null);
+            if (linkerNode == null) {
+                continue;
+            }
+            Class<?> linkClass = linkerNode.getLinkEntityType();
             TableInfo linkTableInfo = TableInfoHelper.getTableInfo(linkClass);
             if (linkTableInfo == null) {
                 return null;
             }
 
             // add this linker field name and value as condition for the link query
-            LinkNode linkNode = new LinkNode();
-            linkNode.setPrefectType(queryMatcher.prefect());
-            linkNode.setTargetFieldValue(searchValue);
-            linkNode.setTargetFieldName(matchQueryLinker.targetNameField());
-            linkNode.setLinkFieldName(matchQueryLinker.linkNameField());
-            filterMap.put(matchQueryLinker.linkNameField(), linkNode);
+            PrefectLinkNode prefectLinkNode = new PrefectLinkNode();
+            prefectLinkNode.setPrefectType(queryMatcher.prefect());
+            prefectLinkNode.setTargetFieldValue(searchValue);
+            prefectLinkNode.setTargetFieldName(linkerNode.getTargetFieldName());
+            prefectLinkNode.setLinkFieldName(linkerNode.getLinkFieldName());
+            filterMap.put(linkerNode.getLinkFieldName(), prefectLinkNode);
             // find link entity with linker mapper
             BaseMapper<T> linkMapper = (BaseMapper<T>) SiriusInspector.getMapper(linkClass);
-            String linkNameColumn = findColumnName(linkTableInfo, matchQueryLinker.linkNameField());
+            String linkNameColumn = findColumnName(linkTableInfo, linkerNode.getLinkFieldName());
             QueryWrapper<T> queryExample = new QueryWrapper<>();
             if (queryMatcher.prefect() == PrefectType.IN || queryMatcher.prefect() == PrefectType.LINK_EQ_IN) {
                 if (queryMatcher.prefect() == PrefectType.IN) {
@@ -475,7 +463,7 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
                 } else {
                     queryExample.eq(linkNameColumn, searchValue);
                 }
-                String linkIdColumn =findColumnName(linkTableInfo, matchQueryLinker.linkIdField());
+                String linkIdColumn = findColumnName(linkTableInfo, linkerNode.getLinkIdFieldName());
                 queryExample.select(linkTableInfo.getKeyColumn(), linkNameColumn, linkIdColumn);
                 List<?> linkRecordlist = linkMapper.selectList(queryExample);
                 if (CollectionUtils.isEmpty(linkRecordlist)) {
@@ -483,7 +471,7 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
                 }
                 // collect and return link entity id list
                 return linkRecordlist.stream()
-                        .map(record -> linkTableInfo.getPropertyValue(record, matchQueryLinker.linkIdField()))
+                        .map(record -> linkTableInfo.getPropertyValue(record, linkerNode.getLinkIdFieldName()))
                         .collect(Collectors.toSet());
             }
             if (queryMatcher.prefect() == PrefectType.EQ) {
@@ -493,7 +481,7 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
                 if (linkRecord == null) {
                     return genNonFoundValue(field, queryMatcher.prefect());
                 }
-                return linkTableInfo.getPropertyValue(linkRecord, matchQueryLinker.linkIdField());
+                return linkTableInfo.getPropertyValue(linkRecord, linkerNode.getLinkIdFieldName());
             }
         }
         return null;
@@ -519,7 +507,73 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
     }
 
     @Data
-    static class LinkNode {
+    static class QueryLinkerNode {
+        private String targetFieldName;
+        private String linkFieldName;
+        private String linkIdFieldName;
+        private String linkIdIgnore;
+        private String mappings;
+        private Class<?> linkEntityType;
+        private String[] group;
+
+        static Set<QueryLinkerNode> build(Set<QueryLinker> queryLinkers) {
+            return queryLinkers.stream().map(ql -> {
+                QueryLinkerNode node = new QueryLinkerNode();
+                node.setTargetFieldName(ql.targetNameField());
+                node.setLinkFieldName(ql.linkNameField());
+                node.setLinkIdFieldName(ql.linkIdField());
+                node.setLinkIdIgnore(ql.linkIdIgnore());
+                node.setMappings(ql.mappings());
+                node.setLinkEntityType(ql.linkEntityType());
+                node.setGroup(ql.group());
+                return node;
+            }).collect(Collectors.toSet());
+        }
+
+        static Set<QueryLinkerNode> build(QueryAutoLinker queryAutoLinker) {
+            String[] linkerParts;
+            if (queryAutoLinker.links().contains(",")) {
+                linkerParts = queryAutoLinker.links().split(",");
+            } else {
+                linkerParts = new String[]{ queryAutoLinker.links() };
+            }
+            int linkerSize = linkerParts.length;
+            Set<QueryLinkerNode> nodes = new HashSet<>(linkerSize);
+            for (int i = 0; i < linkerSize; i++) {
+                String[] linkerPart = linkerParts[i].split("\\s*->\\s*");
+                String targetFieldName = linkerPart[0];
+                String linkFieldName = linkerPart[1];
+                String linkIdName = linkerPart.length == 3 ? linkerPart[2]: "id";
+                String linkIdIgnore = "0";
+                if (linkIdName.contains("!")) {
+                    linkIdName = linkIdName.substring(0, linkIdName.indexOf('!'));
+                    linkIdIgnore = linkIdName.substring(linkIdName.indexOf('!') + 1);
+                }
+                String[] matchGroup = new String[] { "default" };
+                if (queryAutoLinker.groups() != null && queryAutoLinker.groups().length != 0) {
+                    String groupItem = queryAutoLinker.groups()[i];
+                    if (groupItem.contains(",")) {
+                        matchGroup = groupItem.split(",");
+                    } else {
+                        matchGroup = new String[]{ groupItem };
+                    }
+                }
+                QueryLinkerNode queryLinkerNode = new QueryLinkerNode();
+                queryLinkerNode.setTargetFieldName(targetFieldName);
+                queryLinkerNode.setLinkFieldName(linkFieldName);
+                queryLinkerNode.setLinkIdFieldName(linkIdName);
+                queryLinkerNode.setLinkIdIgnore(linkIdIgnore);
+                queryLinkerNode.setMappings(queryAutoLinker.mappings());
+                queryLinkerNode.setLinkEntityType(queryAutoLinker.type());
+                queryLinkerNode.setGroup(matchGroup);
+                nodes.add(queryLinkerNode);
+            }
+            return nodes;
+        }
+    }
+
+    @Data
+    static class PrefectLinkNode {
         private PrefectType prefectType;
         private Object targetFieldValue;
         private String targetFieldName;
@@ -531,5 +585,37 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
         private PrefectType prefectType;
         private Object fieldValue;
         private String fieldName;
+
+        static void construct(Set<QueryLinkerNode> nodes, Map<String, MappingNode> container, TableInfo tableInfo, Object target) {
+            QueryLinkerNode node = nodes.stream().filter(ql -> StringUtils.isNotEmpty(ql.getMappings())).findFirst().orElse(null);
+            if (node != null) {
+                String[] mappings;
+                if (node.getMappings().contains(",")) {
+                    mappings = node.getMappings().split(",");
+                } else {
+                    mappings = new String[]{ node.getMappings() };
+                }
+                Arrays.stream(mappings)
+                        .map(StringUtils::strip)
+                        .map(m -> m.split("\\s*->\\s*"))
+                        .forEach(m -> {
+                            String targetFieldName = m[0];
+                            String fieldName = m[1];
+                            Object fieldValue = tableInfo.getPropertyValue(target, targetFieldName);
+                            MappingNode mappingNode = new MappingNode();
+                            mappingNode.setFieldName(fieldName);
+                            mappingNode.setFieldValue(fieldValue);
+                            mappingNode.setPrefectType(PrefectType.EQ);
+                            TableFieldInfo fieldInfo = tableInfo.getFieldList().stream().filter(fi -> fi.getField().getName().equals(targetFieldName)).findFirst().orElse(null);
+                            if (fieldInfo != null) {
+                                QueryMatcher mappingQueryMatcher = AnnotationUtils.findAnnotation(fieldInfo.getField(), QueryMatcher.class);
+                                if (mappingQueryMatcher != null) {
+                                    mappingNode.setPrefectType(mappingQueryMatcher.prefect());
+                                }
+                            }
+                            container.put(fieldName, mappingNode);
+                        });
+            }
+        }
     }
 }
