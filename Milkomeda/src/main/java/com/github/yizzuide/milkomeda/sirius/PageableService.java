@@ -531,32 +531,25 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
         }
 
         static Set<QueryLinkerNode> build(QueryAutoLinker queryAutoLinker) {
-            String[] linkerParts;
-            if (queryAutoLinker.links().contains(",")) {
-                linkerParts = queryAutoLinker.links().split(",");
-            } else {
-                linkerParts = new String[]{ queryAutoLinker.links() };
-            }
+            String[] linkerParts = queryAutoLinker.links().split(",");
             int linkerSize = linkerParts.length;
             Set<QueryLinkerNode> nodes = new HashSet<>(linkerSize);
             for (int i = 0; i < linkerSize; i++) {
                 String[] linkerPart = linkerParts[i].split("\\s*->\\s*");
                 String targetFieldName = linkerPart[0];
-                String linkFieldName = linkerPart[1];
+                String linkFieldName = linkerPart.length == 1? targetFieldName : linkerPart[1];
                 String linkIdName = linkerPart.length == 3 ? linkerPart[2]: queryAutoLinker.linkIdField();
                 String linkIdIgnore = "0";
                 if (linkIdName.contains("!")) {
-                    linkIdName = linkIdName.substring(0, linkIdName.indexOf('!'));
-                    linkIdIgnore = linkIdName.substring(linkIdName.indexOf('!') + 1);
+                    String origLinkIdName = linkIdName;
+                    int sepIndex = origLinkIdName.indexOf('!');
+                    linkIdName = origLinkIdName.substring(0, sepIndex);
+                    linkIdIgnore = origLinkIdName.substring(sepIndex + 1);
                 }
                 String[] matchGroup = new String[] { "default" };
                 if (queryAutoLinker.groups() != null && queryAutoLinker.groups().length != 0) {
                     String groupItem = queryAutoLinker.groups()[i];
-                    if (groupItem.contains(",")) {
-                        matchGroup = groupItem.split(",");
-                    } else {
-                        matchGroup = new String[]{ groupItem };
-                    }
+                    matchGroup = groupItem.split(",");
                 }
                 QueryLinkerNode queryLinkerNode = new QueryLinkerNode();
                 queryLinkerNode.setTargetFieldName(targetFieldName);
@@ -589,12 +582,7 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
         static void construct(Set<QueryLinkerNode> nodes, Map<String, MappingNode> container, TableInfo tableInfo, Object target) {
             QueryLinkerNode node = nodes.stream().filter(ql -> StringUtils.isNotEmpty(ql.getMappings())).findFirst().orElse(null);
             if (node != null) {
-                String[] mappings;
-                if (node.getMappings().contains(",")) {
-                    mappings = node.getMappings().split(",");
-                } else {
-                    mappings = new String[]{ node.getMappings() };
-                }
+                String[] mappings = node.getMappings().split(",");
                 Arrays.stream(mappings)
                         .map(StringUtils::strip)
                         .map(m -> m.split("\\s*->\\s*"))
