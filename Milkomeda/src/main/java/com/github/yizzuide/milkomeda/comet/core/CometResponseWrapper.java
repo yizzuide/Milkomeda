@@ -225,7 +225,7 @@ public class CometResponseWrapper extends HttpServletResponseWrapper {
                     }
                 }
             }
-            // if not intercepted within interceptor list
+            // if not intercepted from response interceptors
             if (!intercepted) {
                 this.content.writeTo(rawResponse.getOutputStream());
             }

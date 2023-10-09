@@ -203,6 +203,7 @@ milkomeda:
       - /actuator
       - /actuator/**
       - /s_login
+      - /verifyCode/render
       - /collect/**
       - /echo/**
       - /test/**

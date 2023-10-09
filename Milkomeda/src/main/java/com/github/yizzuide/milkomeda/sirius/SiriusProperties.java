@@ -79,6 +79,12 @@ public class SiriusProperties {
         private String psValue;
 
         /**
+         * Apply default value when parse Spring EL error.
+         * @since 3.15.0
+         */
+        private Object defaultValue = 0;
+
+        /**
          * convert property source value.
          */
         private Class<GenericConverter> converterClazz;

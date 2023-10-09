@@ -271,7 +271,11 @@ public class SiriusConfig {
                 if (!psValue.equals(selectAutoInterpolate.getPsValue())) {
                     return psValue;
                 }
-                psValue = SpELPropertySource.parseElFun(selectAutoInterpolate.getPsValue());
+                try {
+                    psValue = SpELPropertySource.parseElFun(selectAutoInterpolate.getPsValue());
+                } catch (Exception ignore) {
+                    psValue = selectAutoInterpolate.getDefaultValue();
+                }
                 if (psValue != null) {
                     return psValue;
                 }
