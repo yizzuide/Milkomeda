@@ -38,7 +38,7 @@ public @interface QueryAutoLinker {
 
     /**
      * Link expression.
-     * @return such as userPhone -> phone -> id
+     * @return link expression
      */
     String links();
 
@@ -56,7 +56,7 @@ public @interface QueryAutoLinker {
 
     /**
      * Mapping fields from target to linker.
-     * @return such as userId -> userId
+     * @return mapping expression
      */
     String mappings() default "";
 

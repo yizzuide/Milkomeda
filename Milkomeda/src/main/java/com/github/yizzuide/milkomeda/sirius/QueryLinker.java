@@ -63,7 +63,7 @@ public @interface QueryLinker {
 
     /**
      * Mapping fields from target to linker.
-     * @return such as userId -> userId
+     * @return mapping expression
      */
     String mappings() default "";
 

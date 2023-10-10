@@ -21,12 +21,15 @@
 
 package com.github.yizzuide.milkomeda.universe.context;
 
+import com.github.yizzuide.milkomeda.comet.core.CometResponseWrapper;
+import lombok.Getter;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.PathMatcher;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.web.util.WebUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -46,18 +49,11 @@ public final class WebContext {
     /**
      * 路径匹配器
      */
+    @Getter
     private static PathMatcher mvcPathMatcher;
 
     public static void setMvcPathMatcher(PathMatcher mvcPathMatcher) {
         WebContext.mvcPathMatcher = mvcPathMatcher;
-    }
-
-    /**
-     * 路径匹配器
-     * @return  PathMatcher
-     */
-    public static PathMatcher getMvcPathMatcher() {
-        return mvcPathMatcher;
     }
 
     /**
@@ -96,6 +92,22 @@ public final class WebContext {
         ServletRequestAttributes requestAttributes = getRequestAttributes();
         if (requestAttributes == null) return null;
         return requestAttributes.getResponse();
+    }
+
+    /**
+     * Get servlet response whenever had wrapped.
+     * @return unwrapped response
+     * @since 3.15.0
+     */
+    public static HttpServletResponse getRawResponse() {
+        HttpServletResponse response = getResponse();
+        assert response != null;
+        CometResponseWrapper responseWrapper =
+                WebUtils.getNativeResponse(response, CometResponseWrapper.class);
+        if (responseWrapper == null) {
+            return response;
+        }
+        return (HttpServletResponse) responseWrapper.getResponse();
     }
 
     /**
