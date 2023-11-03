@@ -39,12 +39,28 @@ public class UniformQueryData<T> {
      * 模型实体
      */
     private T entity;
+
     /**
      * 开始时间
      */
     private Date startDate;
+
     /**
      * 结束时间
      */
     private Date endDate;
+
+    public Long getStartUnixTime() {
+        if (getStartDate() == null) {
+            return null;
+        }
+        return getStartDate().getTime() / 1000;
+    }
+
+    public Long getEndUnixTime() {
+        if (getEndDate() == null) {
+            return null;
+        }
+        return getEndDate().getTime() / 1000;
+    }
 }

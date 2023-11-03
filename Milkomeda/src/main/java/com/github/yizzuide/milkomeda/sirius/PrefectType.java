@@ -54,5 +54,10 @@ public enum PrefectType {
     /**
      * Using for `startDate` and `endDate` of {@link UniformQueryPageData} query.
      */
-    PageDate
+    PageDate,
+
+    /**
+     * Query with unix time relative to {@link PrefectType#PageDate}.
+     */
+    PageUnixTime
 }

@@ -187,6 +187,9 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
                 } else if (queryMatcher.prefect() == PrefectType.PageDate) {
                     queryWrapper.ge(Objects.nonNull(queryPageData.getStartDate()), columnName, queryPageData.getStartDate());
                     queryWrapper.le(Objects.nonNull(queryPageData.getEndDate()), columnName, queryPageData.getEndDate());
+                } else if (queryMatcher.prefect() == PrefectType.PageUnixTime) {
+                    queryWrapper.ge(Objects.nonNull(queryPageData.getStartDate()), columnName, queryPageData.getStartUnixTime());
+                    queryWrapper.le(Objects.nonNull(queryPageData.getEndDate()), columnName, queryPageData.getEndUnixTime());
                 } else if (queryMatcher.prefect() == PrefectType.OrderByPre) {
                     queryWrapper.orderBy(true, queryMatcher.forward(), columnName);
                 } else if (queryMatcher.prefect() == PrefectType.OrderByPost) {
