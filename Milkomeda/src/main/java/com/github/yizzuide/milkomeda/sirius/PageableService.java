@@ -232,7 +232,13 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
         List<T> records;
         // 如果页记录数为-1，则不分页
         if (page.getSize() == -1) {
+            String sqlSelect = queryWrapper.getSqlSelect();
+            queryWrapper.select("*");
             Long totalSize = this.baseMapper.selectCount(queryWrapper);
+            if (totalSize > 10000) {
+                throw new UnsupportedOperationException("Record row over more then 10000");
+            }
+            queryWrapper.select(sqlSelect);
             records = this.baseMapper.selectList(queryWrapper);
             uniformPage.setTotalSize(totalSize);
             uniformPage.setPageCount(1L);
