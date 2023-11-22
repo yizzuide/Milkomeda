@@ -23,36 +23,31 @@ package com.github.yizzuide.milkomeda.light;
 
 import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import com.github.yizzuide.milkomeda.universe.context.SpringContext;
+import io.netty.util.concurrent.FastThreadLocal;
 import lombok.Data;
 import org.springframework.context.ConfigurableApplicationContext;
 
 import java.io.Serializable;
 
 /**
- * LightContext
- *
- * 线程缓存上下文，可以配合<code>LightCache</code>当作超级缓存，也可以单独使用
- *
- * I：上下文id
- * E：上下文数据
+ * 线程缓存上下文，可以配合<code>LightCache</code>当作超级缓存，也可以单独使用。
  *
  * @since 1.9.0
- * @version 3.13.0
+ * @version 3.15.0
  * @author yizzuide
  * <br>
  * Create at 2019/06/30 18:57
  */
 @Data
 public class LightContext<ID, V> {
-    // 每个Thread对应ThreadLocalMap<ThreadLocal, value>
-    // 每个缓存实例都有自己的超级缓存
-    private final ThreadLocal<Spot<ID, V>> context;
+
+    private final FastThreadLocal<Spot<ID, V>> context;
 
     public LightContext() {
-        context = new ThreadLocal<>();
+        context = new FastThreadLocal<>();
     }
 
-    public LightContext(ThreadLocal<Spot<ID, V>> threadLocal) {
+    public LightContext(FastThreadLocal<Spot<ID, V>> threadLocal) {
         this.context = threadLocal;
     }
 
@@ -63,6 +58,17 @@ public class LightContext<ID, V> {
     public void setId(ID id) {
         Spot<ID, V> spot = new Spot<>();
         spot.setView(id);
+        set(spot);
+    }
+
+    /**
+     * 设置上下文数据
+     * @param data  上下文数据
+     * @since 3.15.0
+     */
+    public void setData(V data) {
+        Spot<ID, V> spot = new Spot<>();
+        spot.setData(data);
         set(spot);
     }
 
@@ -95,14 +101,16 @@ public class LightContext<ID, V> {
      * @param value 任意对象
      * @param identifier 唯一标识
      * @param <V>   对象类型
+     * @return LightContext
      * @since 3.13.0
      */
     @SuppressWarnings("unchecked")
-    public static <V> void setValue(V value, String identifier) {
+    public static <V> LightContext<Serializable, V> setValue(V value, String identifier) {
         LightContext<Serializable, V> lightContext = SpringContext.registerBean((ConfigurableApplicationContext) ApplicationContextHolder.get(), identifier, LightContext.class);
         Spot<Serializable, V> spot = new Spot<>();
         spot.setData(value);
         lightContext.set(spot);
+        return lightContext;
     }
 
 

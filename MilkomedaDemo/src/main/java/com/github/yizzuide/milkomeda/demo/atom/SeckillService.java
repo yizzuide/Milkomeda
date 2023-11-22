@@ -18,10 +18,10 @@ public class SeckillService {
     // 模拟库存
     private static int count = 10;
 
-    // 支持分布式key参数采集
-    // waitTime最多等待时间ms，默认-1直到占有锁
-    // leaseTime最多占用锁时间，默认60秒（防止Redis方案的服务突然挂掉时锁无法释放问题，ZK方案不需要管这个设置）
-    @AtomLock(key = "'seckill_' + #productId", waitTime = 10, leaseTime = 120000,
+    // 分布式锁
+    // waitTime：锁获取等待时间ms，默认-1直到占有锁
+    // leaseTime：占用锁时间，默认60秒（防止Redis方案的服务突然挂掉时锁无法释放问题，ZK方案不需要管这个设置）
+    @AtomLock(key = "'seckill_' + #productId", waitTime = 10, leaseTime = 30000,
             waitTimeoutType = AtomLockWaitTimeoutType.FALLBACK, fallback = "#target.seckillFail(args[0], args[1])")
     public boolean seckill(Long userId, Long productId) {
         if (count > 0) {

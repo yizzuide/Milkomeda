@@ -26,8 +26,7 @@ import org.springframework.core.env.Environment;
 import java.util.List;
 
 /**
- * OrbitSource
- * 切面节点来源扩展接口
+ * The OrbitSource interface used for other module to register advisor.
  *
  * @author yizzuide
  * @since 3.13.0
@@ -37,9 +36,9 @@ import java.util.List;
 @FunctionalInterface
 public interface OrbitSource {
     /**
-     * 初始化配置
-     * @param environment   Environment
-     * @return Orbit node list
+     * Create advisor list.
+     * @param environment   spring environment
+     * @return orbit advisor list
      */
-    List<OrbitNode> createNodes(Environment environment);
+    List<OrbitAdvisor> createAdvisors(Environment environment);
 }

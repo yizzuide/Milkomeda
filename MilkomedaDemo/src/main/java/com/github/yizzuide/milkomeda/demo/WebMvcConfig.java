@@ -5,6 +5,7 @@ import org.springframework.boot.actuate.endpoint.SanitizingFunction;
 import org.springframework.boot.autoconfigure.web.WebProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.core.env.PropertySource;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -36,7 +37,9 @@ public class WebMvcConfig implements WebMvcConfigurer {
     @Autowired
     private WebProperties webProperties;
 
-    // Springboot 2.6: Spring Boot现在可以清理 /env 和 /configprops 端点中存在的敏感值
+    // Springboot 2.7: SanitizingFunction现已支持Ordered排序，在SanitizableData一量赋值后中止其它调用
+    // Springboot 2.6: 现在可以清理 /env 和 /configprops 端点中存在的敏感值
+    @Order(Integer.MIN_VALUE)
     @Bean
     public SanitizingFunction mysqlSanitizingFunction() {
         return data -> {

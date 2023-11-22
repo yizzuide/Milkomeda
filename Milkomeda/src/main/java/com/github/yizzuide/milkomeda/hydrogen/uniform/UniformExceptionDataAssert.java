@@ -24,7 +24,6 @@ package com.github.yizzuide.milkomeda.hydrogen.uniform;
 import java.text.MessageFormat;
 
 /**
- * UniformExceptionAssert
  * 统一异步断言，最终需要被枚举类实现
  *
  * @author yizzuide
@@ -45,7 +44,7 @@ public interface UniformExceptionDataAssert extends UniformExceptionData, Unifor
     }
 
     /**
-     * Subclasses can override and implement different formatting message, {@link MessageFormat} is used by default
+     * Subclasses can override and implement a different formatting message, {@link MessageFormat} is used by default.
      * @param msg exception message
      * @param args  exception args
      * @return format message

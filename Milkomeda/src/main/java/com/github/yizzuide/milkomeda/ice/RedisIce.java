@@ -46,7 +46,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * RedisIce
  * 基于Redis的延迟队列实现
  *
  * @author yizzuide
@@ -55,6 +54,7 @@ import java.util.stream.Collectors;
  * <br>
  * Create at 2019/11/16 15:20
  */
+@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 @Slf4j
 public class RedisIce implements Ice, ApplicationListener<IceInstanceChangeEvent> {
 

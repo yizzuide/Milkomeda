@@ -50,7 +50,7 @@ public class IceProperties {
     public final static String MERGE_ID_SEPARATOR = "-";
 
     /**
-     * 实例名（用于多产品隔离，否则不要修改）
+     * 服务实例名（用于多产品隔离）
      */
     private String instanceName = DEFAULT_INSTANCE_NAME;
 
@@ -145,8 +145,7 @@ public class IceProperties {
     private boolean multiTopicListenerPerHandler = false;
 
     /**
-     * TTR超时后是否放入到Dead queue
-     * @see IceTtrOverloadListener
+     * TTR超时后是否放入到DeadQueue（设置为false，则超时由开发者处理通过监听器 {@link IceTtrOverloadListener} 处理）
      */
     private boolean enableRetainToDeadQueueWhenTtrOverload = false;
 
@@ -160,7 +159,7 @@ public class IceProperties {
     @Data
     public static class Introspect {
         /**
-         * Enable export job introspection api.
+         * Enable export job introspection data.
          */
         private boolean enable = false;
 
@@ -170,7 +169,7 @@ public class IceProperties {
         private JobInspector.IndexType indexType = JobInspector.IndexType.UPDATE_TIME;
 
         /**
-         *  Select strategy which for job inspection store.
+         *  Select strategy for job inspection store.
          */
         private JobInspector.InspectorType inspectorType = JobInspector.InspectorType.REDIS;
 

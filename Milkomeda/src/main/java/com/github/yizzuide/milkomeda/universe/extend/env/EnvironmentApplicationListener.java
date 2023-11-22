@@ -21,24 +21,32 @@
 
 package com.github.yizzuide.milkomeda.universe.extend.env;
 
+import com.github.yizzuide.milkomeda.universe.config.MilkomedaProperties;
+import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import com.github.yizzuide.milkomeda.universe.extend.converter.MapToCollectionConverter;
+import com.github.yizzuide.milkomeda.util.ReflectUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.config.ConfigDataEnvironmentPostProcessor;
 import org.springframework.boot.context.event.ApplicationEnvironmentPreparedEvent;
 import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.context.ApplicationListener;
 import org.springframework.core.Ordered;
+import org.springframework.core.convert.converter.GenericConverter;
 import org.springframework.core.convert.support.ConfigurableConversionService;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.lang.NonNull;
+import org.springframework.util.CollectionUtils;
+
+import java.util.List;
+import java.util.Objects;
 
 /**
  * Environment Prepared Listener
  *
  * @author yizzuide
  * @since 3.0.1
- * @version 3.13.0
+ * @version 3.15.0
  * @see org.springframework.boot.context.config.ConfigDataEnvironmentPostProcessor
  * @see org.springframework.boot.context.config.AnsiOutputApplicationListener
  * <br>
@@ -55,13 +63,14 @@ public class EnvironmentApplicationListener implements ApplicationListener<Appli
         }
 
         // StandardServletEnvironment or StandardReactiveEnvironment
+        ApplicationContextHolder.setPendingConfigurableEnvironment(environment);
 
         // BeanWrapper binding ConversionService process:
-        // 1.SpringBoot start setting ConversionService
+        // 1.Spring Boot start setting ConversionService
         // org.springframework.boot.SpringApplication.configureEnvironment()
         //  -> environment.setConversionService(new ApplicationConversionService());
         //  -> context.getBeanFactory().setConversionService(context.getEnvironment().getConversionService());
-        // 2.SpringBoot create BeanWrapper and set ConversionService
+        // 2.Spring Boot create BeanWrapper and set ConversionService
         // org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.instantiateBean()
         //  -> AbstractBeanFactory.initBeanWrapper()
         //      -> bw.setConversionService(getConversionService());
@@ -69,12 +78,20 @@ public class EnvironmentApplicationListener implements ApplicationListener<Appli
         // Register Converter
         ConfigurableConversionService conversionService = environment.getConversionService();
         conversionService.addConverter(new MapToCollectionConverter(conversionService));
+        MilkomedaProperties milkomedaProperties = Binder.get(environment).bind(MilkomedaProperties.PREFIX, MilkomedaProperties.class).get();
+        List<Class<GenericConverter>> converters = milkomedaProperties.getRegisterConverters();
+        if (!CollectionUtils.isEmpty(converters)) {
+            converters.stream().map(ReflectUtil::newInstance).filter(Objects::nonNull).forEach(conversionService::addConverter);
+        }
         // Get and check conversionService
         // ((ConfigurableApplicationContext)ApplicationContextHolder.get()).getBeanFactory().getConversionService()
 
         // bind property
-        boolean logEnable = Binder.get(environment).bind("milkomeda.show-log", Boolean.class).orElseGet(() -> false);
-        log.info("milkomeda log: {}", logEnable ? "enable" : "disable");
+        boolean logEnable = false;
+        try {
+            logEnable = Binder.get(environment).bind("milkomeda.show-log", Boolean.class).orElseGet(() -> false);
+        } catch (Exception ignore) {}
+        log.info("milkomeda log is {}", logEnable ? "enable" : "disable");
     }
 
     @Override

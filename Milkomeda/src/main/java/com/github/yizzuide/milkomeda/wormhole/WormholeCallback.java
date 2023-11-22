@@ -22,7 +22,6 @@
 package com.github.yizzuide.milkomeda.wormhole;
 
 /**
- * WormholeCallback
  * 领域事件回调
  *
  * @author yizzuide

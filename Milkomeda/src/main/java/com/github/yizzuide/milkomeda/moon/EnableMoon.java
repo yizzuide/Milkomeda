@@ -21,6 +21,7 @@
 
 package com.github.yizzuide.milkomeda.moon;
 
+import com.github.yizzuide.milkomeda.universe.config.RedisGlobalConfig;
 import org.springframework.context.annotation.Import;
 
 import java.lang.annotation.*;
@@ -38,6 +39,6 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Inherited
-@Import({MoonConfig.class, MixinMoonConfig.class})
+@Import({RedisGlobalConfig.class, MoonConfig.class, MixinMoonConfig.class})
 public @interface EnableMoon {
 }

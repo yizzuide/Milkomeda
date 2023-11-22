@@ -5,13 +5,14 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.springframework.aop.ProxyMethodInvocation;
 import org.springframework.aop.aspectj.MethodInvocationProceedingJoinPoint;
+import org.springframework.aop.support.AopUtils;
 
 import java.lang.reflect.Method;
 
 /**
- * OrbitAdvice
- * 拦截切面
+ * Extension subclass of {@link MethodInterceptor}.
  *
+ * @see org.springframework.aop.aspectj.AspectJAroundAdvice
  * @author yizzuide
  * @since 3.13.0
  * <br>
@@ -24,9 +25,11 @@ public interface OrbitAdvice extends MethodInterceptor {
          ProxyMethodInvocation pmi = (ProxyMethodInvocation) invocation;
          ProceedingJoinPoint pjp = new MethodInvocationProceedingJoinPoint(pmi);
          Method method = invocation.getMethod();
+         Class<?> targetClass = invocation.getThis() != null ? AopUtils.getTargetClass(invocation.getThis()) : null;
          OrbitInvocation orbitInvocation = OrbitInvocation.builder()
                 .pjp(pjp)
                 .target(pjp.getTarget())
+                .targetClass(targetClass)
                 .method(method)
                 .args(invocation.getArguments())
                 .build();

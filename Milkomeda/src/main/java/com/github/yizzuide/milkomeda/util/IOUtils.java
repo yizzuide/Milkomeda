@@ -34,7 +34,7 @@ import java.nio.charset.StandardCharsets;
  *
  * @author yizzuide
  * @since 3.3.1
- * @version 3.7.0
+ * @version 3.15.0
  * <br>
  * Create at 2020/05/07 14:17
  */
@@ -66,7 +66,7 @@ public class IOUtils {
                 continue;
             }
             // 去空行
-            if (line.matches("\\s+")) {
+            if (line.matches("\\s+") || line.matches("^\\s*[\\r\\n]?")) {
                 continue;
             }
             // 代码缩减空白

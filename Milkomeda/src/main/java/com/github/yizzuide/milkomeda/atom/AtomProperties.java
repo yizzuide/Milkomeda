@@ -27,6 +27,7 @@ import org.springframework.boot.convert.DurationUnit;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 
 /**
  * AtomProperties
@@ -37,8 +38,11 @@ import java.time.temporal.ChronoUnit;
  * Create at 2020/04/30 15:26
  */
 @Data
-@ConfigurationProperties("milkomeda.atom")
+@ConfigurationProperties(AtomProperties.PREFIX)
 public class AtomProperties {
+
+   public static final String PREFIX = "milkomeda.atom";
+
     /**
      * 策略方式
      */
@@ -53,6 +57,63 @@ public class AtomProperties {
      * Zk配置
      */
     private Zk zk = new Zk();
+
+    /**
+     * Etcd config.
+     * @since 3.15.0
+     */
+    private Etcd etcd = new Etcd();
+
+    @Data
+    static class Etcd {
+        /**
+         * The URL is used to Connect from ETCD server.
+         */
+        private String endpointUrl;
+
+        /**
+         * The URL is used to Connect from ETCD servers.
+         */
+        private List<String> endpointUrls;
+
+        /**
+         * config etcd auth user.
+         */
+        private String user;
+
+        /**
+         * Etcd auth password.
+         */
+        private String password;
+
+        /**
+         * Sets the authority used to authenticate connections to servers.
+         */
+        private String authority;
+
+        /**
+         * Etcd root lock key.
+         */
+        private String rootLockNode;
+
+        /**
+         * Etcd connect timeout.
+         */
+        @DurationUnit(ChronoUnit.MILLIS)
+        private Duration connectTimeout = Duration.ofMillis(30000);
+
+        /**
+         * Set the interval for gRPC keepalive time.
+         */
+        @DurationUnit(ChronoUnit.MILLIS)
+        private Duration keepaliveTime = Duration.ofMillis(30000);
+
+        /**
+         * Set timeout for gRPC keepalive time.
+         */
+        @DurationUnit(ChronoUnit.MILLIS)
+        private Duration keepaliveTimeout = Duration.ofMillis(10000);
+    }
 
     @Data
     static class Redis {

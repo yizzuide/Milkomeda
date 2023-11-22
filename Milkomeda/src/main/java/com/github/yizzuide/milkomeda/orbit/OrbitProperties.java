@@ -30,44 +30,56 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * OrbitProperties
+ * Orbit properties config.
  *
  * @author yizzuide
  * @since 3.13.0
+ * @version 3.15.0
  * <br>
  * Create at 2022/02/21 01:27
  */
 @Data
 @ConfigurationProperties(prefix = OrbitProperties.PREFIX)
 public class OrbitProperties {
-    // 当前配置前缀
     public static final String PREFIX = "milkomeda.orbit";
     /**
-     * 实例列表
+     * Orbit config item list.
      */
     private List<Item> instances = new ArrayList<>();
 
     @Data
     public static class Item {
         /**
-         * 唯一id名
+         * The key used for register bean name.
          */
         private String keyName;
 
         /**
-         * 切点表达式，如应用给Mapper的query方法：execution(* com..mapper.*.query*(..))
+         * An advice class which impl of {@link OrbitAdvice}.
+         */
+        private Class<? extends OrbitAdvice> adviceClazz;
+
+        /**
+         * Advice property values.
+         */
+        private Map<String, Object> adviceProps = new HashMap<>();
+
+        /**
+         * AspectJ pointcut expression，such as "execution(* com..mapper.*.query*(..))".
          */
         private String pointcutExpression;
 
         /**
-         * 方法切面实现类
+         * An Advisor class which impl of {@link OrbitAdvisor}.
+         * @since 3.15.0
          */
-        private Class<? extends OrbitAdvice> adviceClassName;
+        private Class<? extends OrbitAdvisor> advisorClazz = AspectJOrbitAdvisor.class;
 
         /**
-         * 切面实现属性注入
+         * Advisor config properties to interpolated dynamically.
+         * @since 3.15.0
          */
-        private Map<String, Object> props = new HashMap<>();
+        private Map<String, Object> advisorProps;
     }
 
 }

@@ -23,6 +23,7 @@ package com.github.yizzuide.milkomeda.util;
 
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.cglib.beans.BeanCopier;
 import org.springframework.util.CollectionUtils;
 
 import java.beans.BeanInfo;
@@ -40,7 +41,7 @@ import java.util.stream.LongStream;
  *
  * @author yizzuide
  * @since 1.13.0
- * @version 3.14.0
+ * @version 3.15.0
  * <br>
  * Create at 2019/09/21 17:23
  */
@@ -135,11 +136,11 @@ public class DataTypeConvertUtil {
     }
 
     /**
-     * Long to Stream
+     * Create counter stream
      * @param count count of number
      * @return  Stream
      */
-    public static <T> LongStream countToStream(int count) {
+    public static LongStream countToStream(int count) {
         long[] arr = new long[count];
         for (int i = 0; i < count; i++) {
             arr[i] = i;
@@ -221,6 +222,17 @@ public class DataTypeConvertUtil {
             }
         }
         return map;
+    }
+
+    /**
+     * Copy field values from source to target.
+     * @param source    source object
+     * @param target    target object
+     * @since 3.15.0
+     */
+    public static void copy(Object source, Object target) {
+        BeanCopier beanCopier = BeanCopier.create(source.getClass(), target.getClass(), false);
+        beanCopier.copy(source, target, null);
     }
 
     /**
@@ -334,7 +346,7 @@ public class DataTypeConvertUtil {
     /**
      * 从源对象采集key路径的值
      * @param keyPath       采集key
-     * @param source        源Map
+     * @param source        采集数据源（支持类型有：Map，Object，JSON字符串）
      * @param defaultValue  默认值
      * @return 采集到的字符串
      * @since 3.0.3
@@ -426,7 +438,7 @@ public class DataTypeConvertUtil {
      * @since 3.0.3
      */
     public static boolean isSugarType(Object obj) {
-        return !(obj instanceof List) && !(obj instanceof Map);
+        return !(obj instanceof Collection) && !(obj instanceof Map);
     }
 
 

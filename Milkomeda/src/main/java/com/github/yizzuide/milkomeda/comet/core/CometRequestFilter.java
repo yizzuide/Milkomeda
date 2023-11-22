@@ -35,11 +35,11 @@ import java.io.IOException;
  * CometRequestFilter
  * 请求过滤器
  *
+ * @see org.springframework.web.filter.CharacterEncodingFilter
+ * @see org.apache.coyote.Response#isCommitted()
  * @author yizzuide
  * @since 2.0.0
  * @version 3.5.0
- * @see org.springframework.web.filter.CharacterEncodingFilter
- * @see org.apache.coyote.Response#isCommitted()
  * <br>
  * Create at 2019/12/12 17:48
  */
@@ -57,9 +57,8 @@ public class CometRequestFilter implements Filter {
         ServletRequest requestWrapper = servletRequest;
         if (CometHolder.shouldWrapRequest()) {
             // 如果有Form表单数据则不读取body，交给SpringMVC框架处理（但@CometParam功能仍然有效）
-            if (CollectionUtils.isEmpty(servletRequest.getParameterMap())) {
-                requestWrapper = new CometRequestWrapper((HttpServletRequest) servletRequest);
-            }
+            boolean cacheBody = CollectionUtils.isEmpty(servletRequest.getParameterMap());
+            requestWrapper = new CometRequestWrapper((HttpServletRequest) servletRequest, cacheBody);
         }
         boolean enableAddResponseWrapper = CometHolder.shouldWrapResponse();
         if (enableAddResponseWrapper) {

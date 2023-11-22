@@ -21,29 +21,20 @@
 
 package com.github.yizzuide.milkomeda.universe.config;
 
-import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import com.github.yizzuide.milkomeda.universe.context.WebContext;
 import com.github.yizzuide.milkomeda.universe.extend.env.Environment;
 import com.github.yizzuide.milkomeda.universe.extend.web.handler.DelegatingContextFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.boot.web.servlet.filter.OrderedFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.util.PathMatcher;
 import org.springframework.web.filter.DelegatingFilterProxy;
-import org.springframework.web.util.UrlPathHelper;
-import org.springframework.web.util.pattern.PathPatternParser;
 
-import java.io.Serializable;
 import java.util.Collections;
 
 /**
@@ -51,13 +42,12 @@ import java.util.Collections;
  *
  * @author yizzuide
  * @since 2.0.0
- * @version 3.14.0
+ * @version 3.15.0
  * <br>
  * Create at 2019/12/13 19:09
  */
-@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
-@Configuration
 @AutoConfigureAfter(WebMvcAutoConfiguration.class)
+@Configuration
 public class MilkomedaContextConfig {
 
     @Autowired
@@ -71,19 +61,9 @@ public class MilkomedaContextConfig {
         return environment;
     }
 
-    @Bean
-    @ConditionalOnMissingBean
-    public ApplicationContextHolder applicationContextHolder(Environment env) {
-        ApplicationContextHolder applicationContextHolder = new ApplicationContextHolder();
-        ApplicationContextHolder.setEnvironment(env);
-        return applicationContextHolder;
-    }
-
     @Autowired
-    public void config(PathMatcher mvcPathMatcher, PathPatternParser mvcPatternParser, UrlPathHelper mvcUrlPathHelper) {
+    public void config(PathMatcher mvcPathMatcher) {
         WebContext.setMvcPathMatcher(mvcPathMatcher);
-        WebContext.setMvcPatternParser(mvcPatternParser);
-        WebContext.setUrlPathHelper(mvcUrlPathHelper);
     }
 
     @Bean
@@ -104,15 +84,5 @@ public class MilkomedaContextConfig {
         int order = OrderedFilter.REQUEST_WRAPPER_FILTER_MAX_ORDER - 104;
         delegatingFilterRegistrationBean.setOrder(order);
         return delegatingFilterRegistrationBean;
-    }
-
-    @Bean
-    @ConditionalOnClass(name = "org.springframework.data.redis.core.RedisTemplate")
-    public RedisTemplate<String, Serializable> jsonRedisTemplate(LettuceConnectionFactory redisConnectionFactory) {
-        RedisTemplate<String, Serializable> template = new RedisTemplate<>();
-        template.setKeySerializer(new StringRedisSerializer());
-        template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
-        template.setConnectionFactory(redisConnectionFactory);
-        return template;
     }
 }

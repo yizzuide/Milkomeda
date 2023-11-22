@@ -45,10 +45,10 @@ import java.util.List;
 public abstract class CrustUserDetailsService implements UserDetailsService {
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        CrustEntity entity = findEntityByUsername(username);
+    public UserDetails loadUserByUsername(String account) throws UsernameNotFoundException {
+        CrustEntity entity = findEntityByUsername(account);
         if (entity == null) {
-            throw new UsernameNotFoundException("Not found entity with username: " + username);
+            throw new UsernameNotFoundException("Not found entity with account: " + account);
         }
         CrustUserInfo<CrustEntity, CrustPermission> userInfo = new CrustUserInfo<>();
         CrustPerm crustPerm = findPermissionsById(entity.getUid());
@@ -64,7 +64,7 @@ public abstract class CrustUserDetailsService implements UserDetailsService {
             userInfo.setPermissionList(permissionList);
             grantedAuthorities = CrustPerm.buildAuthorities(permissionList);
         }
-        userInfo.setEntity(entity);
+        userInfo.setEntity(CrustContext.get().getProps().isEnableLoadEntityLazy() ? null : entity);
         userInfo.setUid(entity.getUid());
         userInfo.setUsername(entity.getUsername());
         return new CrustUserDetails(userInfo.getUid(), userInfo.getUsername(), entity.getPassword(),

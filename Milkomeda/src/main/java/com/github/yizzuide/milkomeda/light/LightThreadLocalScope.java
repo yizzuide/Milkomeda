@@ -21,9 +21,9 @@
 
 package com.github.yizzuide.milkomeda.light;
 
+import io.netty.util.concurrent.FastThreadLocal;
 import org.springframework.cloud.context.scope.GenericScope;
 import org.springframework.cloud.context.scope.ScopeCache;
-import org.springframework.core.NamedThreadLocal;
 import org.springframework.core.Ordered;
 
 import java.util.ArrayList;
@@ -67,8 +67,7 @@ public class LightThreadLocalScope extends GenericScope implements Ordered {
     // 基于LightContext的Scope的缓存
     static class LightScopeCache implements ScopeCache {
 
-        private final LightContext<String, Map<String, Object>> lightContext = new LightContext<>(new NamedThreadLocal<Spot<String, Map<String, Object>>>("light-scope-thread-local"){
-
+        private final LightContext<String, Map<String, Object>> lightContext = new LightContext<>(new FastThreadLocal<Spot<String, Map<String, Object>>>(){
             // 覆盖初始化，防止获了为空
             @Override
             protected Spot<String, Map<String, Object>> initialValue() {

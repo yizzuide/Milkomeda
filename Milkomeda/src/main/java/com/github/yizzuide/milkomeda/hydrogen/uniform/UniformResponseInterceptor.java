@@ -21,64 +21,37 @@
 
 package com.github.yizzuide.milkomeda.hydrogen.uniform;
 
-import com.github.yizzuide.milkomeda.comet.core.CometResponseInterceptor;
-import com.github.yizzuide.milkomeda.universe.lang.Tuple;
+import com.github.yizzuide.milkomeda.comet.core.AbstractResponseInterceptor;
+import com.github.yizzuide.milkomeda.universe.extend.annotation.Alias;
 import com.github.yizzuide.milkomeda.universe.parser.yml.YmlResponseOutput;
-import com.github.yizzuide.milkomeda.util.JSONUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.Ordered;
-import org.springframework.util.FastByteArrayOutputStream;
 
 import javax.servlet.http.HttpServletResponse;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Uniform impl of response wrapper interceptor.
+ * Uniform implementation of response interceptor. It works when response type is subclass of {@link ResultVO}.
  *
  * @since 3.14.0
+ * @version 3.15.0
  * @author yizzuide
  * <br>
  * Create at 2022/10/10 17:57
  */
 @Slf4j
-public class UniformResponseInterceptor implements CometResponseInterceptor {
+@Alias("uniform")
+public class UniformResponseInterceptor extends AbstractResponseInterceptor {
     @Override
-    public boolean writeToResponse(FastByteArrayOutputStream outputStream, HttpServletResponse wrapperResponse, HttpServletResponse rawResponse, Object body) {
+    protected Object doResponse(HttpServletResponse response, Object body) {
         if (body instanceof ResultVO) {
             ResultVO<?> resultVO = (ResultVO<?>) body;
-            Map<String, Object> source = new HashMap<>(5);
+            Map<String, Object> source = new HashMap<>(8);
             source.put(YmlResponseOutput.CODE, resultVO.getCode());
             source.put(YmlResponseOutput.MESSAGE, resultVO.getMessage());
             source.put(YmlResponseOutput.DATA, resultVO.getData());
-            try {
-                Tuple<Map<String, Object>, Map<String, Object>> mapTuple = UniformHandler.matchStatusResult(rawResponse, source);
-                // has config 200?
-                if (mapTuple.getT1() == null || mapTuple.getT1().size() == 0) {
-                    return false;
-                }
-                Map<String, Object> result = mapTuple.getT2();
-                String content = JSONUtil.serialize(result);
-                // reset content and length
-                byte[] bytes = content.getBytes(StandardCharsets.UTF_8);
-                wrapperResponse.resetBuffer();
-                wrapperResponse.setContentLength(bytes.length);
-                outputStream.write(bytes);
-                rawResponse.setContentLength(outputStream.size());
-                // write to response
-                outputStream.writeTo(rawResponse.getOutputStream());
-                return true;
-            } catch (Exception e) {
-                log.error("uniform response error with msg: {}", e.getMessage(), e);
-                return false;
-            }
+            return UniformHandler.matchStatusResult(response, source).getT2();
         }
-        return false;
-    }
-
-    @Override
-    public int getOrder() {
-        return Ordered.HIGHEST_PRECEDENCE;
+        return null;
     }
 }

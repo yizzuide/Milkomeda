@@ -46,7 +46,7 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 0.2.0
- * @version 3.14.1
+ * @version 3.15.0
  * <br>
  * Create at 2019/04/11 19:55
  */
@@ -333,7 +333,9 @@ public class ReflectUtil {
         Field field = null;
         for (String fieldName : fieldNames) {
             field = ReflectionUtils.findField(Objects.requireNonNull(target).getClass(), fieldName);
-            if (field == null) return null;
+            if (field == null) {
+                return null;
+            }
             ReflectionUtils.makeAccessible(field);
             target = ReflectionUtils.getField(field, target);
         }
@@ -380,11 +382,19 @@ public class ReflectUtil {
     public static void setField(Object target, Map<String, Object> props) {
         for (Map.Entry<String, Object> entry : props.entrySet()) {
             Field field = ReflectionUtils.findField(target.getClass(), entry.getKey());
-            if (field == null) continue;
+            if (field == null) {
+                continue;
+            }
             ReflectionUtils.makeAccessible(field);
             // String -> Enum
             if (Enum.class.isAssignableFrom(field.getType()) && entry.getValue() instanceof String) {
                 ReflectionUtils.setField(field, target, Enum.valueOf((Class<? extends Enum>) field.getType(), (String) entry.getValue()));
+            } else if(Class.class.isAssignableFrom(field.getType()) && entry.getValue() instanceof String) {
+                try {
+                    ReflectionUtils.setField(field, target, Class.forName(String.valueOf(entry.getValue())));
+                } catch (ClassNotFoundException e) {
+                    log.error("Set field error with msg: {}", e.getMessage(), e);
+                }
             } else if(Long.class.isAssignableFrom(field.getType()) && entry.getValue() instanceof Integer) {
                 ReflectionUtils.setField(field, target, Long.valueOf(String.valueOf(entry.getValue())));
             } else if(List.class.isAssignableFrom(field.getType()) && entry.getValue() instanceof Map) {

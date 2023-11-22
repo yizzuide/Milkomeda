@@ -26,7 +26,7 @@ import lombok.Data;
 import java.util.Map;
 
 /**
- * JobStatInfo
+ * Job stat record info.
  *
  * @since 3.14.0
  * @author yizzuide

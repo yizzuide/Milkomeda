@@ -28,6 +28,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.util.PropertyPlaceholderHelper;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -84,7 +85,7 @@ public class PlaceholderExtractor extends PropertyPlaceholderHelper {
     }
 
     /**
-     * Create PlaceholderResolver with placeholderPrefix, the default placeholderSuffix is "}"
+     * Create PlaceholderResolver with placeholderPrefix.
      * @param placeholderPrefix placeholder prefix
      * @return PlaceholderResolver
      * @since 3.13.0
@@ -112,7 +113,7 @@ public class PlaceholderExtractor extends PropertyPlaceholderHelper {
     public List<String> getPlaceHolders(String value) {
         int start = value.indexOf(this.placeholderPrefix);
         if (start == -1) {
-            return null;
+            return Collections.emptyList();
         }
         List<String> keys = new ArrayList<>();
         while (start != -1) {

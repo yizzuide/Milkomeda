@@ -23,40 +23,46 @@ package com.github.yizzuide.milkomeda.comet.core;
 
 import com.github.yizzuide.milkomeda.pulsar.PulsarConfig;
 import com.github.yizzuide.milkomeda.universe.config.MilkomedaProperties;
+import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
+import com.github.yizzuide.milkomeda.universe.extend.web.handler.HotHttpHandlerProperty;
+import com.github.yizzuide.milkomeda.universe.extend.web.handler.NamedHandler;
+import com.github.yizzuide.milkomeda.universe.metadata.BeanIds;
 import com.github.yizzuide.milkomeda.universe.polyfill.SpringMvcPolyfill;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration;
+import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
+import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
+import org.springframework.lang.NonNull;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * CometConfig
  *
  * @author yizzuide
  * @since 2.0.0
- * @version 3.14.0
+ * @version 3.15.0
  * <br>
  * Create at 2019/12/12 18:10
  */
 @Configuration
 @AutoConfigureAfter({WebMvcAutoConfiguration.class, PulsarConfig.class})
 @EnableConfigurationProperties({MilkomedaProperties.class, CometProperties.class})
-public class CometConfig {
+public class CometConfig implements ApplicationListener<ApplicationStartedEvent> {
 
     @Autowired CometProperties cometProperties;
 
@@ -89,17 +95,54 @@ public class CometConfig {
     }
 
     @Bean
+    @ConditionalOnProperty(prefix = "milkomeda.comet.request-interceptors.xss", name = "enable", havingValue = "true")
+    public CometXssRequestInterceptor cometXssRequestInterceptor() {
+        return new CometXssRequestInterceptor();
+    }
+
+    @Bean
+    @ConditionalOnProperty(prefix = "milkomeda.comet.request-interceptors.sql-inject", name = "enable", havingValue = "true")
+    public CometSqlInjectRequestInterceptor cometSqlInjectRequestInterceptor() {
+        return new CometSqlInjectRequestInterceptor();
+    }
+
+    @Bean
     public CometResponseBodyAdvice cometResponseBodyAdvice() {
         return new CometResponseBodyAdvice();
     }
 
+    @Override
+    public void onApplicationEvent(@NonNull ApplicationStartedEvent event) {
+        Map<String, HotHttpHandlerProperty> requestInterceptors = cometProperties.getRequestInterceptors();
+        if (!CollectionUtils.isEmpty(requestInterceptors)) {
+            Map<String, CometRequestInterceptor> requestInterceptorMap = ApplicationContextHolder.get().getBeansOfType(CometRequestInterceptor.class);
+            if (!CollectionUtils.isEmpty(requestInterceptorMap)) {
+                CometHolder.setRequestInterceptors(NamedHandler.sortedList(requestInterceptorMap, requestInterceptors::get));
+            }
+        }
+
+        Map<String, HotHttpHandlerProperty> responseInterceptors = cometProperties.getResponseInterceptors();
+        if (CollectionUtils.isEmpty(responseInterceptors)) {
+            return;
+        }
+        Map<String, CometResponseInterceptor> responseInterceptorMap = ApplicationContextHolder.get().getBeansOfType(CometResponseInterceptor.class);
+        if (CollectionUtils.isEmpty(responseInterceptorMap)) {
+            return;
+        }
+        CometHolder.setResponseInterceptors(NamedHandler.sortedList(responseInterceptorMap, responseInterceptors::get));
+    }
+
+
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Configuration
     static class ExtendedConfig implements InitializingBean {
+
         @Autowired
         private RequestMappingHandlerAdapter adapter;
 
-        @Qualifier("requestMappingHandlerMapping")
+        // Springboot 2.7: Since Spring Framework 5.1, Spring MVC has supported multiple RequestMappingHandlerMapping beans.
+        //  Spring Boot 2.7 no longer defines MVC’s main requestMappingHandlerMapping bean as @Primary.
+        @Qualifier(BeanIds.REQUEST_MAPPING_HANDLER_MAPPING)
         @Autowired
         private RequestMappingHandlerMapping requestMappingHandlerMapping;
 

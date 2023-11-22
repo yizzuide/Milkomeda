@@ -53,6 +53,7 @@ import java.util.regex.Pattern;
  * <br>
  * Create at 2020/06/16 11:18
  */
+@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 @Slf4j
 @Intercepts({
         @Signature(type = Executor.class, method = "update", args = {MappedStatement.class, Object.class}),
@@ -120,7 +121,7 @@ public class SundialInterceptor implements Interceptor {
             // 是否使用主连接
             if (sundial.key().equals(DynamicRouteDataSource.MASTER_KEY)) {
                 SundialHolder.setDataSourceType(dataNode.getLeader());
-            } else if(sundial.key().equals("follows")) { // 从库任选
+            } else if("follows".equals(sundial.key())) { // 从库任选
                 if (!CollectionUtils.isEmpty(dataNode.getFollows())) {
                     SundialHolder.setDataSourceType(dataNode.getFollows().stream().findAny().orElse(DynamicRouteDataSource.MASTER_KEY));
                 }

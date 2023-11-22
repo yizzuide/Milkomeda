@@ -26,7 +26,6 @@ import com.github.yizzuide.milkomeda.universe.context.WebContext;
 import com.github.yizzuide.milkomeda.util.JSONUtil;
 import com.github.yizzuide.milkomeda.util.NetworkUtil;
 import com.github.yizzuide.milkomeda.util.ReflectUtil;
-import com.github.yizzuide.milkomeda.util.Strings;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -60,10 +59,11 @@ import java.util.function.Function;
  *
  * @author yizzuide
  * @since 0.2.0
- * @version 3.0.3
+ * @version 3.15.0
  * <br>
  * Create at 2019/04/11 19:48
  */
+@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 @Slf4j
 @Aspect
 @Order(-99)
@@ -120,7 +120,6 @@ public class CometAspect {
         HttpServletRequest request = WebContext.getRequest();
         WebCometData cometData = WebCometData.createFormRequest(request, comet.prototype(), cometProperties.isEnableReadRequestBody());
         cometData.setApiCode(comet.apiCode());
-        cometData.setDescription(Strings.isEmpty(comet.name()) ? comet.description() : comet.name());
         cometData.setRequestType(comet.requestType());
         return applyAround(cometData, threadLocal, joinPoint, request, requestTime, comet.name(), comet.tag(), (returnData) -> {
             if (returnData.getClass() == DeferredResult.class) {
@@ -165,6 +164,7 @@ public class CometAspect {
         cometData.setResponseData(null);
         cometData.setDuration(String.valueOf(duration));
         cometData.setErrorInfo(e.getMessage());
+        // TODO Upgrade: StackTraceElement使用Java 9的StackWalker
         StackTraceElement[] stackTrace = e.getStackTrace();
         if (stackTrace.length > 0) {
             String errorStack = String.format("exception happened: %s \n invoke root: %s", stackTrace[0], stackTrace[stackTrace.length - 1]);
@@ -192,7 +192,7 @@ public class CometAspect {
         String host = NetworkUtil.getHost();
         cometData.setHost(host);
         if (milkomedaProperties.isShowLog()) {
-            log.info("Comet:- before: {}", JSONUtil.serialize(cometData));
+            log.info("method[{}] invoke before: {}", signature.getName(), JSONUtil.serialize(cometData));
         }
         // 外部可以扩展记录自定义数据
         recorder.onRequest(cometData, cometData.getTag(), request, joinPoint.getArgs());
@@ -240,7 +240,7 @@ public class CometAspect {
         // 是否有修改返回值
         returnObj = returnObj == null ? returnData : returnObj;
         if (milkomedaProperties.isShowLog()) {
-            log.info("Comet:- afterReturn: {}", JSONUtil.serialize(cometData));
+            log.info("method[{}] invoke afterReturn: {}", signature.getName(), JSONUtil.serialize(cometData));
         }
         threadLocal.remove();
         return returnObj;

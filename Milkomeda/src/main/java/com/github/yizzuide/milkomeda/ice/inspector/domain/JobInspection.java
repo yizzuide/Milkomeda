@@ -38,23 +38,53 @@ import java.util.Date;
 public class JobInspection implements Serializable {
     private static final long serialVersionUID = -71079477949653608L;
 
+    /**
+     * Job id.
+     */
     private Long id;
 
+    /**
+     * Job topic name.
+     */
     private String topic;
 
+    /**
+     * Which application does the job come from.
+     */
     private String applicationName;
 
+    /**
+     * Job into what queue type.
+     */
     private Integer queueType;
 
+    /**
+     * Which bucket index does the job come from.
+     */
     private Integer bucketIndex;
 
+    /**
+     * Number of retries already happened.
+     */
     private Integer hadRetryCount;
 
+    /**
+     * The job has need to re-push.
+     */
     private Integer needRePush;
 
+    /**
+     * Next execution time with job.
+     */
     private Date executionTime;
 
+    /**
+     * Job push time.
+     */
     private Date pushTime;
 
+    /**
+     * Latest update time executed.
+     */
     private Date updateTime;
 }

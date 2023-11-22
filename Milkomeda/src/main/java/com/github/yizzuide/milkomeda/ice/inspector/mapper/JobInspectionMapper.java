@@ -29,7 +29,7 @@ import org.springframework.data.domain.Pageable;
 import java.util.List;
 
 /**
- * Job Inspection mybatis mapper
+ * Job Inspection mybatis mapper.
  *
  * @author yizzuide
  * @since 3.14.0

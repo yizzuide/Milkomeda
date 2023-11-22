@@ -24,9 +24,11 @@ package com.github.yizzuide.milkomeda.universe.context;
 import com.github.yizzuide.milkomeda.universe.engine.el.ELContext;
 import com.github.yizzuide.milkomeda.universe.extend.env.Environment;
 import lombok.Getter;
+import lombok.Setter;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.lang.NonNull;
 
 /**
@@ -42,24 +44,46 @@ public class ApplicationContextHolder implements ApplicationContextAware {
 
     private static ApplicationContextHolder INSTANCE;
 
+    // Spring准备好的环境变量
+    @Setter @Getter
+    private static ConfigurableEnvironment pendingConfigurableEnvironment;
+
+    // 环境变量包装类
     private static Environment environment;
 
     @Getter
     private ApplicationContext applicationContext;
 
-
-    public ApplicationContextHolder() {
+    public ApplicationContextHolder(Environment environment) {
+        ApplicationContextHolder.environment = environment;
         INSTANCE = this;
     }
 
     @Override
     public void setApplicationContext(@NonNull ApplicationContext applicationContext) {
         this.applicationContext = applicationContext;
-        // 设置应用上下文到EL解析环境
+        // 设置应用上下文到方法EL解析环境
         ELContext.setApplicationContext(applicationContext);
-        if (applicationContext instanceof ConfigurableApplicationContext) {
-            ApplicationContextHolder.environment.setConfigurableEnvironment(((ConfigurableApplicationContext) applicationContext).getEnvironment());
+        if (pendingConfigurableEnvironment != null) {
+            ApplicationContextHolder.environment.setConfigurableEnvironment(pendingConfigurableEnvironment);
+            return;
         }
+        if (applicationContext instanceof ConfigurableApplicationContext) {
+            ConfigurableEnvironment configurableEnvironment = (ConfigurableEnvironment) applicationContext.getEnvironment();
+            ApplicationContextHolder.environment.setConfigurableEnvironment(configurableEnvironment);
+        }
+    }
+
+    /**
+     * Try to get Spring Ioc Context.
+     * @return null if `ApplicationContext` not created yet.
+     * @since 3.15.0
+     */
+    public static ApplicationContext tryGet() {
+        if (INSTANCE == null) {
+            return null;
+        }
+        return get();
     }
 
     /**

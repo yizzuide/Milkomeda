@@ -31,9 +31,10 @@ import org.springframework.data.mongodb.core.mapping.MongoId;
 import java.io.Serializable;
 
 /**
- * JobInspectionDocument
+ * Job inspection document for mongodb.
  *
  * @author yizzuide
+ * @since 3.14.0
  * <br>
  * Create at 2022/09/26 23:14
  */
@@ -44,35 +45,65 @@ public class JobInspectionDocument implements Serializable {
 
     public static final String COLLECTION_NAME = "job_inspection";
 
+    /**
+     * Job id.
+     */
     @MongoId
     private String id;
 
+    /**
+     * Job topic name.
+     */
     @Field("topic")
     private String topic;
 
+    /**
+     * Which application does the job come from.
+     */
     @Field("application_name")
     private String applicationName;
 
+    /**
+     * Job into what queue type.
+     */
     @Field("queue_type")
     private Integer queueType;
 
+    /**
+     * Which bucket index does the job come from.
+     */
     @Field("bucket_index")
     private Integer bucketIndex;
 
+    /**
+     * Number of retries already happened.
+     */
     @Field("hadRetry_count")
     private Integer hadRetryCount;
 
+    /**
+     * The job has need to re-push.
+     */
     @Field("need_re_push")
     private Integer needRePush;
 
+    /**
+     * Next execution time with job.
+     */
     @Field(name = "execution_time", targetType = FieldType.TIMESTAMP)
     private Long executionTime;
 
+    /**
+     * Job push time.
+     */
     // create index named 'push_time.index', and created in the background.
     @Indexed(name = "index", background = true)
     @Field(name = "push_time", targetType = FieldType.TIMESTAMP)
     private Long pushTime;
 
+    /**
+     * Latest update time executed.
+     */
     // create index named 'update_time.index', and created in the background.
     @Indexed(name = "index", background = true)
     @Field(name = "update_time", targetType = FieldType.TIMESTAMP)

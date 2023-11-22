@@ -185,7 +185,7 @@ public class CacheHelper {
         Spot<Serializable, E> fastSpot = null;
         if (cache instanceof LightCache) {
             LightCache lightCache = (LightCache) cache;
-            if (lightCache.isEnableSuperCache() && !lightCache.getOnlyCacheL2()) {
+            if (lightCache.isEnableSuperCache() && !lightCache.isOnlyCacheL2()) {
                 // 方案一：从超级缓存中获取，内存指针引用即可返回（耗时为O(1)）
                 fastSpot = get(cache);
                 if (fastSpot != null) {
@@ -266,7 +266,7 @@ public class CacheHelper {
         Spot<Serializable, E> fastSpot = null;
         if (cache instanceof LightCache) {
             LightCache lightCache = (LightCache) cache;
-            if (lightCache.isEnableSuperCache() && !lightCache.getOnlyCacheL2()) {
+            if (lightCache.isEnableSuperCache() && !lightCache.isOnlyCacheL2()) {
                 fastSpot = get(cache);
                 if (fastSpot == null) {
                     // 设置超级缓存

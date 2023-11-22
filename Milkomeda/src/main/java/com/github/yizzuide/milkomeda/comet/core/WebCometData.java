@@ -49,7 +49,7 @@ import java.util.Map;
 public class WebCometData extends CometData {
     private static final long serialVersionUID = -2078666744044889106L;
     /**
-     * 接口请求序号
+     * 请求标识码
      */
     private String apiCode;
     /**

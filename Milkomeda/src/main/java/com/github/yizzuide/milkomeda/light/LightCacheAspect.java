@@ -56,6 +56,7 @@ import static com.github.yizzuide.milkomeda.util.ReflectUtil.extractValue;
  * <br>
  * Create at 2019/12/18 14:45
  */
+@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 @Slf4j
 @Order(98)
 @Aspect

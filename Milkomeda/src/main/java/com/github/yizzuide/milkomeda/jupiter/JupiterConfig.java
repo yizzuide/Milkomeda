@@ -44,6 +44,7 @@ import java.util.Map;
  * <br>
  * Create at 2020/05/19 16:57
  */
+@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 @EnableConfigurationProperties(JupiterProperties.class)
 public class JupiterConfig implements ApplicationContextAware {
 

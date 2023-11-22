@@ -22,7 +22,8 @@
 package com.github.yizzuide.milkomeda.crust;
 
 /**
- * CrustException
+ * Thrown if an authentication request is rejected because the credentials are not
+ * sufficiently trusted.
  *
  * @author yizzuide
  * @since 3.12.10

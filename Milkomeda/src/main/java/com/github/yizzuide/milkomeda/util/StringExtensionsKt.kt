@@ -45,7 +45,7 @@ class StringExtensionsKt {
 fun isEmpty(str : String?) = SpringPolyfill.isEmpty(str)
 
 /**
- * Object to String，return self if null
+ * Object to String，return self if null.
  * @param obj object value
  * @return string value
  * @since 3.13.0

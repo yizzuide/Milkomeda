@@ -48,9 +48,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * CrustAuthenticationFilter
- * 安全拦截过滤器
+ * Parse token to authentication filter.
  *
+ * @see org.springframework.security.web.context.SecurityContextHolderFilter
+ * @see org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
+ * @see org.springframework.security.web.authentication.www.BasicAuthenticationFilter
+ * @see org.springframework.security.web.authentication.AnonymousAuthenticationFilter
+ * @see org.springframework.security.web.access.ExceptionTranslationFilter
+ * @see org.springframework.security.web.access.intercept.FilterSecurityInterceptor
  * @author yizzuide
  * @since 1.14.0
  * @version 3.12.9
@@ -115,6 +120,7 @@ public class CrustAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
         chain.doFilter(request, response);
+        // Next clear `SecurityContext` within `SecurityContextHolderFilter`
     }
 
     protected void unsuccessfulAuthentication(HttpServletRequest request,
@@ -136,20 +142,24 @@ public class CrustAuthenticationFilter extends OncePerRequestFilter {
     }
 
     protected boolean permissiveRequest(HttpServletRequest request) {
-        if (permissiveRequestMatchers == null)
+        if (permissiveRequestMatchers == null) {
             return false;
+        }
         for (RequestMatcher permissiveMatcher : permissiveRequestMatchers) {
-            if (permissiveMatcher.matches(request))
+            if (permissiveMatcher.matches(request)) {
                 return true;
+            }
         }
         return false;
     }
 
     public void setPermissiveUrl(String... urls) {
-        if (permissiveRequestMatchers == null)
+        if (permissiveRequestMatchers == null) {
             permissiveRequestMatchers = new ArrayList<>();
-        for (String url : urls)
+        }
+        for (String url : urls) {
             permissiveRequestMatchers.add(new AntPathRequestMatcher(url));
+        }
     }
 
     public void setAuthenticationSuccessHandler(AuthenticationSuccessHandler successHandler) {

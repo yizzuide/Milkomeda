@@ -21,7 +21,7 @@
 
 package com.github.yizzuide.milkomeda.atom;
 
-import org.springframework.context.annotation.Bean;
+import com.github.yizzuide.milkomeda.orbit.OrbitConfig;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
@@ -30,16 +30,11 @@ import org.springframework.context.annotation.Import;
  *
  * @author yizzuide
  * @since 3.3.0
+ * @version 3.15.0
  * <br>
  * Create at 2020/04/30 15:13
  */
 @Configuration
-@Import({RedisAtomConfig.class, ZkAtomConfig.class})
+@Import({EtcdAtomConfig.class, RedisAtomConfig.class, ZkAtomConfig.class, OrbitConfig.class})
 public class AtomConfig {
-
-    @Bean
-    public AtomLockAspect atomLockAspect() {
-        return new AtomLockAspect();
-    }
-
 }

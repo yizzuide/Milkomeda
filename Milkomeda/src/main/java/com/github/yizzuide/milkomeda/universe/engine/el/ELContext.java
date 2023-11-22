@@ -31,7 +31,7 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 import java.lang.reflect.Method;
 
 /**
- * ELContext
+ * Method based SpEL context.
  *
  * @author yizzuide
  * @since 2.0.0
@@ -86,7 +86,7 @@ public class ELContext {
             return null;
         }
         // EL表达式执行器
-        ExpressionEvaluator<T> evaluator = new ExpressionEvaluator<>();
+        MethodExpressionEvaluator<T> evaluator = new MethodExpressionEvaluator<>();
         // 创建AOP方法的执行上下文
         StandardEvaluationContext evaluationContext =
                 evaluator.createEvaluationContext(object, clazz, method, args);

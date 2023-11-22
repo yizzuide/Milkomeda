@@ -23,7 +23,9 @@ package com.github.yizzuide.milkomeda.universe.config;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.core.convert.converter.GenericConverter;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -35,8 +37,11 @@ import java.util.Map;
  * Create at 2019/09/27 18:36
  */
 @Data
-@ConfigurationProperties("milkomeda")
+@ConfigurationProperties(MilkomedaProperties.PREFIX)
 public class MilkomedaProperties {
+
+    public static final String PREFIX = "milkomeda";
+
     /**
      * 是否显示日志，默认为false
      */
@@ -46,4 +51,16 @@ public class MilkomedaProperties {
      * 自定义参数配置，用于SpEl的<code>#env</code>读取
      */
     private Map<String, String> env;
+
+    /**
+     * Register early bean when load bean definition list.
+     * @since 3.15.0
+     */
+    private List<Class<?>> registerEarlyBeans;
+
+    /**
+     * Register converter used with conversion service.
+     * @since 3.15.0
+     */
+    private List<Class<GenericConverter>> registerConverters;
 }

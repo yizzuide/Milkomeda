@@ -26,11 +26,16 @@ package com.github.yizzuide.milkomeda.universe.metadata;
  *
  * @author yizzuide
  * @since 3.0.0
- * @version 3.14.0
+ * @version 3.15.0
  * <br>
  * Create at 2020/04/09 15:15
  */
 public interface BeanIds {
+    /**
+     * Spring MVC request handler mapping.
+     */
+    String REQUEST_MAPPING_HANDLER_MAPPING = "requestMappingHandlerMapping";
+
     /**
      * Comet Logger URL解析器Bean名
      */

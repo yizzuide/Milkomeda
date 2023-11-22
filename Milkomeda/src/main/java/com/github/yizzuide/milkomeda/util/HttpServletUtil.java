@@ -42,13 +42,8 @@ public class HttpServletUtil {
      * @return json字符串
      */
     public static String getRequestData(HttpServletRequest request) {
-        Map<String, String[]> names = new HashMap<>(0);
-        try {
-            names = request.getParameterMap();
-        } catch (IllegalStateException ignore) {
-        }
         Map<String, Object> inputs = new HashMap<>();
-        for (Map.Entry<String, String[]> paramEntry : names.entrySet()) {
+        for (Map.Entry<String, String[]> paramEntry : request.getParameterMap().entrySet()) {
             String[] value = paramEntry.getValue();
             if (value == null) {
                 inputs.put(paramEntry.getKey(), "");

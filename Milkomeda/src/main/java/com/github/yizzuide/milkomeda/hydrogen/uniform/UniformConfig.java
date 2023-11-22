@@ -25,14 +25,26 @@ import com.github.yizzuide.milkomeda.universe.config.MilkomedaContextConfig;
 import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import com.github.yizzuide.milkomeda.universe.polyfill.SpringMvcPolyfill;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.web.ServerProperties;
+import org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration;
+import org.springframework.boot.autoconfigure.web.servlet.error.ErrorViewResolver;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.web.servlet.error.ErrorAttributes;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.lang.NonNull;
+import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.HandlerExceptionResolver;
+import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+import java.util.stream.Collectors;
 
 /**
  * UniformConfig
@@ -47,14 +59,13 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupp
  * Create at 2020/03/25 22:46
  */
 @Import(MilkomedaContextConfig.class)
-@EnableConfigurationProperties(UniformProperties.class)
+@AutoConfigureBefore(ErrorMvcAutoConfiguration.class)
+@EnableConfigurationProperties({UniformProperties.class, ServerProperties.class})
 @ConditionalOnProperty(prefix = "milkomeda.hydrogen.uniform", name = "enable", havingValue = "true")
 @Configuration
 public class UniformConfig {
-    // 注入需要使用的ApplicationContext（让MilkomedaContextConfig先配置）
-    @SuppressWarnings("unused")
     @Autowired
-    private ApplicationContextHolder applicationContextHolder;
+    private ServerProperties serverProperties;
 
     @Bean
     public UniformHandler uniformHandler() {
@@ -67,8 +78,20 @@ public class UniformConfig {
     }
 
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
+    @Bean
+    public UniformErrorController uniformErrorController(ErrorAttributes errorAttributes,
+                                                         ObjectProvider<ErrorViewResolver> errorViewResolvers) {
+        return new UniformErrorController(errorAttributes, this.serverProperties.getError(),
+                errorViewResolvers.orderedStream().collect(Collectors.toList()));
+    }
+
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Configuration
     static class ExtendedConfig implements InitializingBean {
+        // 注入需要使用的ApplicationContext（让MilkomedaContextConfig先配置）
+        @SuppressWarnings("unused")
+        @Autowired
+        private ApplicationContextHolder applicationContextHolder;
 
         @Autowired
         private UniformProperties props;
@@ -84,7 +107,22 @@ public class UniformConfig {
 
         // 动态添加异常切面
         private void configExceptionAdvice() {
-            SpringMvcPolyfill.addDynamicExceptionAdvice(handlerExceptionResolver, ApplicationContextHolder.get(),  "uniformHandler");
+            SpringMvcPolyfill.addDynamicExceptionAdvice(handlerExceptionResolver, applicationContextHolder.getApplicationContext(),  "uniformHandler");
+        }
+    }
+
+    @Configuration(proxyBeanMethods = false)
+    @EnableConfigurationProperties(UniformProperties.class)
+    public static class RequestMappingConfigurer implements WebMvcConfigurer {
+
+        @Autowired
+        private UniformProperties props;
+
+        @Override
+        public void configurePathMatch(@NonNull PathMatchConfigurer configurer) {
+            if (StringUtils.hasText(props.getRequestPathPrefix())) {
+                configurer.addPathPrefix(props.getRequestPathPrefix(), p -> true);
+            }
         }
     }
 }

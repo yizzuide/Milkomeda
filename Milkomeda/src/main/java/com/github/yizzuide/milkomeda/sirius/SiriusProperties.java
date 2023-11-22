@@ -25,6 +25,7 @@ import com.baomidou.mybatisplus.annotation.DbType;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.core.convert.converter.GenericConverter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,6 +34,7 @@ import java.util.List;
  * Sirius module properties
  *
  * @since 3.14.0
+ * @version 3.15.0
  * @author yizzuide
  * <br>
  * Create at 2022/10/30 17:52
@@ -48,6 +50,18 @@ public class SiriusProperties {
     private DbType dbType = DbType.MYSQL;
 
     /**
+     * Automatically identify entity fill attributes without adding `@TableField(fill = xxx)` annotations
+     * @since 3.15.0
+     */
+    private boolean autoAddFill = true;
+
+    /**
+     * Recognize and ignore delete type operation if uses logic delete.
+     * @since 3.15.0
+     */
+    private String ignoreLogicDelete = "is_delete=1";
+
+    /**
      * Auto value interpolation.
      */
     private List<AutoInterpolate> autoInterpolates = new ArrayList<>();
@@ -55,16 +69,29 @@ public class SiriusProperties {
     @Data
     static class AutoInterpolate {
         /**
-         * What common field need interpolate to data table.
+         * What common field needs interpolate to data table?
          */
         private List<String> fields;
+
         /**
-         * Property source value.
+         * Property source value which can be with Spring EL using `el(condition, type)`.
          */
         private String psValue;
+
         /**
-         * Field fill type (current support insert and update).
+         * Apply default value when parse Spring EL error.
+         * @since 3.15.0
          */
-        private FieldFill fieldFill;
+        private Object defaultValue = 0;
+
+        /**
+         * convert property source value.
+         */
+        private Class<GenericConverter> converterClazz;
+
+        /**
+         * Field fill type.
+         */
+        private FieldFill fieldFill = FieldFill.INSERT;
     }
 }

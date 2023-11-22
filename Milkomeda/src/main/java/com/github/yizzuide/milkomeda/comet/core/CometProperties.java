@@ -21,8 +21,11 @@
 
 package com.github.yizzuide.milkomeda.comet.core;
 
+import com.github.yizzuide.milkomeda.universe.extend.web.handler.HotHttpHandlerProperty;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+
+import java.util.Map;
 
 /**
  * CometProperties
@@ -44,6 +47,7 @@ public class CometProperties {
 
     /**
      * 允许开启响应包装类读取响应消息体（获取通过注入HttpServletResponse直接写出响应数据则必须开启）
+     *
      * @see CometProperties#enableReadRequestBody
      */
     private boolean enableReadResponseBody = false;
@@ -57,4 +61,16 @@ public class CometProperties {
      * 失败状态码
      */
     private String statusFailCode = "2";
+
+    /**
+     * Config request parameter interceptor.
+     * @since 3.15.0
+     */
+    private Map<String, HotHttpHandlerProperty> requestInterceptors;
+
+    /**
+     * Config response interceptor.
+     * @since 3.15.0
+     */
+    private Map<String, HotHttpHandlerProperty> responseInterceptors;
 }

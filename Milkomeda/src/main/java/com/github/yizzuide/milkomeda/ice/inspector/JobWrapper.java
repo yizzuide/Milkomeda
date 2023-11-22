@@ -31,7 +31,7 @@ import lombok.Data;
 import java.io.Serializable;
 
 /**
- * Job introspect info with {@link Job}
+ * Job introspect info with {@link Job}.
  *
  * @author yizzuide
  * @since 3.14.0

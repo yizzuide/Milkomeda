@@ -46,10 +46,22 @@ public class UniformProperties {
     private boolean enable = false;
 
     /**
+     * 添加统一请求访问路径前缀
+     * @since 3.15.0
+     */
+    private String requestPathPrefix;
+
+    /**
      * Response code type.
      * @since 3.14.0
      */
     private ResultVO.CodeType codeType = ResultVO.CodeType.INT;
+
+    /**
+     * Ignore add field to message when valid fail.
+     * @since 3.15.0
+     */
+    private boolean ignoreAddFieldOnValidFail = false;
 
     /**
      * 响应数据

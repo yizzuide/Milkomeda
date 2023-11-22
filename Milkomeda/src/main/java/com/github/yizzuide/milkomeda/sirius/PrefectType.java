@@ -12,23 +12,52 @@ import com.github.yizzuide.milkomeda.hydrogen.uniform.UniformQueryPageData;
  */
 public enum PrefectType {
     /**
-     * equals field.
+     * Equals field.
      */
     EQ,
+
     /**
-     * sql like field.
+     * Not Equals field.
+     */
+    NEQ,
+
+    /**
+     * Match empty field (null or '').
+     */
+    EMPTY,
+
+    /**
+     * Match using sql `in`.
+     */
+    IN,
+
+    /**
+     * Match full words with {@link QueryLinker} and using sql `in`.
+     */
+    LINK_EQ_IN,
+
+    /**
+     * Match using sql `like`.
      */
     LIKE,
+
     /**
-     * sql order by.
+     * Match using sql `order by`.
      */
     OrderByPre,
+
     /**
-     * page result list order by.
+     * Page result list order by.
      */
     OrderByPost,
+
     /**
-     * using for `startDate` and `endDate` of {@link UniformQueryPageData} query.
+     * Using for `startDate` and `endDate` of {@link UniformQueryPageData} query.
      */
-    PageDate
+    PageDate,
+
+    /**
+     * Query with unix time relative to {@link PrefectType#PageDate}.
+     */
+    PageUnixTime
 }

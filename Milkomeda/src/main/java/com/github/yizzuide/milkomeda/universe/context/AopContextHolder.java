@@ -39,7 +39,6 @@ import org.springframework.aop.framework.AopContext;
 public final class AopContextHolder {
     /**
      * 获得当前切面代理对象
-     * <br>使用前通过<code>@EnableAspectJAutoProxy(proxyTargetClass = true, exposeProxy = true)</code>开启代理曝露
      *
      * @param clazz 当前类
      * @param <T>   当前类型

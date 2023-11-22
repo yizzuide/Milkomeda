@@ -22,10 +22,10 @@
 package com.github.yizzuide.milkomeda.hydrogen.uniform;
 
 import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
-import com.github.yizzuide.milkomeda.universe.context.WebContext;
 import com.github.yizzuide.milkomeda.universe.lang.Tuple;
 import com.github.yizzuide.milkomeda.universe.parser.yml.YmlParser;
 import com.github.yizzuide.milkomeda.universe.parser.yml.YmlResponseOutput;
+import com.github.yizzuide.milkomeda.util.DataTypeConvertUtil;
 import com.github.yizzuide.milkomeda.util.JSONUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -37,6 +37,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -58,21 +59,24 @@ import java.util.*;
 /**
  * UniformHandler
  *
- * @author yizzuide
- * @since 3.0.0
- * @version 3.14.1
  * @see org.springframework.boot.SpringApplication#run(java.lang.String...)
  * #see org.springframework.boot.SpringApplication#registerLoggedException(java.lang.Throwable)
  * #see org.springframework.boot.SpringBootExceptionHandler.LoggedExceptionHandlerThreadLocal#initialValue()
  * @see org.springframework.boot.SpringApplication#setRegisterShutdownHook(boolean)
  * @see org.springframework.context.support.AbstractApplicationContext#registerShutdownHook()
+ * @author yizzuide
+ * @since 3.0.0
+ * @version 3.15.0
  * <br>
  * Create at 2020/03/25 22:47
  */
+@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 @Slf4j
 // 可以用于定义@ExceptionHandler、@InitBinder、@ModelAttribute, 并应用到所有@RequestMapping中
 //@ControllerAdvice // 这种方式默认就会扫描并加载到Ioc，不好动态控制是否加载，但好处是外部API对未来版本的兼容性强
 public class UniformHandler extends ResponseEntityExceptionHandler {
+
+    public static final int REQUEST_BEFORE_EXCEPTION_CODE = 5000;
 
     @Autowired
     private UniformProperties props;
@@ -115,7 +119,9 @@ public class UniformHandler extends ResponseEntityExceptionHandler {
     }
 
     private Class<?> createExceptionClass(Object clazz) {
-        if (!(clazz instanceof String)) return null;
+        if (!(clazz instanceof String)) {
+            return null;
+        }
         Class<?> expClazz = null;
         try {
             expClazz = Class.forName(clazz.toString());
@@ -140,8 +146,12 @@ public class UniformHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<Object> constraintViolationException(ConstraintViolationException e) {
         ConstraintViolation<?> constraintViolation = e.getConstraintViolations().iterator().next();
         String value = String.valueOf(constraintViolation.getInvalidValue());
-        String message = WebContext.getRequestNonNull().getRequestURI() +
-                " [" + constraintViolation.getPropertyPath() + "=" + value + "] " + constraintViolation.getMessage();
+        String message;
+        if (props.isIgnoreAddFieldOnValidFail()) {
+            message = constraintViolation.getMessage();
+        } else {
+            message = "[" + constraintViolation.getPropertyPath() + "=" + value + "] " + constraintViolation.getMessage();
+        }
         log.warn("Hydrogen uniform valid response exception with msg: {} ", message);
         ResponseEntity<Object> responseEntity = handleExceptionResponse(e, HttpStatus.BAD_REQUEST.value(), message);
         return responseEntity == null ? ResponseEntity.status(HttpStatus.BAD_REQUEST.value()).body(null) : responseEntity;
@@ -194,9 +204,11 @@ public class UniformHandler extends ResponseEntityExceptionHandler {
     private ResponseEntity<Object> handleValidBeanExceptionResponse(Exception ex, BindingResult bindingResult) {
         ObjectError objectError = bindingResult.getAllErrors().get(0);
         String message = objectError.getDefaultMessage();
-        if (objectError.getArguments() != null && objectError.getArguments().length > 0) {
-            FieldError fieldError = (FieldError) objectError;
-            message = WebContext.getRequestNonNull().getRequestURI() + " [" + fieldError.getField() + "=" + fieldError.getRejectedValue() + "] " + message;
+        if (!props.isIgnoreAddFieldOnValidFail()) {
+            if (objectError.getArguments() != null && objectError.getArguments().length > 0) {
+                FieldError fieldError = (FieldError) objectError;
+                message = "[" + fieldError.getField() + "=" + fieldError.getRejectedValue() + "] " + message;
+            }
         }
         log.warn("Hydrogen uniform valid response exception with msg: {} ", message);
         return handleExceptionResponse(ex, HttpStatus.BAD_REQUEST.value(), message);
@@ -248,20 +260,35 @@ public class UniformHandler extends ResponseEntityExceptionHandler {
     }
 
     /**
-     * Used for external match with status code to get response result.
-     * @param response  response object
+     * Try match response resolve with code before write.
+     * @param code  response status code
+     * @return  true if matched
+     * @since 3.15.0
+     */
+    public static boolean tryMatch(int code) {
+        UniformProperties props = Binder.get(ApplicationContextHolder.get().getEnvironment()).bind(UniformProperties.PREFIX, UniformProperties.class).get();
+        if (props == null) {
+            return false;
+        }
+        Map<?, ?> resolveMap = (Map<?, ?>) props.getResponse().get(String.valueOf(code));
+        return resolveMap != null;
+    }
+
+    /**
+     * Used for external match with status code to get the response result.
+     * @param statusCode  response status
      * @param source    replace data
      * @return tuple(yml node map, response content)
-     * @since 3.14.0
+     * @since 3.15.0
      */
     @SuppressWarnings("unchecked")
-    public static Tuple<Map<String, Object>, Map<String, Object>> matchStatusResult(HttpServletResponse response, Map<String, Object> source) {
+    public static Tuple<Map<String, Object>, Map<String, Object>> matchStatusResult(int statusCode, Map<String, Object> source) {
         UniformProperties props = Binder.get(ApplicationContextHolder.get().getEnvironment()).bind(UniformProperties.PREFIX, UniformProperties.class).get();
         Map<String, Object> resolveMap;
         if (props == null) {
             resolveMap = createInitResolveMap();
         } else {
-            resolveMap = (Map<String, Object>) props.getResponse().get(String.valueOf(response.getStatus()));
+            resolveMap = (Map<String, Object>) props.getResponse().get(String.valueOf(statusCode));
             if (resolveMap == null) {
                 resolveMap = createInitResolveMap();
             }
@@ -269,25 +296,64 @@ public class UniformHandler extends ResponseEntityExceptionHandler {
 
         Map<String, Object> result = new HashMap<>();
         // status == 200?
-        if (response.getStatus() == HttpStatus.OK.value()) {
+        if (statusCode == HttpStatus.OK.value()) {
             YmlParser.parseAliasMapPath(resolveMap, result, YmlResponseOutput.CODE, null, source);
             YmlParser.parseAliasMapPath(resolveMap, result, YmlResponseOutput.MESSAGE, null, source);
             YmlParser.parseAliasMapPath(resolveMap, result, YmlResponseOutput.DATA, null, source);
             resultFilter(result);
         } else { // status != 200
+            // 源Code字段为空或已配置了Code的值，就使用配置的值
+            Object code = source.get(YmlResponseOutput.CODE);
+            Object configCode = resolveMap.get(YmlResponseOutput.CODE);
+            if (code == null || (configCode != null && StringUtils.hasText(configCode.toString()))) {
+                source.put(YmlResponseOutput.CODE, resolveMap.get(YmlResponseOutput.CODE));
+            }
             YmlResponseOutput.output(resolveMap, result, source, null, false);
         }
         return Tuple.build(resolveMap, result);
     }
 
+    /**
+     * Used for external match with status code to get the response result.
+     * @param response  response object
+     * @param source    replace data
+     * @return tuple(yml node map, response content)
+     * @since 3.14.0
+     */
+
+    public static Tuple<Map<String, Object>, Map<String, Object>> matchStatusResult(HttpServletResponse response, Map<String, Object> source) {
+        return matchStatusResult(response.getStatus(), source);
+    }
+
     @NotNull
     private static Map<String, Object> createInitResolveMap() {
-        Map<String, Object> resolveMap = new HashMap<>(7);
+        Map<String, Object> resolveMap = new HashMap<>(8);
         resolveMap.put(YmlResponseOutput.STATUS, HttpStatus.OK.value());
         resolveMap.put(YmlResponseOutput.CODE, "0");
         resolveMap.put(YmlResponseOutput.MESSAGE, "");
         resolveMap.put(YmlResponseOutput.DATA, Collections.emptyMap());
         return resolveMap;
+    }
+
+    /**
+     * Used for external match with status code to write.
+     * @param response  response object
+     * @param status    http status code
+     * @param e         exception
+     * @throws IOException if an input or output exception occurred
+     * @since 3.15.0
+     */
+    public static void matchStatusToWrite(HttpServletResponse response, Integer status, Exception e) throws IOException {
+        response.setStatus(status == null ? REQUEST_BEFORE_EXCEPTION_CODE : status);
+        ResultVO<?> source;
+        if (e != null) {
+            Map<String, Object> exMap = DataTypeConvertUtil.beanToMap(e);
+            Object code = exMap.get(YmlResponseOutput.CODE);
+            source = UniformResult.error(String.valueOf(code != null ? code : response.getStatus()), e.getMessage());
+        } else {
+            source = UniformResult.error(String.valueOf(response.getStatus()), "");
+        }
+        UniformHandler.matchStatusToWrite(response, source.toMap());
     }
 
     /**

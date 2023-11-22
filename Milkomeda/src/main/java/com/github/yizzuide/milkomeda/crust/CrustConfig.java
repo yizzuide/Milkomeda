@@ -54,10 +54,10 @@ import javax.annotation.Resource;
  * <br>
  * Create at 2019/11/11 14:56
  */
-@Configuration
-@AutoConfigureAfter(LightConfig.class)
 @ConditionalOnClass({AuthenticationManager.class})
 @EnableConfigurationProperties({CrustProperties.class, LightProperties.class})
+@AutoConfigureAfter(LightConfig.class)
+@Configuration
 public class CrustConfig {
 
     @Autowired
@@ -66,6 +66,11 @@ public class CrustConfig {
     @Bean
     public Crust crust() {
         return new Crust();
+    }
+
+    @Bean
+    public CrustTokenResolver crustTokenResolver() {
+        return new CrustTokenResolver(crustProps);
     }
 
     @Bean
@@ -83,18 +88,27 @@ public class CrustConfig {
     }
 
     @Bean(Crust.CATCH_NAME)
+    @ConditionalOnMissingBean
     @ConditionalOnProperty(prefix = "milkomeda.crust", name = "enable-cache", havingValue = "true", matchIfMissing = true)
-    public Cache lightCache(LightProperties lightProps) {
+    public Cache crustLightCache(LightProperties lightProps) {
         LightCache lightCache = new LightCache();
         lightCache.setL1MaxCount(lightProps.getL1MaxCount());
         lightCache.setL1DiscardPercent(lightProps.getL1DiscardPercent());
         lightCache.setL1Expire(crustProps.getExpire().getSeconds());
-        lightCache.setStrategy(lightProps.getStrategy());
-        lightCache.setStrategyClass(lightProps.getStrategyClass());
-        lightCache.setOnlyCacheL1(!crustProps.isEnableCacheL2());
+        lightCache.setStrategy(LightDiscardStrategy.LazyExpire);
+        lightCache.setOnlyCacheL1(crustProps.isCacheInMemory());
         lightCache.setL2Expire(crustProps.getExpire().getSeconds());
-        lightCache.setOnlyCacheL2(false);
         lightCache.setEnableSuperCache(lightProps.isEnableSuperCache());
+        return lightCache;
+    }
+
+    @Bean(Crust.CODE_CATCH_NAME)
+    @ConditionalOnProperty(prefix = "milkomeda.crust", name = "login-type", havingValue = "CODE")
+    public Cache crustCodeLightCache() {
+        LightCache lightCache = new LightCache();
+        lightCache.setEnableSuperCache(false);
+        lightCache.setOnlyCacheL2(true);
+        lightCache.setL2Expire(crustProps.getCodeExpire().getSeconds());
         return lightCache;
     }
 

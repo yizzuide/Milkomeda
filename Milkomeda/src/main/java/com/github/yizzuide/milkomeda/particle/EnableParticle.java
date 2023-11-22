@@ -21,6 +21,7 @@
 
 package com.github.yizzuide.milkomeda.particle;
 
+import com.github.yizzuide.milkomeda.universe.config.RedisGlobalConfig;
 import org.springframework.context.annotation.Import;
 
 import java.lang.annotation.*;
@@ -37,6 +38,6 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Inherited
-@Import(ParticleConfig.class)
+@Import({RedisGlobalConfig.class, ParticleConfig.class})
 public @interface EnableParticle {
 }

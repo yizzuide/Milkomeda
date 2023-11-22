@@ -21,7 +21,9 @@
 
 package com.github.yizzuide.milkomeda.hydrogen.interceptor;
 
+import com.github.yizzuide.milkomeda.universe.metadata.BeanIds;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -48,7 +50,8 @@ public class InterceptorConfig {
 
     @Bean
     @ConditionalOnClass(name = "org.springframework.web.servlet.HandlerInterceptor")
-    public InterceptorLoader interceptorHandler(InterceptorProperties interceptorProperties, RequestMappingHandlerMapping requestMappingHandlerMapping) {
+    public InterceptorLoader interceptorHandler(InterceptorProperties interceptorProperties,
+           @Qualifier(BeanIds.REQUEST_MAPPING_HANDLER_MAPPING) RequestMappingHandlerMapping requestMappingHandlerMapping) {
         return new WebMvcInterceptorLoader(interceptorProperties, requestMappingHandlerMapping);
     }
 }

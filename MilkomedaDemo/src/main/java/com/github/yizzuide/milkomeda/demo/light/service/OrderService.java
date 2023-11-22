@@ -23,7 +23,7 @@ public class OrderService {
 
     private static final String G_KEY = "order_list";
 
-    @LightCacheable(value = "orders", key = G_KEY)
+    @LightCacheable(value = "ordersLight", key = G_KEY)
     public List<Map<String, Object>> findList() {
         String value = LightContext.getValue("test-id");
         log.info("lightContext: {}", value);
@@ -44,7 +44,7 @@ public class OrderService {
      * @param orderId  订单id
      */
     // 参数采集方式生成缓存key
-    @LightCacheable(value = "order", key = "'order:' + #orderId", condition = "#orderId!=null")
+    @LightCacheable(value = "orderLight", key = "'order:' + #orderId", condition = "#orderId!=null")
     // 静态方法生成缓存key
 //    @LightCacheable(value = "order", key = "T(com.github.yizzuide.milkomeda.demo.light.pref.CacheKeys).ORDER.key", condition = "#orderId!=null")
     public Order findById(String orderId) {
@@ -52,12 +52,12 @@ public class OrderService {
         return new Order(orderId, "小明", "1200", 0,  new Date());
     }
 
-    @LightCacheEvict(value = "order", key = "'order:' + #orderId")
+    @LightCacheEvict(value = "orderLight", key = "'order:' + #orderId")
     public void  deleteById(String orderId) {
       log.info("删除订单：{}", orderId);
     }
 
-    @LightCachePut(value = "order", key = "'order:' + #orderId", condition = "#orderId!=null")
+    @LightCachePut(value = "orderLight", key = "'order:' + #orderId", condition = "#orderId!=null")
     public Order updateById(String orderId) {
         return new Order(orderId, "小红", "2000", 0, new Date());
     }

@@ -51,7 +51,7 @@ public class IceKeys {
      */
     public static Map<String, String> resolve(JobWrapper jobWrapper) {
         String applicationName = IceHolder.getApplicationName();
-        Map<String, String> keyMap = new HashMap<>(3);
+        Map<String, String> keyMap = new HashMap<>(8);
         keyMap.put("jobPool", JOB_POOL_KEY_PREFIX.concat(":" + applicationName));
         switch (jobWrapper.getQueueType()) {
             case DelayQueue:

@@ -22,7 +22,7 @@
 package com.github.yizzuide.milkomeda.particle;
 
 import com.github.yizzuide.milkomeda.universe.context.SpringContext;
-import com.github.yizzuide.milkomeda.util.IOUtils;
+import com.github.yizzuide.milkomeda.universe.extend.loader.LuaLoader;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
@@ -53,7 +53,7 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 1.14.0
- * @version 3.12.10
+ * @version 3.15.0
  * <br>
  * Create at 2019/11/11 11:26
  */
@@ -120,6 +120,15 @@ public class ParticleConfig implements ApplicationContextAware {
                     case TIMES:
                         limiter.setHandlerClazz(TimesLimiter.class);
                         break;
+                    case ROLL_WINDOW:
+                        limiter.setHandlerClazz(RollWindowLimiter.class);
+                        break;
+                    case TOKEN_BUCKET:
+                        limiter.setHandlerClazz(TokenBucketLimiter.class);
+                        break;
+                    case LEAKY_BUCKET:
+                        limiter.setHandlerClazz(LeakyBucketLimiter.class);
+                        break;
                     case BARRIER:
                         limiter.setHandlerClazz(BarrierLimiter.class);
                         break;
@@ -129,13 +138,18 @@ public class ParticleConfig implements ApplicationContextAware {
                 }
             }
             LimitHandler limitHandler = SpringContext.registerBean((ConfigurableApplicationContext) applicationContext, limiterName, limiter.getHandlerClazz(), limiter.getProps());
+            applicationContext.getAutowireCapableBeanFactory().autowireBean(limitHandler);
             limitHandler.setExpire(limiter.getKeyExpire().getSeconds());
             limiter.setLimitHandler(limitHandler);
             if (limiter.getHandlerClazz() == BarrierLimiter.class) {
                 barrierLimiters.add(limiter);
             }
             // 缓存并设置属性
-            cacheHandlerBeans.put(limiterName, limitHandler);
+            if(null == cacheHandlerBeans.putIfAbsent(limiterName, limitHandler) &&
+                    limitHandler instanceof LuaLoader) {
+                // 仅读取配置限制器的lua脚本
+                ((LuaLoader) limitHandler).load();
+            }
         }
 
         // 创建barrierLimiter类型限制器链
@@ -157,10 +171,6 @@ public class ParticleConfig implements ApplicationContextAware {
         List<ParticleProperties.Limiter> orderLimiters = limiters.stream()
                 .sorted(OrderComparator.INSTANCE.withSourceProvider(limiter -> limiter)).collect(Collectors.toList());
         particleProperties.setLimiters(orderLimiters);
-
-        // 读取lua脚本
-        String luaScript = IOUtils.loadLua(IOUtils.LUA_PATH, "particle_times_limiter.lua");
-        TimesLimiter.setLuaScript(luaScript);
     }
 
     static Map<String, LimitHandler> getCacheHandlerBeans() {

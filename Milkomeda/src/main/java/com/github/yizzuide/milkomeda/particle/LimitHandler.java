@@ -41,10 +41,11 @@ import java.io.Serializable;
 @Data
 public abstract class LimitHandler implements Limiter {
     /**
-     * 过期时间
+     * expire with second unit.
      * @since 3.12.10
      */
     protected Long expire;
+
     /**
      * 拦截链串，用于记录链条数据
      */

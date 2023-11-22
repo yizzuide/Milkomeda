@@ -27,7 +27,6 @@ import java.util.Comparator;
 
 /**
  * HotDiscard
- *
  * 低频热点丢弃方案
  *
  * @since 1.8.0
@@ -38,6 +37,7 @@ import java.util.Comparator;
  */
 public class HotDiscard extends SortDiscard {
 
+    @SuppressWarnings("rawtypes")
     @Override
     public Class<? extends SortSpot> spotClazz() {
         return HotSpot.class;
@@ -55,7 +55,10 @@ public class HotDiscard extends SortDiscard {
     @Override
     public boolean ascend(Spot<Serializable, Object> spot) {
         HotSpot<Serializable, Object> hotSpot = (HotSpot<Serializable, Object>) spot;
-        hotSpot.setStar(hotSpot.getStar() + 1);
+        // 使用锁保证访问的真实数量
+        synchronized (this) {
+            hotSpot.setStar(hotSpot.getStar() + 1);
+        }
         return false;
     }
 

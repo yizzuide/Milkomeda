@@ -59,17 +59,18 @@ public class ShardingFunction {
 
     /**
      * 取模函数
-     * @param key       拆分键
+     * @param key       路由Key
      * @param count     节点个数
      * @return  取模结果
      */
     public long mod(long key, long count) {
-        return key % count;
+        // hash散列矫正
+        return (count - 1) & (Long.hashCode(key) ^ Long.hashCode(key) >>> 16);
     }
 
     /**
-     * 取ShardingId生成的拆分号
-     * @param key   拆分键
+     * 取ShardingId生成的拆分号（分表Index）
+     * @param key   路由Key
      * @return  拆分号
      */
     public long id(long key) {
@@ -78,7 +79,7 @@ public class ShardingFunction {
 
     /**
      * 自定义序列号抽取函数
-     * @param key       拆分键
+     * @param key       路由Key
      * @param bitStart  二进制开始位（从0开始，且从右边开始计数）
      * @param bitCount  二进制长度（从右边向左取位数）
      * @return 取值结果
@@ -90,7 +91,7 @@ public class ShardingFunction {
 
     /**
      * FNV132算法一致性哈希函数实现（与Murmur相当的性能和不变流量）
-     * @param key           拆分键
+     * @param key           路由Key
      * @param nodeCount     节点数
      * @param replicas      每个节点复制的虚拟节点数，推荐设置4的倍数
      * @return  目标节点
@@ -101,7 +102,7 @@ public class ShardingFunction {
 
     /**
      * Murmur算法一致性哈希实现（高性能，高不变流量）
-     * @param key           拆分键
+     * @param key           路由Key
      * @param nodeCount     节点数
      * @param replicas      每个节点复制的虚拟节点数，推荐设置4的倍数
      * @return  目标节点
@@ -112,7 +113,7 @@ public class ShardingFunction {
 
     /**
      * Ketama算法一致性哈希实现（与Murmur相当的高不变流量，高负载平衡性，推荐使用）
-     * @param key           拆分键
+     * @param key           路由Key
      * @param nodeCount     节点数
      * @param replicas      每个节点复制的虚拟节点数，推荐设置4的倍数
      * @return  目标节点
@@ -124,7 +125,7 @@ public class ShardingFunction {
     /**
      * 自定义算法一致性哈希实现
      * @param hashName      哈希算法名
-     * @param key           拆分键
+     * @param key           路由Key
      * @param nodeCount     节点数
      * @param replicas      每个节点复制的虚拟节点数，推荐设置4的倍数
      * @return  目标节点
@@ -136,7 +137,7 @@ public class ShardingFunction {
 
     /**
      * 时间窗口滑动（可实现按创建日期拆分）
-     * @param key   时间拆分键
+     * @param key   时间路由Key
      * @param startDate 开始时间（格式：yyyy-MM-dd）
      * @param daySlideWindow 滑动窗口天数（一个滑动窗口分一次）
      * @param expandWarnPercent 当前分表扩展警告占百分比，如：0.75
@@ -159,7 +160,7 @@ public class ShardingFunction {
 
     /**
      * 通用窗口滑动（可实现增长类型主键拆分）
-     * @param key           拆分键
+     * @param key           路由Key
      * @param slideWindow   滑动窗口大小
      * @param expandWarnPercent 当前分表扩展警告占百分比，如：0.75
      * @return  拆分号

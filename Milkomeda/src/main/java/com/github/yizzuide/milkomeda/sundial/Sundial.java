@@ -39,14 +39,18 @@ import java.lang.annotation.*;
 @Inherited
 public @interface Sundial {
     /**
-     * 选择数据源Key
+     * 选择数据源Key，使用时分以下两种情况：
+     * <p>
+     *     1. 仅使用主从策略时，需要配置<code>sundial.strategy</code>，再通过该属性设置RouteKey。<br>
+     *     2. 如果是分库分表+主从策略时，需要配置<code>sundial.sharding.nodes</code>，再通过该属性设置RouteKey。
+     * </p>
      * @return String
      */
     @AliasFor("key")
     String value() default DynamicRouteDataSource.MASTER_KEY;
 
     /**
-     * 监选择数据源Key
+     * 等同value的值
      * @return  String
      */
     @AliasFor("value")

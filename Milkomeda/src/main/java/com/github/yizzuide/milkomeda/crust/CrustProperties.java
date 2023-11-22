@@ -21,7 +21,6 @@
 
 package com.github.yizzuide.milkomeda.crust;
 
-import com.github.yizzuide.milkomeda.light.LightCache;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.convert.DurationUnit;
@@ -36,7 +35,7 @@ import java.util.List;
  *
  * @author yizzuide
  * @since 1.14.0
- * @version 3.12.10
+ * @version 3.15.0
  * <br>
  * Create at 2019/11/11 15:51
  */
@@ -49,14 +48,40 @@ public class CrustProperties {
     private boolean stateless = true;
 
     /**
-     * 查询认证信息缓存（Session方式下仅开启超级缓存，因为Session本身有Session级缓存）
+     * Login type config for used with {@link Crust#login(String, String, Class)}.
+     * @since 3.15.0
+     */
+    private CrustLoginType loginType = CrustLoginType.PASSWORD;
+
+    /**
+     * Code verify expire time, must set `CrustLoginType.CODE` with property of {@link CrustProperties#loginType}.
+     * @since 3.15.0
+     */
+    @DurationUnit(ChronoUnit.SECONDS)
+    private Duration codeExpire = Duration.ofSeconds(60);
+
+    /**
+     * Set false if you need custom config via {@link CrustConfigurerAdapter}.
+     * @since 3.15.0
+     */
+    private boolean useAutoConfig = true;
+
+    /**
+     * Set false if you use stateless token.
+     * 认证缓存（Session方式下仅开启超级缓存，因为Session本身有Session级缓存）
      */
     private boolean enableCache = true;
+
     /**
-     * Token方式情况下，并且 <code>enableCache=true</code>，是否缓存到Redis <br>
-     * 注意：这个配置将覆盖缓存模块 {@link LightCache#getOnlyCacheL2()} 配置的值
+     * Set true if cache only used memory.
      */
-    private boolean enableCacheL2 = true;
+    private boolean cacheInMemory = false;
+
+    /**
+     * Set false if you need get entity of user info immediately.
+     * @since 3.15.0
+     */
+    private boolean enableLoadEntityLazy = true;
 
     /**
      * 使用非对称方式（默认为false)<br>
@@ -102,7 +127,7 @@ public class CrustProperties {
     private boolean enableAutoRefreshToken = true;
 
     /**
-     * Token刷新间隔（默认5分钟，单位：分）
+     * Token访问即将过期的刷新间隔
      */
     @DurationUnit(ChronoUnit.MINUTES)
     private Duration refreshTokenInterval = Duration.ofMinutes(5);
@@ -111,12 +136,6 @@ public class CrustProperties {
      * Token刷新响应字段
      */
     private String refreshTokenName = "Authorization";
-
-    /**
-     * default auth fail code.
-     * @since 3.14.0
-     */
-    private String authFailCode = "401";
 
     /**
      * 登录页面路径（仅在stateless=false时有效，默认/login）
@@ -132,7 +151,7 @@ public class CrustProperties {
      * 默认允许访问的URL
      * @since 3.5.0
      */
-    private List<String> permitURLs = Arrays.asList("/favicon.ico", "/druid/**", "/doc.html", "/webjars/**",
+    private List<String> permitUrls = Arrays.asList("/favicon.ico", "/druid/**", "/doc.html", "/webjars/**",
             "/swagger-resources/**", "/swagger-ui.html");
 
     /**

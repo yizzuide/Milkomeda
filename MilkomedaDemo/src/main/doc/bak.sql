@@ -3,7 +3,8 @@ create schema milkomeda;
 create schema milkomeda_r;
 create schema milkomeda_01;
 
--- for milkomeda,milkomeda_r,milkomeda_01
+-- apply to milkomeda, milkomeda_r, milkomeda_01
+drop table if exists t_order;
 create table t_order
 (
 	id bigint not null primary key auto_increment,
@@ -18,7 +19,8 @@ create table t_order
 comment 'order table';
 
 
--- for milkomeda
+-- apply to milkomeda
+drop table if exists t_order_001;
 create table t_order_001
 (
     id bigint not null primary key auto_increment,
@@ -32,7 +34,8 @@ create table t_order_001
 )
     comment 'order table';
 
-
+-- apply to milkomeda
+drop table if exists job_inspection;
 create table job_inspection
 (
     id bigint(32) not null,

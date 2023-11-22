@@ -1,6 +1,5 @@
 package com.github.yizzuide.milkomeda.demo.light.pojo;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -16,11 +15,18 @@ import java.util.Date;
  */
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 public class Order {
-    String orderId;
-    String name;
-    String amount;
-    Integer state;
-    Date createTime;
+    private String orderId;
+    private String name;
+    private String amount;
+    private Integer state;
+    private Date createTime;
+
+    public Order(String orderId, String name, String amount, Integer state, Date createTime) {
+        this.orderId = orderId;
+        this.name = name;
+        this.amount = amount;
+        this.state = state;
+        this.createTime = createTime;
+    }
 }

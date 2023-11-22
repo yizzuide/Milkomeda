@@ -37,6 +37,7 @@ import org.springframework.util.StringUtils;
  * <br>
  * Create at 2020/05/22 15:59
  */
+@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 public class MetalMessageHandler {
 
     private static String METAL_CHANGE_TOPIC;

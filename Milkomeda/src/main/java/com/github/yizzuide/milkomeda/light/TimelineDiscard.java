@@ -38,6 +38,7 @@ import java.util.Date;
  */
 public class TimelineDiscard extends SortDiscard {
 
+    @SuppressWarnings("rawtypes")
     @Override
     public Class<? extends SortSpot> spotClazz() {
         return TimelineSpot.class;

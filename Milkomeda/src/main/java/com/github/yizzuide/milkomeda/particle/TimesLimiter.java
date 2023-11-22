@@ -21,6 +21,7 @@
 
 package com.github.yizzuide.milkomeda.particle;
 
+import com.github.yizzuide.milkomeda.universe.extend.loader.LuaLoader;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -45,7 +46,12 @@ import java.util.Collections;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class TimesLimiter extends LimitHandler {
+public class TimesLimiter extends LimitHandler implements LuaLoader {
+    /**
+     * Decorated postfix for limiter key.
+     */
+    private static final String POSTFIX = ":times";
+
     /**
      * 限制时间类型
      */
@@ -59,11 +65,10 @@ public class TimesLimiter extends LimitHandler {
     @Setter
     private Long limitTimes;
 
-    // 装饰后缀
-    private static final String POSTFIX = ":times";
-
-    // lua 脚本
-    private static String luaScript;
+    /**
+     * Lua script list.
+     */
+    private String[] luaScripts;
 
     public TimesLimiter() { }
 
@@ -98,7 +103,7 @@ public class TimesLimiter extends LimitHandler {
             default:
                 throw new IllegalStateException("Unexpected value: " + timesType);
         }
-        RedisScript<Long> redisScript = new DefaultRedisScript<>(luaScript, Long.class);
+        RedisScript<Long> redisScript = new DefaultRedisScript<>(luaScripts[0], Long.class);
         Long times = redisTemplate.execute(redisScript, Collections.singletonList(decoratedKey), limitTimes, expireSeconds);
         assert times != null;
         // 判断是否超过次数
@@ -107,7 +112,8 @@ public class TimesLimiter extends LimitHandler {
         return next(particle, key, process);
     }
 
-    static void setLuaScript(String luaScript) {
-        TimesLimiter.luaScript = luaScript;
+    @Override
+    public String[] luaFilenames() {
+        return new String[]{"particle_times_limiter.lua"};
     }
 }

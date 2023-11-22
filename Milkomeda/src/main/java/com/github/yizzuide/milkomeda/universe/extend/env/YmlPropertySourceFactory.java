@@ -32,7 +32,7 @@ import java.io.IOException;
 import java.util.Properties;
 
 /**
- *  Add support yaml config with PropertySource
+ *  Add support yaml config with PropertySource.
  *
  * @author yizzuide
  * @since 3.13.0

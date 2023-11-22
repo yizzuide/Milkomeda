@@ -22,6 +22,8 @@
 package com.github.yizzuide.milkomeda.universe.parser.yml;
 
 import com.github.yizzuide.milkomeda.universe.extend.env.CollectionsPropertySource;
+import com.github.yizzuide.milkomeda.universe.lang.Tuple;
+import com.github.yizzuide.milkomeda.util.Strings;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
@@ -97,7 +99,7 @@ public class YmlParser {
      * @param replaceData   如果值存在，使用替换的源强制替换配置的字段
      */
     public static void parseAliasMapPath(Map<String, Object> nodeMap, Map<String, Object> result, String ownerAliasKey, Object defaultValue, Object replaceData) {
-        Map<String, YmlAliasNode> aliasNodeMap = new HashMap<>(2);
+        Map<String, YmlAliasNode> aliasNodeMap = new HashMap<>(4);
         parseAliasNodePath(nodeMap, aliasNodeMap, ownerAliasKey, defaultValue, replaceData);
         if (aliasNodeMap.isEmpty()) {
             return;
@@ -116,25 +118,18 @@ public class YmlParser {
      */
     @SuppressWarnings("all")
     public static void parseAliasNodePath(Map<String, Object> nodeMap, Map<String, YmlAliasNode> aliasNodeMap, String ownerAliasKey, Object defaultValue, Object replaceData) {
-        String key = ownerAliasKey;
-        Object value = nodeMap.get(ownerAliasKey);
+        // 配置中未添加该返回的字段，不计入返回结果
+        if (!nodeMap.keySet().contains(ownerAliasKey)) {
+            return;
+        }
+        Tuple<String, Object> aliasNode = extractAliasNode(nodeMap, ownerAliasKey);
+        String key = aliasNode.getT1();
+        Object value = aliasNode.getT2();
         // 判定别名节点flag
-        boolean hasAliasNode = false;
+        boolean hasAliasNode = !key.equals(ownerAliasKey);
         // 未指定的配置字段，如果有默认值
         if ((value == null || StringUtils.isBlank(value.toString())) && defaultValue != null) {
             value = defaultValue;
-        } else if (value instanceof Map) { // 别名替换
-            Map<String, Object> valueMap = (Map<String, Object>) value;
-            if (valueMap.size() > 0) {
-                key = String.valueOf(valueMap.keySet().toArray()[0]);
-                value = valueMap.get(key);
-                hasAliasNode = true;
-            }
-        }
-
-        // 配置中未添加该返回的字段，不计入返回结果
-        if (value == null) {
-            return;
         }
 
         // 创建别名节点
@@ -157,11 +152,32 @@ public class YmlParser {
             return;
         }
         // 替换是指定的值
-        if (StringUtils.isBlank(value.toString()) && replaceData != null) {
+        if (Strings.isEmpty(Strings.toNullableString(value)) && replaceData != null) {
             ymlAliasNode.setValue(replaceData);
         }
         // Replace empty token
         ymlAliasNode.setValue(CollectionsPropertySource.of(ymlAliasNode.getValue()));
         aliasNodeMap.put(ownerAliasKey,  ymlAliasNode);
+    }
+
+    /**
+     * Get alias node from yml config map.
+     * @param nodeMap   yml config map
+     * @param ownerAliasKey alias key of owner
+     * @return alias node
+     * @since 3.15.0
+     */
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public static Tuple<String, Object> extractAliasNode(Map<String, Object> nodeMap, String ownerAliasKey) {
+        String key = ownerAliasKey;
+        Object value = nodeMap.get(key);
+        if (value instanceof Map) {
+            Map<String, Object> valueMap = (Map) value;
+            if (valueMap.size() > 0) {
+                key = String.valueOf(valueMap.keySet().toArray()[0]);
+                value = valueMap.get(key);
+            }
+        }
+        return Tuple.build(key, value);
     }
 }

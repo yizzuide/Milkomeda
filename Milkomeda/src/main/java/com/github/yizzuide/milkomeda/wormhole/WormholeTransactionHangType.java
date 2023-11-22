@@ -22,7 +22,7 @@
 package com.github.yizzuide.milkomeda.wormhole;
 
 /**
- * WormholeTransactionType
+ * Hook transaction type.
  *
  * @author yizzuide
  * @since 3.11.0

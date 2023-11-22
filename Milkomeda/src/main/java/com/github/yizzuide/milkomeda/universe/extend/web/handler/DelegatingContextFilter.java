@@ -21,11 +21,16 @@
 
 package com.github.yizzuide.milkomeda.universe.extend.web.handler;
 
+import com.github.yizzuide.milkomeda.hydrogen.uniform.UniformHandler;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.OrderComparator;
+import org.springframework.core.annotation.AnnotationAwareOrderComparator;
+import org.springframework.util.CollectionUtils;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.*;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,14 +40,15 @@ import java.util.stream.Collectors;
  * DelegatingContextFilter
  * 代理上下文过滤器
  *
+ * @see org.springframework.web.filter.RequestContextFilter
+ * @see org.springframework.boot.web.servlet.filter.OrderedRequestContextFilter
  * @author yizzuide
  * @since 3.3.1
  * @version 3.12.9
- * @see org.springframework.web.filter.RequestContextFilter
- * @see org.springframework.boot.web.servlet.filter.OrderedRequestContextFilter
  * <br>
  * Create at 2020/05/06 11:12
  */
+@Slf4j
 public class DelegatingContextFilter implements Filter {
 
     @Autowired(required = false)
@@ -50,23 +56,37 @@ public class DelegatingContextFilter implements Filter {
 
     @PostConstruct
     public void init() {
+        if (CollectionUtils.isEmpty(astrolabeHandlers)) {
+            return;
+        }
         // 根据@Order注解排序
-        //AnnotationAwareOrderComparator.sort(astrolabeHandlers);
+        AnnotationAwareOrderComparator.sort(astrolabeHandlers);
         // 根据Order接口排序
-        astrolabeHandlers = astrolabeHandlers.stream()
-                .sorted(OrderComparator.INSTANCE.withSourceProvider(ha -> ha)).collect(Collectors.toList());
+        if (astrolabeHandlers.stream().anyMatch(a -> a.getOrder() != 0)) {
+            astrolabeHandlers = astrolabeHandlers.stream()
+                    .sorted(OrderComparator.INSTANCE.withSourceProvider(ha -> ha)).collect(Collectors.toList());
+        }
     }
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         for (AstrolabeHandler astrolabeHandler : astrolabeHandlers) {
-            astrolabeHandler.preHandle(request);
+            try {
+                astrolabeHandler.preHandle(request);
+            } catch (Exception e) {
+                UniformHandler.matchStatusToWrite( (HttpServletResponse) response, null, e);
+                return;
+            }
         }
         try {
             chain.doFilter(request, response);
         } finally {
-            for (AstrolabeHandler astrolabeHandler : astrolabeHandlers) {
-                astrolabeHandler.postHandle(request, response);
+            try {
+                for (AstrolabeHandler astrolabeHandler : astrolabeHandlers) {
+                    astrolabeHandler.postHandle(request, response);
+                }
+            } catch (Exception e) {
+                log.error("astrolabe handler post handle with error msg: {}", e.getMessage(), e);
             }
         }
     }

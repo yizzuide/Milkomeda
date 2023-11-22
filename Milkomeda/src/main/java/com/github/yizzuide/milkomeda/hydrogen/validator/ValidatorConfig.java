@@ -22,6 +22,7 @@
 package com.github.yizzuide.milkomeda.hydrogen.validator;
 
 import com.github.yizzuide.milkomeda.hydrogen.core.HydrogenHolder;
+import lombok.Cleanup;
 import org.hibernate.validator.HibernateValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
@@ -66,6 +67,7 @@ public class ValidatorConfig {
 
     @Bean
     public Validator validator() {
+        @Cleanup
         ValidatorFactory validatorFactory = Validation.byProvider(HibernateValidator.class )
                 .configure()
                 // 设置validator模式为快速失败（只要有一个校验不通过就不立即返回错误）

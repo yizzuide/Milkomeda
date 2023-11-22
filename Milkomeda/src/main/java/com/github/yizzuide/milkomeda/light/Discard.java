@@ -26,7 +26,6 @@ import java.util.Map;
 
 /**
  * Discard
- *
  * 缓存数据丢弃策略接口
  *
  * @since 1.8.0
@@ -42,6 +41,7 @@ public interface Discard {
      *
      * @return 缓存数据类
      */
+    @SuppressWarnings("rawtypes")
     Class<? extends SortSpot> spotClazz();
 
     /**

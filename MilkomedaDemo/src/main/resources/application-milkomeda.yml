@@ -9,12 +9,35 @@ milkomeda:
   # 自定义业务参数配置（可选，非框架使用）
   env:
     version: 1.0
+  # 配置需要早期注册的Bean
+  register-early-beans:
+    - com.github.yizzuide.milkomeda.demo.universe.EarlyConfigLoader
 
   comet:
     # 读取请求body里的json数据需要开启（默认不开启）
     enable-read-request-body: true
-    # 读取Response直接写出的内容时需要开启
+    # 读取Response的Body时需要开启（默认不开启）
     enable-read-response-body: true
+    # 请求拦截器（拦截器名是通过@Alias("xxx"))
+    request-interceptors:
+      # XSS注入过滤
+      xss:
+        enable: true
+        order: 1
+        include-urls: [ "/collect/usage" ]
+        props:
+          # Form表单字段名白名单
+          whiteFieldNames: ["content", "*WithHtml"]
+      # SQL注入过滤
+      sql-inject:
+        enable: true
+        order: 2
+        include-urls: [ "/collect/usage" ]
+    # 响应拦截器（拦截器名是通过@Alias("xxx"))
+    response-interceptors:
+      uniform:
+        enable: true
+
     # 统一请求日志打印
     logger:
       enable: true
@@ -28,7 +51,7 @@ milkomeda:
           tpl: url->{uri},userId:{$x.uid},token:{$header.token:0},method->{method},parameters->{params},dataId->{$params.data.id}
         - paths: ["/collect/usage"]
           type: response # 设置打印为响应类型（默认为请求类型）
-          tpl: "{\"url\": \"{uri}\", \"resp\": {resp}}"
+          tpl: '{url:"{uri}",resp:{resp}}'
         - paths: ["/error/**"]
           tpl: url->{uri},method->{method}
     # 日志收集器
@@ -38,7 +61,7 @@ milkomeda:
       enable-tag: true
       tags:
         product-tag:
-          include: ["/collect/product/*"]
+          include-urls: ["/collect/product/*"]
           # 异常监控：由于异常可能被 @ControllerAdvice 吞没，拦截器就获取不到异常
           exception-monitor:
             # 忽略正常的响应，业务标识字段为code
@@ -73,6 +96,46 @@ milkomeda:
           message[msg]: 请求超过次数，请稍后再试！
           addition:
             data: ${collections.emptyMap}
+      # 滑动窗口限制器
+      - name: rollLimiter
+        type: roll_window
+        # 60秒内只允许访问一次
+        props:
+          limitTimes: 1
+        key-expire: 60s
+        key-tpl: limit_sms_{$params.phone}
+        include-urls: [ "/particle/sendSMS" ]
+        response:
+          status: 200
+          code: -1
+          message[msg]: 请求超过次数，请稍后再试！
+      # 令牌桶限制器
+      - name: tokenLimiter
+        type: token_bucket
+        props:
+          bucketCapacity: 10
+          tokensPerTime: 2
+          interval: 5
+        key-tpl: limit_token_quota
+        include-urls: [ "/particle/quota" ]
+        response:
+          status: 200
+          code: -1
+          message[msg]: 当前额度有限，请稍后再试！
+      # 漏桶限制器
+      - name: leakyLimiter
+        type: leaky_bucket
+        props:
+          # 桶可装10个请求
+          bucketCapacity: 10
+          # 1秒处理2个请求（速率恒定）
+          waterRate: 2
+        key-tpl: limit_leaky_pull
+        include-urls: [ "/particle/pull" ]
+        response:
+          status: 200
+          code: -1
+          message[msg]: 当前拉取频繁，请稍后再试！
       - name: barrierLimiter
         type: barrier
         props:
@@ -102,16 +165,16 @@ milkomeda:
     enable-light-thread-local-scope: true
     instances:
       # 缓存实例配置（没有配置的使用默认值）
-      order:
+      orderLight:
         # 缓存策略
         strategy: LazyExpire
         # 不需要ThreadLocal缓存
         enable-super-cache: false
         l1-expire: 1m
         l2-expire: 1m
-        #smsMoonCache:
+      #smsMoonCache:
         #only-cache-l2: true
-        #abTestMoonCache:
+      #abTestMoonCache:
         #only-cache-l2: true
 
   echo:
@@ -140,6 +203,7 @@ milkomeda:
       - /actuator
       - /actuator/**
       - /s_login
+      - /verifyCode/render
       - /collect/**
       - /echo/**
       - /test/**
@@ -161,6 +225,8 @@ milkomeda:
       - /metal/**
       - /pillar/**
       - /orbit/**
+      - /chat/**
+
     # 放开static资源访问
     allow-static-urls:
       - /build/*
@@ -169,9 +235,9 @@ milkomeda:
   ice:
     # 在分布式布署时，需要设置实例名
     instance-name: ${spring.application.name}
-    # 开启Job作业（作为消费端使用时，设置为false）
+    # 开启Job服务（作为消费端使用时，设置为false）
     #enable-job-timer: false
-    # 是否用于分布式job作业
+    # 是否用于分布式job服务（当服务端采用分布式时）
     #enable-job-timer-distributed: true
     # Job作业频率（默认5s）
     delay-bucket-poll-rate: 2s
@@ -187,7 +253,7 @@ milkomeda:
     task-topic-pop-max-size: 5
     # 消费轮询间隔（默认5s）
     task-execute-rate: 2s
-    # 消费处理器支持多个监听器
+    # 消费处理器支持多个监听器（模拟订阅模式）
     multi-topic-listener-per-handler: true
     # TTR超载任务进入Dead queue
     enable-retain-to-dead-queue-when-ttr-overload: true
@@ -196,7 +262,7 @@ milkomeda:
       enable: true
       # 查询监测数据使用的时间排序类型（默认为update_time：每次状态修改都更新时间）
       index-type: update_time
-      # 监测数据存储方案（默认为redis）
+      # 监测数据存储方案（默认为redis，只有redis方案不支持在任务结束后保存记录）
       inspector-type: mongodb
 
   moon:
@@ -303,7 +369,10 @@ milkomeda:
     filter:
       #enable: true
       # 测试表达式计算
-      enable: ${condition.equals(${spring.application.name}, milkomeda-demo)}
+      # condition仅支持简单方法（内部非表达达解析）：equals, diff
+      #enable: ${condition.equals(${spring.application.name}, milkomeda-demo)}
+      # el用于支持SpEL复杂语句解析，但不支持获取Bean来调用方法（受限于YML解析比创建Bean实例早的问题）
+      enable: ${el.parse('milkomeda-demo'.equals('${spring.application.name}'), BOOL)}
       filters:
         - name: ipLimiterFilter
           clazz: com.github.yizzuide.milkomeda.demo.hydrogen.handler.IPLimiterFilter
@@ -313,7 +382,17 @@ milkomeda:
 
   # 分布式锁
   atom:
-    strategy: redis # 默认的策略为redis
+    # 使用方案类型，支持目前的主流方案：Etcd、Redis、Zookeeper
+    #strategy: redis
+    # 策略配置（Redis的连接使用Springboot的配置）
+    #redis:
+      # 是否使用集群
+      #use-cluster: false
+
+    strategy: etcd
+    etcd:
+      endpoint-url: http://127.0.0.1:3379
+      root-lock-node: /mk/lock
 
   ## 数据源配置
   sundial:
@@ -342,7 +421,7 @@ milkomeda:
       original-name-as-index-zero: true
       # 分库、分库分表需要的节点配置（仅分表不需要配置）
       nodes:
-        # 一个主、从配置为一个节点，节点名与拆分key相关（从库可选配置）
+        # 一个主、从配置为一个节点(节点索引以0开始)，节点索引与路由key相关（从库可选配置）
         node_0:
           # spring.datasource配置的默认会生成master数据源实例
           leader: master
@@ -387,5 +466,12 @@ milkomeda:
   orbit:
     instances:
       - key-name: pre-log
+        advice-clazz: com.github.yizzuide.milkomeda.demo.orbit.PreLogAdvice
+        # 设置切点表达式（默认advisor-clazz为AspectJ类型）
         pointcut-expression: execution(* com..orbit.*API.fetch*(..))
-        advice-class-name: com.github.yizzuide.milkomeda.demo.orbit.PreLogAdvice
+      - key-name: pay-log
+        advice-clazz: com.github.yizzuide.milkomeda.demo.orbit.RecordAdvice
+        # 该策略为方法注解方式（基于Spring Ioc和Aop底层API实现）
+        advisor-clazz: com.github.yizzuide.milkomeda.orbit.AnnotationOrbitAdvisor
+        advisor-props:
+          methodAnnotationType: com.github.yizzuide.milkomeda.demo.orbit.RecordLog

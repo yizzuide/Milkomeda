@@ -25,6 +25,7 @@ import com.github.yizzuide.milkomeda.universe.metadata.HandlerMetaData;
 import com.github.yizzuide.milkomeda.util.ReflectUtil;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.CollectionUtils;
@@ -37,6 +38,8 @@ import java.util.concurrent.Future;
  * WormholeEventBus
  * 事件总线
  *
+ * @see org.springframework.transaction.interceptor.TransactionInterceptor#invoke(MethodInvocation)
+ * @see org.springframework.transaction.interceptor.TransactionAspectSupport
  * @author yizzuide
  * @since 3.3.0
  * @version 3.11.4
@@ -86,7 +89,10 @@ public class WormholeEventBus {
                 if (hangType == WormholeTransactionHangType.NONE) {
                     execute(isAsync, handler, event, action, callback);
                 } else {
-                    // 注删事务回调
+                    // 注册事务回调
+                    if (!TransactionSynchronizationManager.isActualTransactionActive()) {
+                        log.error("Action[{}] on transaction is not active!", action);
+                    }
                     TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
                         @Override
                         public void beforeCommit(boolean readOnly) {
@@ -117,7 +123,7 @@ public class WormholeEventBus {
             }
         }
 
-        // write into event store
+        // write event data into infrastructure
         if (trackers != null) {
             for (WormholeEventTrack<WormholeEvent<?>> tracker : trackers) {
                 tracker.track(event);

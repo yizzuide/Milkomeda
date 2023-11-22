@@ -21,6 +21,7 @@
 
 package com.github.yizzuide.milkomeda.ice;
 
+import com.github.yizzuide.milkomeda.universe.config.RedisGlobalConfig;
 import org.springframework.context.annotation.Import;
 
 import java.lang.annotation.*;
@@ -50,6 +51,6 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE})
 @Inherited
-@Import(IceBasicConfig.class)
+@Import({RedisGlobalConfig.class, IceBasicConfig.class})
 public @interface EnableIceBasic {
 }

@@ -22,6 +22,7 @@
 package com.github.yizzuide.milkomeda.hydrogen.i18n;
 
 import com.github.yizzuide.milkomeda.hydrogen.core.HydrogenHolder;
+import com.github.yizzuide.milkomeda.universe.metadata.BeanIds;
 import com.github.yizzuide.milkomeda.universe.polyfill.SpringMvcPolyfill;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
@@ -87,7 +88,7 @@ public class I18nConfig {
         @Autowired
         private I18nMessages i18nMessages;
 
-        @Qualifier("requestMappingHandlerMapping")
+        @Qualifier(BeanIds.REQUEST_MAPPING_HANDLER_MAPPING)
         @Autowired
         private RequestMappingHandlerMapping requestMappingHandlerMapping;
 

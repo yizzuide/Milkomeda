@@ -22,9 +22,9 @@
 package com.github.yizzuide.milkomeda.atom;
 
 /**
- * AtomLockWaitTimeoutException
- * 获取锁超时异常
+ * Lock wait timeout exception.
  *
+ * @since 3.13.0
  * @author yizzuide
  * <br>
  * Create at 2020/05/01 02:19

@@ -42,18 +42,17 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * LightCache
- *
+ * <p>
  * 缓存方式：超级缓存（ThreadLocal）| 一级缓存（内存缓存池，缓存个数可控）| 二级缓存（Redis）
- *
- * V：标识数据
- * E：缓存业务数据
+ * </p>
  *
  * @since 1.8.0
- * @version 3.14.0
+ * @version 3.15.0
  * @author yizzuide
  * <br>
  * Create at 2019/06/28 13:33
  */
+@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 @Slf4j
 public class LightCache implements Cache {
     /**
@@ -61,7 +60,7 @@ public class LightCache implements Cache {
      */
     @Setter
     @Getter
-    private Integer l1MaxCount;
+    private volatile Integer l1MaxCount;
 
     /**
      * 一级缓存一次性移除百分比
@@ -81,7 +80,7 @@ public class LightCache implements Cache {
      */
     @Setter
     @Getter
-    private Boolean onlyCacheL1;
+    private boolean onlyCacheL1;
 
     /**
      * 一级缓存丢弃策略
@@ -113,7 +112,7 @@ public class LightCache implements Cache {
      */
     @Setter
     @Getter
-    private Boolean onlyCacheL2;
+    private boolean onlyCacheL2;
 
     /**
      * 开启超缓存
@@ -129,7 +128,7 @@ public class LightCache implements Cache {
     private final LightContext<Serializable, Object> superCache = new LightContext<>();
 
     /**
-     * 一级缓存容器（内存池）
+     * 一级缓存容器（内存池，跳表算法复杂度O(logN)，高并发操作效率高，范围数据查找快）
      */
     private final Map<String, Spot<Serializable, Object>> cacheMap = new ConcurrentSkipListMap<>();
 
@@ -141,15 +140,15 @@ public class LightCache implements Cache {
 
 
     /**
-     * 设置超级缓存
-     *
-     * 如果在一级缓存池里根据缓存标识符可以取得缓存数据，则不会创建新的缓存数据对象
+     * 设置超级缓存（如果在一级缓存池里根据缓存标识符可以取得缓存数据，则不会创建新的缓存数据对象）
      *
      * @param id    缓存标识符
      */
     @Override
     public void set(Serializable id) {
-        if (null == id) return;
+        if (null == id) {
+            return;
+        }
         // 如果一级缓存没有数据，创建新的缓存数据对象
         if (cacheMap.size() == 0) {
             superCache.setId(id);
@@ -199,8 +198,8 @@ public class LightCache implements Cache {
     @SuppressWarnings("unchecked")
     @Override
     public void set(String key, Spot<Serializable, ?> spot) {
-        // 如果是父类型，需要向下转型（会触发初始化排序状态字段）
-        if (spot.getClass() == Spot.class) {
+        // 一级缓存下，如果是父类型，需要向下转型（会触发初始化排序字段）
+        if (spot.getClass() == Spot.class && !onlyCacheL2) {
             spot = discardStrategy.deform(key, (Spot<Serializable, Object>) spot, l1Expire);
         }
 
@@ -253,8 +252,13 @@ public class LightCache implements Cache {
     private boolean cacheL1(String key, Spot<Serializable, Object> spot) {
         // 一级缓存超出最大个数
         if ((cacheMap.size() + 1) > l1MaxCount) {
-            // 根据选择的策略来丢弃数据
-            discardStrategy.discard(cacheMap, l1DiscardPercent);
+            // 使用双重检测确保在条件满足时只执行一次
+            synchronized (this) {
+                if ((cacheMap.size() + 1) > l1MaxCount) {
+                    // 根据选择的策略来丢弃数据
+                    discardStrategy.discard(cacheMap, l1DiscardPercent);
+                }
+            }
         }
 
         // 排行加分
@@ -270,7 +274,7 @@ public class LightCache implements Cache {
 
         // 添加到一级缓存池
         cacheMap.put(key, spot);
-        return true;
+        return  true;
     }
 
     @Override
@@ -281,7 +285,7 @@ public class LightCache implements Cache {
     @Override
     public  <E> Spot<Serializable, E> get(String key, Class<Serializable> vClazz, Class<E> eClazz) {
         JavaType javaType = TypeFactory.defaultInstance()
-                .constructParametricType(discardStrategy.spotClazz(), vClazz, eClazz);
+                .constructParametricType(onlyCacheL2 ? Spot.class : discardStrategy.spotClazz(), vClazz, eClazz);
         return get(key, javaType);
     }
 
@@ -414,9 +418,9 @@ public class LightCache implements Cache {
         this.setL1Expire(other.getL1Expire());
         this.setStrategy(other.getStrategy());
         this.setStrategyClass(other.getStrategyClass());
-        this.setOnlyCacheL1(other.getOnlyCacheL1());
+        this.setOnlyCacheL1(other.isOnlyCacheL1());
         this.setL2Expire(other.getL2Expire());
-        this.setOnlyCacheL2(other.getOnlyCacheL2());
+        this.setOnlyCacheL2(other.isOnlyCacheL2());
         this.setEnableSuperCache(other.isEnableSuperCache());
     }
 

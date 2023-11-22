@@ -21,36 +21,33 @@
 
 package com.github.yizzuide.milkomeda.hydrogen.uniform;
 
-import com.github.yizzuide.milkomeda.universe.parser.yml.YmlResponseOutput;
 import lombok.Data;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
- * Uniformed result view object.
+ * Uniformed result response object. The usage document see {@link ResultVO}.
  *
  * @since 3.14.0
+ * @version 3.15.0
  * @author yizzuide
  * <br>
  * Create at 2022/10/10 16:24
  */
 @Data
 public class UniformResult<T> implements ResultVO<T> {
-
+    /**
+     * Response code.
+     */
     private String code;
 
+    /**
+     * Response message.
+     */
     private String message;
 
+    /**
+     * Response data.
+     */
     private T data;
-
-    public Map<String, Object> toMap() {
-        Map<String, Object> map = new HashMap<>(5);
-        map.put(YmlResponseOutput.CODE, getCode());
-        map.put(YmlResponseOutput.MESSAGE, getMessage());
-        map.put(YmlResponseOutput.DATA, getData());
-        return map;
-    }
 
     /**
      * Return success.
@@ -60,6 +57,22 @@ public class UniformResult<T> implements ResultVO<T> {
      */
     public static <T> ResultVO<T> ok(T data) {
         UniformResult<T> resultVo = new UniformResult<>();
+        resultVo.setData(data);
+        return resultVo;
+    }
+
+    /**
+     * Return success with code and empty message.
+     * @param code  result code
+     * @param data  success data
+     * @param <T>   data type
+     * @return  ResultVO
+     * @since 3.15.0
+     */
+    public static <T> ResultVO<T> ok(String code, T data) {
+        UniformResult<T> resultVo = new UniformResult<>();
+        resultVo.setCode(code);
+        resultVo.setMessage("");
         resultVo.setData(data);
         return resultVo;
     }

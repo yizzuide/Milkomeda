@@ -84,4 +84,9 @@ public class CrustAuthenticationProvider extends DaoAuthenticationProvider {
             throw new BadCredentialsException(messages.getMessage("AbstractUserDetailsAuthenticationProvider.badCredentials", "Bad credentials"));
         }
     }
+
+    @Override
+    public boolean supports(Class<?> authentication) {
+        return CrustAuthenticationToken.class.isAssignableFrom(authentication);
+    }
 }

@@ -43,6 +43,7 @@ import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
  * <br>
  * Create at 2020/05/22 16:34
  */
+@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 @EnableConfigurationProperties(MetalProperties.class)
 @ConditionalOnClass(RedisTemplate.class)
 @AutoConfigureAfter(RedisAutoConfiguration.class)

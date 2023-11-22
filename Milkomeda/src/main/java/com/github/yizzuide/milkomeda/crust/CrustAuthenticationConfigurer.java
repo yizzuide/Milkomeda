@@ -89,12 +89,17 @@ public class CrustAuthenticationConfigurer<T extends CrustAuthenticationConfigur
 }
 
 /**
- * 授权成功处理器 --转向--> 刷新Token处理器
+ * 授权成功处理器后的刷新Token处理器
  */
 class RefreshSuccessHandler implements AuthenticationSuccessHandler {
-    // token刷新间隔
+    /**
+     * token刷新间隔
+     */
     private final long tokenRefreshInterval;
-    // token刷新响应字段
+
+    /**
+     * token刷新响应字段
+     */
     private final String refreshTokenName;
 
     RefreshSuccessHandler(String refreshTokenName) {

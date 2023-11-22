@@ -97,6 +97,7 @@ public class CrustPerm {
 
     /**
      * Build spring security authorities.
+     * @param permissionList  permission list
      * @return authorities list.
      * @since 3.14.0
      */

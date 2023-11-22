@@ -24,4 +24,10 @@ public class OrbitController {
         orderAPI.fetchOrder(orderNo);
         return ResponseEntity.ok("OK");
     }
+
+    @RecordLog
+    @RequestMapping("pay/{orderNo}")
+    public ResponseEntity<String> payOrder(@PathVariable String orderNo) {
+        return ResponseEntity.ok("OK");
+    }
 }

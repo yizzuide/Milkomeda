@@ -31,17 +31,20 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.BeanIds;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
@@ -60,18 +63,17 @@ import java.io.IOException;
 import java.util.*;
 
 /**
- * CrustConfigurerAdapter
- * Spring Security配置器适配器
+ * Spring Security config adapter, need impl with {@link org.springframework.context.annotation.Configuration}.
  *
  * @see org.springframework.security.web.session.SessionManagementFilter
  * @see org.springframework.security.config.annotation.web.configurers.SessionManagementConfigurer
  * @author yizzuide
  * @since 1.14.0
- * @version 3.11.2
+ * @version 3.15.0
  * <br>
  * Create at 2019/11/11 18:25
  */
-public class CrustConfigurerAdapter extends WebSecurityConfigurerAdapter {
+public abstract class CrustConfigurerAdapter {
 
     @Autowired
     private CrustProperties props;
@@ -82,20 +84,33 @@ public class CrustConfigurerAdapter extends WebSecurityConfigurerAdapter {
     @Autowired
     private ApplicationContextHolder applicationContextHolder;
 
-    @Override
-    public void configure(AuthenticationManagerBuilder auth) {
+    @Bean
+    public AuthenticationProvider authenticationProvider(AuthenticationManagerBuilder auth) {
         // 使用继承自DaoAuthenticationProvider
         CrustAuthenticationProvider authenticationProvider = new CrustAuthenticationProvider(props, passwordEncoder);
         // 扩展配置（UserDetailsService、PasswordEncoder）
         configureProvider(authenticationProvider);
+        // 验证码登录Provider
+        CrustCodeAuthenticationProvider codeAuthenticationProvider = new CrustCodeAuthenticationProvider(userDetailsService());
         // 添加自定义身份验证组件
-        auth.authenticationProvider(authenticationProvider);
+        auth.authenticationProvider(authenticationProvider)
+                .authenticationProvider(codeAuthenticationProvider);
+        Map<String, AuthenticationProvider> customAuthenticationProviderMap = ApplicationContextHolder.get().getBeansOfType(AuthenticationProvider.class, false, true);
+        if (!CollectionUtils.isEmpty(customAuthenticationProviderMap)) {
+            customAuthenticationProviderMap.values().forEach(auth::authenticationProvider);
+        }
+        return authenticationProvider;
     }
 
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        List<String> allowURLs = new ArrayList<>(props.getPermitURLs());
-        // 登录
+    @Bean(name = BeanIds.AUTHENTICATION_MANAGER)
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+        return authenticationConfiguration.getAuthenticationManager();
+    }
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        List<String> allowURLs = new ArrayList<>(props.getPermitUrls());
+        // 允许登录
         allowURLs.add(props.getLoginUrl());
         // 额外添加的排除项
         if (!CollectionUtils.isEmpty(props.getAdditionPermitUrls())) {
@@ -104,7 +119,8 @@ public class CrustConfigurerAdapter extends WebSecurityConfigurerAdapter {
         // 标记匿名访问
         // Find URL method map
         Map<RequestMappingInfo, HandlerMethod> handlerMethodMap = applicationContextHolder.getApplicationContext()
-                .getBean(RequestMappingHandlerMapping.class).getHandlerMethods();
+                .getBean(com.github.yizzuide.milkomeda.universe.metadata.BeanIds.REQUEST_MAPPING_HANDLER_MAPPING,
+                        RequestMappingHandlerMapping.class).getHandlerMethods();
         Set<String> anonUrls = new HashSet<>();
         for (Map.Entry<RequestMappingInfo, HandlerMethod> infoEntry : handlerMethodMap.entrySet()) {
             HandlerMethod handlerMethod = infoEntry.getValue();
@@ -122,11 +138,11 @@ public class CrustConfigurerAdapter extends WebSecurityConfigurerAdapter {
         DefaultFailureHandler failureHandler = new DefaultFailureHandler(this);
         http.csrf()
                 .disable()
-            .sessionManagement().sessionCreationPolicy(props.isStateless() ?
-                SessionCreationPolicy.STATELESS : SessionCreationPolicy.IF_REQUIRED).and()
-            .formLogin().disable()
-            // 支持跨域，从CorsConfigurationSource中取跨域配置
-            .cors()
+                .sessionManagement().sessionCreationPolicy(props.isStateless() ?
+                        SessionCreationPolicy.STATELESS : SessionCreationPolicy.IF_REQUIRED).and()
+                .formLogin().disable()
+                // 支持跨域，从CorsConfigurationSource中取跨域配置
+                .cors()
                 .and()
                 // 禁用iframe跨域
                 .headers()
@@ -163,32 +179,34 @@ public class CrustConfigurerAdapter extends WebSecurityConfigurerAdapter {
                     .sessionFixation().changeSessionId()
                     .sessionAuthenticationErrorUrl(props.getLoginUrl())
                     .sessionAuthenticationFailureHandler(failureHandler).and()
-            .logout()
+                    .logout()
                     .logoutUrl(props.getLogoutUrl())
-                    .addLogoutHandler((req, res, auth) -> CrustContext.invalidate())
                     .logoutSuccessUrl(props.getLoginUrl())
+                    .addLogoutHandler((req, res, auth) -> CrustContext.invalidate())
+                    .clearAuthentication(true)
                     .invalidateHttpSession(true);
         }
 
+        // 异常处理器（如果开启了Hydrogen/Uniform模块，则交由Uniform模块处理）
         // 认证用户无权限访问处理
         http.exceptionHandling().accessDeniedHandler(failureHandler)
-                // 匿名用户无权限访问处理
+                // 认证异常或匿名用户无权限访问处理
                 .authenticationEntryPoint(failureHandler);
 
         // add others http configure
         additionalConfigure(http, props.isStateless());
+        return http.build();
     }
 
-    /**
-     * 配置Web资源，资源根路径需要配置静态资源映射<br>
-     * @param web   WebSecurity
-     */
-    @Override
-    public void configure(WebSecurity web) {
+    // 配置Web资源，资源根路径需要配置静态资源映射
+    @Bean
+    public WebSecurityCustomizer webSecurityCustomizer() {
         // 放开静态资源的限制
-        if (!CollectionUtils.isEmpty(props.getAllowStaticUrls())) {
-            web.ignoring().antMatchers(HttpMethod.GET, props.getAllowStaticUrls().toArray(new String[0]));
-        }
+        return (web) -> {
+            if (props.getAllowStaticUrls() != null) {
+                web.ignoring().antMatchers(HttpMethod.GET, props.getAllowStaticUrls().toArray(new String[0]));
+            }
+        };
     }
 
     /**
@@ -209,6 +227,12 @@ public class CrustConfigurerAdapter extends WebSecurityConfigurerAdapter {
     }
 
     /**
+     * Must implement this method used for {@link DaoAuthenticationProvider}.
+     * @return UserDetailsService
+     */
+    protected abstract UserDetailsService userDetailsService();
+
+    /**
      * Custom response for auth or access failure handler.
      * @param isAuth    true if is auth type
      * @param request   http request
@@ -218,15 +242,9 @@ public class CrustConfigurerAdapter extends WebSecurityConfigurerAdapter {
      * @since 3.14.0
      */
     protected void doFailure(boolean isAuth, HttpServletRequest request, HttpServletResponse response, RuntimeException exception) throws IOException {
-        response.setStatus(HttpStatus.OK.value());
-        ResultVO<?> source = UniformResult.error(props.getAuthFailCode(), exception.getMessage());
+        response.setStatus(isAuth ? HttpStatus.UNAUTHORIZED.value(): HttpStatus.FORBIDDEN.value());
+        ResultVO<?> source = UniformResult.error(String.valueOf(response.getStatus()), exception.getMessage());
         UniformHandler.matchStatusToWrite(response, source.toMap());
-    }
-
-    @Bean(name = BeanIds.AUTHENTICATION_MANAGER)
-    @Override
-    public AuthenticationManager authenticationManager() throws Exception {
-        return super.authenticationManager();
     }
 
     @Bean
@@ -251,20 +269,20 @@ public class CrustConfigurerAdapter extends WebSecurityConfigurerAdapter {
 
         // 认证失败处理器
         @Override
-        public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
-            configurerAdapter.doFailure(true, request, response, exception);
+        public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
+            configurerAdapter.doFailure(true, request, response, authException);
+        }
+
+        // 认证异常或匿名用户无权限访问处理器
+        @Override
+        public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
+            this.onAuthenticationFailure(request, response, authException);
         }
 
         // 认证用户无权限访问拒绝处理器
         @Override
         public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException, ServletException {
             configurerAdapter.doFailure(false, request, response, accessDeniedException);
-        }
-
-        // 匿名用户无权限访问拒绝处理器
-        @Override
-        public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
-            configurerAdapter.doFailure(false, request, response, authException);
         }
     }
 }

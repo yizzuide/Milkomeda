@@ -29,9 +29,9 @@ import java.io.Serializable;
  * CrustEntity
  * 需要用户实体实现的适配接口
  *
- * @author yizzuide
  * @since 1.14.0
  * @version 2.0.4
+ * @author yizzuide
  * <br>
  * Create at 2019/11/11 18:47
  */
@@ -43,7 +43,7 @@ public interface CrustEntity extends Serializable {
     Serializable getUid();
 
     /**
-     * 用户名
+     * 帐号（用户名，手机号等）
      * @return username
      */
     String getUsername();

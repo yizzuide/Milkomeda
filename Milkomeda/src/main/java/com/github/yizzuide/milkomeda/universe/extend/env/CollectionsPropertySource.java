@@ -52,6 +52,8 @@ public class CollectionsPropertySource extends PropertySource<Object> {
 
     public static final String COLLECTIONS_OBJECT_DATE = "{date}";
 
+    public static final String COLLECTIONS_OBJECT_MILLS = "{mills}";
+
     private static final String PREFIX = "collections.";
 
     public CollectionsPropertySource() {
@@ -76,17 +78,22 @@ public class CollectionsPropertySource extends PropertySource<Object> {
         if ("dateObject".equals(type)) {
             return COLLECTIONS_OBJECT_DATE;
         }
+        if ("millsObject".equals(type)) {
+            return COLLECTIONS_OBJECT_MILLS;
+        }
         return null;
     }
 
     /**
-     * Get empty object with token
+     * Get value object with token.
      * @param psValue token string
      * @return  empty object
      * @since 3.14.0
      */
     public static Object of(Object psValue) {
-        if (psValue == null) return null;
+        if (psValue == null) {
+            return null;
+        }
         if (psValue.equals(COLLECTIONS_EMPTY_MAP)) {
             return Collections.emptyMap();
         }
@@ -96,11 +103,14 @@ public class CollectionsPropertySource extends PropertySource<Object> {
         if (psValue.equals(COLLECTIONS_OBJECT_DATE)) {
             return new Date();
         }
+        if (psValue.equals(COLLECTIONS_OBJECT_MILLS)) {
+            return System.currentTimeMillis();
+        }
         return psValue;
     }
 
     public static void addToEnvironment(ConfigurableEnvironment environment) {
-        // 添加在SystemEnvironmentPropertySource后面，而SpringCloud（bootstrap.yml，比application.yml优化级高）和SpringBoot（application.yml）环境里的配置可以读取
+        // 添加在SystemEnvironmentPropertySource后面，而SpringCloud（bootstrap.yml，比application.yml优化级高）和Spring Boot（application.yml）环境里的配置可以读取
         environment.getPropertySources().addAfter(StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME,
                 new CollectionsPropertySource());
         log.trace("CollectionsPropertySource add to Environment");

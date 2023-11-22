@@ -35,9 +35,9 @@ import java.util.Set;
 
 /**
  * Converts a Map to Collection.
- *
+ * <p>
  * For similar implementation, refer to MapToMapConverter or CollectionToCollectionConverter
- *
+ * </p>
  * @author yizzuide
  * @since 3.13.0
  * @see org.springframework.core.convert.support.DefaultConversionService
