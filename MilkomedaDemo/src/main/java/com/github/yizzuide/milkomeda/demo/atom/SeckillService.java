@@ -27,7 +27,7 @@ public class SeckillService {
         if (count > 0) {
             // 模拟锁等待超时
             try {
-                Thread.sleep(5000);
+                Thread.sleep(1000);
             } catch (InterruptedException ignore) {
             }
             count--;

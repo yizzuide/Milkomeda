@@ -1,6 +1,6 @@
 local key = KEYS[1]
--- list -> table: ["java.util.ArrayList",[2,8]]
-local phases = cjson.decode(ARGV[1])[2]
+-- list -> table
+local phases = cjson.decode(ARGV[1])
 local percent = tonumber(ARGV[2])
 if redis.call('exists', key) == 0 then
     redis.call('set', key, 0)

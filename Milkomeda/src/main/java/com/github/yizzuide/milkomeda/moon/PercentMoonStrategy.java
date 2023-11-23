@@ -43,7 +43,7 @@ import java.util.List;
  *
  * @author yizzuide
  * @since 2.6.0
- * @version 3.12.10
+ * @version 3.15.1
  * <br>
  * Create at 2020/03/13 21:42
  */
@@ -117,7 +117,7 @@ public class PercentMoonStrategy extends AbstractMoonStrategy {
 
     @Override
     public String loadLuaScript() throws IOException {
-        return IOUtils.loadLua(IOUtils.LUA_PATH, "moon_percent.lua");
+        return IOUtils.loadLua(IOUtils.LUA_PATH, "moon_percent_list.lua");
     }
 
     /**
