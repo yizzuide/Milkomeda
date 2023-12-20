@@ -396,9 +396,13 @@ milkomeda:
 
   ## 数据源配置
   sundial:
-    datasource-type: com.alibaba.druid.pool.DruidDataSource
+    # 使用druid数据源的配置
+    #datasource-type: com.alibaba.druid.pool.DruidDataSource
+    #config-prefix: spring.datasource.druid
+    # 使用hikari数据源的配置
+    datasource-type: com.zaxxer.hikari.HikariDataSource
     # 设置原有数据源配置前缀，作为下面instances数据源创建新的DataSource的模板
-    config-prefix: spring.datasource.druid
+    config-prefix: spring.datasource
     instances:
       # 只读从库必需命名为以read-only为前缀，用于解决主从多数据源事务问题（特别是与分库功能一起使用时的事务管理问题）
       read-only:

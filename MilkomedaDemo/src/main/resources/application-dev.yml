@@ -18,10 +18,27 @@ spring:
     import: "classpath:develop.properties"
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    druid:
-      url: ${mysql.url}
-      username: ${mysql.user}
-      password: ${MYSQL_PWD}
+    # sundial可以使用druid数据源
+    #druid:
+      #url: ${mysql.url}
+      #username: ${mysql.user}
+      #password: ${MYSQL_PWD}
+    url: ${mysql.url}
+    username: ${mysql.user}
+    password: ${MYSQL_PWD}
+    hikari:
+      pool-name: hk_dbcp
+      # 等待从连接池获取连接时间（默认30s）
+      connection-timeout: 60000
+      maximum-pool-size: 30
+      minimum-idle: 5
+      # 连接在池中闲置时间，最低设置为10s，0代表不会从连接池中移除（默认为10分钟）
+      idle-timeout: 120000
+      # 在连接池最大存活时间，0代表无限生命时间，最低设置为30s（默认为30分钟）
+      # 该设置不作用在正使用的连接，除非调用了连接关闭
+      max-lifetime: 1800000
+      # 连接激活的保持时间，该事件只会发生在闲置连接，到期会从池中移除，最低设置为30s，设置为1分钟内最佳
+      keepalive-time: 35000
 
   redis:
     host: 127.0.0.1

@@ -133,7 +133,7 @@ yizzuide, fu837014586@163.com
 ## License
 Milkomeda is available under the MIT license. See the LICENSE file for more info.
 
-## Thanks
-<a href="https://www.jetbrains.com/idea/" target="_blank">
-  <img width="64px" src="./logo/idea.png" alt="IntelliJ IDEA">
+## Sponsors
+<a href="https://www.jetbrains.com" target="_blank">
+  <img width="100" src="./logo/sponsors.png" alt="IntelliJ IDEA">
 </a>

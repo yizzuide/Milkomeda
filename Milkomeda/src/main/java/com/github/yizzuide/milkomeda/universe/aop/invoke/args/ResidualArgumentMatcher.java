@@ -34,7 +34,7 @@ import java.lang.reflect.Method;
 public class ResidualArgumentMatcher implements ArgumentMatcher {
 
     /**
-     * index is flag that indicate last one to add.
+     * index is flag that indicates last one to add.
      */
    static final Integer RESIDUAL_PLACEHOLDER_INDEX = -2;
 

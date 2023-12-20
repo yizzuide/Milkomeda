@@ -1,14 +1,14 @@
 # Milkomeda
 ![tag](https://img.shields.io/github/tag/yizzuide/Milkomeda.svg) [![Maven Central](https://img.shields.io/maven-central/v/com.github.yizzuide/milkomeda-spring-boot-starter)](https://search.maven.org/search?q=g:com.github.yizzuide%20AND%20a:milkomeda-spring-boot-starter) ![Java CI](https://github.com/yizzuide/Milkomeda/workflows/Java%20CI/badge.svg?branch=master) [![Code Coverage](https://codecov.io/gh/yizzuide/Milkomeda/branch/master/graph/badge.svg)](https://codecov.io/gh/yizzuide/Milkomeda/branch/master) [![Production Ready](https://img.shields.io/badge/production-ready-blue.svg)](https://github.com/yizzuide/Milkomeda) ![license](https://img.shields.io/github/license/yizzuide/Milkomeda.svg)
 
-The inspiration for this project name is the Milky Way and the Andromeda will merge in the future, like spring ecosystem, this project has many popular modular solution. 
+The project name is inspired by the fact that the Milky Way and Andromeda galaxies will merge in the future, and like the Spring ecosystem, this project has a number of popular modular solutions. 
 
 > This project is not demo or template, can be called "springboot plus" (sounds like a great project), each module needs to be enabled with the appropriate annotations.
 
 [中文文档](https://github.com/yizzuide/Milkomeda/blob/master/README_zh-CN.md)
 
 ## Goals
-- Use meta configuration whenever possible.
+- Use meta-configuration whenever possible.
 - Use annotations whenever possible.
 - Use declarative programming whenever possible.
 
@@ -19,7 +19,7 @@ The inspiration for this project name is the Milky Way and the Andromeda will me
    * Depends on: Spring MVC
 - [x] Pillar: Used for if/else business block splitting. *0.2.0+*
    * Depends on: Spring IoC
-- [x] Particle: Support idempotent, times and Bloom limiter (*3.9.0*), also allow extensible limiter chain of responsibility. *1.5.0+*
+- [x] Particle: Support idempotent, times and Bloom limiter (*3.9.0*), also allow an extensible limiter chain of responsibility. *1.5.0+*
    * Depends on: Spring MVC, SpringBoot Data Redis
 - [x] Light: Used for data cache, support super cache (ThreadLocal), L1 cache（RAM), L2 cache (Redis). *1.8.0+*
    * Depends on: SpringBoot Data Redis
@@ -43,11 +43,11 @@ The inspiration for this project name is the Milky Way and the Andromeda will me
   * Depends on: Redission, Curator-Recipes
 - [x] Wormhole: The event bus designed based on DDD architecture module can be used for event flow, big data business event production and output. *3.3.0+*
   * Depends on: Spring IoC
-- [x] Sundial: Used for master-slave data source switching, addition support sub-table with consistency of the Hash (3.8.0+). *3.4.0+*
+- [x] Sundial: Used for master-slave data source switching, addition supports sub-table with consistency of the Hash (3.8.0+). *3.4.0+*
   * Depends on: Spring JDBC, Mybatis
 - [x] Jupiter: Lightweight rule engine based on data source queries, query filtering with request domains extract expression (such as `$params`, `$attr`, `$header`)，and result matching with EL/OGNL expression parsing. *3.5.0+*
   * Depends on: Spring JDBC, Spring EL, OGNL
-- [x] Metal: Used for distributed dynamic configuration refresh based on KV data and support property binding injection. *3.6.0+*
+- [x] Metal: Used for distributed dynamic configuration refresh based on KV data and support property-binding injection. *3.6.0+*
   * Depends on: Spring IoC, SpringBoot Data Redis
 - [x] Orbit: Add method interceptor only with yml config or using `@Orbit`. *3.13.0+*
   * Depends on: Spring AOP
@@ -81,7 +81,7 @@ The inspiration for this project name is the Milky Way and the Andromeda will me
 ### 3.0 Release
 Milkomeda 3.0 is now available（April 2020). 
 
-- YML config promoted to first-class of development, allow developers to start quickly.
+- YML config, promoted to first-class of development, allows developers to start quickly.
 - Add a new module called `Hydrogen`, the infrastructure functions of Spring and SpringMVC are all taken over, and explored from the source level.
 - The aggregation ability of functional modules has strengthened to achieve the improvement of the small world within the big world.
 
@@ -94,12 +94,12 @@ Milkomeda 3.0 is now available（April 2020).
 [See Releases](https://github.com/yizzuide/Milkomeda/releases)
 
 ## Contributing
-The *Mikomeda* project needs more developers to work together, join us with some notice as following:
+This project needs more developers to work together, join us with some notice as the following:
 
 - If you have a better idea, please submit a new issue with `[feature]` prefix.
-- Fork from `master` branch, checkout a new branch named like `feat_module_yyyyMMdd` for add new module，`fix_module_yyyyMMdd` for fixing issues.
+- Fork from `master` branch, check out a new branch named like `feat_module_yyyyMMdd` for add new module，`fix_module_yyyyMMdd` for fixing issues.
 - The newly added module should be as universal as possible, also provide demo in `MilkomedaDemo` as better.
-- The newly added module must be under package `com.github.yizzuide.milkomeda` with addition module name sub package, and can be enabled with annotation in Spring Boot environment.
+- The newly added module must be under package `com.github.yizzuide.milkomeda` with addition module name subpackage, and can be enabled with annotation in Spring Boot environment.
 - Don't commit IDE config file and OS temp file, please add to `.gitignore` file.
 - The last thing, pull request for me with `master` branch or `dev-xxx` if there is a recent new version development branch.
 
@@ -109,8 +109,8 @@ yizzuide fu837014586@163.com
 ## License
 Milkomeda is available under the MIT license. See the LICENSE file for more info.
 
-## Thanks
-<a href="https://www.jetbrains.com/?from=Milkomeda" target="_blank">
-  <img width="64px" src="./logo/idea.png" alt="IntelliJ IDEA">
+## Sponsors
+<a href="https://www.jetbrains.com" target="_blank">
+  <img width="100" src="./logo/sponsors.png" alt="IntelliJ IDEA">
 </a>
 
