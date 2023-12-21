@@ -113,9 +113,10 @@ milkomeda:
       - name: tokenLimiter
         type: token_bucket
         props:
-          bucketCapacity: 10
-          tokensPerTime: 2
-          interval: 5
+          # 桶容量为10个令牌
+          capacity: 10
+          # 1秒放5个令牌
+          rate: 5
         key-tpl: limit_token_quota
         include-urls: [ "/particle/quota" ]
         response:
@@ -126,10 +127,10 @@ milkomeda:
       - name: leakyLimiter
         type: leaky_bucket
         props:
-          # 桶可装10个请求
-          bucketCapacity: 10
+          # 桶容量为10个请求
+          capacity: 10
           # 1秒处理2个请求（速率恒定）
-          waterRate: 2
+          rate: 2
         key-tpl: limit_leaky_pull
         include-urls: [ "/particle/pull" ]
         response:

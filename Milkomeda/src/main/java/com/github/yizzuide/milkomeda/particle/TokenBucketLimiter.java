@@ -26,21 +26,18 @@ import com.github.yizzuide.milkomeda.universe.extend.loader.LuaLoader;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.data.redis.core.script.RedisScript;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
-import java.time.Duration;
 import java.time.Instant;
 import java.util.Collections;
-import java.util.concurrent.CountDownLatch;
 
 /**
  * The token bucket can solve the problem of double traffic per unit time which relative to {@link TimesLimiter} and sudden request rejected with {@link LeakyBucketLimiter}.
- * At begin, full tokens in bucket before request come in.
+ * At init, full tokens in the bucket before request come in.
  *
  * @since 3.15.0
+ * @version 3.15.3
  * @author yizzuide
  * <br>
  * Create at 2023/05/19 21:55
@@ -51,26 +48,9 @@ import java.util.concurrent.CountDownLatch;
 public class TokenBucketLimiter extends LimitHandler implements LuaLoader {
 
     /**
-     * Decorated postfix for limiter key.
+     * Decorated postfix for a limiter key.
      */
     private static final String POSTFIX = ":token_bucket";
-
-    /**
-     * Synchronized State for JMM.
-     */
-    private volatile int startState = 0;
-
-    /**
-     * Sync Lock for wait task put tokens into bucket.
-     */
-    private CountDownLatch countDownLatch = new CountDownLatch(1);
-
-    /**
-     * Task pool scheduler.
-     */
-    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
-    @Autowired
-    private ThreadPoolTaskScheduler taskScheduler;
 
     /**
      * Lua script list.
@@ -85,65 +65,35 @@ public class TokenBucketLimiter extends LimitHandler implements LuaLoader {
     /**
      * Bucket size.
      */
-    private long bucketCapacity;
+    private long capacity;
 
     /**
-     * Each time of put token count in bucket.
+     * The number of tokens required by the request.
      */
-    private long tokensPerTime;
+    private long tokensPerRequest = 1;
 
     /**
-     * Interval of put token in bucket (second unit).
+     * Rate of put token in bucket (second unit).
      */
-    private long interval;
+    private long rate;
 
     @Override
     public <R> R limit(String key, Process<R> process) throws Throwable {
         limiterKey = key + POSTFIX;
-        // first time, wait tokens added in the bucket.
-        if (startState == 0) {
-            synchronized (this) {
-                if (startState == 0) {
-                    startState = 1;
-                    startTask();
-                    countDownLatch.await();
-                }
-            }
-        }
-        RedisScript<Long> redisScript = new DefaultRedisScript<>(luaScripts[1], Long.class);
-        Long tokenCount = getJsonRedisTemplate().execute(redisScript, Collections.singletonList(limiterKey));
+        RedisScript<Long> redisScript = new DefaultRedisScript<>(luaScripts[0], Long.class);
+        Long tokens = getJsonRedisTemplate().execute(redisScript, Collections.singletonList(limiterKey), getCapacity(), getTokensPerRequest(), getRate(), Instant.now().getEpochSecond());
         if (Environment.isShowLog()) {
-            log.info("particle get tokens from bucket, leave token count: {}", tokenCount);
+            log.info("left tokens: {}", tokens);
         }
-        // -1 is means bucket empty
-        boolean isOver = tokenCount == null || tokenCount == -1;
+        // -1 is means bucket not enough tokens
+        boolean isOver = tokens == null || tokens == -1;
         Particle particle = new Particle(this.getClass(), isOver, null);
         return next(particle, key, process);
     }
 
-    private void startTask() {
-        // task for put tokens in bucket
-        taskScheduler.scheduleAtFixedRate(() -> {
-            if (startState == 0) {
-                return;
-            }
-            RedisScript<Long> redisScript = new DefaultRedisScript<>(luaScripts[0], Long.class);
-            long currentTimeMillis = System.currentTimeMillis();
-            Long tokenCount = getJsonRedisTemplate().execute(redisScript, Collections.singletonList(limiterKey), bucketCapacity, tokensPerTime, interval, currentTimeMillis);
-            if (Environment.isShowLog()) {
-                log.info("particle task put tokens into bucket, current token count: {}", tokenCount);
-            }
-            // release lock
-            if (countDownLatch != null && countDownLatch.getCount() > 0) {
-                countDownLatch.countDown();
-                countDownLatch = null;
-            }
-        }, Instant.now(), Duration.ofSeconds(interval));
-    }
-
     @Override
     public String[] luaFilenames() {
-        return new String[]{"particle_tokenBucket_limiter.lua", "particle_tokenBucket_consume_limiter.lua"};
+        return new String[]{"particle_tokenBucket_limiter.lua"};
     }
 
 }

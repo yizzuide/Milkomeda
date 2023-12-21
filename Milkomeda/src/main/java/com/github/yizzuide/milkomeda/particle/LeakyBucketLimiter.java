@@ -36,6 +36,7 @@ import java.util.Collections;
  * but reject all requests if the bucket is full.
  *
  * @since 3.15.0
+ * @version 3.15.3
  * @author yizzuide
  * Create at 2023/05/21 18:20
  */
@@ -52,12 +53,12 @@ public class LeakyBucketLimiter extends LimitHandler implements LuaLoader {
     /**
      * Bucket size.
      */
-    private long bucketCapacity;
+    private long capacity;
 
     /**
      * loss water count per second (handle request per second).
      */
-    private long waterRate;
+    private long rate;
 
     /**
      * Lua script list.
@@ -68,7 +69,7 @@ public class LeakyBucketLimiter extends LimitHandler implements LuaLoader {
     public <R> R limit(String key, Process<R> process) throws Throwable {
         String limiterKey = key + POSTFIX;
         RedisScript<Long> redisScript = new DefaultRedisScript<>(luaScripts[0], Long.class);
-        Long waterCount = getJsonRedisTemplate().execute(redisScript, Collections.singletonList(limiterKey), getBucketCapacity(), getWaterRate(), System.currentTimeMillis());
+        Long waterCount = getJsonRedisTemplate().execute(redisScript, Collections.singletonList(limiterKey), getCapacity(), getRate(), System.currentTimeMillis());
         if (Environment.isShowLog()) {
             log.info("particle drop water from bucket, leave water count: {}", waterCount);
         }

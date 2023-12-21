@@ -1,42 +1,47 @@
 local key = KEYS[1]
-local bucketCapacity = tonumber(ARGV[1])
--- number of tokens added each time
-local addToken = tonumber(ARGV[2])
--- token addition interval with second unit
-local addInterval = tonumber(ARGV[3])
-local currentMills = tonumber(ARGV[4])
+local capacity = tonumber(ARGV[1])
+-- the number of tokens required by the request
+local requested = tonumber(ARGV[2])
+-- put tokens per second
+local rate = tonumber(ARGV[3])
+local now = tonumber(ARGV[4])
 
 -- key of bucket last update time
-local lastTimeKey = key..'_update_time'
+local timestamp_key = key..'_update_time'
+-- add full tokens need time
+local fill_time = capacity / rate
+-- tokens expire time
+local ttl = math.floor(fill_time * 2)
 
-local tokenCount = redis.call('get', key)
--- maximum time required for bucket reset
-local resetTime = math.ceil(bucketCapacity / addToken) * addInterval;
--- has tokens
-if tokenCount then
-    local lastTime = tonumber(redis.call('get', lastTimeKey))
-    -- bucket tokens recovery multiple
-    local multiple = math.floor((currentMills - lastTime) / addInterval)
-    local recoveryTokenCount = multiple * addToken
-    -- must not over the capacity size
-    tokenCount = math.min(bucketCapacity, tokenCount + recoveryTokenCount) - 1
-    if tokenCount < 0 then
-        return -1
-    end
-    -- reset expire time
-    redis.call('set', key, tokenCount, 'EX', resetTime)
-    redis.call('set', lastTimeKey, lastTime + multiple * addInterval, 'EX', resetTime)
-    return tokenCount
-else
-    -- first time, full tokens in bucket
-    tokenCount = bucketCapacity -1
-    -- set expire time
-    redis.call('set', key, tokenCount, 'EX', resetTime)
-    redis.call('set', lastTimeKey, currentMills, 'EX', resetTime)
-    return tokenCount
+-- get left token count
+local last_tokens = tonumber(redis.call("get", key))
+-- init full tokens in bucket when is empty or has not been used for a long time
+if last_tokens == nil then
+    last_tokens = capacity
+end
+-- get or init last timestamp
+local last_refreshed = tonumber(redis.call("get", timestamp_key))
+if last_refreshed == nil then
+    last_refreshed = 0
 end
 
-
-
-
-
+-- calc pass time
+local delta = math.max(0, now - last_refreshed)
+-- fill up tokens rate at pass time
+local filled_tokens = math.min(capacity, last_tokens + (delta * rate))
+-- whether the number of tokens in the token bucket meets the number of tokens required by the request
+local allowed = filled_tokens >= requested
+-- using for calc left token count
+local left_tokens = filled_tokens
+-- if return tokens is -1, then limit
+local tokens = -1
+if allowed then
+    left_tokens = filled_tokens - requested
+    tokens = left_tokens
+end
+-- record left tokens and last time
+if ttl > 0 then
+    redis.call('set', key, left_tokens, 'EX', ttl)
+    redis.call('set', timestamp_key, now, 'EX', ttl)
+end
+return tokens
