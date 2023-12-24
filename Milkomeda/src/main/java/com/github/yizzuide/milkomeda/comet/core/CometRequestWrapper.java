@@ -22,18 +22,19 @@
 package com.github.yizzuide.milkomeda.comet.core;
 
 import com.github.yizzuide.milkomeda.util.HttpServletUtil;
+import jakarta.servlet.ReadListener;
+import jakarta.servlet.ServletInputStream;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequestWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.catalina.connector.ClientAbortException;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.multipart.commons.CommonsMultipartResolver;
+import org.springframework.web.multipart.MultipartResolver;
+import org.springframework.web.multipart.support.StandardServletMultipartResolver;
 import org.springframework.web.util.WebUtils;
 
-import javax.servlet.ReadListener;
-import javax.servlet.ServletInputStream;
-import javax.servlet.ServletRequest;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletRequestWrapper;
 import java.io.*;
 import java.net.SocketTimeoutException;
 import java.nio.charset.StandardCharsets;
@@ -75,8 +76,8 @@ public class CometRequestWrapper extends HttpServletRequestWrapper {
         this.originalRequest = request;
         this.cacheBody = cacheBody;
 
-        CommonsMultipartResolver commonsMultipartResolver = new CommonsMultipartResolver(request.getSession().getServletContext());
-        if (commonsMultipartResolver.isMultipart(request)) {
+        MultipartResolver multipartResolver = new StandardServletMultipartResolver();
+        if (multipartResolver.isMultipart(request)) {
             fileUpload = true;
         }
 

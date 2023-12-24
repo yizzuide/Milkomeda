@@ -7,7 +7,7 @@ import com.github.yizzuide.milkomeda.demo.halo.mapper.TOrderMapper;
 import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.Date;
 import java.util.List;
 

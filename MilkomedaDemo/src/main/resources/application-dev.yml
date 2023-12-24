@@ -40,12 +40,6 @@ spring:
       # 连接激活的保持时间，该事件只会发生在闲置连接，到期会从池中移除，最低设置为30s，设置为1分钟内最佳
       keepalive-time: 35000
 
-  redis:
-    host: 127.0.0.1
-    # Spring Boot 2.7: Support for specifying a username for authenticating to Sentinel(s)
-    #sentinel:
-      #username:
-
   # Spring Boot 2.6: To use embedded mongo, the spring.mongodb.embedded.version property must now be set.
   #mongodb:
     #embedded:
@@ -56,6 +50,12 @@ spring:
       database: milkomeda
       host: localhost
       port: 27017
+    # Spring Boot 3.0：从spring.redis迁移到spring.data.redis
+    redis:
+      host: 127.0.0.1
+      # Spring Boot 2.7: Support for specifying a username for authenticating to Sentinel(s)
+      #sentinel:
+        #username:
 
 
   # Pulsar模块异步线程池（Async异步任务线程池，Spring Boot 2.1.0+在这里配置）

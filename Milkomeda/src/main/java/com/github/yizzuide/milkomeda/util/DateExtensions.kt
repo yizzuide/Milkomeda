@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 yizzuide All rights Reserved.
+ * Copyright (c) 2022 yizzuide All rights Reserved.
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -18,18 +18,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-@file:JvmName("CollectionsKt")
+
 package com.github.yizzuide.milkomeda.util
 
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
+import java.util.*
+
 /**
- * Collection util
+ * DateExtensionsKt
  *
- * @since 3.15.0
+ *
  * @author yizzuide
+ * @since 3.14.0
  * <br>
- * Create at 2023/01/27 19:10
+ * Create at 2022/09/27 00:57
  */
-class CollectionExtensionsKt {
+class Dates {
 }
 
-fun singletonMap(key: String, value: Any): Map<String, Any> = mapOf(key to value)
+fun timestamp2Date(timestamp: Long): Date? {
+    if (timestamp < 0) {
+        return null
+    }
+    val instant = Instant.ofEpochMilli(timestamp)
+    return Date.from(instant)
+}
+
+fun date2Timestamp(date: Date?): Long = date?.time ?: -1
+
+fun timestampOfDays(days: Long): Long = LocalDate.now().plusDays(days).
+    atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli() - System.currentTimeMillis()

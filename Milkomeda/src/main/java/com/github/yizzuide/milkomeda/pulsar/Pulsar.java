@@ -22,7 +22,7 @@
 package com.github.yizzuide.milkomeda.pulsar;
 
 import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
-import com.github.yizzuide.milkomeda.util.Strings;
+import com.github.yizzuide.milkomeda.util.StringExtensionsKt;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -200,7 +200,7 @@ public class Pulsar implements ApplicationListener<ApplicationStartedEvent> {
         // 准备设置DeferredResultID
         String id = pulsarFlow.id();
         String idValue = null;
-        if (!Strings.isEmpty(id)) {
+        if (!StringExtensionsKt.isEmpty(id)) {
             // 解析表达式
             idValue = extractValue(joinPoint, id);
             pulsarDeferredResult.setDeferredResultID(idValue);
@@ -210,7 +210,7 @@ public class Pulsar implements ApplicationListener<ApplicationStartedEvent> {
 
         // 调用方法实现
         Object returnObj = joinPoint.proceed(injectParam(joinPoint, pulsarDeferredResult, pulsarFlow,
-                Strings.isEmpty(idValue)));
+                StringExtensionsKt.isEmpty(idValue)));
 
         // 方法有返回值且不是DeferredResult，则不作DeferredResult处理
         if (null != returnObj && !(returnObj instanceof DeferredResult)) {

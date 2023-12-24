@@ -26,7 +26,7 @@ import com.github.yizzuide.milkomeda.demo.wormhole.application.CreditApplication
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 /**
  * AuditController

@@ -23,7 +23,7 @@ package com.github.yizzuide.milkomeda.crust;
 
 import com.github.yizzuide.milkomeda.universe.context.WebContext;
 import com.github.yizzuide.milkomeda.util.JwtUtil;
-import com.github.yizzuide.milkomeda.util.Strings;
+import com.github.yizzuide.milkomeda.util.StringExtensionsKt;
 import io.jsonwebtoken.Claims;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -151,7 +151,7 @@ public class CrustTokenResolver {
      */
     public String getRequestToken() {
         String token = WebContext.getRequestNonNull().getHeader(props.getTokenName());
-        if (Strings.isEmpty(token)) { return null; }
+        if (StringExtensionsKt.isEmpty(token)) { return null; }
         // 一般请求头Authorization的值会添加Bearer
         String tokenHead = "Bearer ";
         if (token.contains(tokenHead)) {

@@ -25,7 +25,7 @@ import com.github.yizzuide.milkomeda.light.*;
 import com.github.yizzuide.milkomeda.universe.context.AopContextHolder;
 import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import com.github.yizzuide.milkomeda.universe.context.WebContext;
-import com.github.yizzuide.milkomeda.util.Strings;
+import com.github.yizzuide.milkomeda.util.StringExtensionsKt;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -102,7 +102,7 @@ public class Crust {
 
     /**
      * Generate verify code for login action.
-     * @param account   account name(phone, email, etc.)
+     * @param account   account name (phone, email, etc.)
      * @return verily code
      * @since 3.15.0
      */
@@ -119,7 +119,7 @@ public class Crust {
 
     /**
      * Get cached code.
-     * @param account   account name(phone, email, etc.)
+     * @param account   account name (phone, email, etc.)
      * @return  verily code
      */
     String getCode(String account) {
@@ -352,7 +352,7 @@ public class Crust {
         if (getProps().isStateless()) {
             String token = getAuthentication() == null ? getToken(false) :
                     getUserInfo(null).getToken();
-            if (Strings.isEmpty(token)) {
+            if (StringExtensionsKt.isEmpty(token)) {
                 throw new InsufficientAuthenticationException("Token is not exists.");
             }
             AopContextHolder.self(this.getClass()).removeTokenCache(token);

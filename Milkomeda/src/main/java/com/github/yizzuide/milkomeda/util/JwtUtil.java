@@ -22,10 +22,10 @@
 package com.github.yizzuide.milkomeda.util;
 
 import io.jsonwebtoken.*;
+import io.jsonwebtoken.security.Keys;
 
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.security.SignatureException;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -37,7 +37,7 @@ import java.util.Map;
  *
  * @author yizzuide
  * @since 1.14.0
- * @version 3.14.0
+ * @version 4.0.0
  * <br>
  * Create at 2019/11/11 15:16
  */
@@ -52,9 +52,13 @@ public class JwtUtil {
      */
     public static String generateToken(Map<String, Object> claims, PrivateKey privateKey, int expireMinutes) {
         return Jwts.builder()
-                .setClaims(claims)
-                .setExpiration(Date.from(LocalDateTime.now().plusMinutes(expireMinutes).atZone(ZoneId.systemDefault()).toInstant()))
-                .signWith(SignatureAlgorithm.RS256, privateKey)
+                .header()
+                .add("typ", "JWT")
+                .add("alg","RS256")
+                .and()
+                .claims(claims)
+                .expiration(Date.from(LocalDateTime.now().plusMinutes(expireMinutes).atZone(ZoneId.systemDefault()).toInstant()))
+                .signWith(Keys.builder(privateKey).build())
                 .compact();
     }
 
@@ -68,9 +72,13 @@ public class JwtUtil {
      */
     public static String generateToken(Map<String, Object> claims, String secureKey, long expireTime, boolean usedRSA) {
         return Jwts.builder()
-                .setClaims(claims)
-                .setExpiration(Date.from(Instant.ofEpochMilli(expireTime)))
-                .signWith(usedRSA ? SignatureAlgorithm.RS256 : SignatureAlgorithm.HS512, secureKey)
+                .header()
+                .add("typ", "JWT")
+                .add("alg", usedRSA ? "RS256" : "HS256")
+                .and()
+                .claims(claims)
+                .expiration(Date.from(Instant.ofEpochMilli(expireTime)))
+                .signWith(Keys.hmacShaKeyFor(secureKey.getBytes()))
                 .compact();
     }
 
@@ -83,12 +91,11 @@ public class JwtUtil {
      * @throws ExpiredJwtException token过期
      * @throws UnsupportedJwtException 不支持
      * @throws MalformedJwtException 被篡改
-     * @throws SignatureException 签名失败
      * @throws IllegalArgumentException 包含非法参数
      */
     public static Claims parseToken(String token, PublicKey publicKey) throws ExpiredJwtException, UnsupportedJwtException,
-            MalformedJwtException, SignatureException, IllegalArgumentException {
-        return Jwts.parser().setSigningKey(publicKey).parseClaimsJws(token).getBody();
+            MalformedJwtException, IllegalArgumentException {
+        return Jwts.parser().verifyWith(publicKey).build().parseSignedClaims(token).getPayload();
     }
 
     /**
@@ -104,7 +111,7 @@ public class JwtUtil {
      */
     public static Claims parseToken(String token, String secureKey) throws ExpiredJwtException, UnsupportedJwtException,
             MalformedJwtException, IllegalArgumentException {
-        return Jwts.parser().setSigningKey(secureKey).parseClaimsJws(token).getBody();
+        return Jwts.parser().verifyWith(Keys.hmacShaKeyFor(secureKey.getBytes())).build().parseSignedClaims(token).getPayload();
     }
 
     /**

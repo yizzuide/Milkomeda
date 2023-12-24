@@ -55,13 +55,6 @@ spring:
     #pathmatch:
       #matching-strategy: ant_path_matcher
 
-    # 让404错误抛出NoHandlerFoundException异常
-    throw-exception-if-no-handler-found: true
-
-    # 资源不生成mapping映射（Springboot2.4 迁移到web里）
-    #resources:
-    #add-mappings: false
-
     format:
       date: yyyy-MM-dd
       date-time: yyyy-MM-dd HH:mm:ss

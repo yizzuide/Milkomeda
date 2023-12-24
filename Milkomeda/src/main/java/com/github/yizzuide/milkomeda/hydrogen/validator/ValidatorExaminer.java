@@ -23,7 +23,7 @@ package com.github.yizzuide.milkomeda.hydrogen.validator;
 
 import com.github.yizzuide.milkomeda.hydrogen.core.HydrogenHolder;
 
-import javax.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolation;
 import java.util.Set;
 
 /**

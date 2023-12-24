@@ -58,7 +58,7 @@ public class FilterProperties {
         /**
          * 过滤器类
          */
-        private Class<? extends javax.servlet.Filter> clazz;
+        private Class<? extends jakarta.servlet.Filter> clazz;
 
         /**
          * 匹配的URL

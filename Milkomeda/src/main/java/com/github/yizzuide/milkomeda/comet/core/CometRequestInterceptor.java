@@ -24,7 +24,7 @@ package com.github.yizzuide.milkomeda.comet.core;
 import com.github.yizzuide.milkomeda.universe.extend.web.handler.NamedHandler;
 import org.springframework.lang.Nullable;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * Comet request wrapper interceptor.

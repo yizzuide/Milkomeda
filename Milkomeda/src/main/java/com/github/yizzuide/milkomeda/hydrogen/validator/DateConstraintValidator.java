@@ -23,8 +23,8 @@ package com.github.yizzuide.milkomeda.hydrogen.validator;
 
 import org.apache.commons.lang3.time.DateUtils;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 
 /**
  * DateConstraintValidator

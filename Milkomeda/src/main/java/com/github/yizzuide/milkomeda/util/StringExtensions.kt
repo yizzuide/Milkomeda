@@ -19,35 +19,31 @@
  * SOFTWARE.
  */
 
-@file:JvmName("Dates")
 package com.github.yizzuide.milkomeda.util
 
-import java.time.Instant
-import java.time.LocalDate
-import java.time.ZoneId
-import java.util.*
+import com.github.yizzuide.milkomeda.universe.polyfill.SpringPolyfill
 
 /**
- * DateExtensionsKt
- *
+ * 字符串扩展
  *
  * @author yizzuide
- * @since 3.14.0
  * <br>
- * Create at 2022/09/27 00:57
+ * Create at 2022/08/06 17:55
+ * @since 3.13.0
  */
-class DateExtensionsKt {
+class Strings {
 }
 
-fun timestamp2Date(timestamp: Long): Date? {
-    if (timestamp < 0) {
-        return null
-    }
-    val instant = Instant.ofEpochMilli(timestamp)
-    return Date.from(instant)
-}
+/**
+ * 判断字符串是否为空
+ * @since 3.13.0
+ */
+fun isEmpty(str : String?) = SpringPolyfill.isEmpty(str)
 
-fun date2Timestamp(date: Date?): Long = date?.time ?: -1
-
-fun timestampOfDays(days: Long): Long = LocalDate.now().plusDays(days).
-    atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli() - System.currentTimeMillis()
+/**
+ * Object to String，return self if null.
+ * @param obj object value
+ * @return string value
+ * @since 3.13.0
+ */
+fun toNullableString(obj : Any?) : String? = obj?.toString()

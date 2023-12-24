@@ -95,7 +95,8 @@ public class ParticleConfig implements ApplicationContextAware {
     public FilterRegistrationBean particleFilterRegistrationBean() {
         FilterRegistrationBean particleFilterRegistrationBean = new FilterRegistrationBean();
         particleFilterRegistrationBean.setFilter(new DelegatingFilterProxy("particleFilter"));
-        particleFilterRegistrationBean.setName("particleFilter");
+        // Spring Boot 3.0: 代理注册Bean与被代理注册Bean的name不能相同
+        particleFilterRegistrationBean.setName("particleFilterBean");
         particleFilterRegistrationBean.setUrlPatterns(Collections.singleton("/*"));
         particleFilterRegistrationBean.setOrder(Ordered.HIGHEST_PRECEDENCE + 20);
         return particleFilterRegistrationBean;

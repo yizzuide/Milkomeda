@@ -30,11 +30,11 @@ import org.springframework.util.FastByteArrayOutputStream;
 import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.util.WebUtils;
 
-import javax.servlet.ServletOutputStream;
-import javax.servlet.WriteListener;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpServletResponseWrapper;
+import jakarta.servlet.ServletOutputStream;
+import jakarta.servlet.WriteListener;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponseWrapper;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 
@@ -80,7 +80,6 @@ public class CometResponseWrapper extends HttpServletResponseWrapper {
         }
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     public void sendError(int sc, String msg) throws IOException {
         copyBodyToResponse(false);
@@ -89,7 +88,7 @@ public class CometResponseWrapper extends HttpServletResponseWrapper {
         }
         catch (IllegalStateException ex) {
             // Possibly on Tomcat when called too late: fall back to silent setStatus
-            super.setStatus(sc, msg);
+            super.setStatus(sc);
         }
     }
 

@@ -26,7 +26,7 @@ import com.github.yizzuide.milkomeda.universe.extend.annotation.Alias;
 import com.github.yizzuide.milkomeda.universe.parser.yml.YmlResponseOutput;
 import lombok.extern.slf4j.Slf4j;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 import java.util.HashMap;
 import java.util.Map;
 

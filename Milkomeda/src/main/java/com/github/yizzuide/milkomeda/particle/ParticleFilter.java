@@ -27,17 +27,17 @@ import com.github.yizzuide.milkomeda.universe.parser.url.URLPlaceholderParser;
 import com.github.yizzuide.milkomeda.universe.parser.url.URLPlaceholderResolver;
 import com.github.yizzuide.milkomeda.universe.parser.yml.YmlResponseOutput;
 import com.github.yizzuide.milkomeda.util.JSONUtil;
-import com.github.yizzuide.milkomeda.util.Strings;
+import com.github.yizzuide.milkomeda.util.StringExtensionsKt;
+import jakarta.annotation.PostConstruct;
+import jakarta.servlet.*;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
 import org.springframework.util.CollectionUtils;
 
-import javax.annotation.PostConstruct;
-import javax.servlet.*;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
@@ -83,7 +83,7 @@ public class ParticleFilter implements Filter {
         urlPlaceholderParser = new URLPlaceholderParser();
         urlPlaceholderParser.setCustomURLPlaceholderResolver(particleURLPlaceholderResolver);
         for (ParticleProperties.Limiter limiter : limiters) {
-            if (Strings.isEmpty(limiter.getKeyTpl())) {
+            if (StringExtensionsKt.isEmpty(limiter.getKeyTpl())) {
                 continue;
             }
             limiter.setCacheKeys(urlPlaceholderParser.grabPlaceHolders(limiter.getKeyTpl()));

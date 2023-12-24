@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
  * Create at 2020/04/16 18:24
  */
 @Slf4j
-// Springboot 2.3: WebServerInitializedEvent is now published before the ContextRefreshedEvent
+// Spring Boot 2.3: WebServerInitializedEvent is now published before the ContextRefreshedEvent
 @Component
 public class MilkomedaApplicationListener implements ApplicationListener<ContextRefreshedEvent> {
     // yml配置的实体需要使用@Lazy!!!

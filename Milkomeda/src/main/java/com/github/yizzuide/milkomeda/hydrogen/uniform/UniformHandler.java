@@ -27,18 +27,18 @@ import com.github.yizzuide.milkomeda.universe.parser.yml.YmlParser;
 import com.github.yizzuide.milkomeda.universe.parser.yml.YmlResponseOutput;
 import com.github.yizzuide.milkomeda.util.DataTypeConvertUtil;
 import com.github.yizzuide.milkomeda.util.JSONUtil;
+import jakarta.annotation.PostConstruct;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.bind.Binder;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
-import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
@@ -47,10 +47,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import javax.annotation.PostConstruct;
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.ConstraintViolation;
-import javax.validation.ConstraintViolationException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
@@ -133,10 +129,10 @@ public class UniformHandler extends ResponseEntityExceptionHandler {
 
     // 4xx异常处理
     @Override
-    protected @NonNull ResponseEntity<Object> handleExceptionInternal(@NonNull Exception ex, @Nullable Object body, @NonNull HttpHeaders headers, HttpStatus status, @NonNull WebRequest request) {
-        ResponseEntity<Object> responseEntity = handleExceptionResponse(ex, status.value(), ex.getMessage());
+    protected ResponseEntity<Object> handleExceptionInternal(@NotNull Exception ex, @Nullable Object body, @NotNull HttpHeaders headers, @NotNull HttpStatusCode statusCode, @NotNull WebRequest request) {
+        ResponseEntity<Object> responseEntity = handleExceptionResponse(ex, statusCode.value(), ex.getMessage());
         if (responseEntity == null) {
-            return super.handleExceptionInternal(ex, body, headers, status, request);
+            return super.handleExceptionInternal(ex, body, headers, statusCode, request);
         }
         return responseEntity;
     }
@@ -157,18 +153,11 @@ public class UniformHandler extends ResponseEntityExceptionHandler {
         return responseEntity == null ? ResponseEntity.status(HttpStatus.BAD_REQUEST.value()).body(null) : responseEntity;
     }
 
-    // 对方法上@RequestBody的Bean参数校验的处理
+    // 对方法上@RequestBody的Bean和@RequestParam的Form参数校验的处理
     @Override
-    protected @NonNull ResponseEntity<Object> handleMethodArgumentNotValid(@NonNull MethodArgumentNotValidException ex, @NonNull HttpHeaders headers, @NonNull HttpStatus status, @NonNull WebRequest request) {
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(@NonNull MethodArgumentNotValidException ex, @NonNull HttpHeaders headers, @NonNull HttpStatusCode statusCode, @NonNull WebRequest request) {
         ResponseEntity<Object> responseEntity = handleValidBeanExceptionResponse(ex, ex.getBindingResult());
-        return responseEntity == null ? super.handleMethodArgumentNotValid(ex, headers, status, request) : responseEntity;
-    }
-
-    // 对方法的Form提交参数绑定校验的处理
-    @Override
-    protected @NonNull ResponseEntity<Object> handleBindException(@NonNull BindException ex, @NonNull HttpHeaders headers, @NonNull HttpStatus status, @NonNull WebRequest request) {
-        ResponseEntity<Object> responseEntity = handleValidBeanExceptionResponse(ex, ex.getBindingResult());
-        return responseEntity == null ? super.handleBindException(ex, headers, status, request) : responseEntity;
+        return responseEntity == null ? super.handleMethodArgumentNotValid(ex, headers, statusCode, request) : responseEntity;
     }
 
     // 其它内部异常处理

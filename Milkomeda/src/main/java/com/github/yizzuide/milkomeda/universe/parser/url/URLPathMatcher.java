@@ -21,7 +21,7 @@
 
 package com.github.yizzuide.milkomeda.universe.parser.url;
 
-import com.github.yizzuide.milkomeda.util.Strings;
+import com.github.yizzuide.milkomeda.util.StringExtensionsKt;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -65,13 +65,13 @@ public class URLPathMatcher {
      * @return  匹配是否成功
      */
     public static boolean match(List<String> sourcePaths, String targetPath) {
-        // Springboot 2.6: Using PathPatternParser to match.
+        // Spring Boot 2.6: Using PathPatternParser to match.
         //return sourcePaths.stream().anyMatch(pathPattern -> WebContext.getMvcPatternParser().parse(pathPattern).matches(PathContainer.parsePath(targetPath)));
 
         // Simple impl...
         boolean matched = false;
         for (String path : sourcePaths) {
-            if (Strings.isEmpty(path)) continue;
+            if (StringExtensionsKt.isEmpty(path)) continue;
             // 去除最后一个/
             String lastChar = path.substring(path.length() - 1);
             if (path.length() > 1 && "/".equals(lastChar)) {

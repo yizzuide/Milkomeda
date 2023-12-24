@@ -146,14 +146,16 @@ milkomeda:
       - name: userBloomLimiter
         type: bloom
         props:
-          # bitmap key
-          bitKey: bit_user
+          # redis bitmap key
+          bitKey: limit_register_user
           # 数据量
           insertions: 2000000
-          # 取值分隔器，默认为`_`
+          # 误差率（借鉴自Guava布隆器默认误判率）
+          fpp: 0.03
+          # 判别值分隔符，取最后一个符号右边值（默认为`_`）
           #valueSeparator: _
-        # 这里的匹配数据：$params.phone，默认前面必须用`_`分隔，可通过上面valueSeparator配置
-        key-tpl: limit_{method}_{uri}_{$params.phone}
+        # 判别值为：$params.phone，通过valueSeparator配置
+        key-tpl: limit_register_user_{$params.phone}
         include-urls: [ "/particle/exists" ]
         response:
           status: 200
@@ -179,16 +181,16 @@ milkomeda:
         #only-cache-l2: true
 
   echo:
-    # 设置请求读取超时
-    read-timeout: 10s
+    # 设置请求超时
+    connect-timeout: 60s
 
   crust:
     # -- 设置token方式 --
     stateless: true
     # token方式不缓存
     enable-cache: false
-    # 使用对称密钥生成token
-    secure-key: crust_secure_key
+    # 默认使用对称加密Key
+    use-rsa: false
     # 自定义token头，默认为token
     token-name: Authorization
 
@@ -294,6 +296,10 @@ milkomeda:
 
     uniform:
       enable: true
+      # 强制code返回类型
+      code-type: int
+      # 异常message不包含具体字段名
+      ignore-add-field-on-valid-fail: true
       response:
         # 5xx通用服务异常处理
         status: 200 # 这个是HTTP标准响应码，不是业务返回字段

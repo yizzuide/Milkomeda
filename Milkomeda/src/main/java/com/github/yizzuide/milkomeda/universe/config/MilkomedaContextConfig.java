@@ -21,18 +21,18 @@
 
 package com.github.yizzuide.milkomeda.universe.config;
 
-import com.github.yizzuide.milkomeda.universe.context.WebContext;
 import com.github.yizzuide.milkomeda.universe.extend.env.Environment;
 import com.github.yizzuide.milkomeda.universe.extend.web.handler.DelegatingContextFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.boot.web.servlet.filter.OrderedFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.util.PathMatcher;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.web.filter.DelegatingFilterProxy;
 
 import java.util.Collections;
@@ -47,6 +47,8 @@ import java.util.Collections;
  * Create at 2019/12/13 19:09
  */
 @AutoConfigureAfter(WebMvcAutoConfiguration.class)
+@EnableConfigurationProperties(MilkomedaProperties.class)
+@EnableAspectJAutoProxy(exposeProxy = true)
 @Configuration
 public class MilkomedaContextConfig {
 
@@ -61,11 +63,6 @@ public class MilkomedaContextConfig {
         return environment;
     }
 
-    @Autowired
-    public void config(PathMatcher mvcPathMatcher) {
-        WebContext.setMvcPathMatcher(mvcPathMatcher);
-    }
-
     @Bean
     public DelegatingContextFilter delegatingContextFilter() {
         return new DelegatingContextFilter();
@@ -77,7 +74,8 @@ public class MilkomedaContextConfig {
         FilterRegistrationBean delegatingFilterRegistrationBean = new FilterRegistrationBean();
         // 设置代理注册的Bean
         delegatingFilterRegistrationBean.setFilter(new DelegatingFilterProxy("delegatingContextFilter"));
-        delegatingFilterRegistrationBean.setName("delegatingContextFilter");
+        // Spring Boot 3.0: 代理注册Bean与被代理注册Bean的name不能相同
+        delegatingFilterRegistrationBean.setName("delegatingContextFilterBean");
         delegatingFilterRegistrationBean.setUrlPatterns(Collections.singleton("/*"));
         // Order defaults to after OrderedRequestContextFilter
         // 解决无法从RequestContext获取信息的问题

@@ -22,12 +22,13 @@
 package com.github.yizzuide.milkomeda.universe.aop.invoke.args;
 
 import org.springframework.aop.support.AopUtils;
-import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
+import org.springframework.core.ParameterNameDiscoverer;
+import org.springframework.core.StandardReflectionParameterNameDiscoverer;
 
 import java.lang.reflect.Method;
 
 /**
- * An abstract argument matcher that has ability to discover param name.
+ * An abstract argument matcher that has an ability to discover param name.
  *
  * @since 3.15.0
  * @author yizzuide
@@ -35,8 +36,8 @@ import java.lang.reflect.Method;
  * Create at 2023/01/12 02:21
  */
 public abstract class AbstractArgumentMatcher implements ArgumentMatcher {
-
-    private final LocalVariableTableParameterNameDiscoverer discoverer = new LocalVariableTableParameterNameDiscoverer();
+    // Spring Boot 3.0：基于JDK 8标准的参数化实现的，JDK支持编译时加上"-parameters参数，便可保留方法参数的名字
+    private final ParameterNameDiscoverer discoverer = new StandardReflectionParameterNameDiscoverer();
 
     @Override
     public int matchIndex(Method method, ArgumentDefinition argumentDefinition) {

@@ -78,7 +78,7 @@ public class CrustProperties {
     private boolean cacheInMemory = false;
 
     /**
-     * Set false if you need get entity of user info immediately.
+     * Set false if you need to get entity of user info immediately.
      * @since 3.15.0
      */
     private boolean enableLoadEntityLazy = true;

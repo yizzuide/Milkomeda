@@ -23,8 +23,8 @@ package com.github.yizzuide.milkomeda.hydrogen.filter;
 
 import com.github.yizzuide.milkomeda.hydrogen.core.HydrogenLoader;
 
-import javax.servlet.Filter;
-import javax.servlet.ServletContext;
+import jakarta.servlet.Filter;
+import jakarta.servlet.ServletContext;
 
 /**
  * FilterLoader

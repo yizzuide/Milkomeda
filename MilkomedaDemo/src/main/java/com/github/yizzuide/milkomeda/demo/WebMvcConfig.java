@@ -29,16 +29,16 @@ import static org.springframework.boot.actuate.endpoint.SanitizableData.SANITIZE
 //    EnableWebMvcConfiguration（等同于@EnableWebMvc，继承自DelegatingWebMvcConfiguration -> WebMvcConfigurationSupport
 // 总结：在Spring Boot 2.0不添加@EnableWebMvc，会配置的更多更全面，拥有添加@EnableWebMvc的所有配置
 
-// Springboot 2.3不支持@ActiveProfiles({"dev,test"})，它将识别为单个字符串：dev,test
+// Spring Boot 2.3不支持@ActiveProfiles({"dev,test"})，它将识别为单个字符串：dev,test
 @ActiveProfiles({"dev","test"})
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
-    // Springboot 2.6: Injecting `Resources` directly no longer works as this configuration has been harmonized in WebProperties
+    // Spring Boot 2.6: Injecting `Resources` directly no longer works as this configuration has been harmonized in WebProperties
     @Autowired
     private WebProperties webProperties;
 
-    // Springboot 2.7: SanitizingFunction现已支持Ordered排序，在SanitizableData一量赋值后中止其它调用
-    // Springboot 2.6: 现在可以清理 /env 和 /configprops 端点中存在的敏感值
+    // Spring Boot 2.7: SanitizingFunction现已支持Ordered排序，在SanitizableData一量赋值后中止其它调用
+    // Spring Boot 2.6: 现在可以清理 /env 和 /configprops 端点中存在的敏感值
     @Order(Integer.MIN_VALUE)
     @Bean
     public SanitizingFunction mysqlSanitizingFunction() {

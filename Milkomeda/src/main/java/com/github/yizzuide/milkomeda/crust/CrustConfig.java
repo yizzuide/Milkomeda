@@ -22,6 +22,7 @@
 package com.github.yizzuide.milkomeda.crust;
 
 import com.github.yizzuide.milkomeda.light.*;
+import io.jsonwebtoken.Jwts;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator;
 import org.springframework.beans.factory.InitializingBean;
@@ -42,7 +43,7 @@ import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 /**
  * CrustConfig
@@ -50,7 +51,7 @@ import javax.annotation.Resource;
  * @see AbstractAutoProxyCreator#postProcessAfterInitialization(java.lang.Object, java.lang.String)
  * @author yizzuide
  * @since 1.14.0
- * @version 3.14.0
+ * @version 4.0.0
  * <br>
  * Create at 2019/11/11 14:56
  */
@@ -155,6 +156,10 @@ public class CrustConfig {
 
         @Override
         public void afterPropertiesSet() throws Exception {
+            // Reset an AES key with 256 bit
+            if (!crustProps.isUseRsa()) {
+                crustProps.setSecureKey(new String(Jwts.SIG.HS256.key().build().getEncoded()));
+            }
             CrustContext.set(crust);
         }
     }

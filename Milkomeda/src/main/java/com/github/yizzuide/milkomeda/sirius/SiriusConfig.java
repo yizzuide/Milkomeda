@@ -24,6 +24,7 @@ package com.github.yizzuide.milkomeda.sirius;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.autoconfigure.ConfigurationCustomizer;
 import com.baomidou.mybatisplus.autoconfigure.MybatisPlusAutoConfiguration;
+import com.baomidou.mybatisplus.autoconfigure.MybatisPlusProperties;
 import com.baomidou.mybatisplus.autoconfigure.MybatisPlusPropertiesCustomizer;
 import com.baomidou.mybatisplus.core.MybatisConfiguration;
 import com.baomidou.mybatisplus.core.MybatisSqlSessionFactoryBuilder;
@@ -42,6 +43,7 @@ import com.github.yizzuide.milkomeda.sirius.wormhole.SiriusInspector;
 import com.github.yizzuide.milkomeda.universe.extend.env.CollectionsPropertySource;
 import com.github.yizzuide.milkomeda.universe.extend.env.SpELPropertySource;
 import com.github.yizzuide.milkomeda.util.ReflectUtil;
+import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import org.apache.ibatis.reflection.MetaObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,7 +59,6 @@ import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 
-import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.*;
 
@@ -69,7 +70,7 @@ import java.util.*;
  * @see MybatisSqlSessionFactoryBean
  * @see MybatisSqlSessionFactoryBuilder
  * @since 3.14.0
- * @version 3.15.0
+ * @version 4.0.0
  * @author yizzuide
  * <br>
  * Create at 2022/10/30 17:52
@@ -121,13 +122,15 @@ public class SiriusConfig {
                     }
                     // ConfigLocation -> Mybatis Configuration
                     properties.setConfigLocation(null);
-                    properties.setConfiguration((MybatisConfiguration) xmlConfigBuilder.getConfiguration());
+                    MybatisPlusProperties.CoreConfiguration coreConfiguration = new MybatisPlusProperties.CoreConfiguration();
+                    coreConfiguration.applyTo(xmlConfigBuilder.getConfiguration());
+                    properties.setConfiguration(coreConfiguration);
                     return;
                 }
                 // 没有设置过，创建默认配置
-                MybatisConfiguration configuration = new MybatisConfiguration();
-                configuration.setDefaultEnumTypeHandler(MybatisEnumTypeHandler.class);
-                properties.setConfiguration(configuration);
+                MybatisPlusProperties.CoreConfiguration coreConfiguration = new MybatisPlusProperties.CoreConfiguration();
+                coreConfiguration.setDefaultEnumTypeHandler(MybatisEnumTypeHandler.class);
+                properties.setConfiguration(coreConfiguration);
             }
         };
     }

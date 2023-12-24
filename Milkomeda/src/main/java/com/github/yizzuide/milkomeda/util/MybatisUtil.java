@@ -26,7 +26,6 @@ import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.util.TablesNamesFinder;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.reflection.SystemMetaObject;
-import org.springframework.util.StringUtils;
 
 import java.io.StringReader;
 import java.lang.reflect.Proxy;
@@ -77,7 +76,7 @@ public class MybatisUtil {
      * @since 3.7.0
      */
     public static String getFirstTableName(String sql) {
-        sql = StringUtils.trimLeadingWhitespace(sql.toLowerCase());
+        sql = sql.toLowerCase().stripLeading();
         if (sql.startsWith("select") || sql.startsWith("delete")) {
             return extractTableName(sql, " from ");
         }

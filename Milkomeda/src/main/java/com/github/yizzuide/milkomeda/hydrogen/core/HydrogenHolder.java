@@ -23,7 +23,7 @@ package com.github.yizzuide.milkomeda.hydrogen.core;
 
 import com.github.yizzuide.milkomeda.hydrogen.i18n.I18nMessages;
 
-import javax.validation.Validator;
+import jakarta.validation.Validator;
 
 /**
  * HydrogenHolder
