@@ -46,6 +46,11 @@ spring:
     resources:
       add-mappings: false
 
+  # Spring Boot 3.2：开启虚拟线程
+  threads:
+    virtual:
+      enabled: true
+
   mvc:
     # 异步超时
     async:

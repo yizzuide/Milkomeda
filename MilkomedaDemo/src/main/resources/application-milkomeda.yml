@@ -235,6 +235,7 @@ milkomeda:
       - /build/*
       - /error/*
 
+
   ice:
     # 在分布式布署时，需要设置实例名
     instance-name: ${spring.application.name}
@@ -486,3 +487,5 @@ milkomeda:
         advisor-clazz: com.github.yizzuide.milkomeda.orbit.AnnotationOrbitAdvisor
         advisor-props:
           methodAnnotationType: com.github.yizzuide.milkomeda.demo.orbit.RecordLog
+  quark:
+    buffer-size:

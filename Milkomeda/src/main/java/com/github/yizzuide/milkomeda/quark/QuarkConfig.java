@@ -21,12 +21,12 @@
 
 package com.github.yizzuide.milkomeda.quark;
 
-import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.lang.NonNull;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 import java.util.List;
@@ -53,7 +53,7 @@ public class QuarkConfig implements ApplicationListener<ContextRefreshedEvent> {
     private List<QuarkEventHandler<?>> eventHandlerList;
 
     @Override
-    public void onApplicationEvent(@NotNull ContextRefreshedEvent event) {
+    public void onApplicationEvent(@NonNull ContextRefreshedEvent event) {
         if (Quarks.bufferSize != null) {
             return;
         }

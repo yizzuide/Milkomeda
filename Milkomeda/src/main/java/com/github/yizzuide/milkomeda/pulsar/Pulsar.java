@@ -24,16 +24,19 @@ package com.github.yizzuide.milkomeda.pulsar;
 import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import com.github.yizzuide.milkomeda.util.StringExtensionsKt;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.ibatis.jdbc.Null;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.BeanNotOfRequiredTypeException;
+import org.springframework.boot.autoconfigure.task.TaskExecutionAutoConfiguration;
 import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.core.annotation.Order;
+import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.context.request.async.WebAsyncTask;
 
@@ -56,7 +59,6 @@ import static com.github.yizzuide.milkomeda.util.ReflectUtil.*;
  * <br>
  * Create at 2019/03/29 10:36
  */
-@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 @Slf4j
 @Aspect
 @Order(66)
@@ -66,11 +68,12 @@ public class Pulsar implements ApplicationListener<ApplicationStartedEvent> {
      */
     private final Map<String, PulsarDeferredResult> deferredResultMap;
 
+    // Spring Boot 3.0: AsyncTaskExecutor类型支持虚拟线程和传统线程池
     /**
      * 线程池执行器（从Spring Boot 2.1.0 开始默认已经装配）
      * @see org.springframework.boot.autoconfigure.task.TaskExecutionAutoConfiguration
      */
-    private ThreadPoolTaskExecutor applicationTaskExecutor;
+    private AsyncTaskExecutor applicationTaskExecutor;
 
     /**
      * 初始化容器容量大小
@@ -84,11 +87,14 @@ public class Pulsar implements ApplicationListener<ApplicationStartedEvent> {
 
     @Override
     public void onApplicationEvent(@NotNull ApplicationStartedEvent event) {
-        Map<String, ThreadPoolTaskExecutor> threadPoolTaskExecutorMap = ApplicationContextHolder.get().getBeansOfType(ThreadPoolTaskExecutor.class);
-        if (threadPoolTaskExecutorMap.containsKey("applicationTaskExecutor")) {
-            applicationTaskExecutor = threadPoolTaskExecutorMap.get("applicationTaskExecutor");
+        Map<String, AsyncTaskExecutor> taskExecutorMap = ApplicationContextHolder.get().getBeansOfType(AsyncTaskExecutor.class);
+        if (taskExecutorMap.containsKey(TaskExecutionAutoConfiguration.APPLICATION_TASK_EXECUTOR_BEAN_NAME)) {
+            applicationTaskExecutor = taskExecutorMap.get(TaskExecutionAutoConfiguration.APPLICATION_TASK_EXECUTOR_BEAN_NAME);
         } else {
-            applicationTaskExecutor = threadPoolTaskExecutorMap.values().stream().findFirst().orElse(null);
+            applicationTaskExecutor = taskExecutorMap.values().stream().findFirst().orElse(null);
+        }
+        if (applicationTaskExecutor == null) {
+            throw new BeanNotOfRequiredTypeException(TaskExecutionAutoConfiguration.APPLICATION_TASK_EXECUTOR_BEAN_NAME, AsyncTaskExecutor.class, Null.class);
         }
     }
 

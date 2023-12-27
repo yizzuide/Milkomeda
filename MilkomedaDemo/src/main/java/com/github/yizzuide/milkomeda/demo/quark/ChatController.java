@@ -25,9 +25,10 @@ import com.github.yizzuide.milkomeda.pulsar.PulsarHolder;
 import com.github.yizzuide.milkomeda.quark.Quarks;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.apache.commons.lang3.RandomUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Random;
 
 /**
  * ChatController
@@ -43,15 +44,16 @@ public class ChatController {
     @RequestMapping("send")
     public String sendQuestion(String question) throws InterruptedException {
         // 模拟生成数据
+        Random random = new Random();
         PulsarHolder.getPulsar().post(() -> {
             for (int i = 0; i < 10; i++) {
                 try {
-                    Thread.sleep(RandomUtils.nextLong(0, 5) * 1000);
+                    Thread.sleep(random.nextLong(0, 5) * 1000);
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
                 MessageData data = new MessageData();
-                data.setId(RandomUtils.nextInt());
+                data.setId(random.nextInt());
                 data.setUserId(1);
                 data.setMsg(RandomStringUtils.randomAlphabetic(6));
                 log.warn("put msg id: {}", data.getId());
@@ -61,12 +63,12 @@ public class ChatController {
         PulsarHolder.getPulsar().post(() -> {
             for (int i = 0; i < 10; i++) {
                 try {
-                    Thread.sleep(RandomUtils.nextLong(0, 5) * 1000);
+                    Thread.sleep(random.nextLong(0, 5) * 1000);
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
                 MessageData data = new MessageData();
-                data.setId(RandomUtils.nextInt());
+                data.setId(random.nextInt());
                 data.setUserId(2);
                 data.setMsg(RandomStringUtils.randomAlphabetic(6));
                 log.warn("put msg id: {}", data.getId());
