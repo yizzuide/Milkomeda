@@ -487,5 +487,3 @@ milkomeda:
         advisor-clazz: com.github.yizzuide.milkomeda.orbit.AnnotationOrbitAdvisor
         advisor-props:
           methodAnnotationType: com.github.yizzuide.milkomeda.demo.orbit.RecordLog
-  quark:
-    buffer-size:
