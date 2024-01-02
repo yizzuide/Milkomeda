@@ -78,15 +78,15 @@
 * SpringBoot
 
 ## Version control guidelines
-| Milkomeda                      | Spring Boot       | Java Version |
-|--------------------------------|-------------------|--------------|
-| 4.x                            | 3.2.x             | JDK 21       |
-| 3.15.x                         | 2.7.x             | JDK 8        |
-| 3.14.x                         | 2.6.x             | JDK 8        |
-| 3.13.x                         | 2.4.x - 2.5.x     | JDK 8        |
-| 3.0 - 3.12.x                   | 2.2.x - 2.3.x     | JDK 8        |
-| 1.16.x - 2.x                   | 2.1.x             | JDK 8        |
-| Dalston.1.11.0-Dalston.1.12.0  | Spring Boot 1.5.x | JDK 8        |
+| Milkomeda                     | Spring Boot       | Java Version |
+|-------------------------------|-------------------|--------------|
+| 4.x                           | 3.2.x             | JDK 21       |
+| 3.15+                         | 2.7.x             | JDK 8        |
+| 3.14.x                        | 2.6.x             | JDK 8        |
+| 3.13.x                        | 2.4.x - 2.5.x     | JDK 8        |
+| 3.0 - 3.12.x                  | 2.2.x - 2.3.x     | JDK 8        |
+| 1.16.x - 2.x                  | 2.1.x             | JDK 8        |
+| Dalston.1.11.0-Dalston.1.12.0 | Spring Boot 1.5.x | JDK 8        |
 
 ## Installation
 ```xml

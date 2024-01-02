@@ -24,9 +24,6 @@ package com.github.yizzuide.milkomeda.universe.config;
 import com.github.yizzuide.milkomeda.universe.extend.env.Environment;
 import com.github.yizzuide.milkomeda.universe.extend.web.handler.DelegatingContextFilter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.AutoConfigureAfter;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.boot.web.servlet.filter.OrderedFilter;
@@ -42,11 +39,10 @@ import java.util.Collections;
  *
  * @author yizzuide
  * @since 2.0.0
- * @version 3.15.0
+ * @version 4.0.0
  * <br>
  * Create at 2019/12/13 19:09
  */
-@AutoConfigureAfter(WebMvcAutoConfiguration.class)
 @EnableConfigurationProperties(MilkomedaProperties.class)
 @EnableAspectJAutoProxy(exposeProxy = true)
 @Configuration
@@ -56,7 +52,6 @@ public class MilkomedaContextConfig {
     private MilkomedaProperties properties;
 
     @Bean
-    @ConditionalOnMissingBean
     public Environment env() {
         Environment environment = new Environment();
         environment.putAll(properties.getEnv());

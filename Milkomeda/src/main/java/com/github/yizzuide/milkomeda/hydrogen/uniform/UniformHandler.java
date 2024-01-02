@@ -34,6 +34,7 @@ import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.bind.BindResult;
 import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.http.*;
 import org.springframework.lang.NonNull;
@@ -62,7 +63,7 @@ import java.util.*;
  * @see org.springframework.context.support.AbstractApplicationContext#registerShutdownHook()
  * @author yizzuide
  * @since 3.0.0
- * @version 3.15.0
+ * @version 4.0.0
  * <br>
  * Create at 2020/03/25 22:47
  */
@@ -255,10 +256,11 @@ public class UniformHandler extends ResponseEntityExceptionHandler {
      * @since 3.15.0
      */
     public static boolean tryMatch(int code) {
-        UniformProperties props = Binder.get(ApplicationContextHolder.get().getEnvironment()).bind(UniformProperties.PREFIX, UniformProperties.class).get();
-        if (props == null) {
+        BindResult<UniformProperties> bindResult = Binder.get(ApplicationContextHolder.get().getEnvironment()).bind(UniformProperties.PREFIX, UniformProperties.class);
+        if (!bindResult.isBound()) {
             return false;
         }
+        UniformProperties props = bindResult.get();
         Map<?, ?> resolveMap = (Map<?, ?>) props.getResponse().get(String.valueOf(code));
         return resolveMap != null;
     }
@@ -272,15 +274,16 @@ public class UniformHandler extends ResponseEntityExceptionHandler {
      */
     @SuppressWarnings("unchecked")
     public static Tuple<Map<String, Object>, Map<String, Object>> matchStatusResult(int statusCode, Map<String, Object> source) {
-        UniformProperties props = Binder.get(ApplicationContextHolder.get().getEnvironment()).bind(UniformProperties.PREFIX, UniformProperties.class).get();
+        BindResult<UniformProperties> bindResult = Binder.get(ApplicationContextHolder.get().getEnvironment()).bind(UniformProperties.PREFIX, UniformProperties.class);
         Map<String, Object> resolveMap;
-        if (props == null) {
-            resolveMap = createInitResolveMap();
-        } else {
+        if (bindResult.isBound()) {
+            UniformProperties props = bindResult.get();
             resolveMap = (Map<String, Object>) props.getResponse().get(String.valueOf(statusCode));
             if (resolveMap == null) {
                 resolveMap = createInitResolveMap();
             }
+        } else {
+            resolveMap = createInitResolveMap();
         }
 
         Map<String, Object> result = new HashMap<>();

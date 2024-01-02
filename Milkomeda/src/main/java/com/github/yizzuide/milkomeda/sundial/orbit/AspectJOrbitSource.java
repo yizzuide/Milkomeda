@@ -27,6 +27,7 @@ import com.github.yizzuide.milkomeda.orbit.OrbitSource;
 import com.github.yizzuide.milkomeda.orbit.OrbitSourceProvider;
 import com.github.yizzuide.milkomeda.sundial.SundialProperties;
 import com.github.yizzuide.milkomeda.util.CollectionExtensionsKt;
+import org.springframework.boot.context.properties.bind.BindResult;
 import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.core.env.Environment;
 import org.springframework.util.CollectionUtils;
@@ -40,7 +41,7 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 3.13.0
- * @version 3.15.0
+ * @version 4.0.0
  * <br>
  * Create at 2022/02/23 02:11
  */
@@ -52,10 +53,11 @@ public class AspectJOrbitSource implements OrbitSource {
     @Override
     public List<OrbitAdvisor> createAdvisors(Environment environment) {
         SundialProperties sundialProperties;
-        try {
-            sundialProperties = Binder.get(environment).bind(SundialProperties.PREFIX, SundialProperties.class).get();
-        } catch (Exception ignore) {
-            // not config, back!
+        BindResult<SundialProperties> bindResult = Binder.get(environment).bind(SundialProperties.PREFIX, SundialProperties.class);
+        if (bindResult.isBound()) {
+            sundialProperties = bindResult.get();
+        } else {
+            // not config, return empty!
             return Collections.emptyList();
         }
         if (CollectionUtils.isEmpty(sundialProperties.getStrategy())) {

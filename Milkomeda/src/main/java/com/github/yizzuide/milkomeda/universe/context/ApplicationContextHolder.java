@@ -36,7 +36,7 @@ import org.springframework.lang.NonNull;
  *
  * @author yizzuide
  * @since 0.2.1
- * @version 3.1.0
+ * @version 4.0.0
  * <br>
  * Create at 2019/04/12 11:04
  */
@@ -49,13 +49,14 @@ public class ApplicationContextHolder implements ApplicationContextAware {
     private static ConfigurableEnvironment pendingConfigurableEnvironment;
 
     // 环境变量包装类
+    @Setter @Getter
     private static Environment environment;
 
     @Getter
     private ApplicationContext applicationContext;
 
     public ApplicationContextHolder(Environment environment) {
-        ApplicationContextHolder.environment = environment;
+        ApplicationContextHolder.setEnvironment(environment);
         INSTANCE = this;
     }
 
@@ -65,12 +66,12 @@ public class ApplicationContextHolder implements ApplicationContextAware {
         // 设置应用上下文到方法EL解析环境
         ELContext.setApplicationContext(applicationContext);
         if (pendingConfigurableEnvironment != null) {
-            ApplicationContextHolder.environment.setConfigurableEnvironment(pendingConfigurableEnvironment);
+            ApplicationContextHolder.getEnvironment().setConfigurableEnvironment(pendingConfigurableEnvironment);
             return;
         }
         if (applicationContext instanceof ConfigurableApplicationContext) {
             ConfigurableEnvironment configurableEnvironment = (ConfigurableEnvironment) applicationContext.getEnvironment();
-            ApplicationContextHolder.environment.setConfigurableEnvironment(configurableEnvironment);
+            ApplicationContextHolder.getEnvironment().setConfigurableEnvironment(configurableEnvironment);
         }
     }
 
@@ -92,21 +93,5 @@ public class ApplicationContextHolder implements ApplicationContextAware {
      */
     public static ApplicationContext get() {
         return INSTANCE.getApplicationContext();
-    }
-
-    /**
-     * Set current environment
-     * @param environment   Environment
-     */
-    public static void setEnvironment(Environment environment) {
-        ApplicationContextHolder.environment = environment;
-    }
-
-    /**
-     * 获取Spring环境变量
-     * @return  Environment
-     */
-    public static Environment getEnvironment() {
-        return environment;
     }
 }
