@@ -21,6 +21,7 @@
 
 package com.github.yizzuide.milkomeda.crust;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Data;
 import org.springframework.core.Ordered;
@@ -46,36 +47,43 @@ public class CrustMenu implements Ordered {
     /**
      * Menu name.
      */
+    @Schema(description = "菜单名称")
     private String name;
 
     /**
      * Menu icon.
      */
+    @Schema(description = "菜单图标")
     private String icon;
 
     /**
      * Menu route path.
      */
+    @Schema(description = "路由路径")
     private String routePath;
 
     /**
      * Menu route name.
      */
+    @Schema(description = "路由名")
     private String routeName;
 
     /**
      * Menu route component path.
      */
+    @Schema(description = "路由组件路径")
     private String componentPath;
 
     /**
      * Menu order.
      */
+    @Schema(description = "排序")
     private int order;
 
     /**
      * Sub-menu list.
      */
+    @Schema(description = "子菜单")
     private List<CrustMenu> children;
 
     /**

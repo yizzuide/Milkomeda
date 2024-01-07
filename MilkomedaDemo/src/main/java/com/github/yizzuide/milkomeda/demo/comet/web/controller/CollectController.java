@@ -33,6 +33,7 @@ public class CollectController {
     @Resource
     private CollectService collectService;
 
+    // Spring Boot 3.0：从 Spring Framework 6.0 开始，尾部斜杠匹配配置选项已过期，如：/feature 在以前版本将匹配 /feature/
     @RequestMapping("feature")
     @Comet(apiCode = "1.1", name = "上传用户特征", tag = "PROFILE", prototype = ProfileWebCometData.class)
     public ResponseEntity<Map<String, String>> feature(@RequestParam Map<String, String> params) {

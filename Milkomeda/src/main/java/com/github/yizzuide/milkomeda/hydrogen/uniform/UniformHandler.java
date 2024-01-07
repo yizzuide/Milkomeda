@@ -45,6 +45,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
@@ -119,9 +120,11 @@ public class UniformHandler extends ResponseEntityExceptionHandler {
         if (!(clazz instanceof String)) {
             return null;
         }
+
         Class<?> expClazz = null;
         try {
-            expClazz = Class.forName(clazz.toString());
+            // 在使用spring-boot-devtools时，业务类的类加载器为RestartClassLoader，这里配置的类就必须通过Thread.currentThread().getContextClassLoader()获取类加载器
+            expClazz = Thread.currentThread().getContextClassLoader().loadClass(clazz.toString());
         } catch (Exception ex) {
             log.error("Hydrogen load class error with msg: {}", ex.getMessage(), ex);
         }
@@ -140,6 +143,7 @@ public class UniformHandler extends ResponseEntityExceptionHandler {
 
     // 方法上单个普通类型（如：String、Long等）参数校验异常（校验注解直接写在参数前面的方式）
     @ExceptionHandler(ConstraintViolationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<Object> constraintViolationException(ConstraintViolationException e) {
         ConstraintViolation<?> constraintViolation = e.getConstraintViolations().iterator().next();
         String value = String.valueOf(constraintViolation.getInvalidValue());
@@ -164,6 +168,7 @@ public class UniformHandler extends ResponseEntityExceptionHandler {
     // 其它内部异常处理
     @SuppressWarnings("unchecked")
     @ExceptionHandler(Throwable.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ResponseEntity<Object> handleException(Throwable e) {
         Map<String, Object> response = props.getResponse();
         Object status = response.get(YmlResponseOutput.STATUS);
@@ -174,7 +179,7 @@ public class UniformHandler extends ResponseEntityExceptionHandler {
         if (this.customExpClazzList != null) {
             for (Map<String, Object> map : this.customExpClazzList) {
                 List<Class<Exception>> expClazzList = (List<Class<Exception>>) map.get(YmlResponseOutput.CLAZZ);
-                if (expClazzList.stream().anyMatch(expClazz -> expClazz.isInstance(e))) {
+                if (expClazzList.stream().anyMatch(expClazz -> expClazz.getName().equals(e.getClass().getName()) || expClazz.isInstance(e))) {
                     YmlResponseOutput.output(map, result, null, (Exception) e, true);
                     return ResponseEntity.status(Integer.parseInt(status.toString())).body(result);
                 }
@@ -359,7 +364,7 @@ public class UniformHandler extends ResponseEntityExceptionHandler {
         Tuple<Map<String, Object>, Map<String, Object>> mapTuple = matchStatusResult(response, source);
         Map<String, Object> resolveMap = mapTuple.getT1();
         Map<String, Object> result = mapTuple.getT2();
-        if (mapTuple.getT1() == null || mapTuple.getT1().size() == 0) {
+        if (mapTuple.getT1() == null || mapTuple.getT1().isEmpty()) {
             return;
         }
         String body = JSONUtil.serialize(result);

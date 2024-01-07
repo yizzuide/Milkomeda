@@ -19,6 +19,7 @@
         <spring-cloud.version>2023.0.0</spring-cloud.version>
         <mybatis.starter.version>3.0.3</mybatis.starter.version>
         <mybatis-plus.version>3.5.4.1</mybatis-plus.version>
+        <knife4j.version>4.3.0</knife4j.version>
         <redission.version>3.25.2</redission.version>
         <jetcd.version>0.7.7</jetcd.version>
         <disruptor.version>3.4.4</disruptor.version>
@@ -126,6 +127,18 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>com.github.xiaoymin</groupId>
+            <artifactId>knife4j-openapi3-jakarta-spring-boot-starter</artifactId>
+            <version>${knife4j.version}</version>
+            <optional>true</optional>
+        </dependency>
+        <!-- spring-doc支持kotlin类型 -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.module</groupId>
+            <artifactId>jackson-module-kotlin</artifactId>
             <optional>true</optional>
         </dependency>
         <!-- Spring Boot 2.3.x: No longer included in web starters -->

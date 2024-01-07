@@ -59,11 +59,15 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.servlet.mvc.condition.PathPatternsRequestCondition;
+import org.springframework.web.servlet.mvc.condition.PatternsRequestCondition;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
+import org.springframework.web.util.pattern.PathPattern;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Spring Security config adapter, need impl with {@link org.springframework.context.annotation.Configuration}.
@@ -129,8 +133,21 @@ public abstract class CrustConfigurerAdapter {
             HandlerMethod handlerMethod = infoEntry.getValue();
             // Has `CrustAnon` annotation on Method？
             CrustAnon crustAnon = handlerMethod.getMethodAnnotation(CrustAnon.class);
-            if (null != crustAnon && null != infoEntry.getKey().getPatternsCondition()) {
-                anonUrls.addAll(infoEntry.getKey().getPatternsCondition().getPatterns());
+            if (null != crustAnon) {
+                Collection<String> requestPatterns = null;
+                PatternsRequestCondition patternsCondition = infoEntry.getKey().getPatternsCondition();
+                if (patternsCondition != null) {
+                    requestPatterns = patternsCondition.getPatterns();
+                }
+                if (requestPatterns == null) {
+                    PathPatternsRequestCondition pathPatternsCondition = infoEntry.getKey().getPathPatternsCondition();
+                    if (pathPatternsCondition != null) {
+                        requestPatterns = pathPatternsCondition.getPatterns().stream().map(PathPattern::getPatternString).collect(Collectors.toSet());
+                    }
+                }
+                if (requestPatterns != null) {
+                    anonUrls.addAll(requestPatterns);
+                }
             }
         }
         if (!CollectionUtils.isEmpty(anonUrls)) {
@@ -139,7 +156,7 @@ public abstract class CrustConfigurerAdapter {
         String[] permitAllMapping = allowURLs.toArray(new String[0]);
         // 通用失败处理器
         DefaultFailureHandler failureHandler = new DefaultFailureHandler(this);
-        // Spring Boot 3.0：配置方式由方法链改为lambda表达式
+        // Spring Boot 3.0：配置方式由方法链改为Spring Security lambda DSL
         http.csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(configurer -> configurer.sessionCreationPolicy(props.isStateless() ?
                         SessionCreationPolicy.STATELESS : SessionCreationPolicy.IF_REQUIRED))
@@ -206,7 +223,7 @@ public abstract class CrustConfigurerAdapter {
         // 放开静态资源的限制
         return (web) -> {
             if (props.getAllowStaticUrls() != null) {
-                web.ignoring().requestMatchers(HttpMethod.GET, props.getAllowStaticUrls().toArray(new String[0]));
+                web.ignoring().requestMatchers(props.getAllowStaticUrls().toArray(new String[0]));
             }
         };
     }
@@ -214,7 +231,7 @@ public abstract class CrustConfigurerAdapter {
     /**
      * Custom http configure.
      * @param http  HttpSecurity
-     * @param stateless true for a session type, false for token type
+     * @param stateless true for a session type, false for a token type
      */
     protected void additionalConfigure(HttpSecurity http, boolean stateless) { }
 

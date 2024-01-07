@@ -22,6 +22,11 @@
 package com.github.yizzuide.milkomeda.comet.core;
 
 import com.github.yizzuide.milkomeda.universe.context.WebContext;
+import jakarta.servlet.ServletOutputStream;
+import jakarta.servlet.WriteListener;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponseWrapper;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
@@ -30,12 +35,8 @@ import org.springframework.util.FastByteArrayOutputStream;
 import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.util.WebUtils;
 
-import jakarta.servlet.ServletOutputStream;
-import jakarta.servlet.WriteListener;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpServletResponseWrapper;
 import java.io.*;
+import java.net.SocketTimeoutException;
 import java.nio.charset.StandardCharsets;
 
 /**
@@ -267,8 +268,11 @@ public class CometResponseWrapper extends HttpServletResponseWrapper {
         // 在DeferredResult第二次Response响应时，会在获取OutputStream写出后，调用这个方法
         @Override
         public void flush() throws IOException {
-            // 写出到响应输出流（解决 DeferredResult 异步响应问题）
-            CometResponseWrapper.this.copyBodyToResponse();
+            try {
+                // 写出到响应输出流（解决 DeferredResult 异步响应问题）
+                CometResponseWrapper.this.copyBodyToResponse();
+            } catch (SocketTimeoutException ignore) {
+            }
             super.flush();
         }
     }

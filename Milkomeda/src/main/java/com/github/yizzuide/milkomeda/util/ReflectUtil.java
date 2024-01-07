@@ -471,7 +471,7 @@ public class ReflectUtil {
     }
 
     /**
-     * Get param value from type.
+     * Get param value from a type.
      * @param methodParameter   MethodParameter
      * @param rawType           param type
      * @param value             request string value
@@ -527,7 +527,7 @@ public class ReflectUtil {
      */
     public static <T> T newInstance(Class<T> clazz) {
         try {
-            return clazz.newInstance();
+            return clazz.getDeclaredConstructor().newInstance();
         } catch (Exception e) {
             log.error("create instance error with msg: {}", e.getMessage(), e);
         }

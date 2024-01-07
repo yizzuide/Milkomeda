@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 yizzuide All rights Reserved.
+ * Copyright (c) 2024 yizzuide All rights Reserved.
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -19,29 +19,26 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.crust;
+package com.github.yizzuide.milkomeda.universe.context;
 
-import java.util.function.Supplier;
+import lombok.Getter;
+import lombok.Setter;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
+
+import java.io.Serializable;
 
 /**
- * Crust login type.
+ * RedisHolder
  *
- * @since 3.15.0
+ * @since 4.0.0
  * @author yizzuide
- * <br>
- * Create at 2023/01/01 02:44
+ * Create at 2024/01/05 17:07
  */
-public enum CrustLoginType {
-    /**
-     * Username and password type.
-     */
-    PASSWORD,
-    /**
-     * Verify a code type.
-     */
-    CODE,
-    /**
-     * Custom login type used with {@link Crust#login(String, String, Class, CrustLoginType, Supplier)}.
-     */
-    CUSTOM
+public class RedisHolder {
+    @Setter @Getter
+    private static StringRedisTemplate stringRedisTemplate;
+
+    @Setter @Getter
+    private static RedisTemplate<String, Serializable> jsonRedisTemplate;
 }
