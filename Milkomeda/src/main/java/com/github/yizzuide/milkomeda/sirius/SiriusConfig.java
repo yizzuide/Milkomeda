@@ -38,6 +38,7 @@ import com.baomidou.mybatisplus.core.metadata.TableInfo;
 import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.BlockAttackInnerInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
+import com.baomidou.mybatisplus.extension.plugins.inner.TenantLineInnerInterceptor;
 import com.baomidou.mybatisplus.extension.spring.MybatisSqlSessionFactoryBean;
 import com.github.yizzuide.milkomeda.sirius.wormhole.SiriusInspector;
 import com.github.yizzuide.milkomeda.universe.extend.env.CollectionsPropertySource;
@@ -76,12 +77,15 @@ import java.util.*;
  * Create at 2022/10/30 17:52
  */
 @AutoConfigureBefore(MybatisPlusAutoConfiguration.class)
-@EnableConfigurationProperties(SiriusProperties.class)
+@EnableConfigurationProperties({SiriusProperties.class, TenantProperties.class})
 @Configuration
 public class SiriusConfig {
 
     @Autowired
     private SiriusProperties props;
+
+    @Autowired
+    private TenantProperties tenantProperties;
 
     @Bean
     public SiriusInspector siriusInspector() {
@@ -100,6 +104,12 @@ public class SiriusConfig {
         mybatisPlusInterceptor.addInnerInterceptor(new PaginationInnerInterceptor(props.getDbType()));
         // 防全表更新插件
         mybatisPlusInterceptor.addInnerInterceptor(new BlockAttackInnerInterceptor());
+        // 添加SaaS租户插件
+        if (tenantProperties.isEnable()) {
+            TenantInterceptHandler tenantInterceptHandler = new TenantInterceptHandler(tenantProperties);
+            SiriusHolder.setTenantInterceptHandler(tenantInterceptHandler);
+            mybatisPlusInterceptor.addInnerInterceptor(new TenantLineInnerInterceptor(tenantInterceptHandler));
+        }
         return mybatisPlusInterceptor;
     }
 
@@ -146,16 +156,15 @@ public class SiriusConfig {
         return new MybatisPlusMetaObjectHandler();
     }
 
+    @Getter
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
-    static class MybatisPlusMetaObjectHandler implements MetaObjectHandler {
+    public static class MybatisPlusMetaObjectHandler implements MetaObjectHandler {
 
         @Autowired
         private SiriusProperties props;
 
-        @Getter
         private List<String> insertFields;
 
-        @Getter
         private List<String> updateFields;
 
         @PostConstruct

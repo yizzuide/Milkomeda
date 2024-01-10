@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 yizzuide All rights Reserved.
+ * Copyright (c) 2024 yizzuide All rights Reserved.
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -19,24 +19,49 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.crust;
+package com.github.yizzuide.milkomeda.sirius;
 
-import java.io.Serial;
+import lombok.Data;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+
+import java.util.Collections;
+import java.util.Set;
 
 /**
- * Thrown if an authentication request is rejected because the credentials are not
- * sufficiently trusted.
+ * Tenant config.
  *
+ * @since 4.0.0
  * @author yizzuide
- * @since 3.12.10
- * <br>
- * Create at 2022/01/31 17:30
+ * Create at 2024/01/10 14:48
  */
-public class CrustException extends RuntimeException {
-    @Serial
-    private static final long serialVersionUID = 7913213972981313630L;
+@Data
+@ConfigurationProperties(prefix = TenantProperties.PREFIX)
+public class TenantProperties {
 
-    public CrustException(String message) {
-        super(message);
-    }
+    public static final String PREFIX = "milkomeda.sirius.tenant";
+
+    /**
+     * Enable tenant intercept mode.
+     */
+    private boolean enable = false;
+
+    /**
+     * Set the tenant id name.
+     */
+    private String tenantIdName = "tenant_id";
+
+    /**
+     * Set the tenant id expression（SpringEL）, the parse result type must be {@link Long}.
+     */
+    private String tenantIdExpression;
+
+    /**
+     *  Table that needs to be ignored temporarily.
+     */
+    private Set<String> tempIgnoreTables = Collections.emptySet();
+
+    /**
+     * Ignore tables.
+     */
+    private Set<String> ignoreTables = Collections.emptySet();
 }
