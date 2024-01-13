@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 yizzuide All rights Reserved.
+ * Copyright (c) 2024 yizzuide All rights Reserved.
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -19,29 +19,40 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.crust;
+package com.github.yizzuide.milkomeda.crust.api;
 
-import org.springframework.context.annotation.Import;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import com.github.yizzuide.milkomeda.crust.CrustContext;
+import com.github.yizzuide.milkomeda.crust.CrustPermission;
+import com.github.yizzuide.milkomeda.crust.CrustUserInfo;
+import lombok.NoArgsConstructor;
 
-import java.lang.annotation.*;
+import java.io.Serial;
+import java.io.Serializable;
 
 /**
- * EnableCrust
+ * API服务用户Info
  *
  * @author yizzuide
- * @since 1.14.0
- * @version 1.16.2
- * <br>
- * Create at 2019/11/11 15:14
+ * Create at 2024/01/12 17:51
  */
-@Import({CrustConfig.class, CrustAutoConfigurer.class})
-@EnableMethodSecurity(securedEnabled = true)
-@EnableWebSecurity
-@Target({ElementType.TYPE})
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
-@Inherited
-public @interface EnableCrust {
+@NoArgsConstructor
+public class CrustApiUserInfo<T> extends CrustUserInfo<T, CrustPermission> {
+
+    @Serial
+    private static final long serialVersionUID = 6717030250582125962L;
+
+    private CrustApiUserInfo(Serializable uid, String username, String token, Long tokenExpire) {
+        this.uid = uid;
+        this.username = username;
+        this.token = token;
+        this.tokenExpire = tokenExpire;
+    }
+
+    public T getEntity() {
+        if (this.entity == null) {
+            T entity = CrustContext.get().loadEntity(this.uid);
+            this.setEntity(entity);
+        }
+        return this.entity;
+    }
 }

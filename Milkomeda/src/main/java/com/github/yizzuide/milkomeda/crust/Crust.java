@@ -21,14 +21,15 @@
 
 package com.github.yizzuide.milkomeda.crust;
 
-import com.github.yizzuide.milkomeda.light.*;
+import com.github.yizzuide.milkomeda.light.Cache;
+import com.github.yizzuide.milkomeda.light.CacheHelper;
+import com.github.yizzuide.milkomeda.light.LightCacheEvict;
+import com.github.yizzuide.milkomeda.light.LightCacheable;
 import com.github.yizzuide.milkomeda.universe.context.AopContextHolder;
 import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import com.github.yizzuide.milkomeda.universe.context.WebContext;
 import com.github.yizzuide.milkomeda.util.StringExtensionsKt;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.lang.NonNull;
@@ -51,11 +52,9 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 /**
- * Crust
- * 核心API
+ * Crust used for CMS service.
  *
  * @author yizzuide
  * @since 1.14.0
@@ -65,80 +64,27 @@ import java.util.stream.Collectors;
  */
 @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 @Slf4j
-public class Crust {
+public class Crust extends AbstractCrust {
+
     /**
      * 用户信息缓存前辍
      */
     private static final String CATCH_KEY_PREFIX = "crust:user:";
-    /**
-     * 帐号验证码缓存前辍
-     */
-    private static final String CATCH_CODE_KEY_PREFIX = "crust:code:";
+
     /**
      * 缓存标识
      */
     static final String CATCH_NAME = "crustLightCache";
-    /**
-     * 验证码缓存标识
-     */
-    static final String CODE_CATCH_NAME = "crustCodeLightCache";
-
-    @Getter
-    @Autowired
-    private CrustProperties props;
 
     @Qualifier(Crust.CATCH_NAME)
     @Autowired(required = false)
     private Cache crustLightCache;
-
-    @Qualifier(Crust.CODE_CATCH_NAME)
-    @Autowired(required = false)
-    private Cache crustCodeLightCache;
 
     @Autowired
     private CrustTokenResolver tokenResolver;
 
     private CrustUserDetailsService crustUserDetailsService;
 
-    /**
-     * Generate verify code for login action.
-     * @param account   account name (phone, email, etc.)
-     * @return verily code
-     * @since 3.15.0
-     */
-    public String generateCode(String account) {
-        String code = RandomStringUtils.randomNumeric(6);
-        String cacheKey = CATCH_CODE_KEY_PREFIX + account;
-        // if enableCode is false
-        if (crustCodeLightCache == null) {
-            return null;
-        }
-        crustCodeLightCache.set(cacheKey, new Spot<>(code));
-        return code;
-    }
-
-    /**
-     * Get cached code.
-     * @param account   account name (phone, email, etc.)
-     * @return  verily code
-     */
-    String getCode(String account) {
-        String cacheKey = CATCH_CODE_KEY_PREFIX + account;
-        if(crustCodeLightCache == null || !crustCodeLightCache.isCacheL2Exists(cacheKey)) {
-            return null;
-        }
-        Spot<Serializable, String> spot = crustCodeLightCache.get(cacheKey, Serializable.class, String.class);
-        return spot == null ? null : spot.getData();
-    }
-
-    /**
-     * 登录认证
-     * @param account 帐号
-     * @param credentials 登录凭证（如密码，手机验/邮箱验证码）
-     * @param entityClazz 实体类型
-     * @param <T> 实体类型
-     * @return CrustUserInfo
-     */
     @NonNull
     public <T extends CrustEntity> CrustUserInfo<T, CrustPermission> login(@NonNull String account, @NonNull String credentials, @NonNull Class<T> entityClazz) {
         return login(account, credentials, entityClazz, props.getLoginType(), null);
@@ -156,18 +102,11 @@ public class Crust {
      * @since 3.15.0
      */
     public <T extends CrustEntity> CrustUserInfo<T, CrustPermission> login(@NonNull String account, @NonNull String credentials, @NonNull Class<T> entityClazz, CrustLoginType loginType, Supplier<AbstractAuthenticationToken> customAuthenticationTokenSupplier) {
-        AbstractAuthenticationToken authenticationToken = null;
-        switch (loginType) {
-            case PASSWORD:
-                authenticationToken = new CrustAuthenticationToken(account, credentials);
-                break;
-            case CODE:
-                authenticationToken = new CrustCodeAuthenticationToken(account, credentials);
-                break;
-            case CUSTOM:
-                authenticationToken = customAuthenticationTokenSupplier.get();
-                break;
-        }
+        AbstractAuthenticationToken authenticationToken = switch (loginType) {
+            case PASSWORD -> new CrustAuthenticationToken(account, credentials);
+            case CODE -> new CrustCodeAuthenticationToken(account, credentials);
+            case CUSTOM -> customAuthenticationTokenSupplier.get();
+        };
         // 设置请求信息
         authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(WebContext.getRequest()));
         AuthenticationManager authenticationManager = ApplicationContextHolder.get().getBean(AuthenticationManager.class);
@@ -225,29 +164,12 @@ public class Crust {
         }
         // 此时 authentication 就是内部封装的 UsernamePasswordAuthenticationToken
         Object principal = authentication.getPrincipal();
-        if (!(principal instanceof CrustUserDetails)) {
+        if (!(principal instanceof CrustUserDetails userDetails)) {
             throw new AuthenticationServiceException("Authentication principal must be subtype of CrustUserDetails");
         }
-        CrustUserDetails userDetails = (CrustUserDetails) principal;
         return (CrustUserInfo<T, CrustPermission>) userDetails.getUserInfo();
     }
 
-    /**
-     * 获取登录的基本信息，如：uid, username, roleId等
-     * @return  CrustUserInfo
-     * @since 3.15.0
-     */
-    public CrustUserInfo<?, CrustPermission> getUserInfo() {
-        return getUserInfo(null);
-    }
-
-    /**
-     * 获取当前用户详细信息
-     *
-     * @param entityClazz 实体类型
-     * @param <T> 实体类型
-     * @return  CrustUserInfo
-     */
     @NonNull
     public <T extends CrustEntity> CrustUserInfo<T, CrustPermission> getUserInfo(Class<T> entityClazz) {
         Authentication authentication = getAuthentication();
@@ -322,10 +244,6 @@ public class Crust {
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 
-    /**
-     * 刷新令牌
-     * @return CrustUserInfo
-     */
     public CrustUserInfo<?, CrustPermission> refreshToken() {
         if (!props.isStateless()) { return null; }
         String refreshedToken;
@@ -335,7 +253,7 @@ public class Crust {
             refreshedToken = tokenResolver.refresh(token, loginUserInfo);
             // remove cache (old token with user auth info)
             AopContextHolder.self(this.getClass()).removeTokenCache(token);
-            // re-cache user auth info with refreshed token, not need change it.
+            // re-cache user auth info with refreshed token, not need to change it.
             AopContextHolder.self(this.getClass()).getAuthInfoFromToken(refreshedToken);
             return loginUserInfo;
         } catch (Exception e) {
@@ -380,16 +298,12 @@ public class Crust {
         return SecurityContextHolder.getContext();
     }
 
-    /**
-     * 从请求中获取Token
-     * @param checkIsExists 检查是否存在
-     * @return Token
-     */
+
     @Nullable
-    String getToken(boolean checkIsExists) {
+    public String getToken(boolean checkIsExists) {
         if (!props.isStateless()) { return null; }
-        String token = tokenResolver.getRequestToken();
-        if (props.isCacheInMemory()) {
+        String token = super.getToken(checkIsExists);
+        if (token == null || props.isCacheInMemory()) {
             return token;
         }
         if (checkIsExists && props.isEnableCache()) {
@@ -415,12 +329,12 @@ public class Crust {
         if (isAdmin != null && isAdmin) {
             return true;
         }
-        List<String> perms = authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList());
+        List<String> perms = authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList();
         return Arrays.stream(permissions).anyMatch(perms::contains);
     }
 
     @SuppressWarnings("unchecked")
-    <T> T loadEntity(Serializable uid) {
+    public <T> T loadEntity(Serializable uid) {
         return (T) getCrustUserDetailsService().findEntityById(uid);
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 yizzuide All rights Reserved.
+ * Copyright (c) 2024 yizzuide All rights Reserved.
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -19,29 +19,24 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.crust;
+package com.github.yizzuide.milkomeda.crust.api;
 
-import org.springframework.context.annotation.Import;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import com.github.yizzuide.milkomeda.crust.CrustException;
 
-import java.lang.annotation.*;
+import java.io.Serial;
 
 /**
- * EnableCrust
+ * Thrown this exception if credential is invalid or not found.
  *
+ * @since 4.0.0
  * @author yizzuide
- * @since 1.14.0
- * @version 1.16.2
- * <br>
- * Create at 2019/11/11 15:14
+ * Create at 2024/01/12 21:13
  */
-@Import({CrustConfig.class, CrustAutoConfigurer.class})
-@EnableMethodSecurity(securedEnabled = true)
-@EnableWebSecurity
-@Target({ElementType.TYPE})
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
-@Inherited
-public @interface EnableCrust {
+public class CrustBadCredentialsException extends CrustException {
+    @Serial
+    private static final long serialVersionUID = 6686394024170951592L;
+
+    public CrustBadCredentialsException(String message) {
+        super(message);
+    }
 }

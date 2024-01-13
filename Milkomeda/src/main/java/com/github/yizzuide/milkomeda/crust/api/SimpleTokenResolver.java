@@ -19,7 +19,7 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.crust;
+package com.github.yizzuide.milkomeda.crust.api;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -45,6 +45,24 @@ import java.util.Base64;
 public class SimpleTokenResolver {
     private static final String CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
+    /**
+     * Generate token with login user id and timestamp.
+     * @param uid   login user id
+     * @param timestamp expire timestamp
+     * @return token
+     */
+    public static String createToken(long uid, long timestamp) {
+        return createToken(uid, timestamp, null, 5);
+    }
+
+    /**
+     * Generate token with login user id and timestamp.
+     * @param uid   login user id
+     * @param timestamp expire timestamp
+     * @param rand  random string
+     * @param randLength  if `rand` set is null, random string length must be set.
+     * @return token
+     */
     public static String createToken(long uid, long timestamp, String rand, int randLength) {
         if (rand == null) {
             rand = generateRandomString(randLength);
@@ -74,7 +92,7 @@ public class SimpleTokenResolver {
         return sb.toString();
     }
 
-    private static class _3DESEncoder {
+    private static final class _3DESEncoder {
         private static final String SECRET_KEY = "&cru#st@~kai--huang0!!%91";
         private static final String IV = "(IV)~%52";
 
@@ -116,9 +134,20 @@ public class SimpleTokenResolver {
     }
 
     @Data
-    public static class TokenData {
+    public static final class TokenData {
+        /**
+         * Login user id.
+         */
         private String userId;
+
+        /**
+         * Token expire timestamp.
+         */
         private long timestamp;
+
+        /**
+         * Random string.
+         */
         private String rand;
 
         public TokenData(String userId, long timestamp, String rand) {

@@ -111,9 +111,9 @@ class RefreshSuccessHandler implements AuthenticationSuccessHandler {
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                         Authentication authentication) {
-        boolean shouldRefresh = shouldTokenRefresh(CrustContext.get().getUserInfo(null).getTokenExpire());
+        boolean shouldRefresh = shouldTokenRefresh(CrustContext.getDefault().getUserInfo(null).getTokenExpire());
         if (shouldRefresh) {
-            CrustUserInfo<?, CrustPermission> userInfo = CrustContext.get().refreshToken();
+            CrustUserInfo<?, CrustPermission> userInfo = CrustContext.getDefault().refreshToken();
             if (userInfo != null) {
                 response.setHeader(refreshTokenName, userInfo.getToken());
             }

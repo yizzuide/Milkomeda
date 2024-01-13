@@ -30,7 +30,6 @@ import org.springframework.boot.web.servlet.filter.OrderedFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
-import org.springframework.web.filter.DelegatingFilterProxy;
 
 import java.util.Collections;
 
@@ -63,14 +62,11 @@ public class MilkomedaContextConfig {
         return new DelegatingContextFilter();
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
     @Bean
-    public FilterRegistrationBean delegatingFilterRegistrationBean() {
-        FilterRegistrationBean delegatingFilterRegistrationBean = new FilterRegistrationBean();
+    public FilterRegistrationBean<DelegatingContextFilter> delegatingFilterRegistrationBean() {
+        FilterRegistrationBean<DelegatingContextFilter> delegatingFilterRegistrationBean = new FilterRegistrationBean<>();
         // 设置代理注册的Bean
-        delegatingFilterRegistrationBean.setFilter(new DelegatingFilterProxy("delegatingContextFilter"));
-        // Spring Boot 3.0: 代理注册Bean与被代理注册Bean的name不能相同
-        delegatingFilterRegistrationBean.setName("delegatingContextFilterBean");
+        delegatingFilterRegistrationBean.setFilter(delegatingContextFilter());
         delegatingFilterRegistrationBean.setUrlPatterns(Collections.singleton("/*"));
         // Order defaults to after OrderedRequestContextFilter
         // 解决无法从RequestContext获取信息的问题

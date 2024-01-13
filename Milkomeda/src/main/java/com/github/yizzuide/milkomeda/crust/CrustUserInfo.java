@@ -29,6 +29,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
@@ -47,28 +48,29 @@ import java.util.Map;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CrustUserInfo<T, P> implements Serializable {
+    @Serial
     private static final long serialVersionUID = -3849153553850107966L;
 
     /**
      * 用户id
      */
-    private Serializable uid;
+    protected Serializable uid;
 
     /**
      * 用户名
      */
-    private String username;
+    protected String username;
 
     /**
      * 认证token（stateless=true时有值）
      */
-    private String token;
+    protected String token;
 
     /**
      * token过期时间
      * @since 3.14.0
      */
-    private Long tokenExpire;
+    protected Long tokenExpire;
 
     /**
      * Check is admin user.
@@ -99,7 +101,7 @@ public class CrustUserInfo<T, P> implements Serializable {
      * </pre>
      * @see CrustUserDetailsService#findEntityById(Serializable)
      */
-    private T entity;
+    protected T entity;
 
     /**
      * User entity current class.
@@ -149,7 +151,7 @@ public class CrustUserInfo<T, P> implements Serializable {
      */
     @SuppressWarnings("unchecked")
     public T getEntity() {
-        Crust crust = CrustContext.get();
+        Crust crust = CrustContext.getDefault();
         if (crust != null && crust.getProps().isEnableLoadEntityLazy() && this.entity == null) {
             this.entity = crust.loadEntity(this.getUid());
         }
@@ -166,15 +168,15 @@ public class CrustUserInfo<T, P> implements Serializable {
     public void setPermissionList(List<P> permissionList) {
         if (!CollectionUtils.isEmpty(permissionList)) {
             // user has no permissions!
-            if (permissionList.get(0) == null) {
+            if (permissionList.getFirst() == null) {
                 return;
             }
-            boolean isMap = permissionList.get(0) instanceof Map;
+            boolean isMap = permissionList.getFirst() instanceof Map;
             if (isMap && this.permClass != null) {
                 this.permissionList = (List<P>) JSONUtil.parseList(JSONUtil.serialize(permissionList), this.permClass);
                 return;
             }
-            this.permClass = permissionList.get(0).getClass();
+            this.permClass = permissionList.getFirst().getClass();
         }
         this.permissionList = permissionList;
     }
@@ -195,6 +197,6 @@ public class CrustUserInfo<T, P> implements Serializable {
         if (CollectionUtils.isEmpty(this.getRoleIds())) {
             return null;
         }
-        return getRoleIds().get(0);
+        return getRoleIds().getFirst();
     }
 }

@@ -97,25 +97,23 @@ public class LightContext<ID, V> {
 
 
     /**
-     * 设置线程数据（用于注册的LightContext Bean）
+     * 设置线程数据（内部自注册LightContext Bean）
      * @param value 任意对象
      * @param identifier 唯一标识
      * @param <V>   对象类型
-     * @return LightContext
      * @since 3.13.0
      */
     @SuppressWarnings("unchecked")
-    public static <V> LightContext<Serializable, V> setValue(V value, String identifier) {
+    public static <V> void setValue(V value, String identifier) {
         LightContext<Serializable, V> lightContext = SpringContext.registerBean((ConfigurableApplicationContext) ApplicationContextHolder.get(), identifier, LightContext.class);
         Spot<Serializable, V> spot = new Spot<>();
         spot.setData(value);
         lightContext.set(spot);
-        return lightContext;
     }
 
 
     /**
-     * 获取线程数据（用于注册的LightContext Bean）
+     * 获取线程数据（内部自注册LightContext Bean）
      * @param identifier 唯一标识
      * @param <V>   对象类型
      * @return cache value
@@ -125,6 +123,17 @@ public class LightContext<ID, V> {
     public static <V> V getValue(String identifier) {
         LightContext<Serializable, V> lightContext = SpringContext.registerBean((ConfigurableApplicationContext) ApplicationContextHolder.get(), identifier, LightContext.class);
         Spot<Serializable, V> spot = lightContext.get();
+        if (spot == null) {
+            return null;
+        }
         return spot.getData();
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <V> void clearValue(String identifier) {
+        if (ApplicationContextHolder.get().containsBean(identifier)) {
+            LightContext<Serializable, V> lightContext = ApplicationContextHolder.get().getBean(identifier, LightContext.class);
+            lightContext.remove();
+        }
     }
 }

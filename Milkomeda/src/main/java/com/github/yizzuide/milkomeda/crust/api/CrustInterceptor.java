@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 yizzuide All rights Reserved.
+ * Copyright (c) 2024 yizzuide All rights Reserved.
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -19,20 +19,21 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.crust;
+package com.github.yizzuide.milkomeda.crust.api;
 
+import com.github.yizzuide.milkomeda.crust.CrustContext;
+import com.github.yizzuide.milkomeda.crust.CrustEntity;
+import com.github.yizzuide.milkomeda.crust.CrustUserInfo;
 import com.github.yizzuide.milkomeda.hydrogen.uniform.ResultVO;
 import com.github.yizzuide.milkomeda.hydrogen.uniform.UniformHandler;
 import com.github.yizzuide.milkomeda.hydrogen.uniform.UniformResult;
 import com.github.yizzuide.milkomeda.light.LightContext;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.lang.NonNull;
 import org.springframework.util.StringUtils;
-import org.springframework.web.servlet.HandlerInterceptor;
-
-import jakarta.annotation.Resource;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.web.servlet.AsyncHandlerInterceptor;
 
 /**
  * Intercept and check token before at the request handle.
@@ -42,29 +43,24 @@ import jakarta.servlet.http.HttpServletResponse;
  * <br>
  * Create at 2022/12/07 00:44
  */
-public class CrustInterceptor implements HandlerInterceptor {
-    public static final String LIGHT_CONTEXT_ID = "crustLightContext";
-
-    @Resource
-    private CrustTokenResolver tokenResolver;
-
-    private LightContext<?, CrustUserInfo<?, ?>> lightContext;
+public class CrustInterceptor implements AsyncHandlerInterceptor {
 
     @Override
     public boolean preHandle(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull Object handler) throws Exception {
-        String token = tokenResolver.getRequestToken();
+        String token = CrustContext.get().getToken(false);
         boolean isAuthedSuccess = false;
         String errorMsg = "Required token is not set.";
         if (StringUtils.hasText(token)) {
-            CrustUserInfo<?, ?> userInfo = tokenResolver.resolve(token, null);
-            if (userInfo == null) {
+            SimpleTokenResolver.TokenData tokenData = SimpleTokenResolver.parseToken(token);
+            CrustUserInfo<CrustEntity, ?> userInfo = new CrustApiUserInfo<>();
+            if (tokenData == null) {
                 errorMsg = "Token is invalid.";
             } else {
                 isAuthedSuccess = true;
-                if (lightContext == null) {
-                    lightContext = LightContext.setValue(null, LIGHT_CONTEXT_ID);
-                }
-                lightContext.setData(userInfo);
+                userInfo.setUid(tokenData.getUserId());
+                userInfo.setToken(token);
+                userInfo.setTokenExpire(tokenData.getTimestamp());
+                LightContext.setValue(userInfo, CrustApi.LIGHT_CONTEXT_ID);
             }
         }
         if (!isAuthedSuccess) {
@@ -78,8 +74,6 @@ public class CrustInterceptor implements HandlerInterceptor {
 
     @Override
     public void afterCompletion(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull Object handler, Exception ex) throws Exception {
-        if (lightContext != null) {
-            lightContext.remove();
-        }
+        CrustContext.get().invalidate();
     }
 }

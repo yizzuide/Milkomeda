@@ -54,11 +54,23 @@ public class CrustProperties {
     private CrustLoginType loginType = CrustLoginType.PASSWORD;
 
     /**
-     * Code verify expire time, must set `CrustLoginType.CODE` with property of {@link CrustProperties#loginType}.
+     * Code verify expire time, the login type must be `CrustLoginType.CODE`.
      * @since 3.15.0
      */
     @DurationUnit(ChronoUnit.SECONDS)
     private Duration codeExpire = Duration.ofSeconds(60);
+
+    /**
+     * Code length, the login type must be `CrustLoginType.CODE`.
+     * @since 4.0.0
+     */
+    private int codeLength = 6;
+
+    /**
+     * Code for test environment, the login type must be `CrustLoginType.CODE`.
+     * @since 4.0.0
+     */
+    private String testCode = "000000";
 
     /**
      * Set false if you need custom config via {@link CrustConfigurerAdapter}.
@@ -177,7 +189,7 @@ public class CrustProperties {
      * 需要配置<code>spring.resources.add-mappings=false</code>
      * @since 3.12.10
      */
-    private String staticLocation = CrustConfig.CrustURLMappingConfigurer.staticLocation;
+    private String staticLocation = CrustURLMappingConfigurer.staticLocation;
 
     /**
      * 配置静态资源映射

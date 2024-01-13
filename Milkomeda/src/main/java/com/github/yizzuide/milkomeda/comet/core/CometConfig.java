@@ -173,7 +173,7 @@ public class CometConfig implements ApplicationListener<ApplicationStartedEvent>
 
         // 动态添加内置拦截器
         private void configRequestMappingHandlerMapping() {
-            SpringMvcPolyfill.addDynamicInterceptor(cometInterceptor,  Ordered.HIGHEST_PRECEDENCE, Collections.singletonList("/**"),
+            SpringMvcPolyfill.addDynamicInterceptor(cometInterceptor,  Ordered.HIGHEST_PRECEDENCE + 1, Collections.singletonList("/**"),
                     null, requestMappingHandlerMapping);
         }
 

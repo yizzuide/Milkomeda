@@ -87,7 +87,7 @@ public class CrustAuthenticationFilter extends OncePerRequestFilter {
 
         CrustUserInfo authResult = null;
         AuthenticationException failed = null;
-        Crust crust = CrustContext.get();
+        Crust crust = CrustContext.getDefault();
         // check request header has token
         if (!requiresAuthentication(request, response)) {
             failed = new InsufficientAuthenticationException("Required token is not set.");
