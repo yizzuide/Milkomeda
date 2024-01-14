@@ -41,9 +41,11 @@ import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerIntercept
 import com.baomidou.mybatisplus.extension.plugins.inner.TenantLineInnerInterceptor;
 import com.baomidou.mybatisplus.extension.spring.MybatisSqlSessionFactoryBean;
 import com.github.yizzuide.milkomeda.sirius.wormhole.SiriusInspector;
+import com.github.yizzuide.milkomeda.sirius.wormhole.SiriusTransactionWorkBus;
 import com.github.yizzuide.milkomeda.universe.extend.env.CollectionsPropertySource;
 import com.github.yizzuide.milkomeda.universe.extend.env.SpELPropertySource;
 import com.github.yizzuide.milkomeda.util.ReflectUtil;
+import com.github.yizzuide.milkomeda.wormhole.TransactionWorkBus;
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import org.apache.ibatis.reflection.MetaObject;
@@ -90,6 +92,11 @@ public class SiriusConfig {
     @Bean
     public SiriusInspector siriusInspector() {
         return new SiriusInspector();
+    }
+
+    @Bean
+    public TransactionWorkBus transactionWorkBus() {
+        return new SiriusTransactionWorkBus();
     }
 
     @Bean

@@ -25,6 +25,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.github.yizzuide.milkomeda.util.JSONUtil;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
@@ -44,9 +45,10 @@ import java.util.Map;
  * <br>
  * Create at 2019/11/11 21:51
  */
-@Data
 @AllArgsConstructor
 @NoArgsConstructor
+@EqualsAndHashCode(exclude = {"entity"})
+@Data
 public class CrustUserInfo<T, P> implements Serializable {
     @Serial
     private static final long serialVersionUID = -3849153553850107966L;

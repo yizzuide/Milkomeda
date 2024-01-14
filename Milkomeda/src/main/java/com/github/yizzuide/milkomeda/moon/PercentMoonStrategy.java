@@ -21,7 +21,7 @@
 
 package com.github.yizzuide.milkomeda.moon;
 
-import com.github.yizzuide.milkomeda.util.IOUtils;
+import com.github.yizzuide.milkomeda.util.IOUtil;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -117,7 +117,7 @@ public class PercentMoonStrategy extends AbstractMoonStrategy {
 
     @Override
     public String loadLuaScript() throws IOException {
-        return IOUtils.loadLua(IOUtils.LUA_PATH, "moon_percent_list.lua");
+        return IOUtil.loadLua(IOUtil.LUA_PATH, "moon_percent_list.lua");
     }
 
     /**

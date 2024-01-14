@@ -24,6 +24,8 @@ package com.github.yizzuide.milkomeda.crust.api;
 import com.github.yizzuide.milkomeda.crust.CrustContext;
 import com.github.yizzuide.milkomeda.crust.CrustPermission;
 import com.github.yizzuide.milkomeda.crust.CrustUserInfo;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.io.Serial;
@@ -36,16 +38,24 @@ import java.io.Serializable;
  * Create at 2024/01/12 17:51
  */
 @NoArgsConstructor
+@EqualsAndHashCode(callSuper = true)
+@Data
 public class CrustApiUserInfo<T> extends CrustUserInfo<T, CrustPermission> {
 
     @Serial
     private static final long serialVersionUID = 6717030250582125962L;
 
-    private CrustApiUserInfo(Serializable uid, String username, String token, Long tokenExpire) {
+    /**
+     * generated token random.
+     */
+    private String rand;
+
+    private CrustApiUserInfo(Serializable uid, String username, String token, Long tokenExpire, String rand) {
         this.uid = uid;
         this.username = username;
         this.token = token;
         this.tokenExpire = tokenExpire;
+        this.rand = rand;
     }
 
     public T getEntity() {
@@ -54,5 +64,12 @@ public class CrustApiUserInfo<T> extends CrustUserInfo<T, CrustPermission> {
             this.setEntity(entity);
         }
         return this.entity;
+    }
+
+    public String getRand() {
+        if (this.rand == null && CrustContext.get() instanceof CrustApi crust) {
+            return crust.loadLoginRand(this.uid);
+        }
+        return rand;
     }
 }

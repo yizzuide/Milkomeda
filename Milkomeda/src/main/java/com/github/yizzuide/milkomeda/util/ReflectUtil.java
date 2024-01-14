@@ -103,7 +103,7 @@ public class ReflectUtil {
                 params.put(argName, argValue);
             }
         }
-        if (params.size() > 0) {
+        if (!params.isEmpty()) {
             return params;
         }
         return null;
@@ -194,12 +194,12 @@ public class ReflectUtil {
         // Map 或 Object
         if (parameterClazz == Map.class || parameterClazz == Object.class) {
             // 去掉实体的包装
-            return method.invoke(target, wrapperBody.apply(wrapperList.get(0)));
+            return method.invoke(target, wrapperBody.apply(wrapperList.getFirst()));
         }
 
         // Entity
         if (parameterClazz == wrapperClazz) {
-            T entity = wrapperList.get(0);
+            T entity = wrapperList.getFirst();
             ResolvableType[] wrapperGenerics = resolvableType.getGenerics();
             Class<?> elementGenericType = wrapperGenerics[0].resolve();
             // Entity or Entity<Map>

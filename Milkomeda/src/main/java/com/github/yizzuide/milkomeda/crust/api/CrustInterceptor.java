@@ -23,7 +23,6 @@ package com.github.yizzuide.milkomeda.crust.api;
 
 import com.github.yizzuide.milkomeda.crust.CrustContext;
 import com.github.yizzuide.milkomeda.crust.CrustEntity;
-import com.github.yizzuide.milkomeda.crust.CrustUserInfo;
 import com.github.yizzuide.milkomeda.hydrogen.uniform.ResultVO;
 import com.github.yizzuide.milkomeda.hydrogen.uniform.UniformHandler;
 import com.github.yizzuide.milkomeda.hydrogen.uniform.UniformResult;
@@ -34,6 +33,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.lang.NonNull;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.AsyncHandlerInterceptor;
+
+import java.util.Objects;
 
 /**
  * Intercept and check token before at the request handle.
@@ -52,15 +53,20 @@ public class CrustInterceptor implements AsyncHandlerInterceptor {
         String errorMsg = "Required token is not set.";
         if (StringUtils.hasText(token)) {
             SimpleTokenResolver.TokenData tokenData = SimpleTokenResolver.parseToken(token);
-            CrustUserInfo<CrustEntity, ?> userInfo = new CrustApiUserInfo<>();
             if (tokenData == null) {
                 errorMsg = "Token is invalid.";
             } else {
-                isAuthedSuccess = true;
+                CrustApiUserInfo<CrustEntity> userInfo = new CrustApiUserInfo<>();
                 userInfo.setUid(tokenData.getUserId());
-                userInfo.setToken(token);
-                userInfo.setTokenExpire(tokenData.getTimestamp());
-                LightContext.setValue(userInfo, CrustApi.LIGHT_CONTEXT_ID);
+                String rand = userInfo.getRand();
+                if (rand != null && !Objects.equals(tokenData.getRand(), rand)) {
+                    errorMsg = "Token is invalid.";
+                } else {
+                    isAuthedSuccess = true;
+                    userInfo.setToken(token);
+                    userInfo.setTokenExpire(tokenData.getTimestamp());
+                    LightContext.setValue(userInfo, CrustApi.LIGHT_CONTEXT_ID);
+                }
             }
         }
         if (!isAuthedSuccess) {

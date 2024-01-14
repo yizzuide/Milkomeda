@@ -43,6 +43,7 @@ import java.util.List;
 public class MybatisUtil {
     private static final CCJSqlParserManager sqlParserManager = new CCJSqlParserManager();
     private static final TablesNamesFinder tablesNamesFinder = new TablesNamesFinder();
+
     /**
      * 获得真正的处理对象,可能多层代理
      * @param target    代理目标

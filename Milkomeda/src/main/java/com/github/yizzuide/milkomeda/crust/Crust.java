@@ -170,6 +170,11 @@ public class Crust extends AbstractCrust {
         return (CrustUserInfo<T, CrustPermission>) userDetails.getUserInfo();
     }
 
+    @Override
+    public boolean hasAuthenticated() {
+        return getAuthentication() != null;
+    }
+
     @NonNull
     public <T extends CrustEntity> CrustUserInfo<T, CrustPermission> getUserInfo(Class<T> entityClazz) {
         Authentication authentication = getAuthentication();

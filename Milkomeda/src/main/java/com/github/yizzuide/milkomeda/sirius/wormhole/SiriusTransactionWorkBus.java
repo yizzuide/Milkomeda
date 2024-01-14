@@ -25,7 +25,6 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.github.yizzuide.milkomeda.sirius.BatchMapper;
 import com.github.yizzuide.milkomeda.universe.exception.NotImplementException;
-import com.github.yizzuide.milkomeda.wormhole.ApplicationService;
 import com.github.yizzuide.milkomeda.wormhole.TransactionWorkBus;
 import lombok.Setter;
 import org.springframework.util.CollectionUtils;
@@ -34,35 +33,15 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * Mybatis plus impl of {@link TransactionWorkBus}.
+ * Mybatis plus implementation of {@link TransactionWorkBus}.
  *
  * @since 3.15.0
+ * @version 4.0.0
  * @author yizzuide
  * Create at 2023/07/13 11:44
  */
+@Setter
 public class SiriusTransactionWorkBus implements TransactionWorkBus {
-
-    /**
-     * Batch insert operation with primary key.
-     */
-    @Setter
-    private boolean useBatchInsertWithKey;
-
-    /**
-     * Link application service which belong to.
-     */
-    @Setter
-    private ApplicationService<?> applicationService;
-
-    public SiriusTransactionWorkBus(boolean useBatchInsertWithKey) {
-        this.useBatchInsertWithKey = useBatchInsertWithKey;
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public <A extends ApplicationService<?>> A getApplicationService() {
-        return (A) applicationService;
-    }
 
     @Override
     public <T> T selectById(Serializable id, Class<T> entityClass) {
@@ -84,36 +63,35 @@ public class SiriusTransactionWorkBus implements TransactionWorkBus {
     @Override
     public <T> int perform(int operation, T entity) {
         BaseMapper<T> mapper = (BaseMapper<T>) SiriusInspector.getMapper(entity.getClass());
-        switch (operation) {
-            case TRANSACTION_OPERATION_SAVE:
-                return mapper.insert(entity);
-            case TRANSACTION_OPERATION_UPDATE:
-                return mapper.updateById(entity);
-            case TRANSACTION_OPERATION_DELETE:
-                return mapper.deleteById(entity);
-        }
-        return 0;
+        return switch (operation) {
+            case TRANSACTION_OPERATION_SAVE -> mapper.insert(entity);
+            case TRANSACTION_OPERATION_UPDATE -> mapper.updateById(entity);
+            case TRANSACTION_OPERATION_DELETE -> mapper.deleteById(entity);
+            default -> 0;
+        };
+    }
+
+    @Override
+    public <T> int performBatch(int operation, List<T> entities) {
+        return performBatch(operation, entities, false);
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T> int performBatch(int operation, List<T> entities) {
+    public <T> int performBatch(int operation, List<T> entities, boolean usedKey) {
         if (CollectionUtils.isEmpty(entities)) {
             return 0;
         }
-        BaseMapper<T> mapper = (BaseMapper<T>) SiriusInspector.getMapper(entities.get(0).getClass());
-        if (!(mapper instanceof BatchMapper)) {
+        BaseMapper<T> mapper = (BaseMapper<T>) SiriusInspector.getMapper(entities.getFirst().getClass());
+        if (!(mapper instanceof BatchMapper<T> batchMapper)) {
             throw new NotImplementException("The mapper must impl with BatchMapper for batch operation.");
         }
-        BatchMapper<T> batchMapper = (BatchMapper<T>) mapper;
-        switch (operation) {
-            case TRANSACTION_OPERATION_SAVE:
-                return useBatchInsertWithKey ? batchMapper.insertKeyBatch(entities) : batchMapper.insertBatch(entities);
-            case TRANSACTION_OPERATION_UPDATE:
-                return batchMapper.updateBatchById(entities);
-            case TRANSACTION_OPERATION_DELETE:
-                return batchMapper.deleteBatchIds(entities);
-        }
-        return 0;
+        return switch (operation) {
+            case TRANSACTION_OPERATION_SAVE ->
+                    usedKey ? batchMapper.insertKeyBatch(entities) : batchMapper.insertBatch(entities);
+            case TRANSACTION_OPERATION_UPDATE -> batchMapper.updateBatchById(entities);
+            case TRANSACTION_OPERATION_DELETE -> batchMapper.deleteBatchIds(entities);
+            default -> 0;
+        };
     }
 }

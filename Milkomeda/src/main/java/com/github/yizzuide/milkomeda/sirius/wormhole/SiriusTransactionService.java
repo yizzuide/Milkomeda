@@ -19,28 +19,35 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.wormhole;
+package com.github.yizzuide.milkomeda.sirius.wormhole;
+
+import com.github.yizzuide.milkomeda.wormhole.TransactionService;
+import com.github.yizzuide.milkomeda.wormhole.TransactionWorkBus;
+import lombok.Getter;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * A simple interface which indicates as an application service in Domain-Driver Design.
+ * Mybatis plus extend of service which provide {@link TransactionWorkBus}.
  *
  * @param <R> the repository type
  *
  * @since 3.15.0
+ * @version 4.0.0
  * @author yizzuide
- * Create at 2023/07/14 03:31
+ * Create at 2023/07/14 03:48
  */
-public interface ApplicationService<R> {
+@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
+@Getter
+public class SiriusTransactionService<R> implements TransactionService<R> {
 
     /**
-     * Get {@link TransactionWorkBus} belong this application service.
-     * @return TransactionWorkBus
+     * Link {@link TransactionWorkBus} belong this service.
      */
-    TransactionWorkBus getTransactionWorkBus();
+    @Autowired
+    protected TransactionWorkBus transactionWorkBus;
 
-    /**
-     * Get repository proxy which accessed under this application service.
-     * @return repository type
-     */
-    R getRepositoryProxy();
+    @Override
+    public R getRepositoryProxy() {
+        return null;
+    }
 }

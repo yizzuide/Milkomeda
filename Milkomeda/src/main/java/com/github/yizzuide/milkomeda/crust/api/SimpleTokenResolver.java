@@ -21,6 +21,7 @@
 
 package com.github.yizzuide.milkomeda.crust.api;
 
+import com.github.yizzuide.milkomeda.util.IdGenerator;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.codec.EncodingException;
@@ -31,11 +32,10 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.DESedeKeySpec;
 import javax.crypto.spec.IvParameterSpec;
 import java.nio.charset.StandardCharsets;
-import java.security.SecureRandom;
 import java.util.Base64;
 
 /**
- * SimpleTokenProvider
+ * Simple token resolver for api service.
  *
  * @since 4.0.0
  * @author yizzuide
@@ -43,7 +43,6 @@ import java.util.Base64;
  */
 @Slf4j
 public class SimpleTokenResolver {
-    private static final String CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
     /**
      * Generate token with login user id and timestamp.
@@ -52,20 +51,19 @@ public class SimpleTokenResolver {
      * @return token
      */
     public static String createToken(long uid, long timestamp) {
-        return createToken(uid, timestamp, null, 5);
+        return createToken(uid, timestamp, null);
     }
 
     /**
      * Generate token with login user id and timestamp.
      * @param uid   login user id
-     * @param timestamp expire timestamp
+     * @param timestamp timestamp
      * @param rand  random string
-     * @param randLength  if `rand` set is null, random string length must be set.
      * @return token
      */
-    public static String createToken(long uid, long timestamp, String rand, int randLength) {
+    public static String createToken(long uid, long timestamp, String rand) {
         if (rand == null) {
-            rand = generateRandomString(randLength);
+            rand = IdGenerator.genRand(5);
         }
         return _3DESEncoder.encode(new TokenData(String.valueOf(uid), timestamp, rand).toString());
     }
@@ -80,16 +78,6 @@ public class SimpleTokenResolver {
         long timestamp = Long.parseLong(parts[1]);
         String rand = parts[2];
         return new TokenData(userId, timestamp, rand);
-    }
-
-    private static String generateRandomString(int length) {
-        StringBuilder sb = new StringBuilder(length);
-        SecureRandom random = new SecureRandom();
-        for (int i = 0; i < length; i++) {
-            int index = random.nextInt(CHARS.length());
-            sb.append(CHARS.charAt(index));
-        }
-        return sb.toString();
     }
 
     private static final class _3DESEncoder {
@@ -141,7 +129,7 @@ public class SimpleTokenResolver {
         private String userId;
 
         /**
-         * Token expire timestamp.
+         * Token timestamp.
          */
         private long timestamp;
 

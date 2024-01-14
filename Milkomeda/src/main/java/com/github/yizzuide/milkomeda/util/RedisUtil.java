@@ -31,6 +31,7 @@ import org.springframework.data.redis.support.atomic.RedisAtomicLong;
 import org.springframework.lang.NonNull;
 
 import java.util.Date;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
@@ -60,11 +61,10 @@ public class RedisUtil {
      * @param delta         自增量
      * @param expireDate    过期时间
      * @param redisTemplate RedisTemplate
-     * @return 当前值
+     * @return 增长序列值
      */
-    public static Long incr(String key, long delta, Date expireDate, RedisTemplate redisTemplate) {
-        assert redisTemplate.getConnectionFactory() != null;
-        RedisAtomicLong ral = new RedisAtomicLong(key, redisTemplate.getConnectionFactory());
+    public static long incr(String key, long delta, Date expireDate, RedisTemplate<String, String> redisTemplate) {
+        RedisAtomicLong ral = new RedisAtomicLong(key, Objects.requireNonNull(redisTemplate.getConnectionFactory()));
         long increment = ral.addAndGet(delta);
         if (expireDate != null) {
             ral.expireAt(expireDate);
@@ -80,7 +80,7 @@ public class RedisUtil {
      * @param redisTemplate RedisTemplate
      * @return 当前值
      */
-    public static Long incr(String key, long delta, long liveTime, RedisTemplate redisTemplate) {
+    public static Long incr(String key, long delta, long liveTime, RedisTemplate<String, String> redisTemplate) {
         assert redisTemplate.getConnectionFactory() != null;
         RedisAtomicLong ral = new RedisAtomicLong(key, redisTemplate.getConnectionFactory());
         long increment = ral.addAndGet(delta);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 yizzuide All rights Reserved.
+ * Copyright (c) 2024 yizzuide All rights Reserved.
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -19,31 +19,40 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.wormhole;
+package com.github.yizzuide.milkomeda.util;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
- * A base aggregates object of the domain model which provides access to {@link TransactionWorkBus}.
+ * DateUtil
  *
- * @since 3.15.0
- * @version 4.0.0
  * @author yizzuide
- * Create at 2023/07/15 17:44
+ * @since 4.0.0
+ * Create at 2024/01/13 16:37
  */
-public abstract class TransactionAggsEntity {
+public class DateUtil {
 
-    /**
-     * The transaction service which invoke from with.
-     * @since 4.0.0
-     */
-    protected TransactionService<?> transactionService;
+    public static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
-    /**
-     * The {@link TransactionWorkBus} is associated with the transaction service.
-     */
-    protected TransactionWorkBus transactionWorkBus;
+    public static int getUnixTime() {
+        return getUnixTime(System.currentTimeMillis());
+    }
 
-    public TransactionAggsEntity(TransactionService<?> transactionService) {
-        this.transactionService = transactionService;
-        this.transactionWorkBus = transactionService.getTransactionWorkBus();
+    public static int getUnixTime(long timestamp) {
+        return Math.toIntExact(timestamp / 1000);
+    }
+
+    public static int getUnixTime(Date date) {
+        return getUnixTime(date.getTime());
+    }
+
+    public static int getUnixTime(String date) {
+        SimpleDateFormat dataFormat = new SimpleDateFormat(DATE_FORMAT);
+        try {
+            return getUnixTime(dataFormat.parse(date));
+        } catch (Exception e) {
+            return 0;
+        }
     }
 }

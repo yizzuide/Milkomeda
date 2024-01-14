@@ -79,12 +79,13 @@ public abstract class AbstractCrust {
     /**
      * Generate verify code for login action.
      * @param account   account name (phone, email, etc.)
+     * @param needSend  whether to send SMS code
      * @return verily code
      * @since 3.15.0
      */
-    public String generateCode(String account, boolean usedProduction) {
+    public String generateCode(String account, boolean needSend) {
         String code = props.getTestCode();
-        if (usedProduction) {
+        if (needSend) {
             code = RandomStringUtils.randomNumeric(props.getCodeLength());
         }
         String cacheKey = CATCH_CODE_KEY_PREFIX + account;
@@ -140,13 +141,18 @@ public abstract class AbstractCrust {
     public abstract <T extends CrustEntity> CrustUserInfo<T, CrustPermission> login(@NonNull String account, @NonNull String credentials, @NonNull Class<T> entityClazz);
 
     /**
+     * Check login status is authenticated.
+     * @return true is authenticated
+     */
+    public abstract boolean hasAuthenticated();
+
+    /**
      * 获取当前用户详细信息
      *
      * @param entityClazz 实体类型
      * @param <T> 实体类型
      * @return  CrustUserInfo
      */
-    @NonNull
     public abstract <T extends CrustEntity> CrustUserInfo<T, CrustPermission> getUserInfo(Class<T> entityClazz);
 
     /**

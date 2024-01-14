@@ -24,12 +24,14 @@ package com.github.yizzuide.milkomeda.crust.api;
 import com.github.yizzuide.milkomeda.crust.*;
 import com.github.yizzuide.milkomeda.light.LightContext;
 import lombok.Getter;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.lang.NonNull;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 
 /**
@@ -69,14 +71,20 @@ public class CrustApi extends AbstractCrust {
         if (!code.equals(credentials)) {
             throw new CrustBadCredentialsException("verify code not match");
         }
-        CrustUserInfo<T, CrustPermission> userInfo = (CrustUserInfo<T, CrustPermission>) crustApiUserDetailsService.loadUserByUsername(account);
+        CrustApiUserInfo<T> userInfo = (CrustApiUserInfo<T>) crustApiUserDetailsService.loadUserByUsername(account);
         long expire = props.getExpire().toMillis();
-        userInfo.setToken(SimpleTokenResolver.createToken(userInfo.getUidLong(), expire));
+        String rand = RandomStringUtils.random(5, true, true);
+        userInfo.setRand(rand);
+        userInfo.setToken(SimpleTokenResolver.createToken(userInfo.getUidLong(), expire, rand));
         userInfo.setTokenExpire(expire);
         return userInfo;
     }
 
-    @NonNull
+    @Override
+    public boolean hasAuthenticated() {
+        return getUserInfo() != null;
+    }
+
     @Override
     public <T extends CrustEntity> CrustUserInfo<T, CrustPermission> getUserInfo(Class<T> entityClazz) {
         return LightContext.getValue(LIGHT_CONTEXT_ID);
@@ -84,7 +92,7 @@ public class CrustApi extends AbstractCrust {
 
     @Override
     public CrustUserInfo<?, CrustPermission> refreshToken() {
-        CrustUserInfo<CrustEntity, CrustPermission> userInfo = LightContext.getValue(LIGHT_CONTEXT_ID);
+        CrustUserInfo<CrustEntity, CrustPermission> userInfo = Objects.requireNonNull(LightContext.getValue(LIGHT_CONTEXT_ID));
         long expire = props.getExpire().toMillis();
         String token = SimpleTokenResolver.createToken(userInfo.getUidLong(), expire);
         userInfo.setToken(token);
@@ -96,6 +104,10 @@ public class CrustApi extends AbstractCrust {
     @Override
     public <T> T loadEntity(Serializable uid) {
         return (T) crustApiUserDetailsService.findEntityById(uid);
+    }
+
+    String loadLoginRand(Serializable uid) {
+        return crustApiUserDetailsService.findLoginRand(uid);
     }
 
     @Override

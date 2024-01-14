@@ -56,7 +56,6 @@ public interface CrustApiUserDetailsService {
 
     /**
      * Find user entity with username.
-     *
      * @param username  user name
      * @return  CrustEntity
      */
@@ -65,10 +64,16 @@ public interface CrustApiUserDetailsService {
 
     /**
      * Find user entity by uid after authentication.
-     *
      * @param uid   user id
      * @return  CrustEntity
      */
     @Nullable
     CrustEntity findEntityById(Serializable uid);
+
+    /**
+     * Find login random by uid.
+     * @param uid   user id
+     * @return  login rand
+     */
+    String findLoginRand(Serializable uid);
 }
