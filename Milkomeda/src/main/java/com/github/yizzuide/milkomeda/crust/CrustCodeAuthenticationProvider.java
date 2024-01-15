@@ -48,7 +48,7 @@ public class CrustCodeAuthenticationProvider implements AuthenticationProvider {
         CrustCodeAuthenticationToken authenticationToken = (CrustCodeAuthenticationToken) authentication;
         String account = (String) authentication.getPrincipal();
         String code = (String) authentication.getCredentials();
-        String cachedCode = CrustContext.getDefault().getCode(account);
+        String cachedCode = CrustContext.get().getCode(account);
         if (cachedCode == null) {
             throw new BadCredentialsException("Verify code not exists!");
         }

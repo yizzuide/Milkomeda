@@ -24,12 +24,18 @@ package com.github.yizzuide.milkomeda.crust;
 import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import io.jsonwebtoken.ClaimJwtException;
 import io.jsonwebtoken.lang.Assert;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.lang.NonNull;
-import org.springframework.security.authentication.InsufficientAuthenticationException;
+import org.springframework.security.authentication.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsChecker;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
@@ -39,10 +45,6 @@ import org.springframework.security.web.util.matcher.RequestHeaderRequestMatcher
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -50,15 +52,16 @@ import java.util.List;
 /**
  * Parse token to authentication filter.
  *
+ * @see org.springframework.security.authentication.dao.AbstractUserDetailsAuthenticationProvider
  * @see org.springframework.security.web.context.SecurityContextHolderFilter
  * @see org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
  * @see org.springframework.security.web.authentication.www.BasicAuthenticationFilter
  * @see org.springframework.security.web.authentication.AnonymousAuthenticationFilter
  * @see org.springframework.security.web.access.ExceptionTranslationFilter
- * @see org.springframework.security.web.access.intercept.FilterSecurityInterceptor
+ * @see org.springframework.security.web.access.intercept.AuthorizationFilter
  * @author yizzuide
  * @since 1.14.0
- * @version 3.12.9
+ * @version 4.0.0
  * <br>
  * Create at 2019/11/11 17:52
  */
@@ -67,6 +70,8 @@ public class CrustAuthenticationFilter extends OncePerRequestFilter {
 
     private final RequestMatcher requiresAuthenticationRequestMatcher;
     private List<RequestMatcher> permissiveRequestMatchers;
+    private final UserDetailsChecker preAuthenticationChecks = new DefaultPreAuthenticationChecks();
+    private final UserDetailsChecker postAuthenticationChecks = new DefaultPostAuthenticationChecks();
     private AuthenticationSuccessHandler successHandler = new SavedRequestAwareAuthenticationSuccessHandler();
     private AuthenticationFailureHandler failureHandler = new SimpleUrlAuthenticationFailureHandler();
 
@@ -114,6 +119,10 @@ public class CrustAuthenticationFilter extends OncePerRequestFilter {
                 crust.activeAuthentication(authResult);
                 authentication = crust.getContext().getAuthentication();
             }
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+            // check user details
+            this.preAuthenticationChecks.check(userDetails);
+            this.postAuthenticationChecks.check(userDetails);
             successfulAuthentication(request, response, chain, authentication);
         } else {
             unsuccessfulAuthentication(request, response, failed);
@@ -170,5 +179,29 @@ public class CrustAuthenticationFilter extends OncePerRequestFilter {
     public void setAuthenticationFailureHandler(AuthenticationFailureHandler failureHandler) {
         Assert.notNull(failureHandler, "failureHandler cannot be null");
         this.failureHandler = failureHandler;
+    }
+
+    private static class DefaultPreAuthenticationChecks implements UserDetailsChecker {
+        @Override
+        public void check(UserDetails user) {
+            if (!user.isAccountNonLocked()) {
+                throw new LockedException("User account is locked");
+            }
+            if (!user.isEnabled()) {
+                throw new DisabledException("User is disabled");
+            }
+            if (!user.isAccountNonExpired()) {
+                throw new AccountExpiredException("User account has expired");
+            }
+        }
+    }
+
+    private static class DefaultPostAuthenticationChecks implements UserDetailsChecker {
+        @Override
+        public void check(UserDetails user) {
+            if (!user.isCredentialsNonExpired()) {
+                throw new CredentialsExpiredException("User credentials have expired");
+            }
+        }
     }
 }

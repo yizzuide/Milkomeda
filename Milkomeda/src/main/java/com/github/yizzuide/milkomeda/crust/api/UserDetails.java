@@ -21,47 +21,27 @@
 
 package com.github.yizzuide.milkomeda.crust.api;
 
-import com.github.yizzuide.milkomeda.crust.*;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-
-import java.io.Serial;
+import com.github.yizzuide.milkomeda.crust.CrustEntity;
+import com.github.yizzuide.milkomeda.crust.CrustStatefulEntity;
 
 /**
- * API服务用户信息
+ * The user details describe user login information which needs to limit request to access resource.
  *
  * @since 4.0.0
  * @author yizzuide
- * Create at 2024/01/12 17:51
+ * Create at 2024/01/15 15:24
  */
-@EqualsAndHashCode(callSuper = true)
-@Data
-public class CrustApiUserInfo<T> extends CrustUserInfo<T, CrustPermission> {
-
-    @Serial
-    private static final long serialVersionUID = 6717030250582125962L;
+public interface UserDetails extends CrustStatefulEntity {
 
     /**
-     * generated token random.
+     * Get login user info.
+     * @return user info
      */
-    private String tokenRand;
-
-    public T getEntity() {
-        if (this.entity == null) {
-            T entity = CrustContext.get().loadEntity(this.uid);
-            this.setEntity(entity);
-        }
-        return this.entity;
-    }
+    CrustApiUserInfo<CrustEntity> userInfo();
 
     /**
-     * Get user details which used to request access filter.
-     * @return user details
+     * Created token random string after login.
+     * @return  token random string
      */
-    public UserDetails getGuardUserDetails() {
-        if (CrustContext.get() instanceof CrustApi crust) {
-            return crust.loadGuardUserDetails(this.uid);
-        }
-        throw new CrustException("Crust context get type must be [CrustApi], current type is " + CrustContext.get().getClass().getName());
-    }
+    String getTokenRand();
 }

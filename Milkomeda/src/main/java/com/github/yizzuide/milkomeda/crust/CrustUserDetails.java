@@ -26,12 +26,12 @@ import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 
 /**
- * CrustUserDetails
  * 用户验证的源数据
  *
  * @author yizzuide
@@ -43,6 +43,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 public class CrustUserDetails implements UserDetails {
+    @Serial
     private static final long serialVersionUID = 2749178892063846690L;
 
     /**

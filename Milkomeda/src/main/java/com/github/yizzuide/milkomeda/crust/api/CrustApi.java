@@ -66,16 +66,20 @@ public class CrustApi extends AbstractCrust {
         // 验证码否正确
         String code = getCode(account);
         if (code == null) {
-            throw new CrustBadCredentialsException("verify code is null");
+            throw new CrustBadCredentialsException("Verify code is null");
         }
         if (!code.equals(credentials)) {
-            throw new CrustBadCredentialsException("verify code not match");
+            throw new CrustBadCredentialsException("Verify code not match");
         }
-        CrustApiUserInfo<T> userInfo = (CrustApiUserInfo<T>) crustApiUserDetailsService.loadUserByUsername(account);
+        UserDetails userDetails = crustApiUserDetailsService.loadUserByUsername(account);
+        if (!userDetails.enabled() || userDetails.accountExpired() || userDetails.accountLocked()) {
+            throw new CrustUserAccessForbidden("Restricted user access");
+        }
+        CrustApiUserInfo<T> userInfo = (CrustApiUserInfo<T>) userDetails.userInfo();
         long expire = props.getExpire().toMillis();
-        String rand = RandomStringUtils.random(5, true, true);
-        userInfo.setRand(rand);
-        userInfo.setToken(SimpleTokenResolver.createToken(userInfo.getUidLong(), expire, rand));
+        String tokenRand = RandomStringUtils.random(5, true, true);
+        userInfo.setTokenRand(tokenRand);
+        userInfo.setToken(SimpleTokenResolver.createToken(userInfo.getUidLong(), expire, tokenRand));
         userInfo.setTokenExpire(expire);
         return userInfo;
     }
@@ -106,8 +110,8 @@ public class CrustApi extends AbstractCrust {
         return (T) crustApiUserDetailsService.findEntityById(uid);
     }
 
-    String loadLoginRand(Serializable uid) {
-        return crustApiUserDetailsService.findLoginRand(uid);
+    UserDetails loadGuardUserDetails(Serializable uid) {
+        return crustApiUserDetailsService.loadGuardUserDetails(uid);
     }
 
     @Override

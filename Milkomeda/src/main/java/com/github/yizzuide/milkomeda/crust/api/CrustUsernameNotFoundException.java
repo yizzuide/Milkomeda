@@ -28,6 +28,7 @@ import java.io.Serial;
 /**
  * Thrown this exception if username not found.
  *
+ * @since 4.0.0
  * @author yizzuide
  * Create at 2024/01/12 21:14
  */

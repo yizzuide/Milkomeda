@@ -69,17 +69,13 @@ public class CrustContext {
      */
     @NonNull
     public static <T extends CrustEntity> CrustUserInfo<T, CrustPermission> getUserInfo(@Nullable Class<T> entityClass) {
-        AbstractCrust crust = get();
-        return crust.getUserInfo(entityClass);
+        return get().getUserInfo(entityClass);
     }
 
     /**
      * 使登录信息失效，清空当前用户的缓存
      */
     public static void invalidate() {
-        Crust crust = getDefault();
-        if (crust != null) {
-            crust.invalidate();
-        }
+        get().invalidate();
     }
 }

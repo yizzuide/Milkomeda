@@ -22,8 +22,6 @@
 package com.github.yizzuide.milkomeda.crust.api;
 
 import com.github.yizzuide.milkomeda.crust.CrustEntity;
-import com.github.yizzuide.milkomeda.crust.CrustPermission;
-import com.github.yizzuide.milkomeda.crust.CrustUserInfo;
 import org.springframework.lang.Nullable;
 
 import java.io.Serializable;
@@ -38,21 +36,28 @@ import java.io.Serializable;
 public interface CrustApiUserDetailsService {
 
     /**
-     * load user info with an account.
+     * load user details with an account.
      * @param account   user account
-     * @return  CrustUserInfo
+     * @return  UserDetails
      */
-    default CrustUserInfo<CrustEntity, CrustPermission> loadUserByUsername(String account) {
+    default UserDetails loadUserByUsername(String account) {
         CrustEntity entity = findEntityByUsername(account);
         if (entity == null) {
             throw new CrustUsernameNotFoundException("Not found entity with account: " + account);
         }
-        CrustUserInfo<CrustEntity, CrustPermission> userInfo = new CrustApiUserInfo<>();
+        CrustApiUserInfo<CrustEntity> userInfo = new CrustApiUserInfo<>();
         userInfo.setUid(entity.getUid());
         userInfo.setUsername(account);
         userInfo.setEntity(entity);
-        return userInfo;
+        return new CrustApiUserDetails(userInfo);
     }
+
+    /**
+     * Find user details which check identity before request resources.
+     * @param uid   user id
+     * @return  UserDetails
+     */
+    UserDetails loadGuardUserDetails(Serializable uid);
 
     /**
      * Find user entity with username.
@@ -69,11 +74,4 @@ public interface CrustApiUserDetailsService {
      */
     @Nullable
     CrustEntity findEntityById(Serializable uid);
-
-    /**
-     * Find login random by uid.
-     * @param uid   user id
-     * @return  login rand
-     */
-    String findLoginRand(Serializable uid);
 }

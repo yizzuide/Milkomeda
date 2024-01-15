@@ -48,6 +48,7 @@ import java.util.List;
  * Crust config used for api service.
  *
  * @since 3.15.0
+ * @version 4.0.0
  * @author yizzuide
  * <br>
  * Create at 2022/12/07 00:12

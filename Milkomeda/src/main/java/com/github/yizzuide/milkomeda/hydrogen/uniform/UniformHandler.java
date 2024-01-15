@@ -74,6 +74,7 @@ import java.util.*;
 //@ControllerAdvice // 这种方式默认就会扫描并加载到Ioc，不好动态控制是否加载，但好处是外部API对未来版本的兼容性强
 public class UniformHandler extends ResponseEntityExceptionHandler {
 
+    public static final int REQUEST_USER_ACCESS_FORBIDDEN = 4003;
     public static final int REQUEST_BEFORE_EXCEPTION_CODE = 5000;
 
     @Autowired

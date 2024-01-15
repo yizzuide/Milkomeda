@@ -21,47 +21,23 @@
 
 package com.github.yizzuide.milkomeda.crust.api;
 
-import com.github.yizzuide.milkomeda.crust.*;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import com.github.yizzuide.milkomeda.crust.CrustException;
 
 import java.io.Serial;
 
 /**
- * API服务用户信息
+ * Thrown this exception if the user access is forbidden.
  *
  * @since 4.0.0
  * @author yizzuide
- * Create at 2024/01/12 17:51
+ * Create at 2024/01/15 15:10
  */
-@EqualsAndHashCode(callSuper = true)
-@Data
-public class CrustApiUserInfo<T> extends CrustUserInfo<T, CrustPermission> {
+public class CrustUserAccessForbidden extends CrustException {
 
     @Serial
-    private static final long serialVersionUID = 6717030250582125962L;
+    private static final long serialVersionUID = 6229594596635627142L;
 
-    /**
-     * generated token random.
-     */
-    private String tokenRand;
-
-    public T getEntity() {
-        if (this.entity == null) {
-            T entity = CrustContext.get().loadEntity(this.uid);
-            this.setEntity(entity);
-        }
-        return this.entity;
-    }
-
-    /**
-     * Get user details which used to request access filter.
-     * @return user details
-     */
-    public UserDetails getGuardUserDetails() {
-        if (CrustContext.get() instanceof CrustApi crust) {
-            return crust.loadGuardUserDetails(this.uid);
-        }
-        throw new CrustException("Crust context get type must be [CrustApi], current type is " + CrustContext.get().getClass().getName());
+    public CrustUserAccessForbidden(String message) {
+        super(message);
     }
 }

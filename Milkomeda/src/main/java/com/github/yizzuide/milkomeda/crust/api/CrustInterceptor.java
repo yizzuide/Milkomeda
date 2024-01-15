@@ -29,9 +29,9 @@ import com.github.yizzuide.milkomeda.hydrogen.uniform.UniformResult;
 import com.github.yizzuide.milkomeda.light.LightContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.lang.NonNull;
-import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.AsyncHandlerInterceptor;
 
 import java.util.Objects;
@@ -40,6 +40,7 @@ import java.util.Objects;
  * Intercept and check token before at the request handle.
  *
  * @since 3.15.0
+ * @version 4.0.0
  * @author yizzuide
  * <br>
  * Create at 2022/12/07 00:44
@@ -49,37 +50,45 @@ public class CrustInterceptor implements AsyncHandlerInterceptor {
     @Override
     public boolean preHandle(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull Object handler) throws Exception {
         String token = CrustContext.get().getToken(false);
-        boolean isAuthedSuccess = false;
-        String errorMsg = "Required token is not set.";
-        if (StringUtils.hasText(token)) {
-            SimpleTokenResolver.TokenData tokenData = SimpleTokenResolver.parseToken(token);
-            if (tokenData == null) {
-                errorMsg = "Token is invalid.";
-            } else {
-                CrustApiUserInfo<CrustEntity> userInfo = new CrustApiUserInfo<>();
-                userInfo.setUid(tokenData.getUserId());
-                String rand = userInfo.getRand();
-                if (rand != null && !Objects.equals(tokenData.getRand(), rand)) {
-                    errorMsg = "Token is invalid.";
-                } else {
-                    isAuthedSuccess = true;
-                    userInfo.setToken(token);
-                    userInfo.setTokenExpire(tokenData.getTimestamp());
-                    LightContext.setValue(userInfo, CrustApi.LIGHT_CONTEXT_ID);
-                }
-            }
-        }
-        if (!isAuthedSuccess) {
-            response.setStatus(HttpStatus.UNAUTHORIZED.value());
-            ResultVO<?> source = UniformResult.error(String.valueOf(response.getStatus()), errorMsg);
-            UniformHandler.matchStatusToWrite(response, source.toMap());
+        if (StringUtils.isBlank(token)) {
+            writeFailResponse(response, HttpStatus.UNAUTHORIZED.value(), "Required token is not set.");
             return false;
         }
+
+        SimpleTokenResolver.TokenData tokenData = SimpleTokenResolver.parseToken(token);
+        if (tokenData == null) {
+            writeFailResponse(response, HttpStatus.UNAUTHORIZED.value(), "Token is invalid.");
+            return false;
+        }
+
+        CrustApiUserInfo<CrustEntity> userInfo = new CrustApiUserInfo<>();
+        userInfo.setUid(tokenData.getUserId());
+        UserDetails guardDetails = userInfo.getGuardUserDetails();
+        if (guardDetails != null) {
+            if (guardDetails.getTokenRand() != null && !Objects.equals(tokenData.getRand(), guardDetails.getTokenRand())) {
+                writeFailResponse(response, HttpStatus.UNAUTHORIZED.value(), "Token is invalid.");
+                return false;
+            }
+            if (!guardDetails.enabled() || guardDetails.accountExpired() || guardDetails.accountLocked()) {
+                writeFailResponse(response, UniformHandler.REQUEST_USER_ACCESS_FORBIDDEN, "Restricted user access");
+                return false;
+            }
+        }
+
+        userInfo.setToken(token);
+        userInfo.setTokenExpire(tokenData.getTimestamp());
+        LightContext.setValue(userInfo, CrustApi.LIGHT_CONTEXT_ID);
         return true;
+    }
+
+    private void writeFailResponse(@NonNull HttpServletResponse response, int status, @NonNull String errorMsg) throws Exception {
+        response.setStatus(status);
+        ResultVO<?> source = UniformResult.error(String.valueOf(response.getStatus()), errorMsg);
+        UniformHandler.matchStatusToWrite(response, source.toMap());
     }
 
     @Override
     public void afterCompletion(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull Object handler, Exception ex) throws Exception {
-        CrustContext.get().invalidate();
+        CrustContext.invalidate();
     }
 }
