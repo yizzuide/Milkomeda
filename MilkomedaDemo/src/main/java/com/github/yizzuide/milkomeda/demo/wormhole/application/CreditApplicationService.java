@@ -1,6 +1,6 @@
 package com.github.yizzuide.milkomeda.demo.wormhole.application;
 
-import com.github.yizzuide.milkomeda.demo.wormhole.appearance.aciton.Actions;
+import com.github.yizzuide.milkomeda.demo.wormhole.domain.aciton.Actions;
 import com.github.yizzuide.milkomeda.demo.wormhole.appearance.command.AuditCommand;
 import com.github.yizzuide.milkomeda.demo.wormhole.domain.model.Credit;
 import com.github.yizzuide.milkomeda.wormhole.WormholeEvent;

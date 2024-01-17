@@ -198,7 +198,7 @@ public class UniformHandler extends ResponseEntityExceptionHandler {
      * @return  ResponseEntity
      */
     private ResponseEntity<Object> handleValidBeanExceptionResponse(Exception ex, BindingResult bindingResult) {
-        ObjectError objectError = bindingResult.getAllErrors().get(0);
+        ObjectError objectError = bindingResult.getAllErrors().getFirst();
         String message = objectError.getDefaultMessage();
         if (!props.isIgnoreAddFieldOnValidFail()) {
             if (objectError.getArguments() != null && objectError.getArguments().length > 0) {

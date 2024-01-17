@@ -48,7 +48,7 @@ public class DateConstraintValidator implements ConstraintValidator<DateConstrai
     @Override
     public boolean isValid(String value, ConstraintValidatorContext constraintValidatorContext) {
         // 如果为空就不验证
-        if (null == value || "".equals(value)) return true;
+        if (null == value || value.isEmpty()) return true;
         try {
             DateUtils.parseDate(value, dateFormat);
             return true;

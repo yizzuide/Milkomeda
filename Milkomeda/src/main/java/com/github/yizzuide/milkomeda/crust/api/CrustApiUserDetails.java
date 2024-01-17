@@ -41,7 +41,7 @@ public record CrustApiUserDetails(CrustApiUserInfo<CrustEntity> userInfo) implem
     @Serial
     private static final long serialVersionUID = -4961178605069846241L;
 
-    public static CrustApiUserDetails from(CrustEntity entity, Supplier<String> tokenRandProvider) {
+    public static UserDetails from(CrustEntity entity, Supplier<String> tokenRandProvider) {
         CrustApiUserInfo<CrustEntity> userInfo = new CrustApiUserInfo<>();
         userInfo.setUid(entity.getUid());
         userInfo.setUsername(entity.getUsername());

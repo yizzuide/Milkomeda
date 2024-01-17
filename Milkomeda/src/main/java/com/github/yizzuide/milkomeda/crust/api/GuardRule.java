@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 yizzuide All rights Reserved.
+ * Copyright (c) 2024 yizzuide All rights Reserved.
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -19,15 +19,42 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.demo.wormhole.appearance.aciton;
+package com.github.yizzuide.milkomeda.crust.api;
+
+import com.github.yizzuide.milkomeda.crust.CrustEntity;
+import lombok.Builder;
+import lombok.Data;
+
+import java.util.List;
+import java.util.function.Function;
 
 /**
- * 业务流程的事件动作
+ * Guard rule used by {@link UserDetails} for check request is allowed.
  *
+ * @since 4.0.0
  * @author yizzuide
- * <br>
- * Create at 2020/05/05 16:01
+ * Create at 2024/01/17 19:02
  */
-public class Actions {
-    public static final String AUDIT_SUCCESS = "action_credit_audit";
+@Builder
+@Data
+public class GuardRule {
+    /**
+     * The request URL that needs to be checked.
+     */
+    private List<String> includeUrls;
+
+    /**
+     * A function to determine whether the request is allowed.
+     */
+    private Function<CrustEntity, Boolean> matcher;
+
+    /**
+     * The response status code when the request is not allowed.
+     */
+    private Integer status;
+
+    /**
+     * The response message when the request is not allowed.
+     */
+    private String message;
 }

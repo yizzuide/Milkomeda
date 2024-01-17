@@ -27,17 +27,19 @@ import com.github.yizzuide.milkomeda.hydrogen.uniform.ResultVO;
 import com.github.yizzuide.milkomeda.hydrogen.uniform.UniformHandler;
 import com.github.yizzuide.milkomeda.hydrogen.uniform.UniformResult;
 import com.github.yizzuide.milkomeda.light.LightContext;
+import com.github.yizzuide.milkomeda.universe.parser.url.URLPathMatcher;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.lang.NonNull;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.servlet.AsyncHandlerInterceptor;
 
 import java.util.Objects;
 
 /**
- * Intercept and check token before at the request handle.
+ * This interceptor check secure data before access resource.
  *
  * @since 3.15.0
  * @version 4.0.0
@@ -72,6 +74,17 @@ public class CrustInterceptor implements AsyncHandlerInterceptor {
             if (!guardDetails.enabled() || guardDetails.accountExpired() || guardDetails.accountLocked()) {
                 writeFailResponse(response, UniformHandler.REQUEST_USER_ACCESS_FORBIDDEN, "Restricted user access");
                 return false;
+            }
+            // match guard rules
+            if (!CollectionUtils.isEmpty(guardDetails.userInfo().getGuardRules())) {
+                for (GuardRule guardRule : guardDetails.userInfo().getGuardRules()) {
+                    if (URLPathMatcher.match(guardRule.getIncludeUrls(), null)) {
+                        if (guardRule.getMatcher().apply(userInfo.getEntity())) {
+                            writeFailResponse(response, guardRule.getStatus(), guardRule.getMessage());
+                            return false;
+                        }
+                    }
+                }
             }
         }
 

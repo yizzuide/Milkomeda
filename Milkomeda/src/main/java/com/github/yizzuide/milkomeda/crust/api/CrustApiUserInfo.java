@@ -21,11 +21,15 @@
 
 package com.github.yizzuide.milkomeda.crust.api;
 
-import com.github.yizzuide.milkomeda.crust.*;
+import com.github.yizzuide.milkomeda.crust.CrustContext;
+import com.github.yizzuide.milkomeda.crust.CrustException;
+import com.github.yizzuide.milkomeda.crust.CrustPermission;
+import com.github.yizzuide.milkomeda.crust.CrustUserInfo;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.io.Serial;
+import java.util.List;
 
 /**
  * API服务用户信息
@@ -45,6 +49,11 @@ public class CrustApiUserInfo<T> extends CrustUserInfo<T, CrustPermission> {
      * generated token random.
      */
     private String tokenRand;
+
+    /**
+     * guard rules for check request are allowed.
+     */
+    private List<GuardRule> guardRules;
 
     public T getEntity() {
         if (this.entity == null) {
