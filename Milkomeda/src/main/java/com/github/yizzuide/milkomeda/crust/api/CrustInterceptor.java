@@ -72,7 +72,7 @@ public class CrustInterceptor implements AsyncHandlerInterceptor {
                 return false;
             }
             if (!guardDetails.enabled() || guardDetails.accountExpired() || guardDetails.accountLocked()) {
-                writeFailResponse(response, UniformHandler.REQUEST_USER_ACCESS_FORBIDDEN, "Restricted user access");
+                writeFailResponse(response, HttpStatus.FORBIDDEN.value(), "Restricted user access");
                 return false;
             }
             // match guard rules

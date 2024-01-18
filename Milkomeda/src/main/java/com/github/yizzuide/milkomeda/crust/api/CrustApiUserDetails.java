@@ -26,7 +26,6 @@ import com.github.yizzuide.milkomeda.crust.CrustStatefulEntity;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.function.Supplier;
 
 /**
  * User details for api service.
@@ -40,15 +39,6 @@ public record CrustApiUserDetails(CrustApiUserInfo<CrustEntity> userInfo) implem
 
     @Serial
     private static final long serialVersionUID = -4961178605069846241L;
-
-    public static UserDetails from(CrustEntity entity, Supplier<String> tokenRandProvider) {
-        CrustApiUserInfo<CrustEntity> userInfo = new CrustApiUserInfo<>();
-        userInfo.setUid(entity.getUid());
-        userInfo.setUsername(entity.getUsername());
-        userInfo.setTokenRand(tokenRandProvider.get());
-        userInfo.setEntity(entity);
-        return new CrustApiUserDetails(userInfo);
-    }
 
     @Override
     public Serializable getUid() {

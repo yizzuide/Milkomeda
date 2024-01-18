@@ -21,6 +21,7 @@
 
 package com.github.yizzuide.milkomeda.universe.extend.web.handler;
 
+import com.github.yizzuide.milkomeda.hydrogen.uniform.UniformException;
 import com.github.yizzuide.milkomeda.hydrogen.uniform.UniformHandler;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.*;
@@ -73,8 +74,8 @@ public class DelegatingContextFilter implements Filter {
         for (AstrolabeHandler astrolabeHandler : astrolabeHandlers) {
             try {
                 astrolabeHandler.preHandle(request);
-            } catch (Exception e) {
-                UniformHandler.matchStatusToWrite( (HttpServletResponse) response, null, e);
+            } catch (UniformException e) {
+                UniformHandler.matchStatusToWrite((HttpServletResponse) response, e.getCode(), e);
                 return;
             }
         }

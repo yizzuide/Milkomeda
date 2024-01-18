@@ -34,8 +34,10 @@ import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.SpringApplication;
 import org.springframework.boot.context.properties.bind.BindResult;
 import org.springframework.boot.context.properties.bind.Binder;
+import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.http.*;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
@@ -57,11 +59,11 @@ import java.util.*;
 /**
  * UniformHandler
  *
- * @see org.springframework.boot.SpringApplication#run(java.lang.String...)
+ * @see SpringApplication#run(String...)
  * #see org.springframework.boot.SpringApplication#registerLoggedException(java.lang.Throwable)
  * #see org.springframework.boot.SpringBootExceptionHandler.LoggedExceptionHandlerThreadLocal#initialValue()
- * @see org.springframework.boot.SpringApplication#setRegisterShutdownHook(boolean)
- * @see org.springframework.context.support.AbstractApplicationContext#registerShutdownHook()
+ * @see SpringApplication#setRegisterShutdownHook(boolean)
+ * @see AbstractApplicationContext#registerShutdownHook()
  * @author yizzuide
  * @since 3.0.0
  * @version 4.0.0
@@ -73,9 +75,6 @@ import java.util.*;
 // 可以用于定义@ExceptionHandler、@InitBinder、@ModelAttribute, 并应用到所有@RequestMapping中
 //@ControllerAdvice // 这种方式默认就会扫描并加载到Ioc，不好动态控制是否加载，但好处是外部API对未来版本的兼容性强
 public class UniformHandler extends ResponseEntityExceptionHandler {
-
-    public static final int REQUEST_USER_ACCESS_FORBIDDEN = 4003;
-    public static final int REQUEST_BEFORE_EXCEPTION_CODE = 5000;
 
     @Autowired
     private UniformProperties props;
@@ -281,15 +280,15 @@ public class UniformHandler extends ResponseEntityExceptionHandler {
     @SuppressWarnings("unchecked")
     public static Tuple<Map<String, Object>, Map<String, Object>> matchStatusResult(int statusCode, Map<String, Object> source) {
         BindResult<UniformProperties> bindResult = Binder.get(ApplicationContextHolder.get().getEnvironment()).bind(UniformProperties.PREFIX, UniformProperties.class);
-        Map<String, Object> resolveMap;
+        Map<String, Object> resolveMap = null;
         if (bindResult.isBound()) {
             UniformProperties props = bindResult.get();
             resolveMap = (Map<String, Object>) props.getResponse().get(String.valueOf(statusCode));
-            if (resolveMap == null) {
-                resolveMap = createInitResolveMap();
-            }
-        } else {
-            resolveMap = createInitResolveMap();
+        }
+
+        // 从来源source创建响应模板
+        if (resolveMap == null) {
+            resolveMap = createInitResolveMap(statusCode, source);
         }
 
         Map<String, Object> result = new HashMap<>();
@@ -324,12 +323,14 @@ public class UniformHandler extends ResponseEntityExceptionHandler {
     }
 
     @NotNull
-    private static Map<String, Object> createInitResolveMap() {
+    private static Map<String, Object> createInitResolveMap(int statusCode, Map<String, Object> source) {
         Map<String, Object> resolveMap = new HashMap<>(8);
         resolveMap.put(YmlResponseOutput.STATUS, HttpStatus.OK.value());
-        resolveMap.put(YmlResponseOutput.CODE, "0");
-        resolveMap.put(YmlResponseOutput.MESSAGE, "");
-        resolveMap.put(YmlResponseOutput.DATA, Collections.emptyMap());
+        resolveMap.put(YmlResponseOutput.CODE, source.get(YmlResponseOutput.CODE));
+        resolveMap.put(YmlResponseOutput.MESSAGE, source.get(YmlResponseOutput.MESSAGE));
+        if (HttpStatus.OK.value() == statusCode) {
+            resolveMap.put(YmlResponseOutput.DATA, Collections.emptyMap());
+        }
         return resolveMap;
     }
 
@@ -342,7 +343,7 @@ public class UniformHandler extends ResponseEntityExceptionHandler {
      * @since 3.15.0
      */
     public static void matchStatusToWrite(HttpServletResponse response, Integer status, Exception e) throws IOException {
-        response.setStatus(status == null ? REQUEST_BEFORE_EXCEPTION_CODE : status);
+        response.setStatus(status);
         ResultVO<?> source;
         if (e != null) {
             Map<String, Object> exMap = DataTypeConvertUtil.beanToMap(e);

@@ -24,6 +24,8 @@ package com.github.yizzuide.milkomeda.crust.api;
 import com.github.yizzuide.milkomeda.crust.CrustEntity;
 import com.github.yizzuide.milkomeda.crust.CrustStatefulEntity;
 
+import java.util.function.Supplier;
+
 /**
  * The user details describe user login information which needs to limit request to access resource.
  *
@@ -32,6 +34,21 @@ import com.github.yizzuide.milkomeda.crust.CrustStatefulEntity;
  * Create at 2024/01/15 15:24
  */
 public interface UserDetails extends CrustStatefulEntity {
+
+    /**
+     * Create user details from entity.
+     * @param entity     entity
+     * @param tokenRandProvider token random supplier
+     * @return user details
+     */
+    static UserDetails from(CrustEntity entity, Supplier<String> tokenRandProvider) {
+        CrustApiUserInfo<CrustEntity> userInfo = new CrustApiUserInfo<>();
+        userInfo.setUid(entity.getUid());
+        userInfo.setUsername(entity.getUsername());
+        userInfo.setTokenRand(tokenRandProvider.get());
+        userInfo.setEntity(entity);
+        return new CrustApiUserDetails(userInfo);
+    }
 
     /**
      * Get login user info.
