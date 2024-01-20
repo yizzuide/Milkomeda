@@ -22,29 +22,54 @@
 package com.github.yizzuide.milkomeda.hydrogen.uniform;
 
 import lombok.Data;
+import org.springframework.util.CollectionUtils;
 
 import java.util.List;
+import java.util.function.Function;
 
 /**
  * Page data for {@link UniformResult}.
  *
  * @since 3.14.0
+ * @version 4.0.0
  * @author yizzuide
  * <br>
  * Create at 2022/10/29 19:35
  */
 @Data
 public class UniformPage<T> {
+
     /**
      * Record row total size.
      */
     private Long totalSize;
+
     /**
      * Total number of pages.
      */
     private Long pageCount;
+
     /**
      * Record rows list.
      */
     private List<T> list;
+
+    /**
+     * Convert to a new UniformPage with the specified VO type.
+     * @param uniformPage   page result
+     * @param converter     convert from entity to VO
+     * @return  UniformPage
+     * @param <T> entity type
+     * @param <V> vo type
+     * @since 4.0.0
+     */
+    public static <T, V> UniformPage<V> convert(UniformPage<T> uniformPage, Function<T, V> converter) {
+        UniformPage<V> cloneUniformPage = new UniformPage<>();
+        cloneUniformPage.setTotalSize(uniformPage.getTotalSize());
+        cloneUniformPage.setPageCount(uniformPage.getPageCount());
+        if (!CollectionUtils.isEmpty(uniformPage.getList())) {
+            cloneUniformPage.setList(uniformPage.getList().stream().map(converter).toList());
+        }
+        return cloneUniformPage;
+    }
 }
