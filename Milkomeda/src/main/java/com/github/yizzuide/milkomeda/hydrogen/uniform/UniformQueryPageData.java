@@ -54,15 +54,15 @@ public class UniformQueryPageData<T> extends UniformQueryData<T> {
     private Integer order;
 
     /**
-     * 从Command查询页转换
-     * @param queryPageData Command查询页
-     * @param converter     Command 转 Entity
-     * @return  Entity查询页
-     * @param <T>   Entity类型
-     * @param <C>   Command类型
+     * Convert query to the entity of page query.
+     * @param queryPageData page query data
+     * @param converter     query to entity
+     * @return  UniformQueryPageData
+     * @param <T>   entity type
+     * @param <Q>   query type
      * @since 4.0.0
      */
-    public static <T, C> UniformQueryPageData<T> convert(UniformQueryPageData<C> queryPageData, Function<C, T> converter) {
+    public static <T, Q> UniformQueryPageData<T> convert(UniformQueryPageData<Q> queryPageData, Function<Q, T> converter) {
         UniformQueryPageData<T> cloneQueryPageData = new UniformQueryPageData<>();
         cloneQueryPageData.setPageStart(queryPageData.getPageStart());
         cloneQueryPageData.setPageSize(queryPageData.getPageSize());

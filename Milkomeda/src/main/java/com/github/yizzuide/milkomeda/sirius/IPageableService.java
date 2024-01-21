@@ -27,55 +27,55 @@ public interface IPageableService<T> extends IService<T> {
     String DEFAULT_GROUP = "default";
 
     /**
-     * Query page data with command.
+     * Query page data with the query.
      * @param pageableService   pageable service
-     * @param queryPageData     UniformQueryPageData with a command type
-     * @param command2EntityConverter   command to entity converter
-     * @param entity2VoConverter        entity to vo converter
+     * @param queryPageData     page query data
+     * @param query2EntityConverter   query to entity converter
+     * @param entity2VoConverter      entity to vo converter
      * @return UniformPage
      * @param <T>   entity type
-     * @param <C>   command type
+     * @param <Q>   query type
      * @param <V>   vo type
      * @since 4.0.0
      */
-    static <T, C, V> UniformPage<V> selectByPage(IPageableService<T> pageableService, UniformQueryPageData<C> queryPageData, Function<C, T> command2EntityConverter, Function<T, V> entity2VoConverter) {
-        return selectByPage(pageableService, queryPageData, DEFAULT_GROUP, command2EntityConverter, entity2VoConverter);
+    static <T, Q, V> UniformPage<V> selectByPage(IPageableService<T> pageableService, UniformQueryPageData<Q> queryPageData, Function<Q, T> query2EntityConverter, Function<T, V> entity2VoConverter) {
+        return selectByPage(pageableService, queryPageData, DEFAULT_GROUP, query2EntityConverter, entity2VoConverter);
     }
 
     /**
-     * Query page data with command.
+     * Query page data with the query.
      * @param pageableService   pageable service
-     * @param queryPageData     UniformQueryPageData with a command type
+     * @param queryPageData     page query data
      * @param group             match group name
-     * @param command2EntityConverter   command to entity converter
-     * @param entity2VoConverter        entity to vo converter
+     * @param query2EntityConverter   query to entity converter
+     * @param entity2VoConverter      entity to vo converter
      * @return UniformPage
      * @param <T>   entity type
-     * @param <C>   command type
+     * @param <Q>   query type
      * @param <V>   vo type
      * @since 4.0.0
      */
-    static <T, C, V> UniformPage<V> selectByPage(IPageableService<T> pageableService, UniformQueryPageData<C> queryPageData, String group, Function<C, T> command2EntityConverter, Function<T, V> entity2VoConverter) {
-        return selectByPage(pageableService, queryPageData, null, group, command2EntityConverter, entity2VoConverter);
+    static <T, Q, V> UniformPage<V> selectByPage(IPageableService<T> pageableService, UniformQueryPageData<Q> queryPageData, String group, Function<Q, T> query2EntityConverter, Function<T, V> entity2VoConverter) {
+        return selectByPage(pageableService, queryPageData, null, group, query2EntityConverter, entity2VoConverter);
     }
 
     /**
-     * Query page data with command.
+     * Query page data with the query.
      * @param pageableService   pageable service
-     * @param queryPageData     UniformQueryPageData with a command type
+     * @param queryPageData     page query data
      * @param queryMatchData    match data
      * @param group             match group name
-     * @param command2EntityConverter   command to entity converter
-     * @param entity2VoConverter        entity to vo converter
+     * @param query2EntityConverter   query to entity converter
+     * @param entity2VoConverter      entity to vo converter
      * @return UniformPage
      * @param <T>   entity type
-     * @param <C>   command type
+     * @param <Q>   query type
      * @param <V>   vo type
      * @since 4.0.0
      */
-    static <T, C, V> UniformPage<V> selectByPage(IPageableService<T> pageableService, UniformQueryPageData<C> queryPageData, Map<String, Object> queryMatchData, String group, Function<C, T> command2EntityConverter, Function<T, V> entity2VoConverter) {
+    static <T, Q, V> UniformPage<V> selectByPage(IPageableService<T> pageableService, UniformQueryPageData<Q> queryPageData, Map<String, Object> queryMatchData, String group, Function<Q, T> query2EntityConverter, Function<T, V> entity2VoConverter) {
         return UniformPage.convert(pageableService.selectByPage(
-                UniformQueryPageData.convert(queryPageData, command2EntityConverter),
+                UniformQueryPageData.convert(queryPageData, query2EntityConverter),
                 queryMatchData,
                 group
         ), entity2VoConverter);

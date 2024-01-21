@@ -21,14 +21,12 @@
 
 package com.github.yizzuide.milkomeda.crust;
 
-import com.github.yizzuide.milkomeda.light.Cache;
-import com.github.yizzuide.milkomeda.light.CacheHelper;
-import com.github.yizzuide.milkomeda.light.LightCacheEvict;
-import com.github.yizzuide.milkomeda.light.LightCacheable;
+import com.github.yizzuide.milkomeda.light.*;
 import com.github.yizzuide.milkomeda.universe.context.AopContextHolder;
 import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import com.github.yizzuide.milkomeda.universe.context.WebContext;
 import com.github.yizzuide.milkomeda.util.StringExtensionsKt;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -51,6 +49,7 @@ import org.springframework.util.StringUtils;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Supplier;
 
 /**
@@ -65,6 +64,8 @@ import java.util.function.Supplier;
 @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 @Slf4j
 public class Crust extends AbstractCrust {
+
+    public static final String LIGHT_CONTEXT_ID = "CrustLightContext";
 
     /**
      * 用户信息缓存前辍
@@ -84,6 +85,13 @@ public class Crust extends AbstractCrust {
     private CrustTokenResolver tokenResolver;
 
     private CrustUserDetailsService crustUserDetailsService;
+
+    private boolean needSuperCache = false;
+
+    @PostConstruct
+    public void init() {
+        needSuperCache = props.isStateless() && !props.isEnableCache();
+    }
 
     @NonNull
     public <T extends CrustEntity> CrustUserInfo<T, CrustPermission> login(@NonNull String account, @NonNull String credentials, @NonNull Class<T> entityClazz) {
@@ -142,8 +150,13 @@ public class Crust extends AbstractCrust {
             roleIds = CollectionUtils.isEmpty(roleIdList) ? null : StringUtils.arrayToCommaDelimitedString(roleIdList.toArray());
         }
         String token = tokenResolver.generate(userInfo, roleIds);
-        // help cache the auth info，that synchronize with the expired token.
-        AopContextHolder.self(this.getClass()).getAuthInfoFromToken(token);
+        if (props.isEnableCache()) {
+            // help cache the auth info，that synchronize with the expired token.
+            AopContextHolder.self(this.getClass()).getAuthInfoFromToken(token);
+        }
+        if (needSuperCache) {
+            LightContext.setValue(userInfo, LIGHT_CONTEXT_ID);
+        }
         return userInfo;
     }
 
@@ -182,6 +195,10 @@ public class Crust extends AbstractCrust {
             throw new CrustException("authentication is null");
         }
 
+        if (needSuperCache) {
+            return Objects.requireNonNull(LightContext.getValue(LIGHT_CONTEXT_ID));
+        }
+
         // Token方式 || Session方式无超级缓存
         if (props.isStateless() || !getProps().isEnableCache()) {
             CrustUserInfo<T, CrustPermission> userInfo = getCurrentLoginUserInfo(authentication, entityClazz);
@@ -211,7 +228,15 @@ public class Crust extends AbstractCrust {
             return getCurrentLoginUserInfo(authentication, null);
         }
         // invoke from CrustAuthenticationFilter.doFilterInternal()
-        CrustUserInfo userInfo = tokenResolver.resolve(token, this::loadEntity);
+        CrustUserInfo userInfo;
+        try {
+            userInfo = tokenResolver.resolve(token, this::loadEntity);
+            if (needSuperCache) {
+                LightContext.setValue(userInfo, LIGHT_CONTEXT_ID);
+            }
+        } catch (Exception e) {
+            return null;
+        }
         if (userInfo == null) {
             return null;
         }
@@ -256,10 +281,12 @@ public class Crust extends AbstractCrust {
             CrustUserInfo<?, CrustPermission> loginUserInfo = getCurrentLoginUserInfo(getAuthentication(), null);
             String token = getToken(false);
             refreshedToken = tokenResolver.refresh(token, loginUserInfo);
-            // remove cache (old token with user auth info)
-            AopContextHolder.self(this.getClass()).removeTokenCache(token);
-            // re-cache user auth info with refreshed token, not need to change it.
-            AopContextHolder.self(this.getClass()).getAuthInfoFromToken(refreshedToken);
+            if (props.isEnableCache()) {
+                // remove cache (old token with user auth info)
+                AopContextHolder.self(this.getClass()).removeTokenCache(token);
+                // re-cache user auth info with refreshed token, not need to change it.
+                AopContextHolder.self(this.getClass()).getAuthInfoFromToken(refreshedToken);
+            }
             return loginUserInfo;
         } catch (Exception e) {
             log.warn("Crust refresh token fail with msg: {}", e.getMessage());
@@ -271,8 +298,12 @@ public class Crust extends AbstractCrust {
      * 使登录信息失效
      */
     public void invalidate() {
+        if (needSuperCache) {
+            LightContext.clearValue(LIGHT_CONTEXT_ID);
+            return;
+        }
         // Token方式下开启缓存时清空
-        if (getProps().isStateless()) {
+        if (getProps().isStateless() && getProps().isEnableCache()) {
             String token = getAuthentication() == null ? getToken(false) :
                     getUserInfo(null).getToken();
             if (StringExtensionsKt.isEmpty(token)) {

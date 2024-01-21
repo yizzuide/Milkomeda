@@ -262,7 +262,7 @@ public abstract class CrustConfigurerAdapter {
      */
     protected void doFailure(boolean isAuth, HttpServletRequest request, HttpServletResponse response, RuntimeException exception) throws IOException {
         response.setStatus(isAuth ? HttpStatus.UNAUTHORIZED.value(): HttpStatus.FORBIDDEN.value());
-        ResultVO<?> source = UniformResult.error(String.valueOf(response.getStatus()), exception.getMessage());
+        ResultVO<?> source = UniformResult.error(String.valueOf(response.getStatus()), exception == null ? "" : exception.getMessage());
         UniformHandler.matchStatusToWrite(response, source.toMap());
     }
 

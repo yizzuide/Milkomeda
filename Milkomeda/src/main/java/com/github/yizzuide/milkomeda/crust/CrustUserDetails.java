@@ -90,32 +90,32 @@ public class CrustUserDetails implements UserDetails {
 
     @Override
     public boolean isAccountNonExpired() {
-        if (userInfo.getEntity() instanceof CrustStatefulEntity) {
-            return !((CrustStatefulEntity) userInfo.getEntity()).accountExpired();
+        if (userInfo.getEntity() instanceof CrustStatefulEntity entity) {
+            return !entity.accountExpired();
         }
         return true;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        if (userInfo.getEntity() instanceof CrustStatefulEntity) {
-            return !((CrustStatefulEntity) userInfo.getEntity()).accountLocked();
+        if (userInfo.getEntity() instanceof CrustStatefulEntity entity) {
+            return !entity.accountLocked();
         }
         return true;
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        if (userInfo.getEntity() instanceof CrustStatefulEntity) {
-            return !((CrustStatefulEntity) userInfo.getEntity()).credentialsExpired();
+        if (userInfo.getEntity() instanceof CrustStatefulEntity entity) {
+            return !entity.credentialsExpired();
         }
         return true;
     }
 
     @Override
     public boolean isEnabled() {
-        if (userInfo.getEntity() instanceof CrustStatefulEntity) {
-            return ((CrustStatefulEntity) userInfo.getEntity()).enabled();
+        if (userInfo.getEntity() instanceof CrustStatefulEntity entity) {
+            return entity.enabled();
         }
         return true;
     }
