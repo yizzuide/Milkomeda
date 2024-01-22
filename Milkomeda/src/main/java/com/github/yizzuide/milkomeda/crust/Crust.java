@@ -68,7 +68,7 @@ public class Crust extends AbstractCrust {
     public static final String LIGHT_CONTEXT_ID = "CrustLightContext";
 
     /**
-     * 用户信息缓存前辍
+     * 用户信息缓存Key前缀
      */
     private static final String CATCH_KEY_PREFIX = "crust:user:";
 
@@ -231,9 +231,6 @@ public class Crust extends AbstractCrust {
         CrustUserInfo userInfo;
         try {
             userInfo = tokenResolver.resolve(token, this::loadEntity);
-            if (needSuperCache) {
-                LightContext.setValue(userInfo, LIGHT_CONTEXT_ID);
-            }
         } catch (Exception e) {
             return null;
         }
@@ -242,6 +239,9 @@ public class Crust extends AbstractCrust {
         }
         // active!
         activeAuthentication(userInfo);
+        if (needSuperCache) {
+            LightContext.setValue(userInfo, LIGHT_CONTEXT_ID);
+        }
         return userInfo;
     }
 
@@ -259,7 +259,7 @@ public class Crust extends AbstractCrust {
     void activeAuthentication(CrustUserInfo userInfo) {
         // has find perms from cache?
         List permissionList = userInfo.getPermissionList();
-        CrustPerm crustPerm = permissionList == null ? getCrustUserDetailsService().findPermissionsById(userInfo.getUid()) :
+        CrustPerm crustPerm = permissionList == null ? getCrustUserDetailsService().findPermissions(userInfo) :
                 CrustPerm.builder().permissionList(permissionList).build();
         List<GrantedAuthority> authorities = null;
         if (crustPerm != null) {
@@ -298,10 +298,6 @@ public class Crust extends AbstractCrust {
      * 使登录信息失效
      */
     public void invalidate() {
-        if (needSuperCache) {
-            LightContext.clearValue(LIGHT_CONTEXT_ID);
-            return;
-        }
         // Token方式下开启缓存时清空
         if (getProps().isStateless() && getProps().isEnableCache()) {
             String token = getAuthentication() == null ? getToken(false) :
@@ -310,6 +306,16 @@ public class Crust extends AbstractCrust {
                 throw new InsufficientAuthenticationException("Token is not exists.");
             }
             AopContextHolder.self(this.getClass()).removeTokenCache(token);
+        }
+    }
+
+    /**
+     * Clear super cache in thread local scope.
+     * @since 4.0.0
+     */
+    void clear() {
+        if (needSuperCache) {
+            LightContext.clearValue(LIGHT_CONTEXT_ID);
         }
     }
 
@@ -339,7 +345,7 @@ public class Crust extends AbstractCrust {
     public String getToken(boolean checkIsExists) {
         if (!props.isStateless()) { return null; }
         String token = super.getToken(checkIsExists);
-        if (token == null || props.isCacheInMemory()) {
+        if (token == null || props.getCache().isOnlyCacheL1()) {
             return token;
         }
         if (checkIsExists && props.isEnableCache()) {

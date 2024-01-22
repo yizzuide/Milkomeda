@@ -150,7 +150,7 @@ public class LightCache implements Cache {
             return;
         }
         // 如果一级缓存没有数据，创建新的缓存数据对象
-        if (cacheMap.size() == 0) {
+        if (cacheMap.isEmpty()) {
             superCache.setId(id);
             return;
         }
@@ -161,7 +161,7 @@ public class LightCache implements Cache {
                 .filter(spot -> spot.getView().equals(id))
                 .findFirst();
         // 没找到，创建新的缓存数据对象
-        if (!viableSpot.isPresent()) {
+        if (viableSpot.isEmpty()) {
             superCache.setId(id);
             return;
         }
@@ -265,10 +265,10 @@ public class LightCache implements Cache {
         boolean isAbandon = discardStrategy.ascend(spot);
         // 缓存被识别为过期，使缓存失效
         if (isAbandon) {
-            if (!onlyCacheL1) {
+            /*if (!onlyCacheL1) {
                 // 从二级缓存移除
                 RedisPolyfill.redisDelete(stringRedisTemplate, key);
-            }
+            }*/
             return false;
         }
 

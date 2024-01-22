@@ -22,8 +22,10 @@
 package com.github.yizzuide.milkomeda.crust;
 
 import com.github.yizzuide.milkomeda.crust.api.EnableCrustApi;
+import com.github.yizzuide.milkomeda.light.LightProperties;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.boot.convert.DurationUnit;
 
 import java.time.Duration;
@@ -81,16 +83,17 @@ public class CrustProperties {
     private boolean useAutoConfig = true;
 
     /**
-     * Set false if you use stateless token (not supported with {@link EnableCrustApi}). <br>
+     * Set false if you don't need to cache (not supported with {@link EnableCrustApi}). <br>
      * Note：In Session mode, only the super cache is enabled because the Session itself has Session scope cache.
      */
     private boolean enableCache = true;
 
     /**
-     * Set true if cache only used memory (not supported with {@link EnableCrustApi}). <br>
-     * Note：Memory caches take up a lot of memory, you must be careful with it.
+     * Set light cache properties.
+     * @since 4.0.0
      */
-    private boolean cacheInMemory = false;
+    @NestedConfigurationProperty
+    private LightProperties cache = new LightProperties();
 
     /**
      * Set false if you need to get entity of user info immediately (not supported with {@link EnableCrustApi}).

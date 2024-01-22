@@ -124,7 +124,7 @@ public class CrustAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
         chain.doFilter(request, response);
-        crust.invalidate();
+        crust.clear();
         // Next clear `SecurityContext` within `SecurityContextHolderFilter`
     }
 

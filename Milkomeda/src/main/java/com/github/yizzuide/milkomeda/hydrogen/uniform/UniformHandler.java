@@ -294,8 +294,8 @@ public class UniformHandler extends ResponseEntityExceptionHandler {
         Map<String, Object> result = new HashMap<>();
         // status == 200?
         if (statusCode == HttpStatus.OK.value()) {
-            YmlParser.parseAliasMapPath(resolveMap, result, YmlResponseOutput.CODE, null, source);
-            YmlParser.parseAliasMapPath(resolveMap, result, YmlResponseOutput.MESSAGE, null, source);
+            YmlParser.parseAliasMapPath(resolveMap, result, YmlResponseOutput.CODE, UniformHolder.getProps().getDefaultSuccessCode(), source);
+            YmlParser.parseAliasMapPath(resolveMap, result, YmlResponseOutput.MESSAGE, "OK", source);
             YmlParser.parseAliasMapPath(resolveMap, result, YmlResponseOutput.DATA, null, source);
             resultFilter(result);
         } else { // status != 200
