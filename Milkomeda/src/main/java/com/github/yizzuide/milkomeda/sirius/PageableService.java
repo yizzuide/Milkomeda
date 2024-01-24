@@ -34,6 +34,7 @@ import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.*;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -219,20 +220,24 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
             // 添加linker字段
             includeColumns.addAll(linkerFields.stream().map(field -> findColumnName(tableInfo, field.getName())).collect(Collectors.toSet()));
         }
+
+        Predicate<TableFieldInfo> selectFieldPredicate = fi -> {
+            if (excludeColumns.contains(fi.getColumn())) {
+                return false;
+            }
+            return includeColumns.contains(fi.getColumn());
+        };
         if (!includeColumns.isEmpty() || !excludeColumns.isEmpty()) {
-            queryWrapper.select(getEntityClass(), fi -> {
-                if (excludeColumns.contains(fi.getColumn())) {
-                    return false;
-                }
-                return includeColumns.contains(fi.getColumn());
-            });
+            queryWrapper.select(getEntityClass(), selectFieldPredicate);
         }
 
         UniformPage<T> uniformPage = new UniformPage<>();
         List<T> records;
         // 如果页记录数为-1，则不分页
         if (page.getSize() == -1) {
+            queryWrapper.select(tableInfo.getKeyColumn());
             Long totalSize = this.baseMapper.selectCount(queryWrapper);
+            queryWrapper.select(getEntityClass(), selectFieldPredicate);
             records = this.baseMapper.selectList(queryWrapper);
             uniformPage.setTotalSize(totalSize);
             uniformPage.setPageCount(1L);
@@ -358,7 +363,7 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
                             String selectTopColumnName = findColumnName(linkTableInfo, selectTopFieldName);
                             // 如果设置为-1，则为倒序
                             linkQueryWrapper.orderBy(true, linkSelectTop != -1, selectTopColumnName);
-                            linkEntityList = List.of(linkMapper.selectOne(linkQueryWrapper));
+                            linkEntityList = linkMapper.selectList(linkQueryWrapper);
                         }
                         linkEntityListCacheMap.put(linkMapperClassName, linkEntityList);
                     }

@@ -21,18 +21,19 @@
 
 package com.github.yizzuide.milkomeda.comet.core;
 
+import com.github.yizzuide.milkomeda.util.IdGenerator;
+import jakarta.servlet.*;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.util.WebUtils;
 
-import jakarta.servlet.*;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**
- * CometRequestFilter
  * 请求过滤器
  *
  * @see org.springframework.web.filter.CharacterEncodingFilter
@@ -45,6 +46,8 @@ import java.io.IOException;
  */
 @Slf4j
 public class CometRequestFilter implements Filter {
+
+    private static final String COMET_REQ_ID = "COMET.REQ_ID";
 
     @Override
     public void init(FilterConfig filterConfig) {
@@ -64,7 +67,9 @@ public class CometRequestFilter implements Filter {
         if (enableAddResponseWrapper) {
             servletResponse = new CometResponseWrapper((HttpServletResponse) servletResponse);
         }
+        MDC.put(COMET_REQ_ID, IdGenerator.genNext32ID());
         filterChain.doFilter(requestWrapper, servletResponse);
+        MDC.remove(COMET_REQ_ID);
         // 更新响应消息体
         if (enableAddResponseWrapper) {
             updateResponse((HttpServletResponse) servletResponse);
