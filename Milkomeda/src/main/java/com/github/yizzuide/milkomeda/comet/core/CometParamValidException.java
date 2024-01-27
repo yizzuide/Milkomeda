@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 yizzuide All rights Reserved.
+ * Copyright (c) 2024 yizzuide All rights Reserved.
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -19,30 +19,22 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.sundial;
+package com.github.yizzuide.milkomeda.comet.core;
 
-import lombok.Data;
+import java.io.Serial;
 
 /**
- * 表达式根对象
+ * {@link CometParam} valid exception.
  *
+ * @since 4.0.0
  * @author yizzuide
- * @since 3.8.0
- * <br>
- * Create at 2020/06/16 14:20
+ * Create at 2024/01/25 22:48
  */
-@Data
-public class ShardingRoot {
-    /**
-     * 表名
-     */
-    private String table;
-    /**
-     * 参数
-     */
-    private Object p;
-    /**
-     * 函数
-     */
-    private ShardingFunction fn;
+public class CometParamValidException extends RuntimeException {
+    @Serial
+    private static final long serialVersionUID = 7537581498126056652L;
+
+    public CometParamValidException(String message) {
+        super(message);
+    }
 }

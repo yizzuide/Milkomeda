@@ -214,7 +214,8 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
                 excludeColumns.add(tableFieldInfo.getColumn());
             }
         }
-        if (!includeColumns.isEmpty()) {
+        boolean hasSelectColumn = !includeColumns.isEmpty();
+        if (hasSelectColumn) {
             // 添加主键字段
             includeColumns.add(tableInfo.getKeyColumn());
             // 添加linker字段
@@ -227,7 +228,7 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
             }
             return includeColumns.contains(fi.getColumn());
         };
-        if (!includeColumns.isEmpty() || !excludeColumns.isEmpty()) {
+        if (hasSelectColumn || !excludeColumns.isEmpty()) {
             queryWrapper.select(getEntityClass(), selectFieldPredicate);
         }
 
@@ -235,9 +236,13 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
         List<T> records;
         // 如果页记录数为-1，则不分页
         if (page.getSize() == -1) {
-            queryWrapper.select(tableInfo.getKeyColumn());
+            if (hasSelectColumn) {
+                queryWrapper.select(tableInfo.getKeyColumn());
+            }
             Long totalSize = this.baseMapper.selectCount(queryWrapper);
-            queryWrapper.select(getEntityClass(), selectFieldPredicate);
+            if (hasSelectColumn) {
+                queryWrapper.select(getEntityClass(), selectFieldPredicate);
+            }
             records = this.baseMapper.selectList(queryWrapper);
             uniformPage.setTotalSize(totalSize);
             uniformPage.setPageCount(1L);
@@ -292,7 +297,7 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
                     } else {
                         Set<Serializable> idValues = records.stream()
                                 .map(e -> (Serializable) tableInfo.getPropertyValue(e, linkerField.getName()))
-                                .filter(val -> !linkerNode.getLinkIdIgnore().equals(val.toString()))
+                                .filter(val -> val != null && !linkerNode.getLinkIdIgnore().equals(val.toString()))
                                 .collect(Collectors.toSet());
                         if (CollectionUtils.isEmpty(idValues)) {
                             continue;

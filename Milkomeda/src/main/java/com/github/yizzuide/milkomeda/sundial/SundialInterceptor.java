@@ -71,7 +71,7 @@ public class SundialInterceptor implements Interceptor {
 
     private final Map<String, Map<String, Method>> cacheMap = new HashMap<>();
 
-    private static final Pattern WHITE_SPACE_BLOCK_PATTERN = Pattern.compile("([\\s]{2,}|[\\t\\r\\n])");
+    private static final Pattern WHITE_SPACE_BLOCK_PATTERN = Pattern.compile("(\\s{2,}|[\\t\\r\\n])");
 
     @Override
     public Object intercept(Invocation invocation) throws Throwable {

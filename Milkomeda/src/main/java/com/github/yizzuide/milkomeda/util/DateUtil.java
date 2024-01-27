@@ -21,7 +21,10 @@
 
 package com.github.yizzuide.milkomeda.util;
 
+import org.apache.commons.lang3.time.DateUtils;
+
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 
 /**
@@ -54,5 +57,13 @@ public class DateUtil {
         } catch (Exception e) {
             return 0;
         }
+    }
+
+    public static int getUnixDay(long unixTime) {
+        return getUnixDay(new Date(unixTime * 1000));
+    }
+
+    public static int getUnixDay(Date date) {
+        return (int) (DateUtils.truncate(date, Calendar.DAY_OF_MONTH).getTime() / 1000);
     }
 }
