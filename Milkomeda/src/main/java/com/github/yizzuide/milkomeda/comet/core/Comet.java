@@ -53,24 +53,21 @@ public @interface Comet {
     String apiCode() default "";
 
     /**
-     * 请求类型（1: 前台请求（默认） 2：第三方服务器推送）
+     * 请求类型（如：1前台请求 2第三方服务器推送）
      * @return String
      */
     String requestType() default "1";
 
     /**
-     * 设置记录数据 prototype（原型）的相应tag，用于分类
+     * 用于匹配处理类型{@link CometData}
      * @return String
      */
     String tag() default "";
 
     /**
-     * 设置记录数据 prototype（原型）如下：
-     * <pre>
-     * 1. CometData类型应该是一个 pojo，需要提供无参构造器
-     * 2. 原则上，一个记录数据原型对应指定一个`tag`
+     * 扩展处理类型{@link CometData}
      * </pre>
-     * @return WebCometData子类型
+     * @return WebCometData
      */
     Class<? extends WebCometData> prototype() default WebCometData.class;
 }

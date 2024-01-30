@@ -50,10 +50,6 @@ public class CometRequestFilter implements Filter {
     private static final String COMET_REQ_ID = "COMET.REQ_ID";
 
     @Override
-    public void init(FilterConfig filterConfig) {
-    }
-
-    @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         // 设置编码，防止Spring MVC注册Filter顺序问题导致乱码问题（目前已经保证Spring Web MVC的CharacterEncodingFilter优先设置）
         // servletRequest.setCharacterEncoding(Charset.defaultCharset().toString());
@@ -67,15 +63,17 @@ public class CometRequestFilter implements Filter {
         if (enableAddResponseWrapper) {
             servletResponse = new CometResponseWrapper((HttpServletResponse) servletResponse);
         }
+        XCometContext.init();
         MDC.put(COMET_REQ_ID, IdGenerator.genNext32ID());
         filterChain.doFilter(requestWrapper, servletResponse);
         MDC.remove(COMET_REQ_ID);
+        XCometContext.clear();
+        // 清空请求参数缓存
+        CometAspect.resolveThreadLocal.remove();
         // 更新响应消息体
         if (enableAddResponseWrapper) {
             updateResponse((HttpServletResponse) servletResponse);
         }
-        // 清空线程数据
-        CometAspect.resolveThreadLocal.remove();
     }
 
     private void updateResponse(HttpServletResponse response) throws IOException {
@@ -84,9 +82,5 @@ public class CometRequestFilter implements Filter {
         Assert.notNull(responseWrapper, "CometResponseWrapper not found");
         // HttpServletResponse rawResponse = (HttpServletResponse) responseWrapper.getResponse();
         responseWrapper.copyBodyToResponse();
-    }
-
-    @Override
-    public void destroy() {
     }
 }

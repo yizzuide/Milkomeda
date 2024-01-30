@@ -329,7 +329,7 @@ public class UniformHandler extends ResponseEntityExceptionHandler {
         resolveMap.put(YmlResponseOutput.CODE, source.get(YmlResponseOutput.CODE));
         resolveMap.put(YmlResponseOutput.MESSAGE, source.get(YmlResponseOutput.MESSAGE));
         if (HttpStatus.OK.value() == statusCode) {
-            resolveMap.put(YmlResponseOutput.DATA, Collections.emptyMap());
+            resolveMap.put(YmlResponseOutput.DATA, null);
         }
         return resolveMap;
     }

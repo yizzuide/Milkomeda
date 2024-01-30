@@ -73,7 +73,7 @@ public class LightContext<ID, V> {
     }
 
     /**
-     * 设置上下文数据
+     * 设置Spot数据
      * @param spot  Spot
      */
     public void set(Spot<ID, V> spot) {
@@ -81,7 +81,7 @@ public class LightContext<ID, V> {
     }
 
     /***
-     * 获取上下文数据
+     * 获取Spot数据
      * @return  Spot
      */
     public Spot<ID, V> get() {

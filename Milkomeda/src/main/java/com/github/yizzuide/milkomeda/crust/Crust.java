@@ -345,12 +345,13 @@ public class Crust extends AbstractCrust {
     public String getToken(boolean checkIsExists) {
         if (!props.isStateless()) { return null; }
         String token = super.getToken(checkIsExists);
-        if (token == null || props.getCache().isOnlyCacheL1()) {
+        if (token == null) {
             return token;
         }
         if (checkIsExists && props.isEnableCache()) {
-            String cacheKey = CATCH_KEY_PREFIX + DigestUtils.md5DigestAsHex(token.getBytes());
-            if (!crustLightCache.isCacheL2Exists(cacheKey)) {
+            String cacheL1key = DigestUtils.md5DigestAsHex(token.getBytes());
+            String cacheL2Key = CATCH_KEY_PREFIX + cacheL1key;
+            if (!crustLightCache.isCacheL1Exists(cacheL1key) && !crustLightCache.isCacheL2Exists(cacheL2Key)) {
                 return null;
             }
         }

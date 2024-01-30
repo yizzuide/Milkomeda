@@ -23,12 +23,15 @@ package com.github.yizzuide.milkomeda.comet.core;
 
 import com.github.yizzuide.milkomeda.util.JSONUtil;
 import com.github.yizzuide.milkomeda.util.NetworkUtil;
+import com.github.yizzuide.milkomeda.util.ReflectUtil;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 
 import jakarta.servlet.http.HttpServletRequest;
+
+import java.io.Serial;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
@@ -38,7 +41,7 @@ import java.util.Map;
  *
  * @author yizzuide
  * @since 1.12.0
- * @version 3.0.0
+ * @version 4.0.0
  * <br>
  * Create at 2019/04/11 19:32
  */
@@ -47,43 +50,53 @@ import java.util.Map;
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true, exclude = {"requestHeaders", "deviceInfo"})
 public class WebCometData extends CometData {
+    @Serial
     private static final long serialVersionUID = -2078666744044889106L;
-    /**
-     * 请求标识码
-     */
-    private String apiCode;
+
     /**
      * 请求类型 1: 前台请求（默认） 2：第三方服务器推送
      */
     private String requestType;
+
     /**
      * 请求 URL
      */
     private String requestURL;
+
     /**
      * 请求路径
      */
     private String requestPath;
+
     /**
      * 请求方式
      */
     private String requestMethod;
+
     /**
      * 请求参数（使用SpringMVC开发的接口同时支持form表单数据和自定义消息体数据）
      */
     private String requestParams;
+
     /**
      * 请求头
      */
     private String requestHeaders;
+
     /**
      * 请求 IP
      */
     private String requestIP;
+
     /**
      * 请求客户端信息（请求头：user-agent）
      */
     private String deviceInfo;
+
+    /**
+     * 服务器地址
+     */
+    private String host;
 
     /**
      * 根据请求创建
@@ -93,13 +106,7 @@ public class WebCometData extends CometData {
      * @return  WebCometData
      */
     public static WebCometData createFormRequest(HttpServletRequest request, Class<? extends WebCometData> prototype,  boolean readRequestBody) {
-        WebCometData cometData;
-        try {
-            cometData = prototype == null ? new WebCometData() : prototype.newInstance();
-        } catch (Exception e) {
-            log.error("Comet create WebCometData error with msg: {}", e.getMessage(), e);
-            throw new IllegalArgumentException("Comet create WebCometData from prototype: " + prototype + " error");
-        }
+        WebCometData cometData = prototype == null ? new WebCometData() : ReflectUtil.newNonNullInstance(prototype);
         cometData.setRequestURL(request.getRequestURL().toString());
         cometData.setRequestPath(request.getRequestURI());
         cometData.setRequestMethod(request.getMethod());

@@ -22,6 +22,9 @@
 package com.github.yizzuide.milkomeda.particle;
 
 import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
+import com.github.yizzuide.milkomeda.universe.engine.el.ELContext;
+import com.github.yizzuide.milkomeda.util.ReflectUtil;
+import com.github.yizzuide.milkomeda.util.StringExtensionsKt;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -29,9 +32,6 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.core.annotation.Order;
-import com.github.yizzuide.milkomeda.util.StringExtensionsKt;
-
-import static com.github.yizzuide.milkomeda.util.ReflectUtil.*;
 
 /**
  * ParticleAspect
@@ -53,7 +53,7 @@ public class ParticleAspect {
 
     @Around("particlePointCut()")
     public Object doAround(ProceedingJoinPoint joinPoint) throws Throwable {
-        val limit = getAnnotation(joinPoint, Limit.class);
+        val limit = ReflectUtil.getAnnotation(joinPoint, Limit.class);
         String beanName = limit.limiterBeanName();
         String prefix = limit.name();
         String key = limit.key();
@@ -61,11 +61,11 @@ public class ParticleAspect {
             throw new IllegalArgumentException("You must set key for use Limit.");
         }
         // 解析表达式
-        key = extractValue(joinPoint, key);
+        key = ELContext.getValue(joinPoint, key);
         Limiter limiter = !StringExtensionsKt.isEmpty(beanName) ? ApplicationContextHolder.get().getBean(beanName, Limiter.class)
                 : ApplicationContextHolder.get().getBean(limit.limiterBeanClass());
         String decorateKey = StringExtensionsKt.isEmpty(prefix) ? key : prefix + ":" + key;
         return limiter.limit(decorateKey, (particle ->
-                joinPoint.proceed(injectParam(joinPoint, particle, limit, true))));
+                joinPoint.proceed(ReflectUtil.injectParam(joinPoint, particle, limit, true))));
     }
 }

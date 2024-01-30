@@ -25,12 +25,15 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.io.Serial;
+import java.io.Serializable;
+import java.util.Map;
 
 /**
- * XCometData
+ * Comet log for business transaction.
  *
  * @author yizzuide
  * @since 1.12.0
+ * @version 4.0.0
  * <br>
  * Create at 2019/09/21 10:55
  */
@@ -39,4 +42,53 @@ import java.io.Serial;
 public class XCometData extends CometData {
     @Serial
     private static final long serialVersionUID = 6781190633733977589L;
+
+    /**
+     * CometX DDD event action.
+     */
+    public static final String ACTION = "COMET_X_ACTION";
+
+    /**
+     * Subject id related to the execute method.
+     */
+    private Serializable subjectId = 0;
+
+    /**
+     * Who execute the method.
+     */
+    private Serializable operator = 0;
+
+    /**
+     * Record info after method execute success.
+     */
+    private String successInfo;
+
+    /**
+     * Other details useful info
+     */
+    private String detailInfo;
+
+    /**
+     * The method return value.
+     */
+    private transient Object result;
+
+    /**
+     * The method context variables.
+     */
+    private transient Map<String, Object> variables;
+
+    public Long getSubjectIdLong() {
+        if (this.subjectId instanceof Long) {
+            return (Long) this.subjectId;
+        }
+        return Long.valueOf(this.subjectId.toString());
+    }
+
+    public Long getOperatorLong() {
+        if (this.operator instanceof Long) {
+            return (Long) this.operator;
+        }
+        return Long.valueOf(this.operator.toString());
+    }
 }

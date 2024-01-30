@@ -21,17 +21,24 @@
 
 package com.github.yizzuide.milkomeda.universe.engine.el;
 
+import com.github.yizzuide.milkomeda.comet.core.XCometContext;
+import com.github.yizzuide.milkomeda.comet.core.XCometData;
 import com.github.yizzuide.milkomeda.metal.MetalHolder;
 import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import com.github.yizzuide.milkomeda.universe.context.WebContext;
 import com.github.yizzuide.milkomeda.universe.extend.env.Environment;
+import com.github.yizzuide.milkomeda.util.DateUtil;
 import org.springframework.context.expression.CachedExpressionEvaluator;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.expression.Expression;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -44,6 +51,11 @@ import java.util.concurrent.ConcurrentHashMap;
  * Create at 2022/12/24 19:58
  */
 public abstract class AbstractExpressionEvaluator extends CachedExpressionEvaluator {
+    /**
+     * EL表达式匹配前缀
+     */
+    private static final List<String> EL_START_TOKENS = Arrays.asList("'", "@", "#", "T(", "root.", "args[", "true", "false");
+
     /**
      * 共享的参数名，基于内部缓存数据
      */
@@ -78,5 +90,36 @@ public abstract class AbstractExpressionEvaluator extends CachedExpressionEvalua
             evaluationContext.setVariable("request", requestAttributes.getRequest());
             evaluationContext.setVariable("reqParams", requestAttributes.getRequest().getParameterMap());
         }
+        // XComet上下文：#ret、#fail、#xxx
+        XCometData cometData = XCometContext.peek();
+        if (cometData != null) {
+            evaluationContext.setVariable("ret", cometData.getResult());
+            if (cometData.getFailure() != null) {
+                evaluationContext.setVariable("fail", cometData.getFailure().getMessage());
+            }
+            if (cometData.getVariables() != null) {
+                Map<String, Object> variables = cometData.getVariables();
+                if (!CollectionUtils.isEmpty(variables)) {
+                    for (Map.Entry<String, Object> entry : variables.entrySet()) {
+                        evaluationContext.setVariable(entry.getKey(), entry.getValue());
+                    }
+                }
+            }
+        }
+        // 添加自定义函数
+        try {
+            Method add = DateUtil.class.getDeclaredMethod("getUnixTime");
+            evaluationContext.registerFunction("now", add);
+        } catch (Exception ignore) {}
+    }
+
+    /**
+     * Match the Spring EL.
+     * @param expression    EL表达式
+     * @return true is matched
+     * @since 4.0.0
+     */
+    protected boolean match(String expression) {
+        return EL_START_TOKENS.stream().anyMatch(expression::startsWith);
     }
 }

@@ -289,9 +289,9 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
                     }
                     BaseMapper linkMapper = SiriusInspector.getMapper(linkerNode.getLinkEntityType());
                     List<?> linkEntityList;
-                    String linkMapperClassName = linkMapper.getClass().getName();
                     // get link entity table info
                     TableInfo linkTableInfo = TableInfoHelper.getTableInfo(linkerNode.getLinkEntityType());
+                    String linkMapperClassName = linkTableInfo.getCurrentNamespace();
                     if (linkEntityListCacheMap.containsKey(linkMapperClassName)) {
                         linkEntityList = linkEntityListCacheMap.get(linkMapperClassName);
                     } else {

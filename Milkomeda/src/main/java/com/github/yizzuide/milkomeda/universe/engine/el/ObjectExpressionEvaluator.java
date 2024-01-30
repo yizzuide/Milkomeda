@@ -28,7 +28,7 @@ import org.springframework.context.expression.BeanFactoryResolver;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 /**
- * Object based expression evaluator.
+ * Spring EL expression evaluator.
  *
  * @since 3.15.0
  * @author yizzuide

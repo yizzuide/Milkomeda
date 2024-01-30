@@ -26,6 +26,8 @@ import com.github.yizzuide.milkomeda.util.ReflectUtil;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.aopalliance.intercept.MethodInvocation;
+import org.springframework.aop.support.AopUtils;
+import org.springframework.core.ResolvableType;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.CollectionUtils;
@@ -42,7 +44,7 @@ import java.util.concurrent.Future;
  * @see org.springframework.transaction.interceptor.TransactionAspectSupport
  * @author yizzuide
  * @since 3.3.0
- * @version 3.11.4
+ * @version 4.0.0
  * <br>
  * Create at 2020/05/05 14:30
  */
@@ -126,7 +128,11 @@ public class WormholeEventBus {
         // write event data into infrastructure
         if (trackers != null) {
             for (WormholeEventTrack<WormholeEvent<?>> tracker : trackers) {
-                tracker.track(event);
+                Class<?> trackerClass = AopUtils.isAopProxy(tracker) ? AopUtils.getTargetClass(tracker) : tracker.getClass();
+                Class<?> declaredType = ResolvableType.forClass(trackerClass).getInterfaces()[0].getGeneric(0).getGeneric(0).resolve();
+                if (declaredType != null && event.getData().getClass().isAssignableFrom(declaredType)) {
+                    tracker.track(event);
+                }
             }
         }
     }

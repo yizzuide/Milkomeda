@@ -158,7 +158,7 @@ public class CrustUserInfo<T, P> implements Serializable {
         }
         if (this.entity instanceof Map) {
             if (this.getEntityClass() == null) {
-                return this.entity;
+                throw new IllegalStateException("Can not find entity class");
             }
             this.entity = (T) JSONUtil.parse(JSONUtil.serialize(this.entity), this.getEntityClass());
         }

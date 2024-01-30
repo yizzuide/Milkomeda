@@ -29,6 +29,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -87,15 +88,9 @@ public class YmlResponseOutput {
         if (e != null && !customException) {
             // 自定义异常栈的详情值从内部异常解析出来，不需要默认值，不指定不会返回
             YmlParser.parseAliasMapPath(nodeMap, result, ERROR_STACK_MSG, null, e.getMessage());
-            StackTraceElement[] stackTrace = e.getStackTrace();
-            if (stackTrace.length > 0) {
-                StringBuilder errorStack = new StringBuilder("exception thrown at: ");
-                for (int i = 0; i < 3; i++) {
-                    errorStack.append(String.format("%s ", stackTrace[i]));
-                }
-                errorStack.append("omit...");
-                YmlParser.parseAliasMapPath(nodeMap, result, ERROR_STACK, null, errorStack.toString());
-            }
+            List<StackTraceElement> stackTraceElements = Arrays.stream(e.getStackTrace()).limit(5).toList();
+            String errorStack = org.apache.commons.lang3.StringUtils.join(stackTraceElements, '\n');
+            YmlParser.parseAliasMapPath(nodeMap, result, ERROR_STACK, null, errorStack);
         }
         // 附加字段写出
         Object addition = nodeMap.get(ADDITION);

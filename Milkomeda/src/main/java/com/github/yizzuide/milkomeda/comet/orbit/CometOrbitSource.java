@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 yizzuide All rights Reserved.
+ * Copyright (c) 2024 yizzuide All rights Reserved.
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -19,34 +19,29 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.demo.wormhole.appearance.controller;
+package com.github.yizzuide.milkomeda.comet.orbit;
 
-import com.github.yizzuide.milkomeda.demo.wormhole.appearance.command.AuditCommand;
-import com.github.yizzuide.milkomeda.demo.wormhole.application.service.CreditApplicationService;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import com.github.yizzuide.milkomeda.comet.core.CometX;
+import com.github.yizzuide.milkomeda.orbit.AnnotationOrbitAdvisor;
+import com.github.yizzuide.milkomeda.orbit.OrbitAdvisor;
+import com.github.yizzuide.milkomeda.orbit.OrbitSource;
+import com.github.yizzuide.milkomeda.orbit.OrbitSourceProvider;
+import org.springframework.core.env.Environment;
 
-import jakarta.annotation.Resource;
+import java.util.Collections;
+import java.util.List;
 
 /**
- * AuditController
- * 领域适配器
+ * Provide {@link OrbitAdvisor} for Orbit module to register advisor.
  *
+ * @since 4.0.0
  * @author yizzuide
- * <br>
- * Create at 2020/05/05 15:36
+ * Create at 2024/01/28 13:42
  */
-@RestController
-@RequestMapping("audit")
-public class AuditController {
-
-    @Resource
-    private CreditApplicationService creditApplicationService;
-
-    // http://localhost:8091/audit/callback?callbackId=123&orderId=12432434&state=0
-    @RequestMapping("callback")
-    public Object audit(AuditCommand auditCommand) {
-        creditApplicationService.audit(auditCommand);
-        return "OK";
+@OrbitSourceProvider
+public class CometOrbitSource implements OrbitSource {
+    @Override
+    public List<OrbitAdvisor> createAdvisors(Environment environment) {
+        return Collections.singletonList(AnnotationOrbitAdvisor.forMethod(CometX.class, "cometX", CometXOrbitAdvice.class, null));
     }
 }

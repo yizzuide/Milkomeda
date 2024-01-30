@@ -22,6 +22,8 @@
 package com.github.yizzuide.milkomeda.pulsar;
 
 import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
+import com.github.yizzuide.milkomeda.universe.engine.el.ELContext;
+import com.github.yizzuide.milkomeda.util.ReflectUtil;
 import com.github.yizzuide.milkomeda.util.StringExtensionsKt;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.jdbc.Null;
@@ -44,8 +46,6 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
-
-import static com.github.yizzuide.milkomeda.util.ReflectUtil.*;
 
 /**
  * Pulsar
@@ -176,7 +176,7 @@ public class Pulsar implements ApplicationListener<ApplicationStartedEvent> {
         }
 
         // 获取注解信息
-        PulsarFlow pulsarFlow = getAnnotation(joinPoint, PulsarFlow.class);
+        PulsarFlow pulsarFlow = ReflectUtil.getAnnotation(joinPoint, PulsarFlow.class);
 
         // 如果没有设置DeferredResult，则使用WebAsyncTask
         if (!pulsarFlow.useDeferredResult()) {
@@ -208,14 +208,14 @@ public class Pulsar implements ApplicationListener<ApplicationStartedEvent> {
         String idValue = null;
         if (!StringExtensionsKt.isEmpty(id)) {
             // 解析表达式
-            idValue = extractValue(joinPoint, id);
+            idValue = ELContext.getValue(joinPoint, id);
             pulsarDeferredResult.setDeferredResultID(idValue);
             // 注解设置成功，放入容器
             putDeferredResult(pulsarDeferredResult);
         }
 
         // 调用方法实现
-        Object returnObj = joinPoint.proceed(injectParam(joinPoint, pulsarDeferredResult, pulsarFlow,
+        Object returnObj = joinPoint.proceed(ReflectUtil.injectParam(joinPoint, pulsarDeferredResult, pulsarFlow,
                 StringExtensionsKt.isEmpty(idValue)));
 
         // 方法有返回值且不是DeferredResult，则不作DeferredResult处理

@@ -22,7 +22,7 @@
 package com.github.yizzuide.milkomeda.universe.engine.el;
 
 /**
- * Simple object based impl of El parser.
+ * The Spring EL parser that can run independently.
  *
  * @since 3.8.0
  * @version 3.15.0
@@ -36,10 +36,10 @@ public class SimpleElParser {
 
     /**
      * Parse spring EL expression and return value.
-     * @param expression  EL expression
-     * @param object    root object
+     * @param expression    EL expression
+     * @param object        root object
      * @param resultType    result class type
-     * @return  value of result type
+     * @return  expression resolve result
      * @param <T>   result type
      */
     public static <T> T parse(String expression, Object object, Class<T> resultType) {

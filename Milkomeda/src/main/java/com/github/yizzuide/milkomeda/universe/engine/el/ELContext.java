@@ -21,6 +21,7 @@
 
 package com.github.yizzuide.milkomeda.universe.engine.el;
 
+import com.github.yizzuide.milkomeda.orbit.OrbitInvocation;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.context.ApplicationContext;
@@ -31,16 +32,19 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 import java.lang.reflect.Method;
 
 /**
- * Method based SpEL context.
+ * Method-based SpEL context.
  *
  * @author yizzuide
  * @since 2.0.0
- * @version 2.4.0
+ * @version 4.0.0
  * <br>
  * Create at 2019/12/20 12:05
  */
 public class ELContext {
-    // Bean工厂解析器
+
+    /**
+     *  Bean工厂解析器
+     */
     private static BeanFactoryResolver beanFactoryResolver;
 
     /**
@@ -57,31 +61,31 @@ public class ELContext {
 
     /**
      * 根据方法切面，获取EL表达式的真实类型值
-     * @param joinPoint         切面连接点
-     * @param condition         el条件表达式
-     * @param desiredResultType 返回类型
+     * @param joinPoint     切面连接点
+     * @param condition     el条件表达式
+     * @param resultType    返回类型
      * @param <T>   返回类型
      * @return  解析的值
      */
-    public static <T> T getActualValue(JoinPoint joinPoint, String condition, Class<T> desiredResultType) {
+    public static <T> T getActualValue(JoinPoint joinPoint, String condition, Class<T> resultType) {
         return getValue(joinPoint.getTarget(), joinPoint.getArgs(),
                 joinPoint.getTarget().getClass(),
-                ((MethodSignature) joinPoint.getSignature()).getMethod(), condition, desiredResultType);
+                ((MethodSignature) joinPoint.getSignature()).getMethod(), condition, resultType);
     }
 
     /**
-     * 根据类的反射信息，获取EL表达式的值
-     * @param object            目标对象
-     * @param args              参数
-     * @param clazz             目标类型
-     * @param method            方法
-     * @param condition         el条件表达式
-     * @param desiredResultType 返回类型
+     * 获取EL表达式的值
+     * @param object        目标对象
+     * @param args          参数
+     * @param clazz         目标类型
+     * @param method        方法
+     * @param condition     el条件表达式
+     * @param resultType    返回类型
      * @param <T>   返回类型
      * @return  解析的值
      */
     public static <T> T getValue(Object object, Object[] args, Class<?> clazz, Method method,
-                                  String condition, Class<T> desiredResultType) {
+                                  String condition, Class<T> resultType) {
         if (args == null) {
             return null;
         }
@@ -93,7 +97,21 @@ public class ELContext {
         // 设置Bean工厂解析器
         evaluationContext.setBeanResolver(beanFactoryResolver);
         AnnotatedElementKey methodKey = new AnnotatedElementKey(method, clazz);
-        return evaluator.condition(condition, methodKey, evaluationContext, desiredResultType);
+        return evaluator.condition(condition, methodKey, evaluationContext, resultType);
+    }
+
+    /**
+     * 获取EL表达式的值
+     * @param object        目标对象
+     * @param invocation    OrbitInvocation
+     * @param condition     el条件表达式
+     * @param resultType    返回类型
+     * @param <T>   返回类型
+     * @return  解析的值
+     * @since 4.0.0
+     */
+    public static <T> T getValue(Object object, OrbitInvocation invocation, String condition, Class<T> resultType) {
+        return getValue(object, invocation.getArgs(), invocation.getTargetClass(), invocation.getMethod(), condition, resultType);
     }
 
     /**

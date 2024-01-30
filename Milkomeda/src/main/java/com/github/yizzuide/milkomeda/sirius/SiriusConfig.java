@@ -310,8 +310,7 @@ public class SiriusConfig {
                 propKey = "withInsertFill";
                 fillFields = this.getInsertFields();
             }
-            if (target instanceof TableInfo) {
-                TableInfo tableInfo = (TableInfo) target;
+            if (target instanceof TableInfo tableInfo) {
                 for (TableFieldInfo fieldInfo: tableInfo.getFieldList()) {
                     if (fillFields.contains(fieldInfo.getProperty())) {
                         Map<String, Object> props = new HashMap<>();
@@ -328,10 +327,6 @@ public class SiriusConfig {
                     ReflectUtil.setField(target, props);
                 }
             }
-        }
-
-        public SiriusProperties getProps() {
-            return props;
         }
     }
 }

@@ -70,16 +70,20 @@ public class MethodExpressionEvaluator<T> extends AbstractExpressionEvaluator {
 
     /**
      * 根据指定的条件表达式获取值
-     * @param conditionExpression   条件表达式
-     * @param elementKey            元素key
-     * @param evalContext           上下文
-     * @param clazz                 值类型
+     * @param expression        条件表达式
+     * @param elementKey        元素key
+     * @param evaluationContext 上下文
+     * @param resultType        值类型
      * @return  解析出来的值
      */
-    public T condition(String conditionExpression, AnnotatedElementKey elementKey,
-                       EvaluationContext evalContext, Class<T> clazz) {
-        return getExpression(this.expressionKeyCache, elementKey, conditionExpression)
-                .getValue(evalContext, clazz);
+    @SuppressWarnings("unchecked")
+    public T condition(String expression, AnnotatedElementKey elementKey,
+                       EvaluationContext evaluationContext, Class<T> resultType) {
+        if (match(expression)) {
+            return getExpression(this.expressionKeyCache, elementKey, expression)
+                    .getValue(evaluationContext, resultType);
+        }
+        return (T) expression;
     }
 
     /**
@@ -106,11 +110,11 @@ public class MethodExpressionEvaluator<T> extends AbstractExpressionEvaluator {
     @Data
     static class MethodBasedRootObject {
         /**
-         * The root object is current method's target object.
+         * The root object is the method's target object.
          */
         private Object root;
         /**
-         * The args is current method invoked.
+         * The args is the method invoked.
          */
         private Object[] args;
     }

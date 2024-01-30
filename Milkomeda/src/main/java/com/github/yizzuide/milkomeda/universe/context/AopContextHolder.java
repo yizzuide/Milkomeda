@@ -24,7 +24,6 @@ package com.github.yizzuide.milkomeda.universe.context;
 import com.github.yizzuide.milkomeda.comet.core.CometAspect;
 import com.github.yizzuide.milkomeda.comet.core.CometInterceptor;
 import com.github.yizzuide.milkomeda.comet.core.WebCometData;
-import com.github.yizzuide.milkomeda.comet.core.XCometData;
 import org.springframework.aop.framework.AopContext;
 
 /**
@@ -77,14 +76,5 @@ public final class AopContextHolder {
             return CometAspect.getCurrentWebCometData();
         }
         return webCometData;
-    }
-
-    /**
-     * 获取服务层采集数据
-     *
-     * @return XCometData
-     */
-    public static XCometData getXCometData() {
-        return CometAspect.getCurrentXCometData();
     }
 }

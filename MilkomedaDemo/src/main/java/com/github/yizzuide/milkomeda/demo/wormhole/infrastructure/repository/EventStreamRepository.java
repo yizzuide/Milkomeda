@@ -21,10 +21,12 @@
 
 package com.github.yizzuide.milkomeda.demo.wormhole.infrastructure.repository;
 
+import com.github.yizzuide.milkomeda.demo.wormhole.domain.model.Credit;
 import com.github.yizzuide.milkomeda.wormhole.WormholeEvent;
 import com.github.yizzuide.milkomeda.wormhole.WormholeEventTracker;
 import com.github.yizzuide.milkomeda.wormhole.WormholeEventTrack;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
 
 /**
  * EventStreamRepository
@@ -36,9 +38,10 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 @WormholeEventTracker
-public class EventStreamRepository implements WormholeEventTrack<WormholeEvent<?>> {
+public class EventStreamRepository implements WormholeEventTrack<WormholeEvent<Credit>> {
+    @Async
     @Override
-    public void track(WormholeEvent<?> event) {
+    public void track(WormholeEvent<Credit> event) {
       log.info("存储事件到大数据流：{}", event);
     }
 }
