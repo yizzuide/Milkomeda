@@ -45,6 +45,21 @@ public class CometData implements Serializable {
     private static final long serialVersionUID = -8296355140769902642L;
 
     /**
+     * 前端请求类型
+     */
+    public static final int REQ_TYPE_FRONT = 1;
+
+    /**
+     * 后台系统请求类型
+     */
+    public static final int REQ_TYPE_BACK = 2;
+
+    /**
+     * 第三方服务请求类型
+     */
+    public static final int REQ_TYPE_THIRD = 3;
+
+    /**
      * 记录名
      */
     private String name;
@@ -68,6 +83,11 @@ public class CometData implements Serializable {
      * 执行的方法
      */
     private String execMethod;
+
+    /**
+     * 请求类型（1前端 2后台系统 3第三方服务器推送）
+     */
+    private Integer requestType;
 
     /**
      * 请求时间

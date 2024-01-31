@@ -54,11 +54,6 @@ public class WebCometData extends CometData {
     private static final long serialVersionUID = -2078666744044889106L;
 
     /**
-     * 请求类型 1: 前台请求（默认） 2：第三方服务器推送
-     */
-    private String requestType;
-
-    /**
      * 请求 URL
      */
     private String requestURL;

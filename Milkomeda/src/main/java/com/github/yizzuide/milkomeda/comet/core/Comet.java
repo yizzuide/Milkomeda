@@ -53,10 +53,10 @@ public @interface Comet {
     String apiCode() default "";
 
     /**
-     * 请求类型（如：1前台请求 2第三方服务器推送）
+     * 请求类型（1前端 2后台系统 3第三方服务器推送）
      * @return String
      */
-    String requestType() default "1";
+    int requestType() default 1;
 
     /**
      * 用于匹配处理类型{@link CometData}

@@ -28,17 +28,19 @@ import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import com.github.yizzuide.milkomeda.universe.context.WebContext;
 import com.github.yizzuide.milkomeda.universe.extend.env.Environment;
 import com.github.yizzuide.milkomeda.util.DateUtil;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.expression.AnnotatedElementKey;
+import org.springframework.context.expression.BeanFactoryResolver;
 import org.springframework.context.expression.CachedExpressionEvaluator;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.ParameterNameDiscoverer;
+import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -46,15 +48,12 @@ import java.util.concurrent.ConcurrentHashMap;
  * Abstract cached expression evaluator.
  *
  * @since 3.15.0
+ * @version 4.0.0
  * @author yizzuide
  * <br>
  * Create at 2022/12/24 19:58
  */
 public abstract class AbstractExpressionEvaluator extends CachedExpressionEvaluator {
-    /**
-     * EL表达式匹配前缀
-     */
-    private static final List<String> EL_START_TOKENS = Arrays.asList("'", "@", "#", "T(", "root.", "args[", "true", "false");
 
     /**
      * 共享的参数名，基于内部缓存数据
@@ -67,11 +66,49 @@ public abstract class AbstractExpressionEvaluator extends CachedExpressionEvalua
     protected final Map<CachedExpressionEvaluator.ExpressionKey, Expression> expressionKeyCache = new ConcurrentHashMap<>(64);
 
     /**
+     * Parse Spring EL with {@link EvaluateSource} and result type.
+     * @param expression    Spring EL
+     * @param source        context source
+     * @param resultType    result type
+     * @return  the parsed value
+     * @param <T> result type
+     * @since 4.0.0
+     */
+    public <T> T condition(String expression, EvaluateSource source, Class<T> resultType) {
+        AnnotatedElementKey elementKey;
+        // 基于目标对象的
+        if (source.getMethod() == null) {
+            elementKey = new AnnotatedElementKey(source.getTarget().getClass(), null);
+        } else {
+            elementKey = new AnnotatedElementKey(source.getMethod(), source.getTargetClass());
+        }
+        StandardEvaluationContext evaluationContext = createEvaluationContext(source);
+        // 注入变量
+        configContext(evaluationContext, source.getTarget());
+        return getExpression(this.expressionKeyCache, elementKey, expression)
+                .getValue(evaluationContext, resultType);
+    }
+
+    /**
+     * Create instance of {@link EvaluationContext}.
+     * @param source context source
+     * @return  EvaluationContext
+     * @since 4.0.0
+     */
+    protected abstract StandardEvaluationContext createEvaluationContext(EvaluateSource source);
+
+    /**
      * Config evaluation context variables.
      * @param evaluationContext StandardEvaluationContext
      * @param root  root object
      */
     protected void configContext(StandardEvaluationContext evaluationContext, Object root) {
+        // BeanFactoryResolver：@bean
+        ApplicationContext beanFactory = ApplicationContextHolder.tryGet();
+        if (beanFactory != null) {
+            BeanFactoryResolver beanFactoryResolver = new BeanFactoryResolver(beanFactory);
+            evaluationContext.setBeanResolver(beanFactoryResolver);
+        }
         // 目标对象：#target
         evaluationContext.setVariable("target", root);
         // 添加变量引用：#env[key]
@@ -111,15 +148,5 @@ public abstract class AbstractExpressionEvaluator extends CachedExpressionEvalua
             Method add = DateUtil.class.getDeclaredMethod("getUnixTime");
             evaluationContext.registerFunction("now", add);
         } catch (Exception ignore) {}
-    }
-
-    /**
-     * Match the Spring EL.
-     * @param expression    EL表达式
-     * @return true is matched
-     * @since 4.0.0
-     */
-    protected boolean match(String expression) {
-        return EL_START_TOKENS.stream().anyMatch(expression::startsWith);
     }
 }

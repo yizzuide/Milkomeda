@@ -25,13 +25,12 @@ package com.github.yizzuide.milkomeda.universe.engine.el;
  * The Spring EL parser that can run independently.
  *
  * @since 3.8.0
- * @version 3.15.0
+ * @version 4.0.0
  * @author yizzuide
  * <br>
  * Create at 2020/06/16 10:25
  */
 public class SimpleElParser {
-
     private static final ObjectExpressionEvaluator EVALUATOR = new ObjectExpressionEvaluator();
 
     /**
@@ -43,6 +42,6 @@ public class SimpleElParser {
      * @param <T>   result type
      */
     public static <T> T parse(String expression, Object object, Class<T> resultType) {
-        return EVALUATOR.condition(expression, object, resultType);
+        return EVALUATOR.condition(expression, EvaluateSource.from(object), resultType);
     }
 }

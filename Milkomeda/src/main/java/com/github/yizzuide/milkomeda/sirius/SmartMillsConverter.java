@@ -29,7 +29,7 @@ import java.util.Collections;
 import java.util.Set;
 
 /**
- * Convert unix timestamp if target type is integer.
+ * Convert unix timestamp if the target type is integer.
  *
  * @since 3.15.0
  * @author yizzuide

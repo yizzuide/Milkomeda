@@ -21,7 +21,6 @@
 
 package com.github.yizzuide.milkomeda.universe.context;
 
-import com.github.yizzuide.milkomeda.universe.engine.el.ELContext;
 import com.github.yizzuide.milkomeda.universe.extend.env.Environment;
 import lombok.Getter;
 import lombok.Setter;
@@ -63,8 +62,6 @@ public class ApplicationContextHolder implements ApplicationContextAware {
     @Override
     public void setApplicationContext(@NonNull ApplicationContext applicationContext) {
         this.applicationContext = applicationContext;
-        // 设置应用上下文到方法EL解析环境
-        ELContext.setApplicationContext(applicationContext);
         if (pendingConfigurableEnvironment != null) {
             ApplicationContextHolder.getEnvironment().setConfigurableEnvironment(pendingConfigurableEnvironment);
             return;

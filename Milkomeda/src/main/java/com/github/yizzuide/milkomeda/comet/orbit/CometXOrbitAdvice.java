@@ -21,10 +21,7 @@
 
 package com.github.yizzuide.milkomeda.comet.orbit;
 
-import com.github.yizzuide.milkomeda.comet.core.CometProperties;
-import com.github.yizzuide.milkomeda.comet.core.CometX;
-import com.github.yizzuide.milkomeda.comet.core.XCometContext;
-import com.github.yizzuide.milkomeda.comet.core.XCometData;
+import com.github.yizzuide.milkomeda.comet.core.*;
 import com.github.yizzuide.milkomeda.crust.CrustContext;
 import com.github.yizzuide.milkomeda.orbit.OrbitAdvice;
 import com.github.yizzuide.milkomeda.orbit.OrbitInvocation;
@@ -64,12 +61,22 @@ public class CometXOrbitAdvice implements OrbitAdvice {
         cometData.setName(cometX.name());
         cometData.setCode(cometX.path());
         cometData.setTag(cometX.tag());
-        cometData.setRequestTime(new Date());
         cometData.setClazzName(invocation.getTargetClass().getName());
         cometData.setExecMethod(invocation.getMethod().getName());
-        if (CrustContext.get() != null) {
-            cometData.setOperator(CrustContext.getUserInfo().getUid());
+        if (CrustContext.get() != null && CrustContext.get().hasAuthenticated()) {
+            try {
+                cometData.setRequestType(CrustContext.usedAPI() ? CometData.REQ_TYPE_FRONT : CometData.REQ_TYPE_BACK);
+                cometData.setOperator(CrustContext.getUserInfo().getUid());
+            } catch (Exception e) {
+                log.warn("Can't set operator because of the login context is null");
+            }
         }
+        XCometData prevCometData = XCometContext.peek();
+        Date startDate = new Date();
+        if (prevCometData != null) {
+            startDate = new Date(prevCometData.getRequestTime().getTime() + 1000L);
+        }
+        cometData.setRequestTime(startDate);
         XCometContext.push(cometData);
 
         Object result = null;
@@ -85,10 +92,10 @@ public class CometXOrbitAdvice implements OrbitAdvice {
             cometData.setTraceStack(org.apache.commons.lang3.StringUtils.join(stackTraceElements, '\n'));
         }
 
-        Date now = new Date();
-        long duration = now.getTime() - cometData.getRequestTime().getTime();
+        Date endDate = new Date();
+        long duration = endDate.getTime() - startDate.getTime();
         cometData.setDuration(duration);
-        cometData.setResponseTime(now);
+        cometData.setResponseTime(endDate);
         cometData.setResult(result);
         if (cometData.getFailure() != null) {
             cometData.setStatus(props.getStatusFailCode());

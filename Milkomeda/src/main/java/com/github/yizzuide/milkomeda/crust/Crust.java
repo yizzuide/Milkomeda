@@ -57,7 +57,7 @@ import java.util.function.Supplier;
  *
  * @author yizzuide
  * @since 1.14.0
- * @version 3.15.0
+ * @version 4.0.0
  * <br>
  * Create at 2019/11/11 15:48
  */
@@ -185,7 +185,7 @@ public class Crust extends AbstractCrust {
 
     @Override
     public boolean hasAuthenticated() {
-        return getAuthentication() != null;
+        return getAuthentication() != null && getAuthentication().isAuthenticated();
     }
 
     @NonNull

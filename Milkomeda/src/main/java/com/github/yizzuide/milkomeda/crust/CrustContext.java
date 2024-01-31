@@ -21,6 +21,7 @@
 
 package com.github.yizzuide.milkomeda.crust;
 
+import com.github.yizzuide.milkomeda.crust.api.CrustApi;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
@@ -49,6 +50,15 @@ public class CrustContext {
 
     public static Crust getDefault() {
         return (Crust) INSTANCE;
+    }
+
+    /**
+     * Whether used in API service.
+     * @return true is used in API service
+     * @since 4.0.0
+     */
+    public static boolean usedAPI() {
+        return get() instanceof CrustApi;
     }
 
     /**
