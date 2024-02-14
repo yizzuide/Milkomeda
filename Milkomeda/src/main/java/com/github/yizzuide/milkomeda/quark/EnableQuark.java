@@ -21,7 +21,6 @@
 
 package com.github.yizzuide.milkomeda.quark;
 
-import com.github.yizzuide.milkomeda.neutron.NeutronConfig;
 import org.springframework.context.annotation.Import;
 
 import java.lang.annotation.*;
@@ -37,6 +36,6 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE})
 @Inherited
-@Import(NeutronConfig.class)
+@Import(QuarkConfig.class)
 public @interface EnableQuark {
 }

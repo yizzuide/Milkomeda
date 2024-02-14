@@ -29,6 +29,7 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.boot.context.properties.bind.BindResult;
 import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.context.annotation.AnnotationBeanNameGenerator;
 import org.springframework.core.env.ConfigurableEnvironment;
@@ -44,6 +45,7 @@ import java.util.List;
  * @see org.springframework.beans.factory.config.BeanFactoryPostProcessor
  * @see org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor
  * @since 3.15.0
+ * @version 4.0.0
  * @author yizzuide
  * <br>
  * Create at 2023/04/27 20:44
@@ -63,7 +65,11 @@ public class EarlyLoadBeanDefinitionRegistryPostProcessor implements BeanDefinit
         // 加载其它配置的早期注册的Bean
         ConfigurableEnvironment configurableEnvironment = ApplicationContextHolder.getPendingConfigurableEnvironment();
         if(configurableEnvironment != null) {
-            MilkomedaProperties milkomedaProperties = Binder.get(configurableEnvironment).bind(MilkomedaProperties.PREFIX, MilkomedaProperties.class).get();
+            BindResult<MilkomedaProperties> bindResult = Binder.get(configurableEnvironment).bind(MilkomedaProperties.PREFIX, MilkomedaProperties.class);
+            if (!bindResult.isBound()) {
+                return;
+            }
+            MilkomedaProperties milkomedaProperties = bindResult.get();
             List<Class<?>> earlyRegisterBeans = milkomedaProperties.getRegisterEarlyBeans();
             if (CollectionUtils.isEmpty(earlyRegisterBeans)) {
                 return;

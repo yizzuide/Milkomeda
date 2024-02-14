@@ -22,7 +22,7 @@
 package com.github.yizzuide.milkomeda.universe.parser.placeholder;
 
 import com.github.yizzuide.milkomeda.util.ReflectUtil;
-import com.github.yizzuide.milkomeda.util.Strings;
+import com.github.yizzuide.milkomeda.util.StringExtensionsKt;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.util.PropertyPlaceholderHelper;
@@ -187,7 +187,7 @@ public class PlaceholderExtractor extends PropertyPlaceholderHelper {
      * @return   替换完成后的字符串
      */
     public String replacePlaceholders(String value, final Map<String, Object> valueMap) {
-        return replacePlaceholders(value, placeholderName -> Strings.toNullableString(valueMap.get(placeholderName)) , false);
+        return replacePlaceholders(value, placeholderName -> StringExtensionsKt.toNullableString(valueMap.get(placeholderName)) , false);
     }
 
     /**

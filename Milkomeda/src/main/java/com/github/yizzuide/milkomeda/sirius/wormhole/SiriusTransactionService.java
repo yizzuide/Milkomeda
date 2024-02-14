@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 yizzuide All rights Reserved.
+ * Copyright (c) 2023 yizzuide All rights Reserved.
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -19,24 +19,35 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.crust;
+package com.github.yizzuide.milkomeda.sirius.wormhole;
 
-import org.springframework.context.annotation.Import;
-
-import java.lang.annotation.*;
+import com.github.yizzuide.milkomeda.wormhole.TransactionService;
+import com.github.yizzuide.milkomeda.wormhole.TransactionWorkBus;
+import lombok.Getter;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * Enable crust used in microservice that not need spring security environment, it just parses token to login info.
+ * Mybatis plus extend of service which provide {@link TransactionWorkBus}.
+ *
+ * @param <R> the repository type
  *
  * @since 3.15.0
+ * @version 4.0.0
  * @author yizzuide
- * <br>
- * Create at 2022/12/07 00:09
+ * Create at 2023/07/14 03:48
  */
-@Import(CrustMicroConfig.class)
-@Target({ElementType.TYPE})
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
-@Inherited
-public @interface EnableCrustMicro {
+@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
+@Getter
+public class SiriusTransactionService<R> implements TransactionService<R> {
+
+    /**
+     * Link {@link TransactionWorkBus} belong this service.
+     */
+    @Autowired
+    protected TransactionWorkBus transactionWorkBus;
+
+    @Override
+    public R getRepositoryProxy() {
+        return null;
+    }
 }

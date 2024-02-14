@@ -21,7 +21,7 @@
 
 package com.github.yizzuide.milkomeda.comet.core;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * CometRecorder

@@ -24,6 +24,10 @@ package com.github.yizzuide.milkomeda.crust;
 import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import io.jsonwebtoken.ClaimJwtException;
 import io.jsonwebtoken.lang.Assert;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.lang.NonNull;
@@ -39,10 +43,6 @@ import org.springframework.security.web.util.matcher.RequestHeaderRequestMatcher
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -50,15 +50,16 @@ import java.util.List;
 /**
  * Parse token to authentication filter.
  *
+ * @see org.springframework.security.authentication.dao.AbstractUserDetailsAuthenticationProvider
  * @see org.springframework.security.web.context.SecurityContextHolderFilter
  * @see org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
  * @see org.springframework.security.web.authentication.www.BasicAuthenticationFilter
  * @see org.springframework.security.web.authentication.AnonymousAuthenticationFilter
  * @see org.springframework.security.web.access.ExceptionTranslationFilter
- * @see org.springframework.security.web.access.intercept.FilterSecurityInterceptor
+ * @see org.springframework.security.web.access.intercept.AuthorizationFilter
  * @author yizzuide
  * @since 1.14.0
- * @version 3.12.9
+ * @version 4.0.0
  * <br>
  * Create at 2019/11/11 17:52
  */
@@ -66,8 +67,11 @@ import java.util.List;
 public class CrustAuthenticationFilter extends OncePerRequestFilter {
 
     private final RequestMatcher requiresAuthenticationRequestMatcher;
+
     private List<RequestMatcher> permissiveRequestMatchers;
+
     private AuthenticationSuccessHandler successHandler = new SavedRequestAwareAuthenticationSuccessHandler();
+
     private AuthenticationFailureHandler failureHandler = new SimpleUrlAuthenticationFailureHandler();
 
     CrustAuthenticationFilter() {
@@ -87,7 +91,7 @@ public class CrustAuthenticationFilter extends OncePerRequestFilter {
 
         CrustUserInfo authResult = null;
         AuthenticationException failed = null;
-        Crust crust = CrustContext.get();
+        Crust crust = CrustContext.getDefault();
         // check request header has token
         if (!requiresAuthentication(request, response)) {
             failed = new InsufficientAuthenticationException("Required token is not set.");
@@ -120,6 +124,7 @@ public class CrustAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
         chain.doFilter(request, response);
+        crust.clear();
         // Next clear `SecurityContext` within `SecurityContextHolderFilter`
     }
 

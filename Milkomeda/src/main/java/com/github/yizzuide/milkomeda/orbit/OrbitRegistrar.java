@@ -26,6 +26,7 @@ import com.github.yizzuide.milkomeda.util.ReflectUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.boot.context.properties.bind.BindResult;
 import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -46,7 +47,7 @@ import java.util.Map;
  * @see org.springframework.aop.aspectj.AspectJExpressionPointcutAdvisor
  * @see org.springframework.beans.factory.config.BeanPostProcessor
  * @since 3.13.0
- * @version 3.15.0
+ * @version 4.0.0
  * @author yizzuide
  * <br>
  * Create at 2022/02/21 01:14
@@ -69,9 +70,10 @@ public class OrbitRegistrar implements ImportBeanDefinitionRegistrar {
         List<OrbitAdvisor> orbitAdvisors = new ArrayList<>();
         // 1.YAML配置方式
         OrbitProperties orbitProperties;
-        try {
-            orbitProperties = Binder.get(this.environment).bind(OrbitProperties.PREFIX, OrbitProperties.class).get();
-        } catch (Exception ignore) {
+        BindResult<OrbitProperties> bindResult = Binder.get(this.environment).bind(OrbitProperties.PREFIX, OrbitProperties.class);
+        if (bindResult.isBound()) {
+            orbitProperties = bindResult.get();
+        } else {
             // 没用配置过Orbit，创建默认配置
             orbitProperties = new OrbitProperties();
         }

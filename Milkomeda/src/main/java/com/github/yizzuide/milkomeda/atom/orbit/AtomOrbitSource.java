@@ -38,6 +38,7 @@ import java.util.List;
  * Provide {@link OrbitAdvisor} for Orbit module to register advisor.
  *
  * @since 3.15.0
+ * @version 4.0.0
  * @author yizzuide
  * <br>
  * Create at 2023/01/27 19:34
@@ -46,14 +47,10 @@ import java.util.List;
 public class AtomOrbitSource implements OrbitSource {
     @Override
     public List<OrbitAdvisor> createAdvisors(Environment environment) {
-        try {
-            // 根据配置文件是否加载来判断当前模块是否加载
-            BindResult<AtomProperties> bindResult = Binder.get(environment).bind(AtomProperties.PREFIX, AtomProperties.class);
-            if (bindResult == null) {
-                return null;
-            }
-        } catch (Exception ignore) {
-            return null;
+        // 根据配置文件是否加载来判断当前模块是否加载
+        BindResult<AtomProperties> bindResult = Binder.get(environment).bind(AtomProperties.PREFIX, AtomProperties.class);
+        if (!bindResult.isBound()) {
+            return Collections.emptyList();
         }
         return Collections.singletonList(AnnotationOrbitAdvisor.forMethod(AtomLock.class, "atom", AtomOrbitAdvice.class, null));
     }

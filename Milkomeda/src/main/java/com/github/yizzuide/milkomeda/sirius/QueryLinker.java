@@ -77,5 +77,5 @@ public @interface QueryLinker {
      * Bind conditions in query group.
      * @return  group name
      */
-    String[] group() default { "default" };
+    String[] group() default { IPageableService.DEFAULT_GROUP };
 }

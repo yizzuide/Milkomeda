@@ -22,11 +22,11 @@
 package com.github.yizzuide.milkomeda.demo.wormhole.appearance.controller;
 
 import com.github.yizzuide.milkomeda.demo.wormhole.appearance.command.AuditCommand;
-import com.github.yizzuide.milkomeda.demo.wormhole.application.CreditApplicationService;
+import com.github.yizzuide.milkomeda.demo.wormhole.application.service.CreditApplicationService;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 /**
  * AuditController

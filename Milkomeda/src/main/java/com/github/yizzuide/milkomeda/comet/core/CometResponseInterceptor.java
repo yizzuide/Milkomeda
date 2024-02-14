@@ -25,7 +25,7 @@ import com.github.yizzuide.milkomeda.universe.extend.web.handler.NamedHandler;
 import com.mongodb.lang.Nullable;
 import org.springframework.util.FastByteArrayOutputStream;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * Comet response wrapper interceptor.

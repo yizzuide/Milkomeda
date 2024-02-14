@@ -30,7 +30,7 @@ import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import java.util.Map;
 
 /**
- * AspectJ impl of orbit advisor metadata which support set pointcut expression.
+ * AspectJ impl of orbit advisor metadata, which support set pointcut expression.
  *
  * @see org.springframework.aop.aspectj.AspectJExpressionPointcut
  * @since 3.15.0

@@ -36,6 +36,7 @@ import com.github.yizzuide.milkomeda.util.DataTypeConvertUtil;
 import com.github.yizzuide.milkomeda.util.JSONUtil;
 import com.github.yizzuide.milkomeda.util.NetworkUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -44,18 +45,15 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.http.MediaType;
 import org.springframework.lang.NonNull;
 import org.springframework.util.CollectionUtils;
-import com.github.yizzuide.milkomeda.util.Strings;
+import com.github.yizzuide.milkomeda.util.StringExtensionsKt;
 import org.springframework.web.servlet.AsyncHandlerInterceptor;
 import org.springframework.web.util.WebUtils;
 
-import javax.annotation.PostConstruct;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.annotation.PostConstruct;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.nio.charset.StandardCharsets;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -178,7 +176,7 @@ public class CometInterceptor implements AsyncHandlerInterceptor, ApplicationCon
                     WebUtils.getNativeResponse(response, CometResponseWrapper.class);
             if (responseWrapper != null) {
                 String content = new String(responseWrapper.getContentAsByteArray(), StandardCharsets.UTF_8);
-                if (!Strings.isEmpty(content)) {
+                if (!StringExtensionsKt.isEmpty(content)) {
                     String contentType = responseWrapper.getResponse().getContentType();
                     // JSON -> Map
                     if (contentType != null && contentType.startsWith(MediaType.APPLICATION_JSON_VALUE)) {
@@ -206,7 +204,7 @@ public class CometInterceptor implements AsyncHandlerInterceptor, ApplicationCon
         CometData cometData = threadLocal.get();
         Date now = new Date();
         long duration = now.getTime() - cometData.getRequestTime().getTime();
-        cometData.setDuration(String.valueOf(duration));
+        cometData.setDuration(duration);
         cometData.setResponseTime(now);
         String tag = cometData.getTag();
         TagCollector tagCollector = tagCollectorMap.get(tag);
@@ -216,11 +214,8 @@ public class CometInterceptor implements AsyncHandlerInterceptor, ApplicationCon
             cometData.setStatus(cometProperties.getStatusFailCode());
             cometData.setResponseData(null);
             cometData.setErrorInfo(ex.getMessage());
-            StackTraceElement[] stackTrace = ex.getStackTrace();
-            if (stackTrace.length > 0) {
-                String errorStack = String.format("exception happened: %s \n invoke root: %s", stackTrace[0], stackTrace[stackTrace.length - 1]);
-                cometData.setTraceStack(errorStack);
-            }
+            List<StackTraceElement> stackTraceElements = Arrays.stream(ex.getStackTrace()).limit(5).toList();
+            cometData.setTraceStack(StringUtils.join(stackTraceElements, '\n'));
             tagCollector.onFailure(cometData);
             threadLocal.remove();
             return;
@@ -230,12 +225,11 @@ public class CometInterceptor implements AsyncHandlerInterceptor, ApplicationCon
         Exception failure = cometData.getFailure();
         if (failure != null) {
             cometData.setStatus(cometProperties.getStatusFailCode());
-            cometData.setResponseData(body == null ? null : JSONUtil.serialize(body));
+            cometData.setResponseData(body);
             ex = failure;
             cometData.setErrorInfo(ex.getMessage());
-            StackTraceElement[] stackTrace = ex.getStackTrace();
-            String errorStack = String.format("exception happened: %s \n invoke root: %s", stackTrace[0], stackTrace[stackTrace.length - 1]);
-            cometData.setTraceStack(errorStack);
+            List<StackTraceElement> stackTraceElements = Arrays.stream(ex.getStackTrace()).limit(5).toList();
+            cometData.setTraceStack(StringUtils.join(stackTraceElements, '\n'));
             tagCollector.onFailure(cometData);
             threadLocal.remove();
             return;
@@ -244,7 +238,7 @@ public class CometInterceptor implements AsyncHandlerInterceptor, ApplicationCon
         // 错误的http协议响应状态码
         if (status >= 400) {
             cometData.setStatus(cometProperties.getStatusFailCode());
-            cometData.setResponseData(body == null ? null : JSONUtil.serialize(body));
+            cometData.setResponseData(body);
             tagCollector.onFailure(cometData);
             threadLocal.remove();
             return;
@@ -298,7 +292,7 @@ public class CometInterceptor implements AsyncHandlerInterceptor, ApplicationCon
             tagCollector.onFailure(cometData);
         } else {  // Response OK
             cometData.setStatus(cometProperties.getStatusSuccessCode());
-            cometData.setResponseData(body instanceof String ? body.toString() : JSONUtil.serialize(body));
+            cometData.setResponseData(body);
             tagCollector.onSuccess(cometData);
         }
         threadLocal.remove();
@@ -324,7 +318,6 @@ public class CometInterceptor implements AsyncHandlerInterceptor, ApplicationCon
         Date requestTime = new Date();
         WebCometData cometData = WebCometData.createFormRequest(request,
                 tagMap.get(selectTag).getPrototype(), cometProperties.isEnableReadRequestBody());
-        cometData.setRequest(request);
         cometData.setRequestTime(requestTime);
         String host = NetworkUtil.getHost();
         cometData.setHost(host);
@@ -354,7 +347,7 @@ public class CometInterceptor implements AsyncHandlerInterceptor, ApplicationCon
 
         // 过滤打印策略类型
         List<CometLoggerProperties.Strategy> strategyList = this.strategyList.stream()
-                .filter(s -> s.getType() == type).collect(Collectors.toList());
+                .filter(s -> s.getType() == type).toList();
         if (CollectionUtils.isEmpty(strategyList)) {
             return;
         }

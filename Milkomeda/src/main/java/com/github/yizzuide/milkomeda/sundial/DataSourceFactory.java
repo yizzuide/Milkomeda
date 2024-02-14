@@ -33,8 +33,8 @@ import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
 import org.springframework.lang.NonNull;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
 import javax.sql.DataSource;
 import java.util.Map;
 
@@ -43,6 +43,7 @@ import java.util.Map;
  * 动态创建数据源工厂
  * @author jsq 786063250@qq.com
  * @since 3.4.0
+ * @version 4.0.0
  * <br>
  * Create at 2020/5/8
  */

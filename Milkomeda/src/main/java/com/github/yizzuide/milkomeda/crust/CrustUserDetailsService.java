@@ -33,12 +33,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * CrustUserDetailsService
  * 用户源数据提取服务抽象，需要继承实现从数据源提取数据
  *
  * @author yizzuide
  * @since 1.14.0
- * @version 1.17.3
+ * @version 4.0.0
  * <br>
  * Create at 2019/11/11 18:01
  */
@@ -51,24 +50,23 @@ public abstract class CrustUserDetailsService implements UserDetailsService {
             throw new UsernameNotFoundException("Not found entity with account: " + account);
         }
         CrustUserInfo<CrustEntity, CrustPermission> userInfo = new CrustUserInfo<>();
-        CrustPerm crustPerm = findPermissionsById(entity.getUid());
+        userInfo.setEntity(entity);
+        userInfo.setUid(entity.getUid());
+        userInfo.setUsername(entity.getUsername());
+
+        CrustPerm crustPerm = findPermissions(userInfo);
         List<GrantedAuthority> grantedAuthorities = null;
-        List<Long> roleIds = null;
         if (crustPerm != null) {
             userInfo.setIsAdmin(crustPerm.isAdmin());
             if (!CollectionUtils.isEmpty(crustPerm.getRoleIds())) {
-                roleIds = new ArrayList<>(crustPerm.getRoleIds());
-                userInfo.setRoleIds(roleIds);
+                userInfo.setRoleIds(crustPerm.getRoleIds());
             }
             List<CrustPermission> permissionList = crustPerm.getPermissionList();
             userInfo.setPermissionList(permissionList);
             grantedAuthorities = CrustPerm.buildAuthorities(permissionList);
         }
-        userInfo.setEntity(CrustContext.get().getProps().isEnableLoadEntityLazy() ? null : entity);
-        userInfo.setUid(entity.getUid());
-        userInfo.setUsername(entity.getUsername());
         return new CrustUserDetails(userInfo.getUid(), userInfo.getUsername(), entity.getPassword(),
-                entity.getSalt(), roleIds, grantedAuthorities, userInfo);
+                entity.getSalt(), userInfo.getRoleIds(), grantedAuthorities, userInfo);
     }
 
     /**
@@ -83,11 +81,30 @@ public abstract class CrustUserDetailsService implements UserDetailsService {
     /**
      * 登录时根据用户名查找权限列表（Session + Token）
      *
-     * @param uid  用户id
+     * @param userInfo  filled with simple basic info
      * @return  权限数据
      */
     @Nullable
-    protected abstract CrustPerm findPermissionsById(Serializable uid);
+    protected CrustPerm findPermissions(CrustUserInfo<CrustEntity, CrustPermission> userInfo) {
+        CrustPermDetails crustPermDetails = buildPremDetails();
+        List<Long> roleIds = userInfo.getRoleIds();
+        if (CollectionUtils.isEmpty(roleIds)) {
+            roleIds = new ArrayList<>();
+            crustPermDetails.getRolesCollector().accept(userInfo, roleIds);
+        }
+        List<Long> sysRoleIds = crustPermDetails.getRolesFilter() != null ?
+                crustPermDetails.getRolesFilter().apply(roleIds) : roleIds;
+        boolean isAdmin = crustPermDetails.getAdminRecognizer().apply(sysRoleIds);
+        List<? extends CrustPermission> permissions = crustPermDetails.getPermsCollector().apply(sysRoleIds, isAdmin);
+        return CrustPerm.builder().roleIds(roleIds).admin(isAdmin).permissionList(permissions).build();
+    }
+
+    /**
+     * 登录时根据用户名查找权限明细（Session + Token）
+     * @return CrustPermDetails
+     * @since 4.0.0
+     */
+    protected abstract CrustPermDetails buildPremDetails();
 
     /**
      * 解析Token时根据用户id查找实体（Token）

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 yizzuide All rights Reserved.
+ * Copyright (c) 2024 yizzuide All rights Reserved.
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -19,15 +19,25 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.demo.wormhole.appearance.aciton;
+package com.github.yizzuide.milkomeda.crust.api;
+
+import org.springframework.context.annotation.Import;
+
+import java.lang.annotation.*;
 
 /**
- * 业务流程的事件动作
+ * Enable crust used in api service that not need spring security environment.
  *
+ * @since 3.15.0
+ * @version 4.0.0
  * @author yizzuide
  * <br>
- * Create at 2020/05/05 16:01
+ * Create at 2022/12/07 00:09
  */
-public class Actions {
-    public static final String AUDIT_SUCCESS = "action_credit_audit";
+@Import(CrustApiConfig.class)
+@Target({ElementType.TYPE})
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+@Inherited
+public @interface EnableCrustApi {
 }

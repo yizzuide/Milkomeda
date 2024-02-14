@@ -25,6 +25,9 @@ import com.github.yizzuide.milkomeda.hydrogen.uniform.ResultVO;
 import com.github.yizzuide.milkomeda.hydrogen.uniform.UniformHandler;
 import com.github.yizzuide.milkomeda.hydrogen.uniform.UniformResult;
 import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpMethod;
@@ -34,10 +37,13 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.BeanIds;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -53,14 +59,15 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.servlet.mvc.condition.PathPatternsRequestCondition;
+import org.springframework.web.servlet.mvc.condition.PatternsRequestCondition;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
+import org.springframework.web.util.pattern.PathPattern;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Spring Security config adapter, need impl with {@link org.springframework.context.annotation.Configuration}.
@@ -69,7 +76,7 @@ import java.util.*;
  * @see org.springframework.security.config.annotation.web.configurers.SessionManagementConfigurer
  * @author yizzuide
  * @since 1.14.0
- * @version 3.15.0
+ * @version 4.0.0
  * <br>
  * Create at 2019/11/11 18:25
  */
@@ -126,8 +133,21 @@ public abstract class CrustConfigurerAdapter {
             HandlerMethod handlerMethod = infoEntry.getValue();
             // Has `CrustAnon` annotation on Method？
             CrustAnon crustAnon = handlerMethod.getMethodAnnotation(CrustAnon.class);
-            if (null != crustAnon && null != infoEntry.getKey().getPatternsCondition()) {
-                anonUrls.addAll(infoEntry.getKey().getPatternsCondition().getPatterns());
+            if (null != crustAnon) {
+                Collection<String> requestPatterns = null;
+                PatternsRequestCondition patternsCondition = infoEntry.getKey().getPatternsCondition();
+                if (patternsCondition != null) {
+                    requestPatterns = patternsCondition.getPatterns();
+                }
+                if (requestPatterns == null) {
+                    PathPatternsRequestCondition pathPatternsCondition = infoEntry.getKey().getPathPatternsCondition();
+                    if (pathPatternsCondition != null) {
+                        requestPatterns = pathPatternsCondition.getPatterns().stream().map(PathPattern::getPatternString).collect(Collectors.toSet());
+                    }
+                }
+                if (requestPatterns != null) {
+                    anonUrls.addAll(requestPatterns);
+                }
             }
         }
         if (!CollectionUtils.isEmpty(anonUrls)) {
@@ -136,63 +156,62 @@ public abstract class CrustConfigurerAdapter {
         String[] permitAllMapping = allowURLs.toArray(new String[0]);
         // 通用失败处理器
         DefaultFailureHandler failureHandler = new DefaultFailureHandler(this);
-        http.csrf()
-                .disable()
-                .sessionManagement().sessionCreationPolicy(props.isStateless() ?
-                        SessionCreationPolicy.STATELESS : SessionCreationPolicy.IF_REQUIRED).and()
-                .formLogin().disable()
+        // Spring Boot 3.0：配置方式由方法链改为Spring Security lambda DSL
+        http.csrf(AbstractHttpConfigurer::disable)
+                .sessionManagement(configurer -> configurer.sessionCreationPolicy(props.isStateless() ?
+                        SessionCreationPolicy.STATELESS : SessionCreationPolicy.IF_REQUIRED))
+                .formLogin(AbstractHttpConfigurer::disable)
                 // 支持跨域，从CorsConfigurationSource中取跨域配置
-                .cors()
-                .and()
+                .cors(Customizer.withDefaults())
                 // 禁用iframe跨域
-                .headers()
-                .frameOptions()
-                .disable()
-                .and()
-                .authorizeRequests()
-                // 跨域预检请求
-                .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                // 忽略的请求
-                .antMatchers(permitAllMapping).permitAll()
-                // 其他所有请求需要身份认证
-                .anyRequest().authenticated();
+                .headers(configurer -> configurer.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
+                .authorizeHttpRequests(registry -> registry
+                        // 跨域预检请求
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        // 忽略的请求
+                        .requestMatchers(permitAllMapping).permitAll()
+                        // 其他所有请求需要身份认证
+                        .anyRequest().authenticated()
+                );
+
 
         // 如果是无状态方式
         if (props.isStateless()) {
             allowURLs.add(props.getLoginUrl());
             // 应用Token认证配置器，忽略需要匿名的请求
-            http.apply(new CrustAuthenticationConfigurer<>(() -> failureHandler))
-                    .permissiveRequestUrls(allowURLs.toArray(new String[0]))
-                    .and()
-                    .logout()
-                    .logoutUrl(props.getLogoutUrl())
-                    .addLogoutHandler((req, res, auth) -> CrustContext.invalidate())
-                    .logoutSuccessHandler((req, res, auth) -> {
-                        ResultVO<?> source = UniformResult.ok(null);
-                        UniformHandler.matchStatusToWrite(res, source.toMap());
-                    });
+            http.with(new CrustAuthenticationConfigurer<>(() -> failureHandler), configurer -> configurer.permissiveRequestUrls(allowURLs.toArray(new String[0])))
+                    .logout(configurer -> configurer
+                        .logoutUrl(props.getLogoutUrl())
+                        .addLogoutHandler((req, res, auth) -> CrustContext.invalidate())
+                        .logoutSuccessHandler((req, res, auth) -> {
+                            ResultVO<?> source = UniformResult.ok(null);
+                            UniformHandler.matchStatusToWrite(res, source.toMap());
+                        })
+                    );
         } else {
             // 自定义session方式登录
-            http.httpBasic().authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint(props.getLoginUrl()))
-                    .and()
-                    .sessionManagement()
-                    .sessionFixation().changeSessionId()
-                    .sessionAuthenticationErrorUrl(props.getLoginUrl())
-                    .sessionAuthenticationFailureHandler(failureHandler).and()
-                    .logout()
-                    .logoutUrl(props.getLogoutUrl())
-                    .logoutSuccessUrl(props.getLoginUrl())
-                    .addLogoutHandler((req, res, auth) -> CrustContext.invalidate())
-                    .clearAuthentication(true)
-                    .invalidateHttpSession(true);
+            http.httpBasic(configurer -> configurer.authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint(props.getLoginUrl())))
+                    .sessionManagement(configurer -> configurer
+                            .sessionFixation()
+                            .changeSessionId()
+                            .sessionAuthenticationErrorUrl(props.getLoginUrl())
+                            .sessionAuthenticationFailureHandler(failureHandler))
+                    .logout(configurer -> configurer
+                            .logoutUrl(props.getLogoutUrl())
+                            .logoutSuccessUrl(props.getLoginUrl())
+                            .addLogoutHandler((req, res, auth) -> CrustContext.invalidate())
+                            .clearAuthentication(true)
+                            .invalidateHttpSession(true)
+                    );
+
         }
 
         // 异常处理器（如果开启了Hydrogen/Uniform模块，则交由Uniform模块处理）
         // 认证用户无权限访问处理
-        http.exceptionHandling().accessDeniedHandler(failureHandler)
+        http.exceptionHandling(configurer -> configurer
+                .accessDeniedHandler(failureHandler)
                 // 认证异常或匿名用户无权限访问处理
-                .authenticationEntryPoint(failureHandler);
-
+                .authenticationEntryPoint(failureHandler));
         // add others http configure
         additionalConfigure(http, props.isStateless());
         return http.build();
@@ -204,7 +223,7 @@ public abstract class CrustConfigurerAdapter {
         // 放开静态资源的限制
         return (web) -> {
             if (props.getAllowStaticUrls() != null) {
-                web.ignoring().antMatchers(HttpMethod.GET, props.getAllowStaticUrls().toArray(new String[0]));
+                web.ignoring().requestMatchers(props.getAllowStaticUrls().toArray(new String[0]));
             }
         };
     }
@@ -212,7 +231,7 @@ public abstract class CrustConfigurerAdapter {
     /**
      * Custom http configure.
      * @param http  HttpSecurity
-     * @param stateless true for session type, false for token type
+     * @param stateless true for a session type, false for a token type
      */
     protected void additionalConfigure(HttpSecurity http, boolean stateless) { }
 
@@ -234,7 +253,7 @@ public abstract class CrustConfigurerAdapter {
 
     /**
      * Custom response for auth or access failure handler.
-     * @param isAuth    true if is auth type
+     * @param isAuth    true if is an auth type
      * @param request   http request
      * @param response  http response
      * @param exception AuthenticationException (auth type) | AccessDeniedException (access type)
@@ -243,7 +262,7 @@ public abstract class CrustConfigurerAdapter {
      */
     protected void doFailure(boolean isAuth, HttpServletRequest request, HttpServletResponse response, RuntimeException exception) throws IOException {
         response.setStatus(isAuth ? HttpStatus.UNAUTHORIZED.value(): HttpStatus.FORBIDDEN.value());
-        ResultVO<?> source = UniformResult.error(String.valueOf(response.getStatus()), exception.getMessage());
+        ResultVO<?> source = UniformResult.error(String.valueOf(response.getStatus()), exception == null ? "" : exception.getMessage());
         UniformHandler.matchStatusToWrite(response, source.toMap());
     }
 

@@ -27,30 +27,30 @@ import com.github.yizzuide.milkomeda.universe.parser.yml.YmlParser;
 import com.github.yizzuide.milkomeda.universe.parser.yml.YmlResponseOutput;
 import com.github.yizzuide.milkomeda.util.DataTypeConvertUtil;
 import com.github.yizzuide.milkomeda.util.JSONUtil;
+import jakarta.annotation.PostConstruct;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.context.properties.bind.BindResult;
 import org.springframework.boot.context.properties.bind.Binder;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.context.support.AbstractApplicationContext;
+import org.springframework.http.*;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
-import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import javax.annotation.PostConstruct;
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.ConstraintViolation;
-import javax.validation.ConstraintViolationException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
@@ -59,14 +59,14 @@ import java.util.*;
 /**
  * UniformHandler
  *
- * @see org.springframework.boot.SpringApplication#run(java.lang.String...)
+ * @see SpringApplication#run(String...)
  * #see org.springframework.boot.SpringApplication#registerLoggedException(java.lang.Throwable)
  * #see org.springframework.boot.SpringBootExceptionHandler.LoggedExceptionHandlerThreadLocal#initialValue()
- * @see org.springframework.boot.SpringApplication#setRegisterShutdownHook(boolean)
- * @see org.springframework.context.support.AbstractApplicationContext#registerShutdownHook()
+ * @see SpringApplication#setRegisterShutdownHook(boolean)
+ * @see AbstractApplicationContext#registerShutdownHook()
  * @author yizzuide
  * @since 3.0.0
- * @version 3.15.0
+ * @version 4.0.0
  * <br>
  * Create at 2020/03/25 22:47
  */
@@ -75,8 +75,6 @@ import java.util.*;
 // 可以用于定义@ExceptionHandler、@InitBinder、@ModelAttribute, 并应用到所有@RequestMapping中
 //@ControllerAdvice // 这种方式默认就会扫描并加载到Ioc，不好动态控制是否加载，但好处是外部API对未来版本的兼容性强
 public class UniformHandler extends ResponseEntityExceptionHandler {
-
-    public static final int REQUEST_BEFORE_EXCEPTION_CODE = 5000;
 
     @Autowired
     private UniformProperties props;
@@ -122,9 +120,11 @@ public class UniformHandler extends ResponseEntityExceptionHandler {
         if (!(clazz instanceof String)) {
             return null;
         }
+
         Class<?> expClazz = null;
         try {
-            expClazz = Class.forName(clazz.toString());
+            // 在使用spring-boot-devtools时，业务类的类加载器为RestartClassLoader，这里配置的类就必须通过Thread.currentThread().getContextClassLoader()获取类加载器
+            expClazz = Thread.currentThread().getContextClassLoader().loadClass(clazz.toString());
         } catch (Exception ex) {
             log.error("Hydrogen load class error with msg: {}", ex.getMessage(), ex);
         }
@@ -133,16 +133,17 @@ public class UniformHandler extends ResponseEntityExceptionHandler {
 
     // 4xx异常处理
     @Override
-    protected @NonNull ResponseEntity<Object> handleExceptionInternal(@NonNull Exception ex, @Nullable Object body, @NonNull HttpHeaders headers, HttpStatus status, @NonNull WebRequest request) {
-        ResponseEntity<Object> responseEntity = handleExceptionResponse(ex, status.value(), ex.getMessage());
+    protected ResponseEntity<Object> handleExceptionInternal(@NotNull Exception ex, @Nullable Object body, @NotNull HttpHeaders headers, @NotNull HttpStatusCode statusCode, @NotNull WebRequest request) {
+        ResponseEntity<Object> responseEntity = handleExceptionResponse(ex, statusCode.value(), ex.getMessage());
         if (responseEntity == null) {
-            return super.handleExceptionInternal(ex, body, headers, status, request);
+            return super.handleExceptionInternal(ex, body, headers, statusCode, request);
         }
         return responseEntity;
     }
 
     // 方法上单个普通类型（如：String、Long等）参数校验异常（校验注解直接写在参数前面的方式）
     @ExceptionHandler(ConstraintViolationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<Object> constraintViolationException(ConstraintViolationException e) {
         ConstraintViolation<?> constraintViolation = e.getConstraintViolations().iterator().next();
         String value = String.valueOf(constraintViolation.getInvalidValue());
@@ -157,23 +158,17 @@ public class UniformHandler extends ResponseEntityExceptionHandler {
         return responseEntity == null ? ResponseEntity.status(HttpStatus.BAD_REQUEST.value()).body(null) : responseEntity;
     }
 
-    // 对方法上@RequestBody的Bean参数校验的处理
+    // 对方法上@RequestBody的Bean和@RequestParam的Form参数校验的处理
     @Override
-    protected @NonNull ResponseEntity<Object> handleMethodArgumentNotValid(@NonNull MethodArgumentNotValidException ex, @NonNull HttpHeaders headers, @NonNull HttpStatus status, @NonNull WebRequest request) {
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(@NonNull MethodArgumentNotValidException ex, @NonNull HttpHeaders headers, @NonNull HttpStatusCode statusCode, @NonNull WebRequest request) {
         ResponseEntity<Object> responseEntity = handleValidBeanExceptionResponse(ex, ex.getBindingResult());
-        return responseEntity == null ? super.handleMethodArgumentNotValid(ex, headers, status, request) : responseEntity;
-    }
-
-    // 对方法的Form提交参数绑定校验的处理
-    @Override
-    protected @NonNull ResponseEntity<Object> handleBindException(@NonNull BindException ex, @NonNull HttpHeaders headers, @NonNull HttpStatus status, @NonNull WebRequest request) {
-        ResponseEntity<Object> responseEntity = handleValidBeanExceptionResponse(ex, ex.getBindingResult());
-        return responseEntity == null ? super.handleBindException(ex, headers, status, request) : responseEntity;
+        return responseEntity == null ? super.handleMethodArgumentNotValid(ex, headers, statusCode, request) : responseEntity;
     }
 
     // 其它内部异常处理
     @SuppressWarnings("unchecked")
     @ExceptionHandler(Throwable.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ResponseEntity<Object> handleException(Throwable e) {
         Map<String, Object> response = props.getResponse();
         Object status = response.get(YmlResponseOutput.STATUS);
@@ -184,7 +179,7 @@ public class UniformHandler extends ResponseEntityExceptionHandler {
         if (this.customExpClazzList != null) {
             for (Map<String, Object> map : this.customExpClazzList) {
                 List<Class<Exception>> expClazzList = (List<Class<Exception>>) map.get(YmlResponseOutput.CLAZZ);
-                if (expClazzList.stream().anyMatch(expClazz -> expClazz.isInstance(e))) {
+                if (expClazzList.stream().anyMatch(expClazz -> expClazz.getName().equals(e.getClass().getName()) || expClazz.isInstance(e))) {
                     YmlResponseOutput.output(map, result, null, (Exception) e, true);
                     return ResponseEntity.status(Integer.parseInt(status.toString())).body(result);
                 }
@@ -202,7 +197,7 @@ public class UniformHandler extends ResponseEntityExceptionHandler {
      * @return  ResponseEntity
      */
     private ResponseEntity<Object> handleValidBeanExceptionResponse(Exception ex, BindingResult bindingResult) {
-        ObjectError objectError = bindingResult.getAllErrors().get(0);
+        ObjectError objectError = bindingResult.getAllErrors().getFirst();
         String message = objectError.getDefaultMessage();
         if (!props.isIgnoreAddFieldOnValidFail()) {
             if (objectError.getArguments() != null && objectError.getArguments().length > 0) {
@@ -266,10 +261,11 @@ public class UniformHandler extends ResponseEntityExceptionHandler {
      * @since 3.15.0
      */
     public static boolean tryMatch(int code) {
-        UniformProperties props = Binder.get(ApplicationContextHolder.get().getEnvironment()).bind(UniformProperties.PREFIX, UniformProperties.class).get();
-        if (props == null) {
+        BindResult<UniformProperties> bindResult = Binder.get(ApplicationContextHolder.get().getEnvironment()).bind(UniformProperties.PREFIX, UniformProperties.class);
+        if (!bindResult.isBound()) {
             return false;
         }
+        UniformProperties props = bindResult.get();
         Map<?, ?> resolveMap = (Map<?, ?>) props.getResponse().get(String.valueOf(code));
         return resolveMap != null;
     }
@@ -283,22 +279,23 @@ public class UniformHandler extends ResponseEntityExceptionHandler {
      */
     @SuppressWarnings("unchecked")
     public static Tuple<Map<String, Object>, Map<String, Object>> matchStatusResult(int statusCode, Map<String, Object> source) {
-        UniformProperties props = Binder.get(ApplicationContextHolder.get().getEnvironment()).bind(UniformProperties.PREFIX, UniformProperties.class).get();
-        Map<String, Object> resolveMap;
-        if (props == null) {
-            resolveMap = createInitResolveMap();
-        } else {
+        BindResult<UniformProperties> bindResult = Binder.get(ApplicationContextHolder.get().getEnvironment()).bind(UniformProperties.PREFIX, UniformProperties.class);
+        Map<String, Object> resolveMap = null;
+        if (bindResult.isBound()) {
+            UniformProperties props = bindResult.get();
             resolveMap = (Map<String, Object>) props.getResponse().get(String.valueOf(statusCode));
-            if (resolveMap == null) {
-                resolveMap = createInitResolveMap();
-            }
+        }
+
+        // 从来源source创建响应模板
+        if (resolveMap == null) {
+            resolveMap = createInitResolveMap(statusCode, source);
         }
 
         Map<String, Object> result = new HashMap<>();
         // status == 200?
         if (statusCode == HttpStatus.OK.value()) {
-            YmlParser.parseAliasMapPath(resolveMap, result, YmlResponseOutput.CODE, null, source);
-            YmlParser.parseAliasMapPath(resolveMap, result, YmlResponseOutput.MESSAGE, null, source);
+            YmlParser.parseAliasMapPath(resolveMap, result, YmlResponseOutput.CODE, UniformHolder.getProps().getDefaultSuccessCode(), source);
+            YmlParser.parseAliasMapPath(resolveMap, result, YmlResponseOutput.MESSAGE, "OK", source);
             YmlParser.parseAliasMapPath(resolveMap, result, YmlResponseOutput.DATA, null, source);
             resultFilter(result);
         } else { // status != 200
@@ -326,12 +323,14 @@ public class UniformHandler extends ResponseEntityExceptionHandler {
     }
 
     @NotNull
-    private static Map<String, Object> createInitResolveMap() {
+    private static Map<String, Object> createInitResolveMap(int statusCode, Map<String, Object> source) {
         Map<String, Object> resolveMap = new HashMap<>(8);
         resolveMap.put(YmlResponseOutput.STATUS, HttpStatus.OK.value());
-        resolveMap.put(YmlResponseOutput.CODE, "0");
-        resolveMap.put(YmlResponseOutput.MESSAGE, "");
-        resolveMap.put(YmlResponseOutput.DATA, Collections.emptyMap());
+        resolveMap.put(YmlResponseOutput.CODE, source.get(YmlResponseOutput.CODE));
+        resolveMap.put(YmlResponseOutput.MESSAGE, source.get(YmlResponseOutput.MESSAGE));
+        if (HttpStatus.OK.value() == statusCode) {
+            resolveMap.put(YmlResponseOutput.DATA, null);
+        }
         return resolveMap;
     }
 
@@ -344,7 +343,7 @@ public class UniformHandler extends ResponseEntityExceptionHandler {
      * @since 3.15.0
      */
     public static void matchStatusToWrite(HttpServletResponse response, Integer status, Exception e) throws IOException {
-        response.setStatus(status == null ? REQUEST_BEFORE_EXCEPTION_CODE : status);
+        response.setStatus(status);
         ResultVO<?> source;
         if (e != null) {
             Map<String, Object> exMap = DataTypeConvertUtil.beanToMap(e);
@@ -367,7 +366,7 @@ public class UniformHandler extends ResponseEntityExceptionHandler {
         Tuple<Map<String, Object>, Map<String, Object>> mapTuple = matchStatusResult(response, source);
         Map<String, Object> resolveMap = mapTuple.getT1();
         Map<String, Object> result = mapTuple.getT2();
-        if (mapTuple.getT1() == null || mapTuple.getT1().size() == 0) {
+        if (mapTuple.getT1() == null || mapTuple.getT1().isEmpty()) {
             return;
         }
         String body = JSONUtil.serialize(result);

@@ -35,7 +35,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -83,9 +83,10 @@ public class UniformErrorController extends BasicErrorController {
 
     @NotNull
     private Tuple<HttpStatus, Map<String, Object>> uniformMatchResult(HttpServletRequest request, HttpStatus status) {
+        Map<String, Object> errorAttrs = getErrorAttributes(request, getErrorAttributeOptions(request, MediaType.ALL));
+        String error = (String) errorAttrs.get("error");
         Map<String, Object> source = new HashMap<>();
-        Map<String, Object> originalMap = getErrorAttributes(request, getErrorAttributeOptions(request, MediaType.ALL));
-        String error = (String) originalMap.get("error");
+        source.put(YmlResponseOutput.CODE, status.value());
         source.put(YmlResponseOutput.MESSAGE, error);
         Tuple<Map<String, Object>, Map<String, Object>> mapTuple = UniformHandler.matchStatusResult(status.value(), source);
         int resolveStatus = Integer.parseInt(mapTuple.getT1().get(YmlResponseOutput.STATUS).toString());

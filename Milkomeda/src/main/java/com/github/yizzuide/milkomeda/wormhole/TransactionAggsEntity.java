@@ -21,21 +21,29 @@
 
 package com.github.yizzuide.milkomeda.wormhole;
 
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-
 /**
  * A base aggregates object of the domain model which provides access to {@link TransactionWorkBus}.
  *
  * @since 3.15.0
+ * @version 4.0.0
  * @author yizzuide
  * Create at 2023/07/15 17:44
  */
-@NoArgsConstructor
-@AllArgsConstructor
 public abstract class TransactionAggsEntity {
+
     /**
-     * The {@link TransactionWorkBus} is associated with the application service.
+     * The transaction service which invoke from with.
+     * @since 4.0.0
+     */
+    protected TransactionService<?> transactionService;
+
+    /**
+     * The {@link TransactionWorkBus} is associated with the transaction service.
      */
     protected TransactionWorkBus transactionWorkBus;
+
+    public TransactionAggsEntity(TransactionService<?> transactionService) {
+        this.transactionService = transactionService;
+        this.transactionWorkBus = transactionService.getTransactionWorkBus();
+    }
 }

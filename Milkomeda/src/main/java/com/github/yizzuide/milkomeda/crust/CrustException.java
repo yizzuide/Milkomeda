@@ -21,6 +21,8 @@
 
 package com.github.yizzuide.milkomeda.crust;
 
+import java.io.Serial;
+
 /**
  * Thrown if an authentication request is rejected because the credentials are not
  * sufficiently trusted.
@@ -31,6 +33,7 @@ package com.github.yizzuide.milkomeda.crust;
  * Create at 2022/01/31 17:30
  */
 public class CrustException extends RuntimeException {
+    @Serial
     private static final long serialVersionUID = 7913213972981313630L;
 
     public CrustException(String message) {

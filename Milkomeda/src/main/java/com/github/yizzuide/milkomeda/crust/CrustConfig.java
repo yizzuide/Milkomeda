@@ -22,10 +22,9 @@
 package com.github.yizzuide.milkomeda.crust;
 
 import com.github.yizzuide.milkomeda.light.*;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -33,16 +32,10 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.Ordered;
-import org.springframework.lang.NonNull;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Role;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.util.CollectionUtils;
-import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
-import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-
-import javax.annotation.Resource;
 
 /**
  * CrustConfig
@@ -50,25 +43,27 @@ import javax.annotation.Resource;
  * @see AbstractAutoProxyCreator#postProcessAfterInitialization(java.lang.Object, java.lang.String)
  * @author yizzuide
  * @since 1.14.0
- * @version 3.14.0
+ * @version 4.0.0
  * <br>
  * Create at 2019/11/11 14:56
  */
-@ConditionalOnClass({AuthenticationManager.class})
+@Import(CrustURLMappingConfigurer.class)
 @EnableConfigurationProperties({CrustProperties.class, LightProperties.class})
 @AutoConfigureAfter(LightConfig.class)
+@ConditionalOnClass({AuthenticationManager.class})
 @Configuration
 public class CrustConfig {
 
     @Autowired
     private CrustProperties crustProps;
 
-    @Bean
-    public Crust crust() {
+    @Bean(AbstractCrust.BEAN_NAME)
+    public AbstractCrust crust() {
         return new Crust();
     }
 
     @Bean
+    @Role(BeanDefinition.ROLE_APPLICATION)
     public CrustTokenResolver crustTokenResolver() {
         return new CrustTokenResolver(crustProps);
     }
@@ -76,12 +71,14 @@ public class CrustConfig {
     @Bean
     @ConditionalOnMissingBean
     @ConditionalOnProperty(prefix = "milkomeda.crust", name = "use-bcrypt", havingValue = "true", matchIfMissing = true)
+    @Role(BeanDefinition.ROLE_APPLICATION)
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
     @Bean
     @ConditionalOnMissingBean
+    @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
     @ConditionalOnProperty(prefix = "milkomeda.crust", name = "enable-cache", havingValue = "true", matchIfMissing = true)
     public LightCacheAspect lightCacheAspect() {
         return new LightCacheAspect();
@@ -90,20 +87,16 @@ public class CrustConfig {
     @Bean(Crust.CATCH_NAME)
     @ConditionalOnMissingBean
     @ConditionalOnProperty(prefix = "milkomeda.crust", name = "enable-cache", havingValue = "true", matchIfMissing = true)
-    public Cache crustLightCache(LightProperties lightProps) {
+    @Role(BeanDefinition.ROLE_APPLICATION)
+    public Cache crustLightCache() {
         LightCache lightCache = new LightCache();
-        lightCache.setL1MaxCount(lightProps.getL1MaxCount());
-        lightCache.setL1DiscardPercent(lightProps.getL1DiscardPercent());
-        lightCache.setL1Expire(crustProps.getExpire().getSeconds());
-        lightCache.setStrategy(LightDiscardStrategy.LazyExpire);
-        lightCache.setOnlyCacheL1(crustProps.isCacheInMemory());
-        lightCache.setL2Expire(crustProps.getExpire().getSeconds());
-        lightCache.setEnableSuperCache(lightProps.isEnableSuperCache());
+        lightCache.configFrom(crustProps.getCache());
         return lightCache;
     }
 
-    @Bean(Crust.CODE_CATCH_NAME)
+    @Bean(AbstractCrust.CODE_CATCH_NAME)
     @ConditionalOnProperty(prefix = "milkomeda.crust", name = "login-type", havingValue = "CODE")
+    @Role(BeanDefinition.ROLE_APPLICATION)
     public Cache crustCodeLightCache() {
         LightCache lightCache = new LightCache();
         lightCache.setEnableSuperCache(false);
@@ -114,48 +107,8 @@ public class CrustConfig {
 
     @Bean
     @ConditionalOnMissingBean
+    @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
     public LightCacheCleanAstrolabeHandler lightCacheCleanAstrolabeHandler(@Autowired(required = false) LightThreadLocalScope scope) {
         return new LightCacheCleanAstrolabeHandler(scope);
-    }
-
-    @Configuration(proxyBeanMethods = false)
-    @EnableConfigurationProperties(CrustProperties.class)
-    public static class CrustURLMappingConfigurer implements WebMvcConfigurer, InitializingBean {
-        @Autowired
-        private CrustProperties crustProps;
-
-        @Resource
-        private Crust crust;
-
-        public static final String staticLocation = "classpath:/static/";
-
-        @Override
-        public void addViewControllers(@NonNull ViewControllerRegistry registry) {
-            if (StringUtils.isEmpty(crustProps.getRootRedirect())) {
-                return;
-            }
-            // 添加根路径跳转
-            registry.addRedirectViewController("/", crustProps.getRootRedirect());
-            registry.setOrder(Ordered.HIGHEST_PRECEDENCE);
-        }
-
-        @Override
-        public void addResourceHandlers(@NonNull ResourceHandlerRegistry registry) {
-            if (!StringUtils.isEmpty(crustProps.getStaticLocation())) {
-                // 设置静态资源，用于Spring Security配置
-                registry.addResourceHandler("/**").addResourceLocations(crustProps.getStaticLocation());
-            }
-
-            if (!CollectionUtils.isEmpty(crustProps.getResourceMappings())) {
-                crustProps.getResourceMappings().forEach(ResourceMapping ->
-                        registry.addResourceHandler(ResourceMapping.getPathPatterns().toArray(new String[0]))
-                                .addResourceLocations(ResourceMapping.getTargetLocations().toArray(new String[0])));
-            }
-        }
-
-        @Override
-        public void afterPropertiesSet() throws Exception {
-            CrustContext.set(crust);
-        }
     }
 }

@@ -25,8 +25,8 @@ import com.github.yizzuide.milkomeda.hydrogen.core.AbstractHydrogenLoader;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import javax.servlet.FilterRegistration;
-import javax.servlet.ServletContext;
+import jakarta.servlet.FilterRegistration;
+import jakarta.servlet.ServletContext;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

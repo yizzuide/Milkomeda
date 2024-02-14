@@ -25,13 +25,13 @@ import com.github.yizzuide.milkomeda.ice.Ice;
 import com.github.yizzuide.milkomeda.ice.IceHolder;
 import com.github.yizzuide.milkomeda.ice.inspector.domain.JobInspection;
 import com.github.yizzuide.milkomeda.ice.inspector.mapper.JobInspectionMapper;
-import com.github.yizzuide.milkomeda.util.Dates;
+import com.github.yizzuide.milkomeda.util.DateExtensionsKt;
+import jakarta.annotation.Resource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.util.CollectionUtils;
 
-import javax.annotation.Resource;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -106,10 +106,10 @@ public class MysqlJobInspector extends AbstractJobInspector {
         jobInspection.setQueueType(jobWrapper.getQueueType().ordinal());
         jobInspection.setBucketIndex(jobWrapper.getBucketIndex());
         jobInspection.setHadRetryCount(jobWrapper.getHadRetryCount());
-        jobInspection.setExecutionTime(Dates.timestamp2Date(jobWrapper.getExecutionTime()));
+        jobInspection.setExecutionTime(DateExtensionsKt.timestamp2Date(jobWrapper.getExecutionTime()));
         jobInspection.setNeedRePush(jobWrapper.isNeedRePush() ? 1 : 0);
-        jobInspection.setUpdateTime(Dates.timestamp2Date(jobWrapper.getUpdateTime()));
-        jobInspection.setPushTime(Dates.timestamp2Date(jobWrapper.getPushTime()));
+        jobInspection.setUpdateTime(DateExtensionsKt.timestamp2Date(jobWrapper.getUpdateTime()));
+        jobInspection.setPushTime(DateExtensionsKt.timestamp2Date(jobWrapper.getPushTime()));
         return jobInspection;
     }
 
@@ -124,10 +124,10 @@ public class MysqlJobInspector extends AbstractJobInspector {
         JobWrapper.setQueueType(JobQueueType.values()[jobInspection.getQueueType()]);
         JobWrapper.setBucketIndex(jobInspection.getBucketIndex());
         JobWrapper.setHadRetryCount(jobInspection.getHadRetryCount());
-        JobWrapper.setExecutionTime(Dates.date2Timestamp(jobInspection.getExecutionTime()));
+        JobWrapper.setExecutionTime(DateExtensionsKt.date2Timestamp(jobInspection.getExecutionTime()));
         JobWrapper.setNeedRePush(jobInspection.getNeedRePush() == 1);
-        JobWrapper.setUpdateTime(Dates.date2Timestamp(jobInspection.getUpdateTime()));
-        JobWrapper.setPushTime(Dates.date2Timestamp(jobInspection.getPushTime()));
+        JobWrapper.setUpdateTime(DateExtensionsKt.date2Timestamp(jobInspection.getUpdateTime()));
+        JobWrapper.setPushTime(DateExtensionsKt.date2Timestamp(jobInspection.getPushTime()));
         return JobWrapper;
     }
 }

@@ -33,9 +33,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
 
-import javax.validation.Validation;
-import javax.validation.Validator;
-import javax.validation.ValidatorFactory;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import jakarta.validation.ValidatorFactory;
 
 /**
  * ValidatorConfig
@@ -72,7 +72,7 @@ public class ValidatorConfig {
                 .configure()
                 // 设置validator模式为快速失败（只要有一个校验不通过就不立即返回错误）
                 .failFast(true)
-//                .addProperty( "hibernate.validator.fail_fast", "true" ) // 和上一个方法等同
+//                .addProperty("hibernate.validator.fail_fast", "true") // 和上一个方法等同
                 .buildValidatorFactory();
         Validator validator = validatorFactory.getValidator();
         HydrogenHolder.setValidator(validator);

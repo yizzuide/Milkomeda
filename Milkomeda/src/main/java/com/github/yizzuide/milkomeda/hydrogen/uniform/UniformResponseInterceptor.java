@@ -26,7 +26,7 @@ import com.github.yizzuide.milkomeda.universe.extend.annotation.Alias;
 import com.github.yizzuide.milkomeda.universe.parser.yml.YmlResponseOutput;
 import lombok.extern.slf4j.Slf4j;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -44,10 +44,10 @@ import java.util.Map;
 public class UniformResponseInterceptor extends AbstractResponseInterceptor {
     @Override
     protected Object doResponse(HttpServletResponse response, Object body) {
-        if (body instanceof ResultVO) {
-            ResultVO<?> resultVO = (ResultVO<?>) body;
+        if (body instanceof ResultVO<?> resultVO) {
             Map<String, Object> source = new HashMap<>(8);
-            source.put(YmlResponseOutput.CODE, resultVO.getCode());
+            source.put(YmlResponseOutput.CODE, resultVO.getCode() == null ?
+                    UniformHolder.getProps().getDefaultSuccessCode() : resultVO.getCode());
             source.put(YmlResponseOutput.MESSAGE, resultVO.getMessage());
             source.put(YmlResponseOutput.DATA, resultVO.getData());
             return UniformHandler.matchStatusResult(response, source).getT2();

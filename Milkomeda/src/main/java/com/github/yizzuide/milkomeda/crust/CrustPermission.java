@@ -77,7 +77,7 @@ public interface CrustPermission extends Ordered {
     String getLabel();
 
     /**
-     * Set permission icon.
+     * Set the permission icon.
      * @param icon  String
      */
     void setIcon(String icon);
@@ -102,12 +102,12 @@ public interface CrustPermission extends Ordered {
 
     /**
      * Set permission type.
-     * @param type 0 is menu directory, 1 is menu, 2 is button action
+     * @param type 0 is menu directory, 1 is a menu, 2 is button action
      */
     void setType(Integer type);
 
     /**
-     * Permission type. (0 is menu directory, 1 is menu, 2 is button action)
+     * Permission type. (0 is menu directory, 1 is a menu, 2 is button action)
      * @return  Integer
      */
     Integer getType();
@@ -161,13 +161,13 @@ public interface CrustPermission extends Ordered {
     void setChildren(List<CrustPermission> children);
 
     /**
-     * Get sub-permission list.
+     * Get a sub-permission list.
      * @return  sub-permission list
      */
     List<CrustPermission> getChildren();
 
     /**
-     * Build perm tree from permission list.
+     * Build a perm tree from a permission list.
      * @param permissionList    permission list
      * @param permClass         permission class
      * @param parentId          build start parent id
@@ -193,7 +193,7 @@ public interface CrustPermission extends Ordered {
     }
 
     /**
-     * Build menu tree from permission list.
+     * Build a menu tree from a permission list.
      * @param permissionList    permission list
      * @param parentId          build start parent id
      * @return menu tree

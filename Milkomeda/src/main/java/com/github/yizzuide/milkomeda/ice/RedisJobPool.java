@@ -24,7 +24,7 @@ package com.github.yizzuide.milkomeda.ice;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import com.github.yizzuide.milkomeda.util.JSONUtil;
-import com.github.yizzuide.milkomeda.util.Strings;
+import com.github.yizzuide.milkomeda.util.StringExtensionsKt;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationListener;
 import org.springframework.data.redis.core.BoundHashOperations;
@@ -75,7 +75,7 @@ public class RedisJobPool implements JobPool, InitializingBean, ApplicationListe
     @Override
     public boolean exists(String jobId) {
         String job = getPool().get(jobId);
-        return !Strings.isEmpty(job);
+        return !StringExtensionsKt.isEmpty(job);
     }
 
     @SuppressWarnings("rawtypes")

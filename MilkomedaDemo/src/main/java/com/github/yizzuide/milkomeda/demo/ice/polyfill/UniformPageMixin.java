@@ -32,7 +32,7 @@ import org.springframework.boot.jackson.JsonMixin;
  * <br>
  * Create at 2022/11/30 19:06
  */
-// Springboot 2.7: Spring Boot的Jackson自动配置将扫描应用程序的包以查找带有@JsonMixin注释的类，并将它们注册到自动配置的ObjectMapper，
+// Spring Boot 2.7: Spring Boot的Jackson自动配置将扫描应用程序的包以查找带有@JsonMixin注释的类，并将它们注册到自动配置的ObjectMapper，
 //  注册动作由Spring Boot的JsonMixinModule执行
 @JsonMixin(UniformPage.class)
 public abstract class UniformPageMixin {

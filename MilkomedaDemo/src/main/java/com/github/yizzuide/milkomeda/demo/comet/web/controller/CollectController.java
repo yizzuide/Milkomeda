@@ -11,8 +11,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.HashMap;
@@ -33,6 +33,7 @@ public class CollectController {
     @Resource
     private CollectService collectService;
 
+    // Spring Boot 3.0：从 Spring Framework 6.0 开始，尾部斜杠匹配配置选项已过期，如：/feature 在以前版本将匹配 /feature/
     @RequestMapping("feature")
     @Comet(apiCode = "1.1", name = "上传用户特征", tag = "PROFILE", prototype = ProfileWebCometData.class)
     public ResponseEntity<Map<String, String>> feature(@RequestParam Map<String, String> params) {

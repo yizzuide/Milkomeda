@@ -24,13 +24,16 @@ package com.github.yizzuide.milkomeda.ice.inspector;
 import com.github.yizzuide.milkomeda.ice.IceHolder;
 import com.github.yizzuide.milkomeda.ice.IceKeys;
 import com.github.yizzuide.milkomeda.universe.lang.SetString;
-import com.github.yizzuide.milkomeda.util.Dates;
+import com.github.yizzuide.milkomeda.util.DateExtensionsKt;
 import org.springframework.data.redis.core.BoundHashOperations;
 import org.springframework.data.redis.core.BoundValueOperations;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import static com.github.yizzuide.milkomeda.util.DataTypeConvertUtil.toLong;
@@ -169,7 +172,7 @@ public final class JobStat {
 
     private void dayCount(String key, Long daysOfExpire) {
         BoundValueOperations<String, String> valueOps = getCountValOps(key);
-        Boolean success = valueOps.setIfAbsent("1", Dates.timestampOfDays(daysOfExpire), TimeUnit.MILLISECONDS);
+        Boolean success = valueOps.setIfAbsent("1", DateExtensionsKt.timestampOfDays(daysOfExpire), TimeUnit.MILLISECONDS);
         if (!Boolean.TRUE.equals(success)) {
             valueOps.increment();
         }

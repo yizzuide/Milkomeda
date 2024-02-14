@@ -21,6 +21,7 @@
 
 package com.github.yizzuide.milkomeda.comet.core;
 
+import com.github.yizzuide.milkomeda.orbit.OrbitConfig;
 import com.github.yizzuide.milkomeda.pulsar.PulsarConfig;
 import com.github.yizzuide.milkomeda.universe.config.MilkomedaProperties;
 import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
@@ -31,6 +32,7 @@ import com.github.yizzuide.milkomeda.universe.polyfill.SpringMvcPolyfill;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration;
@@ -40,6 +42,8 @@ import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Role;
 import org.springframework.core.Ordered;
 import org.springframework.lang.NonNull;
 import org.springframework.util.CollectionUtils;
@@ -60,6 +64,7 @@ import java.util.*;
  * Create at 2019/12/12 18:10
  */
 @Configuration
+@Import(OrbitConfig.class)
 @AutoConfigureAfter({WebMvcAutoConfiguration.class, PulsarConfig.class})
 @EnableConfigurationProperties({MilkomedaProperties.class, CometProperties.class})
 public class CometConfig implements ApplicationListener<ApplicationStartedEvent> {
@@ -72,6 +77,7 @@ public class CometConfig implements ApplicationListener<ApplicationStartedEvent>
     }
 
     @Bean
+    @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
     public CometAspect cometAspect() {
         return new CometAspect();
     }
@@ -80,6 +86,7 @@ public class CometConfig implements ApplicationListener<ApplicationStartedEvent>
     //@ConditionalOnMissingBean // 识别类型：FilterRegistrationBean，会导致永远无法加载
     // 下面两方式在版本2.1.0推出，用于识别泛型类型：FilterRegistrationBean<CometRequestFilter>
     // @ConditionalOnMissingBean(parameterizedContainer = FilterRegistrationBean.class)
+    @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
     public FilterRegistrationBean<CometRequestFilter> cometRequestFilter() {
         FilterRegistrationBean<CometRequestFilter> cometRequestFilter = new FilterRegistrationBean<>();
         cometRequestFilter.setFilter(new CometRequestFilter());
@@ -90,23 +97,27 @@ public class CometConfig implements ApplicationListener<ApplicationStartedEvent>
     }
 
     @Bean
+    @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
     public CometInterceptor cometInterceptor() {
         return new CometInterceptor();
     }
 
     @Bean
     @ConditionalOnProperty(prefix = "milkomeda.comet.request-interceptors.xss", name = "enable", havingValue = "true")
+    @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
     public CometXssRequestInterceptor cometXssRequestInterceptor() {
         return new CometXssRequestInterceptor();
     }
 
     @Bean
     @ConditionalOnProperty(prefix = "milkomeda.comet.request-interceptors.sql-inject", name = "enable", havingValue = "true")
+    @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
     public CometSqlInjectRequestInterceptor cometSqlInjectRequestInterceptor() {
         return new CometSqlInjectRequestInterceptor();
     }
 
     @Bean
+    @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
     public CometResponseBodyAdvice cometResponseBodyAdvice() {
         return new CometResponseBodyAdvice();
     }
@@ -140,7 +151,7 @@ public class CometConfig implements ApplicationListener<ApplicationStartedEvent>
         @Autowired
         private RequestMappingHandlerAdapter adapter;
 
-        // Springboot 2.7: Since Spring Framework 5.1, Spring MVC has supported multiple RequestMappingHandlerMapping beans.
+        // Spring Boot 2.7: Since Spring Framework 5.1, Spring MVC has supported multiple RequestMappingHandlerMapping beans.
         //  Spring Boot 2.7 no longer defines MVC’s main requestMappingHandlerMapping bean as @Primary.
         @Qualifier(BeanIds.REQUEST_MAPPING_HANDLER_MAPPING)
         @Autowired
@@ -173,7 +184,7 @@ public class CometConfig implements ApplicationListener<ApplicationStartedEvent>
 
         // 动态添加内置拦截器
         private void configRequestMappingHandlerMapping() {
-            SpringMvcPolyfill.addDynamicInterceptor(cometInterceptor,  Ordered.HIGHEST_PRECEDENCE, Collections.singletonList("/**"),
+            SpringMvcPolyfill.addDynamicInterceptor(cometInterceptor,  Ordered.HIGHEST_PRECEDENCE + 1, Collections.singletonList("/**"),
                     null, requestMappingHandlerMapping);
         }
 

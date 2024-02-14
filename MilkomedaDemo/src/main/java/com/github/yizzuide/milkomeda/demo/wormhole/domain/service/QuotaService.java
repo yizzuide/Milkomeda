@@ -21,7 +21,7 @@
 
 package com.github.yizzuide.milkomeda.demo.wormhole.domain.service;
 
-import com.github.yizzuide.milkomeda.demo.wormhole.appearance.aciton.Actions;
+import com.github.yizzuide.milkomeda.demo.wormhole.domain.aciton.Actions;
 import com.github.yizzuide.milkomeda.demo.wormhole.domain.model.Credit;
 import com.github.yizzuide.milkomeda.wormhole.WormholeAction;
 import com.github.yizzuide.milkomeda.wormhole.WormholeEvent;

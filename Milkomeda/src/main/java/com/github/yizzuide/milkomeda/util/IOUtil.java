@@ -21,8 +21,6 @@
 
 package com.github.yizzuide.milkomeda.util;
 
-import org.springframework.util.StringUtils;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -30,7 +28,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 
 /**
- * IOUtils
+ * IOUtil
  *
  * @author yizzuide
  * @since 3.3.1
@@ -38,7 +36,7 @@ import java.nio.charset.StandardCharsets;
  * <br>
  * Create at 2020/05/07 14:17
  */
-public class IOUtils {
+public class IOUtil {
     public static final String LUA_PATH = "/META-INF/scripts";
 
     /**
@@ -53,7 +51,7 @@ public class IOUtils {
         if (path == null || filename == null) {
             return "";
         }
-        InputStream inputStream = IOUtils.class.getResourceAsStream(path + "/" + filename);
+        InputStream inputStream = IOUtil.class.getResourceAsStream(path + "/" + filename);
         if (inputStream == null) {
             return "";
         }
@@ -70,8 +68,7 @@ public class IOUtils {
                 continue;
             }
             // 代码缩减空白
-            line = StringUtils.trimLeadingWhitespace(line);
-            line = StringUtils.trimTrailingWhitespace(line);
+            line = line.stripLeading().stripTrailing();
             line = line.replaceAll("[\n\r\t]", "");
             out.append(line);
             // 忽略有分号的行，说明已有结束符

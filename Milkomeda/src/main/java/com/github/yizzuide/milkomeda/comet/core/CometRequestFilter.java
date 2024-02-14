@@ -21,18 +21,19 @@
 
 package com.github.yizzuide.milkomeda.comet.core;
 
+import com.github.yizzuide.milkomeda.util.IdGenerator;
+import jakarta.servlet.*;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.util.WebUtils;
 
-import javax.servlet.*;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**
- * CometRequestFilter
  * 请求过滤器
  *
  * @see org.springframework.web.filter.CharacterEncodingFilter
@@ -46,9 +47,7 @@ import java.io.IOException;
 @Slf4j
 public class CometRequestFilter implements Filter {
 
-    @Override
-    public void init(FilterConfig filterConfig) {
-    }
+    private static final String COMET_REQ_ID = "COMET.REQ_ID";
 
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
@@ -64,13 +63,17 @@ public class CometRequestFilter implements Filter {
         if (enableAddResponseWrapper) {
             servletResponse = new CometResponseWrapper((HttpServletResponse) servletResponse);
         }
+        XCometContext.init();
+        MDC.put(COMET_REQ_ID, IdGenerator.genNext32ID());
         filterChain.doFilter(requestWrapper, servletResponse);
+        MDC.remove(COMET_REQ_ID);
+        XCometContext.clear();
+        // 清空请求参数缓存
+        CometAspect.resolveThreadLocal.remove();
         // 更新响应消息体
         if (enableAddResponseWrapper) {
             updateResponse((HttpServletResponse) servletResponse);
         }
-        // 清空线程数据
-        CometAspect.resolveThreadLocal.remove();
     }
 
     private void updateResponse(HttpServletResponse response) throws IOException {
@@ -79,9 +82,5 @@ public class CometRequestFilter implements Filter {
         Assert.notNull(responseWrapper, "CometResponseWrapper not found");
         // HttpServletResponse rawResponse = (HttpServletResponse) responseWrapper.getResponse();
         responseWrapper.copyBodyToResponse();
-    }
-
-    @Override
-    public void destroy() {
     }
 }

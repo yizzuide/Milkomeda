@@ -38,8 +38,6 @@ import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.util.function.Function;
 
-import static com.github.yizzuide.milkomeda.util.ReflectUtil.extractValue;
-
 /**
  * LightCacheAspect
  * <br>
@@ -81,7 +79,7 @@ public class LightCacheAspect {
         return applyAround(joinPoint, cachePut, cachePut.condition(), cachePut.value(), cachePut.keyPrefix(), cachePut.key());
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     private Object applyAround(ProceedingJoinPoint joinPoint, Annotation annotation, String condition, String cacheBeanName, String prefix, String key) throws Throwable {
         // 检查缓存条件
         if (StringUtils.hasLength(condition) && !Boolean.parseBoolean(ELContext.getValue(joinPoint, condition))) {
@@ -93,10 +91,10 @@ public class LightCacheAspect {
         }
 
         // 解析缓存实例名
-        cacheBeanName = extractValue(joinPoint, cacheBeanName);
+        cacheBeanName = ELContext.getValue(joinPoint, cacheBeanName);
 
         // 解析表达式
-        String viewId = extractValue(joinPoint, key);
+        String viewId = ELContext.getValue(joinPoint, key);
         LightCache cache;
         if (ApplicationContextHolder.get().containsBean(cacheBeanName)) {
             cache = ApplicationContextHolder.get().getBean(cacheBeanName, LightCache.class);
@@ -136,7 +134,7 @@ public class LightCacheAspect {
         }
         // 获取类型
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
-        return CacheHelper.get(cache, signature.getReturnType(), viewId, keyGenerator, id -> joinPoint.proceed());
+        return CacheHelper.get(cache, (Class) signature.getMethod().getReturnType(), viewId, keyGenerator, id -> joinPoint.proceed());
     }
 
     /**

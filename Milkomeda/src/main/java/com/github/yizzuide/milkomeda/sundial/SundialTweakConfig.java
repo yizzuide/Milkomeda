@@ -24,10 +24,8 @@ package com.github.yizzuide.milkomeda.sundial;
 import org.apache.ibatis.mapping.Environment;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.SqlSessionFactory;
-import org.mybatis.spring.boot.autoconfigure.MybatisAutoConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 
 /**
  * SundialTweakConfig
@@ -39,8 +37,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
  * Create at 2020/05/31 14:57
  */
 @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
-@ConditionalOnClass(MybatisAutoConfiguration.class)
-@AutoConfigureAfter(MybatisAutoConfiguration.class)
+@AutoConfigureAfter(name = {"org.mybatis.spring.boot.autoconfigure.MybatisAutoConfiguration", "com.baomidou.mybatisplus.autoconfigure.MybatisPlusAutoConfiguration"})
 public class SundialTweakConfig {
     @Autowired
     public void configSqlSessionFactory(SqlSessionFactory sqlSessionFactory) {

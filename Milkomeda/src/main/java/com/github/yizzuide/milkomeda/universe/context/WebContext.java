@@ -22,7 +22,11 @@
 package com.github.yizzuide.milkomeda.universe.context;
 
 import com.github.yizzuide.milkomeda.comet.core.CometResponseWrapper;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import lombok.Getter;
+import lombok.Setter;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -30,31 +34,24 @@ import org.springframework.util.PathMatcher;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.util.WebUtils;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
+import org.springframework.web.util.pattern.PathPatternParser;
 
 /**
- * WebContext
+ * Spring web context.
  *
  * @author yizzuide
  * @since 1.14.0
- * @version 3.14.0
+ * @version 4.0.0
  * <br>
  * Create at 2019/11/11 21:38
  */
 public final class WebContext {
 
-    /**
-     * 路径匹配器
-     */
-    @Getter
+    @Setter @Getter
     private static PathMatcher mvcPathMatcher;
 
-    public static void setMvcPathMatcher(PathMatcher mvcPathMatcher) {
-        WebContext.mvcPathMatcher = mvcPathMatcher;
-    }
+    @Setter @Getter
+    private static PathPatternParser mvcPatternParser;
 
     /**
      * 获取请求信息

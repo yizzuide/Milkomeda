@@ -26,13 +26,19 @@ import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.json.JsonReadFeature;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
+import com.github.yizzuide.milkomeda.universe.context.RedisHolder;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
@@ -44,6 +50,7 @@ import java.util.TimeZone;
  * Redis global config.
  *
  * @since 3.15.0
+ * @version 4.0.0
  * @author yizzuide
  * <br>
  * Create at 2022/12/08 01:53
@@ -51,12 +58,16 @@ import java.util.TimeZone;
 @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 @AutoConfigureAfter(RedisAutoConfiguration.class)
 @Configuration
-public class RedisGlobalConfig {
+public class RedisGlobalConfig implements InitializingBean {
+
+    // Spring Boot 3.0：LettuceConnectionFactory注入类型改为RedisConnectionFactory
+    @Autowired
+    private RedisConnectionFactory redisConnectionFactory;
+
     @Bean
     @ConditionalOnClass(name = "org.springframework.data.redis.core.RedisTemplate")
-    public RedisTemplate<String, Serializable> jsonRedisTemplate(LettuceConnectionFactory redisConnectionFactory) {
+    public RedisTemplate<String, Serializable> jsonRedisTemplate() {
         RedisTemplate<String, Serializable> redisTemplate = new RedisTemplate<>();
-        Jackson2JsonRedisSerializer<Object> jackson2JsonRedisSerializer = new Jackson2JsonRedisSerializer<>(Object.class);
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -64,12 +75,21 @@ public class RedisGlobalConfig {
         TimeZone china = TimeZone.getTimeZone("GMT+08:00");
         objectMapper.setTimeZone(china);
         objectMapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
-        jackson2JsonRedisSerializer.setObjectMapper(objectMapper);
+        Jackson2JsonRedisSerializer<Object> jackson2JsonRedisSerializer = new Jackson2JsonRedisSerializer<>(objectMapper, Object.class);
         redisTemplate.setKeySerializer(new StringRedisSerializer());
         redisTemplate.setValueSerializer(jackson2JsonRedisSerializer);
         redisTemplate.setHashKeySerializer(new StringRedisSerializer());
         redisTemplate.setHashValueSerializer(jackson2JsonRedisSerializer);
         redisTemplate.setConnectionFactory(redisConnectionFactory);
+        RedisHolder.setJsonRedisTemplate(redisTemplate);
         return redisTemplate;
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        ObjectProvider<StringRedisTemplate> beanProvider = ApplicationContextHolder.get().getBeanProvider(StringRedisTemplate.class);
+        if (beanProvider.getIfAvailable()!= null) {
+            RedisHolder.setStringRedisTemplate(beanProvider.getIfAvailable());
+        }
     }
 }

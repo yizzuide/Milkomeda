@@ -21,21 +21,25 @@
 
 package com.github.yizzuide.milkomeda.universe.parser.url;
 
-import com.github.yizzuide.milkomeda.util.Strings;
+import com.github.yizzuide.milkomeda.universe.context.WebContext;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.http.server.PathContainer;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
+import org.springframework.web.util.ServletRequestPathUtils;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 /**
- * URLPathMatcher
- * 路径匹配器
+ * URI路径匹配器
  *
  * @see org.springframework.util.AntPathMatcher
  * @see org.springframework.web.util.pattern.PathPatternParser
- * @author yizzuide
  * @since 3.0.0
- * <br>
+ * @version 4.0.0
+ * @author yizzuide
  * Create at 2020/03/29 14:07
  */
 public class URLPathMatcher {
@@ -61,17 +65,27 @@ public class URLPathMatcher {
     /**
      * 匹配路径
      * @param sourcePaths   源路径列表
-     * @param targetPath    目标路径
+     * @param targetPath    目标路径（如果为空，从request中获取)
      * @return  匹配是否成功
      */
-    public static boolean match(List<String> sourcePaths, String targetPath) {
-        // Springboot 2.6: Using PathPatternParser to match.
-        //return sourcePaths.stream().anyMatch(pathPattern -> WebContext.getMvcPatternParser().parse(pathPattern).matches(PathContainer.parsePath(targetPath)));
+    public static boolean match(@NonNull List<String> sourcePaths, @Nullable String targetPath) {
+        if (targetPath == null) {
+            HttpServletRequest request = WebContext.getRequestNonNull();
+            if (ServletRequestPathUtils.hasCachedPath(request)) {
+                targetPath = ServletRequestPathUtils.getCachedPathValue(request);
+            }
+        }
+        String finalPath = targetPath;
+        if (finalPath == null) {
+            return false;
+        }
+        // Spring Boot 2.6: Using PathPatternParser to match.
+        return sourcePaths.stream().anyMatch(pathPattern -> WebContext.getMvcPatternParser().parse(pathPattern).matches(PathContainer.parsePath(finalPath)));
 
         // Simple impl...
-        boolean matched = false;
+        /*boolean matched = false;
         for (String path : sourcePaths) {
-            if (Strings.isEmpty(path)) continue;
+            if (StringExtensionsKt.isEmpty(path)) continue;
             // 去除最后一个/
             String lastChar = path.substring(path.length() - 1);
             if (path.length() > 1 && "/".equals(lastChar)) {
@@ -104,6 +118,6 @@ public class URLPathMatcher {
                 break;
             }
         }
-        return matched;
+        return matched;*/
     }
 }

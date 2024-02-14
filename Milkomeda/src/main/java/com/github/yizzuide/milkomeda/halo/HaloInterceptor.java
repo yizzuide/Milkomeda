@@ -107,7 +107,7 @@ public class HaloInterceptor implements Interceptor {
         // 参数名映射列表
         List<ParameterMapping> parameterMappings = boundSql.getParameterMappings();
         List<String> params = new ArrayList<>();
-        if (parameterMappings.size() > 0 && parameterObject != null) {
+        if (!parameterMappings.isEmpty() && parameterObject != null) {
             // 类型注册查看 {@link org.apache.ibatis.type.TypeHandlerRegistry.TypeHandlerRegistry(org.apache.ibatis.session.Configuration)}
             TypeHandlerRegistry typeHandlerRegistry = configuration.getTypeHandlerRegistry();
             // 当前为简单类型值

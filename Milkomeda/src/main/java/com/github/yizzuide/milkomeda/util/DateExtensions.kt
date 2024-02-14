@@ -19,7 +19,6 @@
  * SOFTWARE.
  */
 
-@file:JvmName("Dates")
 package com.github.yizzuide.milkomeda.util
 
 import java.time.Instant
@@ -36,7 +35,7 @@ import java.util.*
  * <br>
  * Create at 2022/09/27 00:57
  */
-class DateExtensionsKt {
+class Dates {
 }
 
 fun timestamp2Date(timestamp: Long): Date? {

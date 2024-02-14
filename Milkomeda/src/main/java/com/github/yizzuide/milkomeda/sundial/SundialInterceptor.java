@@ -36,9 +36,9 @@ import org.apache.ibatis.session.RowBounds;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.util.CollectionUtils;
-import com.github.yizzuide.milkomeda.util.Strings;
+import com.github.yizzuide.milkomeda.util.StringExtensionsKt;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
@@ -71,7 +71,7 @@ public class SundialInterceptor implements Interceptor {
 
     private final Map<String, Map<String, Method>> cacheMap = new HashMap<>();
 
-    private static final Pattern WHITE_SPACE_BLOCK_PATTERN = Pattern.compile("([\\s]{2,}|[\\t\\r\\n])");
+    private static final Pattern WHITE_SPACE_BLOCK_PATTERN = Pattern.compile("(\\s{2,}|[\\t\\r\\n])");
 
     @Override
     public Object intercept(Invocation invocation) throws Throwable {
@@ -88,7 +88,7 @@ public class SundialInterceptor implements Interceptor {
         String nodeExp = sundial.nodeExp();
         String partExp = sundial.partExp();
         // 未设置节点拆分和表拆分，直接返回
-        if (Strings.isEmpty(nodeExp) && Strings.isEmpty(partExp)) {
+        if (StringExtensionsKt.isEmpty(nodeExp) && StringExtensionsKt.isEmpty(partExp)) {
             return invocation.proceed();
         }
 
@@ -108,7 +108,7 @@ public class SundialInterceptor implements Interceptor {
         root.setFn(shardingFunction);
         String schema = null;
         // 包含分库的处理
-        if (sundial.shardingType() != ShardingType.TABLE && !Strings.isEmpty(nodeExp)) {
+        if (sundial.shardingType() != ShardingType.TABLE && !StringExtensionsKt.isEmpty(nodeExp)) {
             String node = SimpleElParser.parse(nodeExp, root, String.class);
             SundialProperties.DataNode dataNode = props.getSharding().getNodes().get(node);
             // node_001 --转--> node_1
@@ -129,7 +129,7 @@ public class SundialInterceptor implements Interceptor {
                 SundialHolder.setDataSourceType(sundial.key());
             }
             // 需要添加的数据库名
-            if (!Strings.isEmpty(dataNode.getSchema())) {
+            if (!StringExtensionsKt.isEmpty(dataNode.getSchema())) {
                 schema = dataNode.getSchema();
             }
             // 如果仅为分库类型
@@ -146,7 +146,7 @@ public class SundialInterceptor implements Interceptor {
         }
 
         // 分库分表 or 分表
-        if (!Strings.isEmpty(partExp)) {
+        if (!StringExtensionsKt.isEmpty(partExp)) {
             String part = SimpleElParser.parse(partExp, root, String.class);
             // 如果保留原表名，去掉0索引后缀
             if (props.getSharding().isOriginalNameAsIndexZero()) {

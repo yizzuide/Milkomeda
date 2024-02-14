@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 yizzuide All rights Reserved.
+ * Copyright (c) 2024 yizzuide All rights Reserved.
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -18,18 +18,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-@file:JvmName("CollectionsKt")
-package com.github.yizzuide.milkomeda.util
+
+package com.github.yizzuide.milkomeda.demo.comet.repository;
+
+import com.github.yizzuide.milkomeda.comet.core.XCometData;
+import com.github.yizzuide.milkomeda.wormhole.WormholeEvent;
+import com.github.yizzuide.milkomeda.wormhole.WormholeEventTrack;
+import com.github.yizzuide.milkomeda.wormhole.WormholeEventTracker;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
 
 /**
- * Collection util
+ * CometXRepository
  *
- * @since 3.15.0
  * @author yizzuide
- * <br>
- * Create at 2023/01/27 19:10
+ * Create at 2024/01/29 15:53
  */
-class CollectionExtensionsKt {
+@Slf4j
+@WormholeEventTracker
+public class CometXRepository implements WormholeEventTrack<WormholeEvent<XCometData>> {
+    @Async
+    @Override
+    public void track(WormholeEvent<XCometData> event) {
+        log.info("CometXRepository track: {}", event);
+    }
 }
-
-fun singletonMap(key: String, value: Any): Map<String, Any> = mapOf(key to value)

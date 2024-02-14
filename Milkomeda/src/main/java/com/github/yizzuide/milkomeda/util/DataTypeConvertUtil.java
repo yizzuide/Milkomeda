@@ -58,7 +58,7 @@ public class DataTypeConvertUtil {
     public static String toCamelCase(String str) {
         str = str.toLowerCase();
         Matcher matcher = linePattern.matcher(str);
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         while (matcher.find()) {
             matcher.appendReplacement(sb, matcher.group(1).toUpperCase());
         }
@@ -74,7 +74,7 @@ public class DataTypeConvertUtil {
      */
     public static String humpToLine(String str) {
         Matcher matcher = humpPattern.matcher(str);
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         while (matcher.find()) {
             matcher.appendReplacement(sb, "_" + matcher.group(0).toLowerCase());
         }
@@ -136,7 +136,7 @@ public class DataTypeConvertUtil {
     }
 
     /**
-     * Create counter stream
+     * Create counter-stream
      * @param count count of number
      * @return  Stream
      */
@@ -173,8 +173,9 @@ public class DataTypeConvertUtil {
      * @return 字节数组
      */
     public static byte[] hexStr2Byte(String hexStr) {
-        if (hexStr.length() < 1)
+        if (hexStr.isEmpty()) {
             return null;
+        }
         byte[] result = new byte[hexStr.length() / 2];
         for (int i = 0; i < hexStr.length() / 2; i++) {
             int high = Integer.parseInt(hexStr.substring(i * 2, i * 2 + 1), 16);
@@ -193,7 +194,6 @@ public class DataTypeConvertUtil {
         Map<String, Object> map;
         try {
             map = new HashMap<>();
-
             BeanInfo beanInfo = Introspector.getBeanInfo(object.getClass());
             PropertyDescriptor[] propertyDescriptors = beanInfo.getPropertyDescriptors();
             for (PropertyDescriptor property : propertyDescriptors) {
@@ -208,7 +208,6 @@ public class DataTypeConvertUtil {
             // 可能会把自己的 class 和 hashcode 编进去，直接去掉
             map.remove("class");
         } catch (Exception e) {
-            e.printStackTrace();
             return new HashMap<>();
         }
         Set<String> set = map.keySet();

@@ -26,27 +26,32 @@ import com.github.yizzuide.milkomeda.universe.extend.env.Environment;
 import com.github.yizzuide.milkomeda.universe.extend.web.handler.DelegatingContextFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.boot.web.servlet.filter.OrderedFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.util.PathMatcher;
-import org.springframework.web.filter.DelegatingFilterProxy;
+import org.springframework.web.servlet.config.annotation.DelegatingWebMvcConfiguration;
+import org.springframework.web.util.pattern.PathPatternParser;
 
 import java.util.Collections;
 
 /**
  * MilkomedaContextConfig
  *
+ * @see org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport
  * @author yizzuide
  * @since 2.0.0
- * @version 3.15.0
+ * @version 4.0.0
  * <br>
  * Create at 2019/12/13 19:09
  */
-@AutoConfigureAfter(WebMvcAutoConfiguration.class)
+@EnableConfigurationProperties(MilkomedaProperties.class)
+@AutoConfigureAfter({WebMvcAutoConfiguration.class, DelegatingWebMvcConfiguration.class})
+@EnableAspectJAutoProxy(exposeProxy = true)
 @Configuration
 public class MilkomedaContextConfig {
 
@@ -54,16 +59,12 @@ public class MilkomedaContextConfig {
     private MilkomedaProperties properties;
 
     @Bean
-    @ConditionalOnMissingBean
-    public Environment env() {
+    public Environment env(PathMatcher mvcPathMatcher, PathPatternParser mvcPatternParser) {
+        WebContext.setMvcPathMatcher(mvcPathMatcher);
+        WebContext.setMvcPatternParser(mvcPatternParser);
         Environment environment = new Environment();
         environment.putAll(properties.getEnv());
         return environment;
-    }
-
-    @Autowired
-    public void config(PathMatcher mvcPathMatcher) {
-        WebContext.setMvcPathMatcher(mvcPathMatcher);
     }
 
     @Bean
@@ -71,13 +72,11 @@ public class MilkomedaContextConfig {
         return new DelegatingContextFilter();
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
     @Bean
-    public FilterRegistrationBean delegatingFilterRegistrationBean() {
-        FilterRegistrationBean delegatingFilterRegistrationBean = new FilterRegistrationBean();
+    public FilterRegistrationBean<DelegatingContextFilter> delegatingFilterRegistrationBean() {
+        FilterRegistrationBean<DelegatingContextFilter> delegatingFilterRegistrationBean = new FilterRegistrationBean<>();
         // 设置代理注册的Bean
-        delegatingFilterRegistrationBean.setFilter(new DelegatingFilterProxy("delegatingContextFilter"));
-        delegatingFilterRegistrationBean.setName("delegatingContextFilter");
+        delegatingFilterRegistrationBean.setFilter(delegatingContextFilter());
         delegatingFilterRegistrationBean.setUrlPatterns(Collections.singleton("/*"));
         // Order defaults to after OrderedRequestContextFilter
         // 解决无法从RequestContext获取信息的问题

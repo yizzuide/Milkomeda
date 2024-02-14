@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,6 +20,7 @@ import java.util.Map;
  * <br>
  * Create at 2022/02/10 16:18
  */
+// Spring Boot 2.3: WebServerInitializedEvent is now published before the ContextRefreshedEvent
 @Slf4j
 @Component
 public class MilkomedaStartListener implements ApplicationListener<ApplicationStartedEvent> {

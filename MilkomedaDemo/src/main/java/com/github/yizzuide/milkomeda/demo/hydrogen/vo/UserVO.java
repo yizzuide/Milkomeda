@@ -2,8 +2,8 @@ package com.github.yizzuide.milkomeda.demo.hydrogen.vo;
 
 import lombok.Data;
 
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.Size;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Size;
 
 /**
  * UserVO

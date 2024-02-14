@@ -46,6 +46,11 @@ spring:
     resources:
       add-mappings: false
 
+  # Spring Boot 3.2：开启虚拟线程
+  threads:
+    virtual:
+      enabled: true
+
   mvc:
     # 异步超时
     async:
@@ -54,13 +59,6 @@ spring:
     # Spring Boot 2.6: 默认的路径匹配器由AntPathMatcher改为PathPatternParser（包括Actuator，但matching-strategy不作用于Actuator），匹配根路径必须添加"/"
     #pathmatch:
       #matching-strategy: ant_path_matcher
-
-    # 让404错误抛出NoHandlerFoundException异常
-    throw-exception-if-no-handler-found: true
-
-    # 资源不生成mapping映射（Springboot2.4 迁移到web里）
-    #resources:
-    #add-mappings: false
 
     format:
       date: yyyy-MM-dd

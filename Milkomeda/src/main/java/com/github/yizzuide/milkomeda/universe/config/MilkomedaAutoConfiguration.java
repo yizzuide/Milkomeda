@@ -22,8 +22,6 @@
 package com.github.yizzuide.milkomeda.universe.config;
 
 import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.Import;
 
 /**
@@ -31,17 +29,16 @@ import org.springframework.context.annotation.Import;
  *
  * @author yizzuide
  * @since 0.2.1
- * @version 3.15.0
+ * @version 4.0.0
+ * @see org.springframework.boot.context.annotation.ImportCandidates#load(Class, ClassLoader)
  * @see org.springframework.core.io.support.SpringFactoriesLoader
  * @see org.springframework.boot.SpringApplication
  * <br>
  * Create at 2019/04/12 11:29
  */
-// Springboot 2.7: @AutoConfiguration should be used to annotate top-level autoconfiguration classes,
+// Spring Boot 2.7: @AutoConfiguration should be used to annotate top-level autoconfiguration classes,
 //    Configuration classes that are nested within or imported by an @AutoConfiguration class should continue to use @Configuration as before.
 @AutoConfiguration
 @Import(MilkomedaContextConfig.class)
-@EnableConfigurationProperties(MilkomedaProperties.class)
-@EnableAspectJAutoProxy(exposeProxy = true)
 public class MilkomedaAutoConfiguration {
 }

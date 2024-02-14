@@ -26,7 +26,7 @@ import com.github.yizzuide.milkomeda.comet.core.CometRecorder;
 import com.github.yizzuide.milkomeda.comet.core.EventDrivenWebCometData;
 import lombok.extern.slf4j.Slf4j;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * 日志收集器记录器

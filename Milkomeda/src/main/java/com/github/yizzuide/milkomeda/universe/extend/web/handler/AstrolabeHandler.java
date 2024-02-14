@@ -23,8 +23,8 @@ package com.github.yizzuide.milkomeda.universe.extend.web.handler;
 
 import org.springframework.web.context.request.WebRequestInterceptor;
 
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
 
 /**
  * Request aspect handler that impl used filter which compare with {@link WebRequestInterceptor} impl used interceptor.

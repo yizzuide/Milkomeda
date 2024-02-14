@@ -29,8 +29,8 @@ import org.springframework.security.web.authentication.AuthenticationFailureHand
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -111,7 +111,7 @@ class RefreshSuccessHandler implements AuthenticationSuccessHandler {
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                         Authentication authentication) {
-        boolean shouldRefresh = shouldTokenRefresh(CrustContext.get().getUserInfo(null).getTokenExpire());
+        boolean shouldRefresh = shouldTokenRefresh(CrustContext.get().getUserInfo().getTokenExpire());
         if (shouldRefresh) {
             CrustUserInfo<?, CrustPermission> userInfo = CrustContext.get().refreshToken();
             if (userInfo != null) {

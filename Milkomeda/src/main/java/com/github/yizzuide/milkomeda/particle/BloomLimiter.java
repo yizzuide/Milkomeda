@@ -25,7 +25,8 @@ import com.github.yizzuide.milkomeda.universe.algorithm.hash.BloomHashWrapper;
 import com.github.yizzuide.milkomeda.util.RedisUtil;
 import lombok.Setter;
 import org.springframework.data.redis.connection.RedisConnection;
-import com.github.yizzuide.milkomeda.util.Strings;
+import com.github.yizzuide.milkomeda.util.StringExtensionsKt;
+import org.springframework.util.Assert;
 
 import java.util.Collections;
 import java.util.List;
@@ -36,7 +37,7 @@ import java.util.List;
  *
  * @author yizzuide
  * @since 3.9.0
- * @version 3.12.10
+ * @version 4.0.0
  * <br>
  * Create at 2020/06/23 16:03
  */
@@ -74,14 +75,14 @@ public class BloomLimiter extends LimitHandler {
     public <R> R limit(String key, Process<R> process) throws Throwable {
         int splitIndex = key.lastIndexOf(valueSeparator);
         // 如果没有设置bitKey，自动设置redis的key前辍
-        if (Strings.isEmpty(bitKey)) {
+        if (StringExtensionsKt.isEmpty(bitKey)) {
             bitKey = key.substring(0, splitIndex);
         }
         String value = key.substring(splitIndex + 1);
         int[] offset = getBloomHashWrapper().offset(value);
         Particle particle = null;
         for (int i : offset) {
-            Boolean hit = getRedisTemplate().execute((RedisConnection connection) -> connection.getBit(bitKey.getBytes(), i));
+            Boolean hit = getRedisTemplate().execute((RedisConnection connection) -> connection.stringCommands().getBit(bitKey.getBytes(), i));
             assert hit != null;
             // 只要有一bit为0，即匹配失败
             if (!hit) {
@@ -108,19 +109,18 @@ public class BloomLimiter extends LimitHandler {
      * @param values 记录列表
      */
     public void addAll(List<String> values) {
-        assert bitKey != null;
+        Assert.notNull(bitKey, "Please set redis bitmap key with `bitKey` before add data.");
         RedisUtil.batchConn((connection) -> {
             for (String value : values) {
                 int[] offset = getBloomHashWrapper().offset(value);
                 for (int i : offset) {
-                    connection.setBit(bitKey.getBytes(), i, true);
+                    connection.stringCommands().setBit(bitKey.getBytes(), i, true);
                 }
             }
         }, getRedisTemplate());
     }
 
     private BloomHashWrapper<String> getBloomHashWrapper() {
-        // 双重检测
         if (bloomHashWrapper == null) {
             synchronized (this) {
                 if (bloomHashWrapper == null) {

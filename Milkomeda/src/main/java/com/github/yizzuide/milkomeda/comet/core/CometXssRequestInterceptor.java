@@ -28,7 +28,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.safety.Safelist;
 import org.springframework.util.CollectionUtils;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**

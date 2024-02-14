@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 yizzuide All rights Reserved.
+ * Copyright (c) 2024 yizzuide All rights Reserved.
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -19,16 +19,23 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.crust;
+package com.github.yizzuide.milkomeda.crust.api;
 
+import com.github.yizzuide.milkomeda.crust.AbstractCrust;
+import com.github.yizzuide.milkomeda.crust.CrustProperties;
+import com.github.yizzuide.milkomeda.crust.CrustURLMappingConfigurer;
+import com.github.yizzuide.milkomeda.light.Cache;
+import com.github.yizzuide.milkomeda.light.LightCache;
 import com.github.yizzuide.milkomeda.universe.metadata.BeanIds;
 import com.github.yizzuide.milkomeda.universe.polyfill.SpringMvcPolyfill;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.core.Ordered;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
@@ -38,25 +45,40 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Crust config used for microservice.
+ * Crust config used for api service.
  *
  * @since 3.15.0
+ * @version 4.0.0
  * @author yizzuide
  * <br>
  * Create at 2022/12/07 00:12
  */
+@Import(CrustURLMappingConfigurer.class)
 @EnableConfigurationProperties(CrustProperties.class)
 @Configuration
-public class CrustMicroConfig {
+public class CrustApiConfig {
 
-    @Bean
-    public CrustTokenResolver crustTokenResolver(CrustProperties props) {
-        return new CrustTokenResolver(props);
+    @Autowired
+    private CrustProperties crustProps;
+
+    @Bean(AbstractCrust.BEAN_NAME)
+    public AbstractCrust crustApi() {
+        return new CrustApi();
     }
 
     @Bean
     public CrustInterceptor crustInterceptor() {
         return new CrustInterceptor();
+    }
+
+    @Bean(AbstractCrust.CODE_CATCH_NAME)
+    @ConditionalOnProperty(prefix = "milkomeda.crust", name = "login-type", havingValue = "CODE")
+    public Cache crustCodeLightCache() {
+        LightCache lightCache = new LightCache();
+        lightCache.setEnableSuperCache(false);
+        lightCache.setOnlyCacheL2(true);
+        lightCache.setL2Expire(crustProps.getCodeExpire().getSeconds());
+        return lightCache;
     }
 
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
@@ -80,7 +102,7 @@ public class CrustMicroConfig {
             if (!CollectionUtils.isEmpty(additionPermitUrls)) {
                 allowURLs.addAll(additionPermitUrls);
             }
-            SpringMvcPolyfill.addDynamicInterceptor(crustInterceptor,  Ordered.HIGHEST_PRECEDENCE + 1, Collections.singletonList("/**"),
+            SpringMvcPolyfill.addDynamicInterceptor(crustInterceptor,  Ordered.HIGHEST_PRECEDENCE, Collections.singletonList("/**"),
                     allowURLs, requestMappingHandlerMapping);
         }
     }

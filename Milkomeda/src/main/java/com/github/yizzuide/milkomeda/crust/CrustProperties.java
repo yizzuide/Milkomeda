@@ -21,8 +21,11 @@
 
 package com.github.yizzuide.milkomeda.crust;
 
+import com.github.yizzuide.milkomeda.crust.api.EnableCrustApi;
+import com.github.yizzuide.milkomeda.light.LightProperties;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.boot.convert.DurationUnit;
 
 import java.time.Duration;
@@ -35,15 +38,16 @@ import java.util.List;
  *
  * @author yizzuide
  * @since 1.14.0
- * @version 3.15.0
+ * @version 4.0.0
  * <br>
  * Create at 2019/11/11 15:51
  */
 @Data
 @ConfigurationProperties("milkomeda.crust")
 public class CrustProperties {
+
     /**
-     * 使用Token的无状态登录（后台session管理方式设置为false）
+     * Used token authorization is default, set false if you use the session mode.
      */
     private boolean stateless = true;
 
@@ -54,11 +58,23 @@ public class CrustProperties {
     private CrustLoginType loginType = CrustLoginType.PASSWORD;
 
     /**
-     * Code verify expire time, must set `CrustLoginType.CODE` with property of {@link CrustProperties#loginType}.
+     * Code verify expire time, the login type must be `CrustLoginType.CODE`.
      * @since 3.15.0
      */
     @DurationUnit(ChronoUnit.SECONDS)
     private Duration codeExpire = Duration.ofSeconds(60);
+
+    /**
+     * Code length, the login type must be `CrustLoginType.CODE`.
+     * @since 4.0.0
+     */
+    private int codeLength = 6;
+
+    /**
+     * Code for test environment, the login type must be `CrustLoginType.CODE`.
+     * @since 4.0.0
+     */
+    private String testCode = "000000";
 
     /**
      * Set false if you need custom config via {@link CrustConfigurerAdapter}.
@@ -67,120 +83,122 @@ public class CrustProperties {
     private boolean useAutoConfig = true;
 
     /**
-     * Set false if you use stateless token.
-     * 认证缓存（Session方式下仅开启超级缓存，因为Session本身有Session级缓存）
+     * Set false if you don't need to cache (not supported with {@link EnableCrustApi}). <br>
+     * Note：In Session mode, only the super cache is enabled because the Session itself has Session scope cache.
      */
     private boolean enableCache = true;
 
     /**
-     * Set true if cache only used memory.
+     * Set light cache properties.
+     * @since 4.0.0
      */
-    private boolean cacheInMemory = false;
+    @NestedConfigurationProperty
+    private LightProperties cache = new LightProperties();
 
     /**
-     * Set false if you need get entity of user info immediately.
+     * Set false if you need to get entity of user info immediately (not supported with {@link EnableCrustApi}).
      * @since 3.15.0
      */
     private boolean enableLoadEntityLazy = true;
 
     /**
-     * 使用非对称方式（默认为false)<br>
-     * 注意：如果设置true，则必须设置<code>priKey</code>和<code>pubKey</code>
+     * Used RSA encryption (not supported with {@link EnableCrustApi}). <br>
+     * Note：Must be config with <code>priKey</code> and <code>pubKey</code> if set this is true.
      */
     private boolean useRsa = false;
 
     /**
-     * 对称密钥
+     * Used AES encryption (not supported with {@link EnableCrustApi}). <br>
      */
     private String secureKey;
 
     /**
-     * 非对称公钥
+     * RSA public key (not supported with {@link EnableCrustApi}). <br>
      */
     private String pubKey;
 
     /**
-     * 非对称私钥
+     * RSA private key (not supported with {@link EnableCrustApi}). <br>
      */
     private String priKey;
 
     /**
-     * Token过期时间（默认30分钟，单位：分）
+     * Token expire time.
      */
     @DurationUnit(ChronoUnit.MINUTES)
     private Duration expire = Duration.ofMinutes(30);
 
     /**
-     * 请求头自定义的token名（默认为token)
+     *  Set token name in request header.
      */
     private String tokenName = "token";
 
     /**
-     * 是否使用Bcrypt，实现直接在密码里加salt（默认为true）<br>
-     * 什么是Bcrypt？Bcrypt能够将salt添加到加密的密码中，解密时可以将salt提取出来
+     * Used Spring Security Bcrypt to encode password (not supported with {@link EnableCrustApi}). <br>
+     * Bcrypt is able to add salt to an encrypted password, which can be extracted when decrypted.
      */
     private boolean useBcrypt = true;
 
     /**
-     * 开启Token自动刷新（默认开启）
+     * Enable auto refresh token (not supported with {@link EnableCrustApi}). <br>
      */
     private boolean enableAutoRefreshToken = true;
 
     /**
-     * Token访问即将过期的刷新间隔
+     * The refreshing interval for the Token access to expire (not supported with {@link EnableCrustApi}). <br>
      */
     @DurationUnit(ChronoUnit.MINUTES)
     private Duration refreshTokenInterval = Duration.ofMinutes(5);
 
     /**
-     * Token刷新响应字段
+     * The refreshing token name in response header (not supported with {@link EnableCrustApi}). <br>
      */
     private String refreshTokenName = "Authorization";
 
     /**
-     * 登录页面路径（仅在stateless=false时有效，默认/login）
+     * The login request path needs allowed (not supported with {@link EnableCrustApi}). <br>
      */
     private String loginUrl = "/login";
 
     /**
-     * 登出路径（默认/logout）
+     * The logout request path (not supported with {@link EnableCrustApi}). <br>
      */
     private String logoutUrl = "/logout";
 
     /**
-     * 默认允许访问的URL
+     * The default permit urls.
      * @since 3.5.0
      */
     private List<String> permitUrls = Arrays.asList("/favicon.ico", "/druid/**", "/doc.html", "/webjars/**",
             "/swagger-resources/**", "/swagger-ui.html");
 
     /**
-     * 添加允许访问的URL
+     * The addition permit urls.
      * @since 3.5.0
      */
     private List<String> additionPermitUrls;
 
     /**
-     * 允许的静态资源
+     * The static resource permit urls.
      * @since 3.5.0
      */
     private List<String> allowStaticUrls;
 
     /**
-     * 根路径跳转
+     * The root path '/' redirect url (not supported with {@link EnableCrustApi}). <br>
      * @since 3.12.10
      */
     private String rootRedirect;
 
     /**
-     * 静态资源路径
-     * 需要配置<code>spring.resources.add-mappings=false</code>
+     * The Static resource path. <br>
+     * Keep config in yml: <code>spring.resources.add-mappings=false</code>
      * @since 3.12.10
      */
-    private String staticLocation = CrustConfig.CrustURLMappingConfigurer.staticLocation;
+    private String staticLocation = CrustURLMappingConfigurer.staticLocation;
 
     /**
-     * 配置静态资源映射
+     * Configure static resource mapping.
      * @since 3.14.0
      */
     private List<ResourceMapping> resourceMappings;

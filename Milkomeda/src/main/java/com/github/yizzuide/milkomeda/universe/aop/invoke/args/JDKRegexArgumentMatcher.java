@@ -21,7 +21,7 @@
 
 package com.github.yizzuide.milkomeda.universe.aop.invoke.args;
 
-import com.github.yizzuide.milkomeda.util.Strings;
+import com.github.yizzuide.milkomeda.util.StringExtensionsKt;
 
 import java.util.regex.Pattern;
 
@@ -37,7 +37,7 @@ public class JDKRegexArgumentMatcher extends AbstractArgumentMatcher {
     @Override
     public boolean support(ArgumentDefinition argumentDefinition) {
         return ArgumentMatchType.REGEX.equals(argumentDefinition.getMatchType()) &&
-                (argumentDefinition.getIdentifier() != null && !Strings.isEmpty(argumentDefinition.getIdentifier().toString()));
+                (argumentDefinition.getIdentifier() != null && !StringExtensionsKt.isEmpty(argumentDefinition.getIdentifier().toString()));
     }
 
     @Override

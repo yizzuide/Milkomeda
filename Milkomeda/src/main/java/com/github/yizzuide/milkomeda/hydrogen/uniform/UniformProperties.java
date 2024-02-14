@@ -32,6 +32,7 @@ import java.util.Map;
  *
  * @author yizzuide
  * @since 3.0.0
+ * @version 4.0.0
  * <br>
  * Create at 2020/04/06 00:06
  */
@@ -56,6 +57,12 @@ public class UniformProperties {
      * @since 3.14.0
      */
     private ResultVO.CodeType codeType = ResultVO.CodeType.INT;
+
+    /**
+     * Default success code used by {@link UniformResult}.
+     * @since 4.0.0
+     */
+    private int defaultSuccessCode = 0;
 
     /**
      * Ignore add field to message when valid fail.

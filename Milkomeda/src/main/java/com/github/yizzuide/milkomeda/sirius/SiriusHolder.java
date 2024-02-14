@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 yizzuide All rights Reserved.
+ * Copyright (c) 2024 yizzuide All rights Reserved.
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -19,28 +19,19 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.wormhole;
+package com.github.yizzuide.milkomeda.sirius;
+
+import lombok.Getter;
+import lombok.Setter;
 
 /**
- * A simple interface which indicates as an application service in Domain-Driver Design.
+ * This holder which provides simple access sirius context.
  *
- * @param <R> the repository type
- *
- * @since 3.15.0
+ * @since 4.0.0
  * @author yizzuide
- * Create at 2023/07/14 03:31
+ * Create at 2024/01/10 14:42
  */
-public interface ApplicationService<R> {
-
-    /**
-     * Get {@link TransactionWorkBus} belong this application service.
-     * @return TransactionWorkBus
-     */
-    TransactionWorkBus getTransactionWorkBus();
-
-    /**
-     * Get repository proxy which accessed under this application service.
-     * @return repository type
-     */
-    R getRepositoryProxy();
+public final class SiriusHolder {
+    @Setter @Getter
+    private static TenantInterceptHandler tenantInterceptHandler;
 }

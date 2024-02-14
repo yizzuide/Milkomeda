@@ -37,8 +37,10 @@ import java.util.Map;
  * Create at 2019/12/12 18:04
  */
 @Data
-@ConfigurationProperties("milkomeda.comet")
+@ConfigurationProperties(CometProperties.PREFIX)
 public class CometProperties {
+
+    public static final String PREFIX = "milkomeda.comet";
 
     /**
      * 允许开启请求包装类读取请求消息体（收集application/json类型消息体请求日志，或使用 {@link CometParam } 时必须开启）
@@ -55,12 +57,12 @@ public class CometProperties {
     /**
      * 成功状态码
      */
-    private String statusSuccessCode = "1";
+    private int statusSuccessCode = 0;
 
     /**
      * 失败状态码
      */
-    private String statusFailCode = "2";
+    private int statusFailCode = 1;
 
     /**
      * Config request parameter interceptor.

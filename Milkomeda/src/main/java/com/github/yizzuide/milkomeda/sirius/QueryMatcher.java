@@ -57,5 +57,5 @@ public @interface QueryMatcher {
      * @return  group name
      * @since 3.15.0
      */
-    String[] group() default { "default" };
+    String[] group() default { IPageableService.DEFAULT_GROUP };
 }
