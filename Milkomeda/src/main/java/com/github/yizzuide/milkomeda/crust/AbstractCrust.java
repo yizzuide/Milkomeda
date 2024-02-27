@@ -162,6 +162,16 @@ public abstract class AbstractCrust {
     public abstract CrustUserInfo<?, CrustPermission> refreshToken();
 
     /**
+     * Custom for permission any match.
+     * @param permissions permission list
+     * @return  ture if match
+     * @since 3.14.0
+     */
+    public boolean permitAny(String ...permissions) {
+        return true;
+    }
+
+    /**
      * 从数据源加载用户
      *
      * @param uid user id
