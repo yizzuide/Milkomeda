@@ -349,21 +349,15 @@ public class Crust extends AbstractCrust {
             return token;
         }
         if (checkIsExists && props.isEnableCache()) {
-            String cacheL1key = DigestUtils.md5DigestAsHex(token.getBytes());
-            String cacheL2Key = CATCH_KEY_PREFIX + cacheL1key;
-            if (!crustLightCache.isCacheL1Exists(cacheL1key) && !crustLightCache.isCacheL2Exists(cacheL2Key)) {
+            String cacheKey = CATCH_KEY_PREFIX + DigestUtils.md5DigestAsHex(token.getBytes());
+            if (!crustLightCache.isCacheL1Exists(cacheKey) && !crustLightCache.isCacheL2Exists(cacheKey)) {
+                log.warn("Can't find in cache with key: {}, token: {}", cacheKey, token);
                 return null;
             }
         }
         return token;
     }
 
-    /**
-     * Custom for permission any match.
-     * @param permissions permission list
-     * @return  ture if match
-     * @since 3.14.0
-     */
     public boolean permitAny(String ...permissions) {
         Authentication authentication = getAuthentication();
         Assert.notNull(authentication, "Authentication must be not null.");
