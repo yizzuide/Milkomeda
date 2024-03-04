@@ -38,7 +38,7 @@ public class BatchInjector extends DefaultSqlInjector {
     @Override
     public List<AbstractMethod> getMethodList(Class<?> mapperClass, TableInfo tableInfo) {
         List<AbstractMethod> methodList = super.getMethodList(mapperClass, tableInfo);
-        // 内置的Insert batch, 主键是自增的不保存正常运行（仅支持Mysql）
+        // 内置的Insert batch, 主键是自增的不保证正常运行（仅支持Mysql）
         //methodList.add(new InsertBatchSomeColumn());
         methodList.add(new InsertKeyBatchMethod());
         methodList.add(new InsertBatchMethod());

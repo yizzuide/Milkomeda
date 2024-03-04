@@ -47,6 +47,13 @@ public @interface QueryMatcher {
     boolean forward() default true;
 
     /**
+     * Sort order if used with multiple fields.
+     * @return the 0 is natural, -1 is higher, 1 is lower
+     * @since 4.0.0
+     */
+    int order() default 0;
+
+    /**
      * Query link field with `targetNameField` of  {@link QueryLinker}.
      * @return match data field name
      */

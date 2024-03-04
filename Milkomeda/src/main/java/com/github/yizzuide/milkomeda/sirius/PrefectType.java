@@ -6,6 +6,7 @@ import com.github.yizzuide.milkomeda.hydrogen.uniform.UniformQueryPageData;
  * Prefect type using for {@link QueryMatcher}
  *
  * @since 3.14.0
+ * @version 4.0.0
  * @author yizzuide
  * <br>
  * Create at 2022/10/30 16:59
@@ -44,12 +45,7 @@ public enum PrefectType {
     /**
      * Match using sql `order by`.
      */
-    OrderByPre,
-
-    /**
-     * Page result list order by.
-     */
-    OrderByPost,
+    OrderBy,
 
     /**
      * Using for `startDate` and `endDate` of {@link UniformQueryPageData} query.

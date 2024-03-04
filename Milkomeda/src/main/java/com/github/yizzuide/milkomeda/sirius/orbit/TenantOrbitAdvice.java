@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 yizzuide All rights Reserved.
+ * Copyright (c) 2024 yizzuide All rights Reserved.
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -19,24 +19,34 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.sirius;
+package com.github.yizzuide.milkomeda.sirius.orbit;
 
-import org.springframework.context.annotation.Import;
-
-import java.lang.annotation.*;
+import com.github.yizzuide.milkomeda.orbit.OrbitAdvice;
+import com.github.yizzuide.milkomeda.orbit.OrbitInvocation;
+import com.github.yizzuide.milkomeda.sirius.SiriusHolder;
+import com.github.yizzuide.milkomeda.sirius.Tenant;
+import org.springframework.core.annotation.AnnotationUtils;
 
 /**
- * Sirius is a module of mybatis-plus extension.
+ * Tenant implementation of {@link OrbitAdvice}.
  *
- * @since 3.14.0
+ * @since 4.0.0
  * @author yizzuide
- * <br>
- * Create at 2022/10/30 17:45
+ * Create at 2024/03/03 00:51
  */
-@Import(SiriusConfig.class)
-@Inherited
-@Documented
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.TYPE})
-public @interface EnableSirius {
+public class TenantOrbitAdvice implements OrbitAdvice {
+    @Override
+    public Object invoke(OrbitInvocation invocation) throws Throwable {
+        Tenant tenant = AnnotationUtils.findAnnotation(invocation.getMethod(), Tenant.class);
+        if (tenant != null) {
+            SiriusHolder.setTenantIgnore(tenant.ignore());
+        }
+        try {
+            return invocation.proceed();
+        } finally {
+            if (tenant != null) {
+                SiriusHolder.clear();
+            }
+        }
+    }
 }

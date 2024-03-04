@@ -22,8 +22,6 @@ import lombok.EqualsAndHashCode;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.core.OrderComparator;
-import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.CollectionUtils;
@@ -86,9 +84,6 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
         T target = queryPageData.getEntity();
         TableInfo tableInfo = TableInfoHelper.getTableInfo(entityClass);
         Field[] fields = tClass.getDeclaredFields();
-        boolean postOrderByASC = true;
-        boolean needPostOrderBy = false;
-        Field orderField = null;
         List<Field> linkerFields = new ArrayList<>();
         Map<String, Set<QueryLinkerNode>> linkerNodes = new HashMap<>();
         // 需要在linker关联结果过滤条件
@@ -115,28 +110,11 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
                 continue;
             }
             for (QueryMatcher queryMatcher : queryMatchers) {
-                if (!Arrays.asList(queryMatcher.group()).contains(group)) {
+                if (!Arrays.asList(queryMatcher.group()).contains(group) ||
+                    queryMatcher.prefect() == PrefectType.OrderBy) {
                     continue;
                 }
-                String columnName = null;
-                // find from table info
-                for (TableFieldInfo tableFieldInfo : tableInfo.getFieldList()) {
-                    if (field.getName().equals(tableFieldInfo.getProperty())) {
-                        columnName = tableFieldInfo.getColumn();
-                        break;
-                    }
-                }
-                // get from @TableField or convert it
-                if (columnName == null) {
-                    TableField tableField = field.getDeclaredAnnotation(TableField.class);
-                    if (tableField != null) {
-                        columnName = tableField.value();
-                    }
-                    if (StringUtils.isEmpty(columnName)) {
-                        columnName = DataTypeConvertUtil.humpToLine(field.getName());
-                    }
-                }
-
+                String columnName = findColumnName(tableInfo, field);
                 Object fieldValue = null;
                 if (target != null) {
                     // can get field value from getter method？
@@ -182,16 +160,15 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
                 } else if (queryMatcher.prefect() == PrefectType.PageUnixTime) {
                     queryWrapper.ge(Objects.nonNull(queryPageData.getStartDate()), columnName, queryPageData.getStartUnixTime());
                     queryWrapper.le(Objects.nonNull(queryPageData.getEndDate()), columnName, queryPageData.getEndUnixTime());
-                } else if (queryMatcher.prefect() == PrefectType.OrderByPre) {
-                    queryWrapper.orderBy(true, queryMatcher.forward(), columnName);
-                } else if (queryMatcher.prefect() == PrefectType.OrderByPost) {
-                    needPostOrderBy = true;
-                    postOrderByASC = queryMatcher.forward();
-                    orderField = field;
                 } else {
                     additionParseQueryMatcher(queryWrapper, queryMatcher.prefectString(), columnName, fieldNonNull, fieldValue);
                 }
             }
+            List<QueryMatcher> orderedQueryMatchers = queryMatchers.stream().filter(qMatcher -> qMatcher.prefect() == PrefectType.OrderBy).collect(Collectors.toList());
+            if (!CollectionUtils.isEmpty(orderedQueryMatchers)) {
+                orderedQueryMatchers.sort(Comparator.comparingInt(QueryMatcher::order));
+            }
+            orderedQueryMatchers.forEach(queryMatcher -> queryWrapper.orderBy(true, queryMatcher.forward(), findColumnName(tableInfo, field)));
         }
 
         // 设置查询字段
@@ -245,29 +222,6 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
             records = recordPage.getRecords();
             uniformPage.setTotalSize(recordPage.getTotal());
             uniformPage.setPageCount(recordPage.getPages());
-        }
-        if (!CollectionUtils.isEmpty(records) && needPostOrderBy) {
-            // impl of Ordered
-            if (target instanceof Ordered) {
-                records = records.stream()
-                        .sorted(OrderComparator.INSTANCE.withSourceProvider(t -> t))
-                        .collect(Collectors.toList());
-            } else {
-                Field finalOrderField = orderField;
-                records.sort(Comparator.comparingInt(t -> {
-                    // can get field value from getter method？
-                    Object propertyValue = tableInfo.getPropertyValue(t, finalOrderField.getName());
-                    if (propertyValue != null) {
-                        return (Integer) propertyValue;
-                    }
-                    // reflect it!
-                    return (Integer) ReflectionUtils.getField(finalOrderField, t);
-                }));
-            }
-            // need desc?
-            if (!postOrderByASC) {
-                Collections.reverse(records);
-            }
         }
 
         // query link name
@@ -544,6 +498,21 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
             }
         }
         return null;
+    }
+
+    private String findColumnName(TableInfo tableInfo, Field field) {
+        String columnName = findColumnName(tableInfo, field.getName());
+        // get from @TableField or convert it
+        if (columnName == null) {
+            TableField tableField = field.getDeclaredAnnotation(TableField.class);
+            if (tableField != null) {
+                columnName = tableField.value();
+            }
+            if (StringUtils.isEmpty(columnName)) {
+                columnName = DataTypeConvertUtil.humpToLine(field.getName());
+            }
+        }
+        return columnName;
     }
 
     @EqualsAndHashCode

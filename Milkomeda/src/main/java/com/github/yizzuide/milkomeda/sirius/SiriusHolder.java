@@ -21,17 +21,40 @@
 
 package com.github.yizzuide.milkomeda.sirius;
 
+import com.github.yizzuide.milkomeda.light.LightContext;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.Serializable;
+
 /**
- * This holder which provides simple access sirius context.
+ * This holder which provides tenant context.
  *
  * @since 4.0.0
  * @author yizzuide
  * Create at 2024/01/10 14:42
  */
 public final class SiriusHolder {
-    @Setter @Getter
+
+    @Setter
+    @Getter
     private static TenantInterceptHandler tenantInterceptHandler;
+
+    private final static LightContext<Serializable, Boolean> lightContext = new LightContext<>();
+
+    public static void setTenantIgnore(boolean tenantIgnore) {
+        lightContext.setData(tenantIgnore);
+    }
+
+    public static boolean isTenantIgnore() {
+        if (lightContext.get() == null || lightContext.get().getData() == null) {
+            return false;
+        }
+        return lightContext.get().getData();
+    }
+
+    public static void clear() {
+        lightContext.remove();
+    }
+
 }

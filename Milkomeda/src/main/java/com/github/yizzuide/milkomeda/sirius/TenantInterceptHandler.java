@@ -66,6 +66,9 @@ public class TenantInterceptHandler implements TenantLineHandler {
 
     @Override
     public boolean ignoreTable(String tableName) {
+        if (SiriusHolder.isTenantIgnore()) {
+            return true;
+        }
         return ignoreTables.stream().anyMatch(table -> table.equals(tableName.toLowerCase()) || table.equals(tableName.toUpperCase()));
     }
 

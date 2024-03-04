@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 yizzuide All rights Reserved.
+ * Copyright (c) 2024 yizzuide All rights Reserved.
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -21,22 +21,23 @@
 
 package com.github.yizzuide.milkomeda.sirius;
 
-import org.springframework.context.annotation.Import;
-
 import java.lang.annotation.*;
 
 /**
- * Sirius is a module of mybatis-plus extension.
+ * Tenant id ignore control with mybatis-plus query.
  *
- * @since 3.14.0
+ * @since 4.0.0
  * @author yizzuide
- * <br>
- * Create at 2022/10/30 17:45
+ * Create at 2024/03/03 00:35
  */
-@Import(SiriusConfig.class)
-@Inherited
 @Documented
+@Inherited
+@Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.TYPE})
-public @interface EnableSirius {
+public @interface Tenant {
+    /**
+     * where ignore add tenant id in query.
+     * @return true is follow in global config.
+     */
+    boolean ignore() default false;
 }
