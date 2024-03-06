@@ -21,44 +21,20 @@
 
 package com.github.yizzuide.milkomeda.sirius;
 
-import com.github.yizzuide.milkomeda.light.LightContext;
-import com.github.yizzuide.milkomeda.light.Spot;
-import lombok.Getter;
-import lombok.Setter;
-import org.springframework.lang.Nullable;
-
-import java.io.Serializable;
+import lombok.Builder;
+import lombok.Data;
 
 /**
- * This holder which provides tenant context.
+ * Tenant data for {@link Tenant}.
  *
  * @since 4.0.0
  * @author yizzuide
- * Create at 2024/01/10 14:42
+ * Create at 2024/03/05 15:25
  */
-public final class SiriusHolder {
-
-    @Setter
-    @Getter
-    private static TenantInterceptHandler tenantInterceptHandler;
-
-    private final static LightContext<Serializable, TenantData> lightContext = new LightContext<>();
-
-    public static void setTenantData(TenantData tenantData) {
-        lightContext.setData(tenantData);
-    }
-
-    @Nullable
-    public static TenantData getTenantData() {
-        Spot<Serializable, TenantData> tenantDataSpot = lightContext.get();
-        if (tenantDataSpot == null) {
-            return null;
-        }
-        return tenantDataSpot.getData();
-    }
-
-    public static void clear() {
-        lightContext.remove();
-    }
-
+@Builder
+@Data
+public class TenantData {
+    private boolean ignored;
+    private String idColumn;
+    private String idValue;
 }

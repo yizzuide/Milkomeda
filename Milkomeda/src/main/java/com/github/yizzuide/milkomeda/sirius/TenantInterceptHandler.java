@@ -26,6 +26,7 @@ import com.github.yizzuide.milkomeda.universe.extend.env.SpELPropertySource;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.LongValue;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -56,17 +57,23 @@ public class TenantInterceptHandler implements TenantLineHandler {
 
     @Override
     public String getTenantIdColumn() {
+        if (SiriusHolder.getTenantData() != null && StringUtils.hasText(SiriusHolder.getTenantData().getIdColumn())) {
+            return SiriusHolder.getTenantData().getIdColumn();
+        }
         return this.tenantProperties.getTenantIdName();
     }
 
     @Override
     public Expression getTenantId() {
+        if (SiriusHolder.getTenantData() != null && StringUtils.hasText(SiriusHolder.getTenantData().getIdValue())) {
+            return new LongValue(SiriusHolder.getTenantData().getIdValue());
+        }
         return new LongValue((Long) SpELPropertySource.parseElFun(tenantProperties.getTenantIdExpression()));
     }
 
     @Override
     public boolean ignoreTable(String tableName) {
-        if (SiriusHolder.isTenantIgnore()) {
+        if (SiriusHolder.getTenantData() != null && SiriusHolder.getTenantData().isIgnored()) {
             return true;
         }
         return ignoreTables.stream().anyMatch(table -> table.equals(tableName.toLowerCase()) || table.equals(tableName.toUpperCase()));

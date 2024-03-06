@@ -53,11 +53,11 @@ public class ChatController {
                     throw new RuntimeException(e);
                 }
                 MessageData data = new MessageData();
-                data.setId(random.nextInt());
+                data.setId(random.nextInt(0, 1000000));
                 data.setUserId(1);
                 data.setMsg(RandomStringUtils.randomAlphabetic(6));
                 log.warn("put msg id: {}", data.getId());
-                Quarks.bindProducer(data.getUserId().longValue()).publishEventData(data);
+                Quarks.bindProducer(data.getUserId().longValue(), "test").publishEventData(data);
             }
         });
         PulsarHolder.getPulsar().post(() -> {
@@ -68,11 +68,11 @@ public class ChatController {
                     throw new RuntimeException(e);
                 }
                 MessageData data = new MessageData();
-                data.setId(random.nextInt());
+                data.setId(random.nextInt(0, 1000000));
                 data.setUserId(2);
                 data.setMsg(RandomStringUtils.randomAlphabetic(6));
                 log.warn("put msg id: {}", data.getId());
-                Quarks.bindProducer(data.getUserId().longValue()).publishEventData(data);
+                Quarks.bindProducer(data.getUserId().longValue(), "test").publishEventData(data);
             }
         });
         return "OK";

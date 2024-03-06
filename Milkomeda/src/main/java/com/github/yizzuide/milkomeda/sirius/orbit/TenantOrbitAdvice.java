@@ -25,7 +25,10 @@ import com.github.yizzuide.milkomeda.orbit.OrbitAdvice;
 import com.github.yizzuide.milkomeda.orbit.OrbitInvocation;
 import com.github.yizzuide.milkomeda.sirius.SiriusHolder;
 import com.github.yizzuide.milkomeda.sirius.Tenant;
+import com.github.yizzuide.milkomeda.sirius.TenantData;
+import com.github.yizzuide.milkomeda.universe.engine.el.ELContext;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * Tenant implementation of {@link OrbitAdvice}.
@@ -39,7 +42,16 @@ public class TenantOrbitAdvice implements OrbitAdvice {
     public Object invoke(OrbitInvocation invocation) throws Throwable {
         Tenant tenant = AnnotationUtils.findAnnotation(invocation.getMethod(), Tenant.class);
         if (tenant != null) {
-            SiriusHolder.setTenantIgnore(tenant.ignore());
+            String idValue = tenant.idValue();
+            if (StringUtils.hasText(idValue)) {
+                idValue = ELContext.getValue(invocation.getPjp(), idValue);
+            }
+            TenantData tenantData = TenantData.builder()
+                    .ignored(tenant.ignored())
+                    .idColumn(tenant.idColumn())
+                    .idValue(idValue)
+                    .build();
+            SiriusHolder.setTenantData(tenantData);
         }
         try {
             return invocation.proceed();

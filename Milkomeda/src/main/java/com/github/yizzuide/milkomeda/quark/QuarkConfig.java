@@ -21,15 +21,21 @@
 
 package com.github.yizzuide.milkomeda.quark;
 
+import com.lmax.disruptor.ExceptionHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.lang.NonNull;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.util.CollectionUtils;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -38,6 +44,7 @@ import java.util.concurrent.TimeUnit;
  * Quark config.
  *
  * @since 3.15.0
+ * @version 4.0.0
  * @author yizzuide
  * Create at 2023/08/19 10:52
  */
@@ -52,6 +59,9 @@ public class QuarkConfig implements ApplicationListener<ContextRefreshedEvent> {
     @Autowired
     private List<QuarkEventHandler<?>> eventHandlerList;
 
+    @Autowired(required = false)
+    private List<ExceptionHandler<?>> exceptionHandlerList;
+
     @Override
     public void onApplicationEvent(@NonNull ContextRefreshedEvent event) {
         if (Quarks.bufferSize != null) {
@@ -64,6 +74,36 @@ public class QuarkConfig implements ApplicationListener<ContextRefreshedEvent> {
                 new ThreadPoolExecutor.DiscardPolicy());
         Quarks.setExecutor(executor);
         Quarks.setBufferSize(props.getBufferSize());
-        Quarks.setEventHandlerList(eventHandlerList);
+        if (!CollectionUtils.isEmpty(eventHandlerList)) {
+            Map<String, List<QuarkEventHandler<?>>> topicEventHandlerMap = new HashMap<>();
+            eventHandlerList.stream().filter(ha -> {
+                Quark quark = AnnotationUtils.findAnnotation(ha.getClass(), Quark.class);
+                if (quark == null) {
+                    return false;
+                }
+                return quark.usedEventHandler();
+            }).forEach(ha -> {
+                Quark quark = AnnotationUtils.findAnnotation(ha.getClass(), Quark.class);
+                assert quark != null;
+                topicEventHandlerMap.computeIfAbsent(quark.topic(), k -> new ArrayList<>()).add(ha);
+            });
+            Quarks.setEventHandlerList(topicEventHandlerMap);
+
+            Map<String, ExceptionHandler<?>> topicExceptionHandlerMap = new HashMap<>();
+            if (!CollectionUtils.isEmpty(exceptionHandlerList)) {
+                exceptionHandlerList.stream().filter(eh -> {
+                    Quark quark = AnnotationUtils.findAnnotation(eh.getClass(), Quark.class);
+                    if (quark == null) {
+                        return false;
+                    }
+                    return quark.usedExceptionHandler();
+                }).forEach(eh -> {
+                    Quark quark = AnnotationUtils.findAnnotation(eh.getClass(), Quark.class);
+                    assert quark != null;
+                    topicExceptionHandlerMap.put(quark.topic(), eh);
+                });
+                Quarks.setExceptionHandlerList(topicExceptionHandlerMap);
+            }
+        }
     }
 }

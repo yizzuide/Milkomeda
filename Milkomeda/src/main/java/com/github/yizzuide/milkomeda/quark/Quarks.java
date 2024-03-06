@@ -24,7 +24,9 @@ package com.github.yizzuide.milkomeda.quark;
 import com.lmax.disruptor.*;
 import com.lmax.disruptor.dsl.Disruptor;
 import com.lmax.disruptor.dsl.ProducerType;
+import org.springframework.util.CollectionUtils;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -34,6 +36,7 @@ import java.util.concurrent.Executor;
  * Quark manager to create producer.
  *
  * @since 3.15.0
+ * @version 4.0.0
  * @author yizzuide
  * Create at 2023/08/20 10:23
  */
@@ -43,9 +46,11 @@ public class Quarks {
 
     private static Executor executor;
 
-    private static List<QuarkEventHandler<?>> eventHandlerList;
+    private static Map<String, List<QuarkEventHandler<?>>> topicEventHandlerMap;
 
-    private static final Map<Long, QuarkProducer> producerMap = new ConcurrentHashMap<>();
+    private static Map<String, ExceptionHandler<?>> topicExceptionHandlerMap;
+
+    private static final Map<Serializable, QuarkProducer> producerMap = new ConcurrentHashMap<>();
 
     static void setBufferSize(Integer bufferSize) {
         Quarks.bufferSize = bufferSize;
@@ -55,29 +60,39 @@ public class Quarks {
         Quarks.executor = executor;
     }
 
-    static void setEventHandlerList(List<QuarkEventHandler<?>> eventHandlerList) {
-        Quarks.eventHandlerList = eventHandlerList;
+    static void setEventHandlerList(Map<String, List<QuarkEventHandler<?>>> topicEventHandlerMap) {
+        Quarks.topicEventHandlerMap = topicEventHandlerMap;
+    }
+
+    static void setExceptionHandlerList(Map<String, ExceptionHandler<?>> topicExceptionHandlerMap) {
+        Quarks.topicExceptionHandlerMap = topicExceptionHandlerMap;
     }
 
     /**
      * Bind a producer with identifier.
-     * @param identifier such as user id.
+     * @param identifier what data belongs to identifier.
+     * @param topic topic name which used event handler.
      * @return  QuarkProducer
      */
-    @SuppressWarnings({"deprecation", "unchecked"})
-    public static QuarkProducer bindProducer(Long identifier) {
+    @SuppressWarnings({"deprecation", "unchecked", "rawtypes"})
+    public static QuarkProducer bindProducer(Serializable identifier, String topic) {
         if (producerMap.containsKey(identifier)) {
             return producerMap.get(identifier);
         }
         QuarkEventFactory<Object> eventFactory = new QuarkEventFactory<>();
         Disruptor<QuarkEvent<Object>> disruptor = new Disruptor<>(eventFactory, bufferSize, executor,
                 ProducerType.SINGLE, new YieldingWaitStrategy());
+        List<QuarkEventHandler<?>> quarkEventHandlers = topicEventHandlerMap.get(topic);
         // handlers execute concurrently
-        disruptor.handleEventsWith(eventHandlerList.toArray(new EventHandler[]{}));
+        disruptor.handleEventsWith(quarkEventHandlers.toArray(new EventHandler[]{}));
         // this handler executes after upper handlers
-        //eventHandlerGroup.then(h3);
+        // .then(h3);
         // h4 and h5 execute concurrently after h3
-        //disruptor.after(h3).handleEventsWith(h4, h5);
+        // .after(h3).handleEventsWith(h4, h5);
+        if (!CollectionUtils.isEmpty(topicExceptionHandlerMap) && topicExceptionHandlerMap.get(topic) != null) {
+            quarkEventHandlers.forEach(eventHandler -> disruptor.handleExceptionsFor((EventHandler) eventHandler)
+                .with(topicExceptionHandlerMap.get(topic)));
+        }
         disruptor.start();
         RingBuffer<QuarkEvent<Object>> ringBuffer = disruptor.getRingBuffer();
         QuarkProducer quarkProducer = new QuarkProducer();
@@ -87,8 +102,8 @@ public class Quarks {
         return quarkProducer;
     }
 
-    @SuppressWarnings("unchecked")
-    static QuarkProducer bindInnerProducer(Long identifier) {
+    @SuppressWarnings({"unchecked"})
+    static QuarkProducer bindInnerProducer(Serializable identifier, String topic) {
         if (producerMap.containsKey(identifier)) {
             return producerMap.get(identifier);
         }
@@ -99,9 +114,14 @@ public class Quarks {
                 new YieldingWaitStrategy());
         // Coordination barrier for tracking the cursor for publishers and sequence of dependent EventProcessors for processing a data structure
         SequenceBarrier barrier = ringBuffer.newBarrier();
+        List<QuarkEventHandler<?>> quarkEventHandlers = topicEventHandlerMap.get(topic);
+        ExceptionHandler<Object> exceptionHandler = null;
+        if (!CollectionUtils.isEmpty(topicExceptionHandlerMap)) {
+            exceptionHandler = (ExceptionHandler<Object>) topicExceptionHandlerMap.get(topic);
+        }
         // WorkerPool contains a pool of WorkProcessors that will consume sequences
         WorkerPool<QuarkEvent<Object>> workerPool = new WorkerPool<>(ringBuffer, barrier,
-                new FatalExceptionHandler(), eventHandlerList.toArray(new WorkHandler[]{}));
+                exceptionHandler, quarkEventHandlers.toArray(new WorkHandler[]{}));
         // Sync event handler sequence to ringbuffer
         ringBuffer.addGatingSequences(workerPool.getWorkerSequences());
         workerPool.start(executor);
@@ -115,7 +135,7 @@ public class Quarks {
      * unbind a producer with identifier for release resource.
      * @param identifier such as user id.
      */
-    public static void unbindProducer(Long identifier) {
+    public static void unbindProducer(Serializable identifier) {
         if (!producerMap.containsKey(identifier)) {
             return;
         }

@@ -39,5 +39,17 @@ public @interface Tenant {
      * where ignore add tenant id in query.
      * @return true is follow in global config.
      */
-    boolean ignore() default false;
+    boolean ignored() default false;
+
+    /**
+     * custom tenant id column name.
+     * @return tenant id column, null is follow in global config.
+     */
+    String idColumn() default "";
+
+    /**
+     * custom tenant id value.
+     * @return  tenant id value, null is follow in global config.
+     */
+    String idValue() default "";
 }

@@ -19,46 +19,50 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.sirius;
+package com.github.yizzuide.milkomeda.quark;
 
-import com.github.yizzuide.milkomeda.light.LightContext;
-import com.github.yizzuide.milkomeda.light.Spot;
-import lombok.Getter;
-import lombok.Setter;
-import org.springframework.lang.Nullable;
+import org.springframework.core.annotation.AliasFor;
+import org.springframework.stereotype.Component;
 
-import java.io.Serializable;
+import java.lang.annotation.*;
 
 /**
- * This holder which provides tenant context.
+ * Quark handler for event and exception receive.
  *
  * @since 4.0.0
  * @author yizzuide
- * Create at 2024/01/10 14:42
+ * Create at 2024/03/05 19:41
  */
-public final class SiriusHolder {
+@Documented
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.TYPE})
+@Inherited
+@Component
+public @interface Quark {
 
-    @Setter
-    @Getter
-    private static TenantInterceptHandler tenantInterceptHandler;
+    /**
+     * where the topic handle from.
+     * @return  topic name
+     */
+    @AliasFor("topic")
+    String value() default "";
 
-    private final static LightContext<Serializable, TenantData> lightContext = new LightContext<>();
+    /**
+     * where the topic handle from.
+     * @return  topic name
+     */
+    @AliasFor("value")
+    String topic() default "";
 
-    public static void setTenantData(TenantData tenantData) {
-        lightContext.setData(tenantData);
-    }
+    /**
+     * Indicate whether it is an event handler.
+     * @return true is event handler
+     */
+    boolean usedEventHandler() default true;
 
-    @Nullable
-    public static TenantData getTenantData() {
-        Spot<Serializable, TenantData> tenantDataSpot = lightContext.get();
-        if (tenantDataSpot == null) {
-            return null;
-        }
-        return tenantDataSpot.getData();
-    }
-
-    public static void clear() {
-        lightContext.remove();
-    }
-
+    /**
+     * Indicate whether it is an exception handler.
+     * @return true is exception handler
+     */
+    boolean usedExceptionHandler() default false;
 }
