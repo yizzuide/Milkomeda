@@ -23,12 +23,32 @@ public enum PrefectType {
     NEQ,
 
     /**
+     * Greater than field.
+     */
+    GT,
+
+    /**
+     * Greater than or equals field.
+     */
+    GE,
+
+    /**
+     * Less than field.
+     */
+    LT,
+
+    /**
+     * Less than or equals field.
+     */
+    LE,
+
+    /**
      * Match empty field (null or '').
      */
     EMPTY,
 
     /**
-     * Match using sql `in`.
+     * Match fuzzy with {@link QueryLinker} or not used linker using sql `in`.
      */
     IN,
 
