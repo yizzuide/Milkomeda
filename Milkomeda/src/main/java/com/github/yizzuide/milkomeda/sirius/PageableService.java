@@ -372,7 +372,7 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
                         if (CollectionUtils.isEmpty(matchEntityList)){
                             continue;
                         }
-                        Field[] declaredFields = voList == null ? TypeReflector.getFields(tableInfo.getEntityType()) :
+                        Field[] declaredFields = entity2VoConverter == null ? TypeReflector.getFields(tableInfo.getEntityType()) :
                                 TypeReflector.getFields(voList.getFirst().getClass());
                         Field targetField = Stream.of(declaredFields)
                                 .filter(field -> field.getName().equals(linkerNode.getTargetFieldName()))
@@ -382,7 +382,7 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
                             List<Object> targetValues = matchEntityList.stream()
                                     .map(linkEntity -> linkTableInfo.getPropertyValue(linkEntity, linkerNode.getLinkFieldName()))
                                     .toList();
-                            if (voList == null) {
+                            if (entity2VoConverter == null) {
                                 tableInfo.setPropertyValue(record, linkerNode.getTargetFieldName(), targetValues);
                             } else {
                                 V vo = voList.get(i);
@@ -392,7 +392,7 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
                         }
                         Object linkEntity = matchEntityList.getFirst();
                         Object targetValue = linkTableInfo.getPropertyValue(linkEntity, linkerNode.getLinkFieldName());
-                        if (voList == null) {
+                        if (entity2VoConverter == null) {
                             tableInfo.setPropertyValue(record, linkerNode.getTargetFieldName(), targetValue);
                             continue;
                         }
@@ -402,7 +402,7 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
                 }
             }
         }
-        if (voList == null) {
+        if (entity2VoConverter == null) {
             uniformPage.setList((List<V>) records);
         } else {
             uniformPage.setList(voList);
