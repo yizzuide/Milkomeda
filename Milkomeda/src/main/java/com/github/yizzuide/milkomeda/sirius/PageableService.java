@@ -73,8 +73,17 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
         return selectByPage(queryPageData, queryMatchData, DEFAULT_GROUP);
     }
 
+    public UniformPage<T> selectByPage(UniformQueryPageData<T> queryPageData,
+                                       Map<String, Object> queryMatchData,
+                                       String group) {
+        return selectByPage(queryPageData, queryMatchData, null, group);
+    }
+
     @SuppressWarnings({"ConstantConditions", "rawtypes", "unchecked"})
-    public UniformPage<T> selectByPage(UniformQueryPageData<T> queryPageData, Map<String, Object> queryMatchData, String group) {
+    public <V> UniformPage<V> selectByPage(UniformQueryPageData<T> queryPageData,
+                                       Map<String, Object> queryMatchData,
+                                       Function<T, V> entity2VoConverter,
+                                       String group) {
         Page<T> page = new Page<>();
         page.setCurrent(queryPageData.getPageStart());
         page.setSize(queryPageData.getPageSize());
@@ -222,8 +231,9 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
             queryWrapper.select(getEntityClass(), selectFieldPredicate);
         }
 
-        UniformPage<T> uniformPage = new UniformPage<>();
+        UniformPage<V> uniformPage = new UniformPage<>();
         List<T> records;
+        List<V> voList = null;
         // 如果页记录数为-1，则不分页
         if (page.getSize() == -1) {
             if (hasSelectColumn) {
@@ -349,7 +359,12 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
                     if (CollectionUtils.isEmpty(linkEntityList)) {
                         continue;
                     }
-                    for (T record : records) {
+                    if (entity2VoConverter != null) {
+                        voList = records.stream().map(entity2VoConverter).collect(Collectors.toCollection(ArrayList::new));
+                    }
+                    int recordSize = records.size();
+                    for (int i = 0; i < recordSize; i++) {
+                        T record = records.get(i);
                         Object matchIdValue = tableInfo.getPropertyValue(record, linkerField.getName());
                         List<?> matchEntityList = linkEntityList.stream()
                                 .filter(linkEntity -> String.valueOf(linkTableInfo.getPropertyValue(linkEntity, linkerNode.getLinkIdFieldName())).equals(String.valueOf(matchIdValue)))
@@ -357,24 +372,41 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
                         if (CollectionUtils.isEmpty(matchEntityList)){
                             continue;
                         }
-                        Field targetField = Stream.of(tableInfo.getEntityType().getDeclaredFields())
+                        Field[] declaredFields = voList == null ? TypeReflector.getFields(tableInfo.getEntityType()) :
+                                TypeReflector.getFields(voList.getFirst().getClass());
+                        Field targetField = Stream.of(declaredFields)
                                 .filter(field -> field.getName().equals(linkerNode.getTargetFieldName()))
-                                .findFirst().orElse(null);
+                                .findFirst()
+                                .orElse(null);
                         if (List.class.isAssignableFrom(targetField.getType())) {
                             List<Object> targetValues = matchEntityList.stream()
                                     .map(linkEntity -> linkTableInfo.getPropertyValue(linkEntity, linkerNode.getLinkFieldName()))
                                     .toList();
-                            tableInfo.setPropertyValue(record, linkerNode.getTargetFieldName(), targetValues);
+                            if (voList == null) {
+                                tableInfo.setPropertyValue(record, linkerNode.getTargetFieldName(), targetValues);
+                            } else {
+                                V vo = voList.get(i);
+                                TypeReflector.setProps(vo, linkerNode.getTargetFieldName(), targetValues);
+                            }
                             continue;
                         }
                         Object linkEntity = matchEntityList.getFirst();
                         Object targetValue = linkTableInfo.getPropertyValue(linkEntity, linkerNode.getLinkFieldName());
-                        tableInfo.setPropertyValue(record, linkerNode.getTargetFieldName(), targetValue);
+                        if (voList == null) {
+                            tableInfo.setPropertyValue(record, linkerNode.getTargetFieldName(), targetValue);
+                            continue;
+                        }
+                        V vo = voList.get(i);
+                        TypeReflector.setProps(vo, linkerNode.getTargetFieldName(), targetValue);
                     }
                 }
             }
         }
-        uniformPage.setList(records);
+        if (voList == null) {
+            uniformPage.setList((List<V>) records);
+        } else {
+            uniformPage.setList(voList);
+        }
         return uniformPage;
     }
 

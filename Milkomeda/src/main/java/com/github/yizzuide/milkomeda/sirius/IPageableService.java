@@ -38,8 +38,32 @@ public interface IPageableService<T> extends IService<T> {
      * @param <V>   vo type
      * @since 4.0.0
      */
-    static <T, Q, V> UniformPage<V> selectByPage(IPageableService<T> pageableService, UniformQueryPageData<Q> queryPageData, Function<Q, T> query2EntityConverter, Function<T, V> entity2VoConverter) {
-        return selectByPage(pageableService, queryPageData, DEFAULT_GROUP, query2EntityConverter, entity2VoConverter);
+    static <T, Q, V> UniformPage<V> selectByPage(IPageableService<T> pageableService,
+                                                 UniformQueryPageData<Q> queryPageData,
+                                                 Function<Q, T> query2EntityConverter,
+                                                 Function<T, V> entity2VoConverter) {
+        return selectByPage(pageableService, queryPageData, DEFAULT_GROUP, query2EntityConverter, entity2VoConverter, true);
+    }
+
+    /**
+     * Query page data with the query.
+     * @param pageableService   pageable service
+     * @param queryPageData     page query data
+     * @param query2EntityConverter   query to entity converter
+     * @param entity2VoConverter      entity to vo converter
+     * @param linkFieldsToVO    whether link fields to VO
+     * @return UniformPage
+     * @param <T>   entity type
+     * @param <Q>   query type
+     * @param <V>   vo type
+     * @since 4.0.0
+     */
+    static <T, Q, V> UniformPage<V> selectByPage(IPageableService<T> pageableService,
+                                                 UniformQueryPageData<Q> queryPageData,
+                                                 Function<Q, T> query2EntityConverter,
+                                                 Function<T, V> entity2VoConverter,
+                                                 boolean linkFieldsToVO) {
+        return selectByPage(pageableService, queryPageData, DEFAULT_GROUP, query2EntityConverter, entity2VoConverter, linkFieldsToVO);
     }
 
     /**
@@ -49,14 +73,20 @@ public interface IPageableService<T> extends IService<T> {
      * @param group             match group name
      * @param query2EntityConverter   query to entity converter
      * @param entity2VoConverter      entity to vo converter
+     * @param linkFieldsToVO    whether link fields to VO
      * @return UniformPage
      * @param <T>   entity type
      * @param <Q>   query type
      * @param <V>   vo type
      * @since 4.0.0
      */
-    static <T, Q, V> UniformPage<V> selectByPage(IPageableService<T> pageableService, UniformQueryPageData<Q> queryPageData, String group, Function<Q, T> query2EntityConverter, Function<T, V> entity2VoConverter) {
-        return selectByPage(pageableService, queryPageData, null, group, query2EntityConverter, entity2VoConverter);
+    static <T, Q, V> UniformPage<V> selectByPage(IPageableService<T> pageableService,
+                                                 UniformQueryPageData<Q> queryPageData,
+                                                 String group,
+                                                 Function<Q, T> query2EntityConverter,
+                                                 Function<T, V> entity2VoConverter,
+                                                 boolean linkFieldsToVO) {
+        return selectByPage(pageableService, queryPageData, null, group, query2EntityConverter, entity2VoConverter, linkFieldsToVO);
     }
 
     /**
@@ -67,13 +97,27 @@ public interface IPageableService<T> extends IService<T> {
      * @param group             match group name
      * @param query2EntityConverter   query to entity converter
      * @param entity2VoConverter      entity to vo converter
+     * @param linkFieldsToVO    whether link fields to VO
      * @return UniformPage
      * @param <T>   entity type
      * @param <Q>   query type
      * @param <V>   vo type
      * @since 4.0.0
      */
-    static <T, Q, V> UniformPage<V> selectByPage(IPageableService<T> pageableService, UniformQueryPageData<Q> queryPageData, Map<String, Object> queryMatchData, String group, Function<Q, T> query2EntityConverter, Function<T, V> entity2VoConverter) {
+    static <T, Q, V> UniformPage<V> selectByPage(IPageableService<T> pageableService,
+                                                 UniformQueryPageData<Q> queryPageData,
+                                                 Map<String, Object> queryMatchData,
+                                                 String group, Function<Q, T> query2EntityConverter,
+                                                 Function<T, V> entity2VoConverter,
+                                                 boolean linkFieldsToVO) {
+        if (linkFieldsToVO) {
+            return pageableService.selectByPage(
+                    UniformQueryPageData.convert(queryPageData, query2EntityConverter),
+                    queryMatchData,
+                    entity2VoConverter,
+                    group
+            );
+        }
         return UniformPage.convert(pageableService.selectByPage(
                 UniformQueryPageData.convert(queryPageData, query2EntityConverter),
                 queryMatchData,
@@ -115,6 +159,21 @@ public interface IPageableService<T> extends IService<T> {
      * @since 3.15.0
      */
     UniformPage<T> selectByPage(UniformQueryPageData<T> queryPageData, Map<String, Object> queryMatchData, String group);
+
+    /**
+     * Query by page data, match data and group name which support entity to vo converter.
+     * @param queryPageData page data
+     * @param queryMatchData match data
+     * @param entity2VoConverter entity to vo converter
+     * @param group match group name
+     * @return  UniformPage
+     * @since 4.0.0
+     * @param <V> VO class type
+     */
+    <V> UniformPage<V> selectByPage(UniformQueryPageData<T> queryPageData,
+                                Map<String, Object> queryMatchData,
+                                Function<T, V> entity2VoConverter,
+                                String group);
 
     /**
      * Remove record row before check it reference.
