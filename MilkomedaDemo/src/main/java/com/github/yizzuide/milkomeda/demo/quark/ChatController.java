@@ -42,7 +42,7 @@ import java.util.Random;
 public class ChatController {
 
     @RequestMapping("send")
-    public String sendQuestion(String question) throws InterruptedException {
+    public String sendQuestion(String question) {
         // 模拟生成数据
         Random random = new Random();
         PulsarHolder.getPulsar().post(() -> {

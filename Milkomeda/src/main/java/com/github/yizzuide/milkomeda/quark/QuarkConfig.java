@@ -64,9 +64,10 @@ public class QuarkConfig implements ApplicationListener<ContextRefreshedEvent> {
 
     @Override
     public void onApplicationEvent(@NonNull ContextRefreshedEvent event) {
-        if (Quarks.bufferSize != null) {
+        if (Quarks.getBufferSize() != null) {
             return;
         }
+        Quarks.setWarningPercent(props.getWarningPercent());
         QuarkProperties.Pool pool = props.getPool();
         ThreadPoolExecutor executor = new ThreadPoolExecutor(pool.getCore(), pool.getMaximum(),
                 pool.getKeepAliveTime().toMillis(), TimeUnit.MILLISECONDS,

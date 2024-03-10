@@ -27,6 +27,7 @@ import java.lang.annotation.*;
  * Auto generate multi {@link QueryLinker}.
  *
  * @since 3.15.0
+ * @version 4.0.0
  * @author yizzuide
  * Create at 2023/09/21 10:33
  */
@@ -34,6 +35,7 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.ANNOTATION_TYPE})
 @Inherited
+@Repeatable(QueryAutoLinkers.class)
 public @interface QueryAutoLinker {
 
     /**
@@ -52,7 +54,7 @@ public @interface QueryAutoLinker {
      * Bind link expression in query group.
      * @return  group name
      */
-    String[] groups() default {};
+    String[] group() default { IPageableService.DEFAULT_GROUP };
 
     /**
      * Mapping fields from target to linker.

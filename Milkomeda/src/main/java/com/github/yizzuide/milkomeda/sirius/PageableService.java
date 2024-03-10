@@ -90,17 +90,25 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
         Map<String, PrefectLinkNode> filterMap = new HashMap<>();
         for (Field field : fields) {
             // convert QueryAutoLinker to QueryLinkerNode
-            QueryAutoLinker queryAutoLinker = AnnotationUtils.findAnnotation(field, QueryAutoLinker.class);
-            if (queryAutoLinker != null) {
-                Set<QueryLinkerNode> nodes = QueryLinkerNode.build(queryAutoLinker);
-                linkerNodes.put(field.getName(), nodes);
-                linkerFields.add(field);
+            Set<QueryAutoLinker> queryAutoLinkers = AnnotatedElementUtils.getMergedRepeatableAnnotations(field, QueryAutoLinker.class, QueryAutoLinkers.class);
+            if (!CollectionUtils.isEmpty(queryAutoLinkers)) {
+                List<QueryAutoLinker> filteredQueryAutoLinkers = queryAutoLinkers.stream()
+                        .filter(ql -> Arrays.asList(ql.group()).contains(group))
+                        .toList();
+                for (QueryAutoLinker queryAutoLinker : filteredQueryAutoLinkers) {
+                    Set<QueryLinkerNode> nodes = QueryLinkerNode.build(queryAutoLinker);
+                    linkerNodes.put(field.getName(), nodes);
+                    linkerFields.add(field);
+                }
             }
 
             // convert QueryLinker to QueryLinkerNode
             Set<QueryLinker> queryLinkers = AnnotatedElementUtils.getMergedRepeatableAnnotations(field, QueryLinker.class, QueryLinkers.class);
             if (!CollectionUtils.isEmpty(queryLinkers)) {
-                Set<QueryLinkerNode> nodes = QueryLinkerNode.build(queryLinkers);
+                Set<QueryLinker> filteredQueryLinkers = queryLinkers.stream()
+                        .filter(ql -> Arrays.asList(ql.group()).contains(group))
+                        .collect(Collectors.toSet());
+                Set<QueryLinkerNode> nodes = QueryLinkerNode.build(filteredQueryLinkers);
                 linkerNodes.put(field.getName(), nodes);
                 linkerFields.add(field);
             }
@@ -249,9 +257,6 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
                 List<QueryLinkerNode> queryLinkerNodes = linkerNodes.get(linkerField.getName()).stream()
                         .sorted(Comparator.comparingInt(QueryLinkerNode::getLinkSelectTop)).toList();
                 for (QueryLinkerNode linkerNode : queryLinkerNodes) {
-                    if (!Arrays.asList(linkerNode.getGroup()).contains(group)) {
-                        continue;
-                    }
                     BaseMapper linkMapper = SiriusInspector.getMapper(linkerNode.getLinkEntityType());
                     List<?> linkEntityList;
                     // get link entity table info
@@ -613,11 +618,11 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
             String[] linkerParts = queryAutoLinker.links().split(",");
             int linkerSize = linkerParts.length;
             Set<QueryLinkerNode> nodes = new HashSet<>(linkerSize);
-            for (int i = 0; i < linkerSize; i++) {
-                String[] linkerPart = linkerParts[i].split("\\s*->\\s*");
+            for (String part : linkerParts) {
+                String[] linkerPart = part.split("\\s*->\\s*");
                 String targetFieldName = linkerPart[0];
-                String linkFieldName = linkerPart.length == 1? targetFieldName : linkerPart[1];
-                String linkIdName = linkerPart.length == 3 ? linkerPart[2]: queryAutoLinker.linkIdField();
+                String linkFieldName = linkerPart.length == 1 ? targetFieldName : linkerPart[1];
+                String linkIdName = linkerPart.length == 3 ? linkerPart[2] : queryAutoLinker.linkIdField();
                 String linkIdIgnore = "0";
                 if (linkIdName.contains("!")) {
                     String origLinkIdName = linkIdName;
@@ -633,13 +638,6 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
                     linkFieldName = linkFieldName.substring(0, sepIndex);
                     linkSelectTopFieldName = linkFieldName;
                 }
-                String[] matchGroup = new String[] { DEFAULT_GROUP };
-                if (queryAutoLinker.groups() != null && queryAutoLinker.groups().length != 0) {
-                    // 如果只有1个group，则统一设置为第一个group
-                    int index = queryAutoLinker.groups().length == 1 ? 0 : i;
-                    String groupItem = queryAutoLinker.groups()[index];
-                    matchGroup = groupItem.split(",");
-                }
                 QueryLinkerNode queryLinkerNode = new QueryLinkerNode();
                 queryLinkerNode.setTargetFieldName(targetFieldName);
                 queryLinkerNode.setLinkFieldName(linkFieldName);
@@ -651,7 +649,7 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
                 }
                 queryLinkerNode.setMappings(queryAutoLinker.mappings());
                 queryLinkerNode.setLinkEntityType(queryAutoLinker.type());
-                queryLinkerNode.setGroup(matchGroup);
+                queryLinkerNode.setGroup(queryAutoLinker.group());
                 nodes.add(queryLinkerNode);
             }
             return nodes;

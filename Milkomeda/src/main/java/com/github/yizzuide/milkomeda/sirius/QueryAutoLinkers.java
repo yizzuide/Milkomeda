@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 yizzuide All rights Reserved.
+ * Copyright (c) 2024 yizzuide All rights Reserved.
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -19,54 +19,21 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.quark;
+package com.github.yizzuide.milkomeda.sirius;
 
-import lombok.Data;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.convert.DurationUnit;
-
-import java.time.Duration;
-import java.time.temporal.ChronoUnit;
+import java.lang.annotation.*;
 
 /**
- * Quark config properties.
+ * Support repeatable of {@link QueryAutoLinker}.
  *
- * @since 3.15.0
- * @version 4.0.0
+ * @since 4.0.0
  * @author yizzuide
- * Create at 2023/08/19 10:04
+ * Create at 2024/03/10 00:59
  */
-@Data
-@ConfigurationProperties(prefix = "milkomeda.quark")
-public class QuarkProperties {
-
-    /**
-     * Cache buffer size.
-     */
-    private Integer bufferSize = 1 << 13;
-
-    /**
-     * Buffer size warning percent for expansion.
-     * @since 4.0.0
-     */
-    private Float warningPercent = .05f;
-
-    /**
-     * Thread pool.
-     */
-    private Pool pool = new Pool();
-
-
-    @Data
-    static class Pool {
-
-        private Integer core = 4;
-
-        private Integer maximum = 8;
-
-        @DurationUnit(ChronoUnit.MILLIS)
-        private Duration keepAliveTime = Duration.ofSeconds(20);
-
-        private Integer queueSize = 1 << 15;
-    }
+@Documented
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.FIELD, ElementType.ANNOTATION_TYPE})
+@Inherited
+public @interface QueryAutoLinkers {
+    QueryAutoLinker[] value();
 }
