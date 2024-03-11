@@ -359,7 +359,7 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
                     if (CollectionUtils.isEmpty(linkEntityList)) {
                         continue;
                     }
-                    if (entity2VoConverter != null) {
+                    if (entity2VoConverter != null && voList == null) {
                         voList = records.stream().map(entity2VoConverter).collect(Collectors.toCollection(ArrayList::new));
                     }
                     int recordSize = records.size();
@@ -402,7 +402,7 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
                 }
             }
         }
-        if (entity2VoConverter == null) {
+        if (entity2VoConverter == null || voList == null) {
             uniformPage.setList((List<V>) records);
         } else {
             uniformPage.setList(voList);
