@@ -9,8 +9,8 @@ import com.baomidou.mybatisplus.core.metadata.TableInfo;
 import com.baomidou.mybatisplus.core.metadata.TableInfoHelper;
 import com.baomidou.mybatisplus.core.toolkit.ReflectionKit;
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.github.pagehelper.PageHelper;
 import com.github.yizzuide.milkomeda.hydrogen.uniform.UniformPage;
 import com.github.yizzuide.milkomeda.hydrogen.uniform.UniformQueryPageData;
 import com.github.yizzuide.milkomeda.sirius.wormhole.SiriusInspector;
@@ -84,15 +84,11 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
                                        Map<String, Object> queryMatchData,
                                        Function<T, V> entity2VoConverter,
                                        String group) {
-        Page<T> page = new Page<>();
-        page.setCurrent(queryPageData.getPageStart());
-        page.setSize(queryPageData.getPageSize());
-
         QueryWrapper<T> queryWrapper = new QueryWrapper<>();
         Class<T> tClass = currentModelClass();
         T target = queryPageData.getEntity();
         TableInfo tableInfo = TableInfoHelper.getTableInfo(entityClass);
-        Field[] fields = tClass.getDeclaredFields();
+        Field[] fields = TypeReflector.getFields(tClass);
         List<Field> linkerFields = new ArrayList<>();
         Map<String, Set<QueryLinkerNode>> linkerNodes = new HashMap<>();
         // 需要在linker关联结果过滤条件
@@ -235,7 +231,7 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
         List<T> records;
         List<V> voList = null;
         // 如果页记录数为-1，则不分页
-        if (page.getSize() == -1) {
+        if (queryPageData.getPageSize() == -1) {
             if (hasSelectColumn) {
                 queryWrapper.select(tableInfo.getKeyColumn());
             }
@@ -247,10 +243,13 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
             uniformPage.setTotalSize(totalSize);
             uniformPage.setPageCount(1L);
         } else {
-            Page<T> recordPage = this.baseMapper.selectPage(page, queryWrapper);
-            records = recordPage.getRecords();
-            uniformPage.setTotalSize(recordPage.getTotal());
-            uniformPage.setPageCount(recordPage.getPages());
+            //Page<T> resultPage = this.baseMapper.selectPage(page, queryWrapper);
+            try (com.github.pagehelper.Page<T> pageable = PageHelper.startPage(queryPageData.getPageStart(), queryPageData.getPageSize())) {
+                pageable.toPageInfo().setList(this.baseMapper.selectList(queryWrapper));
+                records = pageable.getResult();
+                uniformPage.setTotalSize(pageable.getTotal());
+                uniformPage.setPageCount((long) pageable.getPages());
+            }
         }
 
         // query link name

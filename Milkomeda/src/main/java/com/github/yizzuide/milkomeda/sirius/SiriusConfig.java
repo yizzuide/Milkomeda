@@ -37,7 +37,6 @@ import com.baomidou.mybatisplus.core.metadata.TableFieldInfo;
 import com.baomidou.mybatisplus.core.metadata.TableInfo;
 import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.BlockAttackInnerInterceptor;
-import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.TenantLineInnerInterceptor;
 import com.baomidou.mybatisplus.extension.spring.MybatisSqlSessionFactoryBean;
 import com.github.yizzuide.milkomeda.sirius.wormhole.SiriusInspector;
@@ -63,7 +62,9 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Sirius module config.
@@ -82,9 +83,6 @@ import java.util.*;
 @EnableConfigurationProperties({SiriusProperties.class, TenantProperties.class})
 @Configuration
 public class SiriusConfig {
-
-    @Autowired
-    private SiriusProperties props;
 
     @Autowired
     private TenantProperties tenantProperties;
@@ -107,8 +105,8 @@ public class SiriusConfig {
     @Bean
     public MybatisPlusInterceptor mybatisPlusInterceptor() {
         MybatisPlusInterceptor mybatisPlusInterceptor = new MybatisPlusInterceptor();
-        // 分页插件
-        mybatisPlusInterceptor.addInnerInterceptor(new PaginationInnerInterceptor(props.getDbType()));
+        // 分页插件（改为PageHelper插件）
+        //mybatisPlusInterceptor.addInnerInterceptor(new PaginationInnerInterceptor(props.getDbType()));
         // 防全表更新插件
         mybatisPlusInterceptor.addInnerInterceptor(new BlockAttackInnerInterceptor());
         // 添加SaaS租户插件
@@ -122,7 +120,7 @@ public class SiriusConfig {
 
     // 属性自定义配置，在Mybatis-plus自动配置前执行
     @Bean
-    public MybatisPlusPropertiesCustomizer propertiesCustomizer(ResourceLoader resourceLoader) throws IOException {
+    public MybatisPlusPropertiesCustomizer propertiesCustomizer(ResourceLoader resourceLoader) {
         return properties -> {
             GlobalConfig globalConfig = properties.getGlobalConfig();
             globalConfig.setBanner(false);
@@ -313,18 +311,14 @@ public class SiriusConfig {
             if (target instanceof TableInfo tableInfo) {
                 for (TableFieldInfo fieldInfo: tableInfo.getFieldList()) {
                     if (fillFields.contains(fieldInfo.getProperty())) {
-                        Map<String, Object> props = new HashMap<>();
-                        props.put(propKey, true);
-                        ReflectUtil.setField(target, props);
+                        TypeReflector.setProps(target, propKey, true);
                         return;
                     }
                 }
             } else {
                 TableFieldInfo tableFieldInfo = (TableFieldInfo)target;
                 if (fillFields.contains(tableFieldInfo.getProperty())) {
-                    Map<String, Object> props = new HashMap<>();
-                    props.put(propKey, true);
-                    ReflectUtil.setField(target, props);
+                    TypeReflector.setProps(target, propKey, true);
                 }
             }
         }
