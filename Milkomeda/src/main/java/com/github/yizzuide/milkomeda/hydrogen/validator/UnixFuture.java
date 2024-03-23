@@ -19,37 +19,46 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.sirius;
+package com.github.yizzuide.milkomeda.hydrogen.validator;
 
-import java.lang.annotation.*;
+import jakarta.validation.Constraint;
+import jakarta.validation.Payload;
+
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+import static java.lang.annotation.ElementType.*;
+import static java.lang.annotation.ElementType.TYPE_USE;
 
 /**
- * Tenant id ignore control with mybatis-plus query.
+ * Unix未来时间验证
  *
  * @since 4.0.0
  * @author yizzuide
- * Create at 2024/03/03 00:35
+ * Create at 2024/03/22 15:47
  */
 @Documented
-@Target({ElementType.METHOD})
+@Target({ METHOD, FIELD, ANNOTATION_TYPE, CONSTRUCTOR, PARAMETER, TYPE_USE })
 @Retention(RetentionPolicy.RUNTIME)
-@Inherited
-public @interface Tenant {
+@Constraint(validatedBy = UnixFutureValidator.class)
+public @interface UnixFuture {
     /**
-     * where ignore add tenant id in query.
-     * @return true is follow in global config.
+     * 定义默认验证失败的消息
+     * @return String
      */
-    boolean ignored() default false;
+    String message() default "{hydrogen.validation.constraints.UnixFutureConstraint.message}";
 
     /**
-     * custom tenant id column name.
-     * @return tenant id column, null is follow in global config.
+     * 所属分组，默认在 Default 分组
+     * @return Class列表
      */
-    String idColumn() default "";
+    Class<?>[] groups() default {};
 
     /**
-     * custom tenant id value.
-     * @return  tenant id value, null is follow in global config.
+     * 主要是针对bean的
+     * @return Class
      */
-    String idValue() default "";
+    Class<? extends Payload>[] payload() default {};
 }

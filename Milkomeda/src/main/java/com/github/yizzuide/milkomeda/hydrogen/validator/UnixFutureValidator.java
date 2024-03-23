@@ -19,37 +19,25 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.sirius;
+package com.github.yizzuide.milkomeda.hydrogen.validator;
 
-import java.lang.annotation.*;
+import com.github.yizzuide.milkomeda.util.DateUtil;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
+
+import java.time.Instant;
 
 /**
- * Tenant id ignore control with mybatis-plus query.
+ * UnixFutureValidator
  *
  * @since 4.0.0
  * @author yizzuide
- * Create at 2024/03/03 00:35
+ * Create at 2024/03/22 16:04
  */
-@Documented
-@Target({ElementType.METHOD})
-@Retention(RetentionPolicy.RUNTIME)
-@Inherited
-public @interface Tenant {
-    /**
-     * where ignore add tenant id in query.
-     * @return true is follow in global config.
-     */
-    boolean ignored() default false;
-
-    /**
-     * custom tenant id column name.
-     * @return tenant id column, null is follow in global config.
-     */
-    String idColumn() default "";
-
-    /**
-     * custom tenant id value.
-     * @return  tenant id value, null is follow in global config.
-     */
-    String idValue() default "";
+public class UnixFutureValidator implements ConstraintValidator<UnixFuture, Integer> {
+    @Override
+    public boolean isValid(Integer value, ConstraintValidatorContext context) {
+        if (null == value) return true;
+        return DateUtil.isFuture(Instant.ofEpochSecond(value));
+    }
 }

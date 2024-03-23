@@ -47,7 +47,7 @@ import java.util.Map;
  *
  * @author yizzuide
  * @since 2.0.0
- * @version 3.15.0
+ * @version 4.0.0
  * @see org.springframework.web.util.ContentCachingRequestWrapper
  * <br>
  * Create at 2019/12/12 17:37
@@ -62,7 +62,7 @@ public class CometRequestWrapper extends HttpServletRequestWrapper {
     private final boolean cacheBody;
 
     // 文件上传标识
-    private boolean fileUpload = false;
+    private boolean fileUploadFlag = false;
 
     private final HttpServletRequest originalRequest;
 
@@ -78,7 +78,7 @@ public class CometRequestWrapper extends HttpServletRequestWrapper {
 
         MultipartResolver multipartResolver = new StandardServletMultipartResolver();
         if (multipartResolver.isMultipart(request)) {
-            fileUpload = true;
+            fileUploadFlag = true;
         }
 
         // 将body数据存储起来
@@ -139,7 +139,7 @@ public class CometRequestWrapper extends HttpServletRequestWrapper {
 
     @Override
     public ServletInputStream getInputStream() throws IOException {
-        if (!cacheBody) {
+        if (!cacheBody || fileUploadFlag) {
             return super.getInputStream();
         }
         final ByteArrayInputStream inputStream = new ByteArrayInputStream(body);
@@ -198,6 +198,9 @@ public class CometRequestWrapper extends HttpServletRequestWrapper {
      * @return String
      */
     public String getBodyString() {
+        if (body == null) {
+            return null;
+        }
         final InputStream inputStream = new ByteArrayInputStream(body);
         return inputStream2String(inputStream);
     }
@@ -241,7 +244,7 @@ public class CometRequestWrapper extends HttpServletRequestWrapper {
             throw new RuntimeException(e);
         }
         String body = sb.toString();
-        if (fileUpload || CollectionUtils.isEmpty(CometHolder.getRequestInterceptors())) {
+        if (fileUploadFlag || CollectionUtils.isEmpty(CometHolder.getRequestInterceptors())) {
             return body;
         }
         return interceptRequest(null, null, body);

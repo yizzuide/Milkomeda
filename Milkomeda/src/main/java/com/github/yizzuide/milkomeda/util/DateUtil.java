@@ -24,6 +24,9 @@ package com.github.yizzuide.milkomeda.util;
 import org.apache.commons.lang3.time.DateUtils;
 
 import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -37,6 +40,8 @@ import java.util.Date;
 public class DateUtil {
 
     public static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
+
+    public static final String DATE_FORMAT_HHMMSS = "yyyy-MM-dd HH:mm:ss";
 
     public static int getUnixTime() {
         return getUnixTime(System.currentTimeMillis());
@@ -65,5 +70,25 @@ public class DateUtil {
 
     public static int getUnixDay(Date date) {
         return (int) (DateUtils.truncate(date, Calendar.DAY_OF_MONTH).getTime() / 1000);
+    }
+
+    public static Instant beginDate(Instant current) {
+        return current.truncatedTo(ChronoUnit.DAYS);
+    }
+
+    public static long betweenDays(Instant begin, Instant end) {
+        return ChronoUnit.DAYS.between(begin, end);
+    }
+
+    public static long betweenHours(Instant begin, Instant end) {
+        return Duration.between(begin, end).toHours();
+    }
+
+    public static long betweenMinutes(Instant begin, Instant end) {
+        return ChronoUnit.MINUTES.between(begin, end);
+    }
+
+    public static boolean isFuture(Instant current) {
+        return current.isAfter(Instant.now());
     }
 }

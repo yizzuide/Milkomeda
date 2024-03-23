@@ -31,7 +31,7 @@ import java.lang.annotation.Target;
 import static java.lang.annotation.ElementType.*;
 
 /**
- * PhoneConstraint
+ * 手机号验证
  *
  * @author yizzuide
  * @since 3.0.0

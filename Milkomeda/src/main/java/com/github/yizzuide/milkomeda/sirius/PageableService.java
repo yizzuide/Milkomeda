@@ -52,11 +52,13 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
     }
 
     @SuppressWarnings("unchecked")
+    @Override
     protected Class<M> currentMapperClass() {
         return (Class<M>) ReflectionKit.getSuperClassGenericType(this.getClass(), PageableService.class, 0);
     }
 
     @SuppressWarnings("unchecked")
+    @Override
     protected Class<T> currentModelClass() {
         return (Class<T>) ReflectionKit.getSuperClassGenericType(this.getClass(), PageableService.class, 1);
     }

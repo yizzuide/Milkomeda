@@ -49,7 +49,6 @@ public class TenantOrbitSource implements OrbitSource {
         if (!bindResult.isBound()) {
             return Collections.emptyList();
         }
-        AnnotationOrbitAdvisor annotationOrbitAdvisor = new AnnotationOrbitAdvisor(Tenant.class, Tenant.class, "sirius-tenant", TenantOrbitAdvice.class, null);
-        return Collections.singletonList(annotationOrbitAdvisor);
+        return Collections.singletonList(AnnotationOrbitAdvisor.forMethod(Tenant.class, "sirius_tenant", TenantOrbitAdvice.class, null));
     }
 }
