@@ -34,7 +34,9 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.lang.NonNull;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -104,7 +106,13 @@ public class OrbitRegistrar implements ImportBeanDefinitionRegistrar {
             Class<OrbitAdvice> adviceClass = (Class<OrbitAdvice>) value.getClass();
             Orbit orbit = AnnotationUtils.findAnnotation(adviceClass, Orbit.class);
             if (orbit != null) {
-                orbitAdvisors.add(new AspectJOrbitAdvisor(orbit.pointcutExpression(), id, adviceClass, null));
+                if (StringUtils.hasLength(orbit.pointcutExpression())) {
+                    orbitAdvisors.add(new AspectJOrbitAdvisor(orbit.pointcutExpression(), id, adviceClass, null));
+                    return;
+                }
+                if (orbit.pointcutAnnotation() != Annotation.class) {
+                    orbitAdvisors.add(AnnotationOrbitAdvisor.forMethod(orbit.pointcutAnnotation(), id, adviceClass, null));
+                }
             }
         });
 

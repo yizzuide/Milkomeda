@@ -209,7 +209,7 @@ public class CacheHelper {
         String key = keyGenerator.apply(fastSpot.getView());
 
         // 方案二：直接尝试从一级缓存池获取（耗时为O(logN)），或二级缓存Redis获取（耗时：网络+序列化）
-        Spot<Serializable, E> spot = cache.get(key, new TypeReference<Serializable>() {}, eTypeRef);
+        Spot<Serializable, E> spot = cache.get(key, new TypeReference<>() {}, eTypeRef);
         if (spot != null) {
             data = spot.getData();
             // 设置缓存数据

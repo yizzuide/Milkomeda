@@ -172,7 +172,9 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
                         if (values != null) {
                             condition = true;
                         }
-                        if (values instanceof Object[]) {
+                        if (values instanceof Collection) {
+                            valueObjects = (Collection<Object>) values;
+                        } else if (values instanceof Object[]) {
                             valueObjects = Arrays.asList((Object[]) values);
                         }
                     }

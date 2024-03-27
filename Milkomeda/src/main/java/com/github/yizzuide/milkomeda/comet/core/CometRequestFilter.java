@@ -28,7 +28,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.util.Assert;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.util.WebUtils;
 
 import java.io.IOException;
@@ -55,9 +54,7 @@ public class CometRequestFilter implements Filter {
         // servletRequest.setCharacterEncoding(Charset.defaultCharset().toString());
         ServletRequest requestWrapper = servletRequest;
         if (CometHolder.shouldWrapRequest()) {
-            // 如果有Form表单数据则不读取body，交给SpringMVC框架处理（但@CometParam功能仍然有效）
-            boolean cacheBody = CollectionUtils.isEmpty(servletRequest.getParameterMap());
-            requestWrapper = new CometRequestWrapper((HttpServletRequest) servletRequest, cacheBody);
+            requestWrapper = new CometRequestWrapper((HttpServletRequest) servletRequest);
         }
         boolean enableAddResponseWrapper = CometHolder.shouldWrapResponse();
         if (enableAddResponseWrapper) {

@@ -42,8 +42,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * CometRequestWrapper
- * 请求包装，用于重复读取请求消息体内容
+ * 请求包装类，用于可重复读取请求消息体内容
  *
  * @author yizzuide
  * @since 2.0.0
@@ -59,7 +58,7 @@ public class CometRequestWrapper extends HttpServletRequestWrapper {
      */
     private byte[] body;
 
-    private final boolean cacheBody;
+    private boolean cacheBodyFlag = false;
 
     // 文件上传标识
     private boolean fileUploadFlag = false;
@@ -69,12 +68,10 @@ public class CometRequestWrapper extends HttpServletRequestWrapper {
     /**
      * Create Request wrapper for intercept or cache body.
      * @param request   HttpServletRequest
-     * @param cacheBody enable cache body
      */
-    public CometRequestWrapper(HttpServletRequest request, boolean cacheBody) {
+    public CometRequestWrapper(HttpServletRequest request) {
         super(request);
         this.originalRequest = request;
-        this.cacheBody = cacheBody;
 
         MultipartResolver multipartResolver = new StandardServletMultipartResolver();
         if (multipartResolver.isMultipart(request)) {
@@ -82,13 +79,17 @@ public class CometRequestWrapper extends HttpServletRequestWrapper {
         }
 
         // 将body数据存储起来
-        if (cacheBody) {
-            String bodyStr = getBodyString(request);
-            if (StringUtils.isEmpty(bodyStr)) {
-                body = new byte[0];
-                return;
+        if (!fileUploadFlag) {
+            // 如果有Form表单数据则不读取body，交给SpringMVC框架处理（但@CometParam功能仍然有效）
+            cacheBodyFlag = CollectionUtils.isEmpty(request.getParameterMap());
+            if (cacheBodyFlag) {
+                String bodyStr = getBodyString(request);
+                if (StringUtils.isEmpty(bodyStr)) {
+                    body = new byte[0];
+                    return;
+                }
+                body = bodyStr.getBytes(StandardCharsets.UTF_8);
             }
-            body = bodyStr.getBytes(StandardCharsets.UTF_8);
         }
     }
 
@@ -139,7 +140,7 @@ public class CometRequestWrapper extends HttpServletRequestWrapper {
 
     @Override
     public ServletInputStream getInputStream() throws IOException {
-        if (!cacheBody || fileUploadFlag) {
+        if (!cacheBodyFlag || fileUploadFlag) {
             return super.getInputStream();
         }
         final ByteArrayInputStream inputStream = new ByteArrayInputStream(body);

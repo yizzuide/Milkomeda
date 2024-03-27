@@ -27,7 +27,7 @@ import org.springframework.stereotype.Component;
 import java.lang.annotation.*;
 
 /**
- * Register a aspectJ advisor.
+ * Register an orbit advisor.
  *
  * @since 3.13.0
  * @author yizzuide
@@ -51,6 +51,11 @@ public @interface Orbit {
      * 切点表达式，如应用给Mapper的query方法：execution(* com..mapper.*.query*(..))
      * @return  切点表达式
      */
-    String pointcutExpression();
+    String pointcutExpression() default "";
 
+    /**
+     * 切面注解
+     * @return  注解类型
+     */
+    Class<Annotation> pointcutAnnotation() default Annotation.class;
 }
