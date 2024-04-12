@@ -66,23 +66,21 @@ public class CrustInterceptor implements AsyncHandlerInterceptor {
         CrustApiUserInfo<CrustEntity> userInfo = new CrustApiUserInfo<>();
         userInfo.setUid(tokenData.getUserId());
         UserDetails guardDetails = userInfo.getGuardUserDetails();
-        if (guardDetails != null) {
-            if (guardDetails.getTokenRand() != null && !Objects.equals(tokenData.getRand(), guardDetails.getTokenRand())) {
-                writeFailResponse(response, HttpStatus.UNAUTHORIZED.value(), "Token is invalid.");
-                return false;
-            }
-            if (!guardDetails.enabled() || guardDetails.accountExpired() || guardDetails.accountLocked()) {
-                writeFailResponse(response, HttpStatus.FORBIDDEN.value(), "Restricted user access");
-                return false;
-            }
-            // match guard rules
-            if (!CollectionUtils.isEmpty(guardDetails.userInfo().getGuardRules())) {
-                for (GuardRule guardRule : guardDetails.userInfo().getGuardRules()) {
-                    if (URLPathMatcher.match(guardRule.getIncludeUrls(), null)) {
-                        if (guardRule.getMatcher().apply(userInfo.getEntity())) {
-                            writeFailResponse(response, guardRule.getStatus(), guardRule.getMessage());
-                            return false;
-                        }
+        if (guardDetails == null || (guardDetails.getTokenRand() != null && !Objects.equals(tokenData.getRand(), guardDetails.getTokenRand()))) {
+            writeFailResponse(response, HttpStatus.UNAUTHORIZED.value(), "Token is invalid.");
+            return false;
+        }
+        if (!guardDetails.enabled() || guardDetails.accountExpired() || guardDetails.accountLocked()) {
+            writeFailResponse(response, HttpStatus.FORBIDDEN.value(), "Restricted user access");
+            return false;
+        }
+        // match guard rules
+        if (!CollectionUtils.isEmpty(guardDetails.userInfo().getGuardRules())) {
+            for (GuardRule guardRule : guardDetails.userInfo().getGuardRules()) {
+                if (URLPathMatcher.match(guardRule.getIncludeUrls(), null)) {
+                    if (guardRule.getMatcher().apply(userInfo.getEntity())) {
+                        writeFailResponse(response, guardRule.getStatus(), guardRule.getMessage());
+                        return false;
                     }
                 }
             }

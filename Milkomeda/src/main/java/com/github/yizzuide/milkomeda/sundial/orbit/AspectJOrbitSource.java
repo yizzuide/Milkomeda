@@ -26,7 +26,6 @@ import com.github.yizzuide.milkomeda.orbit.OrbitAdvisor;
 import com.github.yizzuide.milkomeda.orbit.OrbitSource;
 import com.github.yizzuide.milkomeda.orbit.OrbitSourceProvider;
 import com.github.yizzuide.milkomeda.sundial.SundialProperties;
-import com.github.yizzuide.milkomeda.util.CollectionExtensionsKt;
 import org.springframework.boot.context.properties.bind.BindResult;
 import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.core.env.Environment;
@@ -66,7 +65,7 @@ public class AspectJOrbitSource implements OrbitSource {
         // convert strategy config to orbit node
         return sundialProperties.getStrategy().stream()
                 .map(strategy -> new AspectJOrbitAdvisor(strategy.getPointcutExpression(), strategy.getKeyName(),
-                        AspectJDataSourceOrbitAdvice.class, CollectionExtensionsKt.singletonMap(SundialProperties.Strategy.KEY_NAME, strategy.getKeyName())))
+                        AspectJDataSourceOrbitAdvice.class, Collections.singletonMap(SundialProperties.Strategy.KEY_NAME, strategy.getKeyName())))
                 .collect(Collectors.toList());
     }
 }

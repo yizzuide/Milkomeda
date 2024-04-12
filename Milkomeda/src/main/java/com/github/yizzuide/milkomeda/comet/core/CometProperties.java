@@ -25,6 +25,8 @@ import com.github.yizzuide.milkomeda.universe.extend.web.handler.HotHttpHandlerP
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -32,7 +34,7 @@ import java.util.Map;
  *
  * @author yizzuide
  * @since 2.0.0
- * @version 3.5.0
+ * @version 4.0.0
  * <br>
  * Create at 2019/12/12 18:04
  */
@@ -53,6 +55,13 @@ public class CometProperties {
      * @see CometProperties#enableReadRequestBody
      */
     private boolean enableReadResponseBody = false;
+
+    /**
+     * 请求与响应包装类需要排除的URL
+     * @since 4.0.0
+     */
+    private List<String> excludeUrls = Arrays.asList("/favicon.ico", "/druid/**", "/doc.html", "/webjars/**",
+            "/swagger-resources/**", "/swagger-ui.html");
 
     /**
      * 成功状态码

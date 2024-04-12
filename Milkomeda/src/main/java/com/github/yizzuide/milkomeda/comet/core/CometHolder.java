@@ -23,6 +23,10 @@ package com.github.yizzuide.milkomeda.comet.core;
 
 import com.github.yizzuide.milkomeda.comet.collector.CometCollectorProperties;
 import com.github.yizzuide.milkomeda.comet.logger.CometLoggerProperties;
+import com.github.yizzuide.milkomeda.universe.context.WebContext;
+import com.github.yizzuide.milkomeda.universe.parser.url.URLPathMatcher;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.List;
 
@@ -92,6 +96,15 @@ public class CometHolder {
      * @since 3.11.0
      */
     public static boolean shouldWrapRequest() {
+        return shouldWrapRequest(WebContext.getRequest());
+    }
+
+    public static boolean shouldWrapRequest(ServletRequest request) {
+        if (request instanceof HttpServletRequest req) {
+            if (URLPathMatcher.match(getProps().getExcludeUrls(), req.getRequestURI())) {
+                return false;
+            }
+        }
         return getProps().isEnableReadRequestBody();
     }
 
@@ -101,6 +114,15 @@ public class CometHolder {
      * @since 3.11.0
      */
     public static boolean shouldWrapResponse() {
+        return shouldWrapResponse(WebContext.getRequest());
+    }
+
+    public static boolean shouldWrapResponse(ServletRequest request) {
+        if (request instanceof HttpServletRequest req) {
+            if (URLPathMatcher.match(getProps().getExcludeUrls(), req.getRequestURI())) {
+                return false;
+            }
+        }
         return getProps().isEnableReadResponseBody();
     }
 

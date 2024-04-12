@@ -27,6 +27,7 @@ import jakarta.servlet.WriteListener;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpServletResponseWrapper;
+import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
@@ -52,6 +53,7 @@ import java.nio.charset.StandardCharsets;
  * <br>
  * Create at 2020/04/07 14:54
  */
+@Slf4j
 public class CometResponseWrapper extends HttpServletResponseWrapper {
 
     private final FastByteArrayOutputStream content = new FastByteArrayOutputStream(1024);
@@ -196,7 +198,11 @@ public class CometResponseWrapper extends HttpServletResponseWrapper {
      * @throws IOException  Network IO exception
      */
     public void copyBodyToResponse() throws IOException {
-        copyBodyToResponse(true);
+        try {
+            copyBodyToResponse(true);
+        } catch (SocketTimeoutException e) {
+            log.warn("Read socket timeout");
+        }
     }
 
     /**

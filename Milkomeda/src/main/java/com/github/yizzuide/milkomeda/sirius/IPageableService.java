@@ -161,6 +161,19 @@ public interface IPageableService<T> extends IService<T> {
     UniformPage<T> selectByPage(UniformQueryPageData<T> queryPageData, Map<String, Object> queryMatchData, String group);
 
     /**
+     * Query by page data and group name which support entity to vo converter.
+     * @param queryPageData page data
+     * @param entity2VoConverter entity to vo converter
+     * @param group match group name
+     * @return  UniformPage
+     * @since 4.0.0
+     * @param <V> VO class type
+     */
+    <V> UniformPage<V> selectByPage(UniformQueryPageData<T> queryPageData,
+                                Function<T, V> entity2VoConverter,
+                                String group);
+
+    /**
      * Query by page data, match data and group name which support entity to vo converter.
      * @param queryPageData page data
      * @param queryMatchData match data

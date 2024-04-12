@@ -29,6 +29,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.stream.Stream;
 
 /**
  * DateUtil
@@ -90,5 +91,18 @@ public class DateUtil {
 
     public static boolean isFuture(Instant current) {
         return current.isAfter(Instant.now());
+    }
+
+    public static Integer nextUnixDay(Integer day) {
+        return plusUnixDays(day, 1);
+    }
+
+    public static Integer plusUnixDays(Integer day, Integer unit) {
+        return Math.toIntExact(Instant.ofEpochSecond(day).plus(unit, ChronoUnit.DAYS).getEpochSecond());
+    }
+
+    public static Stream<Integer> genUnixDays(Integer beginDay, Integer endDay) {
+        return Stream.iterate(beginDay, DateUtil::nextUnixDay)
+                .limit(ChronoUnit.DAYS.between(Instant.ofEpochSecond(beginDay), Instant.ofEpochSecond(endDay)));
     }
 }

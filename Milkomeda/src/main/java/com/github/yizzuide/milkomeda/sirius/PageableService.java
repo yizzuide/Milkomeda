@@ -68,7 +68,7 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
     }
 
     public UniformPage<T> selectByPage(UniformQueryPageData<T> queryPageData, String group) {
-        return selectByPage(queryPageData, null, group);
+        return selectByPage(queryPageData, (Map<String, Object>) null, group);
     }
 
     public UniformPage<T> selectByPage(UniformQueryPageData<T> queryPageData, Map<String, Object> queryMatchData) {
@@ -79,6 +79,12 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
                                        Map<String, Object> queryMatchData,
                                        String group) {
         return selectByPage(queryPageData, queryMatchData, null, group);
+    }
+
+    public <V> UniformPage<V> selectByPage(UniformQueryPageData<T> queryPageData,
+                                       Function<T, V> entity2VoConverter,
+                                       String group) {
+        return selectByPage(queryPageData, null, entity2VoConverter, group);
     }
 
     @SuppressWarnings({"ConstantConditions", "rawtypes", "unchecked"})

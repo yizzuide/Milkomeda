@@ -21,12 +21,15 @@
 
 package com.github.yizzuide.milkomeda.wormhole;
 
+import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
+
 /**
  * An interface which indicates as a transaction service in Domain-Driver Design.
  *
  * @param <R> the repository type
  *
  * @since 3.15.0
+ * @version 4.0.0
  * @author yizzuide
  * Create at 2023/07/14 03:31
  */
@@ -43,4 +46,15 @@ public interface TransactionService<R> {
      * @return repository type
      */
     R getRepositoryProxy();
+
+    /**
+     * Get repository proxy by class.
+     * @param clazz the repository class
+     * @return repository
+     * @param <T>  repository type
+     * @since 4.0.0
+     */
+    default <T> T getRepositoryProxy(Class<T> clazz) {
+        return ApplicationContextHolder.get().getBean(clazz);
+    }
 }

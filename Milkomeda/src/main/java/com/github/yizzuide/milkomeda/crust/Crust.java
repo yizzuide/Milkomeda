@@ -32,10 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
-import org.springframework.security.authentication.AbstractAuthenticationToken;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.AuthenticationServiceException;
-import org.springframework.security.authentication.InsufficientAuthenticationException;
+import org.springframework.security.authentication.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
@@ -185,7 +182,11 @@ public class Crust extends AbstractCrust {
 
     @Override
     public boolean hasAuthenticated() {
-        return getAuthentication() != null && getAuthentication().isAuthenticated();
+        Authentication authentication = getAuthentication();
+        if (authentication == null || authentication.getClass() == AnonymousAuthenticationToken.class) {
+            return false;
+        }
+        return authentication.isAuthenticated();
     }
 
     @NonNull

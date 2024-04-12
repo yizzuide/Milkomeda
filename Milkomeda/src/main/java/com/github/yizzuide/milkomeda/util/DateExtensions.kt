@@ -29,7 +29,6 @@ import java.util.*
 /**
  * DateExtensionsKt
  *
- *
  * @author yizzuide
  * @since 3.14.0
  * <br>
@@ -46,7 +45,7 @@ fun timestamp2Date(timestamp: Long): Date? {
     return Date.from(instant)
 }
 
-fun date2Timestamp(date: Date?): Long = date?.time ?: -1
+fun date2Timestamp(date: Date?): Long = date?.time ?: 0
 
 fun timestampOfDays(days: Long): Long = LocalDate.now().plusDays(days).
     atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli() - System.currentTimeMillis()

@@ -53,10 +53,10 @@ public class CometRequestFilter implements Filter {
         // 设置编码，防止Spring MVC注册Filter顺序问题导致乱码问题（目前已经保证Spring Web MVC的CharacterEncodingFilter优先设置）
         // servletRequest.setCharacterEncoding(Charset.defaultCharset().toString());
         ServletRequest requestWrapper = servletRequest;
-        if (CometHolder.shouldWrapRequest()) {
+        if (CometHolder.shouldWrapRequest(servletRequest)) {
             requestWrapper = new CometRequestWrapper((HttpServletRequest) servletRequest);
         }
-        boolean enableAddResponseWrapper = CometHolder.shouldWrapResponse();
+        boolean enableAddResponseWrapper = CometHolder.shouldWrapResponse(servletRequest);
         if (enableAddResponseWrapper) {
             servletResponse = new CometResponseWrapper((HttpServletResponse) servletResponse);
         }

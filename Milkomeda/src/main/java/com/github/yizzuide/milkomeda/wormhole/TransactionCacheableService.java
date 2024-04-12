@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 yizzuide All rights Reserved.
+ * Copyright (c) 2024 yizzuide All rights Reserved.
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -19,35 +19,32 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.sirius.wormhole;
+package com.github.yizzuide.milkomeda.wormhole;
 
-import com.github.yizzuide.milkomeda.wormhole.TransactionCacheableService;
-import com.github.yizzuide.milkomeda.wormhole.TransactionWorkBus;
-import lombok.Getter;
-import org.springframework.beans.factory.annotation.Autowired;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Mybatis plus extend of service which provide {@link TransactionWorkBus}.
+ * A cacheable transaction service for {@link TransactionService}.
  *
  * @param <R> the repository type
  *
- * @since 3.15.0
- * @version 4.0.0
+ * @since 4.0.0
  * @author yizzuide
- * Create at 2023/07/14 03:48
+ * Create at 2024/04/07 18:58
  */
-@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
-@Getter
-public class SiriusTransactionService<R> extends TransactionCacheableService<R> {
+public abstract class TransactionCacheableService<R> implements TransactionService<R> {
 
-    /**
-     * Link {@link TransactionWorkBus} belong this service.
-     */
-    @Autowired
-    protected TransactionWorkBus transactionWorkBus;
+    private static final Map<Class<?>, Object> CACHE_REPOSITORY_MAP = new ConcurrentHashMap<>();
 
+    @SuppressWarnings("unchecked")
     @Override
-    public R getRepositoryProxy() {
-        return null;
+    public <T> T getRepositoryProxy(Class<T> clazz) {
+        T repository = (T) CACHE_REPOSITORY_MAP.get(clazz);
+        if (repository == null) {
+            repository = TransactionService.super.getRepositoryProxy(clazz);
+            CACHE_REPOSITORY_MAP.put(clazz, repository);
+        }
+        return repository;
     }
 }
