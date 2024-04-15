@@ -21,7 +21,7 @@
 
 package com.github.yizzuide.milkomeda.moon;
 
-import com.github.yizzuide.milkomeda.util.IOUtils;
+import com.github.yizzuide.milkomeda.util.IOUtil;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.data.redis.core.script.RedisScript;
@@ -87,6 +87,6 @@ public class PeriodicMoonStrategy extends AbstractMoonStrategy {
 
     @Override
     public String loadLuaScript() throws IOException {
-        return IOUtils.loadLua(IOUtils.LUA_PATH, "moon_periodic.lua");
+        return IOUtil.loadLua(IOUtil.LUA_PATH, "moon_periodic.lua");
     }
 }

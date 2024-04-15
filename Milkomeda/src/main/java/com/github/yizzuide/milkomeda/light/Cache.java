@@ -109,6 +109,14 @@ public interface Cache {
     void erase(String key);
 
     /**
+     * Check is cache in memory.
+     * @param key cache key
+     * @return ture if exists
+     * @since 3.20.0
+     */
+    boolean isCacheL1Exists(String key);
+
+    /**
      * Check is cache in redis.
      * @param key cache key
      * @return ture if exists

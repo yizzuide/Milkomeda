@@ -22,6 +22,7 @@
 package com.github.yizzuide.milkomeda.universe.context;
 
 import com.github.yizzuide.milkomeda.universe.engine.el.ELContext;
+import com.github.yizzuide.milkomeda.universe.engine.el.EvaluateSource;
 import com.github.yizzuide.milkomeda.universe.function.TripleFunction;
 import com.github.yizzuide.milkomeda.universe.metadata.HandlerMetaData;
 import org.springframework.aop.framework.autoproxy.AutoProxyUtils;
@@ -47,7 +48,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * This util class include Bean class build, register, scan, and find annotation method.
+ * Spring Bean class build, register, scan, and find annotation method.
  *
  * @author yizzuide
  * @since 3.13.0
@@ -161,7 +162,7 @@ public final class SpringContext {
     }
 
     /**
-     * Get method map with annotation from target Class
+     * Get the method map with annotation from target Class
      * @param annotationClass   annotation type
      * @param targetType        target class
      * @param <A>               annotation generic type
@@ -220,8 +221,9 @@ public final class SpringContext {
                 }
                 // 支持SpEL
                 String name = nameProvider.apply(executeAnnotation, handlerAnnotation, metaData);
-                if (name.startsWith("'") || name.startsWith("@") || name.startsWith("#") || name.startsWith("T(") || name.startsWith("args[")) {
-                    name = ELContext.getValue(target, new Object[]{}, target.getClass(), method, name, String.class);
+                if (ELContext.match(name)) {
+                    name = ELContext.getValue(EvaluateSource.builder().target(target)
+                            .targetClass(target.getClass()).method(method).args(new Object[]{}).build(), name, String.class);
                 }
                 if (name == null) {
                     throw new IllegalArgumentException("Please specify the [tag] of "+ executeAnnotation +" !");

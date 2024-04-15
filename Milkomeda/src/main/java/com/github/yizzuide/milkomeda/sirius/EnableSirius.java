@@ -26,7 +26,7 @@ import org.springframework.context.annotation.Import;
 import java.lang.annotation.*;
 
 /**
- * Sirius is module of mybatis-plus addition.
+ * Sirius is a module of mybatis-plus extension.
  *
  * @since 3.14.0
  * @author yizzuide

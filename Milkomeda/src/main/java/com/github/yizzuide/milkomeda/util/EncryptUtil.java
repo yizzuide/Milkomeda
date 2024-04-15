@@ -87,7 +87,7 @@ public class EncryptUtil {
      * @return base64编码密文
      */
     public static byte[] decode(String data) {
-        return Strings.isEmpty(data) ? null : Base64.decodeBase64(data);
+        return StringExtensionsKt.isEmpty(data) ? null : Base64.decodeBase64(data);
     }
 
     /**

@@ -25,14 +25,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.lang.NonNull;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+import org.springframework.scheduling.TaskScheduler;
 
 /**
  * DelayTimer
  *
  * @author yizzuide
  * @since 1.15.0
- * @version 3.8.0
+ * @version 3.20.0
  * <br>
  * Create at 2019/11/16 18:57
  */
@@ -41,9 +41,10 @@ public class DelayTimer implements ApplicationListener<ApplicationStartedEvent> 
     @Autowired
     private IceProperties props;
 
+    // Spring Boot 3.0：TaskScheduler超级接口支持虚拟线程和传统线程池
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
-    private ThreadPoolTaskScheduler taskScheduler;
+    private TaskScheduler taskScheduler;
 
     @Autowired
     private DelegatingDelayJobHandler delegatingDelayJobHandler;

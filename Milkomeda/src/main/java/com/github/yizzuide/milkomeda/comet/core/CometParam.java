@@ -21,6 +21,8 @@
 
 package com.github.yizzuide.milkomeda.comet.core;
 
+import com.github.yizzuide.milkomeda.hydrogen.validator.ValidatorProperties;
+
 import java.lang.annotation.*;
 
 /**
@@ -29,7 +31,7 @@ import java.lang.annotation.*;
  *
  * @author yizzuide
  * @since 2.0.0
- * @version 3.13.0
+ * @version 3.20.0
  * <br>
  * Create at 2019/12/12 18:42
  */
@@ -38,6 +40,20 @@ import java.lang.annotation.*;
 @Documented
 @Inherited
 public @interface CometParam {
+    /**
+     * Valid request body. It needs config with {@link ValidatorProperties#isEnable()} is true.
+     * @return  true is need valid
+     * @since 3.20.0
+     */
+    boolean valid() default false;
+
+    /**
+     * Valid groups.
+     * @return  group classes
+     * @since 3.20.0
+     */
+    Class<?>[] validGroups() default {};
+
     /**
      * 解码器（用于与Echo联合验签使用）
      * @return  CometParamDecrypt实现

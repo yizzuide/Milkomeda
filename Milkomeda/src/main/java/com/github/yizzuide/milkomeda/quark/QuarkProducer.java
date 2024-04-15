@@ -25,21 +25,46 @@ import com.lmax.disruptor.RingBuffer;
 import com.lmax.disruptor.dsl.Disruptor;
 import lombok.Data;
 
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
+
 /**
  * Quark producer for holder {@link RingBuffer} and publish event.
  *
  * @since 3.15.0
+ * @version 3.20.0
  * @author yizzuide
  * Create at 2023/08/19 13:03
  */
 @Data
-public class QuarkProducer {
+public final class QuarkProducer {
 
-    private Disruptor<QuarkEvent<Object>> disruptor;
+    private List<Disruptor<QuarkEvent<Object>>> disruptorList;
 
-    private RingBuffer<QuarkEvent<Object>> ringBuffer;
+    private volatile RingBuffer<QuarkEvent<Object>>[] ringBuffers;
+
+    private final String topic;
+
+    private final int warningSize;
+
+    private final AtomicInteger idx = new AtomicInteger(0);
+
+    @SuppressWarnings({"unchecked"})
+    public QuarkProducer(Disruptor<QuarkEvent<Object>> disruptor, String topic) {
+        this.disruptorList = new CopyOnWriteArrayList<>();
+        this.disruptorList.add(disruptor);
+
+        this.topic = topic;
+        this.warningSize = (int) (disruptor.getBufferSize() * Quarks.getWarningPercent());
+        RingBuffer<QuarkEvent<Object>>[] ringBuffers = new RingBuffer[1];
+        ringBuffers[0] = disruptor.getRingBuffer();
+        this.ringBuffers = ringBuffers;
+    }
 
     public <T> void publishEventData(T data) {
+        checkAndResize();
+        RingBuffer<QuarkEvent<Object>> ringBuffer = getCurrentRingBuffer();
         // first, get and occupy the next sequence
         // 通过自旋获取下一个位置，需要均衡当前线程的任务与环形缓存的大小
         long sequence = ringBuffer.next();
@@ -54,5 +79,49 @@ public class QuarkProducer {
             // 在事件发布后，这个sequence会传递给消费者（EventHandler）
             ringBuffer.publish(sequence);
         }
+    }
+
+    public long getRemainingCapacity() {
+        return getCurrentRingBuffer().remainingCapacity();
+    }
+
+    void shutdown() {
+        this.disruptorList.forEach(Disruptor::shutdown);
+    }
+
+    private RingBuffer<QuarkEvent<Object>> getCurrentRingBuffer() {
+        // 高性能取模，idx必须为2的幂次方
+        return ringBuffers[idx.get() & ringBuffers.length - 1];
+    }
+
+    @SuppressWarnings({"unchecked"})
+    private void checkAndResize() {
+        if (getRemainingCapacity() > warningSize) {
+            return;
+        }
+        // is all ringBuffers filled over?
+        int count = ringBuffers.length;
+        if (count > 1) {
+            for (int i = 0; i < count; i++) {
+                RingBuffer<QuarkEvent<Object>> ringBuffer = ringBuffers[i];
+                if (ringBuffer.remainingCapacity() > warningSize) {
+                    // reset uses the previous index
+                    idx.getAndSet(i);
+                    return;
+                }
+            }
+        }
+
+        int newSize = count << 1;
+        RingBuffer<QuarkEvent<Object>>[] ringBuffers = new RingBuffer[newSize];
+        System.arraycopy(this.ringBuffers, 0, ringBuffers, 0, count);
+        for (int i = count; i < newSize; i++) {
+            Disruptor<QuarkEvent<Object>> disruptor = Quarks.createDisruptor(topic);
+            this.disruptorList.add(disruptor);
+            ringBuffers[i] = disruptor.getRingBuffer();
+        }
+        // reset uses the last index
+        idx.getAndSet(count);
+        this.ringBuffers = ringBuffers;
     }
 }

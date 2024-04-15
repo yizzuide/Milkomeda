@@ -21,27 +21,27 @@
 
 package com.github.yizzuide.milkomeda.universe.engine.el;
 
+import com.github.yizzuide.milkomeda.orbit.OrbitInvocation;
 import org.aspectj.lang.JoinPoint;
-import org.aspectj.lang.reflect.MethodSignature;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.expression.AnnotatedElementKey;
-import org.springframework.context.expression.BeanFactoryResolver;
-import org.springframework.expression.spel.support.StandardEvaluationContext;
 
-import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.List;
 
 /**
- * Method based SpEL context.
+ * Method-based SpEL context.
  *
  * @author yizzuide
  * @since 2.0.0
- * @version 2.4.0
+ * @version 3.20.0
  * <br>
  * Create at 2019/12/20 12:05
  */
 public class ELContext {
-    // Bean工厂解析器
-    private static BeanFactoryResolver beanFactoryResolver;
+
+    /**
+     * EL表达式匹配前缀
+     */
+    private static final List<String> EL_START_TOKENS = Arrays.asList("'", "@", "#", "T(", "root.", "args[", "true", "false");
 
     /**
      * 根据方法切面，获取EL表达式的值
@@ -50,57 +50,60 @@ public class ELContext {
      * @return 解析的值
      */
     public static String getValue(JoinPoint joinPoint, String condition) {
-        return getValue(joinPoint.getTarget(), joinPoint.getArgs(),
-                joinPoint.getTarget().getClass(),
-                ((MethodSignature) joinPoint.getSignature()).getMethod(), condition, String.class);
+        return getActualValue(joinPoint, condition, String.class);
     }
 
     /**
      * 根据方法切面，获取EL表达式的真实类型值
-     * @param joinPoint         切面连接点
-     * @param condition         el条件表达式
-     * @param desiredResultType 返回类型
+     * @param joinPoint     切面连接点
+     * @param condition     el条件表达式
+     * @param resultType    返回类型
      * @param <T>   返回类型
      * @return  解析的值
      */
-    public static <T> T getActualValue(JoinPoint joinPoint, String condition, Class<T> desiredResultType) {
-        return getValue(joinPoint.getTarget(), joinPoint.getArgs(),
-                joinPoint.getTarget().getClass(),
-                ((MethodSignature) joinPoint.getSignature()).getMethod(), condition, desiredResultType);
+    public static <T> T getActualValue(JoinPoint joinPoint, String condition, Class<T> resultType) {
+        return getValue(EvaluateSource.from(joinPoint), condition, resultType);
     }
 
     /**
-     * 根据类的反射信息，获取EL表达式的值
-     * @param object            目标对象
-     * @param args              参数
-     * @param clazz             目标类型
-     * @param method            方法
-     * @param condition         el条件表达式
-     * @param desiredResultType 返回类型
+     * 获取EL表达式的值
+     * @param object        目标对象
+     * @param invocation    OrbitInvocation
+     * @param condition     el条件表达式
+     * @param resultType    返回类型
      * @param <T>   返回类型
      * @return  解析的值
+     * @since 3.20.0
      */
-    public static <T> T getValue(Object object, Object[] args, Class<?> clazz, Method method,
-                                  String condition, Class<T> desiredResultType) {
-        if (args == null) {
-            return null;
+    public static <T> T getValue(Object object, OrbitInvocation invocation, String condition, Class<T> resultType) {
+        return getValue(EvaluateSource.from(invocation, object), condition, resultType);
+    }
+
+    /**
+     * Get value from Spring EL.
+     * @param source        context source
+     * @param condition     Spring EL
+     * @param resultType    return type
+     * @param <T>   result type
+     * @return  the parsed value
+     * @since 3.20.0
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> T getValue(EvaluateSource source, String condition, Class<T> resultType) {
+        if (match(condition)) {
+            MethodExpressionEvaluator<T> evaluator = new MethodExpressionEvaluator<>();
+            return evaluator.condition(condition, source, resultType);
         }
-        // EL表达式执行器
-        MethodExpressionEvaluator<T> evaluator = new MethodExpressionEvaluator<>();
-        // 创建AOP方法的执行上下文
-        StandardEvaluationContext evaluationContext =
-                evaluator.createEvaluationContext(object, clazz, method, args);
-        // 设置Bean工厂解析器
-        evaluationContext.setBeanResolver(beanFactoryResolver);
-        AnnotatedElementKey methodKey = new AnnotatedElementKey(method, clazz);
-        return evaluator.condition(condition, methodKey, evaluationContext, desiredResultType);
+        return (T) condition;
     }
 
     /**
-     * 设置应用上下文
-     * @param applicationContext    ApplicationContext
+     * Match the Spring EL.
+     * @param expression    Spring EL
+     * @return true is matched
+     * @since 3.20.0
      */
-    public static void setApplicationContext(ApplicationContext applicationContext) {
-        beanFactoryResolver = new BeanFactoryResolver(applicationContext);
+    public static boolean match(String expression) {
+        return EL_START_TOKENS.stream().anyMatch(expression::startsWith);
     }
 }

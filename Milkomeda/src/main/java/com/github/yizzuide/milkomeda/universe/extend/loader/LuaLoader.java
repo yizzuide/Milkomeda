@@ -21,7 +21,7 @@
 
 package com.github.yizzuide.milkomeda.universe.extend.loader;
 
-import com.github.yizzuide.milkomeda.util.IOUtils;
+import com.github.yizzuide.milkomeda.util.IOUtil;
 
 import java.io.IOException;
 
@@ -39,7 +39,7 @@ public interface LuaLoader {
      * @return lua source dir.
      */
     default String resourceDirPath() {
-        return IOUtils.LUA_PATH;
+        return IOUtil.LUA_PATH;
     }
 
     /**
@@ -65,7 +65,7 @@ public interface LuaLoader {
         }
         String[] luaScripts = new String[luaFilenames.length];
         for (int i = 0; i < luaFilenames.length; i++) {
-            luaScripts[i] = IOUtils.loadLua(resourceDirPath(), luaFilenames[i]);
+            luaScripts[i] = IOUtil.loadLua(resourceDirPath(), luaFilenames[i]);
         }
         setLuaScripts(luaScripts);
     }

@@ -45,7 +45,7 @@
 
     <select id="queryAllByLimit" resultMap="JobInspectionMap">
         select
-            id, topic, application_name, queue_type, bucket_index, had_retry_count, need_re_push, execution_time, push_time, update_time
+        id, topic, application_name, queue_type, bucket_index, had_retry_count, need_re_push, execution_time, push_time, update_time
         from job_inspection
         <if test="entity != null">
             <where>
@@ -139,7 +139,7 @@
         insert into job_inspection(id, topic, application_name, queue_type, bucket_index, had_retry_count, need_re_push, execution_time, push_time, update_time)
         values
         <foreach collection="entities" item="entity" separator=",">
-        (#{id}, #{entity.topic}, #{entity.applicationName}, #{entity.queueType}, #{entity.bucketIndex}, #{entity.hadRetryCount}, #{entity.needRePush}, #{entity.executionTime}, #{entity.pushTime}, #{entity.updateTime})
+            (#{id}, #{entity.topic}, #{entity.applicationName}, #{entity.queueType}, #{entity.bucketIndex}, #{entity.hadRetryCount}, #{entity.needRePush}, #{entity.executionTime}, #{entity.pushTime}, #{entity.updateTime})
         </foreach>
     </insert>
 

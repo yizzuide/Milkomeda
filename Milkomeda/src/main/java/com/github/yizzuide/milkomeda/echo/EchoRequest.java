@@ -123,12 +123,12 @@ public abstract class EchoRequest extends AbstractRequest implements CometParamD
 
             // data内容识别转换
             if (responseData.getData() instanceof String) {
+                String dataStr = (String) responseData.getData();
                 // 指定的为字符串类型直接返回
                 if (isStringType) {
                     return responseData;
                 }
                 // 去字符串符和反斜杠
-                String dataStr = (String) responseData.getData();
                 if (dataStr.startsWith("\"")) {
                     dataStr = dataStr.substring(1);
                 }

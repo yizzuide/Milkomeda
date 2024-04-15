@@ -150,7 +150,7 @@ public class LightCache implements Cache {
             return;
         }
         // 如果一级缓存没有数据，创建新的缓存数据对象
-        if (cacheMap.size() == 0) {
+        if (cacheMap.isEmpty()) {
             superCache.setId(id);
             return;
         }
@@ -265,10 +265,10 @@ public class LightCache implements Cache {
         boolean isAbandon = discardStrategy.ascend(spot);
         // 缓存被识别为过期，使缓存失效
         if (isAbandon) {
-            if (!onlyCacheL1) {
+            /*if (!onlyCacheL1) {
                 // 从二级缓存移除
                 RedisPolyfill.redisDelete(stringRedisTemplate, key);
-            }
+            }*/
             return false;
         }
 
@@ -363,6 +363,11 @@ public class LightCache implements Cache {
     }
 
     @Override
+    public boolean isCacheL1Exists(String key) {
+        return cacheMap.containsKey(key);
+    }
+
+    @Override
     public boolean isCacheL2Exists(String key) {
         return Objects.requireNonNull(stringRedisTemplate.hasKey(key));
     }
@@ -399,7 +404,7 @@ public class LightCache implements Cache {
                     return;
                 }
                 try {
-                    discardStrategy = strategyClass.newInstance();
+                    discardStrategy = strategyClass.getDeclaredConstructor().newInstance();
                 } catch (Exception e) {
                     discardStrategy  = new HotDiscard();
                     log.error("light create strategy class error with message:{}", e.getMessage(), e);

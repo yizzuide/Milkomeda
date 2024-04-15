@@ -46,7 +46,7 @@ public class LightProperties {
     private int l1MaxCount = 64;
 
     /** 设置一级缓存超出后丢弃的百分比 （不适用于LightDiscardStrategy.LazyExpire）*/
-    private float l1DiscardPercent = 0.1f;
+    private float l1DiscardPercent = 0.35f;
 
     /**  一级缓存过期时间（单位s，只适用于LightDiscardStrategy.LazyExpire） */
     @DurationUnit(ChronoUnit.SECONDS)

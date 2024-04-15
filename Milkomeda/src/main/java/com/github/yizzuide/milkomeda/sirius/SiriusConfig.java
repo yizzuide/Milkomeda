@@ -36,12 +36,14 @@ import com.baomidou.mybatisplus.core.metadata.TableFieldInfo;
 import com.baomidou.mybatisplus.core.metadata.TableInfo;
 import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.BlockAttackInnerInterceptor;
-import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
+import com.baomidou.mybatisplus.extension.plugins.inner.TenantLineInnerInterceptor;
 import com.baomidou.mybatisplus.extension.spring.MybatisSqlSessionFactoryBean;
 import com.github.yizzuide.milkomeda.sirius.wormhole.SiriusInspector;
+import com.github.yizzuide.milkomeda.sirius.wormhole.SiriusTransactionWorkBus;
 import com.github.yizzuide.milkomeda.universe.extend.env.CollectionsPropertySource;
 import com.github.yizzuide.milkomeda.universe.extend.env.SpELPropertySource;
 import com.github.yizzuide.milkomeda.util.ReflectUtil;
+import com.github.yizzuide.milkomeda.wormhole.TransactionWorkBus;
 import lombok.Getter;
 import org.apache.ibatis.reflection.MetaObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,7 +61,9 @@ import org.springframework.util.CollectionUtils;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Sirius module config.
@@ -69,22 +73,27 @@ import java.util.*;
  * @see MybatisSqlSessionFactoryBean
  * @see MybatisSqlSessionFactoryBuilder
  * @since 3.14.0
- * @version 3.15.0
+ * @version 3.20.0
  * @author yizzuide
  * <br>
  * Create at 2022/10/30 17:52
  */
 @AutoConfigureBefore(MybatisPlusAutoConfiguration.class)
-@EnableConfigurationProperties(SiriusProperties.class)
+@EnableConfigurationProperties({SiriusProperties.class, TenantProperties.class})
 @Configuration
 public class SiriusConfig {
 
     @Autowired
-    private SiriusProperties props;
+    private TenantProperties tenantProperties;
 
     @Bean
     public SiriusInspector siriusInspector() {
         return new SiriusInspector();
+    }
+
+    @Bean
+    public TransactionWorkBus transactionWorkBus() {
+        return new SiriusTransactionWorkBus();
     }
 
     @Bean
@@ -95,16 +104,22 @@ public class SiriusConfig {
     @Bean
     public MybatisPlusInterceptor mybatisPlusInterceptor() {
         MybatisPlusInterceptor mybatisPlusInterceptor = new MybatisPlusInterceptor();
-        // 分页插件
-        mybatisPlusInterceptor.addInnerInterceptor(new PaginationInnerInterceptor(props.getDbType()));
+        // 分页插件（改为PageHelper插件）
+        //mybatisPlusInterceptor.addInnerInterceptor(new PaginationInnerInterceptor(props.getDbType()));
         // 防全表更新插件
         mybatisPlusInterceptor.addInnerInterceptor(new BlockAttackInnerInterceptor());
+        // 添加SaaS租户插件
+        if (tenantProperties.isEnable()) {
+            TenantInterceptHandler tenantInterceptHandler = new TenantInterceptHandler(tenantProperties);
+            SiriusHolder.setTenantInterceptHandler(tenantInterceptHandler);
+            mybatisPlusInterceptor.addInnerInterceptor(new TenantLineInnerInterceptor(tenantInterceptHandler));
+        }
         return mybatisPlusInterceptor;
     }
 
     // 属性自定义配置，在Mybatis-plus自动配置前执行
     @Bean
-    public MybatisPlusPropertiesCustomizer propertiesCustomizer(ResourceLoader resourceLoader) throws IOException {
+    public MybatisPlusPropertiesCustomizer propertiesCustomizer(ResourceLoader resourceLoader) {
         return properties -> {
             GlobalConfig globalConfig = properties.getGlobalConfig();
             globalConfig.setBanner(false);
@@ -143,16 +158,15 @@ public class SiriusConfig {
         return new MybatisPlusMetaObjectHandler();
     }
 
+    @Getter
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
-    static class MybatisPlusMetaObjectHandler implements MetaObjectHandler {
+    public static class MybatisPlusMetaObjectHandler implements MetaObjectHandler {
 
         @Autowired
         private SiriusProperties props;
 
-        @Getter
         private List<String> insertFields;
 
-        @Getter
         private List<String> updateFields;
 
         @PostConstruct
@@ -295,24 +309,16 @@ public class SiriusConfig {
                 TableInfo tableInfo = (TableInfo) target;
                 for (TableFieldInfo fieldInfo: tableInfo.getFieldList()) {
                     if (fillFields.contains(fieldInfo.getProperty())) {
-                        Map<String, Object> props = new HashMap<>();
-                        props.put(propKey, true);
-                        ReflectUtil.setField(target, props);
+                        TypeReflector.setProps(target, propKey, true);
                         return;
                     }
                 }
             } else {
                 TableFieldInfo tableFieldInfo = (TableFieldInfo)target;
                 if (fillFields.contains(tableFieldInfo.getProperty())) {
-                    Map<String, Object> props = new HashMap<>();
-                    props.put(propKey, true);
-                    ReflectUtil.setField(target, props);
+                    TypeReflector.setProps(target, propKey, true);
                 }
             }
-        }
-
-        public SiriusProperties getProps() {
-            return props;
         }
     }
 }

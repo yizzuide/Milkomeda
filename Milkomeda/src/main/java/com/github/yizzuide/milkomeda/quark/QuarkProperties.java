@@ -32,6 +32,7 @@ import java.time.temporal.ChronoUnit;
  * Quark config properties.
  *
  * @since 3.15.0
+ * @version 3.20.0
  * @author yizzuide
  * Create at 2023/08/19 10:04
  */
@@ -43,6 +44,12 @@ public class QuarkProperties {
      * Cache buffer size.
      */
     private Integer bufferSize = 1 << 13;
+
+    /**
+     * Buffer size warning percent for expansion.
+     * @since 3.20.0
+     */
+    private Float warningPercent = .05f;
 
     /**
      * Thread pool.

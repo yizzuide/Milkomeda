@@ -24,7 +24,6 @@ package com.github.yizzuide.milkomeda.sundial;
 import lombok.Data;
 
 /**
- * ShardingRoot
  * 表达式根对象
  *
  * @author yizzuide

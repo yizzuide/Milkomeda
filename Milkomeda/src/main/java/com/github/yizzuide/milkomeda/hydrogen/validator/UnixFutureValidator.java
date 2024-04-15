@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 yizzuide All rights Reserved.
+ * Copyright (c) 2024 yizzuide All rights Reserved.
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -19,15 +19,25 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.demo.wormhole.appearance.aciton;
+package com.github.yizzuide.milkomeda.hydrogen.validator;
+
+import com.github.yizzuide.milkomeda.util.DateUtil;
+import javax.validation.ConstraintValidator;
+import javax.validation.ConstraintValidatorContext;
+
+import java.time.Instant;
 
 /**
- * 业务流程的事件动作
+ * UnixFutureValidator
  *
+ * @since 4.0.0
  * @author yizzuide
- * <br>
- * Create at 2020/05/05 16:01
+ * Create at 2024/03/22 16:04
  */
-public class Actions {
-    public static final String AUDIT_SUCCESS = "action_credit_audit";
+public class UnixFutureValidator implements ConstraintValidator<UnixFuture, Integer> {
+    @Override
+    public boolean isValid(Integer value, ConstraintValidatorContext context) {
+        if (null == value) return true;
+        return DateUtil.isFuture(Instant.ofEpochSecond(value));
+    }
 }

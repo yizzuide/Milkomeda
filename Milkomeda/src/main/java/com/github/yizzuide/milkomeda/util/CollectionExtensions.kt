@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 yizzuide All rights Reserved.
+ * Copyright (c) 2023 yizzuide All rights Reserved.
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -19,24 +19,17 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.crust;
-
-import org.springframework.context.annotation.Import;
-
-import java.lang.annotation.*;
+package com.github.yizzuide.milkomeda.util
 
 /**
- * Enable crust used in microservice that not need spring security environment, it just parses token to login info.
+ * Collection util
  *
  * @since 3.15.0
  * @author yizzuide
  * <br>
- * Create at 2022/12/07 00:09
+ * Create at 2023/01/27 19:10
  */
-@Import(CrustMicroConfig.class)
-@Target({ElementType.TYPE})
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
-@Inherited
-public @interface EnableCrustMicro {
+class Collections {
 }
+
+fun singletonMap(key: String, value: Any): Map<String, Any> = mapOf(key to value)

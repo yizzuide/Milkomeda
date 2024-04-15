@@ -44,6 +44,7 @@ import java.util.TimeZone;
  * Redis global config.
  *
  * @since 3.15.0
+ * @version 3.20.0
  * @author yizzuide
  * <br>
  * Create at 2022/12/08 01:53

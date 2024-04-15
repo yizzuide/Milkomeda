@@ -11,12 +11,13 @@
 
     <properties>
         <java.version>1.8</java.version>
-        <kotlin.version>1.6.21</kotlin.version>
-        <project.release.version>3.15.3-SNAPSHOT</project.release.version>
+        <kotlin.version>1.9.21</kotlin.version>
+        <project.release.version>3.20.0-SNAPSHOT</project.release.version>
         <spring-boot.version>2.7.6</spring-boot.version>
         <spring-cloud.version>2021.0.5</spring-cloud.version>
         <mybatis.starter.version>3.0.0</mybatis.starter.version>
         <mybatis-plus.version>3.5.2</mybatis-plus.version>
+        <pagehelper.version>1.4.7</pagehelper.version>
         <redission.version>3.18.0</redission.version>
         <jetcd.version>0.7.5</jetcd.version>
         <disruptor.version>3.4.4</disruptor.version>
@@ -73,7 +74,7 @@
         <profile>
             <id>sonatype-oss-release</id>
             <properties>
-                <project.release.version>3.15.3</project.release.version>
+                <project.release.version>3.20.0</project.release.version>
             </properties>
             <build>
                 <plugins>
@@ -171,6 +172,12 @@
             <groupId>org.mybatis.spring.boot</groupId>
             <artifactId>mybatis-spring-boot-starter</artifactId>
             <version>${mybatis.starter.version}</version>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>com.github.pagehelper</groupId>
+            <artifactId>pagehelper-spring-boot-starter</artifactId>
+            <version>${pagehelper.version}</version>
             <optional>true</optional>
         </dependency>
         <dependency>

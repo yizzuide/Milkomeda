@@ -21,17 +21,20 @@
 
 package com.github.yizzuide.milkomeda.comet.core;
 
+import com.github.yizzuide.milkomeda.orbit.OrbitRegistrar;
+import com.github.yizzuide.milkomeda.wormhole.WormholeEventBus;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * CometX
- * 业务方法采集器
+ * The comet bossiness log record which combines with the {@link OrbitRegistrar} and {@link WormholeEventBus}.
  *
  * @author yizzuide
  * @since 1.12.0
+ * @version 3.20.0
  * <br>
  * Create at 2019/09/21 01:15
  */
@@ -39,26 +42,44 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface CometX {
     /**
-     * 日志记录名
+     * Label name.
      * @return String
      */
-    String name() default "";
+    String name();
 
     /**
-     * 设置记录数据 prototype（原型）的相应tag，用于分类
-     * 不同的 tag 对应不同的记录数据原型
+     * Executes path.
      * @return String
      */
-    String tag() default "";
+    String path() default "";
 
     /**
-     * 设置记录数据 prototype（原型）
-     * 注意：
-     * 1. CometData类型应该是一个 pojo，需要提供无参构造器
-     * 2. 原则上一个记录数据原型对应指定一个 tag
-     *
-     * @return XCometData子类型
+     * Business category.
+     * @return String
      */
-    Class<? extends XCometData> prototype() default XCometData.class;
+    String tag();
 
+    /**
+     * Subject id which relative to the {@link CometX#tag}.
+     * @return Spring EL
+     */
+    String subjectId() default "";
+
+    /**
+     * Execute success info.
+     * @return Spring EL
+     */
+    String success() default "";
+
+    /**
+     * Other useful info.
+     * @return Spring El
+     */
+    String detail() default "";
+
+    /**
+     * whether to execute.
+     * @return  Spring EL
+     */
+    String condition() default "";
 }

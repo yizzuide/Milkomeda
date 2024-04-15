@@ -21,16 +21,17 @@
 
 package com.github.yizzuide.milkomeda.universe.extend.web.handler;
 
+import com.github.yizzuide.milkomeda.hydrogen.uniform.UniformException;
 import com.github.yizzuide.milkomeda.hydrogen.uniform.UniformHandler;
+import javax.annotation.PostConstruct;
+import javax.servlet.*;
+import javax.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.OrderComparator;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.util.CollectionUtils;
 
-import javax.annotation.PostConstruct;
-import javax.servlet.*;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -73,8 +74,8 @@ public class DelegatingContextFilter implements Filter {
         for (AstrolabeHandler astrolabeHandler : astrolabeHandlers) {
             try {
                 astrolabeHandler.preHandle(request);
-            } catch (Exception e) {
-                UniformHandler.matchStatusToWrite( (HttpServletResponse) response, null, e);
+            } catch (UniformException e) {
+                UniformHandler.matchStatusToWrite((HttpServletResponse) response, e.getCode(), e);
                 return;
             }
         }

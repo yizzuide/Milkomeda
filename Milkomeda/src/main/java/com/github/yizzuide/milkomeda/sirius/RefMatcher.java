@@ -21,13 +21,13 @@
 
 package com.github.yizzuide.milkomeda.sirius;
 
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import java.lang.annotation.*;
 
 /**
  * Reference matcher using for {@link IPageableService}.
  *
  * @since 3.14.0
+ * @version 3.20.0
  * @author yizzuide
  * <br>
  * Create at 2022/11/10 21:55
@@ -49,10 +49,11 @@ public @interface RefMatcher {
     String foreignField() default "";
 
     /**
-     * Foreign mapper type referenced at, must add on the mapper type.
+     * Foreign entity type referenced.
      * @return entity class
+     * @since 3.20.0
      */
-    Class<? extends BaseMapper> foreignMapper() default BaseMapper.class;
+    Class<?> foreignType() default Object.class;
 
     enum RefType {
         /**
@@ -61,7 +62,7 @@ public @interface RefMatcher {
         SELF,
 
         /**
-         * Foreign Reference, used on mapper type.
+         * Foreign Reference, used on entity or mapper type.
          */
         FOREIGN
     }

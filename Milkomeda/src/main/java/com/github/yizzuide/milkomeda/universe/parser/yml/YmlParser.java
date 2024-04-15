@@ -23,7 +23,7 @@ package com.github.yizzuide.milkomeda.universe.parser.yml;
 
 import com.github.yizzuide.milkomeda.universe.extend.env.CollectionsPropertySource;
 import com.github.yizzuide.milkomeda.universe.lang.Tuple;
-import com.github.yizzuide.milkomeda.util.Strings;
+import com.github.yizzuide.milkomeda.util.StringExtensionsKt;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
@@ -152,7 +152,7 @@ public class YmlParser {
             return;
         }
         // 替换是指定的值
-        if (Strings.isEmpty(Strings.toNullableString(value)) && replaceData != null) {
+        if (StringExtensionsKt.isEmpty(StringExtensionsKt.toNullableString(value)) && replaceData != null) {
             ymlAliasNode.setValue(replaceData);
         }
         // Replace empty token

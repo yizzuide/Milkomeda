@@ -25,7 +25,6 @@ import io.jsonwebtoken.*;
 
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.security.SignatureException;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -37,7 +36,7 @@ import java.util.Map;
  *
  * @author yizzuide
  * @since 1.14.0
- * @version 3.14.0
+ * @version 3.20.0
  * <br>
  * Create at 2019/11/11 15:16
  */
@@ -70,7 +69,7 @@ public class JwtUtil {
         return Jwts.builder()
                 .setClaims(claims)
                 .setExpiration(Date.from(Instant.ofEpochMilli(expireTime)))
-                .signWith(usedRSA ? SignatureAlgorithm.RS256 : SignatureAlgorithm.HS512, secureKey)
+                .signWith(usedRSA ? SignatureAlgorithm.RS256 : SignatureAlgorithm.HS256, secureKey)
                 .compact();
     }
 
@@ -83,7 +82,6 @@ public class JwtUtil {
      * @throws ExpiredJwtException token过期
      * @throws UnsupportedJwtException 不支持
      * @throws MalformedJwtException 被篡改
-     * @throws SignatureException 签名失败
      * @throws IllegalArgumentException 包含非法参数
      */
     public static Claims parseToken(String token, PublicKey publicKey) throws ExpiredJwtException, UnsupportedJwtException,

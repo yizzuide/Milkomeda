@@ -26,7 +26,6 @@ import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.util.TablesNamesFinder;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.reflection.SystemMetaObject;
-import org.springframework.util.StringUtils;
 
 import java.io.StringReader;
 import java.lang.reflect.Proxy;
@@ -44,6 +43,7 @@ import java.util.List;
 public class MybatisUtil {
     private static final CCJSqlParserManager sqlParserManager = new CCJSqlParserManager();
     private static final TablesNamesFinder tablesNamesFinder = new TablesNamesFinder();
+
     /**
      * 获得真正的处理对象,可能多层代理
      * @param target    代理目标
@@ -77,7 +77,7 @@ public class MybatisUtil {
      * @since 3.7.0
      */
     public static String getFirstTableName(String sql) {
-        sql = StringUtils.trimLeadingWhitespace(sql.toLowerCase());
+        sql = sql.toLowerCase().trim();
         if (sql.startsWith("select") || sql.startsWith("delete")) {
             return extractTableName(sql, " from ");
         }

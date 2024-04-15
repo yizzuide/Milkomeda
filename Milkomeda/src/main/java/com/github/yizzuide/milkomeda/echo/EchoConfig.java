@@ -59,7 +59,7 @@ import java.util.Objects;
  *
  * @author yizzuide
  * @since 1.13.0
- * @version 1.13.12
+ * @version 3.20.0
  * <br>
  * Create at 2019/09/21 16:24
  */
@@ -75,6 +75,7 @@ public class EchoConfig {
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     public RestTemplate simpleRestTemplate(RestTemplateBuilder builder) {
         RestTemplate restTemplate = builder.build();
+        // Spring Boot 3.0：Spring Framework 6.0 中已删除对 Apache HttpClient 的支持，现在由 org.apache.httpcomponents.client5:httpclient5 取代
         restTemplate.setRequestFactory(clientHttpRequestFactory());
         // 自定义错误处理
         restTemplate.setErrorHandler(new EchoResponseErrorHandler());
@@ -144,11 +145,11 @@ public class EchoConfig {
         //设置客户端和服务端建立连接的超时时间
         clientHttpRequestFactory.setConnectTimeout((int) echoProperties.getConnectTimeout().toMillis());
         //设置客户端从服务端读取数据的超时时间
-        clientHttpRequestFactory.setReadTimeout((int) echoProperties.getReadTimeout().toMillis());
+        clientHttpRequestFactory.setReadTimeout((int) echoProperties.getConnectTimeout().toMillis());
         //设置从连接池获取连接的超时时间，不宜过长
         clientHttpRequestFactory.setConnectionRequestTimeout((int) echoProperties.getConnectionRequestTimeout().toMillis());
         //缓冲请求数据，默认为true。通过POST或者PUT大量发送数据时，建议将此更改为false，以免耗尽内存（注意：Spring boot 1.5.x下需要注释掉这行）
-        clientHttpRequestFactory.setBufferRequestBody(echoProperties.isEnableBufferRequestBody());
+        clientHttpRequestFactory.setBufferRequestBody(false);
         return clientHttpRequestFactory;
     }
 }

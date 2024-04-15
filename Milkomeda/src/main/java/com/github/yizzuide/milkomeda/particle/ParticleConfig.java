@@ -43,7 +43,6 @@ import org.springframework.core.Ordered;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.lang.NonNull;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.filter.DelegatingFilterProxy;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -89,13 +88,11 @@ public class ParticleConfig implements ApplicationContextAware {
         return new ParticleFilter();
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
     @Bean
     @ConditionalOnProperty(prefix = "milkomeda.particle", name = "enable-filter", havingValue = "true")
-    public FilterRegistrationBean particleFilterRegistrationBean() {
-        FilterRegistrationBean particleFilterRegistrationBean = new FilterRegistrationBean();
-        particleFilterRegistrationBean.setFilter(new DelegatingFilterProxy("particleFilter"));
-        particleFilterRegistrationBean.setName("particleFilter");
+    public FilterRegistrationBean<ParticleFilter> particleFilterRegistrationBean() {
+        FilterRegistrationBean<ParticleFilter> particleFilterRegistrationBean = new FilterRegistrationBean<>();
+        particleFilterRegistrationBean.setFilter(particleFilter());
         particleFilterRegistrationBean.setUrlPatterns(Collections.singleton("/*"));
         particleFilterRegistrationBean.setOrder(Ordered.HIGHEST_PRECEDENCE + 20);
         return particleFilterRegistrationBean;

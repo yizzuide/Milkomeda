@@ -21,6 +21,8 @@
 
 package com.github.yizzuide.milkomeda.wormhole;
 
+import lombok.Getter;
+
 /**
  * WormholeHolder
  *
@@ -31,17 +33,14 @@ package com.github.yizzuide.milkomeda.wormhole;
  */
 public class WormholeHolder {
 
+    /**
+     * 领域事件总线
+     */
+    @Getter
     private static WormholeEventBus eventBus;
 
     static void setEventBus(WormholeEventBus eventBus) {
         WormholeHolder.eventBus = eventBus;
     }
 
-    /**
-     * 获取领域事件总线
-     * @return  WormholeEventBus
-     */
-    public static WormholeEventBus getEventBus() {
-        return eventBus;
-    }
 }

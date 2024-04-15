@@ -34,7 +34,7 @@ import java.util.Map;
  * <br>
  * Create at 2020/03/25 21:48
  */
-// 让方法参数上的校验注解生效，需要在Controller添加@Validated
+// 参数如果是非复合对象类型，需要在controller类上面添加@Validated注解
 @Validated
 @Slf4j
 @RequestMapping("hydrogen")

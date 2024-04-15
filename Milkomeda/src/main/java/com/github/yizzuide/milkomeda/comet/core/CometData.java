@@ -25,43 +25,54 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.ToString;
 
-import javax.servlet.http.HttpServletRequest;
+
 import java.io.Serializable;
 import java.util.Date;
 
 /**
- * CometData
+ * Basic comet log data.
  *
  * @author yizzuide
  * @since 0.2.0
- * @version 3.15.0
+ * @version 3.20.0
  * <br>
  * Create at 2019/09/21 00:48
  */
 @Data
-@ToString(exclude = {"attachment", "request", "intentData", "failure"})
+@ToString(exclude = {"failure", "attachment", "intentData"})
 public class CometData implements Serializable {
+    
     private static final long serialVersionUID = -8296355140769902642L;
 
     /**
-     * 日志记录名
+     * 前端请求类型
+     */
+    public static final int REQ_TYPE_FRONT = 1;
+
+    /**
+     * 后台系统请求类型
+     */
+    public static final int REQ_TYPE_BACK = 2;
+
+    /**
+     * 第三方服务请求类型
+     */
+    public static final int REQ_TYPE_THIRD = 3;
+
+    /**
+     * 记录名
      */
     private String name;
 
     /**
-     * 记录数据 prototype（原型）的相应tag
+     * 唯一标识码
+     */
+    private String code;
+
+    /**
+     * 分类标签
      */
     private String tag;
-
-    /**
-     * 服务器地址
-     */
-    private String host;
-
-    /**
-     * 微服务名
-     */
-    private String microName;
 
     /**
      * 类名
@@ -74,6 +85,11 @@ public class CometData implements Serializable {
     private String execMethod;
 
     /**
+     * 请求类型（1前端 2后台系统 3第三方服务器推送）
+     */
+    private Integer requestType;
+
+    /**
      * 请求时间
      */
     private Date requestTime;
@@ -81,7 +97,7 @@ public class CometData implements Serializable {
     /**
      * 方法参数
      */
-    private String requestData;
+    private Object requestData;
 
     /**
      * 响应时间
@@ -91,17 +107,17 @@ public class CometData implements Serializable {
     /**
      * 处理耗时
      */
-    private String duration;
+    private Long duration;
 
     /**
      * 响应数据
      */
-    private String responseData;
+    private Object responseData;
 
     /**
-     * 状态
+     * 处理状态码
      */
-    private String status;
+    private Integer status;
 
     /**
      * 错误信息
@@ -114,16 +130,17 @@ public class CometData implements Serializable {
     private String traceStack;
 
     /**
+     * 业务端有异常时设置失败，日志收集器将走失败流程
+     * @since 3.0.5
+     */
+    @JsonIgnore
+    private transient Exception failure;
+
+    /**
      * 跟踪附件，用于设置日志记录实体
      */
     @JsonIgnore
     private transient Object attachment;
-
-    /**
-     * 请求对象
-     */
-    @JsonIgnore
-    private transient HttpServletRequest request;
 
     /**
      * 业务端传递给日志收集器的意图数据
@@ -131,11 +148,4 @@ public class CometData implements Serializable {
      */
     @JsonIgnore
     private transient Object intentData;
-
-    /**
-     * 业务端有异常时设置失败，日志收集器将走失败没流程
-     * @since 3.0.5
-     */
-    @JsonIgnore
-    private transient Exception failure;
 }

@@ -5,6 +5,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
+
+
 /**
  * ProfileCometData
  *
@@ -16,6 +18,8 @@ import lombok.ToString;
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 public class ProfileWebCometData extends WebCometData {
+    
     private static final long serialVersionUID = 7001588685766209866L;
+
     private String uid;
 }

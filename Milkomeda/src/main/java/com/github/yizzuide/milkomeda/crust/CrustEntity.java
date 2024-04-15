@@ -26,8 +26,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.io.Serializable;
 
 /**
- * CrustEntity
- * 需要用户实体实现的适配接口
+ * 登录用户实体接口
  *
  * @since 1.14.0
  * @version 2.0.4
@@ -55,8 +54,7 @@ public interface CrustEntity extends Serializable {
     String getPassword();
 
     /**
-     * 如果设置了<code>milkomeda.crust.use_bCrypt</code>为<code>true</code>(默认为true)，
-     * 那个这个字段不需要实现，否则需要实现
+     * 如果设置了 <code>milkomeda.crust.use_bCrypt</code>为<code>true</code> (默认为true)，那个这个字段不需要实现，否则需要实现
      * @return salt
      */
     @JsonIgnore

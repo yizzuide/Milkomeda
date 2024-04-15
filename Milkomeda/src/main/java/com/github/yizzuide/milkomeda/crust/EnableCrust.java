@@ -22,7 +22,7 @@
 package com.github.yizzuide.milkomeda.crust;
 
 import org.springframework.context.annotation.Import;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 
 import java.lang.annotation.*;
@@ -37,7 +37,7 @@ import java.lang.annotation.*;
  * Create at 2019/11/11 15:14
  */
 @Import({CrustConfig.class, CrustAutoConfigurer.class})
-@EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true)
+@EnableMethodSecurity(securedEnabled = true)
 @EnableWebSecurity
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)

@@ -24,6 +24,7 @@ package com.github.yizzuide.milkomeda.crust;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 
+
 import java.util.Collection;
 
 /**
@@ -36,6 +37,7 @@ import java.util.Collection;
  */
 public class CrustCodeAuthenticationToken extends AbstractAuthenticationToken {
 
+    
     private static final long serialVersionUID = 2459037569753551026L;
 
     private final Object account;

@@ -26,8 +26,8 @@ import com.baomidou.mybatisplus.core.metadata.TableFieldInfo;
 import com.baomidou.mybatisplus.core.metadata.TableInfo;
 import com.baomidou.mybatisplus.core.metadata.TableInfoHelper;
 import com.baomidou.mybatisplus.core.toolkit.Constants;
+import com.baomidou.mybatisplus.core.toolkit.PluginUtils;
 import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
-import com.github.yizzuide.milkomeda.util.ReflectUtil;
 import org.apache.ibatis.executor.statement.PreparedStatementHandler;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
@@ -37,7 +37,6 @@ import org.apache.ibatis.reflection.MetaObject;
 import org.springframework.util.StringUtils;
 
 import java.sql.PreparedStatement;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -45,6 +44,7 @@ import java.util.Map;
  * Auto interpolate extension of {@link MybatisParameterHandler}.
  *
  * @since 3.15.0
+ * @version 3.20.0
  * @author yizzuide
  * <br>
  * Create at 2022/12/02 19:03
@@ -71,7 +71,7 @@ public class SiriusMybatisParameterHandler extends MybatisParameterHandler {
 
         boolean findFlag = false;
         Object entity = null;
-        if (parameter instanceof Map) {
+        if (parameter instanceof Map<?, ?>) {
             Map<?, ?> map = (Map<?, ?>) parameter;
             if (map.containsKey(Constants.ENTITY)) {
                entity = map.get(Constants.ENTITY);
@@ -106,11 +106,13 @@ public class SiriusMybatisParameterHandler extends MybatisParameterHandler {
         // 根据值填充后的模型重新构建BoundSql -> PreparedStatementHandler.instantiateStatement() -> PreparedStatementHandler.parameterize()
         BoundSql newBoundSql = mappedStatement.getBoundSql(getParameterObject());
         List<ParameterMapping> parameterMappings = boundSql.getParameterMappings();
+        if (parameterMappings == null || parameterMappings.isEmpty()) {
+            return;
+        }
         parameterMappings.clear();
         parameterMappings.addAll(newBoundSql.getParameterMappings());
-        Map<String, Object> props = new HashMap<>();
-        props.put("sql", newBoundSql.getSql());
-        ReflectUtil.setField(boundSql, props);
+        PluginUtils.MPBoundSql mpBs = PluginUtils.mpBoundSql(boundSql);
+        mpBs.sql(newBoundSql.getSql());
     }
 
     @Override

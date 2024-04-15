@@ -23,7 +23,7 @@ package com.github.yizzuide.milkomeda.pillar;
 
 import com.github.yizzuide.milkomeda.universe.context.SpringContext;
 import com.github.yizzuide.milkomeda.universe.metadata.HandlerMetaData;
-import com.github.yizzuide.milkomeda.util.Strings;
+import com.github.yizzuide.milkomeda.util.StringExtensionsKt;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.lang.NonNull;
@@ -52,7 +52,7 @@ public class PillarEntryContext implements ApplicationListener<ContextRefreshedE
             PillarEntryHandler pillarEntryHandler = (PillarEntryHandler) handlerAnnotation;
             PillarEntryPoint pillarEntryPoint = (PillarEntryPoint) annotation;
             String tag = pillarEntryHandler.tag();
-            if (Strings.isEmpty(tag)) {
+            if (StringExtensionsKt.isEmpty(tag)) {
                 tag = pillarEntryPoint.tag();
             }
             // 设置其它属性方法的值

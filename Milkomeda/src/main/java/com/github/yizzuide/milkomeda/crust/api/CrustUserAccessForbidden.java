@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 yizzuide All rights Reserved.
+ * Copyright (c) 2024 yizzuide All rights Reserved.
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -18,18 +18,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-@file:JvmName("CollectionsKt")
-package com.github.yizzuide.milkomeda.util
+
+package com.github.yizzuide.milkomeda.crust.api;
+
+import com.github.yizzuide.milkomeda.crust.CrustException;
+
+
 
 /**
- * Collection util
+ * Thrown this exception if the user access is forbidden.
  *
- * @since 3.15.0
+ * @since 4.0.0
  * @author yizzuide
- * <br>
- * Create at 2023/01/27 19:10
+ * Create at 2024/01/15 15:10
  */
-class CollectionExtensionsKt {
-}
+public class CrustUserAccessForbidden extends CrustException {
 
-fun singletonMap(key: String, value: Any): Map<String, Any> = mapOf(key to value)
+    
+    private static final long serialVersionUID = 6229594596635627142L;
+
+    public CrustUserAccessForbidden(String message) {
+        super(message);
+    }
+}

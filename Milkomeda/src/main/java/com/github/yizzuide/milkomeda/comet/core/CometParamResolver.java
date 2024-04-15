@@ -22,6 +22,7 @@
 package com.github.yizzuide.milkomeda.comet.core;
 
 import com.github.yizzuide.milkomeda.hydrogen.uniform.UniformQueryData;
+import com.github.yizzuide.milkomeda.hydrogen.validator.ValidatorExaminer;
 import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import com.github.yizzuide.milkomeda.universe.context.WebContext;
 import com.github.yizzuide.milkomeda.util.JSONUtil;
@@ -43,10 +44,12 @@ import java.util.Map;
  *
  * @see org.springframework.web.method.support.HandlerMethodArgumentResolver
  * @see org.springframework.web.method.annotation.ModelAttributeMethodProcessor
+ * @see org.springframework.web.servlet.mvc.method.annotation.RequestResponseBodyMethodProcessor
+ * @see org.springframework.web.servlet.mvc.method.annotation.AbstractMessageConverterMethodProcessor
  *
  * @author yizzuide
  * @since 2.0.0
- * @version 3.10.0
+ * @version 3.20.0
  * <br>
  * Create at 2019/12/12 22:08
  */
@@ -92,13 +95,28 @@ public class CometParamResolver implements HandlerMethodArgumentResolver {
             return JSONUtil.parseList(params, Map.class);
         }
 
-        // parse QueryData from Uniform
+        // parse query data from uniform and valid entity
         if (UniformQueryData.class.isAssignableFrom(parameterType)) {
-            return ReflectUtil.getParamsTypeValue(methodParameter, parameterType, params,
-                    (wrapper) -> ((UniformQueryData<?>)wrapper).getEntity(), (wrapper, entity) -> ((UniformQueryData<Object>)wrapper).setEntity(entity));
+            UniformQueryData<?> queryData = (UniformQueryData<?>) ReflectUtil.getParamsTypeValue(methodParameter, parameterType, params,
+                    (wrapper) -> ((UniformQueryData<?>) wrapper).getEntity(), (wrapper, entity) -> ((UniformQueryData<Object>) wrapper).setEntity(entity));
+            validate(methodParameter, queryData.getEntity());
+            return queryData;
         }
 
         // custom object
-        return JSONUtil.parse(params, parameterType);
+        Object commandParam = JSONUtil.parse(params, parameterType);
+        validate(methodParameter, commandParam);
+        return commandParam;
+    }
+
+    private void validate(@NonNull MethodParameter methodParameter, Object obj) {
+        CometParam cometParam = methodParameter.getParameterAnnotation(CometParam.class);
+        if (cometParam == null || !cometParam.valid()) {
+            return;
+        }
+        String errorMessage = ValidatorExaminer.valid(obj, cometParam.validGroups());
+        if (errorMessage != null) {
+            throw new CometParamValidException(errorMessage);
+        }
     }
 }

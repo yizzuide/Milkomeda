@@ -28,6 +28,7 @@ import com.github.yizzuide.milkomeda.util.ReflectUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.config.ConfigDataEnvironmentPostProcessor;
 import org.springframework.boot.context.event.ApplicationEnvironmentPreparedEvent;
+import org.springframework.boot.context.properties.bind.BindResult;
 import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.context.ApplicationListener;
 import org.springframework.core.Ordered;
@@ -46,7 +47,7 @@ import java.util.Objects;
  *
  * @author yizzuide
  * @since 3.0.1
- * @version 3.15.0
+ * @version 3.20.0
  * @see org.springframework.boot.context.config.ConfigDataEnvironmentPostProcessor
  * @see org.springframework.boot.context.config.AnsiOutputApplicationListener
  * <br>
@@ -78,19 +79,23 @@ public class EnvironmentApplicationListener implements ApplicationListener<Appli
         // Register Converter
         ConfigurableConversionService conversionService = environment.getConversionService();
         conversionService.addConverter(new MapToCollectionConverter(conversionService));
-        MilkomedaProperties milkomedaProperties = Binder.get(environment).bind(MilkomedaProperties.PREFIX, MilkomedaProperties.class).get();
-        List<Class<GenericConverter>> converters = milkomedaProperties.getRegisterConverters();
-        if (!CollectionUtils.isEmpty(converters)) {
-            converters.stream().map(ReflectUtil::newInstance).filter(Objects::nonNull).forEach(conversionService::addConverter);
+        BindResult<MilkomedaProperties> mkBindResult = Binder.get(environment).bind(MilkomedaProperties.PREFIX, MilkomedaProperties.class);
+        if (mkBindResult.isBound()) {
+            MilkomedaProperties milkomedaProperties = mkBindResult.get();
+            List<Class<GenericConverter>> converters = milkomedaProperties.getRegisterConverters();
+            if (!CollectionUtils.isEmpty(converters)) {
+                converters.stream().map(ReflectUtil::newInstance).filter(Objects::nonNull).forEach(conversionService::addConverter);
+            }
         }
         // Get and check conversionService
         // ((ConfigurableApplicationContext)ApplicationContextHolder.get()).getBeanFactory().getConversionService()
 
         // bind property
         boolean logEnable = false;
-        try {
-            logEnable = Binder.get(environment).bind("milkomeda.show-log", Boolean.class).orElseGet(() -> false);
-        } catch (Exception ignore) {}
+        BindResult<Boolean> logBindResult = Binder.get(environment).bind("milkomeda.show-log", Boolean.class);
+        if (logBindResult.isBound()) {
+            logEnable = logBindResult.get();
+        }
         log.info("milkomeda log is {}", logEnable ? "enable" : "disable");
     }
 

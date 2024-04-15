@@ -29,6 +29,8 @@ import org.apache.commons.lang3.RandomUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Random;
+
 /**
  * ChatController
  *
@@ -41,8 +43,9 @@ import org.springframework.web.bind.annotation.RestController;
 public class ChatController {
 
     @RequestMapping("send")
-    public String sendQuestion(String question) throws InterruptedException {
+    public String sendQuestion(String question) {
         // 模拟生成数据
+        Random random = new Random();
         PulsarHolder.getPulsar().post(() -> {
             for (int i = 0; i < 10; i++) {
                 try {
@@ -51,11 +54,11 @@ public class ChatController {
                     throw new RuntimeException(e);
                 }
                 MessageData data = new MessageData();
-                data.setId(RandomUtils.nextInt());
+                data.setId(RandomUtils.nextInt(0, 100000000));
                 data.setUserId(1);
                 data.setMsg(RandomStringUtils.randomAlphabetic(6));
-                log.warn("put msg id: {}", data.getId());
-                Quarks.bindProducer(data.getUserId().longValue()).publishEventData(data);
+                log.warn("put msg1 id: {}", data.getId());
+                Quarks.bindProducer(data.getUserId().longValue(), "test").publishEventData(data);
             }
         });
         PulsarHolder.getPulsar().post(() -> {
@@ -66,11 +69,11 @@ public class ChatController {
                     throw new RuntimeException(e);
                 }
                 MessageData data = new MessageData();
-                data.setId(RandomUtils.nextInt());
+                data.setId(RandomUtils.nextInt(0, 100000000));
                 data.setUserId(2);
                 data.setMsg(RandomStringUtils.randomAlphabetic(6));
-                log.warn("put msg id: {}", data.getId());
-                Quarks.bindProducer(data.getUserId().longValue()).publishEventData(data);
+                log.warn("put msg2 id: {}", data.getId());
+                Quarks.bindProducer(data.getUserId().longValue(), "test").publishEventData(data);
             }
         });
         return "OK";

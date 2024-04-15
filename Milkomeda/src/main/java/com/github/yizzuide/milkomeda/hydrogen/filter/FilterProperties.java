@@ -24,6 +24,7 @@ package com.github.yizzuide.milkomeda.hydrogen.filter;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+import javax.servlet.Filter;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -58,7 +59,7 @@ public class FilterProperties {
         /**
          * 过滤器类
          */
-        private Class<? extends javax.servlet.Filter> clazz;
+        private Class<? extends Filter> clazz;
 
         /**
          * 匹配的URL

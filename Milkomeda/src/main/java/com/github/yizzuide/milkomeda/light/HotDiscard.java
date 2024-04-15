@@ -26,7 +26,6 @@ import java.io.Serializable;
 import java.util.Comparator;
 
 /**
- * HotDiscard
  * 低频热点丢弃方案
  *
  * @since 1.8.0
@@ -55,10 +54,7 @@ public class HotDiscard extends SortDiscard {
     @Override
     public boolean ascend(Spot<Serializable, Object> spot) {
         HotSpot<Serializable, Object> hotSpot = (HotSpot<Serializable, Object>) spot;
-        // 使用锁保证访问的真实数量
-        synchronized (this) {
-            hotSpot.setStar(hotSpot.getStar() + 1);
-        }
+        hotSpot.setStar(hotSpot.getStar() + 1);
         return false;
     }
 

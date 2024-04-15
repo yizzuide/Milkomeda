@@ -21,32 +21,23 @@
 
 package com.github.yizzuide.milkomeda.universe.engine.el;
 
-import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.expression.AnnotatedElementKey;
-import org.springframework.context.expression.BeanFactoryResolver;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 /**
- * Object based expression evaluator.
+ * Spring EL expression evaluator.
  *
  * @since 3.15.0
+ * @version 3.20.0
  * @author yizzuide
  * <br>
  * Create at 2022/12/24 20:02
  */
 public class ObjectExpressionEvaluator extends AbstractExpressionEvaluator {
-    public <T> T condition(String expression, Object object, Class<T> resultType) {
+
+    @Override
+    protected StandardEvaluationContext createEvaluationContext(EvaluateSource source) {
         StandardEvaluationContext evaluationContext = new StandardEvaluationContext();
-        ApplicationContext beanFactory = ApplicationContextHolder.tryGet();
-        if (beanFactory != null) {
-            BeanFactoryResolver beanFactoryResolver = new BeanFactoryResolver(beanFactory);
-            evaluationContext.setBeanResolver(beanFactoryResolver);
-        }
-        evaluationContext.setRootObject(object);
-        configContext(evaluationContext, object);
-        AnnotatedElementKey elementKey = new AnnotatedElementKey(object.getClass(), null);
-        return getExpression(this.expressionKeyCache, elementKey, expression)
-                .getValue(evaluationContext, resultType);
+        evaluationContext.setRootObject(source.getTarget());
+        return evaluationContext;
     }
 }

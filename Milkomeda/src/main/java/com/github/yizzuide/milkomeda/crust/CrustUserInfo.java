@@ -25,9 +25,11 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.github.yizzuide.milkomeda.util.JSONUtil;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
+
 
 import java.io.Serializable;
 import java.util.List;
@@ -43,32 +45,34 @@ import java.util.Map;
  * <br>
  * Create at 2019/11/11 21:51
  */
-@Data
 @AllArgsConstructor
 @NoArgsConstructor
+@EqualsAndHashCode(exclude = {"entity"})
+@Data
 public class CrustUserInfo<T, P> implements Serializable {
+    
     private static final long serialVersionUID = -3849153553850107966L;
 
     /**
      * 用户id
      */
-    private Serializable uid;
+    protected Serializable uid;
 
     /**
      * 用户名
      */
-    private String username;
+    protected String username;
 
     /**
      * 认证token（stateless=true时有值）
      */
-    private String token;
+    protected String token;
 
     /**
      * token过期时间
      * @since 3.14.0
      */
-    private Long tokenExpire;
+    protected Long tokenExpire;
 
     /**
      * Check is admin user.
@@ -99,7 +103,7 @@ public class CrustUserInfo<T, P> implements Serializable {
      * </pre>
      * @see CrustUserDetailsService#findEntityById(Serializable)
      */
-    private T entity;
+    protected T entity;
 
     /**
      * User entity current class.
@@ -149,13 +153,12 @@ public class CrustUserInfo<T, P> implements Serializable {
      */
     @SuppressWarnings("unchecked")
     public T getEntity() {
-        Crust crust = CrustContext.get();
-        if (crust != null && crust.getProps().isEnableLoadEntityLazy() && this.entity == null) {
-            this.entity = crust.loadEntity(this.getUid());
+        if (this.entity == null) {
+            this.entity = CrustContext.get().loadEntity(this.getUid());
         }
         if (this.entity instanceof Map) {
             if (this.getEntityClass() == null) {
-                return this.entity;
+                throw new IllegalStateException("Can not find entity class");
             }
             this.entity = (T) JSONUtil.parse(JSONUtil.serialize(this.entity), this.getEntityClass());
         }

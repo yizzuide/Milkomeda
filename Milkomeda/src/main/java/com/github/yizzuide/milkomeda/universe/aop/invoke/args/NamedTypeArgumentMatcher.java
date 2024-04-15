@@ -21,7 +21,7 @@
 
 package com.github.yizzuide.milkomeda.universe.aop.invoke.args;
 
-import com.github.yizzuide.milkomeda.util.Strings;
+import com.github.yizzuide.milkomeda.util.StringExtensionsKt;
 
 /**
  * Common using impl of Argument matcher has recognized name and type with {@link ArgumentDefinition}.
@@ -41,7 +41,7 @@ public class NamedTypeArgumentMatcher extends AbstractArgumentMatcher {
         if (type == ArgumentMatchType.BY_NAME_CONTAINS ||
                 type == ArgumentMatchType.BY_NAME_PREFIX ||
                 type == ArgumentMatchType.BY_NAME_POSTFIX) {
-            return argumentDefinition.getIdentifier() != null && !Strings.isEmpty(argumentDefinition.getIdentifier().toString());
+            return argumentDefinition.getIdentifier() != null && !StringExtensionsKt.isEmpty(argumentDefinition.getIdentifier().toString());
         }
         return false;
     }

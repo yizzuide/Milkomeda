@@ -61,7 +61,7 @@ import java.util.Collections;
 @AutoConfigureAfter({MessageSourceAutoConfiguration.class, WebMvcAutoConfiguration.class})
 @ConditionalOnProperty(prefix = "milkomeda.hydrogen.i18n", name = "enable", havingValue = "true")
 public class I18nConfig {
-    // Springboot 2.6: The application’s MessageSource is now used when resolving {parameters} in constraint messages.
+    // Spring Boot 2.6: The application’s MessageSource is now used when resolving {parameters} in constraint messages.
     //  This allows you to use your application’s messages.properties files for Bean Validation messages.
     @Autowired
     private MessageSource messageSource;

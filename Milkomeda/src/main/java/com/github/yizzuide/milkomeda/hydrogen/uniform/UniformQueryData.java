@@ -21,6 +21,7 @@
 
 package com.github.yizzuide.milkomeda.hydrogen.uniform;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 import java.util.Date;
@@ -50,6 +51,7 @@ public class UniformQueryData<T> {
      */
     private Date endDate;
 
+    @JsonIgnore
     public Long getStartUnixTime() {
         if (getStartDate() == null) {
             return null;
@@ -57,6 +59,7 @@ public class UniformQueryData<T> {
         return getStartDate().getTime() / 1000;
     }
 
+    @JsonIgnore
     public Long getEndUnixTime() {
         if (getEndDate() == null) {
             return null;

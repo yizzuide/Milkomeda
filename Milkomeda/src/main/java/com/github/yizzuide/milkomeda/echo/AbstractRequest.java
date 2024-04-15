@@ -219,7 +219,7 @@ public abstract class AbstractRequest {
 
         EchoResponseData<T> responseData = createReturnData(responseEntity, specType, useStandardHTTP, forceCamel);
         if (useStandardHTTP) {
-            responseData.setCode(String.valueOf(request.getStatusCodeValue()));
+            responseData.setCode(String.valueOf(request.getStatusCode()));
         }
         checkResponse(responseData);
         return responseData;
@@ -313,7 +313,7 @@ public abstract class AbstractRequest {
             for (Object k : reqParams.keySet()) {
                 builder.queryParam((String) k, reqParams.get(k));
             }
-            request = reqParams.size() > 0 ? restTemplate.exchange(builder.build().encode().toUri(), method, httpEntity, respType) :
+            request = !reqParams.isEmpty() ? restTemplate.exchange(builder.build().encode().toUri(), method, httpEntity, respType) :
                     restTemplate.exchange(url, method, httpEntity, respType);
         }
         return request;
@@ -368,7 +368,7 @@ public abstract class AbstractRequest {
      * @param headers HttpHeaders
      */
     protected void appendHeaders(HttpHeaders headers) {
-        headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
+        headers.setContentType(MediaType.APPLICATION_JSON);
         headers.add("Accept", MediaType.APPLICATION_JSON_VALUE);
     }
 

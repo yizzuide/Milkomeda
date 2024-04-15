@@ -25,7 +25,6 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.github.yizzuide.milkomeda.sirius.BatchMapper;
 import com.github.yizzuide.milkomeda.universe.exception.NotImplementException;
-import com.github.yizzuide.milkomeda.wormhole.ApplicationService;
 import com.github.yizzuide.milkomeda.wormhole.TransactionWorkBus;
 import lombok.Setter;
 import org.springframework.util.CollectionUtils;
@@ -34,35 +33,15 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * Mybatis plus impl of {@link TransactionWorkBus}.
+ * Mybatis plus implementation of {@link TransactionWorkBus}.
  *
  * @since 3.15.0
+ * @version 3.20.0
  * @author yizzuide
  * Create at 2023/07/13 11:44
  */
+@Setter
 public class SiriusTransactionWorkBus implements TransactionWorkBus {
-
-    /**
-     * Batch insert operation with primary key.
-     */
-    @Setter
-    private boolean useBatchInsertWithKey;
-
-    /**
-     * Link application service which belong to.
-     */
-    @Setter
-    private ApplicationService<?> applicationService;
-
-    public SiriusTransactionWorkBus(boolean useBatchInsertWithKey) {
-        this.useBatchInsertWithKey = useBatchInsertWithKey;
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public <A extends ApplicationService<?>> A getApplicationService() {
-        return (A) applicationService;
-    }
 
     @Override
     public <T> T selectById(Serializable id, Class<T> entityClass) {
@@ -95,9 +74,14 @@ public class SiriusTransactionWorkBus implements TransactionWorkBus {
         return 0;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public <T> int performBatch(int operation, List<T> entities) {
+        return performBatch(operation, entities, false);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T> int performBatch(int operation, List<T> entities, boolean usedKey) {
         if (CollectionUtils.isEmpty(entities)) {
             return 0;
         }
@@ -108,7 +92,7 @@ public class SiriusTransactionWorkBus implements TransactionWorkBus {
         BatchMapper<T> batchMapper = (BatchMapper<T>) mapper;
         switch (operation) {
             case TRANSACTION_OPERATION_SAVE:
-                return useBatchInsertWithKey ? batchMapper.insertKeyBatch(entities) : batchMapper.insertBatch(entities);
+                return usedKey ? batchMapper.insertKeyBatch(entities) : batchMapper.insertBatch(entities);
             case TRANSACTION_OPERATION_UPDATE:
                 return batchMapper.updateBatchById(entities);
             case TRANSACTION_OPERATION_DELETE:

@@ -156,7 +156,7 @@ public class FusionAspect {
         // 没有设置反馈
         if (!StringUtils.hasLength(fallback)) {
             // 获取方法默认返回值
-            return Tuple.build(false, ReflectUtil.getMethodDefaultReturnVal(joinPoint));
+            return Tuple.build(false, ReflectUtil.getTypeDefaultVal(ReflectUtil.getMethodReturnType(joinPoint)));
         }
         // 否则调用反馈方法
         return Tuple.build(false, ELContext.getActualValue(joinPoint, fallback, ReflectUtil.getMethodReturnType(joinPoint)));

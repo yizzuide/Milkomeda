@@ -25,10 +25,11 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * The {@link TransactionWorkBus} interface bridge link {@link ApplicationService},
+ * The {@link TransactionWorkBus} interface bridge link {@link TransactionService},
  * which provide transaction operation for support single user case business in domain.
  *
  * @since 3.15.0
+ * @version 3.20.0
  * @author yizzuide
  * Create at 2023/07/13 11:27
  */
@@ -85,15 +86,12 @@ public interface TransactionWorkBus {
     <T> int performBatch(int operation, List<T> entities);
 
     /**
-     * Set application service which work with.
-     * @param applicationService application service
+     * Perform batch transaction action.
+     * @param operation transaction operation type
+     * @param entities  data entity list
+     * @param usedKey   batch insert used key
+     * @param <T>   entity type
+     * @return effect count
      */
-    void setApplicationService(ApplicationService<?> applicationService);
-
-    /**
-     * Get application service which work with.
-     * @return  application service
-     * @param <A> application service type
-     */
-    <A extends ApplicationService<?>> A getApplicationService();
+    <T> int performBatch(int operation, List<T> entities, boolean usedKey);
 }

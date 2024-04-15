@@ -22,18 +22,19 @@
 package com.github.yizzuide.milkomeda.comet.core;
 
 import com.github.yizzuide.milkomeda.util.HttpServletUtil;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.catalina.connector.ClientAbortException;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.util.CollectionUtils;
-import org.springframework.web.multipart.commons.CommonsMultipartResolver;
-import org.springframework.web.util.WebUtils;
-
 import javax.servlet.ReadListener;
 import javax.servlet.ServletInputStream;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.catalina.connector.ClientAbortException;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.util.CollectionUtils;
+import org.springframework.web.multipart.MultipartResolver;
+import org.springframework.web.multipart.support.StandardServletMultipartResolver;
+import org.springframework.web.util.WebUtils;
+
 import java.io.*;
 import java.net.SocketTimeoutException;
 import java.nio.charset.StandardCharsets;
@@ -41,12 +42,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * CometRequestWrapper
- * 请求包装，用于重复读取请求消息体内容
+ * 请求包装类，用于可重复读取请求消息体内容
  *
  * @author yizzuide
  * @since 2.0.0
- * @version 3.15.0
+ * @version 3.20.0
  * @see org.springframework.web.util.ContentCachingRequestWrapper
  * <br>
  * Create at 2019/12/12 17:37
@@ -58,36 +58,38 @@ public class CometRequestWrapper extends HttpServletRequestWrapper {
      */
     private byte[] body;
 
-    private final boolean cacheBody;
+    private boolean cacheBodyFlag = false;
 
     // 文件上传标识
-    private boolean fileUpload = false;
+    private boolean fileUploadFlag = false;
 
     private final HttpServletRequest originalRequest;
 
     /**
      * Create Request wrapper for intercept or cache body.
      * @param request   HttpServletRequest
-     * @param cacheBody enable cache body
      */
-    public CometRequestWrapper(HttpServletRequest request, boolean cacheBody) {
+    public CometRequestWrapper(HttpServletRequest request) {
         super(request);
         this.originalRequest = request;
-        this.cacheBody = cacheBody;
 
-        CommonsMultipartResolver commonsMultipartResolver = new CommonsMultipartResolver(request.getSession().getServletContext());
-        if (commonsMultipartResolver.isMultipart(request)) {
-            fileUpload = true;
+        MultipartResolver multipartResolver = new StandardServletMultipartResolver();
+        if (multipartResolver.isMultipart(request)) {
+            fileUploadFlag = true;
         }
 
         // 将body数据存储起来
-        if (cacheBody) {
-            String bodyStr = getBodyString(request);
-            if (StringUtils.isEmpty(bodyStr)) {
-                body = new byte[0];
-                return;
+        if (!fileUploadFlag) {
+            // 如果有Form表单数据则不读取body，交给SpringMVC框架处理（但@CometParam功能仍然有效）
+            cacheBodyFlag = CollectionUtils.isEmpty(request.getParameterMap());
+            if (cacheBodyFlag) {
+                String bodyStr = getBodyString(request);
+                if (StringUtils.isEmpty(bodyStr)) {
+                    body = new byte[0];
+                    return;
+                }
+                body = bodyStr.getBytes(StandardCharsets.UTF_8);
             }
-            body = bodyStr.getBytes(StandardCharsets.UTF_8);
         }
     }
 
@@ -138,7 +140,7 @@ public class CometRequestWrapper extends HttpServletRequestWrapper {
 
     @Override
     public ServletInputStream getInputStream() throws IOException {
-        if (!cacheBody) {
+        if (!cacheBodyFlag || fileUploadFlag) {
             return super.getInputStream();
         }
         final ByteArrayInputStream inputStream = new ByteArrayInputStream(body);
@@ -197,6 +199,9 @@ public class CometRequestWrapper extends HttpServletRequestWrapper {
      * @return String
      */
     public String getBodyString() {
+        if (body == null) {
+            return null;
+        }
         final InputStream inputStream = new ByteArrayInputStream(body);
         return inputStream2String(inputStream);
     }
@@ -240,7 +245,7 @@ public class CometRequestWrapper extends HttpServletRequestWrapper {
             throw new RuntimeException(e);
         }
         String body = sb.toString();
-        if (fileUpload || CollectionUtils.isEmpty(CometHolder.getRequestInterceptors())) {
+        if (fileUploadFlag || CollectionUtils.isEmpty(CometHolder.getRequestInterceptors())) {
             return body;
         }
         return interceptRequest(null, null, body);

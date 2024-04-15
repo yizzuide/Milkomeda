@@ -12,7 +12,7 @@ import lombok.extern.slf4j.Slf4j;
  * Create at 2022/02/21 01:45
  */
 @Slf4j
-// YAML配置方式（推荐，在功能和扩展性更强大）或@Orbit注解方式
+// YAML配置方式 或 @Orbit注解方式
 //@Orbit(pointcutExpression = "execution(* com..orbit.*API.fetch*(..))")
 public class PreLogAdvice implements OrbitAdvice {
     @Override

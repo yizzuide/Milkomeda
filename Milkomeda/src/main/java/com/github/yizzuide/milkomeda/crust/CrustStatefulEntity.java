@@ -22,7 +22,7 @@
 package com.github.yizzuide.milkomeda.crust;
 
 /**
- * Stateful crust entity that correspond to spring security `UserDetails`.
+ * Stateful crust entity that corresponds to spring security `UserDetails`.
  *
  * @since 3.14.0
  * @author yizzuide
@@ -31,11 +31,27 @@ package com.github.yizzuide.milkomeda.crust;
  */
 public interface CrustStatefulEntity extends CrustEntity {
 
+    /**
+     * The account is expired.
+     * @return ture is expired
+     */
     boolean accountExpired();
 
+    /**
+     * The account is locked.
+     * @return ture is locked
+     */
     boolean accountLocked();
 
+    /**
+     * The credentials are expired.
+     * @return ture is expired
+     */
     boolean credentialsExpired();
 
+    /**
+     * The account is enabled.
+     * @return ture is enabled
+     */
     boolean enabled();
 }

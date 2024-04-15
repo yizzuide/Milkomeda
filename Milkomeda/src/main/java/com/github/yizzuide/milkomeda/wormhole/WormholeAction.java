@@ -52,8 +52,8 @@ public @interface WormholeAction {
     String name() default "";
 
     /**
-     * Ordered execute on event handler.
-     * @return order in list
+     * Ordered executing on event handler.
+     * @return order in the list
      * @since 3.15.0
      */
     int order() default 0;

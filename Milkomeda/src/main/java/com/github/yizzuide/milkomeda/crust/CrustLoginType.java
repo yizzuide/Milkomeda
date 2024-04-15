@@ -37,7 +37,7 @@ public enum CrustLoginType {
      */
     PASSWORD,
     /**
-     * Verify code type.
+     * Verify a code type.
      */
     CODE,
     /**

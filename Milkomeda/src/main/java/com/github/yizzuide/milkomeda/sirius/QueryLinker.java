@@ -44,7 +44,7 @@ public @interface QueryLinker {
     String targetNameField();
 
     /**
-     * Link name field.
+     * Link name field for {@link QueryLinker#targetNameField}.
      * @return link name
      */
     String linkNameField();
@@ -71,11 +71,11 @@ public @interface QueryLinker {
      * Link entity class.
      * @return mapper class
      */
-    Class<?> linkEntityType();
+    Class<?> type();
 
     /**
      * Bind conditions in query group.
      * @return  group name
      */
-    String[] group() default { "default" };
+    String[] group() default { IPageableService.DEFAULT_GROUP };
 }

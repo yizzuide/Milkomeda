@@ -21,6 +21,8 @@
 
 package com.github.yizzuide.milkomeda.sirius;
 
+
+
 /**
  * Inject insert batch without the primary key method in mapper.
  *
@@ -30,6 +32,7 @@ package com.github.yizzuide.milkomeda.sirius;
  */
 public class InsertBatchMethod extends InsertKeyBatchMethod {
 
+    
     private static final long serialVersionUID = 6280748690199232360L;
 
     public InsertBatchMethod() {

@@ -29,7 +29,7 @@ import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.task.TaskSchedulingAutoConfiguration;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.CollectionUtils;
 
 import java.lang.reflect.Method;
@@ -41,7 +41,7 @@ import java.util.Map;
  *
  * @author yizzuide
  * @since 1.15.0
- * @version 3.0.9
+ * @version 3.20.0
  * <br>
  * Create at 2019/11/17 17:00
  */
@@ -51,9 +51,10 @@ import java.util.Map;
 @ConditionalOnProperty(prefix = "milkomeda.ice", name = "enable-task", havingValue = "true")
 public class IceScheduleConfig {
 
+    // Spring Boot 3.0：TaskScheduler超级接口支持虚拟线程和传统线程池
     @Autowired
     @SuppressWarnings({"unchecked", "SpringJavaInjectionPointsAutowiringInspection", "rawtypes"})
-    public void config(Ice ice, IceProperties props, ThreadPoolTaskScheduler taskScheduler) {
+    public void config(Ice ice, IceProperties props, TaskScheduler taskScheduler) {
         taskScheduler.scheduleAtFixedRate(() -> IceContext.getTopicMap().keySet().forEach(topic -> {
             List<Job<Map<String, Object>>> jobs = ice.pop(topic, props.getTaskTopicPopMaxSize());
             if (CollectionUtils.isEmpty(jobs)) return;

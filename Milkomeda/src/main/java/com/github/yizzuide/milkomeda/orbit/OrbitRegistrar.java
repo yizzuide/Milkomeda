@@ -26,6 +26,7 @@ import com.github.yizzuide.milkomeda.util.ReflectUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.boot.context.properties.bind.BindResult;
 import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -33,7 +34,9 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.lang.NonNull;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -46,7 +49,7 @@ import java.util.Map;
  * @see org.springframework.aop.aspectj.AspectJExpressionPointcutAdvisor
  * @see org.springframework.beans.factory.config.BeanPostProcessor
  * @since 3.13.0
- * @version 3.15.0
+ * @version 3.20.0
  * @author yizzuide
  * <br>
  * Create at 2022/02/21 01:14
@@ -69,9 +72,10 @@ public class OrbitRegistrar implements ImportBeanDefinitionRegistrar {
         List<OrbitAdvisor> orbitAdvisors = new ArrayList<>();
         // 1.YAML配置方式
         OrbitProperties orbitProperties;
-        try {
-            orbitProperties = Binder.get(this.environment).bind(OrbitProperties.PREFIX, OrbitProperties.class).get();
-        } catch (Exception ignore) {
+        BindResult<OrbitProperties> bindResult = Binder.get(this.environment).bind(OrbitProperties.PREFIX, OrbitProperties.class);
+        if (bindResult.isBound()) {
+            orbitProperties = bindResult.get();
+        } else {
             // 没用配置过Orbit，创建默认配置
             orbitProperties = new OrbitProperties();
         }
@@ -102,7 +106,13 @@ public class OrbitRegistrar implements ImportBeanDefinitionRegistrar {
             Class<OrbitAdvice> adviceClass = (Class<OrbitAdvice>) value.getClass();
             Orbit orbit = AnnotationUtils.findAnnotation(adviceClass, Orbit.class);
             if (orbit != null) {
-                orbitAdvisors.add(new AspectJOrbitAdvisor(orbit.pointcutExpression(), id, adviceClass, null));
+                if (StringUtils.hasLength(orbit.pointcutExpression())) {
+                    orbitAdvisors.add(new AspectJOrbitAdvisor(orbit.pointcutExpression(), id, adviceClass, null));
+                    return;
+                }
+                if (orbit.pointcutAnnotation() != Annotation.class) {
+                    orbitAdvisors.add(AnnotationOrbitAdvisor.forMethod(orbit.pointcutAnnotation(), id, adviceClass, null));
+                }
             }
         });
 

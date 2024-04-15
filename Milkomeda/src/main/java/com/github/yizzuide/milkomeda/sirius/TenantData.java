@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 yizzuide All rights Reserved.
+ * Copyright (c) 2024 yizzuide All rights Reserved.
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -19,35 +19,22 @@
  * SOFTWARE.
  */
 
-@file:JvmName("Dates")
-package com.github.yizzuide.milkomeda.util
+package com.github.yizzuide.milkomeda.sirius;
 
-import java.time.Instant
-import java.time.LocalDate
-import java.time.ZoneId
-import java.util.*
+import lombok.Builder;
+import lombok.Data;
 
 /**
- * DateExtensionsKt
+ * Tenant data for {@link Tenant}.
  *
- *
+ * @since 4.0.0
  * @author yizzuide
- * @since 3.14.0
- * <br>
- * Create at 2022/09/27 00:57
+ * Create at 2024/03/05 15:25
  */
-class DateExtensionsKt {
+@Builder
+@Data
+public class TenantData {
+    private boolean ignored;
+    private String idColumn;
+    private String idValue;
 }
-
-fun timestamp2Date(timestamp: Long): Date? {
-    if (timestamp < 0) {
-        return null
-    }
-    val instant = Instant.ofEpochMilli(timestamp)
-    return Date.from(instant)
-}
-
-fun date2Timestamp(date: Date?): Long = date?.time ?: -1
-
-fun timestampOfDays(days: Long): Long = LocalDate.now().plusDays(days).
-    atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli() - System.currentTimeMillis()

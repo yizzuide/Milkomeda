@@ -21,7 +21,6 @@
 
 package com.github.yizzuide.milkomeda.util;
 
-import com.github.yizzuide.milkomeda.universe.engine.el.ELContext;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.aspectj.lang.JoinPoint;
@@ -46,15 +45,12 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 0.2.0
- * @version 3.15.0
+ * @version 3.20.0
  * <br>
  * Create at 2019/04/11 19:55
  */
 @Slf4j
 public class ReflectUtil {
-
-    // EL表达式识别标识
-    private static final List<String> EL_START_TOKENS = Arrays.asList("'", "@", "#", "T(", "args[", "true", "false");
 
     /**
      * 获取父类或接口上泛型对应的Class
@@ -64,8 +60,8 @@ public class ReflectUtil {
     public static Class<?>[] getClassOfParameterizedType(Type type) {
         // 是否带泛型
         if (type instanceof ParameterizedType) {
-            ParameterizedType pt = (ParameterizedType)type;
-            Type[] subTypes = pt.getActualTypeArguments();
+            ParameterizedType parameterizedType = (ParameterizedType) type;
+            Type[] subTypes = parameterizedType.getActualTypeArguments();
             Class<?>[] classes = new Class[subTypes.length];
             for (int i = 0; i < subTypes.length; i++) {
                 // 获取泛型类型
@@ -103,7 +99,7 @@ public class ReflectUtil {
                 params.put(argName, argValue);
             }
         }
-        if (params.size() > 0) {
+        if (!params.isEmpty()) {
             return params;
         }
         return null;
@@ -152,22 +148,6 @@ public class ReflectUtil {
         return args;
     }
 
-    /**
-     * 根据EL表达式或内置头表达式抽取值
-     * @param joinPoint 切面连接点
-     * @param express   表达式
-     * @return 解析的值
-     */
-    public static String extractValue(JoinPoint joinPoint, String express) {
-        // 解析EL表达式
-        for (String elStartToken : EL_START_TOKENS) {
-            if (express.startsWith(elStartToken)) {
-                return ELContext.getValue(joinPoint, express);
-            }
-        }
-        return express;
-    }
-
 
     /**
      * 包装类型智能注入到方法
@@ -187,10 +167,11 @@ public class ReflectUtil {
         if(method.getParameterTypes().length == 0) {
             return method.invoke(target);
         }
+
         // ResolvableType是Spring核心包里的泛型解决方案，简化对泛型识别处理（下面注释保留Java API处理方式）
         ResolvableType resolvableType = ResolvableType.forMethodParameter(method, 0);
         // 获取参数类型
-        Class<?> parameterClazz = resolvableType.resolve(); // method.getParameterTypes()[0];
+        Class<?> parameterClazz = resolvableType.resolve();
         // Map 或 Object
         if (parameterClazz == Map.class || parameterClazz == Object.class) {
             // 去掉实体的包装
@@ -215,53 +196,31 @@ public class ReflectUtil {
 
         // List
         if (parameterClazz == List.class) {
-            // List
-//            Type[] genericParameterTypes = method.getGenericParameterTypes();
-//            if (!(genericParameterTypes[0] instanceof ParameterizedType)) {
             ResolvableType[] wrapperGenerics = resolvableType.getGenerics();
             Class<?> elementGenericType = wrapperGenerics[0].resolve();
             if (elementGenericType == null) {
                 // 去掉实体的包装
                 return method.invoke(target, wrapperList.stream().map(wrapperBody).collect(Collectors.toList()));
             }
-            // List<?>
-//            ParameterizedType parameterizedType = (ParameterizedType) genericParameterTypes[0];
-//            Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
-//            Type actualTypeArgument = actualTypeArguments[0];
-            // List<Map>
-//            if (TypeUtil.type2Class(actualTypeArgument) == Map.class) {
+
             if (elementGenericType == Map.class) {
                 // 去掉实体的包装
                 return method.invoke(target, wrapperList.stream().map(wrapperBody).collect(Collectors.toList()));
             }
-            // List<Entity>
-//            if (TypeUtil.type2Class(actualTypeArgument) == wrapperClazz) {
             if (elementGenericType == wrapperClazz) {
-                // List<Entity>
                 Class<?> entityGenericType = wrapperGenerics[0].getGeneric(0).resolve();
-//                if (!(actualTypeArgument instanceof ParameterizedType)) {
                 if (entityGenericType == null) {
                     return method.invoke(target, wrapperList);
                 }
-                // List<Entity<Map>>
-//                Type[] subActualTypeArguments = ((ParameterizedType) actualTypeArgument).getActualTypeArguments();
-//                if (TypeUtil.type2Class(subActualTypeArguments[0]) == Map.class) {
                 if (entityGenericType == Map.class) {
                     return method.invoke(target, wrapperList);
                 }
-                // List<Entity<T>>
-//                JavaType javaType = TypeUtil.type2JavaType(subActualTypeArguments[0]);
                 for (T wrapper : wrapperList) {
-//                    Object body = JSONUtil.nativeRead(JSONUtil.serialize(wrapperBody.apply(wrapper)), javaType);
                     Object body = JSONUtil.parse(JSONUtil.serialize(wrapperBody.apply(wrapper)), entityGenericType);
                     wipeWrapperBody.accept(wrapper, body);
                 }
                 return method.invoke(target, wrapperList);
             }
-
-            // List<T>
-//            method.invoke(target, wrapperList.stream().map(wrapper ->
-//                    JSONUtil.nativeRead(JSONUtil.serialize(wrapperBody.apply(wrapper)), TypeUtil.type2JavaType(actualTypeArgument))).collect(Collectors.toList()));
             return method.invoke(target, wrapperList.stream().map(wrapper ->
                     JSONUtil.parse(JSONUtil.serialize(wrapperBody.apply(wrapper)), elementGenericType)).collect(Collectors.toList()));
         }
@@ -272,27 +231,25 @@ public class ReflectUtil {
 
 
     /**
-     * 获取方法返回类型，并返回默认类型值
-     * @param joinPoint JoinPoint
+     * 获取默认类型值
      * @return  默认类型值
      */
-    public static Object getMethodDefaultReturnVal(JoinPoint joinPoint) {
-        Class<?> retType = getMethodReturnType(joinPoint);
+    public static Object getTypeDefaultVal(Class<?> type) {
         // 基本数据类型过滤
-        if (Long.class == retType) {
+        if (Long.class == type) {
             return -1L;
         }
-        if (long.class == retType || int.class == retType || short.class == retType ||
-                float.class == retType || double.class == retType || Number.class.isAssignableFrom(retType)) {
+        if (long.class == type || int.class == type || short.class == type ||
+                float.class == type || double.class == type || Number.class.isAssignableFrom(type)) {
             return -1;
         }
-        if (boolean.class == retType || Boolean.class.isAssignableFrom(retType)) {
+        if (boolean.class == type || Boolean.class.isAssignableFrom(type)) {
             return false;
         }
-        if (byte.class == retType || Byte.class.isAssignableFrom(retType)) {
+        if (byte.class == type || Byte.class.isAssignableFrom(type)) {
             return 0;
         }
-        if (char.class == retType || Character.class.isAssignableFrom(retType)) {
+        if (char.class == type || Character.class.isAssignableFrom(type)) {
             return '\0';
         }
         return null;
@@ -326,7 +283,7 @@ public class ReflectUtil {
      * @since 3.7.1
      */
     public static Pair<Field, Object> getFieldBundlePath(Object target, String fieldPath) {
-        if (target == null || Strings.isEmpty(fieldPath)) {
+        if (target == null || StringExtensionsKt.isEmpty(fieldPath)) {
             return null;
         }
         String[] fieldNames = StringUtils.delimitedListToStringArray(fieldPath, ".");
@@ -471,7 +428,7 @@ public class ReflectUtil {
     }
 
     /**
-     * Get param value from type.
+     * Get param value from a type.
      * @param methodParameter   MethodParameter
      * @param rawType           param type
      * @param value             request string value
@@ -527,10 +484,21 @@ public class ReflectUtil {
      */
     public static <T> T newInstance(Class<T> clazz) {
         try {
-            return clazz.newInstance();
+            return clazz.getDeclaredConstructor().newInstance();
         } catch (Exception e) {
             log.error("create instance error with msg: {}", e.getMessage(), e);
         }
         return null;
+    }
+
+    /**
+     * 创建非空类实例
+     * @param clazz 类
+     * @param <T>   类的类型
+     * @return  实例
+     * @since 3.20.0
+     */
+    public static <T> T newNonNullInstance(Class<T> clazz) {
+        return Objects.requireNonNull(newInstance(clazz));
     }
 }

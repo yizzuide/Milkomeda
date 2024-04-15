@@ -38,6 +38,7 @@ import java.util.List;
  * Register Orbit node from yml config with annotation.
  *
  * @since 3.15.0
+ * @version 3.20.0
  * @author yizzuide
  * <br>
  * Create at 2023/04/15 02:45
@@ -46,14 +47,10 @@ import java.util.List;
 public class AnnotationOrbitSource implements OrbitSource {
     @Override
     public List<OrbitAdvisor> createAdvisors(Environment environment) {
-        try {
-            // 根据配置文件是否加载来判断当前模块是否加载
-            BindResult<SundialProperties> bindResult = Binder.get(environment).bind(SundialProperties.PREFIX, SundialProperties.class);
-            if (bindResult == null) {
-                return null;
-            }
-        } catch (Exception ignore) {
-            return null;
+        // 根据配置文件是否加载来判断当前模块是否加载
+        BindResult<SundialProperties> bindResult = Binder.get(environment).bind(SundialProperties.PREFIX, SundialProperties.class);
+        if (!bindResult.isBound()) {
+            return Collections.emptyList();
         }
         AnnotationOrbitAdvisor annotationOrbitAdvisor = new AnnotationOrbitAdvisor(Sundial.class, Sundial.class, "sundial", AnnotationDataSourceOrbitAdvice.class, null);
         return Collections.singletonList(annotationOrbitAdvisor);

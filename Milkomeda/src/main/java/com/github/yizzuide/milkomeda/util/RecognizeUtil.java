@@ -42,8 +42,17 @@ public class RecognizeUtil {
      */
     public static boolean isCompoundType(Object obj) {
         return !(obj instanceof Byte || obj instanceof Boolean || obj instanceof CharSequence ||
-                obj instanceof Short || obj instanceof Integer || obj instanceof Long ||
-                obj instanceof Double || obj instanceof Float);
+                obj instanceof Short || obj instanceof Integer || obj instanceof Long || obj instanceof Double || obj instanceof Float);
+    }
+
+    /**
+     * 是否是复合类型
+     * @param cls   类
+     * @return  复合类型返回true
+     */
+    public static boolean isCompoundType(Class<?> cls) {
+        return !(cls == Byte.class || cls == Boolean.class || Character.class.isAssignableFrom(cls) ||
+                cls == Short.class || cls == Integer.class || cls == Long.class || cls == Double.class || cls == Float.class);
     }
 
     /**

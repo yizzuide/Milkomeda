@@ -24,10 +24,13 @@ package com.github.yizzuide.milkomeda.hydrogen.uniform;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import java.util.function.Function;
+
 /**
  * Request query page type data.
  *
  * @since 3.14.0
+ * @version 3.20.0
  * @author yizzuide
  * <br>
  * Create at 2022/10/29 19:10
@@ -46,7 +49,27 @@ public class UniformQueryPageData<T> extends UniformQueryData<T> {
     private Integer pageSize;
 
     /**
-     * 排序
+     * 排序，用于redis分页排序（1:asc, -1:desc)
      */
     private Integer order;
+
+    /**
+     * Convert query to the entity of page query.
+     * @param queryPageData page query data
+     * @param converter     query to entity
+     * @return  UniformQueryPageData
+     * @param <T>   entity type
+     * @param <Q>   query type
+     * @since 3.20.0
+     */
+    public static <T, Q> UniformQueryPageData<T> convert(UniformQueryPageData<Q> queryPageData, Function<Q, T> converter) {
+        UniformQueryPageData<T> cloneQueryPageData = new UniformQueryPageData<>();
+        cloneQueryPageData.setPageStart(queryPageData.getPageStart());
+        cloneQueryPageData.setPageSize(queryPageData.getPageSize());
+        cloneQueryPageData.setOrder(queryPageData.getOrder());
+        cloneQueryPageData.setEntity(converter.apply(queryPageData.getEntity()));
+        cloneQueryPageData.setStartDate(queryPageData.getStartDate());
+        cloneQueryPageData.setEndDate(queryPageData.getEndDate());
+        return cloneQueryPageData;
+    }
 }

@@ -19,41 +19,42 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.sirius.wormhole;
+package com.github.yizzuide.milkomeda.wormhole;
 
-import com.github.yizzuide.milkomeda.wormhole.ApplicationService;
-import com.github.yizzuide.milkomeda.wormhole.TransactionWorkBus;
+import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 
 /**
- * Mybatis plus extend of application service which provide {@link TransactionWorkBus}.
+ * An interface which indicates as a transaction service in Domain-Driver Design.
  *
  * @param <R> the repository type
  *
  * @since 3.15.0
+ * @version 4.0.0
  * @author yizzuide
- * Create at 2023/07/14 03:48
+ * Create at 2023/07/14 03:31
  */
-public abstract class SiriusApplicationService<R> implements ApplicationService<R> {
+public interface TransactionService<R> {
 
     /**
-     * Link {@link TransactionWorkBus} belong this application service.
+     * Get {@link TransactionWorkBus} belong this service.
+     * @return TransactionWorkBus
      */
-    private final TransactionWorkBus transactionWorkBus;
-
-    public SiriusApplicationService() {
-        transactionWorkBus = new SiriusTransactionWorkBus(false);
-        transactionWorkBus.setApplicationService(this);
-    }
-
-    public TransactionWorkBus getTransactionWorkBus() {
-        return transactionWorkBus;
-    }
+    TransactionWorkBus getTransactionWorkBus();
 
     /**
-     * Change and enable batch insert with the primary key.
-     * @param enable    true if batch insert with the primary key
+     * Get repository proxy which accessed under this service.
+     * @return repository type
      */
-    public void setUseBatchInsertWithKey(boolean enable) {
-        ((SiriusTransactionWorkBus) transactionWorkBus).setUseBatchInsertWithKey(enable);
+    R getRepositoryProxy();
+
+    /**
+     * Get repository proxy by class.
+     * @param clazz the repository class
+     * @return repository
+     * @param <T>  repository type
+     * @since 4.0.0
+     */
+    default <T> T getRepositoryProxy(Class<T> clazz) {
+        return ApplicationContextHolder.get().getBean(clazz);
     }
 }

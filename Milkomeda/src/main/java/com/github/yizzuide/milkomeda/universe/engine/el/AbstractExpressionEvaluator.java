@@ -21,17 +21,26 @@
 
 package com.github.yizzuide.milkomeda.universe.engine.el;
 
+import com.github.yizzuide.milkomeda.comet.core.XCometContext;
+import com.github.yizzuide.milkomeda.comet.core.XCometData;
 import com.github.yizzuide.milkomeda.metal.MetalHolder;
 import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import com.github.yizzuide.milkomeda.universe.context.WebContext;
 import com.github.yizzuide.milkomeda.universe.extend.env.Environment;
+import com.github.yizzuide.milkomeda.util.DateUtil;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.expression.AnnotatedElementKey;
+import org.springframework.context.expression.BeanFactoryResolver;
 import org.springframework.context.expression.CachedExpressionEvaluator;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.ParameterNameDiscoverer;
+import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -39,11 +48,13 @@ import java.util.concurrent.ConcurrentHashMap;
  * Abstract cached expression evaluator.
  *
  * @since 3.15.0
+ * @version 3.20.0
  * @author yizzuide
  * <br>
  * Create at 2022/12/24 19:58
  */
 public abstract class AbstractExpressionEvaluator extends CachedExpressionEvaluator {
+
     /**
      * 共享的参数名，基于内部缓存数据
      */
@@ -55,11 +66,49 @@ public abstract class AbstractExpressionEvaluator extends CachedExpressionEvalua
     protected final Map<CachedExpressionEvaluator.ExpressionKey, Expression> expressionKeyCache = new ConcurrentHashMap<>(64);
 
     /**
+     * Parse Spring EL with {@link EvaluateSource} and result type.
+     * @param expression    Spring EL
+     * @param source        context source
+     * @param resultType    result type
+     * @return  the parsed value
+     * @param <T> result type
+     * @since 3.20.0
+     */
+    public <T> T condition(String expression, EvaluateSource source, Class<T> resultType) {
+        AnnotatedElementKey elementKey;
+        // 基于目标对象的
+        if (source.getMethod() == null) {
+            elementKey = new AnnotatedElementKey(source.getTarget().getClass(), null);
+        } else {
+            elementKey = new AnnotatedElementKey(source.getMethod(), source.getTargetClass());
+        }
+        StandardEvaluationContext evaluationContext = createEvaluationContext(source);
+        // 注入变量
+        configContext(evaluationContext, source.getTarget());
+        return getExpression(this.expressionKeyCache, elementKey, expression)
+                .getValue(evaluationContext, resultType);
+    }
+
+    /**
+     * Create instance of {@link EvaluationContext}.
+     * @param source context source
+     * @return  EvaluationContext
+     * @since 3.20.0
+     */
+    protected abstract StandardEvaluationContext createEvaluationContext(EvaluateSource source);
+
+    /**
      * Config evaluation context variables.
      * @param evaluationContext StandardEvaluationContext
      * @param root  root object
      */
     protected void configContext(StandardEvaluationContext evaluationContext, Object root) {
+        // BeanFactoryResolver：@bean
+        ApplicationContext beanFactory = ApplicationContextHolder.tryGet();
+        if (beanFactory != null) {
+            BeanFactoryResolver beanFactoryResolver = new BeanFactoryResolver(beanFactory);
+            evaluationContext.setBeanResolver(beanFactoryResolver);
+        }
         // 目标对象：#target
         evaluationContext.setVariable("target", root);
         // 添加变量引用：#env[key]
@@ -78,5 +127,26 @@ public abstract class AbstractExpressionEvaluator extends CachedExpressionEvalua
             evaluationContext.setVariable("request", requestAttributes.getRequest());
             evaluationContext.setVariable("reqParams", requestAttributes.getRequest().getParameterMap());
         }
+        // XComet上下文：#ret、#fail、#xxx
+        XCometData cometData = XCometContext.peek();
+        if (cometData != null) {
+            evaluationContext.setVariable("ret", cometData.getResult());
+            if (cometData.getFailure() != null) {
+                evaluationContext.setVariable("fail", cometData.getFailure().getMessage());
+            }
+            if (cometData.getVariables() != null) {
+                Map<String, Object> variables = cometData.getVariables();
+                if (!CollectionUtils.isEmpty(variables)) {
+                    for (Map.Entry<String, Object> entry : variables.entrySet()) {
+                        evaluationContext.setVariable(entry.getKey(), entry.getValue());
+                    }
+                }
+            }
+        }
+        // 添加自定义函数
+        try {
+            Method add = DateUtil.class.getDeclaredMethod("getUnixTime");
+            evaluationContext.registerFunction("now", add);
+        } catch (Exception ignore) {}
     }
 }

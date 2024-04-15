@@ -25,6 +25,8 @@ import com.github.yizzuide.milkomeda.universe.extend.web.handler.HotHttpHandlerP
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -32,13 +34,15 @@ import java.util.Map;
  *
  * @author yizzuide
  * @since 2.0.0
- * @version 3.5.0
+ * @version 3.20.0
  * <br>
  * Create at 2019/12/12 18:04
  */
 @Data
-@ConfigurationProperties("milkomeda.comet")
+@ConfigurationProperties(CometProperties.PREFIX)
 public class CometProperties {
+
+    public static final String PREFIX = "milkomeda.comet";
 
     /**
      * 允许开启请求包装类读取请求消息体（收集application/json类型消息体请求日志，或使用 {@link CometParam } 时必须开启）
@@ -53,14 +57,21 @@ public class CometProperties {
     private boolean enableReadResponseBody = false;
 
     /**
+     * 请求与响应包装类需要排除的URL
+     * @since 3.20.0
+     */
+    private List<String> excludeUrls = Arrays.asList("/favicon.ico", "/druid/**", "/doc.html", "/webjars/**",
+            "/swagger-resources/**", "/swagger-ui.html");
+
+    /**
      * 成功状态码
      */
-    private String statusSuccessCode = "1";
+    private int statusSuccessCode = 0;
 
     /**
      * 失败状态码
      */
-    private String statusFailCode = "2";
+    private int statusFailCode = 1;
 
     /**
      * Config request parameter interceptor.

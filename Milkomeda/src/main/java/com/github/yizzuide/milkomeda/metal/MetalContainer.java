@@ -24,7 +24,7 @@ package com.github.yizzuide.milkomeda.metal;
 import com.github.yizzuide.milkomeda.universe.extend.env.Environment;
 import com.github.yizzuide.milkomeda.util.DataTypeConvertUtil;
 import com.github.yizzuide.milkomeda.util.ReflectUtil;
-import com.github.yizzuide.milkomeda.util.Strings;
+import com.github.yizzuide.milkomeda.util.StringExtensionsKt;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
@@ -85,7 +85,7 @@ public class MetalContainer {
      */
     public void addVNode(Metal metal, Object target, Field field) {
         String key = metal.value();
-        if (Strings.isEmpty(key)) {
+        if (StringExtensionsKt.isEmpty(key)) {
             key = field.getName();
         }
         String vNodeKey = key;

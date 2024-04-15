@@ -21,10 +21,7 @@
 
 package com.github.yizzuide.milkomeda.atom;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
 /**
  * AtomLock
@@ -35,6 +32,7 @@ import java.lang.annotation.Target;
  * <br>
  * Create at 2020/04/30 16:26
  */
+@Documented
 @Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface AtomLock {

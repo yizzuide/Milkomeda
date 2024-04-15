@@ -42,7 +42,7 @@ import java.util.Collections;
 public class RollWindowLimiter extends LimitHandler implements LuaLoader {
 
     /**
-     * Decorated postfix for limiter key.
+     * Decorated postfix for a limiter key.
      */
     private static final String POSTFIX = ":roll";
 

@@ -37,7 +37,7 @@ public class PhoneConstraintValidator implements ConstraintValidator<PhoneConstr
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {
         // 如果为空就不验证
-        if (null == value || "".equals(value)) return true;
+        if (null == value || value.isEmpty()) return true;
         return Pattern.matches(ValidatorHolder.getProps().getRegexPhone(), value);
     }
 }

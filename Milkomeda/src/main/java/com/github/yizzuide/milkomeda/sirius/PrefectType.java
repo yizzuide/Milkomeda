@@ -6,6 +6,7 @@ import com.github.yizzuide.milkomeda.hydrogen.uniform.UniformQueryPageData;
  * Prefect type using for {@link QueryMatcher}
  *
  * @since 3.14.0
+ * @version 3.20.0
  * @author yizzuide
  * <br>
  * Create at 2022/10/30 16:59
@@ -22,12 +23,32 @@ public enum PrefectType {
     NEQ,
 
     /**
+     * Greater than field.
+     */
+    GT,
+
+    /**
+     * Greater than or equals field.
+     */
+    GE,
+
+    /**
+     * Less than field.
+     */
+    LT,
+
+    /**
+     * Less than or equals field.
+     */
+    LE,
+
+    /**
      * Match empty field (null or '').
      */
     EMPTY,
 
     /**
-     * Match using sql `in`.
+     * Match fuzzy with {@link QueryLinker} or not used linker using sql `in`.
      */
     IN,
 
@@ -44,12 +65,7 @@ public enum PrefectType {
     /**
      * Match using sql `order by`.
      */
-    OrderByPre,
-
-    /**
-     * Page result list order by.
-     */
-    OrderByPost,
+    OrderBy,
 
     /**
      * Using for `startDate` and `endDate` of {@link UniformQueryPageData} query.

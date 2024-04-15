@@ -28,6 +28,8 @@ import org.apache.ibatis.executor.keygen.NoKeyGenerator;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.mapping.SqlSource;
 
+
+
 /**
  * Inject insert batch with the primary key method in mapper.
  *
@@ -37,6 +39,7 @@ import org.apache.ibatis.mapping.SqlSource;
  */
 @Slf4j
 public class InsertKeyBatchMethod extends AbstractMethod {
+    
     private static final long serialVersionUID = 6846870839503630813L;
 
     public InsertKeyBatchMethod(String methodName) {
@@ -70,7 +73,9 @@ public class InsertKeyBatchMethod extends AbstractMethod {
         if (hasSetKey()) {
             fieldSql.append(tableInfo.getKeyColumn()).append(",");
         }
-        tableInfo.getFieldList().forEach(x -> fieldSql.append(x.getColumn()).append(","));
+        tableInfo.getFieldList().stream()
+                .filter(x -> !tableInfo.isWithLogicDelete() || !x.isLogicDelete())
+                .forEach(x -> fieldSql.append(x.getColumn()).append(","));
         fieldSql.delete(fieldSql.length() - 1, fieldSql.length());
         fieldSql.insert(0, "(");
         fieldSql.append(")");
@@ -83,7 +88,9 @@ public class InsertKeyBatchMethod extends AbstractMethod {
         if (hasSetKey()) {
             valueSql.append("#{item.").append(tableInfo.getKeyProperty()).append("},");
         }
-        tableInfo.getFieldList().forEach(x -> valueSql.append("#{item.").append(x.getProperty()).append("},"));
+        tableInfo.getFieldList().stream()
+                .filter(x -> !tableInfo.isWithLogicDelete() || !x.isLogicDelete())
+                .forEach(x -> valueSql.append("#{item.").append(x.getProperty()).append("},"));
         valueSql.delete(valueSql.length() - 1, valueSql.length());
         valueSql.append("</foreach>");
         return valueSql.toString();

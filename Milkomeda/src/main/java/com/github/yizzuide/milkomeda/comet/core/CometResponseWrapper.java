@@ -22,6 +22,12 @@
 package com.github.yizzuide.milkomeda.comet.core;
 
 import com.github.yizzuide.milkomeda.universe.context.WebContext;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.WriteListener;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletResponseWrapper;
+import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
@@ -30,12 +36,8 @@ import org.springframework.util.FastByteArrayOutputStream;
 import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.util.WebUtils;
 
-import javax.servlet.ServletOutputStream;
-import javax.servlet.WriteListener;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpServletResponseWrapper;
 import java.io.*;
+import java.net.SocketTimeoutException;
 import java.nio.charset.StandardCharsets;
 
 /**
@@ -51,6 +53,7 @@ import java.nio.charset.StandardCharsets;
  * <br>
  * Create at 2020/04/07 14:54
  */
+@Slf4j
 public class CometResponseWrapper extends HttpServletResponseWrapper {
 
     private final FastByteArrayOutputStream content = new FastByteArrayOutputStream(1024);
@@ -80,7 +83,6 @@ public class CometResponseWrapper extends HttpServletResponseWrapper {
         }
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     public void sendError(int sc, String msg) throws IOException {
         copyBodyToResponse(false);
@@ -89,7 +91,7 @@ public class CometResponseWrapper extends HttpServletResponseWrapper {
         }
         catch (IllegalStateException ex) {
             // Possibly on Tomcat when called too late: fall back to silent setStatus
-            super.setStatus(sc, msg);
+            super.setStatus(sc);
         }
     }
 
@@ -196,7 +198,11 @@ public class CometResponseWrapper extends HttpServletResponseWrapper {
      * @throws IOException  Network IO exception
      */
     public void copyBodyToResponse() throws IOException {
-        copyBodyToResponse(true);
+        try {
+            copyBodyToResponse(true);
+        } catch (SocketTimeoutException e) {
+            log.warn("Read socket timeout");
+        }
     }
 
     /**
@@ -268,8 +274,11 @@ public class CometResponseWrapper extends HttpServletResponseWrapper {
         // 在DeferredResult第二次Response响应时，会在获取OutputStream写出后，调用这个方法
         @Override
         public void flush() throws IOException {
-            // 写出到响应输出流（解决 DeferredResult 异步响应问题）
-            CometResponseWrapper.this.copyBodyToResponse();
+            try {
+                // 写出到响应输出流（解决 DeferredResult 异步响应问题）
+                CometResponseWrapper.this.copyBodyToResponse();
+            } catch (SocketTimeoutException ignore) {
+            }
             super.flush();
         }
     }

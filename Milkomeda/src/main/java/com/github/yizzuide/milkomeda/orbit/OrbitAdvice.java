@@ -37,10 +37,10 @@ public interface OrbitAdvice extends MethodInterceptor {
     }
 
     /**
-     * 覆盖当前方法，执行前置或后置切面
-     * @param invocation    调用数据
-     * @return  使用`invocation.proceed()`返回结果
-     * @throws Throwable    执行异常
+     * Overrides and performs custom behavior.
+     * @param invocation    OrbitInvocation
+     * @return  proxy method result
+     * @throws Throwable    any exception
      */
     Object invoke(OrbitInvocation invocation) throws Throwable;
 }

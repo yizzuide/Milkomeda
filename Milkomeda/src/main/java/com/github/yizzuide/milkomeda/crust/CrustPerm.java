@@ -28,9 +28,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.util.CollectionUtils;
 
-import java.util.HashSet;
+import java.io.Serializable;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -44,7 +43,11 @@ import java.util.stream.Collectors;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class CrustPerm {
+public class CrustPerm implements Serializable {
+
+
+    private static final long serialVersionUID = -152359602270167238L;
+
     /**
      * 是否为Admin用户
      * @since 3.14.0
@@ -54,7 +57,7 @@ public class CrustPerm {
     /**
      * 角色ID列表
      */
-    private Set<Long> roleIds;
+    private List<Long> roleIds;
 
     /**
      * 权限列表
@@ -80,7 +83,7 @@ public class CrustPerm {
         }
 
         public Builder roleIds(List<Long> roleIds) {
-            this.crustPerm.setRoleIds(new HashSet<>(roleIds));
+            this.crustPerm.setRoleIds(roleIds);
             return this;
         }
 

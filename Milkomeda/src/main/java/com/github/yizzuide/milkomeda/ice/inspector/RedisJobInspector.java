@@ -26,7 +26,7 @@ import com.github.yizzuide.milkomeda.ice.IceKeys;
 import com.github.yizzuide.milkomeda.ice.IceProperties;
 import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import com.github.yizzuide.milkomeda.util.JSONUtil;
-import com.github.yizzuide.milkomeda.util.Strings;
+import com.github.yizzuide.milkomeda.util.StringExtensionsKt;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationListener;
 import org.springframework.data.redis.core.BoundHashOperations;
@@ -75,7 +75,7 @@ public class RedisJobInspector extends AbstractJobInspector implements Initializ
     public JobWrapper get(String jobId) {
         BoundHashOperations<String, String, String> ops = redisTemplate.boundHashOps(jobInspectorDataKey);
         String jsonObject = ops.get(jobId);
-        if (Strings.isEmpty(jsonObject)) {
+        if (StringExtensionsKt.isEmpty(jsonObject)) {
             return null;
         }
         return JSONUtil.parse(jsonObject, JobWrapper.class);

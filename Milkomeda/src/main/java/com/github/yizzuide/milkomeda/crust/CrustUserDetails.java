@@ -26,12 +26,12 @@ import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 
 /**
- * CrustUserDetails
  * 用户验证的源数据
  *
  * @author yizzuide
@@ -43,6 +43,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 public class CrustUserDetails implements UserDetails {
+    
     private static final long serialVersionUID = 2749178892063846690L;
 
     /**
@@ -89,32 +90,36 @@ public class CrustUserDetails implements UserDetails {
 
     @Override
     public boolean isAccountNonExpired() {
-        if (userInfo.getEntity() instanceof CrustStatefulEntity) {
-            return !((CrustStatefulEntity) userInfo.getEntity()).accountExpired();
+        CrustEntity entity = userInfo.getEntity();
+        if (entity instanceof CrustStatefulEntity) {
+            return !((CrustStatefulEntity) entity).accountExpired();
         }
         return true;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        if (userInfo.getEntity() instanceof CrustStatefulEntity) {
-            return !((CrustStatefulEntity) userInfo.getEntity()).accountLocked();
+        CrustEntity entity = userInfo.getEntity();
+        if (entity instanceof CrustStatefulEntity) {
+            return !((CrustStatefulEntity) entity).accountLocked();
         }
         return true;
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        if (userInfo.getEntity() instanceof CrustStatefulEntity) {
-            return !((CrustStatefulEntity) userInfo.getEntity()).credentialsExpired();
+        CrustEntity entity = userInfo.getEntity();
+        if (entity instanceof CrustStatefulEntity) {
+            return !((CrustStatefulEntity) entity).credentialsExpired();
         }
         return true;
     }
 
     @Override
     public boolean isEnabled() {
-        if (userInfo.getEntity() instanceof CrustStatefulEntity) {
-            return ((CrustStatefulEntity) userInfo.getEntity()).enabled();
+        CrustEntity entity = userInfo.getEntity();
+        if (entity instanceof CrustStatefulEntity) {
+            return ((CrustStatefulEntity) entity).enabled();
         }
         return true;
     }
