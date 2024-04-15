@@ -97,8 +97,7 @@ public class YmlResponseOutput {
         if (addition instanceof Map) {
             Map<String, Object> additionMap = (Map) addition;
             for (String key : additionMap.keySet()) {
-                Object ele = additionMap.get(key);
-                additionMap.put(key, CollectionsPropertySource.of(String.valueOf(ele)));
+                additionMap.compute(key, (k, ele) -> CollectionsPropertySource.of(String.valueOf(ele)));
             }
             result.putAll(additionMap);
         }

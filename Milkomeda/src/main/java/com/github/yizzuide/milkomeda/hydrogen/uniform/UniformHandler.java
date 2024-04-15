@@ -153,7 +153,7 @@ public class UniformHandler extends ResponseEntityExceptionHandler {
         } else {
             message = "[" + constraintViolation.getPropertyPath() + "=" + value + "] " + constraintViolation.getMessage();
         }
-        log.warn("Hydrogen uniform valid response exception with msg: {} ", message);
+        log.warn("Hydrogen uniform valid parameter exception with msg: {} ", message);
         ResponseEntity<Object> responseEntity = handleExceptionResponse(e, HttpStatus.BAD_REQUEST.value(), message);
         return responseEntity == null ? ResponseEntity.status(HttpStatus.BAD_REQUEST.value()).body(null) : responseEntity;
     }
@@ -205,7 +205,7 @@ public class UniformHandler extends ResponseEntityExceptionHandler {
                 message = "[" + fieldError.getField() + "=" + fieldError.getRejectedValue() + "] " + message;
             }
         }
-        log.warn("Hydrogen uniform valid response exception with msg: {} ", message);
+        log.warn("Hydrogen uniform valid bean exception with msg: {} ", message);
         return handleExceptionResponse(ex, HttpStatus.BAD_REQUEST.value(), message);
     }
 
