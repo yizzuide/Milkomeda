@@ -27,9 +27,11 @@ import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.SessionCallback;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.data.redis.support.atomic.RedisAtomicLong;
 import org.springframework.lang.NonNull;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
@@ -40,21 +42,41 @@ import java.util.function.Consumer;
  *
  * @author yizzuide
  * @since 1.14.0
- * @version 3.9.0
+ * @version 4.0.0
  * <br>
  * Create at 2019/11/11 14:07
  */
 public class RedisUtil {
     /**
-     * SetNX
+     * Add lock key
      * @param key           键
-     * @param liveTime      过期时间
+     * @param clientId      客户端 ID
+     * @param seconds       过期时间
      * @param redisTemplate RedisTemplate
      * @return 返回true，表示加锁成功
      */
-    public static Boolean setIfAbsent(String key, long liveTime, RedisTemplate<String, String> redisTemplate) {
-        return redisTemplate.opsForValue().setIfAbsent(key, "1", liveTime, TimeUnit.SECONDS);
+    public static Boolean setIfAbsent(String key, String clientId, long seconds, RedisTemplate<String, String> redisTemplate) {
+        return redisTemplate.opsForValue().setIfAbsent(key, clientId, seconds, TimeUnit.SECONDS);
     }
+
+    /**
+     * unlock key
+     * @param key           键
+     * @param clientId      客户端 ID
+     * @param redisTemplate RedisTemplate
+     * @return true is unlocked success
+     * @since 4.0.0
+     */
+    public static Boolean unlock(String key, String clientId, RedisTemplate<String, String> redisTemplate) {
+        String script ="if (redis.call('get', KEYS[1]) == ARGV[1]) then " +
+                "return redis.call('del', KEYS[1]) else " +
+                "return 0 end;";
+        DefaultRedisScript<Boolean> redisScript = new DefaultRedisScript<>();
+        redisScript.setResultType(Boolean.class);
+        redisScript.setScriptText(script);
+        return redisTemplate.execute(redisScript, Collections.singletonList(key), clientId);
+    }
+
     /**
      * 自增键
      * @param key           键
