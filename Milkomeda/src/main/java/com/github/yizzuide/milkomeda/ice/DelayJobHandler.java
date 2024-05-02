@@ -35,6 +35,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * DelayJobHandler
@@ -105,8 +106,9 @@ public class DelayJobHandler implements Runnable, ApplicationListener<IceInstanc
     @Override
     public void run() {
         // 延迟桶处理锁住资源，防止同一桶索引分布式并发执行时出现相同记录问题
+        String clientId = UUID.randomUUID().toString();
         if (props.isEnableJobTimerDistributed()) {
-            boolean hasObtainLock = RedisUtil.setIfAbsent(this.lockKey, props.getJobTimerLockTimeoutSeconds().getSeconds(), redisTemplate);
+            boolean hasObtainLock = RedisUtil.setIfAbsent(this.lockKey, clientId, props.getJobTimerLockTimeoutSeconds().getSeconds(), redisTemplate);
             if (!hasObtainLock) {
                 return;
             }
@@ -152,7 +154,7 @@ public class DelayJobHandler implements Runnable, ApplicationListener<IceInstanc
         } finally {
             if (props.isEnableJobTimerDistributed()) {
                 // 删除Lock
-                RedisPolyfill.redisDelete(redisTemplate, this.lockKey);
+                RedisUtil.unlock(this.lockKey, clientId, redisTemplate);
             }
         }
     }

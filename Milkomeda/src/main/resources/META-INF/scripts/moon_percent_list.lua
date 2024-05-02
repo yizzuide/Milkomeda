@@ -10,6 +10,7 @@ local current = tonumber(redis.call('get', key))
 current = (current + 1) % percent
 local index = 0
 -- lua table start index 1
+-- for i,v in ipairs(phases) do
 for i = 1, #phases, 1 do
     local p = tonumber(phases[i])
     if i > 1 then

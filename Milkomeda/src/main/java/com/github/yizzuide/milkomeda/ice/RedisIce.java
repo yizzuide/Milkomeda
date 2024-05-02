@@ -39,10 +39,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.CollectionUtils;
 
 import java.time.Duration;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -309,7 +306,8 @@ public class RedisIce implements Ice, ApplicationListener<IceInstanceChangeEvent
         if (count == 1) return Collections.singletonList(pop(topic));
 
         // 使用SetNX锁住资源，防止多线程并发执行，造成重复消费问题
-        boolean hasObtainLock = RedisUtil.setIfAbsent(this.lockKey, props.getTaskPopCountLockTimeoutSeconds().getSeconds(), redisTemplate);
+        String clientId = UUID.randomUUID().toString();
+        boolean hasObtainLock = RedisUtil.setIfAbsent(this.lockKey, clientId, props.getTaskPopCountLockTimeoutSeconds().getSeconds(), redisTemplate);
         if (!hasObtainLock) return null;
 
         List<Job<T>> jobList;
@@ -340,7 +338,7 @@ public class RedisIce implements Ice, ApplicationListener<IceInstanceChangeEvent
             }, redisTemplate);
         } finally {
             // 删除Lock
-            RedisPolyfill.redisDelete(redisTemplate, this.lockKey);
+            RedisUtil.unlock(this.lockKey, clientId, redisTemplate);
         }
         return jobList;
     }

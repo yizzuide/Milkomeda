@@ -21,10 +21,11 @@
 
 package com.github.yizzuide.milkomeda.particle;
 
-import com.github.yizzuide.milkomeda.universe.polyfill.RedisPolyfill;
 import com.github.yizzuide.milkomeda.util.RedisUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
+
+import java.util.UUID;
 
 /**
  * IdempotentLimiter
@@ -47,15 +48,16 @@ public class IdempotentLimiter extends LimitHandler {
     public <R> R limit(String key, Process<R> process) throws Throwable {
         String decoratedKey = key + POSTFIX;
         StringRedisTemplate redisTemplate = getRedisTemplate();
-        Boolean hasObtainLock = RedisUtil.setIfAbsent(decoratedKey, expire, redisTemplate);
+        String clientId = UUID.randomUUID().toString();
+        Boolean hasObtainLock = RedisUtil.setIfAbsent(decoratedKey, clientId, expire, redisTemplate);
         assert hasObtainLock != null;
         Particle particle = new Particle(this.getClass(), !hasObtainLock, hasObtainLock ? null : "1");
         try {
             return next(particle, key, process);
         } finally {
-            // 只有第一次设置key的线程有权删除这个key
             if (hasObtainLock) {
-                RedisPolyfill.redisDelete(redisTemplate, decoratedKey);
+                // 删除Lock
+                RedisUtil.unlock(decoratedKey, clientId, redisTemplate);
             }
         }
     }

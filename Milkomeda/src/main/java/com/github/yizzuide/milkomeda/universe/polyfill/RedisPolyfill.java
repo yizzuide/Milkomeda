@@ -41,6 +41,7 @@ public class RedisPolyfill {
      * @param key           缓存键
      * @return  删除是否成功
      */
+    @SuppressWarnings({"rawtypes", "unchecked"})
     public static Boolean redisDelete(RedisTemplate redisTemplate, final String key) {
         Object obj = redisTemplate.execute((RedisCallback<Object>) connection -> {
             StringRedisSerializer serializer = new StringRedisSerializer();
