@@ -94,7 +94,7 @@ public class ParticleConfig implements ApplicationContextAware {
         FilterRegistrationBean<ParticleFilter> particleFilterRegistrationBean = new FilterRegistrationBean<>();
         particleFilterRegistrationBean.setFilter(particleFilter());
         particleFilterRegistrationBean.setUrlPatterns(Collections.singleton("/*"));
-        particleFilterRegistrationBean.setOrder(Ordered.HIGHEST_PRECEDENCE + 20);
+        particleFilterRegistrationBean.setOrder(Ordered.HIGHEST_PRECEDENCE + 1);
         return particleFilterRegistrationBean;
     }
 

@@ -27,6 +27,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.support.annotation.AnnotationMatchingPointcut;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
+import org.springframework.core.Ordered;
 
 import java.lang.annotation.Annotation;
 import java.util.Map;
@@ -58,7 +59,7 @@ public class AnnotationOrbitAdvisor extends AbstractOrbitAdvisor {
 
     public AnnotationOrbitAdvisor(Class<? extends Annotation> classAnnotationType, Class<? extends Annotation> methodAnnotationType,
                                   String advisorId, Class<? extends OrbitAdvice> adviceClass, Map<String, Object> props) {
-        super(advisorId, adviceClass, props);
+        super(advisorId, adviceClass, props, Ordered.LOWEST_PRECEDENCE);
         this.classAnnotationType = classAnnotationType;
         this.methodAnnotationType = methodAnnotationType;
     }

@@ -48,7 +48,7 @@ import java.util.function.Consumer;
  */
 public class RedisUtil {
     /**
-     * Add lock key
+     * Add lock
      * @param key           键
      * @param clientId      客户端 ID
      * @param seconds       过期时间
@@ -60,7 +60,7 @@ public class RedisUtil {
     }
 
     /**
-     * unlock key
+     * Unlock used with with {@link RedisUtil#setIfAbsent(String, String, long, RedisTemplate)}
      * @param key           键
      * @param clientId      客户端 ID
      * @param redisTemplate RedisTemplate

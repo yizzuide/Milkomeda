@@ -29,6 +29,7 @@ import com.github.yizzuide.milkomeda.orbit.OrbitSource;
 import com.github.yizzuide.milkomeda.orbit.OrbitSourceProvider;
 import org.springframework.boot.context.properties.bind.BindResult;
 import org.springframework.boot.context.properties.bind.Binder;
+import org.springframework.core.Ordered;
 import org.springframework.core.env.Environment;
 
 import java.util.Collections;
@@ -52,6 +53,9 @@ public class AtomOrbitSource implements OrbitSource {
         if (!bindResult.isBound()) {
             return Collections.emptyList();
         }
-        return Collections.singletonList(AnnotationOrbitAdvisor.forMethod(AtomLock.class, "atom", AtomOrbitAdvice.class, null));
+        AnnotationOrbitAdvisor advisor = AnnotationOrbitAdvisor.forMethod(AtomLock.class, "atom", AtomOrbitAdvice.class, null);
+        // set order after the Particle[1]
+        advisor.setOrder(Ordered.HIGHEST_PRECEDENCE + 2);
+        return Collections.singletonList(advisor);
     }
 }

@@ -103,7 +103,7 @@ public class I18nConfig {
         private void configRequestMappingHandlerMapping() {
             final LocaleChangeInterceptor localeChangeInterceptor = new LocaleChangeInterceptor();
             localeChangeInterceptor.setParamName(i18nProperties.getQuery());
-            SpringMvcPolyfill.addDynamicInterceptor(localeChangeInterceptor, Ordered.HIGHEST_PRECEDENCE + 10, Collections.singletonList("/**"),
+            SpringMvcPolyfill.addDynamicInterceptor(localeChangeInterceptor, Ordered.HIGHEST_PRECEDENCE + 12, Collections.singletonList("/**"),
                     null, requestMappingHandlerMapping);
         }
     }

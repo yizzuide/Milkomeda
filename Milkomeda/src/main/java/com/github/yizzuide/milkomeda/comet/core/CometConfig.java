@@ -92,7 +92,7 @@ public class CometConfig implements ApplicationListener<ApplicationStartedEvent>
         cometRequestFilter.setFilter(new CometRequestFilter());
         cometRequestFilter.setName("cometRequestFilter");
         cometRequestFilter.setUrlPatterns(Collections.singleton("/*"));
-        cometRequestFilter.setOrder(Ordered.HIGHEST_PRECEDENCE + 10);
+        cometRequestFilter.setOrder(Ordered.HIGHEST_PRECEDENCE + 11);
         return cometRequestFilter;
     }
 
@@ -184,7 +184,7 @@ public class CometConfig implements ApplicationListener<ApplicationStartedEvent>
 
         // 动态添加内置拦截器
         private void configRequestMappingHandlerMapping() {
-            SpringMvcPolyfill.addDynamicInterceptor(cometInterceptor,  Ordered.HIGHEST_PRECEDENCE + 1, Collections.singletonList("/**"),
+            SpringMvcPolyfill.addDynamicInterceptor(cometInterceptor,  Ordered.HIGHEST_PRECEDENCE + 10, Collections.singletonList("/**"),
                     null, requestMappingHandlerMapping);
         }
 
