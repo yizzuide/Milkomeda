@@ -21,17 +21,20 @@
 
 package com.github.yizzuide.milkomeda.orbit;
 
+import org.springframework.core.Ordered;
+
 import java.util.Map;
 
 /**
  * The top level interface with metadata to assemble advisor bean definition, all subclasses need provide a parameterless constructor.
  *
  * @since 3.15.0
+ * @version 3.20.0
  * @author yizzuide
  * <br>
  * Create at 2023/01/27 18:35
  */
-public interface OrbitAdvisor extends AdvisorBeanDefinitionFactory {
+public interface OrbitAdvisor extends AdvisorBeanDefinitionFactory, Ordered {
     /**
      * The advisor id for register in spring context.
      * @return advisor id

@@ -25,10 +25,12 @@ import com.github.yizzuide.milkomeda.util.ReflectUtil;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.aop.support.AbstractGenericPointcutAdvisor;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.core.Ordered;
 import org.springframework.util.CollectionUtils;
 
 import java.util.Map;
@@ -40,6 +42,7 @@ import java.util.Map;
  * @see org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator
  * @see org.springframework.beans.factory.config.RuntimeBeanNameReference
  * @since 3.15.0
+ * @version 3.20.0
  * @author yizzuide
  * <br>
  * Create at 2022/02/26 00:58
@@ -63,11 +66,25 @@ public abstract class AbstractOrbitAdvisor implements OrbitAdvisor {
      */
     private Map<String, Object> adviceProps;
 
+    /**
+     * Advice order.
+     */
+    @Setter
+    private Integer order = Ordered.LOWEST_PRECEDENCE;
+
+    @Override
+    public int getOrder() {
+        return order;
+    }
+
     @Override
     public void initFrom(OrbitProperties.Item orbitItem) {
         this.setAdvisorId(orbitItem.getKeyName());
         this.setAdviceClass(orbitItem.getAdviceClazz());
         this.setAdviceProps(orbitItem.getAdviceProps());
+        if (orbitItem.getOrder() != null) {
+            this.setOrder(orbitItem.getOrder());
+        }
         if (!CollectionUtils.isEmpty(orbitItem.getAdvisorProps())) {
             ReflectUtil.setField(this, orbitItem.getAdvisorProps());
         }
@@ -79,6 +96,7 @@ public abstract class AbstractOrbitAdvisor implements OrbitAdvisor {
         return this.createAdvisorBeanDefinitionBuilder()
                 // 添加Bean引用，内部创建RuntimeBeanNameReference，延迟对Advice Bean的创建
                 .addPropertyReference("advice", adviceBeanName)
+                .addPropertyValue("order", getOrder())
                 // 将Advisor作为基础设施Bean，不添加自动代理
                 .setRole(BeanDefinition.ROLE_INFRASTRUCTURE)
                 .getBeanDefinition();

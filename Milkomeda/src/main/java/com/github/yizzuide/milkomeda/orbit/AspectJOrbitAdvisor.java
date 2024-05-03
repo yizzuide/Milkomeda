@@ -26,6 +26,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.springframework.aop.aspectj.AspectJExpressionPointcutAdvisor;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
+import org.springframework.core.Ordered;
 
 import java.util.Map;
 
@@ -49,7 +50,7 @@ public class AspectJOrbitAdvisor extends AbstractOrbitAdvisor {
     private String pointcutExpression;
 
     public AspectJOrbitAdvisor(String pointcutExpression, String id, Class<? extends OrbitAdvice> adviceClass, Map<String, Object> props) {
-        super(id, adviceClass, props);
+        super(id, adviceClass, props, Ordered.LOWEST_PRECEDENCE);
         this.pointcutExpression = pointcutExpression;
     }
 

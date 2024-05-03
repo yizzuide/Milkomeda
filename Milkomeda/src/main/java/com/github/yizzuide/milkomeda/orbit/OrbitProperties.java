@@ -34,7 +34,7 @@ import java.util.Map;
  *
  * @author yizzuide
  * @since 3.13.0
- * @version 3.15.0
+ * @version 3.20.0
  * <br>
  * Create at 2022/02/21 01:27
  */
@@ -80,6 +80,12 @@ public class OrbitProperties {
          * @since 3.15.0
          */
         private Map<String, Object> advisorProps;
+
+        /**
+         * Advisor order.
+         * @since 3.20.0
+         */
+        private Integer order;
     }
 
 }

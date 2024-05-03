@@ -45,6 +45,11 @@ public class RedisAtom implements Atom {
 
     private RedissonClient redisson;
 
+    // Redisson解决锁重入问题：数据类型采用 Hash<key, [锁持有ID，重入次数]>，当删除时检测重入次数为 1 时才删除。
+    // Redisson解决锁提前释放问题：通过 WatchDog 每隔锁释放时间的 1/3 检查当前是否持有锁，持有就重置锁释放时间为初始设置的值。
+    // Redisson解决分布式服务线程的并发同步：通过 redis 发布/订阅来唤醒其它阻塞的线程，被唤醒（它的子线程操作信号量来唤醒）的线程都去抢占这把锁，没抢到的的线程继续阻塞并通过子线程订阅锁释放事件。
+    // Redisson不完全解决redis多节点同步：通过 RedLook 实现在半数以上节点设置成功才算加锁成功，但由于 Redis 的主从复制是通过fork子进程来增量复制的，如果当前节点没有同步完锁就挂了就丢失了加锁数据问题。
+    //  redis是 AP 模式，主要保证访问的可靠性，如果需要数据强一致就用 CP 模式的 Zookeeper。
     @Override
     public AtomLockInfo lock(String keyPath, Duration leaseTime, AtomLockType type, boolean readOnly) {
         RLock lock = getLock(keyPath, type, readOnly);
