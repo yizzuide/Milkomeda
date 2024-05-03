@@ -28,7 +28,7 @@ import com.github.yizzuide.milkomeda.crust.CrustException;
 /**
  * Thrown this exception if the user access is forbidden.
  *
- * @since 4.0.0
+ * @since 3.20.0
  * @author yizzuide
  * Create at 2024/01/15 15:10
  */

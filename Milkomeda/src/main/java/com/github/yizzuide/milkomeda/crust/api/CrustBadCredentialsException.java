@@ -28,7 +28,7 @@ import com.github.yizzuide.milkomeda.crust.CrustException;
 /**
  * Thrown this exception if credential is invalid or not found.
  *
- * @since 4.0.0
+ * @since 3.20.0
  * @author yizzuide
  * Create at 2024/01/12 21:13
  */

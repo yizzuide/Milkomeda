@@ -26,7 +26,7 @@ import java.lang.annotation.*;
 /**
  * Tenant id ignore control with mybatis-plus query.
  *
- * @since 4.0.0
+ * @since 3.20.0
  * @author yizzuide
  * Create at 2024/03/03 00:35
  */

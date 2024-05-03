@@ -35,7 +35,7 @@ import static java.lang.annotation.ElementType.TYPE_USE;
 /**
  * Unix未来时间验证
  *
- * @since 4.0.0
+ * @since 3.20.0
  * @author yizzuide
  * Create at 2024/03/22 15:47
  */

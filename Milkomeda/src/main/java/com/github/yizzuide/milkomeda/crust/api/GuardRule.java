@@ -31,7 +31,7 @@ import java.util.function.Function;
 /**
  * Guard rule used by {@link UserDetails} for check request is allowed.
  *
- * @since 4.0.0
+ * @since 3.20.0
  * @author yizzuide
  * Create at 2024/01/17 19:02
  */

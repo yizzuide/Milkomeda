@@ -31,7 +31,7 @@ import java.util.Map;
 /**
  * Cached reflect for class
  *
- * @since 4.0.0
+ * @since 3.20.0
  * @author yizzuide
  * Create at 2024/03/10 17:03
  */

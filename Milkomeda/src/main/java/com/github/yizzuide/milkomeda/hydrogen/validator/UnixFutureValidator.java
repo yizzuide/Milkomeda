@@ -30,7 +30,7 @@ import java.time.Instant;
 /**
  * UnixFutureValidator
  *
- * @since 4.0.0
+ * @since 3.20.0
  * @author yizzuide
  * Create at 2024/03/22 16:04
  */

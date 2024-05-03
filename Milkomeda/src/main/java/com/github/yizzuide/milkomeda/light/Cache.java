@@ -27,14 +27,10 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import java.io.Serializable;
 
 /**
- * Cache
  * 缓存接口
  *
- * V：标识数据
- * E：缓存业务数据
- *
  * @since 1.9.0
- * @version 1.17.0
+ * @version 3.14.0
  * @author yizzuide
  * <br>
  * Create at 2019/07/01 15:39

@@ -32,7 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @param <R> the repository type
  *
  * @since 3.15.0
- * @version 4.0.0
+ * @version 3.20.0
  * @author yizzuide
  * Create at 2023/07/14 03:48
  */

@@ -19,32 +19,22 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.wormhole;
+package com.github.yizzuide.milkomeda.atom;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
- * A cacheable transaction service for {@link TransactionService}.
- *
- * @param <R> the repository type
+ * An Atom holder which can get from Spring bean container.
  *
  * @since 3.20.0
  * @author yizzuide
- * Create at 2024/04/07 18:58
+ * Create at 2024/05/03 21:46
  */
-public abstract class TransactionCacheableService<R> implements TransactionService<R> {
+public class AtomHolder {
 
-    private static final Map<Class<?>, Object> CACHE_REPOSITORY_MAP = new ConcurrentHashMap<>();
+    @Setter
+    @Getter
+    static Atom atom;
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T> T getRepositoryProxy(Class<T> clazz) {
-        T repository = (T) CACHE_REPOSITORY_MAP.get(clazz);
-        if (repository == null) {
-            repository = TransactionService.super.getRepositoryProxy(clazz);
-            CACHE_REPOSITORY_MAP.put(clazz, repository);
-        }
-        return repository;
-    }
 }

@@ -22,6 +22,8 @@
 package com.github.yizzuide.milkomeda.atom;
 
 import com.github.yizzuide.milkomeda.orbit.OrbitConfig;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
@@ -30,11 +32,19 @@ import org.springframework.context.annotation.Import;
  *
  * @author yizzuide
  * @since 3.3.0
- * @version 3.15.0
+ * @version 3.20.0
  * <br>
  * Create at 2020/04/30 15:13
  */
 @Configuration
 @Import({EtcdAtomConfig.class, RedisAtomConfig.class, ZkAtomConfig.class, OrbitConfig.class})
-public class AtomConfig {
+public class AtomConfig implements InitializingBean {
+
+    @Autowired
+    private Atom atom;
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        AtomHolder.setAtom(atom);
+    }
 }

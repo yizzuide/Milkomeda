@@ -35,7 +35,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
 /**
  * Custom tenant intercept handler.
  *
- * @since 4.0.0
+ * @since 3.20.0
  * @author yizzuide
  * Create at 2024/01/10 14:46
  */

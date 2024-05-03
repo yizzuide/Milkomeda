@@ -29,7 +29,7 @@ import java.lang.annotation.*;
  * Enable crust used in api service that not need spring security environment.
  *
  * @since 3.15.0
- * @version 4.0.0
+ * @version 3.20.0
  * @author yizzuide
  * <br>
  * Create at 2022/12/07 00:09

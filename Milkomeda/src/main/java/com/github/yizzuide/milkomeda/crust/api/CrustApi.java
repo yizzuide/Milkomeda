@@ -37,7 +37,7 @@ import java.util.Objects;
 /**
  * Crust used for api service.
  *
- * @since 4.0.0
+ * @since 3.20.0
  * @author yizzuide
  * Create at 2024/01/12 18:08
  */

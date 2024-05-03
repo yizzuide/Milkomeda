@@ -32,7 +32,7 @@ import java.io.Serializable;
 /**
  * This holder which provides tenant context.
  *
- * @since 4.0.0
+ * @since 3.20.0
  * @author yizzuide
  * Create at 2024/01/10 14:42
  */

@@ -217,6 +217,7 @@ public class CacheHelper {
             return data;
         }
 
+        // TODO 添加分布式锁，读取数据库时，只有一个线程调用到数据库
         // 方案三：从数据源获取（耗时最长，一个标识只会查一次）
         data = dataGenerator.apply(fastSpot.getView().toString());
         // 如果返回值为null，不缓存

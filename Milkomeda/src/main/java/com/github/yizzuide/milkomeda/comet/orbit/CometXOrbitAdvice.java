@@ -43,7 +43,7 @@ import java.util.stream.Collectors;
 /**
  * This advice listen on method which annotated {@link CometX} has invoked.
  *
- * @since 4.0.0
+ * @since 3.20.0
  * @author yizzuide
  * Create at 2024/01/28 14:16
  */

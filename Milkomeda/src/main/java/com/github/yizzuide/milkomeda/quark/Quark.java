@@ -29,7 +29,7 @@ import java.lang.annotation.*;
 /**
  * Quark handler for event and exception receive.
  *
- * @since 4.0.0
+ * @since 3.20.0
  * @author yizzuide
  * Create at 2024/03/05 19:41
  */

@@ -29,7 +29,7 @@ import java.util.function.Supplier;
 /**
  * The user details describe user login information which needs to limit request to access resource.
  *
- * @since 4.0.0
+ * @since 3.20.0
  * @author yizzuide
  * Create at 2024/01/15 15:24
  */

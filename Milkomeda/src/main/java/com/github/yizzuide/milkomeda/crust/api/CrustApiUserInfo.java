@@ -34,7 +34,7 @@ import java.util.List;
 /**
  * API服务用户信息
  *
- * @since 4.0.0
+ * @since 3.20.0
  * @author yizzuide
  * Create at 2024/01/12 17:51
  */
