@@ -36,5 +36,5 @@ public interface Callback {
      * 回调方法
      * @throws Exception 回调异常
      */
-    void call() throws Exception;
+    Object call() throws Throwable;
 }

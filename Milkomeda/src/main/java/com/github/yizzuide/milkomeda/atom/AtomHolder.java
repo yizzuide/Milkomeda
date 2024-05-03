@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 yizzuide All rights Reserved.
+ * Copyright (c) 2024 yizzuide All rights Reserved.
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -21,30 +21,20 @@
 
 package com.github.yizzuide.milkomeda.atom;
 
-import com.github.yizzuide.milkomeda.orbit.OrbitConfig;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
- * AtomConfig
+ * An Atom holder which can get from Spring bean container.
  *
+ * @since 4.0.0
  * @author yizzuide
- * @since 3.3.0
- * @version 4.0.0
- * <br>
- * Create at 2020/04/30 15:13
+ * Create at 2024/05/03 21:46
  */
-@Configuration
-@Import({EtcdAtomConfig.class, RedisAtomConfig.class, ZkAtomConfig.class, OrbitConfig.class})
-public class AtomConfig implements InitializingBean {
+public class AtomHolder {
 
-    @Autowired
-    private Atom atom;
+    @Setter
+    @Getter
+    static Atom atom;
 
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        AtomHolder.setAtom(atom);
-    }
 }

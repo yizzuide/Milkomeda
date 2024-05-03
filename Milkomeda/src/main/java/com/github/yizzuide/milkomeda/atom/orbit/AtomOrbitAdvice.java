@@ -21,7 +21,8 @@
 
 package com.github.yizzuide.milkomeda.atom.orbit;
 
-import com.github.yizzuide.milkomeda.atom.*;
+import com.github.yizzuide.milkomeda.atom.Atom;
+import com.github.yizzuide.milkomeda.atom.AtomLock;
 import com.github.yizzuide.milkomeda.orbit.OrbitAdvice;
 import com.github.yizzuide.milkomeda.orbit.OrbitInvocation;
 import com.github.yizzuide.milkomeda.universe.engine.el.ELContext;
@@ -32,12 +33,11 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.AnnotationUtils;
 
-import java.time.Duration;
-
 /**
  * This advice listen on method which annotated {@link AtomLock} has invoked.
  *
  * @since 3.15.0
+ * @version 4.0.0
  * @author yizzuide
  * <br>
  * Create at 2023/01/27 19:38
@@ -56,39 +56,10 @@ public class AtomOrbitAdvice implements OrbitAdvice {
         AtomLock atomLock = AnnotationUtils.findAnnotation(invocation.getMethod(), AtomLock.class);
         assert atomLock != null;
         String keyPath = ELContext.getValue(joinPoint, atomLock.key());
-        Object lock = null;
-        boolean isLocked = false;
-        try {
-            AtomLockInfo lockInfo = this.getAtom().tryLock(keyPath, atomLock.type(), atomLock.readOnly());
-            isLocked = lockInfo.isLocked();
-            lock = lockInfo.getLock();
-            if (!isLocked) {
-                lockInfo = this.getAtom().tryLock(keyPath, Duration.ofMillis(atomLock.waitTime()), Duration.ofMillis(atomLock.leaseTime()), atomLock.type(), atomLock.readOnly());
-                isLocked = lockInfo.isLocked();
-                lock = lockInfo.getLock();
-            }
-            if (isLocked) {
-                return joinPoint.proceed();
-            }
-            // has set wait time?
-            if (atomLock.waitTime() > 0) {
-                if (atomLock.waitTimeoutType() == AtomLockWaitTimeoutType.THROW_EXCEPTION) {
-                    throw new AtomLockWaitTimeoutException();
-                } else if (atomLock.waitTimeoutType() == AtomLockWaitTimeoutType.FALLBACK) {
+        return atom.autoLock(keyPath, atomLock.type(), atomLock.readOnly(), atomLock.waitTime(), atomLock.leaseTime(),
+                atomLock.waitTimeoutType(), () -> {
                     String fallback = atomLock.fallback();
                     return ELContext.getActualValue(joinPoint, fallback, ReflectUtil.getMethodReturnType(joinPoint));
-                }
-                // here is AtomLockWaitTimeoutType.WAIT_INFINITE
-            }
-            lockInfo = this.getAtom().lock(keyPath, Duration.ofMillis(atomLock.leaseTime()), atomLock.type(), atomLock.readOnly());
-            lock = lockInfo.getLock();
-            isLocked = lockInfo.isLocked();
-            return joinPoint.proceed();
-        } finally {
-            // 只有加锁的线程需要解锁
-            if (isLocked && lock != null && this.getAtom().isLocked(lock)) {
-                this.getAtom().unlock(lock);
-            }
-        }
+                }, invocation::proceed);
     }
 }
