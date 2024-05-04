@@ -122,6 +122,13 @@ public class LightCache implements Cache {
     private boolean enableSuperCache;
 
     /**
+     * 数据源获取使用分布式互斥锁
+     */
+    @Setter
+    @Getter
+    private boolean dataGenerateMutex;
+
+    /**
      * 超级缓存（每个Cache都有自己的超级缓存，互不影响）
      */
     @Getter
@@ -443,5 +450,6 @@ public class LightCache implements Cache {
         this.setL2Expire(props.getL2Expire().getSeconds());
         this.setOnlyCacheL2(props.isOnlyCacheL2());
         this.setEnableSuperCache(props.isEnableSuperCache());
+        this.setDataGenerateMutex(props.isDataGenerateMutex());
     }
 }

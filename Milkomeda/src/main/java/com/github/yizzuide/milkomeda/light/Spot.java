@@ -25,8 +25,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * Spot
- *
  * 缓存数据
  *
  * @since 1.8.0
