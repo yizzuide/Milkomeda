@@ -22,7 +22,7 @@
 package com.github.yizzuide.milkomeda.hydrogen.uniform;
 
 import com.github.yizzuide.milkomeda.comet.core.AbstractResponseInterceptor;
-import com.github.yizzuide.milkomeda.universe.extend.annotation.Alias;
+import com.github.yizzuide.milkomeda.universe.extend.annotation.AliasBinder;
 import com.github.yizzuide.milkomeda.universe.parser.yml.YmlResponseOutput;
 import lombok.extern.slf4j.Slf4j;
 
@@ -34,13 +34,13 @@ import java.util.Map;
  * Uniform implementation of response interceptor. It works when response type is subclass of {@link ResultVO}.
  *
  * @since 3.14.0
- * @version 3.15.0
+ * @version 3.20.0
  * @author yizzuide
  * <br>
  * Create at 2022/10/10 17:57
  */
 @Slf4j
-@Alias("uniform")
+@AliasBinder(value = "uniform", autoload = true)
 public class UniformResponseInterceptor extends AbstractResponseInterceptor {
     @Override
     protected Object doResponse(HttpServletResponse response, Object body) {

@@ -21,7 +21,7 @@
 
 package com.github.yizzuide.milkomeda.universe.extend.web.handler;
 
-import com.github.yizzuide.milkomeda.universe.extend.annotation.Alias;
+import com.github.yizzuide.milkomeda.universe.extend.annotation.AliasBinder;
 import com.github.yizzuide.milkomeda.universe.extend.annotation.AliasWrapper;
 import com.github.yizzuide.milkomeda.universe.parser.url.URLPathMatcher;
 import com.github.yizzuide.milkomeda.util.RecognizeUtil;
@@ -37,9 +37,10 @@ import java.util.stream.Collectors;
 
 /**
  * This handler interface provides named and ordered in a list.
- * It always used with {@link Alias} and {@link AliasWrapper}.
+ * It always used with {@link AliasBinder} and {@link AliasWrapper}.
  *
  * @since 3.15.0
+ * @version 3.20.0
  * @author yizzuide
  * <br>
  * Create at 2023/05/05 22:36
@@ -66,10 +67,22 @@ public interface NamedHandler extends PriorityOrdered {
      */
     default String handlerName() {
         Class<?> handlerClass = this.getClass();
-        if (handlerClass.isAnnotationPresent(Alias.class)) {
-            return handlerClass.getAnnotation(Alias.class).value();
+        if (handlerClass.isAnnotationPresent(AliasBinder.class)) {
+            return handlerClass.getAnnotation(AliasBinder.class).value();
         }
         return RecognizeUtil.getBeanName(this.getClass());
+    }
+
+    /**
+     * Whether used to load automatically.
+     * @since 3.20.0
+     */
+    default boolean isAutoLoad() {
+        Class<?> handlerClass = this.getClass();
+        if (handlerClass.isAnnotationPresent(AliasBinder.class)) {
+            return handlerClass.getAnnotation(AliasBinder.class).autoload();
+        }
+        return false;
     }
 
     /**
@@ -80,7 +93,7 @@ public interface NamedHandler extends PriorityOrdered {
      */
     static <T extends NamedHandler> Map<String, AliasWrapper<T>> mapFrom(Map<String, T> beanMap) {
         return beanMap.entrySet().stream()
-                .map(e -> new AbstractMap.SimpleEntry<>(e.getValue().handlerName(), new AliasWrapper<>(e.getValue().handlerName(), e.getKey(), e.getValue())))
+                .map(e -> new AbstractMap.SimpleEntry<>(e.getValue().handlerName(), new AliasWrapper<>(e.getValue().handlerName(), e.getKey(), e.getValue(), e.getValue().isAutoLoad())))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
@@ -148,5 +161,26 @@ public interface NamedHandler extends PriorityOrdered {
             }
         }
         return URLPathMatcher.match(includeUrls, url);
+    }
+
+    /**
+     * load handler which annotated with {@link AliasBinder} and autoload is enable.
+     * @param aliasHandlers         all alias handlers
+     * @param handlerPropertyMap    config handler map
+     * @since 3.20.0
+     */
+    static void autoload(Collection<? extends NamedHandler> aliasHandlers, Map<String, HotHttpHandlerProperty> handlerPropertyMap) {
+        List<NamedHandler> handlers = aliasHandlers.stream().filter(NamedHandler::isAutoLoad).collect(Collectors.toList());
+        if (!CollectionUtils.isEmpty(handlers)) {
+            for (NamedHandler handler : handlers) {
+                String handlerName = handler.handlerName();
+                if (handlerPropertyMap.containsKey(handlerName)) {
+                    continue;
+                }
+                HotHttpHandlerProperty hotHttpHandlerProperty = new HotHttpHandlerProperty();
+                hotHttpHandlerProperty.setEnable(true);
+                handlerPropertyMap.put(handlerName, hotHttpHandlerProperty);
+            }
+        }
     }
 }

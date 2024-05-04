@@ -29,6 +29,7 @@ import com.github.yizzuide.milkomeda.universe.extend.web.handler.HotHttpHandlerP
 import com.github.yizzuide.milkomeda.universe.extend.web.handler.NamedHandler;
 import com.github.yizzuide.milkomeda.universe.metadata.BeanIds;
 import com.github.yizzuide.milkomeda.universe.polyfill.SpringMvcPolyfill;
+import com.google.common.collect.Maps;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -59,7 +60,7 @@ import java.util.*;
  *
  * @author yizzuide
  * @since 2.0.0
- * @version 3.15.0
+ * @version 3.20.0
  * <br>
  * Create at 2019/12/12 18:10
  */
@@ -132,12 +133,17 @@ public class CometConfig implements ApplicationListener<ApplicationStartedEvent>
             }
         }
 
-        Map<String, HotHttpHandlerProperty> responseInterceptors = cometProperties.getResponseInterceptors();
-        if (CollectionUtils.isEmpty(responseInterceptors)) {
-            return;
-        }
         Map<String, CometResponseInterceptor> responseInterceptorMap = ApplicationContextHolder.get().getBeansOfType(CometResponseInterceptor.class);
         if (CollectionUtils.isEmpty(responseInterceptorMap)) {
+            return;
+        }
+        Map<String, HotHttpHandlerProperty> responseInterceptors = Optional.ofNullable(cometProperties.getResponseInterceptors()).orElseGet(() -> {
+            cometProperties.setResponseInterceptors(Maps.newHashMap());
+            return cometProperties.getResponseInterceptors();
+        });
+        // 添加自动装载处理器
+        NamedHandler.autoload(responseInterceptorMap.values(), responseInterceptors);
+        if (CollectionUtils.isEmpty(responseInterceptors)) {
             return;
         }
         CometHolder.setResponseInterceptors(NamedHandler.sortedList(responseInterceptorMap, responseInterceptors::get));
