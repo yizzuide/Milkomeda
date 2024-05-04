@@ -175,6 +175,9 @@ milkomeda:
         enable-super-cache: false
         l1-expire: 1m
         l2-expire: 1m
+        # 只允许一个线程调用数据获取
+        data-generate-mutex: true
+
         #smsMoonCache:
         #only-cache-l2: true
         #abTestMoonCache:

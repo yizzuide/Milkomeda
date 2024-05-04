@@ -35,7 +35,7 @@ import java.util.Map;
  *
  * @author yizzuide
  * @since 1.17.0
- * @version 3.12.4
+ * @version 3.20.0
  * <br>
  * Create at 2019/12/03 16:24
  */
@@ -48,7 +48,7 @@ public class LightProperties {
     /** 设置一级缓存超出后丢弃的百分比 （不适用于LightDiscardStrategy.LazyExpire）*/
     private float l1DiscardPercent = 0.35f;
 
-    /**  一级缓存过期时间（单位s，只适用于LightDiscardStrategy.LazyExpire） */
+    /**  一级缓存过期时间（单位s，仅适用于LightDiscardStrategy.LazyExpire） */
     @DurationUnit(ChronoUnit.SECONDS)
     private Duration l1Expire = Duration.ofSeconds(-1);
 
@@ -67,10 +67,6 @@ public class LightProperties {
 
     /** 只缓存在二级缓存上 */
     private boolean onlyCacheL2 = false;
-    /**
-     * 自定义实例名配置（实例的注册方式为首次使用时）
-     */
-    private Map<String, LightProperties> instances = new HashMap<>();
 
     /**
      * 是否开启超缓存
@@ -83,4 +79,15 @@ public class LightProperties {
      * @since 3.13.0
      */
     private boolean enableLightThreadLocalScope = false;
+
+    /**
+     * 数据源获取使用分布式互斥锁
+     * @since 3.20.0
+     */
+    private boolean dataGenerateMutex = false;
+
+    /**
+     * 自定义实例名配置（实例的注册方式为首次使用时）
+     */
+    private Map<String, LightProperties> instances = new HashMap<>();
 }

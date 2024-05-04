@@ -46,7 +46,7 @@ public interface Atom {
      * @throws Throwable execute exception
      * @since 3.20.0
      */
-    default Object autoLock(String keyPath, AtomLockType type, long waitTime, Callback callback) throws Throwable {
+    default <E> E autoLock(String keyPath, AtomLockType type, long waitTime, Callback callback) throws Throwable {
         return this.autoLock(keyPath, type, false, waitTime, 60000L, AtomLockWaitTimeoutType.THROW_EXCEPTION, null, callback);
     }
 
@@ -64,7 +64,8 @@ public interface Atom {
      * @throws Throwable execute exception
      * @since 3.20.0
      */
-    default Object autoLock(String keyPath, AtomLockType type, boolean readOnly,
+    @SuppressWarnings("unchecked")
+    default <E> E autoLock(String keyPath, AtomLockType type, boolean readOnly,
                           long waitTime, long leaseTime, AtomLockWaitTimeoutType waitTimeoutType, Callback fallback,
                             Callback callback) throws Throwable {
         Object lock = null;
@@ -79,21 +80,21 @@ public interface Atom {
                 lock = lockInfo.getLock();
             }
             if (isLocked) {
-                return callback.call();
+                return (E) callback.call();
             }
             // has set wait time?
             if (waitTime > 0) {
                 if (waitTimeoutType == AtomLockWaitTimeoutType.THROW_EXCEPTION) {
                     throw new AtomLockWaitTimeoutException();
                 } else if (waitTimeoutType == AtomLockWaitTimeoutType.FALLBACK) {
-                    return fallback.call();
+                    return (E) fallback.call();
                 }
                 // here is AtomLockWaitTimeoutType.WAIT_INFINITE
             }
             lockInfo = this.lock(keyPath, Duration.ofMillis(leaseTime), type, readOnly);
             lock = lockInfo.getLock();
             isLocked = lockInfo.isLocked();
-            return callback.call();
+            return (E) callback.call();
         } finally {
             // 只有加锁的线程需要解锁
             if (isLocked && lock != null && this.isLocked(lock)) {
