@@ -30,6 +30,7 @@ import lombok.NoArgsConstructor;
  * Alias bind bean in spring context.
  *
  * @since 3.15.0
+ * @version 4.0.0
  * @author yizzuide
  * <br>
  * Create at 2023/05/05 22:10
@@ -53,4 +54,10 @@ public class AliasWrapper<T> {
      * Bean instance.
      */
     private T bean;
+
+    /**
+     * Whether used to load automatically.
+     * @since 4.0.0
+     */
+    private boolean autoload;
 }

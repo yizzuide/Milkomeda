@@ -21,7 +21,7 @@
 
 package com.github.yizzuide.milkomeda.comet.core;
 
-import com.github.yizzuide.milkomeda.universe.extend.annotation.Alias;
+import com.github.yizzuide.milkomeda.universe.extend.annotation.AliasBinder;
 import lombok.Setter;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -39,7 +39,7 @@ import java.util.List;
  * <br>
  * Create at 2023/05/01 04:28
  */
-@Alias("xss")
+@AliasBinder("xss")
 public class CometXssRequestInterceptor extends AbstractRequestInterceptor {
 
     // 允许常用显示型html标签

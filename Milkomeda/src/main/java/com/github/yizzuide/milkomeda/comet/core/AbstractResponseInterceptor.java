@@ -42,14 +42,14 @@ import java.nio.charset.StandardCharsets;
  * <br>
  * Create at 2023/05/06 02:47
  */
+@Getter
 @Slf4j
 @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 public abstract class AbstractResponseInterceptor implements CometResponseInterceptor {
 
-    @Setter @Getter
+    @Setter
     private int order;
 
-    @Getter
     @Autowired
     private CometProperties cometProperties;
 

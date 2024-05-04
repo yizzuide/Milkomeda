@@ -33,10 +33,10 @@ milkomeda:
         enable: true
         order: 2
         include-urls: [ "/collect/usage" ]
-    # 响应拦截器（拦截器名是通过@Alias("xxx"))
-    response-interceptors:
-      uniform:
-        enable: true
+    # 响应拦截器（已实现Uniform启用时自动加载，拦截器名是通过@AliasBinder("xxx")）
+    #response-interceptors:
+      #uniform:
+        #enable: true
 
     # 统一请求日志打印
     logger:

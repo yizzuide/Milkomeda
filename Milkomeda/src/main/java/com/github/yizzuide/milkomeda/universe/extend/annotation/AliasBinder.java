@@ -21,13 +21,16 @@
 
 package com.github.yizzuide.milkomeda.universe.extend.annotation;
 
+import com.github.yizzuide.milkomeda.comet.core.CometResponseInterceptor;
+
 import java.lang.annotation.*;
 
 /**
- * Add alias bind to bean, but this name can not find in spring context (so its can repeat in each other module). it's just
- * used for link and find easily in yml config.
+ * Add alias bind to bean, but this name can not find in spring context (so you can have duplicate names in other modules).
+ *  * It is configured in the list of {@link CometResponseInterceptor}.
  *
  * @since 3.15.0
+ * @version 4.0.0
  * @author yizzuide
  * <br>
  * Create at 2023/05/05 21:54
@@ -35,10 +38,17 @@ import java.lang.annotation.*;
 @Documented
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Alias {
+public @interface AliasBinder {
     /**
-     * Set bean alias.
-     * @return bean alias.
+     * Set bean alias name.
+     * @return bean alias name.
      */
     String value();
+
+    /**
+     * Whether to load automatically.
+     * @return false is not
+     * @since 4.0.0
+     */
+    boolean autoload() default false;
 }
