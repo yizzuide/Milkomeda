@@ -25,6 +25,7 @@ import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import com.github.yizzuide.milkomeda.universe.engine.el.ELContext;
 import com.github.yizzuide.milkomeda.util.ReflectUtil;
 import com.github.yizzuide.milkomeda.util.StringExtensionsKt;
+import io.netty.util.Timeout;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.jdbc.Null;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -46,16 +47,18 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Pulsar
  * <p>
  * 用于存放和管理DeferredResult的容器，配合应用注解 <code>@PulsarFlow</code> 切面，
  * 并提供参数注入DeferredResult的包装类 <code>PulsarDeferredResult</code> 到请求参数列表。
+ * </p>
  *
- * @author yizzuide
  * @since 0.1.0
- * @version 3.15.0
+ * @version 3.20.0
+ * @author yizzuide
  * <br>
  * Create at 2019/03/29 10:36
  */
@@ -140,8 +143,8 @@ public class Pulsar implements ApplicationListener<ApplicationStartedEvent> {
     /**
      * 提交一个异步运行任务
      *
+     * @param runnable 可运行任务
      * @since 1.1.0
-     * @param runnable Runnable
      */
     public void post(Runnable runnable) {
         applicationTaskExecutor.execute(runnable);
@@ -149,6 +152,7 @@ public class Pulsar implements ApplicationListener<ApplicationStartedEvent> {
 
     /**
      * 提交一个异步任务，并返回结果
+     *
      * @param callable  Callable
      * @param <T>   结果类型
      * @return  Future
@@ -156,6 +160,18 @@ public class Pulsar implements ApplicationListener<ApplicationStartedEvent> {
      */
     public <T> Future<T> postForResult(Callable<T> callable) {
         return applicationTaskExecutor.submit(callable);
+    }
+
+    /**
+     * 提交一个延迟任务
+     *
+     * @param runnable      可运行任务
+     * @param milliseconds  延迟 ms
+     * @return  Timeout
+     * @since 3.20.0
+     */
+    public Timeout delay(Runnable runnable, int milliseconds) {
+        return PulsarHolder.hashedWheelTimer.newTimeout(timeout -> post(runnable), milliseconds, TimeUnit.MILLISECONDS);
     }
 
     /**
@@ -180,24 +196,11 @@ public class Pulsar implements ApplicationListener<ApplicationStartedEvent> {
 
         // 如果没有设置DeferredResult，则使用WebAsyncTask
         if (!pulsarFlow.useDeferredResult()) {
-            // 返回异步任务（交给统一异常处理响应）
-            /*if (null != timeoutCallback) {
-                webAsyncTask.onTimeout(() -> this.timeoutCallback);
-            }*/
             return new WebAsyncTask<>(new WebAsyncTaskCallable(joinPoint));
         }
 
         // 使用DeferredResult方式
         DeferredResult<Object> deferredResult = new DeferredResult<>();
-
-        // 设置DeferredResult的错误处理（交给统一异常处理响应）
-        /*if (null != timeoutCallback) {
-            // 适配超时处理
-            deferredResult.onTimeout(() -> deferredResult.setResult(this.timeoutCallback.get()));
-        }
-        if (null != errorCallback) {
-            deferredResult.onError((throwable) -> deferredResult.setErrorResult(errorCallback.apply(throwable)));
-        }*/
 
         // 创建增强DeferredResult
         PulsarDeferredResult pulsarDeferredResult = new PulsarDeferredResult();
@@ -269,10 +272,6 @@ public class Pulsar implements ApplicationListener<ApplicationStartedEvent> {
                 if (t instanceof Exception) {
                     throw (Exception) t;
                 } else { // Error类型
-                    // 错误处理（已经交给了统一异常模块来处理响应）
-                    /*if (null != errorCallback) {
-                        return errorCallback.apply(t);
-                    }*/
                     return ResponseEntity.status(500).body(t.getMessage());
                 }
             }

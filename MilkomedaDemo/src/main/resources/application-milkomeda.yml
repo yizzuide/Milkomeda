@@ -490,3 +490,8 @@ milkomeda:
         advisor-clazz: com.github.yizzuide.milkomeda.orbit.AnnotationOrbitAdvisor
         advisor-props:
           methodAnnotationType: com.github.yizzuide.milkomeda.demo.orbit.RecordLog
+
+  # 高并发任务队列
+  quark:
+    topic-chains:
+      test: h1 -> h2

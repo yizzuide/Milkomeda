@@ -27,6 +27,8 @@ import org.springframework.boot.convert.DurationUnit;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Quark config properties.
@@ -52,9 +54,15 @@ public class QuarkProperties {
     private Float warningPercent = .05f;
 
     /**
-     * Thread pool.
+     * Executor pool.
      */
     private Pool pool = new Pool();
+
+    /**
+     * Config topic handler chain.
+     * @since 3.20.0
+     */
+    private Map<String, String> topicChains = new HashMap<>();
 
 
     @Data

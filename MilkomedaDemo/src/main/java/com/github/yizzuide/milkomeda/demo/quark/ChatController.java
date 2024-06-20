@@ -29,8 +29,6 @@ import org.apache.commons.lang3.RandomUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Random;
-
 /**
  * ChatController
  *
@@ -45,7 +43,6 @@ public class ChatController {
     @RequestMapping("send")
     public String sendQuestion(String question) {
         // 模拟生成数据
-        Random random = new Random();
         PulsarHolder.getPulsar().post(() -> {
             for (int i = 0; i < 10; i++) {
                 try {

@@ -65,7 +65,7 @@ public class TransactionConfig {
     @Autowired
     private TransactionProperties props;
 
-    // PlatformTransactionManager是事务规范接口（实现有JDBC的DataSourceTransactionManager等），事务由具体数据库来现实，
+    // KP：PlatformTransactionManager是事务规范接口（实现有JDBC的DataSourceTransactionManager等），事务由具体数据库来现实，
     //  而TransactionDefinition和TransactionStatus这两个接口分别是事务的定义和运行状态。
     // Spring的事务通过AOP动态代理：TransactionInterceptor.invoke() -> TransactionAspectSupport.invokeWithinTransaction()
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
@@ -85,8 +85,8 @@ public class TransactionConfig {
         // 设置隔离级别
         // ISOLATION_READ_UNCOMMITTED：读未提交，可能会产生脏读、不可重复读（同一事务多次读取记录值时不一样，重点在修改）、幻读（多次读取记录条数不一样，重在插入和删除）。
         // ISOLATION_READ_COMMITTED：读已提交，可能会产生不可重复读、幻读。
-        // ISOLATION_REPEATABLE_READ：可重复读，一定程度上解决了幻读，在特殊的情况下产生幻读问题。
-        //  InnoDB存储引擎在 REPEATABLE-READ（可重读）事务隔离级别下使用的是 Next-Key Lock 锁（记录锁+ Cap锁），且不会造成任何性能上的损失，因此可以避免幻读的产生。
+        // ISOLATION_REPEATABLE_READ：可重复读，一定程度上解决了产生幻读问题（除非事务使用更新类型的当前读时会重新生成 ReadView，从而导致幻读）。
+        //  InnoDB存储引擎在 REPEATABLE-READ（可重读）事务隔离级别下使用的是 Next-Key Lock 锁（记录锁 + Cap锁），且不会造成任何性能上的损失。
         // ISOLATION_SERIALIZABLE：串行化，完全遵行ACID，解决所有问题，但性能会大幅下降。
         txAttr_REQUIRED.setIsolationLevel(props.getIsolationLevel().value());
         // 设置超时

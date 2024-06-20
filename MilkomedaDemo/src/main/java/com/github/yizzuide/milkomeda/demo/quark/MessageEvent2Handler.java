@@ -13,12 +13,12 @@ import java.util.Random;
  * @author yizzuide
  * Create at 2023/08/19 14:34
  */
-@Quark(topic = "test", name = "h1")
+@Quark(topic = "test", name = "h2")
 @Slf4j
-public class MessageEventHandler extends QuarkEventHandler<MessageData> {
+public class MessageEvent2Handler extends QuarkEventHandler<MessageData> {
     @Override
     public void onEvent(QuarkEvent<MessageData> event, long sequence, boolean endOfBatch) throws Exception {
         Thread.sleep(new Random().nextInt(5) * 1000L);
-        log.info("event: {}, seq: {}, end: {}", event.getData().getId(), sequence, endOfBatch);
+        log.info("event2: {}, seq: {}, end: {}", event.getData().getId(), sequence, endOfBatch);
     }
 }
