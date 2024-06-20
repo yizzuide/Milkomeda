@@ -35,8 +35,8 @@ import java.util.List;
  */
 public class MethodArgumentBinder {
 
+    // KP：happens-before：如果一个操作happens-before另一个操作，那么第一个操作的执行结果将对第二个操作可见。
     // volatile变量规则：对一个volatile变量的写，happens-before于任意后续对这个volatile变量的读。
-    // happens-before：如果一个操作happens-before另一个操作，那么第一个操作的执行结果将对第二个操作可见。
     // 实现原理：为实现volatile内存语义，JMM会限制编译器重排序和处理器重排序（编译器在生成字节码时，会在指令序列中插入内存屏障来禁止处理器重排序）。
     // 读写操作：当操作volatile变量写时，JMM把该线程的本地内存（CPU缓存、寄存器）中的所有共享变量刷新到主内存；当读的时候，volatile变量强制从主内存中读取。
     // 应用技巧：释放锁的线程在写volatile变量之前对共享变量进行的修改，在别的线程读取同一个volatile变量后将立即可见。
@@ -71,7 +71,7 @@ public class MethodArgumentBinder {
 
     private static CompositeArgumentMatcher getArgumentMatchers() {
         if (argumentMatchers == null) {
-            // 每个Object都关联一个Monitor（存在于对象头Mark Word），它记录被哪个线程持有、重入次数、block队列、wait队列等，同时notify/notifyAll/wait等方法会使用到Monitor锁对象，所以必须在同步代码块中使用。
+            // KP：每个Object都关联一个Monitor（存在于对象头Mark Word），它记录被哪个线程持有、重入次数、block队列、wait队列等，同时notify/notifyAll/wait等方法会使用到Monitor锁对象，所以必须在同步代码块中使用。
             // Synchronized的同步是可重入、非公平抢占方式，在JVM里的实现都是基于MonitorEnter和MonitorExit指令进入退出Monitor对象来实现方法同步和代码块同步。
             synchronized (MethodArgumentBinder.class) {
                 if (argumentMatchers == null) {

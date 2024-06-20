@@ -21,32 +21,33 @@
 
 package com.github.yizzuide.milkomeda.pulsar;
 
+import io.netty.util.HashedWheelTimer;
+import lombok.Getter;
 import org.springframework.web.context.request.async.DeferredResult;
 
 import java.util.concurrent.Callable;
 
 /**
- * PulsarHolder
- * Pulsar 静态资源引用类
+ * Pulsar 引用类
  *
- * @author yizzuide
  * @since 1.0.0
- * @version 3.12.10
+ * @version 4.0.0
+ * @author yizzuide
  * <br>
  * Create at 2019/04/30 15:47
  */
 public class PulsarHolder {
 
+    @Getter
     private static Pulsar pulsar;
+
+    // Netty 时间轮
+    static HashedWheelTimer hashedWheelTimer;
 
     static void setPulsar(Pulsar pulsar) { PulsarHolder.pulsar = pulsar; }
 
-    /**
-     * 获取Pulsar
-     * @return Pulsar
-     */
-    public static Pulsar getPulsar() {
-        return pulsar;
+    static void setHashedWheelTimer(HashedWheelTimer hashedWheelTimer) {
+        PulsarHolder.hashedWheelTimer = hashedWheelTimer;
     }
 
     /**

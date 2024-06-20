@@ -60,7 +60,7 @@ public class LightCache implements Cache {
      */
     @Setter
     @Getter
-    private volatile Integer l1MaxCount;
+    private Integer l1MaxCount;
 
     /**
      * 一级缓存一次性移除百分比
@@ -257,11 +257,12 @@ public class LightCache implements Cache {
      * @return 缓存是否成功
      */
     private boolean cacheL1(String key, Spot<Serializable, Object> spot) {
+        final int limitSize = l1MaxCount;
         // 一级缓存超出最大个数
-        if ((cacheMap.size() + 1) > l1MaxCount) {
+        if ((cacheMap.size() + 1) > limitSize) {
             // 使用双重检测确保在条件满足时只执行一次
             synchronized (this) {
-                if ((cacheMap.size() + 1) > l1MaxCount) {
+                if ((cacheMap.size() + 1) > limitSize) {
                     // 根据选择的策略来丢弃数据
                     discardStrategy.discard(cacheMap, l1DiscardPercent);
                 }
@@ -270,12 +271,8 @@ public class LightCache implements Cache {
 
         // 排行加分
         boolean isAbandon = discardStrategy.ascend(spot);
-        // 缓存被识别为过期，使缓存失效
+        // 缓存失败
         if (isAbandon) {
-            /*if (!onlyCacheL1) {
-                // 从二级缓存移除
-                RedisPolyfill.redisDelete(stringRedisTemplate, key);
-            }*/
             return false;
         }
 

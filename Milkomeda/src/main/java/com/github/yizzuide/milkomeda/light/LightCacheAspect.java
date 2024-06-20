@@ -128,7 +128,7 @@ public class LightCacheAspect {
             return null;
         }
 
-        // 更新类型也是先更新数据源，再更新缓存
+        // 更新类型是先更新数据源，再删除缓存
         if (annotation.annotationType() == LightCachePut.class) {
             return CacheHelper.put(cache, viewId, keyGenerator, id -> joinPoint.proceed());
         }

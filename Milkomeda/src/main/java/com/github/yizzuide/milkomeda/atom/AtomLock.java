@@ -49,10 +49,10 @@ public @interface AtomLock {
     long waitTime() default -1;
 
     /**
-     * 自动释放锁时间ms（ZK不需要这个特性，断开就删除节点）
+     * 自动释放锁时间ms（Redis设置为-1时开启 WatchDog 锁续期，ZK不需要这个特性，断开就删除节点）
      * @return -1不自动释放锁
      */
-    long leaseTime() default 60000;
+    long leaseTime() default -1;
 
     /**
      * 加锁类型（ZK仅支持公平锁、读写锁，ETCD不支持设置）

@@ -90,7 +90,7 @@ public final class QuarkProducer {
     }
 
     private RingBuffer<QuarkEvent<Object>> getCurrentRingBuffer() {
-        // 高性能取模，idx必须为2的幂次方
+        // 高性能取模，ringBuffers.length必须为2的幂次方
         return ringBuffers[idx.get() & ringBuffers.length - 1];
     }
 

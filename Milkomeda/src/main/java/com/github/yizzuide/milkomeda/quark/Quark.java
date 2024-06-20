@@ -40,19 +40,20 @@ import java.lang.annotation.*;
 @Component
 public @interface Quark {
 
-    /**
-     * where the topic handle from.
-     * @return  topic name
-     */
-    @AliasFor("topic")
+    @AliasFor(annotation = Component.class)
     String value() default "";
 
     /**
-     * where the topic handle from.
+     * Where the topic handle from.
      * @return  topic name
      */
-    @AliasFor("value")
-    String topic() default "";
+    String topic();
+
+    /**
+     * Set handler name.
+     * @return handler name
+     */
+    String name() default "";
 
     /**
      * Indicate whether it is an event handler.

@@ -21,6 +21,8 @@
 
 package com.github.yizzuide.milkomeda.pulsar;
 
+import io.netty.util.HashedWheelTimer;
+import io.netty.util.Timer;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
@@ -35,7 +37,7 @@ import org.springframework.web.servlet.DispatcherServlet;
  *
  * @author yizzuide
  * @since 1.14.0
- * @version 3.15.0
+ * @version 4.0.0
  * <br>
  * Create at 2019/11/11 11:34
  */
@@ -48,5 +50,12 @@ public class PulsarConfig {
     @Bean
     public Pulsar pulsar() {
         return new Pulsar();
+    }
+
+    @Bean
+    public Timer hashedWheelTimer() {
+        HashedWheelTimer hashedWheelTimer = new HashedWheelTimer();
+        PulsarHolder.setHashedWheelTimer(hashedWheelTimer);
+        return hashedWheelTimer;
     }
 }

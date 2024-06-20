@@ -31,6 +31,7 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.lang.NonNull;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -77,6 +78,7 @@ public class QuarkConfig implements ApplicationListener<ContextRefreshedEvent> {
         Quarks.setBufferSize(props.getBufferSize());
         if (!CollectionUtils.isEmpty(eventHandlerList)) {
             Map<String, List<QuarkEventHandler<?>>> topicEventHandlerMap = new HashMap<>();
+            Map<String, QuarkEventHandler<?>> namedEventHandlerMap = new HashMap<>();
             eventHandlerList.stream().filter(ha -> {
                 Quark quark = AnnotationUtils.findAnnotation(ha.getClass(), Quark.class);
                 if (quark == null) {
@@ -87,8 +89,11 @@ public class QuarkConfig implements ApplicationListener<ContextRefreshedEvent> {
                 Quark quark = AnnotationUtils.findAnnotation(ha.getClass(), Quark.class);
                 assert quark != null;
                 topicEventHandlerMap.computeIfAbsent(quark.topic(), k -> new ArrayList<>()).add(ha);
+                if (StringUtils.hasText(quark.name())) {
+                    namedEventHandlerMap.put(quark.name(), ha);
+                }
             });
-            Quarks.setEventHandlerList(topicEventHandlerMap);
+            Quarks.setEventHandlerList(topicEventHandlerMap, namedEventHandlerMap, props.getTopicChains());
 
             Map<String, ExceptionHandler<?>> topicExceptionHandlerMap = new HashMap<>();
             if (!CollectionUtils.isEmpty(exceptionHandlerList)) {

@@ -48,8 +48,6 @@ public final class Quarks {
 
     private static Executor executor;
 
-    private static Map<String, List<QuarkEventHandler<?>>> topicEventHandlerMap;
-
     private static Map<String, ExceptionHandler<?>> topicExceptionHandlerMap;
 
     private static final Map<Serializable, QuarkProducer> producerMap = new ConcurrentHashMap<>();
@@ -74,8 +72,10 @@ public final class Quarks {
         Quarks.executor = executor;
     }
 
-    static void setEventHandlerList(Map<String, List<QuarkEventHandler<?>>> topicEventHandlerMap) {
-        Quarks.topicEventHandlerMap = topicEventHandlerMap;
+    static void setEventHandlerList(Map<String, List<QuarkEventHandler<?>>> topicEventHandlerMap,
+                                    Map<String, QuarkEventHandler<?>> namedEventHandlerMap,
+                                    Map<String, String> chainMap) {
+        QuarkChainHelper.setTopicEventHandlers(topicEventHandlerMap, namedEventHandlerMap, chainMap);
     }
 
     static void setExceptionHandlerList(Map<String, ExceptionHandler<?>> topicExceptionHandlerMap) {
@@ -114,13 +114,7 @@ public final class Quarks {
         QuarkEventFactory<Object> eventFactory = new QuarkEventFactory<>();
         Disruptor<QuarkEvent<Object>> disruptor = new Disruptor<>(eventFactory, bufferSize, executor,
                 ProducerType.SINGLE, new YieldingWaitStrategy());
-        List<QuarkEventHandler<?>> quarkEventHandlers = topicEventHandlerMap.get(topic);
-        // handlers execute concurrently
-        disruptor.handleEventsWith(quarkEventHandlers.toArray(new EventHandler[]{}));
-        // this handler executes after upper handlers
-        // .then(h3);
-        // h4 and h5 execute concurrently after h3
-        // .after(h3).handleEventsWith(h4, h5);
+        List<QuarkEventHandler<?>> quarkEventHandlers = QuarkChainHelper.invoke(disruptor, topic);
         if (!CollectionUtils.isEmpty(topicExceptionHandlerMap) && topicExceptionHandlerMap.get(topic) != null) {
             quarkEventHandlers.forEach(eventHandler -> disruptor.handleExceptionsFor((EventHandler) eventHandler)
                     .with(topicExceptionHandlerMap.get(topic)));
@@ -136,20 +130,20 @@ public final class Quarks {
                 new QuarkEventFactory<>(),
                 bufferSize,
                 new YieldingWaitStrategy());
-        // Coordination barrier for tracking the cursor for publishers and sequence of dependent EventProcessors
-        // for processing a data structure
-        SequenceBarrier barrier = ringBuffer.newBarrier();
-        List<QuarkEventHandler<?>> quarkEventHandlers = topicEventHandlerMap.get(topic);
+        List<QuarkEventHandler<?>> quarkEventHandlers = QuarkChainHelper.invoke(null, topic);
         ExceptionHandler<Object> exceptionHandler;
         if (!CollectionUtils.isEmpty(topicExceptionHandlerMap)) {
             exceptionHandler = (ExceptionHandler<Object>) topicExceptionHandlerMap.get(topic);
         } else {
             exceptionHandler = new FatalExceptionHandler();
         }
+        // Coordination barrier for tracking the cursor for publishers and sequence of dependent EventProcessors
+        // for processing a data structure
+        SequenceBarrier barrier = ringBuffer.newBarrier();
         // WorkerPool contains a pool of WorkProcessors that will consume sequences
         WorkerPool<QuarkEvent<Object>> workerPool = new WorkerPool<>(ringBuffer, barrier,
                 exceptionHandler, quarkEventHandlers.toArray(new WorkHandler[]{}));
-        // Sync event handler sequence to ringbuffer
+        // Sync event handler sequence to ring buffer
         ringBuffer.addGatingSequences(workerPool.getWorkerSequences());
         workerPool.start(executor);
         return ringBuffer;

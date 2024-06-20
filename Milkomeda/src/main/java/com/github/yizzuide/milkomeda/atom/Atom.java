@@ -47,7 +47,7 @@ public interface Atom {
      * @since 4.0.0
      */
     default <E> E autoLock(String keyPath, AtomLockType type, long waitTime, Callback callback) throws Throwable {
-        return this.autoLock(keyPath, type, false, waitTime, 60000L, AtomLockWaitTimeoutType.THROW_EXCEPTION, null, callback);
+        return this.autoLock(keyPath, type, false, waitTime, -1, AtomLockWaitTimeoutType.THROW_EXCEPTION, null, callback);
     }
 
     /**

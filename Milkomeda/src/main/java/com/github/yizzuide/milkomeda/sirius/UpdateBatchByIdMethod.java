@@ -27,6 +27,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.mapping.SqlSource;
 
+import java.io.Serial;
+
 /**
  * Inject update batch with the primary key method in mapper.
  *
@@ -37,6 +39,7 @@ import org.apache.ibatis.mapping.SqlSource;
 @Slf4j
 public class UpdateBatchByIdMethod extends AbstractMethod {
 
+    @Serial
     private static final long serialVersionUID = 1136438483463808038L;
 
     public UpdateBatchByIdMethod() {

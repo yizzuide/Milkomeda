@@ -25,6 +25,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.github.yizzuide.milkomeda.atom.Atom;
 import com.github.yizzuide.milkomeda.atom.AtomHolder;
 import com.github.yizzuide.milkomeda.atom.AtomLockType;
+import com.github.yizzuide.milkomeda.pulsar.PulsarHolder;
 import com.github.yizzuide.milkomeda.universe.function.ThrowableFunction;
 import com.github.yizzuide.milkomeda.util.ReflectUtil;
 import com.github.yizzuide.milkomeda.util.TypeUtil;
@@ -188,7 +189,7 @@ public class CacheHelper {
                         return cacheData;
                     }
                     E cacheData = dataGenerator.apply(id.toString());
-                    // 如果数据中间件查询返回 null，那么在缓存中设置一个空缓存，防止缓存穿透（缓存(nil) -> 数据中间件(null)）
+                    // KP：如果数据中间件查询返回 null，那么在缓存中设置一个空缓存，防止缓存穿透（缓存(nil) -> 数据中间件(null)）
                     if (cacheData == null) {
                         cacheData = (E) ReflectUtil.newInstance(TypeUtil.type2Class(eTypeRef));
                     }
@@ -234,34 +235,15 @@ public class CacheHelper {
      */
     public static <E> E put(Cache cache, Serializable id,
                             Function<Serializable, String> keyGenerator, ThrowableFunction<String, E> dataGenerator) throws Throwable  {
-        // 先执行数据操作
+        // 延时双删之第一次删除缓存
+        erase(cache, id, keyGenerator);
+
+        // 执行数据操作
         String key = keyGenerator.apply(id);
         E data = dataGenerator.apply(key);
 
-        // 返回值如果为空，清空缓存
-        if (data == null) {
-            erase(cache, id, keyGenerator);
-            return data;
-        }
-
-        // 再存入缓存
-        Spot<Serializable, E> fastSpot;
-        LightCache lightCache = (LightCache) cache;
-        if (lightCache.isEnableSuperCache() && !lightCache.isOnlyCacheL2()) {
-            fastSpot = get(cache);
-            if (fastSpot == null) {
-                // 设置超级缓存
-                set(cache, id);
-                fastSpot = get(cache);
-            }
-        } else {
-            fastSpot = new Spot<>();
-            fastSpot.setView(id);
-        }
-        // 设置缓存数据
-        fastSpot.setData(data);
-        // 设置一级缓存 -> 二级缓存
-        cache.set(key, fastSpot);
+        // 延时双删之第二次删除
+        PulsarHolder.getPulsar().delay(() -> erase(cache, id, keyGenerator), 1000);
         return data;
     }
 }
