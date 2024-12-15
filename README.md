@@ -62,6 +62,7 @@ The project name is inspired by the fact that the Milky Way and Andromeda galaxi
 ## Version control guidelines
 | Milkomeda                     | Spring Boot       |
 |-------------------------------|-------------------|
+| 4.0+                          | 3.2.x             |
 | 3.15.x - 3.20.x               | 2.7.x             |
 | 3.14.x                        | 2.6.x             |
 | 3.13.x                        | 2.4.x - 2.5.x     |
