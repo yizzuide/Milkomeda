@@ -23,8 +23,8 @@
         <milkomeda.version>3.20.0-SNAPSHOT</milkomeda.version>
         <mybatis.starter>2.2.2</mybatis.starter>
         <pagehelper.version>1.4.7</pagehelper.version>
-        <redission.version>3.17.7</redission.version>
-        <zookeeper.version>3.7.1</zookeeper.version>
+        <redission.version>3.22.0</redission.version>
+        <zookeeper.version>3.7.2</zookeeper.version>
         <jetcd.version>0.7.5</jetcd.version>
         <contiperf.version>2.3.4</contiperf.version>
         <easy-captcha.version>1.6.2</easy-captcha.version>
