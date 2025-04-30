@@ -37,7 +37,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
     @Autowired
     private WebProperties webProperties;
 
-    // Spring Boot 2.7: SanitizingFunction现已支持Ordered排序，在SanitizableData一量赋值后中止其它调用
+    // Spring Boot 2.7: SanitizingFunction现已支持Ordered排序，在SanitizableData一旦赋值后中止其它调用
     // Spring Boot 2.6: 现在可以清理 /env 和 /configprops 端点中存在的敏感值
     @Order(Integer.MIN_VALUE)
     @Bean

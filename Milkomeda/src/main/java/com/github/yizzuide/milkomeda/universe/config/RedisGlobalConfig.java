@@ -49,7 +49,6 @@ import java.util.TimeZone;
  * <br>
  * Create at 2022/12/08 01:53
  */
-@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 @AutoConfigureAfter(RedisAutoConfiguration.class)
 @Configuration
 public class RedisGlobalConfig {

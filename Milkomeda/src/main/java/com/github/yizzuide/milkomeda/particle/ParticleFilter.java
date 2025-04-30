@@ -28,16 +28,16 @@ import com.github.yizzuide.milkomeda.universe.parser.url.URLPlaceholderResolver;
 import com.github.yizzuide.milkomeda.universe.parser.yml.YmlResponseOutput;
 import com.github.yizzuide.milkomeda.util.JSONUtil;
 import com.github.yizzuide.milkomeda.util.StringExtensionsKt;
-import javax.annotation.PostConstruct;
-import javax.servlet.*;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
 import org.springframework.util.CollectionUtils;
 
+import javax.annotation.PostConstruct;
+import javax.servlet.*;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
@@ -58,7 +58,6 @@ import static com.github.yizzuide.milkomeda.particle.ParticleProperties.Limiter.
  * <br>
  * Create at 2020/04/08 11:41
  */
-@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 public class ParticleFilter implements Filter {
 
     @Autowired
