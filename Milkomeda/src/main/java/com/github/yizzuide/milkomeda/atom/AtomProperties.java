@@ -34,6 +34,7 @@ import java.util.List;
  *
  * @author yizzuide
  * @since 3.3.0
+ * @version 4.0.0
  * <br>
  * Create at 2020/04/30 15:26
  */
@@ -47,11 +48,6 @@ public class AtomProperties {
      * 策略方式
      */
     private AtomStrategyType strategy = AtomStrategyType.REDIS;
-
-    /**
-     * redis配置
-     */
-    private Redis redis = new Redis();
 
     /**
      * Zk配置
@@ -113,14 +109,6 @@ public class AtomProperties {
          */
         @DurationUnit(ChronoUnit.MILLIS)
         private Duration keepaliveTimeout = Duration.ofMillis(10000);
-    }
-
-    @Data
-    static class Redis {
-        /**
-         * 使用集群方案
-         */
-        private boolean useCluster = false;
     }
 
     @Data

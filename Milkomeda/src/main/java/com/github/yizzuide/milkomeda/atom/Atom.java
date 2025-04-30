@@ -71,6 +71,7 @@ public interface Atom {
         Object lock = null;
         boolean isLocked = false;
         try {
+            // 立即获取锁（放在 try 里面是因为可以通过 isLocked 来确定是否需要在 finally 中解锁）
             AtomLockInfo lockInfo = this.tryLock(keyPath, type, readOnly);
             isLocked = lockInfo.isLocked();
             lock = lockInfo.getLock();

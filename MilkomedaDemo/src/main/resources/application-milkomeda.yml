@@ -13,6 +13,12 @@ milkomeda:
   register-early-beans:
     - com.github.yizzuide.milkomeda.demo.universe.EarlyConfigLoader
 
+  # 共享数据源插件配置
+  data:
+    redisson:
+      enable: true
+      use-cluster: false
+
   comet:
     # 读取请求body里的json数据需要开启（默认不开启）
     enable-read-request-body: true
@@ -394,11 +400,7 @@ milkomeda:
   # 分布式锁
   atom:
     # 使用方案类型，支持目前的主流方案：Etcd、Redis、Zookeeper
-    strategy: redis
-    # 策略配置（Redis的连接使用Springboot的配置）
-    redis:
-      # 是否使用集群
-      use-cluster: false
+    strategy: redis # Redis的连接使用Springboot的配置
 
     #strategy: etcd
     #etcd:

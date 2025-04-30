@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 yizzuide All rights Reserved.
+ * Copyright (c) 2025 yizzuide All rights Reserved.
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -19,34 +19,28 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.atom;
+package com.github.yizzuide.milkomeda.universe.extend.annotation;
 
-import com.github.yizzuide.milkomeda.universe.config.RedissonConfig;
-import org.redisson.api.RedissonClient;
-import org.springframework.boot.autoconfigure.AutoConfigureAfter;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.context.annotation.Condition;
+import org.springframework.context.annotation.ConditionContext;
+import org.springframework.core.env.Environment;
+import org.springframework.core.type.AnnotatedTypeMetadata;
+import org.springframework.util.StringUtils;
 
 /**
- * AtomConfig
+ * RedisClusterConditional
  *
+ * @since 4.0.0
  * @author yizzuide
- * @since 3.3.0
- * @version 4.0.0
- * <br>
- * Create at 2020/04/30 15:13
+ * Create at 2025/05/01 01:33
  */
-@Configuration
-@Import(RedissonConfig.class)
-@AutoConfigureAfter({RedisAutoConfiguration.class, RedissonConfig.class})
-@ConditionalOnProperty(prefix = "milkomeda.atom", name = "strategy", havingValue = "REDIS", matchIfMissing = true)
-public class RedisAtomConfig {
-
-    @Bean
-    public Atom atom(RedissonClient redissonClient) {
-        return new RedisAtom(redissonClient);
+public class RedisClusterConditional implements Condition {
+    @Override
+    public boolean matches(@NotNull ConditionContext context, @NotNull AnnotatedTypeMetadata metadata) {
+        Environment env = context.getEnvironment();
+        // 检查集群节点配置是否存在且非空
+        String nodes = env.getProperty("spring.redis.cluster.nodes");
+        return StringUtils.hasText(nodes);
     }
 }
