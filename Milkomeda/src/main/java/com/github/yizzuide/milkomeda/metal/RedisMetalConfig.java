@@ -39,11 +39,10 @@ import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
  *
  * @author yizzuide
  * @since 3.6.0
- * @version 3.14.0
+ * @version 4.0.0
  * <br>
  * Create at 2020/05/22 16:34
  */
-@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 @EnableConfigurationProperties(MetalProperties.class)
 @ConditionalOnClass(RedisTemplate.class)
 @AutoConfigureAfter(RedisAutoConfiguration.class)
@@ -53,16 +52,16 @@ public class RedisMetalConfig {
     private MetalProperties props;
 
     @Bean
-    public RedisMessageListenerContainer container(RedisConnectionFactory connectionFactory,
-                                                   MessageListenerAdapter listenerAdapter) {
+    public RedisMessageListenerContainer metalListenerContainer(RedisConnectionFactory connectionFactory,
+                                                                MessageListenerAdapter metalListenerAdapter) {
         RedisMessageListenerContainer container = new RedisMessageListenerContainer();
         container.setConnectionFactory(connectionFactory);
-        container.addMessageListener(listenerAdapter, new PatternTopic(MetalMessageHandler.getTopic(props.getApplicationName())));
+        container.addMessageListener(metalListenerAdapter, new PatternTopic(MetalMessageHandler.getTopic(props.getApplicationName())));
         return container;
     }
 
     @Bean
-    public MessageListenerAdapter listenerAdapter(MetalMessageHandler metalMessageHandler) {
+    public MessageListenerAdapter metalListenerAdapter(MetalMessageHandler metalMessageHandler) {
         return new MessageListenerAdapter(metalMessageHandler);
     }
 

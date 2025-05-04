@@ -47,7 +47,7 @@ import java.util.concurrent.TimeUnit;
  * </p>
  *
  * @since 1.8.0
- * @version 3.15.0
+ * @version 4.0.0
  * @author yizzuide
  * <br>
  * Create at 2019/06/28 13:33
@@ -55,6 +55,10 @@ import java.util.concurrent.TimeUnit;
 @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 @Slf4j
 public class LightCache implements Cache {
+
+    @Setter @Getter
+    private String name;
+
     /**
      * 一级缓存最大个数
      */
@@ -352,13 +356,19 @@ public class LightCache implements Cache {
 
     @Override
     public void erase(String key) {
-        if (enableSuperCache) {
-            // 从超级缓存移除
-            superCache.remove();
-        }
+        eraseL1(key);
         if (!onlyCacheL1) {
             // 从二级缓存移除
             RedisPolyfill.redisDelete(stringRedisTemplate, key);
+        }
+
+    }
+
+    @Override
+    public void eraseL1(String key) {
+        if (enableSuperCache) {
+            // 从超级缓存移除
+            superCache.remove();
         }
         if (!onlyCacheL2) {
             // 从一级缓存移除

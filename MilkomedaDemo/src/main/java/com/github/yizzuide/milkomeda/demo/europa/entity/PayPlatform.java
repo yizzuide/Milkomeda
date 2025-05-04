@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 yizzuide All rights Reserved.
+ * Copyright (c) 2025 yizzuide All rights Reserved.
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -19,37 +19,23 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.sirius;
+package com.github.yizzuide.milkomeda.demo.europa.entity;
 
-import java.lang.annotation.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
- * Tenant id ignore control with mybatis-plus query.
+ * PayPlatform
  *
- * @since 4.0.0
  * @author yizzuide
- * Create at 2024/03/03 00:35
+ * Create at 2025/05/03 21:13
  */
-@Documented
-@Target({ElementType.METHOD})
-@Retention(RetentionPolicy.RUNTIME)
-@Inherited
-public @interface Tenant {
-    /**
-     * ignore add tenant id in query where.
-     * @return true is follow in global config.
-     */
-    boolean ignored() default false;
-
-    /**
-     * custom tenant id column name.
-     * @return tenant id column, null is follow in global config.
-     */
-    String idColumn() default "";
-
-    /**
-     * custom tenant id value (support Spring EL).
-     * @return  tenant id value, null is follow in global config.
-     */
-    String idValue() default "";
+@NoArgsConstructor
+@AllArgsConstructor
+@Data
+public class PayPlatform {
+    private Long id;
+    private String name;
+    private Integer appId;
 }

@@ -34,7 +34,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
  * <br>
  * Create at 2022/12/06 19:39
  */
-@ConditionalOnProperty(value = "use-auto-config", prefix = "milkomeda.crust", havingValue = "true", matchIfMissing = true)
+@ConditionalOnProperty(prefix = "milkomeda.crust", value = "use-auto-config", havingValue = "true", matchIfMissing = true)
 @Configuration
 public class CrustAutoConfigurer extends CrustConfigurerAdapter {
     @Override

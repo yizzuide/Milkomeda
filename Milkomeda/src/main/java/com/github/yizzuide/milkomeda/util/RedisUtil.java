@@ -21,6 +21,7 @@
 
 package com.github.yizzuide.milkomeda.util;
 
+import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.core.RedisCallback;
@@ -138,5 +139,24 @@ public class RedisUtil {
             callback.accept(connection);
             return null;
         });
+    }
+    
+    /**
+     * 构建发布订阅通道名
+     * @param applicationName   应用名
+     * @param channelName       通道名
+     * @param tplChannelName    模板通道名
+     * @return  通道名
+     * @since 4.0.0
+     */
+    public static String buildChannelName(String applicationName, String channelName, String tplChannelName) {
+        if (applicationName == null) {
+            String appName = ApplicationContextHolder.getEnvironment().get("spring.application.name");
+            if (StringExtensionsKt.isEmpty(appName)) {
+                return channelName;
+            }
+            return String.format(tplChannelName, appName);
+        }
+        return String.format(tplChannelName, applicationName);
     }
 }

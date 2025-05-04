@@ -90,6 +90,7 @@ public class CrustConfig {
     @Role(BeanDefinition.ROLE_APPLICATION)
     public Cache crustLightCache() {
         LightCache lightCache = new LightCache();
+        lightCache.setName(Crust.CATCH_NAME);
         lightCache.configFrom(crustProps.getCache());
         return lightCache;
     }

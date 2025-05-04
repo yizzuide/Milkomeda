@@ -30,12 +30,26 @@ import java.io.Serializable;
  * 缓存接口
  *
  * @since 1.9.0
- * @version 3.14.0
+ * @version 4.0.0
  * @author yizzuide
  * <br>
  * Create at 2019/07/01 15:39
  */
 public interface Cache {
+    /**
+     * 设置缓存名
+     * @param name  缓存名
+     * @since 4.0.0
+     */
+    void setName(String name);
+
+    /**
+     * 获取缓存名
+     * @return 缓存名
+     * @since 4.0.0
+     */
+    String getName();
+    
     /**
      * 设置超级缓存
      *
@@ -103,6 +117,12 @@ public interface Cache {
      * @param key   缓存key
      */
     void erase(String key);
+
+    /**
+     * 根据key擦除指定的L1缓存
+     * @param key 缓存key
+     */
+    void eraseL1(String key);
 
     /**
      * Check is cache in memory.

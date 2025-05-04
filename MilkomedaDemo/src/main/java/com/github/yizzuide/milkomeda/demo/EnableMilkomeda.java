@@ -4,6 +4,7 @@ import com.github.yizzuide.milkomeda.atom.EnableAtom;
 import com.github.yizzuide.milkomeda.comet.core.EnableComet;
 import com.github.yizzuide.milkomeda.crust.EnableCrust;
 import com.github.yizzuide.milkomeda.echo.EnableEcho;
+import com.github.yizzuide.milkomeda.europa.EnableEuropa;
 import com.github.yizzuide.milkomeda.fusion.EnableFusion;
 import com.github.yizzuide.milkomeda.halo.EnableHalo;
 import com.github.yizzuide.milkomeda.hydrogen.core.EnableHydrogen;
@@ -34,6 +35,7 @@ import java.lang.annotation.Target;
  * <br>
  * Create at 2019/12/13 01:03
  */
+@EnableEuropa
 @EnableQuark
 @EnableOrbit
 @EnablePillar

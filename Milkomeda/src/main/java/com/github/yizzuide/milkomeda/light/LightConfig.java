@@ -27,13 +27,17 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.listener.PatternTopic;
+import org.springframework.data.redis.listener.RedisMessageListenerContainer;
+import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
 
 /**
  * LightConfig
  *
  * @author yizzuide
  * @since 1.17.0
- * @version 3.13.0
+ * @version 4.0.0
  * <br>
  * Create at 2019/12/03 16:22
  */
@@ -52,6 +56,25 @@ public class LightConfig {
         LightCache lightCache = new LightCache();
         lightCache.configFrom(props);
         return lightCache;
+    }
+
+    @Bean
+    public RedisMessageListenerContainer lightListenerContainer(RedisConnectionFactory connectionFactory,
+                                                                MessageListenerAdapter lightListenerAdapter) {
+        RedisMessageListenerContainer container = new RedisMessageListenerContainer();
+        container.setConnectionFactory(connectionFactory);
+        container.addMessageListener(lightListenerAdapter, new PatternTopic(LightMessageHandler.getTopic(null)));
+        return container;
+    }
+
+    @Bean
+    public MessageListenerAdapter lightListenerAdapter(LightMessageHandler lightMessageHandler) {
+        return new MessageListenerAdapter(lightMessageHandler);
+    }
+
+    @Bean
+    public LightMessageHandler lightMessageHandler() {
+        return new LightMessageHandler();
     }
 
     @Bean

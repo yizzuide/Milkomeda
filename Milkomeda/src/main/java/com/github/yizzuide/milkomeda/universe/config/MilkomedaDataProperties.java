@@ -57,14 +57,14 @@ public class MilkomedaDataProperties {
 
         /**
          * 集群状态扫描间隔（默认为2s）
-         * @since 3.21.0
+         * @since 4.0.0
          */
         @DurationUnit(ChronoUnit.MILLIS)
         private Duration scanInterval = Duration.ofMillis(2000);
 
         /**
          * 空闲连接超时时间（默认为10s）
-         * @since 3.21.0
+         * @since 4.0.0
          */
         @DurationUnit(ChronoUnit.MILLIS)
         private Duration idleConnectionTimeout = Duration.ofMillis(10000);

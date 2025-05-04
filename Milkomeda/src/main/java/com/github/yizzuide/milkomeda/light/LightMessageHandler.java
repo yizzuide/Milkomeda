@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 yizzuide All rights Reserved.
+ * Copyright (c) 2025 yizzuide All rights Reserved.
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -19,46 +19,48 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.metal;
+package com.github.yizzuide.milkomeda.light;
 
+import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import com.github.yizzuide.milkomeda.util.RedisUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.StringUtils;
 
 /**
- * 分布式配置同步消息处理器
+ * 缓存Key修改消息处理器
  *
+ * @since 4.0.0
  * @author yizzuide
- * @since 3.6.0
- * @version 4.0.0
- * <br>
- * Create at 2020/05/22 15:59
+ * Create at 2025/05/02 17:09
  */
-public class MetalMessageHandler {
+public class LightMessageHandler {
 
-    private static String METAL_CHANGE_TOPIC;
+    public static String LIGHT_CHANGE_TOPIC;
 
-    private static final String METAL_MSG_KV_SEPARATOR= " -> ";
+    public static final String LIGHT_MSG_SEPARATOR = ":";
 
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
 
+
     // 这个方法会在接受到消息时自动调用
     public void handleMessage(String message) {
-        String[] kv =  StringUtils.delimitedListToStringArray(message, METAL_MSG_KV_SEPARATOR);
-        String key = kv[0];
-        String value = kv[1];
-        MetalHolder.updateProperty(key, value);
+        String[] items =  StringUtils.delimitedListToStringArray(message, LIGHT_MSG_SEPARATOR);
+        String cacheName = items[0];
+        String key = items[1];
+        Cache cache = ApplicationContextHolder.get().getBean(cacheName, LightCache.class);
+        cache.eraseL1(key);
     }
 
+
     /**
-     * 发布配置修改消息
-     * @param key   配置key
-     * @param value 值
+     * 发布Key修改消息
+     * @param cacheName   缓存名
+     * @param key 缓存 key
      */
-    public void buildAndSendMessage(String key, String value) {
-        stringRedisTemplate.convertAndSend(METAL_CHANGE_TOPIC, key + METAL_MSG_KV_SEPARATOR + value);
+    public void buildAndSendMessage(String cacheName, String key) {
+        stringRedisTemplate.convertAndSend(LIGHT_CHANGE_TOPIC, cacheName + LIGHT_MSG_SEPARATOR + key);
     }
 
     /**
@@ -67,10 +69,10 @@ public class MetalMessageHandler {
      * @return  topic
      */
     public static String getTopic(String applicationName) {
-        if (METAL_CHANGE_TOPIC != null) {
-            return METAL_CHANGE_TOPIC;
+        if (LIGHT_CHANGE_TOPIC != null) {
+            return LIGHT_CHANGE_TOPIC;
         }
-        METAL_CHANGE_TOPIC = RedisUtil.buildChannelName(applicationName, "MK_METAL_TOPIC", "MK_METAL_%s_TOPIC");
-        return METAL_CHANGE_TOPIC;
+        LIGHT_CHANGE_TOPIC = RedisUtil.buildChannelName(applicationName, "MK_LIGHT_TOPIC", "MK_LIGHT_%s_TOPIC");
+        return LIGHT_CHANGE_TOPIC;
     }
 }
