@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 yizzuide All rights Reserved.
+ * Copyright (c) 2025 yizzuide All rights Reserved.
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -19,26 +19,29 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.crust;
+package com.github.yizzuide.milkomeda.demo.europa.controller;
 
-import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.security.core.userdetails.UserDetailsService;
+import com.github.yizzuide.milkomeda.demo.europa.entity.PayPlatform;
+import com.github.yizzuide.milkomeda.demo.europa.service.PayPlatformService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Default impl of CrustConfigurerAdapter with {@link UserDetailsService}.
+ * PayPlatformController
  *
- * @since 3.15.0
  * @author yizzuide
- * <br>
- * Create at 2022/12/06 19:39
+ * Create at 2025/05/03 21:17
  */
-@ConditionalOnProperty(prefix = "milkomeda.crust", value = "use-auto-config", havingValue = "true", matchIfMissing = true)
-@Configuration
-public class CrustAutoConfigurer extends CrustConfigurerAdapter {
-    @Override
-    protected UserDetailsService userDetailsService() {
-        return ApplicationContextHolder.get().getBean(CrustUserDetailsService.class);
+@RequestMapping("payPlatform")
+@RestController
+public class PayPlatformController {
+    @Autowired
+    private PayPlatformService payPlatformService;
+
+    @RequestMapping("find/{id}")
+    public PayPlatform getPayPlatformById(@PathVariable Long id) {
+        return payPlatformService.findById(id);
     }
 }

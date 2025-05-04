@@ -169,8 +169,16 @@ milkomeda:
           message[msg]: 用户不存在，请先注册
     exclude-urls: ["/favicon.ico"]
 
+  # L1(memory) + L2(Redis)（使用 Spring Cache）
+  europa:
+    only-cache-l2: true
+    instances:
+      payPlatform:
+        l2-ttl: 2h
+
+  # 三级缓存（不使用Spring Cache）
   light:
-    # 这个ThreadLocalScope是独立的功能，和下面缓存没有关联
+    # 这个ThreadLocalScope是独立的功能，和下面缓存没有关联（缓存实例instances里设置无效）
     enable-light-thread-local-scope: true
     instances:
       # 缓存实例配置（没有配置的使用默认值）
@@ -238,6 +246,7 @@ milkomeda:
       - /pillar/**
       - /orbit/**
       - /chat/**
+      - /payPlatform/**
 
     # 放开static资源访问
     allow-static-urls:

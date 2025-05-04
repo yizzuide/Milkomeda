@@ -12,7 +12,7 @@
     <properties>
         <java.version>1.8</java.version>
         <kotlin.version>1.9.21</kotlin.version>
-        <project.release.version>3.20.0-SNAPSHOT</project.release.version>
+        <project.release.version>3.21.0-SNAPSHOT</project.release.version>
         <spring-boot.version>2.7.6</spring-boot.version>
         <spring-cloud.version>2021.0.5</spring-cloud.version>
         <mybatis.starter.version>3.0.0</mybatis.starter.version>
@@ -74,7 +74,7 @@
         <profile>
             <id>sonatype-oss-release</id>
             <properties>
-                <project.release.version>3.20.0</project.release.version>
+                <project.release.version>3.21.0</project.release.version>
             </properties>
             <build>
                 <plugins>
@@ -140,6 +140,15 @@
             <artifactId>spring-boot-properties-migrator</artifactId>
             <scope>runtime</scope>
         </dependency>-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-cache</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
+            <optional>true</optional>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-redis</artifactId>

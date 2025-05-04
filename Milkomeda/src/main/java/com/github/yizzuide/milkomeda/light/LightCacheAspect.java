@@ -50,15 +50,15 @@ import java.util.function.Function;
  *
  * @author yizzuide
  * @since 2.0.0
- * @version 3.12.4
+ * @version 3.21.0
  * <br>
  * Create at 2019/12/18 14:45
  */
-@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 @Slf4j
 @Order(98)
 @Aspect
 public class LightCacheAspect {
+
     public static final String DEFAULT_BEAN_NAME = "lightCache";
 
     @Autowired
@@ -103,6 +103,7 @@ public class LightCacheAspect {
             // 修改Bean name，防止与开发者项目里重复
             cacheBeanName = innerCacheBeanName(cacheBeanName);
             cache = SpringContext.registerBean((ConfigurableApplicationContext) ApplicationContextHolder.get(), cacheBeanName, LightCache.class);
+            cache.setName(cacheBeanName);
             // 自定义缓存实例配置
             if (props.getInstances().containsKey(originCacheBeanName)) {
                 cache.configFrom(props.getInstances().get(originCacheBeanName));

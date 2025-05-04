@@ -26,6 +26,7 @@ import com.github.yizzuide.milkomeda.atom.Atom;
 import com.github.yizzuide.milkomeda.atom.AtomHolder;
 import com.github.yizzuide.milkomeda.atom.AtomLockType;
 import com.github.yizzuide.milkomeda.pulsar.PulsarHolder;
+import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import com.github.yizzuide.milkomeda.universe.function.ThrowableFunction;
 import com.github.yizzuide.milkomeda.util.ReflectUtil;
 import com.github.yizzuide.milkomeda.util.TypeUtil;
@@ -220,7 +221,12 @@ public class CacheHelper {
      * @param keyGenerator  缓存key生成器
      */
     public static void erase(Cache cache, Serializable id, Function<Serializable, String> keyGenerator) {
-        cache.erase(keyGenerator.apply(id));
+        String key = keyGenerator.apply(id);
+        cache.erase(key);
+
+        // 通知分布式服务删除
+        LightMessageHandler lightMessageHandler = ApplicationContextHolder.get().getBean(LightMessageHandler.class);
+        lightMessageHandler.buildAndSendMessage(cache.getName(), key);
     }
 
     /**
@@ -244,6 +250,10 @@ public class CacheHelper {
 
         // 延时双删之第二次删除
         PulsarHolder.getPulsar().delay(() -> erase(cache, id, keyGenerator), 1000);
+
+        // 通知分布式服务删除
+        LightMessageHandler lightMessageHandler = ApplicationContextHolder.get().getBean(LightMessageHandler.class);
+        lightMessageHandler.buildAndSendMessage(cache.getName(), key);
         return data;
     }
 }

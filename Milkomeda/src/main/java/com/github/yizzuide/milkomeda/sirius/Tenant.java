@@ -36,7 +36,7 @@ import java.lang.annotation.*;
 @Inherited
 public @interface Tenant {
     /**
-     * where ignore add tenant id in query.
+     * ignore add tenant id in query where.
      * @return true is follow in global config.
      */
     boolean ignored() default false;
@@ -48,7 +48,7 @@ public @interface Tenant {
     String idColumn() default "";
 
     /**
-     * custom tenant id value.
+     * custom tenant id value (support Spring EL).
      * @return  tenant id value, null is follow in global config.
      */
     String idValue() default "";

@@ -20,7 +20,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>1.8</java.version>
         <spring-cloud.version>2021.0.5</spring-cloud.version>
-        <milkomeda.version>3.20.0-SNAPSHOT</milkomeda.version>
+        <milkomeda.version>3.21.0-SNAPSHOT</milkomeda.version>
         <mybatis.starter>2.2.2</mybatis.starter>
         <pagehelper.version>1.4.7</pagehelper.version>
         <redission.version>3.22.0</redission.version>
@@ -109,6 +109,10 @@
             <artifactId>pagehelper-spring-boot-starter</artifactId>
             <version>${pagehelper.version}</version>
             <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
         </dependency>
         <dependency>
             <groupId>org.redisson</groupId>

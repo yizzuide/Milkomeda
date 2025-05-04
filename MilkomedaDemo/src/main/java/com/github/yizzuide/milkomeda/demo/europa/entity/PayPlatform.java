@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 yizzuide All rights Reserved.
+ * Copyright (c) 2025 yizzuide All rights Reserved.
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -19,26 +19,23 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.crust;
+package com.github.yizzuide.milkomeda.demo.europa.entity;
 
-import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.security.core.userdetails.UserDetailsService;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
- * Default impl of CrustConfigurerAdapter with {@link UserDetailsService}.
+ * PayPlatform
  *
- * @since 3.15.0
  * @author yizzuide
- * <br>
- * Create at 2022/12/06 19:39
+ * Create at 2025/05/03 21:13
  */
-@ConditionalOnProperty(prefix = "milkomeda.crust", value = "use-auto-config", havingValue = "true", matchIfMissing = true)
-@Configuration
-public class CrustAutoConfigurer extends CrustConfigurerAdapter {
-    @Override
-    protected UserDetailsService userDetailsService() {
-        return ApplicationContextHolder.get().getBean(CrustUserDetailsService.class);
-    }
+@NoArgsConstructor
+@AllArgsConstructor
+@Data
+public class PayPlatform {
+    private Long id;
+    private String name;
+    private Integer appId;
 }
