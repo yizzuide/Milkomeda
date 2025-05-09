@@ -23,9 +23,9 @@ public class OrderHandler {
     // 前置监听
     @Async // 异步执行
     @HaloListener(tableName = "t_order", type = HaloType.PRE)
-    public void handlePre(Object params, SqlCommandType commandType) { // 散装参数方式
+    public void handlePre(Object params, SqlCommandType commandType, String sql) { // 散装参数方式
         // params可能是实体类型、简单数据类型或Map
-        log.info("handlePre - 监听到【t_order】表操作：{}，参数：{}", commandType, params);
+        log.info("handlePre - 监听到【t_order】表操作：{}，参数：{}, sql: {}", commandType, params, sql);
     }
 
     // 默认监听所有的表
