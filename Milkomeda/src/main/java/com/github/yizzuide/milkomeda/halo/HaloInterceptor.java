@@ -60,11 +60,10 @@ import java.util.regex.Pattern;
  *
  * @author yizzuide
  * @since 2.5.0
- * @version 3.15.0
+ * @version 4.0.0
  * <br>
  * Create at 2020/01/30 20:38
  */
-@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 @Slf4j
 @Intercepts({
         @Signature(type = Executor.class, method = "update", args = {MappedStatement.class, Object.class}),
@@ -87,6 +86,12 @@ public class HaloInterceptor implements Interceptor {
         Object param = args.length > 1 ? args[1] : null;
         BoundSql boundSql = mappedStatement.getSqlSource().getBoundSql(param);
         String sql = WHITE_SPACE_BLOCK_PATTERN.matcher(boundSql.getSql()).replaceAll(" ");
+
+        // 获取参数对象和映射关系，解析出非参数化的sql
+        List<ParameterMapping> parameterMappings = boundSql.getParameterMappings();
+        Object parameterObject = boundSql.getParameterObject();
+        sql = getUnParametricSql(sql, parameterObject, parameterMappings, mappedStatement.getConfiguration());
+
         if (!props.isShowSlowLog()) {
             return warpIntercept(invocation, mappedStatement, sql, param);
         }
@@ -98,6 +103,19 @@ public class HaloInterceptor implements Interceptor {
             logSqlInfo(mappedStatement.getConfiguration(), boundSql, sql, mappedStatement.getId(), time);
         }
         return result;
+    }
+
+    private String getUnParametricSql(String sql, Object parameter, List<ParameterMapping> mappings, Configuration config) {
+        if (mappings.isEmpty() || parameter == null) return sql;
+
+        MetaObject metaObject = config.newMetaObject(parameter);
+        for (ParameterMapping mapping : mappings) {
+            String property = mapping.getProperty();
+            Object value = metaObject.getValue(property);
+            // 处理字符串类型参数，添加单引号
+            sql = sql.replaceFirst("\\?", value instanceof String ? "'" + value + "'" : value.toString());
+        }
+        return sql;
     }
 
     // 打印Sql日志
@@ -211,12 +229,13 @@ public class HaloInterceptor implements Interceptor {
             Class<?>[] parameterTypes = method.getParameterTypes();
             ReflectionUtils.makeAccessible(method);
             if (parameterTypes.length == 1 && parameterTypes[0] == HaloMeta.class) {
-                HaloMeta haloMeta = new HaloMeta(sqlCommandType, tableName, param, result);
+                HaloMeta haloMeta = new HaloMeta(sqlCommandType, sql, tableName, param, result);
                 method.invoke(target, haloMeta);
             } else if (parameterTypes.length > 1) {
                 // invoke and bind args dynamically
                 ArgumentSources argumentSources = new ArgumentSources();
                 argumentSources.add(new ArgumentDefinition(ArgumentMatchType.BY_NAME_PREFIX,"param", Object.class, param));
+                argumentSources.add(new ArgumentDefinition(ArgumentMatchType.BY_NAME_PREFIX,"sql", String.class, sql));
                 argumentSources.add(new ArgumentDefinition(ArgumentMatchType.BY_TYPE,null, SqlCommandType.class, sqlCommandType));
                 argumentSources.add(new ArgumentDefinition(ArgumentMatchType.Residual,null, Object.class, result));
                 Object[] args = MethodArgumentBinder.bind(argumentSources, method);

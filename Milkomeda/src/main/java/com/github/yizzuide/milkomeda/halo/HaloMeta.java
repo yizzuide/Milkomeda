@@ -31,6 +31,7 @@ import org.apache.ibatis.mapping.SqlCommandType;
  *
  * @author yizzuide
  * @since 2.5.1
+ * @version 4.0.0
  * <br>
  * Create at 2020/02/06 14:38
  */
@@ -41,6 +42,11 @@ public class HaloMeta {
      * 命令类型
      */
     private SqlCommandType sqlCommandType;
+    /**
+     * sql语句
+     * @since 4.0.0
+     */
+    private String sql;
     /**
      * 表名
      */
