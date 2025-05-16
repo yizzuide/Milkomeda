@@ -42,7 +42,6 @@ public class DelayTimer implements ApplicationListener<ApplicationStartedEvent> 
     private IceProperties props;
 
     // Spring Boot 3.0：TaskScheduler超级接口支持虚拟线程和传统线程池
-    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
     private TaskScheduler taskScheduler;
 

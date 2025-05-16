@@ -13,7 +13,7 @@
         <java.version>1.8</java.version>
         <kotlin.version>1.9.21</kotlin.version>
         <project.release.version>3.21.0-SNAPSHOT</project.release.version>
-        <spring-boot.version>2.7.6</spring-boot.version>
+        <spring-boot.version>2.7.18</spring-boot.version>
         <spring-cloud.version>2021.0.5</spring-cloud.version>
         <mybatis.starter.version>3.0.0</mybatis.starter.version>
         <mybatis-plus.version>3.5.2</mybatis-plus.version>
@@ -257,7 +257,7 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <!-- Springboot 2.6: Redis (both Jedis and Lettuce) will now automatically enable pooling when commons-pool2 is on the classpath. -->
+        <!-- Spring Boot 2.6: Redis (both Jedis and Lettuce) will now automatically enable pooling when commons-pool2 is on the classpath. -->
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-pool2</artifactId>

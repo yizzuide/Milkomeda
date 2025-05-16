@@ -53,7 +53,7 @@ public class IceScheduleConfig {
 
     // Spring Boot 3.0：TaskScheduler超级接口支持虚拟线程和传统线程池
     @Autowired
-    @SuppressWarnings({"unchecked", "SpringJavaInjectionPointsAutowiringInspection", "rawtypes"})
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public void config(Ice ice, IceProperties props, TaskScheduler taskScheduler) {
         taskScheduler.scheduleAtFixedRate(() -> IceContext.getTopicMap().keySet().forEach(topic -> {
             List<Job<Map<String, Object>>> jobs = ice.pop(topic, props.getTaskTopicPopMaxSize());
