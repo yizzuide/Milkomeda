@@ -112,8 +112,12 @@ public class HaloInterceptor implements Interceptor {
         for (ParameterMapping mapping : mappings) {
             String property = mapping.getProperty();
             Object value = metaObject.getValue(property);
-            // 处理字符串类型参数，添加单引号
-            sql = sql.replaceFirst("\\?", value instanceof String ? "'" + value + "'" : value.toString());
+            if (value == null) {
+                sql = sql.replaceFirst("\\?", "null");
+            } else {
+                // 处理字符串类型参数，添加单引号
+                sql = sql.replaceFirst("\\?", value instanceof String ? "'" + value + "'" : value.toString());
+            }
         }
         return sql;
     }

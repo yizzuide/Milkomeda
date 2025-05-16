@@ -73,7 +73,6 @@ public class EchoConfig {
     private EchoProperties echoProperties;
 
     @Bean("echoRestTemplate")
-    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     public RestTemplate simpleRestTemplate(RestTemplateBuilder builder) {
         RestTemplate restTemplate = builder.build();
         // Spring Boot 3.0：Spring Framework 6.0 中已删除对 Apache HttpClient 的支持，现在由 org.apache.httpcomponents.client5:httpclient5 取代
