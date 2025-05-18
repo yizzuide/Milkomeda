@@ -51,7 +51,7 @@ public class MetalSource {
     }
 
     public boolean isEmpty() {
-        return this.sourceMap.size() == 0;
+        return this.sourceMap.isEmpty();
     }
 
     public Map<String, String> getSource() {

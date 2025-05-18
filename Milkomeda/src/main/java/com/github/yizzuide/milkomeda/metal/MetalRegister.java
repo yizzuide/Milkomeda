@@ -23,7 +23,9 @@ package com.github.yizzuide.milkomeda.metal;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.SmartInstantiationAwareBeanPostProcessor;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.lang.NonNull;
 
 import java.lang.reflect.Field;
@@ -42,11 +44,10 @@ public class MetalRegister implements SmartInstantiationAwareBeanPostProcessor {
     /**
      * 容器
      */
-    private final MetalContainer metalContainer;
+    @Lazy
+    @Autowired
+    private MetalContainer metalContainer;
 
-    public MetalRegister(MetalContainer metalContainer) {
-        this.metalContainer = metalContainer;
-    }
 
     @Override
     public boolean postProcessAfterInstantiation(@NonNull Object bean, @NonNull String beanName) throws BeansException {

@@ -49,9 +49,9 @@ import java.util.Map;
  */
 @EnableCaching
 @EnableConfigurationProperties(EuropaProperties.class)
-@Import(RedissonConfig.class)
 @ConditionalOnProperty(prefix = EuropaProperties.PREFIX, name = "only-cache-l2", havingValue = "true")
-@Configuration
+@Import(RedissonConfig.class)
+@Configuration(proxyBeanMethods = false)
 public class L2CacheConfig implements CachingConfigurer {
 
     @Autowired

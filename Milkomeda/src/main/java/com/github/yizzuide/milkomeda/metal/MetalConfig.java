@@ -21,7 +21,10 @@
 
 package com.github.yizzuide.milkomeda.metal;
 
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Role;
 
 /**
  * MetalConfig
@@ -31,6 +34,7 @@ import org.springframework.context.annotation.Bean;
  * <br>
  * Create at 2020/05/21 23:26
  */
+@Configuration(proxyBeanMethods = false)
 public class MetalConfig {
 
     @Bean
@@ -45,9 +49,10 @@ public class MetalConfig {
         return metalContainer;
     }
 
+    @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
     @Bean
-    public MetalRegister metalRegister(MetalContainer metalContainer) {
-        return new MetalRegister(metalContainer);
+    public static MetalRegister metalRegister() {
+        return new MetalRegister();
     }
 
 }

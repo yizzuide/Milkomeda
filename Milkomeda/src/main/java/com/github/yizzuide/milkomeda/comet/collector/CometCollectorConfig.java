@@ -63,7 +63,6 @@ public class CometCollectorConfig implements ApplicationContextAware {
     @Autowired(required = false)
     private List<Collector> collectors;
 
-    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
     private CometAspect cometAspect;
 

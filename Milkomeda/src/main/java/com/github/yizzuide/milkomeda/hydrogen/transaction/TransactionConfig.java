@@ -26,12 +26,14 @@ import org.springframework.aop.Advisor;
 import org.springframework.aop.aspectj.AspectJExpressionPointcut;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.transaction.TransactionAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Role;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionManager;
@@ -55,11 +57,11 @@ import java.util.stream.Collectors;
  * Create at 2019/11/25 10:56
  */
 @Aspect
-@Configuration
 @EnableTransactionManagement
 @AutoConfigureAfter(TransactionAutoConfiguration.class)
 @EnableConfigurationProperties(TransactionProperties.class)
 @ConditionalOnProperty(prefix = "milkomeda.hydrogen.transaction", name = "enable", havingValue = "true")
+@Configuration(proxyBeanMethods = false)
 public class TransactionConfig {
 
     @Autowired
@@ -68,7 +70,7 @@ public class TransactionConfig {
     // KP：PlatformTransactionManager是事务规范接口（实现有JDBC的DataSourceTransactionManager等），事务由具体数据库来实现，
     //  而TransactionDefinition和TransactionStatus这两个接口分别是事务的定义和运行状态。
     // Spring的事务通过AOP动态代理：TransactionInterceptor.invoke() -> TransactionAspectSupport.invokeWithinTransaction()
-    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
+    @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
     @Bean
     public TransactionInterceptor txAdvice(PlatformTransactionManager transactionManager) {
         RuleBasedTransactionAttribute txAttr_REQUIRED = new RuleBasedTransactionAttribute();
@@ -117,6 +119,7 @@ public class TransactionConfig {
         return new TransactionInterceptor((TransactionManager) transactionManager, source);
     }
 
+    @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
     @Bean
     public Advisor txAdviceAdvisor(TransactionInterceptor txAdvice) {
         AspectJExpressionPointcut pointcut = new AspectJExpressionPointcut();

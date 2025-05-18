@@ -22,20 +22,23 @@
 package com.github.yizzuide.milkomeda.hydrogen.validator;
 
 import com.github.yizzuide.milkomeda.hydrogen.core.HydrogenHolder;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import jakarta.validation.ValidatorFactory;
 import lombok.Cleanup;
 import org.hibernate.validator.HibernateValidator;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.validation.ValidationAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.Role;
 import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
-
-import jakarta.validation.Validation;
-import jakarta.validation.Validator;
-import jakarta.validation.ValidatorFactory;
 
 /**
  * ValidatorConfig
@@ -50,23 +53,29 @@ import jakarta.validation.ValidatorFactory;
 @EnableConfigurationProperties(ValidatorProperties.class)
 @AutoConfigureAfter(ValidationAutoConfiguration.class)
 @ConditionalOnProperty(prefix = "milkomeda.hydrogen.validator", name = "enable", havingValue = "true")
-public class ValidatorConfig {
+public class ValidatorConfig implements InitializingBean {
 
+    @Lazy
     @Autowired
-    public void config(ValidatorProperties validatorProperties) {
+    private ValidatorProperties validatorProperties;
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
         ValidatorHolder.setProps(validatorProperties);
     }
 
+    @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
     @Bean
-    public MethodValidationPostProcessor methodValidationPostProcessor() {
+    public static MethodValidationPostProcessor methodValidationPostProcessor() {
         MethodValidationPostProcessor postProcessor = new MethodValidationPostProcessor();
         // 设置validator模式为快速失败返回
         postProcessor.setValidator(validator());
         return postProcessor;
     }
 
+    @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
     @Bean
-    public Validator validator() {
+    public static Validator validator() {
         @Cleanup
         ValidatorFactory validatorFactory = Validation.byProvider(HibernateValidator.class )
                 .configure()

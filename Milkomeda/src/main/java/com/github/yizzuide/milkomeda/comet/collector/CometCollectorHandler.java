@@ -41,16 +41,16 @@ import java.lang.annotation.*;
 @Component
 public @interface CometCollectorHandler {
     /**
-     * 同tag
+     * 处理器的标签名
      * @return  String
      */
-    @AliasFor("tag")
+    @AliasFor(value = "value", annotation = Component.class)
     String value() default "";
 
     /**
      * 处理器的标签名
      * @return  String
      */
-    @AliasFor("value")
+    @AliasFor(value = "value", annotation = Component.class)
     String tag() default "";
 }

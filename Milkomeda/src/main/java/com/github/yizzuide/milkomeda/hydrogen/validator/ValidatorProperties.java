@@ -22,7 +22,9 @@
 package com.github.yizzuide.milkomeda.hydrogen.validator;
 
 import lombok.Data;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Role;
 
 /**
  * ValidatorProperties
@@ -32,8 +34,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * <br>
  * Create at 2020/04/06 00:59
  */
-@Data
 @ConfigurationProperties("milkomeda.hydrogen.validator")
+@Data
 public class ValidatorProperties {
     /**
      * 启用验证器

@@ -41,7 +41,7 @@ import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
  * <br>
  * Create at 2019/12/03 16:22
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @EnableConfigurationProperties(LightProperties.class)
 public class LightConfig {
 
