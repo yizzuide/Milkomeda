@@ -16,12 +16,19 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("orbit")
 @RestController
 public class OrbitController {
+
     @Autowired
     private OrderAPI orderAPI;
 
     @RequestMapping("find/{orderNo}")
     public ResponseEntity<String> findOrder(@PathVariable String orderNo) {
         orderAPI.fetchOrder(orderNo);
+        return ResponseEntity.ok("OK");
+    }
+
+    @RequestMapping("push/{orderNo}")
+    public ResponseEntity<String> pushOrder(@PathVariable String orderNo) {
+        orderAPI.pushOrder(orderNo);
         return ResponseEntity.ok("OK");
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 yizzuide All rights Reserved.
+ * Copyright (c) 2025 yizzuide All rights Reserved.
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -19,25 +19,36 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.orbit;
+package com.github.yizzuide.milkomeda.orbit.orbit;
 
-import com.github.yizzuide.milkomeda.orbit.orbit.OrbitProxyConfig;
-import org.springframework.context.annotation.Import;
+import org.springframework.core.annotation.AliasFor;
 
 import java.lang.annotation.*;
 
 /**
- * EnableOrbit
+ * The {@link OrbitAround} handle the method's proxy process with {@link OrbitProxy}, and register under {@link OrbitHandler}.
+ * It uses tag name to match proxy method, which is added around process pre or post.
  *
+ * @since 3.21.0
  * @author yizzuide
- * @since 3.13.0
- * <br>
- * Create at 2022/02/21 01:20
+ * Create at 2025/05/18 15:38
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.TYPE})
+@Target({ElementType.METHOD})
 @Inherited
-@Import({OrbitConfig.class, OrbitProxyConfig.class})
-public @interface EnableOrbit {
+public @interface OrbitAround {
+    /**
+     * Corresponding to {@link OrbitProxy} value.
+     * @return around tag
+     */
+    @AliasFor("tag")
+    String value() default "";
+
+    /**
+     * Corresponding to {@link OrbitProxy} tag.
+     * @return around tag
+     */
+    @AliasFor("value")
+    String tag() default "";
 }
