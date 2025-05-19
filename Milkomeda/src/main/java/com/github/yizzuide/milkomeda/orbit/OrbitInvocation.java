@@ -21,6 +21,7 @@
 
 package com.github.yizzuide.milkomeda.orbit;
 
+import com.github.yizzuide.milkomeda.universe.context.AopContextHolder;
 import lombok.Builder;
 import lombok.Getter;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -32,7 +33,7 @@ import java.lang.reflect.Method;
  *
  * @author yizzuide
  * @since 3.13.0
- * @version 3.15.0
+ * @version 4.0.0
  * <br>
  * Create at 2022/02/23 17:08
  */
@@ -66,11 +67,43 @@ public class OrbitInvocation {
     private Object[] args;
 
     /**
+     * 获取被代理的目标对象（支持非当前代理目标类）
+     * @param clazz Bean class
+     * @return  Bean目标对象
+     * @param <T>   Bean类型
+     * @since 4.0.0
+     */
+    @SuppressWarnings("unchecked")
+    public <T> T getTarget(Class<T> clazz) {
+        if (clazz == targetClass) {
+            return (T)target;
+        }
+        return AopContextHolder.getRealTarget(clazz);
+    }
+
+    /**
      * 调用被切面的方法执行
      * @return  原方法的返回结果
-     * @throws Throwable    可抛出异常
      */
-    public Object proceed() throws Throwable {
-        return pjp.proceed();
+    public Object proceed() {
+        try {
+            return pjp.proceed();
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * 调用被切面的方法执行
+     * @param args   参数
+     * @return  原方法的返回结果
+     * @since 4.0.0
+     */
+    public Object proceed(Object[] args) {
+        try {
+            return pjp.proceed(args);
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
+        }
     }
 }

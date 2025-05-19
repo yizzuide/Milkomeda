@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 yizzuide All rights Reserved.
+ * Copyright (c) 2025 yizzuide All rights Reserved.
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -19,25 +19,31 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.orbit;
+package com.github.yizzuide.milkomeda.orbit.orbit;
 
-import com.github.yizzuide.milkomeda.orbit.orbit.OrbitProxyConfig;
-import org.springframework.context.annotation.Import;
+import com.github.yizzuide.milkomeda.orbit.AnnotationOrbitAdvisor;
+import com.github.yizzuide.milkomeda.orbit.OrbitAdvisor;
+import com.github.yizzuide.milkomeda.orbit.OrbitSource;
+import com.github.yizzuide.milkomeda.orbit.OrbitSourceProvider;
+import org.springframework.core.Ordered;
+import org.springframework.core.env.Environment;
 
-import java.lang.annotation.*;
+import java.util.Collections;
+import java.util.List;
 
 /**
- * EnableOrbit
+ * Register the advisor with {@link OrbitSourceProvider}, It links the {@link OrbitProxy} and {@link OrbitProxyAdvice}.
  *
+ * @since 4.0.0
  * @author yizzuide
- * @since 3.13.0
- * <br>
- * Create at 2022/02/21 01:20
+ * Create at 2025/05/18 15:02
  */
-@Documented
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.TYPE})
-@Inherited
-@Import({OrbitConfig.class, OrbitProxyConfig.class})
-public @interface EnableOrbit {
+@OrbitSourceProvider
+public class OrbitProxySource implements OrbitSource {
+    @Override
+    public List<OrbitAdvisor> createAdvisors(Environment environment) {
+        AnnotationOrbitAdvisor advisor = AnnotationOrbitAdvisor.forMethod(OrbitProxy.class, "orbitProxy", OrbitProxyAdvice.class, null);
+        advisor.setOrder(Ordered.LOWEST_PRECEDENCE);
+        return Collections.singletonList(advisor);
+    }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 yizzuide All rights Reserved.
+ * Copyright (c) 2025 yizzuide All rights Reserved.
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -19,25 +19,38 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.orbit;
+package com.github.yizzuide.milkomeda.orbit.orbit;
 
-import com.github.yizzuide.milkomeda.orbit.orbit.OrbitProxyConfig;
-import org.springframework.context.annotation.Import;
+import com.github.yizzuide.milkomeda.light.LightContext;
+import com.github.yizzuide.milkomeda.light.Spot;
+import com.github.yizzuide.milkomeda.orbit.OrbitInvocation;
+import org.springframework.lang.NonNull;
 
-import java.lang.annotation.*;
+import java.io.Serializable;
 
 /**
- * EnableOrbit
+ * The context used by orbit handler which annotated {@link OrbitHandler} to get {@link OrbitInvocation}.
  *
+ * @since 4.0.0
  * @author yizzuide
- * @since 3.13.0
- * <br>
- * Create at 2022/02/21 01:20
+ * Create at 2025/05/18 18:17
  */
-@Documented
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.TYPE})
-@Inherited
-@Import({OrbitConfig.class, OrbitProxyConfig.class})
-public @interface EnableOrbit {
+public class OrbitHandlerContext {
+
+    private static final LightContext<Serializable, OrbitInvocation> lightContext = new LightContext<>();
+
+    public static void setInvocation(OrbitInvocation invocation) {
+        lightContext.setData(invocation);
+    }
+
+    @NonNull
+    public static OrbitInvocation getInvocation() {
+        Spot<Serializable, OrbitInvocation> invocationSpot = lightContext.get();
+        return invocationSpot.getData();
+    }
+
+    public static void clear() {
+        lightContext.remove();
+    }
+
 }

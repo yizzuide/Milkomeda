@@ -38,13 +38,13 @@ import java.lang.reflect.Method;
 public abstract class AbstractArgumentMatcher implements ArgumentMatcher {
 
     // Spring Boot 3.0：基于JDK 8标准的参数化实现的，JDK支持编译时加上"-parameters参数，便可保留方法参数的名字
-    private final ParameterNameDiscoverer discoverer = new DefaultParameterNameDiscoverer();
+    public static final ParameterNameDiscoverer NAME_DISCOVERER = new DefaultParameterNameDiscoverer();
 
     @Override
     public int matchIndex(Method method, ArgumentDefinition argumentDefinition) {
         // get target method which warped proxy
         method = AopUtils.getMostSpecificMethod(method, method.getDeclaringClass());
-        String[] parameterNames = discoverer.getParameterNames(method);
+        String[] parameterNames = NAME_DISCOVERER.getParameterNames(method);
         Class<?>[] parameterTypes = method.getParameterTypes();
         if (parameterNames == null || parameterNames.length == 0) {
             return -1;

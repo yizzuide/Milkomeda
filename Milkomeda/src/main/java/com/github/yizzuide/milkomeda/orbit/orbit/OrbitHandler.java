@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 yizzuide All rights Reserved.
+ * Copyright (c) 2025 yizzuide All rights Reserved.
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -19,25 +19,23 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.orbit;
+package com.github.yizzuide.milkomeda.orbit.orbit;
 
-import com.github.yizzuide.milkomeda.orbit.orbit.OrbitProxyConfig;
-import org.springframework.context.annotation.Import;
+import org.springframework.stereotype.Component;
 
 import java.lang.annotation.*;
 
 /**
- * EnableOrbit
+ * The {@link OrbitHandler} is root component for multi {@link OrbitAround} to register.
  *
+ * @since 4.0.0
  * @author yizzuide
- * @since 3.13.0
- * <br>
- * Create at 2022/02/21 01:20
+ * Create at 2025/05/18 15:37
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE})
 @Inherited
-@Import({OrbitConfig.class, OrbitProxyConfig.class})
-public @interface EnableOrbit {
+@Component
+public @interface OrbitHandler {
 }

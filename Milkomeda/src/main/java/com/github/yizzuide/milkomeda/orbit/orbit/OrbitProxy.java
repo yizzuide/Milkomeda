@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 yizzuide All rights Reserved.
+ * Copyright (c) 2025 yizzuide All rights Reserved.
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -19,25 +19,37 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.orbit;
+package com.github.yizzuide.milkomeda.orbit.orbit;
 
-import com.github.yizzuide.milkomeda.orbit.orbit.OrbitProxyConfig;
-import org.springframework.context.annotation.Import;
+import com.github.yizzuide.milkomeda.orbit.Orbit;
+import org.springframework.core.annotation.AliasFor;
 
 import java.lang.annotation.*;
 
 /**
- * EnableOrbit
+ * The default proxy for enhance implementation annotation of {@link Orbit}. It is accomplished through method proxy processing
+ * together with {@link OrbitHandler} and {@link OrbitAround}.
  *
+ * @since 4.0.0
  * @author yizzuide
- * @since 3.13.0
- * <br>
- * Create at 2022/02/21 01:20
+ * Create at 2025/05/18 15:03
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.TYPE})
+@Target({ElementType.METHOD})
 @Inherited
-@Import({OrbitConfig.class, OrbitProxyConfig.class})
-public @interface EnableOrbit {
+public @interface OrbitProxy {
+    /**
+     * Corresponding to {@link OrbitAround} value.
+     * @return around tag
+     */
+    @AliasFor("tag")
+    String value() default "";
+
+    /**
+     * Corresponding to {@link OrbitAround} tag.
+     * @return around tag
+     */
+    @AliasFor("value")
+    String tag() default "";
 }

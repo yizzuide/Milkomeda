@@ -25,6 +25,12 @@ public class OrbitController {
         return ResponseEntity.ok("OK");
     }
 
+    @RequestMapping("push/{orderNo}")
+    public ResponseEntity<String> pushOrder(@PathVariable String orderNo) {
+        orderAPI.pushOrder(orderNo);
+        return ResponseEntity.ok("OK");
+    }
+
     @RecordLog
     @RequestMapping("pay/{orderNo}")
     public ResponseEntity<String> payOrder(@PathVariable String orderNo) {

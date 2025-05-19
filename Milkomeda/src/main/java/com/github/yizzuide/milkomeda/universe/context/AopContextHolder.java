@@ -24,14 +24,17 @@ package com.github.yizzuide.milkomeda.universe.context;
 import com.github.yizzuide.milkomeda.comet.core.CometAspect;
 import com.github.yizzuide.milkomeda.comet.core.CometInterceptor;
 import com.github.yizzuide.milkomeda.comet.core.WebCometData;
+import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.AopContext;
+import org.springframework.aop.framework.AopProxyUtils;
+import org.springframework.aop.support.AopUtils;
 
 /**
  * AopContextHolder
  *
  * @author yizzuide
  * @since 1.13.4
- * @version 3.12.10
+ * @version 4.0.0
  * <br>
  * Create at 2019/10/24 21:17
  */
@@ -46,6 +49,42 @@ public final class AopContextHolder {
     @SuppressWarnings("unchecked")
     public static <T> T self(Class<T> clazz) {
         return  (T)AopContext.currentProxy();
+    }
+
+    /**
+     * 获取被代理的Bean目标对象
+     * @param proxy Bean代理对象
+     * @param clazz Bean class
+     * @return  Bean目标对象
+     * @param <T> Bean类型
+     * @since 4.0.0
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> T getRealTarget(Object proxy, Class<T> clazz) {
+        Object target = null;
+        if (AopUtils.isAopProxy(proxy)) {
+            target = AopProxyUtils.getSingletonTarget(proxy);
+        }
+        if (target == null && proxy instanceof Advised) {
+            try {
+                target = ((Advised)proxy).getTargetSource().getTarget();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return (T)target;
+    }
+
+    /**
+     * 获取被代理的Bean目标对象
+     * @param clazz Bean class
+     * @return  Bean目标对象
+     * @param <T>   Bean类型
+     * @since 4.0.0
+     */
+    public static <T> T getRealTarget(Class<T> clazz) {
+        T proxy = ApplicationContextHolder.get().getBean(clazz);
+        return getRealTarget(proxy, clazz);
     }
 
     /**
