@@ -80,7 +80,8 @@
 ## Version control guidelines
 | Milkomeda                     | Spring Boot       |
 |-------------------------------|-------------------|
-| 3.15.x                        | 2.7.x             |
+| 4.0 preview                   | 3.2.x             |
+| 3.15.x - 3.20.x               | 2.7.x             |
 | 3.14.x                        | 2.6.x             |
 | 3.13.x                        | 2.4.x - 2.5.x     |
 | 3.0 - 3.12.x                  | 2.2.x - 2.3.x     |
@@ -133,8 +134,3 @@ yizzuide, fu837014586@163.com
 
 ## License
 Milkomeda is available under the MIT license. See the LICENSE file for more info.
-
-## Sponsors
-<a href="https://www.jetbrains.com" target="_blank">
-  <img width="100" src="./logo/sponsors.png" alt="IntelliJ IDEA">
-</a>
