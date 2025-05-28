@@ -24,7 +24,7 @@
         <jsqlparser.version>4.5</jsqlparser.version>
         <jwt.version>0.9.1</jwt.version>
         <commons-fileupload.version>1.5</commons-fileupload.version>
-        <commons-beanutils.version>1.9.4</commons-beanutils.version>
+        <commons-beanutils.version>1.11.0</commons-beanutils.version>
         <jsoup.version>1.15.3</jsoup.version>
         <ognl.version>3.3.4</ognl.version>
     </properties>
