@@ -30,6 +30,7 @@ import com.github.yizzuide.milkomeda.universe.extend.web.handler.NamedHandler;
 import com.github.yizzuide.milkomeda.universe.metadata.BeanIds;
 import com.github.yizzuide.milkomeda.universe.polyfill.SpringMvcPolyfill;
 import com.google.common.collect.Maps;
+import jakarta.servlet.DispatcherType;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -83,42 +84,47 @@ public class CometConfig implements ApplicationListener<ApplicationStartedEvent>
         return new CometAspect();
     }
 
-    @Bean
-    //@ConditionalOnMissingBean // 识别类型：FilterRegistrationBean，会导致永远无法加载
-    // 下面两方式在版本2.1.0推出，用于识别泛型类型：FilterRegistrationBean<CometRequestFilter>
+    // Spring Boot 2.1.0：用于识别泛型类型：FilterRegistrationBean<CometRequestFilter>
     // @ConditionalOnMissingBean(parameterizedContainer = FilterRegistrationBean.class)
+    // @ConditionalOnMissingBean // 识别类型：FilterRegistrationBean，会导致永远无法加载
+    // Spring Boot 3.1：The ServletRegistrationBean and FilterRegistrationBean classes will now fail
+    //  with an IllegalStateException rather than logging a warning if registration fails.
+    //  If you need the old behavior, you should call setIgnoreRegistrationFailure(true) on your registration bean.
     @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
+    @Bean
     public FilterRegistrationBean<CometRequestFilter> cometRequestFilter() {
         FilterRegistrationBean<CometRequestFilter> cometRequestFilter = new FilterRegistrationBean<>();
         cometRequestFilter.setFilter(new CometRequestFilter());
         cometRequestFilter.setName("cometRequestFilter");
         cometRequestFilter.setUrlPatterns(Collections.singleton("/*"));
         cometRequestFilter.setOrder(Ordered.HIGHEST_PRECEDENCE + 11);
+        // Spring Boot 3.0: 默认过滤器只在REQUEST阶段执行，若需在异步阶段执行
+        cometRequestFilter.setDispatcherTypes(DispatcherType.REQUEST, DispatcherType.ASYNC);
         return cometRequestFilter;
     }
 
-    @Bean
     @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
+    @Bean
     public CometInterceptor cometInterceptor() {
         return new CometInterceptor();
     }
 
-    @Bean
     @ConditionalOnProperty(prefix = "milkomeda.comet.request-interceptors.xss", name = "enable", havingValue = "true")
     @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
+    @Bean
     public CometXssRequestInterceptor cometXssRequestInterceptor() {
         return new CometXssRequestInterceptor();
     }
 
-    @Bean
     @ConditionalOnProperty(prefix = "milkomeda.comet.request-interceptors.sql-inject", name = "enable", havingValue = "true")
     @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
+    @Bean
     public CometSqlInjectRequestInterceptor cometSqlInjectRequestInterceptor() {
         return new CometSqlInjectRequestInterceptor();
     }
 
-    @Bean
     @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
+    @Bean
     public CometResponseBodyAdvice cometResponseBodyAdvice() {
         return new CometResponseBodyAdvice();
     }
@@ -150,7 +156,6 @@ public class CometConfig implements ApplicationListener<ApplicationStartedEvent>
     }
 
 
-    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Configuration
     static class ExtendedConfig implements InitializingBean {
 

@@ -27,6 +27,8 @@ public class ThirdKey {
     // Spring Boot 2.4: 提供@Name自定义参数名，@DurationUnit, @DataSizeUnit, and @PeriodUnit can annotate a constructor parameter using @ConstructorBinding
     // Spring Boot 2.6: If you are using @ConfigurationProperties with a Java 16 record and the record has a single constructor, it no longer needs to be annotated with @ConstructorBinding.
     // Spring Boot 3.0: 在单个构造器时，@ConstructorBinding可以省略；但多个构造器下指定构造器时，@ConstructorBinding必须指定
+    //  If you were relying on autowiring of a dependency into the constructor of a @ConfigurationProperties class,
+    //  you must now annotate it with @Autowired to prevent it being identified as a target for property binding.
     @ConstructorBinding
     public ThirdKey(@Name("parPubKey") String parPubKey, String priKey) {
         this.parPubKey = parPubKey;

@@ -8,9 +8,14 @@ import com.github.yizzuide.milkomeda.demo.hydrogen.vo.UserVO;
 import com.github.yizzuide.milkomeda.hydrogen.core.HydrogenHolder;
 import com.github.yizzuide.milkomeda.hydrogen.filter.FilterLoader;
 import com.github.yizzuide.milkomeda.hydrogen.interceptor.InterceptorLoader;
+import com.github.yizzuide.milkomeda.hydrogen.uniform.ResultVO;
+import com.github.yizzuide.milkomeda.hydrogen.uniform.UniformResult;
 import com.github.yizzuide.milkomeda.hydrogen.validator.PhoneConstraint;
 import com.github.yizzuide.milkomeda.pulsar.PulsarHolder;
 import com.github.yizzuide.milkomeda.universe.polyfill.SpringPolyfill;
+import jakarta.annotation.Resource;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -23,8 +28,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import jakarta.annotation.Resource;
-import jakarta.validation.Valid;
 import java.util.Map;
 
 /**
@@ -80,9 +83,9 @@ public class HydrogenController {
     }
 
     @RequestMapping("register")
-    public String register(@Valid UserVO userVO) { // @Valid是JSR303校验
+    public ResultVO<@NotNull UserVO> register(@Valid UserVO userVO) { // @Valid是JSR303校验
         log.info("valid userVO:  {}", userVO);
-        return HttpStatus.OK.name();
+        return UniformResult.ok(null);
     }
 
     // 中国: 127.0.0.1:8091/hydrogen/i18n?lang=zh_CN

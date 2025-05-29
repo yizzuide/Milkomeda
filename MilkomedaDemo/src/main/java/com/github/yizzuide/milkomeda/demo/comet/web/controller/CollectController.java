@@ -25,6 +25,9 @@ import java.util.Map;
  * <br>
  * Create at 2019/04/11 22:17
  */
+// Spring Boot 3.0: Spring MVC and Spring WebFlux no longer detect controllers based solely on a type-level @RequestMapping annotation.
+//  That means interface-based AOP proxying for web controllers may no longer work. Please, enable class-based proxying for such controllers;
+//  otherwise the interface must also be annotated with @Controller.
 @Slf4j
 @RestController
 @RequestMapping("collect")
@@ -33,7 +36,7 @@ public class CollectController {
     @Resource
     private CollectService collectService;
 
-    // Spring Boot 3.0：从 Spring Framework 6.0 开始，尾部斜杠匹配配置选项已过期，如：/feature 在以前版本将匹配 /feature/
+    // Spring Boot 3.0：从 Spring Framework 6.0 开始，尾部斜杠匹配配置选项已过期，如：在6.0以前版本可以匹配 /feature/，现已无法匹配
     @RequestMapping("feature")
     @Comet(apiCode = "1.1", name = "上传用户特征", tag = "PROFILE", prototype = ProfileWebCometData.class)
     public ResponseEntity<Map<String, String>> feature(@RequestParam Map<String, String> params) {

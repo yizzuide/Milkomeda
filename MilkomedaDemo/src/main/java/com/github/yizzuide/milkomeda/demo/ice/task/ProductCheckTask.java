@@ -23,8 +23,8 @@ public class ProductCheckTask {
 //    @Autowired
     private Ice ice;
 
-    // 使用多线程调度同一任务，使用前要开启@EnableAsync，如果线程池不叫taskExecutor，需要指定
-//    @Async("pulsarTaskExecutor")
+    // 使用多线程调度同一任务，使用前要开启@EnableAsync
+//    @Async
     // 使用前开启@EnableScheduling
 //    @Scheduled(fixedRate = 1000)
     public void check() {

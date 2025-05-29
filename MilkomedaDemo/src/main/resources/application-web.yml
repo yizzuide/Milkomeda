@@ -27,11 +27,16 @@ server:
     include-binding-errors: never
     include-message: never
     include-stacktrace: never
+    # Spring Boot 3.0: 配置异常转发路径时，过滤器可通过设置ERROR类型触发<code>filter.setDispatcherTypes(DispatcherType.ERROR);</code>
+    path: /error
   # Spring Boot 2.7: Embedded web servers can be configured to use SSL with PEM-encoded certificate and private key files
   #  Management endpoints can be secured using similar management.server.ssl.* properties
   #ssl:
     #certificate:
     #certificate-private-key:
+
+
+
 spring:
   # Spring Boot 2.3: 优雅关机等待时间
   lifecycle:
@@ -45,12 +50,6 @@ spring:
     # Spring Boot 2.4: 资源不生成mapping映射
     resources:
       add-mappings: false
-
-  # Spring Boot 3.2：开启虚拟线程
-  threads:
-    virtual:
-      enabled: true
-
   mvc:
     # 异步超时
     async:
@@ -72,3 +71,14 @@ spring:
     date-format: yyyy-MM-dd HH:mm:ss
     locale: zh_CN
     time-zone: GMT+8
+
+  # Spring Boot 3.0: In Servlet applications, Spring Security 6.0 applies authorization to every dispatch type.
+  #   To align with this, Spring Boot now configures Spring Security’s filter to be called for every dispatch type.
+  security:
+    filter:
+      dispatcher-types: async, error, forward, include, request
+
+  # Spring Boot 3.2：开启虚拟线程
+  threads:
+    virtual:
+      enabled: true

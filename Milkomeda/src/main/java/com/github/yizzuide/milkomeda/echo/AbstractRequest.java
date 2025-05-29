@@ -320,6 +320,7 @@ public abstract class AbstractRequest {
     }
 
     private boolean hasBody(HttpMethod method) {
+        // Spring Boot 3.0: HttpMethod is now a class and no longer an enum.
         return method == HttpMethod.POST || method == HttpMethod.PUT || method == HttpMethod.PATCH;
     }
 

@@ -60,6 +60,10 @@ public class SundialConfig {
     @Autowired
     private SundialProperties props;
 
+    // Spring boot 3.0: Spring's default JDBC exception translator is the JDBC 4 based SQLExceptionSubclassTranslator now.
+    //  For full backwards compatibility with database-specific error codes, consider re-enabling the legacy
+    //  SQLErrorCodeSQLExceptionTranslator. This translator kicks in for user-provided sql-error-codes.xml files.
+    //  It can simply pick up Spring's legacy default error code mappings as well when triggered by an empty user-provided file in the root of the classpath.
     @Bean
     public DataSourceFactory dataSourceFactory(){
         return new DataSourceFactory();

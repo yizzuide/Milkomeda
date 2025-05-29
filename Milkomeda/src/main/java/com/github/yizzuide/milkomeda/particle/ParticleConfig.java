@@ -23,6 +23,7 @@ package com.github.yizzuide.milkomeda.particle;
 
 import com.github.yizzuide.milkomeda.universe.context.SpringContext;
 import com.github.yizzuide.milkomeda.universe.extend.loader.LuaLoader;
+import jakarta.servlet.DispatcherType;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
@@ -95,6 +96,7 @@ public class ParticleConfig implements ApplicationContextAware {
         particleFilterRegistrationBean.setFilter(particleFilter());
         particleFilterRegistrationBean.setUrlPatterns(Collections.singleton("/*"));
         particleFilterRegistrationBean.setOrder(Ordered.HIGHEST_PRECEDENCE + 1);
+        particleFilterRegistrationBean.setDispatcherTypes(DispatcherType.REQUEST, DispatcherType.ASYNC);
         return particleFilterRegistrationBean;
     }
 

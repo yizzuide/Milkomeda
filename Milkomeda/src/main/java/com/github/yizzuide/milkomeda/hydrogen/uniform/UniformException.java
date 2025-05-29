@@ -23,6 +23,7 @@ package com.github.yizzuide.milkomeda.hydrogen.uniform;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import java.io.Serial;
 
 /**
  * UniformException
@@ -36,6 +37,7 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class UniformException extends RuntimeException {
+    @Serial
     private static final long serialVersionUID = -5573748402659884460L;
 
     private int code;

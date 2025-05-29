@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 yizzuide All rights Reserved.
+ * Copyright (c) 2025 yizzuide All rights Reserved.
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -19,27 +19,22 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.metal;
+package com.github.yizzuide.milkomeda.hydrogen.validator;
 
-import lombok.Data;
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import com.github.yizzuide.milkomeda.hydrogen.uniform.ResultVO;
+import jakarta.validation.valueextraction.ExtractedValue;
+import jakarta.validation.valueextraction.ValueExtractor;
 
 /**
- * MetalProperties
+ * Defines the logic used to extract the values from the {@link ResultVO} object of data T.
  *
+ * @since 4.0.0
  * @author yizzuide
- * @since 3.6.1
- * <br>
- * Create at 2020/05/23 22:54
+ * Create at 2025/05/22 23:06
  */
-@Data
-@ConfigurationProperties(MetalProperties.PREFIX)
-public class MetalProperties {
-
-    public static final String PREFIX = "milkomeda.metal";
-
-    /**
-     * 分布式配置服务名（如果是后台管理应用和API应用共享配置，必需设置一样的应用名）
-     */
-    private String applicationName;
+public class ResultValueExtractor implements ValueExtractor<ResultVO<@ExtractedValue ?>> {
+    @Override
+    public void extractValues(ResultVO<?> originalValue, ValueReceiver receiver) {
+        receiver.value(null, originalValue.getData());
+    }
 }

@@ -55,6 +55,8 @@ public class CacheConfig implements CachingConfigurer {
     @Autowired
     private RedissonClient redissonClient;
 
+    // Spring Boot 3.0: The `org.springframework.cache.ehcache` package has been removed as it was providing
+    //  support for Ehcache 2.x(net.sf.ehcache), Ehcache 3(org.ehcache:ehcache) is the direct replacement.
     @Bean
     @Override
     public CacheManager cacheManager() {

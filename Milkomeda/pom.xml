@@ -274,7 +274,7 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <!-- Springboot 2.6: Redis (both Jedis and Lettuce) will now automatically enable pooling when commons-pool2 is on the classpath. -->
+        <!-- Spring Boot 2.6: Redis (both Jedis and Lettuce) will now automatically enable pooling when commons-pool2 is on the classpath. -->
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-pool2</artifactId>

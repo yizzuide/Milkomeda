@@ -45,6 +45,10 @@ import java.util.Set;
  * <br>
  * Create at 2022/08/30 19:46
  */
+// Spring Boot 3.0: SourceHttpMessageConverter is not configured by default anymore in Spring MVC and RestTemplate.
+//  As a consequence, Spring web applications using javax.xml.transform.Source now need to configure SourceHttpMessageConverter explicitly.
+//  Note that the order of converter registration is important, and SourceHttpMessageConverter should typically be
+//  registered before "catch-all" converters like MappingJackson2HttpMessageConverter, for example.
 public class MapToCollectionConverter implements ConditionalGenericConverter {
 
     private final ConversionService conversionService;

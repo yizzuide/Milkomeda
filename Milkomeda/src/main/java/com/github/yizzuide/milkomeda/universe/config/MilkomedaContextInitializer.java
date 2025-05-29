@@ -41,6 +41,10 @@ import java.util.Collection;
 public class MilkomedaContextInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
     @Override
     public void initialize(@NonNull ConfigurableApplicationContext applicationContext) {
+        // 提前注册Bean
+        /*if (applicationContext instanceof AnnotationConfigServletWebServerApplicationContext context) {
+            context.registerBean();
+        }*/
         applicationContext.addBeanFactoryPostProcessor(new EarlyLoadBeanDefinitionRegistryPostProcessor());
     }
 }

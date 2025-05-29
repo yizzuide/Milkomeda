@@ -43,6 +43,9 @@ import org.springframework.stereotype.Service;
 @WormholeEventHandler
 public class QuotaService {
 
+    // Spring Boot 3.0: Methods annotated with @Async must return either Future or void.
+    //  This has long been documented but is now also actively checked and enforced,
+    //  with an exception thrown for any other return type.
     @Async
     @WormholeAction(value = Actions.AUDIT_SUCCESS, transactionHang = WormholeTransactionHangType.AFTER_COMMIT)
     public void onEvent(WormholeEvent<Credit> event) {

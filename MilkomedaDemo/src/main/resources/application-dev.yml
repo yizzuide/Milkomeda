@@ -105,6 +105,10 @@ management:
       enabled: false
     health:
       show-details: always
+      # Spring Boot 3.1: The configured membership of a health group is now validated on startup.
+      #   If a health indicator that does not exist has been included or excluded, startup will fail.
+      #   This validation can be disabled, restoring the behavior of earlier versions.
+      validate-group-membership: false
     # Spring Boot 2.4: A new startup actuator endpoint is now available that shows information about your application startup.
     startup:
       enabled: true

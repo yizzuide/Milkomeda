@@ -23,9 +23,9 @@ package com.github.yizzuide.milkomeda.metal;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.SmartInstantiationAwareBeanPostProcessor;
-import org.springframework.context.annotation.Lazy;
+import org.springframework.core.Ordered;
+import org.springframework.core.PriorityOrdered;
 import org.springframework.lang.NonNull;
 
 import java.lang.reflect.Field;
@@ -40,13 +40,15 @@ import java.lang.reflect.Field;
  * Create at 2020/05/21 18:31
  */
 @Slf4j
-public class MetalRegister implements SmartInstantiationAwareBeanPostProcessor {
+public class MetalRegister implements SmartInstantiationAwareBeanPostProcessor, PriorityOrdered {
     /**
      * 容器
      */
-    @Lazy
-    @Autowired
-    private MetalContainer metalContainer;
+    private final MetalContainer metalContainer;
+
+    public MetalRegister(MetalContainer metalContainer) {
+        this.metalContainer = metalContainer;
+    }
 
 
     @Override
@@ -57,12 +59,17 @@ public class MetalRegister implements SmartInstantiationAwareBeanPostProcessor {
             for (Field field : clz.getDeclaredFields()) {
                 metaVal = field.getAnnotation(Metal.class);
                 if (metaVal != null) {
-                    metalContainer.addVNode(metaVal, bean, field);
+                    this.metalContainer.addVNode(metaVal, bean, field);
                 }
             }
         } catch (Exception e) {
             log.error("Metal process post bean error with msg: {}", e.getMessage(), e);
         }
         return true;
+    }
+
+    @Override
+    public int getOrder() {
+        return Ordered.HIGHEST_PRECEDENCE;
     }
 }

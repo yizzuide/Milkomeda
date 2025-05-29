@@ -12,3 +12,9 @@ com.github.yizzuide.milkomeda.universe.extend.env.CustomPropertySourceLocator
 org.springframework.context.ApplicationListener=\
 com.github.yizzuide.milkomeda.universe.extend.env.EnvironmentApplicationListener
 
+# Spring Boot 3.0: The core container performs basic bean property determination without `java.beans.Introspector` by default.
+#   For full backwards compatibility with 5.3.x in case of sophisticated JavaBeans usage, specify the following:
+#org.springframework.beans.BeanInfoFactory=org.springframework.beans.ExtendedBeanInfoFactory
+#  Spring 6.0 default property determination (and better introspection performance!) as following:
+#org.springframework.beans.BeanInfoFactory=org.springframework.beans.SimpleBeanInfoFactory
+

@@ -24,6 +24,7 @@ package com.github.yizzuide.milkomeda.hydrogen.core;
 import com.github.yizzuide.milkomeda.hydrogen.i18n.I18nMessages;
 
 import jakarta.validation.Validator;
+import lombok.Getter;
 
 /**
  * HydrogenHolder
@@ -37,26 +38,21 @@ public class HydrogenHolder {
     /**
      * 验证器
      */
+    @Getter
     private static Validator validator;
 
     /**
      * 国际化
      */
+    @Getter
     private static I18nMessages i18nMessages;
 
     public static void setValidator(Validator validator) {
         HydrogenHolder.validator = validator;
     }
 
-    public static Validator getValidator() {
-        return validator;
-    }
-
     public static void setI18nMessages(I18nMessages i18nMessages) {
         HydrogenHolder.i18nMessages = i18nMessages;
     }
 
-    public static I18nMessages getI18nMessages() {
-        return i18nMessages;
-    }
 }

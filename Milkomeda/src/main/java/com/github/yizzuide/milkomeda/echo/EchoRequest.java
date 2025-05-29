@@ -279,7 +279,7 @@ public abstract class EchoRequest extends AbstractRequest implements CometParamD
      * @return  EchoResponseData
      */
     public EchoResponseData<List<Map<String, Object>>> fetchList(HttpMethod method, String url, Map<String, String> headerMap, Map<String, Object> params, boolean forceCamel) {
-        return sendRequest(method, url, headerMap, params, new TypeReference<List<Map<String, Object>>>() {}, forceCamel);
+        return sendRequest(method, url, headerMap, params, new TypeReference<>() {}, forceCamel);
     }
 
     /**

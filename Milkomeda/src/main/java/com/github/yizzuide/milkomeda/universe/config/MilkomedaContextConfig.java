@@ -24,6 +24,7 @@ package com.github.yizzuide.milkomeda.universe.config;
 import com.github.yizzuide.milkomeda.universe.context.WebContext;
 import com.github.yizzuide.milkomeda.universe.extend.env.Environment;
 import com.github.yizzuide.milkomeda.universe.extend.web.handler.DelegatingContextFilter;
+import jakarta.servlet.DispatcherType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration;
@@ -80,8 +81,8 @@ public class MilkomedaContextConfig {
         delegatingFilterRegistrationBean.setUrlPatterns(Collections.singleton("/*"));
         // Order defaults to after OrderedRequestContextFilter
         // 解决无法从RequestContext获取信息的问题
-        int order = OrderedFilter.REQUEST_WRAPPER_FILTER_MAX_ORDER - 104;
-        delegatingFilterRegistrationBean.setOrder(order);
+        delegatingFilterRegistrationBean.setOrder(OrderedFilter.REQUEST_WRAPPER_FILTER_MAX_ORDER - 104);
+        delegatingFilterRegistrationBean.setDispatcherTypes(DispatcherType.REQUEST, DispatcherType.ASYNC);
         return delegatingFilterRegistrationBean;
     }
 }

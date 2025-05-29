@@ -36,7 +36,6 @@ import org.springframework.boot.autoconfigure.AutoConfigureAfter;
  * <br>
  * Create at 2020/05/31 14:57
  */
-@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 @AutoConfigureAfter(name = {"org.mybatis.spring.boot.autoconfigure.MybatisAutoConfiguration", "com.baomidou.mybatisplus.autoconfigure.MybatisPlusAutoConfiguration"})
 public class SundialTweakConfig {
     @Autowired

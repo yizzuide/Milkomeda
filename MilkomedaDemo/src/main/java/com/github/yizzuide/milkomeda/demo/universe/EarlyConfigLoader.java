@@ -34,7 +34,11 @@ import jakarta.annotation.PostConstruct;
  */
 @Slf4j
 public class EarlyConfigLoader {
+    // Spring Boot 3.0: The JSR-330 based @Inject annotation is to be found in jakarta.inject now.
+    //  The corresponding JSR-250 based annotations @PostConstruct and @PreDestroy are to be found in jakarta.annotation.
+    //  For the time being, Spring keeps detecting their javax equivalents as well, covering common use in pre-compiled binaries.
     @PostConstruct
+    //@javax.annotation.PostConstruct
     public void init() {
         log.info("早期注册Bean初始化");
     }

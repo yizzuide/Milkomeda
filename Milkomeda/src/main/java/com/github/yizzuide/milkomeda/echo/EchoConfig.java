@@ -72,10 +72,11 @@ public class EchoConfig {
     @Autowired
     private EchoProperties echoProperties;
 
+    // // Spring Boot 3.0: RestTemplate, or rather the HttpComponentsClientHttpRequestFactory, now requires Apache HttpClient 5.
     @Bean("echoRestTemplate")
     public RestTemplate simpleRestTemplate(RestTemplateBuilder builder) {
         RestTemplate restTemplate = builder.build();
-        // Spring Boot 3.0：Spring Framework 6.0 中已删除对 Apache HttpClient 的支持，现在由 org.apache.httpcomponents.client5:httpclient5 取代
+        // Spring Boot 3.1：Support for Apache HttpClient 4 with RestTemplate was removed in Spring Framework 6,in favor of Apache HttpClient 5.
         restTemplate.setRequestFactory(clientHttpRequestFactory());
         // 自定义错误处理
         restTemplate.setErrorHandler(new EchoResponseErrorHandler());

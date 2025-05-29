@@ -351,7 +351,7 @@ milkomeda:
           status: 200
           code: -1
           # 如果需要Exception异常信息
-          #message: 参数错误
+          message:
           addition:
             data: ${collections.emptyMap}
 

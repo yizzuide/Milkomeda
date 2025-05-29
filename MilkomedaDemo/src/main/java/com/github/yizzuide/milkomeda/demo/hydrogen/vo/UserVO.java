@@ -15,6 +15,6 @@ import jakarta.validation.constraints.Size;
 @Data
 public class UserVO {
     @NotEmpty
-    @Size(min = 6)
+    @Size(min = 6, max = 30)
     private String username;
 }

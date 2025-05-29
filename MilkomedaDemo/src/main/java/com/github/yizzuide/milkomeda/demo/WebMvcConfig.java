@@ -1,7 +1,9 @@
 package com.github.yizzuide.milkomeda.demo;
 
+import com.fasterxml.jackson.core.StreamReadConstraints;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.endpoint.SanitizingFunction;
+import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
 import org.springframework.boot.autoconfigure.web.WebProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -37,8 +39,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
     @Autowired
     private WebProperties webProperties;
 
-    // Spring Boot 2.7: SanitizingFunction现已支持Ordered排序，在SanitizableData一量赋值后中止其它调用
     // Spring Boot 2.6: 现在可以清理 /env 和 /configprops 端点中存在的敏感值
+    // Spring Boot 2.7: SanitizingFunction现已支持Ordered排序，在SanitizableData一旦赋值后中止其它调用
     @Order(Integer.MIN_VALUE)
     @Bean
     public SanitizingFunction mysqlSanitizingFunction() {
@@ -51,5 +53,19 @@ public class WebMvcConfig implements WebMvcConfigurer {
             }
             return data;
         };
+    }
+
+    // Spring Boot 3.0: The trailing slash matching configuration option has been deprecated, its default value set to false.
+    //  Such as "/some/greeting" not match "/some/greeting/"
+    /*@Override
+    public void configurePathMatch(PathMatchConfigurer configurer) {
+        configurer.setUseTrailingSlashMatch(false);
+    }*/
+
+    // Spring Boot 3.1: One notable change in Jackson 2.15 is the introduction of processing limits.
+    @Bean
+    Jackson2ObjectMapperBuilderCustomizer customStreamReadConstraints() {
+        return (builder) -> builder.postConfigurer((objectMapper) -> objectMapper.getFactory()
+                .setStreamReadConstraints(StreamReadConstraints.builder().maxNestingDepth(2000).build()));
     }
 }

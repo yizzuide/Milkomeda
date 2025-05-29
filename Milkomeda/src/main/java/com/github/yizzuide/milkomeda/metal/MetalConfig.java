@@ -37,13 +37,15 @@ import org.springframework.context.annotation.Role;
 @Configuration(proxyBeanMethods = false)
 public class MetalConfig {
 
+    @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
     @Bean
-    public MetalSource metalSource() {
+    public static MetalSource metalSource() {
         return new MetalSource();
     }
 
+    @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
     @Bean
-    public MetalContainer metalContainer(MetalSource metalSource) {
+    public static MetalContainer metalContainer(MetalSource metalSource) {
         MetalContainer metalContainer = new MetalContainer(metalSource);
         MetalHolder.setMetalContainer(metalContainer);
         return metalContainer;
@@ -51,8 +53,7 @@ public class MetalConfig {
 
     @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
     @Bean
-    public static MetalRegister metalRegister() {
-        return new MetalRegister();
+    public static MetalRegister metalRegister(MetalContainer metalContainer) {
+        return new MetalRegister(metalContainer);
     }
-
 }

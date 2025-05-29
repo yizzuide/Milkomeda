@@ -37,7 +37,8 @@ import java.lang.reflect.Method;
  */
 public abstract class AbstractArgumentMatcher implements ArgumentMatcher {
 
-    // Spring Boot 3.0：基于JDK 8标准的参数化实现的，JDK支持编译时加上"-parameters参数，便可保留方法参数的名字
+    // Spring Boot 3.0：Compile your Java sources with the common Java 8+ `-parameters` flag for parameter name retention.
+    //  With the Kotlin compiler, we recommend the `-java-parameters` flag for completeness.
     public static final ParameterNameDiscoverer NAME_DISCOVERER = new DefaultParameterNameDiscoverer();
 
     @Override
