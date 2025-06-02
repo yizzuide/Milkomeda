@@ -30,6 +30,45 @@ package com.github.yizzuide.milkomeda.util
  * Create at 2023/01/27 19:10
  */
 class Collections {
+    // kotlin没有static, 通过拌生对象 companion object 创建，默认名为Companion
+    companion object Creator {
+
+        @JvmField
+        val DEFAULT_ARRAYLIST_LOAD_FACTOR = 1.5f
+
+        @JvmField
+        val DEFAULT_HASHMAP_LOAD_FACTOR = 0.75f
+
+        /**
+         * 根据底层扩容机制，创建一个合理大小的 ArrayList
+         */
+        @JvmStatic
+        fun <T> list(size: Int): ArrayList<T> {
+            val initialCapacity = if (size <= 0) 10 else getCapacity((size / DEFAULT_ARRAYLIST_LOAD_FACTOR).toInt())
+            return ArrayList(initialCapacity)
+        }
+
+        /**
+         * 根据底层扩容机制，创建一个合理大小的 HashMap
+         */
+        @JvmStatic
+        fun <K, V> map(size: Int): HashMap<K, V> {
+            val initialCapacity = if (size <= 0) 16 else getCapacity((size / DEFAULT_HASHMAP_LOAD_FACTOR).toInt())
+            return HashMap(initialCapacity, DEFAULT_HASHMAP_LOAD_FACTOR)
+        }
+
+        /**
+         * 计算合理的初始容量（确保是 2 的幂）
+         */
+        private fun getCapacity(initialCapacity: Int): Int {
+            var capacity = 1
+            while (capacity < initialCapacity) {
+                // capacity左移一位，相当于 capacity *= 2
+                capacity = capacity shl 1
+            }
+            return capacity
+        }
+    }
 }
 
 fun singletonMap(key: String, value: Any): Map<String, Any> = mapOf(key to value)

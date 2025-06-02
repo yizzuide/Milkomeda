@@ -21,6 +21,8 @@
 
 package com.github.yizzuide.milkomeda.sundial;
 
+import java.util.Random;
+
 /**
  * ShardingId
  * 1bit + 41bit时间差 + 3bit机器号 + 7bit业务号 + 4bit区分号 + 8bit自增序列
@@ -82,12 +84,14 @@ public class ShardingId {
             }
             if (preTime == timestamp) {
                 seqStart = (seqStart + 1) & MAX_SN;
-                // 如果序列号处于最大，循环到超过1毫秒
-                if (seqStart == MAX_SN) {
+                // 同一毫秒的序列数已经达到最大
+                if (seqStart == 0) {
+                    seqStart = new Random().nextInt(10);
                     timestamp = nextTime(preTime);
                 }
             } else {
-                seqStart = 0L;
+                // 并发量不是特别高的时候，如果都从 0 开始的话，会导致生成的 ID 都是偶数，那么在做一些分表操作的时候，会导致严重的分配不均匀。
+                seqStart = new Random().nextInt(10);
             }
             preTime = timestamp;
             return (timestamp - EPOCH) << (SN_BITS + SHARD_BITS + BUSINESS_ID_BITS + WORKER_ID_BITS)

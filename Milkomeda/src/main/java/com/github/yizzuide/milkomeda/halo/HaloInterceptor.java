@@ -111,7 +111,7 @@ public class HaloInterceptor implements Interceptor {
         MetaObject metaObject = config.newMetaObject(parameter);
         for (ParameterMapping mapping : mappings) {
             String property = mapping.getProperty();
-            Object value = metaObject.getValue(property);
+            Object value = metaObject.hasGetter(property) ? metaObject.getValue(property) : parameter;
             if (value == null) {
                 sql = sql.replaceFirst("\\?", "null");
             } else {
