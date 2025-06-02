@@ -28,6 +28,7 @@ import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.AopContext;
 import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.aop.support.AopUtils;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 /**
  * AopContextHolder
@@ -85,6 +86,14 @@ public final class AopContextHolder {
     public static <T> T getRealTarget(Class<T> clazz) {
         T proxy = ApplicationContextHolder.get().getBean(clazz);
         return getRealTarget(proxy, clazz);
+    }
+
+    /**
+     * 设置当前事务回滚
+     * @since 4.0.0
+     */
+    public static void transactionRollback() {
+        TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
     }
 
     /**
