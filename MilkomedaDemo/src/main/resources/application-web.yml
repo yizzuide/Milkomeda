@@ -6,6 +6,7 @@ server:
       cookie:
         http-only: true
         name: mk-sessionId
+
   servlet:
     session:
       timeout: 120m
@@ -20,8 +21,10 @@ server:
     # Spring Boot 2.3: 设置服务器编码
     encoding:
       charset: UTF-8
+
   # Spring Boot 2.3: 优雅关机，拒绝新请求，等正在执行的请求完成
   shutdown: graceful
+
   # Spring Boot 2.3: 不再响应默认的错误信息
   error:
     include-binding-errors: never
@@ -29,11 +32,17 @@ server:
     include-stacktrace: never
     # Spring Boot 3.0: 配置异常转发路径时，过滤器可通过设置ERROR类型触发<code>filter.setDispatcherTypes(DispatcherType.ERROR);</code>
     path: /error
+
   # Spring Boot 2.7: Embedded web servers can be configured to use SSL with PEM-encoded certificate and private key files
   #  Management endpoints can be secured using similar management.server.ssl.* properties
   #ssl:
     #certificate:
     #certificate-private-key:
+
+  # Spring Boot 3.0: Previously, the server.max-http-header-size was treated inconsistently across the four supported embedded web servers.
+  #  When using Jetty, Netty, or Undertow, it would configure the max HTTP request header size. When using Tomcat, it would configure the max HTTP request and response header sizes.
+  #  To address this inconsistency, server.max-http-header-size has been deprecated and a replacement:
+  max-http-request-header-size: 8KB
 
 
 

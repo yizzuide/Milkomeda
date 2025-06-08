@@ -72,7 +72,9 @@ public class EchoConfig {
     @Autowired
     private EchoProperties echoProperties;
 
-    // // Spring Boot 3.0: RestTemplate, or rather the HttpComponentsClientHttpRequestFactory, now requires Apache HttpClient 5.
+    // Spring Boot 3.0: RestTemplate, or rather the HttpComponentsClientHttpRequestFactory, now requires Apache HttpClient 5.
+    //  If you are noticing issues with HTTP client behavior, it could be that RestTemplate is falling back to the JDK client.
+    //  `org.apache.httpcomponents:httpclient` can be brought transitively by other dependencies, so your application might rely on this dependency without declaring it.
     @Bean("echoRestTemplate")
     public RestTemplate simpleRestTemplate(RestTemplateBuilder builder) {
         RestTemplate restTemplate = builder.build();

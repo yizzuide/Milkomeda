@@ -40,17 +40,20 @@ spring:
       # 连接激活的保持时间，该事件只会发生在闲置连接，到期会从池中移除，最低设置为30s，设置为1分钟内最佳
       keepalive-time: 35000
 
-  # Spring Boot 2.6: To use embedded mongo, the spring.mongodb.embedded.version property must now be set.
-  #mongodb:
-    #embedded:
-      #version: 3.6
+  # Spring Boot 3.0: Autoconfiguration and dependency management for Flapdoodle embedded MongoDB has been removed.
+  #   If you are using embedded MongoDB for testing, use the autoconfiguration library provided by the
+  #   Flapdoodle project or modify the tests to use the Testcontainers project instead of embedded MongoDB.
 
+  # Spring Boot 3.0: The `spring.data` prefix has been reserved for `Spring Data` and any properties under the prefix
+  #   imply that Spring Data is required on the classpath.
   data:
     mongodb:
       database: milkomeda
       host: localhost
       port: 27017
-    # Spring Boot 3.0：从spring.redis迁移到spring.data.redis
+
+    # Spring Boot 3.0：Configuration Properties for Redis have moved from `spring.redis.` to `spring.data.redis.`
+    #   as redis autoconfiguration requires Spring Data to be present on the classpath.
     redis:
       host: 127.0.0.1
       # Spring Boot 2.7: Support for specifying a username for authenticating to Sentinel(s)
@@ -103,23 +106,49 @@ management:
   endpoint:
     shutdown:
       enabled: false
+    # Spring Boot 2.4: A new startup actuator endpoint is now available that shows information about your application startup.
+    startup:
+      enabled: true
+    # Spring Boot 3.0: this release opts for a more secure default. The keys-based approach has been removed in favor of a role-based approach,
+    #   similar to the health endpoint details. Whether unsanitized values are shown or not can be configured using the properties
+    #   which can have the following values:
+    #     NEVER - All values are sanitized (the default).
+    #     ALWAYS - All values are present in the output (any user-defined sanitizing functions will still apply).
+    #     WHEN_AUTHORIZED - Values are present in the output only if a user is authorized (any user-defined sanitizing functions will apply).
+    #   For JMX, users are always considered to be authorized. For HTTP, users are considered to be authorized if they are authenticated and have the specified roles.
+    env:
+      show-values: never
+    configprops:
+      show-values: never
     health:
       show-details: always
       # Spring Boot 3.1: The configured membership of a health group is now validated on startup.
       #   If a health indicator that does not exist has been included or excluded, startup will fail.
       #   This validation can be disabled, restoring the behavior of earlier versions.
       validate-group-membership: false
-    # Spring Boot 2.4: A new startup actuator endpoint is now available that shows information about your application startup.
-    startup:
-      enabled: true
+
   endpoints:
     web:
       exposure:
         include: '*'
+    # Spring Boot 3.0: Responses from the actuator endpoints shipped with Spring Boot now use an isolated ObjectMapper instance to ensure results are consistent.
+    #   If you want to revert to the old behavior and use the application ObjectMapper, you can set management.endpoints.jackson.isolated-object-mapper to false.
+    # If you have developed your own endpoints, you might want to ensure that responses implement the OperationResponseBody interface.
+    #   This will ensure that the isolated ObjectMapper is considered when serializing the response as JSON.
+    jackson:
+      isolated-object-mapper: true
+    # Spring Boot 3.0: By default, only the health endpoint is now exposed over JMX, to align with the default web endpoint exposure.
+    jmx:
+      exposure:
+        include: '*'
+
+  # Spring Boot 3.0: 'trace.http' Endpoint Renamed to 'httpexchanges'. Related infrastructure classes have also been renamed.
+  #   For example, HttpTraceRepository is now named HttpExchangeRepository.
+  httpexchanges:
+    recording:
+      include: time_taken, request-headers, response-headers
+
   # Spring Boot 2.4: HTTP traces no longer include cookie headers by default.
-  #trace:
-    #http:
-      #include: cookies, errors, request-headers, response-headers
   info:
     # Spring Boot 2.6: The env info contributor is now disabled by default. It would like them to appear them in the InfoEndpoint.
     env:

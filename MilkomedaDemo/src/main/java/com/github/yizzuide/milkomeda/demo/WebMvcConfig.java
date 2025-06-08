@@ -1,10 +1,16 @@
 package com.github.yizzuide.milkomeda.demo;
 
 import com.fasterxml.jackson.core.StreamReadConstraints;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.coyote.ProtocolHandler;
+import org.apache.coyote.http11.AbstractHttp11Protocol;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.endpoint.SanitizingFunction;
 import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
 import org.springframework.boot.autoconfigure.web.WebProperties;
+import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
+import org.springframework.boot.web.server.WebServerFactoryCustomizer;
+import org.springframework.context.SmartLifecycle;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -31,13 +37,14 @@ import static org.springframework.boot.actuate.endpoint.SanitizableData.SANITIZE
 //    EnableWebMvcConfiguration（等同于@EnableWebMvc，继承自DelegatingWebMvcConfiguration -> WebMvcConfigurationSupport
 // 总结：在Spring Boot 2.0不添加@EnableWebMvc，会配置的更多更全面，拥有添加@EnableWebMvc的所有配置
 
-// Spring Boot 2.3不支持@ActiveProfiles({"dev,test"})，它将识别为单个字符串：dev,test
+// Spring Boot 2.3: 不支持@ActiveProfiles({"dev,test"})，它将识别为单个字符串：dev,test
 @ActiveProfiles({"dev","test"})
 @Configuration
-public class WebMvcConfig implements WebMvcConfigurer {
+@Slf4j
+public class WebMvcConfig implements WebMvcConfigurer, SmartLifecycle {
     // Spring Boot 2.6: Injecting `Resources` directly no longer works as this configuration has been harmonized in WebProperties
     @Autowired
-    private WebProperties webProperties;
+    private WebProperties webProperties; // webProperties.getResources();
 
     // Spring Boot 2.6: 现在可以清理 /env 和 /configprops 端点中存在的敏感值
     // Spring Boot 2.7: SanitizingFunction现已支持Ordered排序，在SanitizableData一旦赋值后中止其它调用
@@ -62,10 +69,54 @@ public class WebMvcConfig implements WebMvcConfigurer {
         configurer.setUseTrailingSlashMatch(false);
     }*/
 
+    // Spring Boot 3.0: To limit the max header size of an HTTP response on Tomcat
+    //  or Jetty (the only two servers that support such a setting), use a WebServerFactoryCustomizer.
+    @Bean
+    public WebServerFactoryCustomizer<TomcatServletWebServerFactory> webServerFactoryCustomizer() {
+        return factory -> factory.addConnectorCustomizers(connector -> {
+            ProtocolHandler handler = connector.getProtocolHandler();
+            if (handler instanceof AbstractHttp11Protocol<?> http11Protocol) {
+                http11Protocol.setMaxHttpResponseHeaderSize(-1);
+            }
+        });
+    }
+
+    // Spring Boot 3.0: FlywayConfigurationCustomizer beans are now called to customize the FluentConfiguration after
+    //  any Callback and JavaMigration beans have been added to the configuration. An application that defines
+    //  Callback and JavaMigration beans and adds callbacks and Java migrations using a customizer may have
+    //  to be updated to ensure that the intended callbacks and Java migrations are used.
+    /*@Bean
+    public FlywayConfigurationCustomizer flywayConfigurationCustomizer() {
+        return configuration -> {};
+    }*/
+
     // Spring Boot 3.1: One notable change in Jackson 2.15 is the introduction of processing limits.
     @Bean
-    Jackson2ObjectMapperBuilderCustomizer customStreamReadConstraints() {
+    public Jackson2ObjectMapperBuilderCustomizer customStreamReadConstraints() {
         return (builder) -> builder.postConfigurer((objectMapper) -> objectMapper.getFactory()
                 .setStreamReadConstraints(StreamReadConstraints.builder().maxNestingDepth(2000).build()));
+    }
+
+    @Override
+    public void start() {
+        log.info("Application started!");
+    }
+
+    @Override
+    public boolean isRunning() {
+        return true;
+    }
+
+    // Spring Boot 3.0: The phases used by the SmartLifecycle implementations for graceful shutdown have been updated.
+    //  Graceful shutdown now begins in phase `SmartLifecycle.DEFAULT_PHASE - 2048` and the web server is stopped in phase `SmartLifecycle.DEFAULT_PHASE - 1024`.
+    //  Any SmartLifecycle implementations that were participating in graceful shutdown should be updated accordingly.
+    @Override
+    public void stop() {
+        log.info("Application has to stop!");
+    }
+
+    @Override
+    public int getPhase() {
+        return SmartLifecycle.DEFAULT_PHASE - 2000;
     }
 }
