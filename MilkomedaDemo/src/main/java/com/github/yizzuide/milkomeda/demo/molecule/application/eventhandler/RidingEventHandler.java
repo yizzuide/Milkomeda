@@ -26,7 +26,7 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 /**
- * 网约车事件处理器
+ * 打车事件处理器
  *
  * @author yizzuide
  * Create at 2025/06/09 17:24

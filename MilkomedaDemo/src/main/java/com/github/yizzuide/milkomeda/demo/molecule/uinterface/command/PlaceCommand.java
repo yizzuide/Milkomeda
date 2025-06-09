@@ -32,7 +32,6 @@ import lombok.Data;
 @Data
 public class PlaceCommand {
     private Long userId;
-    private Long price;
     private String from;
     private String to;
 }

@@ -45,7 +45,7 @@ public class RidingController {
 
     @PostMapping("place")
     public ResultVO<String> place(PlaceCommand placeCommand) {
-        // 模拟获取并设置登录用户ID
+        // 从安全上下文获取
         placeCommand.setUserId(1L);
         return UniformResult.ok(ridingAppService.place(placeCommand));
     }

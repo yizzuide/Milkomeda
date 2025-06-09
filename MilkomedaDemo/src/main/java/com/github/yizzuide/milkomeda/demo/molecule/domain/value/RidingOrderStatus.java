@@ -19,30 +19,14 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.demo.molecule.application.service;
-
-import com.github.yizzuide.milkomeda.demo.molecule.domain.entity.RidingOrderAggregate;
-import com.github.yizzuide.milkomeda.demo.molecule.uinterface.command.PlaceCommand;
-import com.github.yizzuide.milkomeda.molecule.event.DomainEventsDefer;
-import org.springframework.stereotype.Service;
+package com.github.yizzuide.milkomeda.demo.molecule.domain.value;
 
 /**
- * 打车服务
+ * 打车订单状态值对象
  *
  * @author yizzuide
- * Create at 2025/06/09 17:04
+ * Create at 2025/06/10 02:24
  */
-@Service
-public class RidingAppService {
-
-    @DomainEventsDefer // 自动发布领域事件
-    public String place(PlaceCommand command) {
-        // 从事件朔源加载聚合根...
-
-        // 领域服务校验...
-
-        // 创建订单
-        RidingOrderAggregate aggregate = RidingOrderAggregate.create(command);
-        return aggregate.getOrderNo();
-    }
+public enum RidingOrderStatus {
+    CREATED,
 }
