@@ -12,6 +12,7 @@ import com.github.yizzuide.milkomeda.ice.EnableIce;
 import com.github.yizzuide.milkomeda.jupiter.EnableJupiter;
 import com.github.yizzuide.milkomeda.light.EnableLight;
 import com.github.yizzuide.milkomeda.metal.EnableMetal;
+import com.github.yizzuide.milkomeda.molecule.EnableMolecule;
 import com.github.yizzuide.milkomeda.moon.EnableMoon;
 import com.github.yizzuide.milkomeda.neutron.EnableNeutron;
 import com.github.yizzuide.milkomeda.orbit.EnableOrbit;
@@ -35,6 +36,7 @@ import java.lang.annotation.Target;
  * <br>
  * Create at 2019/12/13 01:03
  */
+@EnableMolecule
 @EnableEuropa
 @EnableQuark
 @EnableOrbit

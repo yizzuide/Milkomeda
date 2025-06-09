@@ -247,6 +247,7 @@ milkomeda:
       - /orbit/**
       - /chat/**
       - /payPlatform/**
+      - /riding/**
 
     # 放开static资源访问
     allow-static-urls:
@@ -435,6 +436,11 @@ milkomeda:
         username: root
         password: ${MYSQL_PWD}
         url:  jdbc:mysql://localhost:3306?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&useSSL=false&rewriteBatchedStatements=true&allowMultiQueries=true&allowPublicKeyRetrieval=true
+      pg:
+        driver-class-name: org.postgresql.Driver
+        username: postgres
+        password: ${MYSQL_PWD}
+        url: jdbc:postgresql://localhost:5432/postgres?currentSchema=milkomeda&useUnicode=true&characterEncoding=UTF-8&TimeZone=Asia/Shanghai
     # 主从切面策略（内部通过桥接Orbit模块功能实现）
     strategy:
       - key-name: read-only # 这里用上面instances里配置的key
