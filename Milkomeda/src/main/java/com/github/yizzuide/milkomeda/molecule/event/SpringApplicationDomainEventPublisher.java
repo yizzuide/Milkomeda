@@ -21,18 +21,28 @@
 
 package com.github.yizzuide.milkomeda.molecule.event;
 
+import org.jetbrains.annotations.NotNull;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationEventPublisherAware;
+
 /**
- * The DomainEventPublisher used to collect aggregate register events and publish them.
+ * Spring-based domain Event publisher impl for {@link DomainEventPublisher}.
  *
  * @since 4.0.0
  * @author yizzuide
- * Create at 2025/06/09 14:30
+ * Create at 2025/06/09 20:04
  */
-@FunctionalInterface
-public interface DomainEventPublisher {
-    /**
-     * Public domain event
-     * @param event domain event
-     */
-    void publishEvent(Object event);
+public class SpringApplicationDomainEventPublisher implements ApplicationEventPublisherAware, DomainEventPublisher {
+
+    private ApplicationEventPublisher applicationEventPublisher;
+
+    @Override
+    public void setApplicationEventPublisher(@NotNull ApplicationEventPublisher applicationEventPublisher) {
+        this.applicationEventPublisher = applicationEventPublisher;
+    }
+
+    public void publishEvent(Object event) {
+        this.applicationEventPublisher.publishEvent(event);
+    }
 }
+

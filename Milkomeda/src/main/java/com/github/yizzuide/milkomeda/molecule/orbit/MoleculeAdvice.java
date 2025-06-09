@@ -21,7 +21,7 @@
 
 package com.github.yizzuide.milkomeda.molecule.orbit;
 
-import com.github.yizzuide.milkomeda.molecule.event.DomainEventBus;
+import com.github.yizzuide.milkomeda.molecule.MoleculeContext;
 import com.github.yizzuide.milkomeda.orbit.OrbitAdvice;
 import com.github.yizzuide.milkomeda.orbit.OrbitAdvisor;
 import com.github.yizzuide.milkomeda.orbit.OrbitInvocation;
@@ -38,7 +38,7 @@ public class MoleculeAdvice implements OrbitAdvice {
     @Override
     public Object invoke(OrbitInvocation invocation) throws Throwable {
         Object result = invocation.proceed();
-        DomainEventBus.publish();
+        MoleculeContext.getDomainEventBus().publish();
         return result;
     }
 }

@@ -21,7 +21,7 @@
 
 package com.github.yizzuide.milkomeda.molecule.agg;
 
-import com.github.yizzuide.milkomeda.molecule.event.DomainEventBus;
+import com.github.yizzuide.milkomeda.molecule.MoleculeContext;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -49,7 +49,7 @@ public abstract class AbstractAggregateRoot implements AggregateRoot {
             return;
         }
         domainEvents.add(event);
-        DomainEventBus.collect(this);
+        MoleculeContext.getDomainEventBus().collect(this);
     }
 
     public Collection<Object> domainEvents() {

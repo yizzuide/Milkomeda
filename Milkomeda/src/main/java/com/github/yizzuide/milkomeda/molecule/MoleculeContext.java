@@ -19,20 +19,24 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.molecule.event;
+package com.github.yizzuide.milkomeda.molecule;
+
+import com.github.yizzuide.milkomeda.molecule.event.DomainEventBus;
+import lombok.Getter;
 
 /**
- * The DomainEventPublisher used to collect aggregate register events and publish them.
+ * The context hold {@link DomainEventBus} which manage domain events.
  *
  * @since 4.0.0
  * @author yizzuide
- * Create at 2025/06/09 14:30
+ * Create at 2025/06/09 19:56
  */
-@FunctionalInterface
-public interface DomainEventPublisher {
-    /**
-     * Public domain event
-     * @param event domain event
-     */
-    void publishEvent(Object event);
+public class MoleculeContext {
+
+    @Getter
+    private static DomainEventBus domainEventBus;
+
+    static void setDomainEventBus(DomainEventBus domainEventBus) {
+        MoleculeContext.domainEventBus = domainEventBus;
+    }
 }

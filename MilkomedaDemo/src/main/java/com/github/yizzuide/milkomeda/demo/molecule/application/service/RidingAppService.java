@@ -23,7 +23,7 @@ package com.github.yizzuide.milkomeda.demo.molecule.application.service;
 
 import com.github.yizzuide.milkomeda.demo.molecule.domain.entity.RidingOrderAggregate;
 import com.github.yizzuide.milkomeda.demo.molecule.uinterface.command.PlaceCommand;
-import com.github.yizzuide.milkomeda.molecule.event.DomainEventsNotifier;
+import com.github.yizzuide.milkomeda.molecule.event.DomainEventsDefer;
 import org.springframework.stereotype.Service;
 
 /**
@@ -35,7 +35,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class RidingAppService {
 
-    @DomainEventsNotifier // 自动发布领域事件
+    @DomainEventsDefer // 自动发布领域事件
     public String place(PlaceCommand command) {
         // 从事件朔源加载聚合根...
 

@@ -21,7 +21,7 @@
 
 package com.github.yizzuide.milkomeda.molecule.orbit;
 
-import com.github.yizzuide.milkomeda.molecule.event.DomainEventsNotifier;
+import com.github.yizzuide.milkomeda.molecule.event.DomainEventsDefer;
 import com.github.yizzuide.milkomeda.orbit.AnnotationOrbitAdvisor;
 import com.github.yizzuide.milkomeda.orbit.OrbitAdvisor;
 import com.github.yizzuide.milkomeda.orbit.OrbitSource;
@@ -33,7 +33,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * This advice listen on method which annotated {@link DomainEventsNotifier} has invoked.
+ * This advice listen on method which annotated {@link DomainEventsDefer} has invoked.
  *
  * @since 4.0.0
  * @author yizzuide
@@ -43,7 +43,7 @@ import java.util.List;
 public class MoleculeOrbitSource implements OrbitSource {
     @Override
     public List<OrbitAdvisor> createAdvisors(Environment environment) {
-        AnnotationOrbitAdvisor advisor = AnnotationOrbitAdvisor.forMethod(DomainEventsNotifier.class, "molecule", MoleculeAdvice.class, null);
+        AnnotationOrbitAdvisor advisor = AnnotationOrbitAdvisor.forMethod(DomainEventsDefer.class, "molecule", MoleculeAdvice.class, null);
         advisor.setOrder(Ordered.LOWEST_PRECEDENCE);
         return Collections.singletonList(advisor);
     }

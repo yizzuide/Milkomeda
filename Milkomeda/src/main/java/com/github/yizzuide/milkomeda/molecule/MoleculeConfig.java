@@ -23,6 +23,7 @@ package com.github.yizzuide.milkomeda.molecule;
 
 import com.github.yizzuide.milkomeda.molecule.event.DomainEventBus;
 import com.github.yizzuide.milkomeda.molecule.event.DomainEventPublisher;
+import com.github.yizzuide.milkomeda.molecule.event.SpringApplicationDomainEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -38,9 +39,13 @@ public class MoleculeConfig {
 
     @Bean
     public DomainEventPublisher domainEventPublisher() {
-        DomainEventPublisher domainEventPublisher = new DomainEventPublisher();
-        DomainEventBus.setDomainEventPublisher(domainEventPublisher);
-        return domainEventPublisher;
+        return new SpringApplicationDomainEventPublisher();
     }
 
+    @Bean
+    public DomainEventBus domainEventBus(DomainEventPublisher domainEventPublisher) {
+        DomainEventBus domainEventBus = new DomainEventBus(domainEventPublisher);
+        MoleculeContext.setDomainEventBus(domainEventBus);
+        return domainEventBus;
+    }
 }

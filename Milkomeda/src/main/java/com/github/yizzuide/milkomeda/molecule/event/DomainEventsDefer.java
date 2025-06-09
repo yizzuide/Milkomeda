@@ -27,7 +27,8 @@ import java.lang.annotation.Target;
 import java.lang.annotation.Retention;
 
 /**
- * Domain event trigger annotation that used at application service layer.
+ * The {@link DomainEventsDefer} annotation publish domain event which hanging with {@link DomainEventBus}
+ * that used at application service layer.
  *
  * @since 4.0.0
  * @author yizzuide
@@ -35,5 +36,5 @@ import java.lang.annotation.Retention;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
-public @interface DomainEventsNotifier {
+public @interface DomainEventsDefer {
 }

@@ -22,7 +22,9 @@
 package com.github.yizzuide.milkomeda.molecule.event;
 
 import com.github.yizzuide.milkomeda.molecule.agg.AggregateRoot;
-import lombok.Setter;
+
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * The {@link DomainEventBus} serve for aggregate that collect events and publish from application layer.
@@ -33,22 +35,40 @@ import lombok.Setter;
  */
 public class DomainEventBus {
 
-    @Setter
-    private static DomainEventPublisher domainEventPublisher;
+    private final DomainEventPublisher domainEventPublisher;
 
+    private final ThreadLocal<List<AggregateRoot>> HANGING_AGGREGATES = ThreadLocal.withInitial(CopyOnWriteArrayList::new);
+
+    public DomainEventBus(DomainEventPublisher domainEventPublisher) {
+        this.domainEventPublisher = domainEventPublisher;
+    }
 
     /**
      * Collect aggregate events
      * @param aggregate AggregateRoot
      */
-    public static void collect(AggregateRoot aggregate) {
-        domainEventPublisher.registerEvents(aggregate);
+    public void collect(AggregateRoot aggregate) {
+        List<AggregateRoot> aggregateRoots = HANGING_AGGREGATES.get();
+        if (aggregateRoots.isEmpty() || !aggregateRoots.contains(aggregate)) {
+            aggregateRoots.add(aggregate);
+        }
     }
 
     /**
      * Publish aggregate events
      */
-    public static void publish() {
-        domainEventPublisher.publishEvents();
+    public void publish() {
+        List<AggregateRoot> aggregateRoots = HANGING_AGGREGATES.get();
+        if (aggregateRoots.isEmpty()) {
+            return;
+        }
+        aggregateRoots.forEach(aggregate -> {
+            aggregate.domainEvents().forEach(domainEventPublisher::publishEvent);
+            aggregate.clearDomainEvents();
+            aggregateRoots.remove(aggregate);
+        });
+        if (aggregateRoots.isEmpty()) {
+            HANGING_AGGREGATES.remove();
+        }
     }
 }
