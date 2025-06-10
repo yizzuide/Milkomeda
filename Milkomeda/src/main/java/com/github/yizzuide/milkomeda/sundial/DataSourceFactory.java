@@ -43,7 +43,7 @@ import java.util.Map;
  * 动态创建数据源工厂
  * @author jsq 786063250@qq.com
  * @since 3.4.0
- * @version 3.20.0
+ * @version 3.21.0
  * <br>
  * Create at 2020/5/8
  */
@@ -96,7 +96,7 @@ public class DataSourceFactory implements EnvironmentAware {
         Map dataSourceProperties = binder.bind(DEFAULT_DATASOURCE_PREFIX, Map.class).get();
         // 新的配置项覆盖spring.datasource原有配置来创建新的DataSource
         if (dataSourceConf != null) {
-            Map<String, Object> dataSourceConfMap = DataTypeConvertUtil.beanToMap(dataSourceConf);
+            Map<String, Object> dataSourceConfMap = DataTypeConvertUtil.humpToLink(DataTypeConvertUtil.beanToMap(dataSourceConf));
             dataSourceProperties.putAll(dataSourceConfMap);
         }
         // 根据数据源类型创建实例
