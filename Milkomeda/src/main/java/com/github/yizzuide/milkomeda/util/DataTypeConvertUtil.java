@@ -41,7 +41,7 @@ import java.util.stream.LongStream;
  *
  * @author yizzuide
  * @since 1.13.0
- * @version 3.15.0
+ * @version 4.0.0
  * <br>
  * Create at 2019/09/21 17:23
  */
@@ -80,6 +80,56 @@ public class DataTypeConvertUtil {
         }
         matcher.appendTail(sb);
         return sb.toString();
+    }
+
+    /**
+     * 驼峰转连接线
+     * @param str   源字符串
+     * @return  连接字符串
+     * @since 4.0.0
+     */
+    public static String humpToLink(String str) {
+        Matcher matcher = humpPattern.matcher(str);
+        StringBuilder sb = new StringBuilder();
+        while (matcher.find()) {
+            matcher.appendReplacement(sb, "-" + matcher.group(0).toLowerCase());
+        }
+        matcher.appendTail(sb);
+        return sb.toString();
+    }
+
+    /**
+     * 驼峰Map转下划线
+     * @param map   Map
+     * @return Map
+     * @since 4.0.0
+     */
+    public static Map<String, Object> humpToLine(Map<String, Object> map) {
+        if (map == null) {
+            return null;
+        }
+        Map<String, Object> result = new HashMap<>(map.size());
+        for (Map.Entry<String, Object> entry : map.entrySet()) {
+            result.put(humpToLine(entry.getKey()), entry.getValue());
+        }
+        return result;
+    }
+
+    /**
+     * 驼峰Map转连接线
+     * @param map   Map
+     * @return  Map
+     * @since 4.0.0
+     */
+    public static Map<String, Object> humpToLink(Map<String, Object> map) {
+        if (map == null) {
+            return null;
+        }
+        Map<String, Object> result = new LinkedHashMap<>(map.size());
+        for (Map.Entry<String, Object> entry : map.entrySet()) {
+            result.put(humpToLink(entry.getKey()), entry.getValue());
+        }
+        return result;
     }
 
 

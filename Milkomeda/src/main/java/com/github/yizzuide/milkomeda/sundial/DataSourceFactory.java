@@ -96,11 +96,11 @@ public class DataSourceFactory implements EnvironmentAware {
         Map dataSourceProperties = binder.bind(DEFAULT_DATASOURCE_PREFIX, Map.class).get();
         // 新的配置项覆盖spring.datasource原有配置来创建新的DataSource
         if (dataSourceConf != null) {
-            Map<String, Object> dataSourceConfMap = DataTypeConvertUtil.beanToMap(dataSourceConf);
+            Map<String, Object> dataSourceConfMap = DataTypeConvertUtil.humpToLink(DataTypeConvertUtil.beanToMap(dataSourceConf));
             dataSourceProperties.putAll(dataSourceConfMap);
         }
         // 根据数据源类型创建实例
-        DataSource dataSource = sundialProperties.getDatasourceType().newInstance();
+        DataSource dataSource = sundialProperties.getDatasourceType().getDeclaredConstructor().newInstance();
         // 绑定数据源配置值
         bind(dataSource, dataSourceProperties);
         return dataSource;

@@ -27,7 +27,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
-import java.sql.Driver;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -151,7 +150,7 @@ public class SundialProperties {
         /**
          * 数据库驱动类名
          */
-        private Class<? extends Driver> driverClassName;
+        private String driverClassName;
 
         /**
          * 账号
