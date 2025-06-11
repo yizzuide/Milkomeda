@@ -21,8 +21,21 @@
 
 package com.github.yizzuide.milkomeda.molecule;
 
-import com.github.yizzuide.milkomeda.molecule.event.DomainEventBus;
+import com.github.yizzuide.milkomeda.molecule.core.event.DomainEventBus;
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.EventSourcingProperties;
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.RegisterAggregate;
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.RegisterEvent;
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.agg.Aggregate;
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.event.Event;
+import com.github.yizzuide.milkomeda.universe.context.SpringContext;
 import lombok.Getter;
+import lombok.Setter;
+import org.springframework.boot.context.properties.bind.Binder;
+import org.springframework.core.env.ConfigurableEnvironment;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * The context hold {@link DomainEventBus} which manage domain events.
@@ -36,7 +49,65 @@ public class MoleculeContext {
     @Getter
     private static DomainEventBus domainEventBus;
 
+    @Setter
+    private static Map<String, Class<? extends Aggregate>> aggregateTypeMapper = new HashMap<>(64);
+
+    private static final Map<Class<?  extends Aggregate>, String> aggregateTagMapper = new HashMap<>(64);
+
+    @Setter
+    private static Map<String, Class<? extends Event>> eventTypeMapper = new HashMap<>(64);
+
+    private static final Map<Class<? extends Event>, String> eventTagMapper = new HashMap<>(64);
+
+
     static void setDomainEventBus(DomainEventBus domainEventBus) {
         MoleculeContext.domainEventBus = domainEventBus;
+    }
+
+    public static Class<? extends Aggregate> getClassByAggregateType(String aggregateType) {
+        Class<? extends Aggregate> aggClass = aggregateTypeMapper.get(aggregateType);
+        if (aggClass == null) {
+            throw new IllegalArgumentException("Aggregate type " + aggregateType + " not found");
+        }
+        return aggClass;
+    }
+
+    public static String getAggregateTypeByClass(Class<? extends Aggregate> aggClass) {
+        String aggregateType = aggregateTagMapper.get(aggClass);
+        if (aggregateType == null) {
+            throw new IllegalArgumentException("Aggregate class " + aggClass.getName() + " not found");
+        }
+        return aggregateType;
+    }
+
+    public static Class<? extends Event> getClassByEventType(String eventType) {
+        Class<? extends Event> eventClass = eventTypeMapper.get(eventType);
+        if (eventClass == null) {
+            throw new IllegalArgumentException("Event type " + eventType + " not found");
+        }
+        return eventClass;
+    }
+
+    public static String getEventTypeByClass(Class<? extends Event> eventClass) {
+        String eventType = eventTagMapper.get(eventClass);
+        if (eventType == null) {
+            throw new IllegalArgumentException("Event class " + eventClass.getName() + " not found");
+        }
+        return eventType;
+    }
+
+    public static void loadAggregatesAndEvents(ConfigurableEnvironment environment) {
+        EventSourcingProperties properties =  Binder.get(environment).bind(EventSourcingProperties.PREFIX, EventSourcingProperties.class).orElseGet(null);
+        if (properties == null || !properties.getEnabled()) {
+            return;
+        }
+        Set<Class<Aggregate>> aggClasses = SpringContext.loadClassFromBasePackage(properties.getAggregatePackage(), Aggregate.class);
+        Map<String, Class<? extends Aggregate>> aggregateClassMapper = SpringContext.bindClassTagMap(aggClasses, RegisterAggregate.class, annotation -> ((RegisterAggregate) annotation).value());
+        MoleculeContext.setAggregateTypeMapper(aggregateClassMapper);
+        aggregateClassMapper.forEach((key, value) -> aggregateTagMapper.put(value, key));
+        Set<Class<Event>> eventClasses = SpringContext.loadClassFromBasePackage(properties.getEventPackage(), Event.class);
+        Map<String, Class<? extends Event>> eventClassMapper = SpringContext.bindClassTagMap(eventClasses, RegisterEvent.class, annotation -> ((RegisterEvent) annotation).value());
+        MoleculeContext.setEventTypeMapper(eventClassMapper);
+        eventClassMapper.forEach((key, value) -> eventTagMapper.put(value, key));
     }
 }

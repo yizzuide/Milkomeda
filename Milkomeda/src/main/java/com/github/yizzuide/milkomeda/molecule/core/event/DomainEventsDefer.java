@@ -19,39 +19,22 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.molecule;
+package com.github.yizzuide.milkomeda.molecule.core.event;
 
-import com.github.yizzuide.milkomeda.molecule.core.event.DomainEventBus;
-import com.github.yizzuide.milkomeda.molecule.core.event.DomainEventPublisher;
-import com.github.yizzuide.milkomeda.molecule.core.event.SpringApplicationDomainEventPublisher;
-import com.github.yizzuide.milkomeda.molecule.core.eventhandler.DefaultEventHandler;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import java.lang.annotation.Retention;
 
 /**
- * Molecule module configuration.
+ * The {@link DomainEventsDefer} annotation publish domain event which hanging with {@link DomainEventBus}
+ * that used at application service layer.
  *
  * @since 4.0.0
  * @author yizzuide
- * Create at 2025/06/09 16:47
+ * Create at 2025/06/09 11:47
  */
-@Configuration
-public class MoleculeConfig {
-
-    @Bean
-    public DomainEventPublisher domainEventPublisher() {
-        return new SpringApplicationDomainEventPublisher();
-    }
-
-    @Bean
-    public DomainEventBus domainEventBus(DomainEventPublisher domainEventPublisher) {
-        DomainEventBus domainEventBus = new DomainEventBus(domainEventPublisher);
-        MoleculeContext.setDomainEventBus(domainEventBus);
-        return domainEventBus;
-    }
-
-    @Bean
-    public DefaultEventHandler defaultEventHandler() {
-        return new DefaultEventHandler();
-    }
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.METHOD)
+public @interface DomainEventsDefer {
 }

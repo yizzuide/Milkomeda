@@ -19,39 +19,22 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.molecule;
+package com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql;
 
-import com.github.yizzuide.milkomeda.molecule.core.event.DomainEventBus;
-import com.github.yizzuide.milkomeda.molecule.core.event.DomainEventPublisher;
-import com.github.yizzuide.milkomeda.molecule.core.event.SpringApplicationDomainEventPublisher;
-import com.github.yizzuide.milkomeda.molecule.core.eventhandler.DefaultEventHandler;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * Molecule module configuration.
+ * RegisterAggregate
  *
  * @since 4.0.0
  * @author yizzuide
- * Create at 2025/06/09 16:47
+ * Create at 2025/06/11 15:26
  */
-@Configuration
-public class MoleculeConfig {
-
-    @Bean
-    public DomainEventPublisher domainEventPublisher() {
-        return new SpringApplicationDomainEventPublisher();
-    }
-
-    @Bean
-    public DomainEventBus domainEventBus(DomainEventPublisher domainEventPublisher) {
-        DomainEventBus domainEventBus = new DomainEventBus(domainEventPublisher);
-        MoleculeContext.setDomainEventBus(domainEventBus);
-        return domainEventBus;
-    }
-
-    @Bean
-    public DefaultEventHandler defaultEventHandler() {
-        return new DefaultEventHandler();
-    }
+@Target({ElementType.TYPE})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface RegisterAggregate {
+    String value();
 }

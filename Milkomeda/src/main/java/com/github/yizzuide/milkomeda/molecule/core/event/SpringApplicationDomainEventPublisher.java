@@ -19,39 +19,30 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.molecule;
+package com.github.yizzuide.milkomeda.molecule.core.event;
 
-import com.github.yizzuide.milkomeda.molecule.core.event.DomainEventBus;
-import com.github.yizzuide.milkomeda.molecule.core.event.DomainEventPublisher;
-import com.github.yizzuide.milkomeda.molecule.core.event.SpringApplicationDomainEventPublisher;
-import com.github.yizzuide.milkomeda.molecule.core.eventhandler.DefaultEventHandler;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationEventPublisherAware;
 
 /**
- * Molecule module configuration.
+ * Spring-based domain Event publisher impl for {@link DomainEventPublisher}.
  *
  * @since 4.0.0
  * @author yizzuide
- * Create at 2025/06/09 16:47
+ * Create at 2025/06/09 20:04
  */
-@Configuration
-public class MoleculeConfig {
+public class SpringApplicationDomainEventPublisher implements ApplicationEventPublisherAware, DomainEventPublisher {
 
-    @Bean
-    public DomainEventPublisher domainEventPublisher() {
-        return new SpringApplicationDomainEventPublisher();
+    private ApplicationEventPublisher applicationEventPublisher;
+
+    @Override
+    public void setApplicationEventPublisher(@NotNull ApplicationEventPublisher applicationEventPublisher) {
+        this.applicationEventPublisher = applicationEventPublisher;
     }
 
-    @Bean
-    public DomainEventBus domainEventBus(DomainEventPublisher domainEventPublisher) {
-        DomainEventBus domainEventBus = new DomainEventBus(domainEventPublisher);
-        MoleculeContext.setDomainEventBus(domainEventBus);
-        return domainEventBus;
-    }
-
-    @Bean
-    public DefaultEventHandler defaultEventHandler() {
-        return new DefaultEventHandler();
+    public void publishEvent(Object event) {
+        this.applicationEventPublisher.publishEvent(event);
     }
 }
+

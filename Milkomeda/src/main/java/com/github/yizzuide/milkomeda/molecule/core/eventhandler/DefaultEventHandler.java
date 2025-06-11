@@ -19,39 +19,22 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.molecule;
+package com.github.yizzuide.milkomeda.molecule.core.eventhandler;
 
-import com.github.yizzuide.milkomeda.molecule.core.event.DomainEventBus;
-import com.github.yizzuide.milkomeda.molecule.core.event.DomainEventPublisher;
-import com.github.yizzuide.milkomeda.molecule.core.event.SpringApplicationDomainEventPublisher;
-import com.github.yizzuide.milkomeda.molecule.core.eventhandler.DefaultEventHandler;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import com.github.yizzuide.milkomeda.molecule.MoleculeContext;
+import com.github.yizzuide.milkomeda.molecule.core.event.ApplicationPostCommitEvent;
+import org.springframework.context.event.EventListener;
 
 /**
- * Molecule module configuration.
+ * The default event handler for handle {@link ApplicationPostCommitEvent}.
  *
  * @since 4.0.0
  * @author yizzuide
- * Create at 2025/06/09 16:47
+ * Create at 2025/06/11 18:14
  */
-@Configuration
-public class MoleculeConfig {
-
-    @Bean
-    public DomainEventPublisher domainEventPublisher() {
-        return new SpringApplicationDomainEventPublisher();
-    }
-
-    @Bean
-    public DomainEventBus domainEventBus(DomainEventPublisher domainEventPublisher) {
-        DomainEventBus domainEventBus = new DomainEventBus(domainEventPublisher);
-        MoleculeContext.setDomainEventBus(domainEventBus);
-        return domainEventBus;
-    }
-
-    @Bean
-    public DefaultEventHandler defaultEventHandler() {
-        return new DefaultEventHandler();
+public class DefaultEventHandler {
+    @EventListener
+    public void handle(ApplicationPostCommitEvent ignore) {
+        MoleculeContext.getDomainEventBus().publish();
     }
 }

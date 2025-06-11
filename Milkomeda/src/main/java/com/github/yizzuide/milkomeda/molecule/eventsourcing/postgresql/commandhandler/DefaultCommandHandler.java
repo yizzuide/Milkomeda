@@ -19,32 +19,24 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.molecule.orbit;
+package com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.commandhandler;
 
-import com.github.yizzuide.milkomeda.molecule.core.event.DomainEventsDefer;
-import com.github.yizzuide.milkomeda.orbit.AnnotationOrbitAdvisor;
-import com.github.yizzuide.milkomeda.orbit.OrbitAdvisor;
-import com.github.yizzuide.milkomeda.orbit.OrbitSource;
-import com.github.yizzuide.milkomeda.orbit.OrbitSourceProvider;
-import org.springframework.core.Ordered;
-import org.springframework.core.env.Environment;
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.agg.Aggregate;
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.command.Command;
+import jakarta.annotation.Nonnull;
+import lombok.extern.slf4j.Slf4j;
 
-import java.util.Collections;
-import java.util.List;
+@Slf4j
+public class DefaultCommandHandler implements CommandHandler<Command> {
 
-/**
- * This advice listen on method which annotated {@link DomainEventsDefer} has invoked.
- *
- * @since 4.0.0
- * @author yizzuide
- * Create at 2025/06/09 14:56
- */
-@OrbitSourceProvider
-public class MoleculeOrbitSource implements OrbitSource {
     @Override
-    public List<OrbitAdvisor> createAdvisors(Environment environment) {
-        AnnotationOrbitAdvisor advisor = AnnotationOrbitAdvisor.forMethod(DomainEventsDefer.class, "molecule", MoleculeAdvice.class, null);
-        advisor.setOrder(Ordered.LOWEST_PRECEDENCE);
-        return Collections.singletonList(advisor);
+    public void handle(Aggregate aggregate, Command command) {
+        aggregate.process(command);
+    }
+
+    @Nonnull
+    @Override
+    public Class<Command> getCommandType() {
+        return Command.class;
     }
 }

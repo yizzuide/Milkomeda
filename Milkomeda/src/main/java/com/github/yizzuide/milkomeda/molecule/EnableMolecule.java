@@ -21,6 +21,7 @@
 
 package com.github.yizzuide.milkomeda.molecule;
 
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.EventSourcingConfig;
 import org.springframework.context.annotation.Import;
 
 import java.lang.annotation.*;
@@ -36,6 +37,6 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Inherited
-@Import(MoleculeConfig.class)
+@Import({MoleculeConfig.class, EventSourcingConfig.class})
 public @interface EnableMolecule {
 }

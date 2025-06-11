@@ -19,39 +19,23 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.molecule;
-
-import com.github.yizzuide.milkomeda.molecule.core.event.DomainEventBus;
-import com.github.yizzuide.milkomeda.molecule.core.event.DomainEventPublisher;
-import com.github.yizzuide.milkomeda.molecule.core.event.SpringApplicationDomainEventPublisher;
-import com.github.yizzuide.milkomeda.molecule.core.eventhandler.DefaultEventHandler;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+package com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql;
 
 /**
- * Molecule module configuration.
+ * The event subscription type for asynchronous processing.
  *
  * @since 4.0.0
  * @author yizzuide
- * Create at 2025/06/09 16:47
+ * Create at 2025/06/10 15:51
  */
-@Configuration
-public class MoleculeConfig {
+public enum SubscriptionType {
+    /**
+     * Fixed delay polling for query event.
+     */
+    POLLING,
 
-    @Bean
-    public DomainEventPublisher domainEventPublisher() {
-        return new SpringApplicationDomainEventPublisher();
-    }
-
-    @Bean
-    public DomainEventBus domainEventBus(DomainEventPublisher domainEventPublisher) {
-        DomainEventBus domainEventBus = new DomainEventBus(domainEventPublisher);
-        MoleculeContext.setDomainEventBus(domainEventBus);
-        return domainEventBus;
-    }
-
-    @Bean
-    public DefaultEventHandler defaultEventHandler() {
-        return new DefaultEventHandler();
-    }
+    /**
+     * Use Postgresql channel to receive event.
+     */
+    POSTGRES_CHANNEL
 }

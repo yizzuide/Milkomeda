@@ -512,3 +512,16 @@ milkomeda:
   quark:
     topic-chains:
       test: h1 -> h2
+
+  molecule:
+    event-sourcing:
+      enabled: true
+      datasource-prefix: milkomeda.sundial.instances.pg
+      aggregate-package: com.github.yizzuide.milkomeda.demo.molecule.eventsourcing.domain.aggregate
+      event-package: com.github.yizzuide.milkomeda.demo.molecule.eventsourcing.domain.event
+      snapshotting:
+        ORDER:
+          enabled: true
+          nth-event: 5
+      subscription-type: postgres_channel
+

@@ -21,6 +21,7 @@
 
 package com.github.yizzuide.milkomeda.universe.config;
 
+import com.github.yizzuide.milkomeda.molecule.MoleculeContext;
 import com.github.yizzuide.milkomeda.universe.extend.processor.EarlyLoadBeanDefinitionRegistryPostProcessor;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -33,6 +34,7 @@ import java.util.Collection;
  *
  * @see org.springframework.boot.SpringApplication#setInitializers(Collection)
  * @since 3.15.0
+ * @version 4.0.0
  * @author yizzuide
  * <br>
  * Create at 2023/04/27 20:50
@@ -41,10 +43,13 @@ import java.util.Collection;
 public class MilkomedaContextInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
     @Override
     public void initialize(@NonNull ConfigurableApplicationContext applicationContext) {
-        // 提前注册Bean
+        // 直接注册Bean
         /*if (applicationContext instanceof AnnotationConfigServletWebServerApplicationContext context) {
             context.registerBean();
         }*/
+        // 提前注册Bean
         applicationContext.addBeanFactoryPostProcessor(new EarlyLoadBeanDefinitionRegistryPostProcessor());
+        // 加载Molecule模块的聚合类和事件
+        MoleculeContext.loadAggregatesAndEvents(applicationContext.getEnvironment());
     }
 }

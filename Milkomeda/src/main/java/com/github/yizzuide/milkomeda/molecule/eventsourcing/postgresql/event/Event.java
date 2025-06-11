@@ -19,32 +19,23 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.molecule.orbit;
+package com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.event;
 
-import com.github.yizzuide.milkomeda.molecule.core.event.DomainEventsDefer;
-import com.github.yizzuide.milkomeda.orbit.AnnotationOrbitAdvisor;
-import com.github.yizzuide.milkomeda.orbit.OrbitAdvisor;
-import com.github.yizzuide.milkomeda.orbit.OrbitSource;
-import com.github.yizzuide.milkomeda.orbit.OrbitSourceProvider;
-import org.springframework.core.Ordered;
-import org.springframework.core.env.Environment;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 
-import java.util.Collections;
-import java.util.List;
+import java.time.OffsetDateTime;
+import java.util.UUID;
 
-/**
- * This advice listen on method which annotated {@link DomainEventsDefer} has invoked.
- *
- * @since 4.0.0
- * @author yizzuide
- * Create at 2025/06/09 14:56
- */
-@OrbitSourceProvider
-public class MoleculeOrbitSource implements OrbitSource {
-    @Override
-    public List<OrbitAdvisor> createAdvisors(Environment environment) {
-        AnnotationOrbitAdvisor advisor = AnnotationOrbitAdvisor.forMethod(DomainEventsDefer.class, "molecule", MoleculeAdvice.class, null);
-        advisor.setOrder(Ordered.LOWEST_PRECEDENCE);
-        return Collections.singletonList(advisor);
-    }
+@ToString
+@Getter
+@RequiredArgsConstructor(access = AccessLevel.PROTECTED)
+public abstract class Event {
+
+    protected final UUID aggregateId;
+    protected final int version;
+    protected final OffsetDateTime createdDate = OffsetDateTime.now();
+
 }

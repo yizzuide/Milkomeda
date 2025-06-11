@@ -86,7 +86,7 @@ public class PillarExecutor<P, R> {
     public Pillar<P, R> getPillar(String type) {
         List<? extends Pillar<P, R>> pillars = getPillars(type);
         if (CollectionUtils.isEmpty(pillars)) throw new IllegalArgumentException("type " + type +" not find");
-        return pillars.get(0);
+        return pillars.getFirst();
     }
 
     /**

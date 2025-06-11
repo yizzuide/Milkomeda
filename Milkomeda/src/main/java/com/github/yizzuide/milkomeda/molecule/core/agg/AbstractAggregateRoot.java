@@ -19,39 +19,44 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.molecule;
+package com.github.yizzuide.milkomeda.molecule.core.agg;
 
-import com.github.yizzuide.milkomeda.molecule.core.event.DomainEventBus;
-import com.github.yizzuide.milkomeda.molecule.core.event.DomainEventPublisher;
-import com.github.yizzuide.milkomeda.molecule.core.event.SpringApplicationDomainEventPublisher;
-import com.github.yizzuide.milkomeda.molecule.core.eventhandler.DefaultEventHandler;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import com.github.yizzuide.milkomeda.molecule.MoleculeContext;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 /**
- * Molecule module configuration.
+ * The abstract aggregation root is used to be extends by all aggregation roots.
  *
  * @since 4.0.0
  * @author yizzuide
- * Create at 2025/06/09 16:47
+ * Create at 2025/06/09 13:28
  */
-@Configuration
-public class MoleculeConfig {
+public abstract class AbstractAggregateRoot implements AggregateRoot {
 
-    @Bean
-    public DomainEventPublisher domainEventPublisher() {
-        return new SpringApplicationDomainEventPublisher();
+    private final transient List<Object> domainEvents = new ArrayList<>();
+
+    /**
+     * Register domain event
+     * @param event domain event
+     */
+    protected void registerEvent(@NotNull Object event) {
+        if (domainEvents.contains(event)) {
+            return;
+        }
+        domainEvents.add(event);
+        MoleculeContext.getDomainEventBus().collect(this);
     }
 
-    @Bean
-    public DomainEventBus domainEventBus(DomainEventPublisher domainEventPublisher) {
-        DomainEventBus domainEventBus = new DomainEventBus(domainEventPublisher);
-        MoleculeContext.setDomainEventBus(domainEventBus);
-        return domainEventBus;
+    public Collection<Object> domainEvents() {
+        return Collections.unmodifiableList(domainEvents);
     }
 
-    @Bean
-    public DefaultEventHandler defaultEventHandler() {
-        return new DefaultEventHandler();
+    public void clearDomainEvents() {
+        domainEvents.clear();
     }
 }

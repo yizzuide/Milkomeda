@@ -19,32 +19,16 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.molecule.orbit;
+package com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.exception;
 
-import com.github.yizzuide.milkomeda.molecule.core.event.DomainEventsDefer;
-import com.github.yizzuide.milkomeda.orbit.AnnotationOrbitAdvisor;
-import com.github.yizzuide.milkomeda.orbit.OrbitAdvisor;
-import com.github.yizzuide.milkomeda.orbit.OrbitSource;
-import com.github.yizzuide.milkomeda.orbit.OrbitSourceProvider;
-import org.springframework.core.Ordered;
-import org.springframework.core.env.Environment;
+import java.io.Serial;
 
-import java.util.Collections;
-import java.util.List;
+public class OptimisticConcurrencyControlException extends AggregateStateException {
 
-/**
- * This advice listen on method which annotated {@link DomainEventsDefer} has invoked.
- *
- * @since 4.0.0
- * @author yizzuide
- * Create at 2025/06/09 14:56
- */
-@OrbitSourceProvider
-public class MoleculeOrbitSource implements OrbitSource {
-    @Override
-    public List<OrbitAdvisor> createAdvisors(Environment environment) {
-        AnnotationOrbitAdvisor advisor = AnnotationOrbitAdvisor.forMethod(DomainEventsDefer.class, "molecule", MoleculeAdvice.class, null);
-        advisor.setOrder(Ordered.LOWEST_PRECEDENCE);
-        return Collections.singletonList(advisor);
+    @Serial
+    private static final long serialVersionUID = 1403265134536979889L;
+
+    public OptimisticConcurrencyControlException(long expectedVersion) {
+        super("Actual version doesn't match expected version %s", expectedVersion);
     }
 }

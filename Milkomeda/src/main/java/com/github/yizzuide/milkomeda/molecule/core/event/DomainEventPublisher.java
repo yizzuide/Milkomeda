@@ -19,39 +19,20 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.molecule;
-
-import com.github.yizzuide.milkomeda.molecule.core.event.DomainEventBus;
-import com.github.yizzuide.milkomeda.molecule.core.event.DomainEventPublisher;
-import com.github.yizzuide.milkomeda.molecule.core.event.SpringApplicationDomainEventPublisher;
-import com.github.yizzuide.milkomeda.molecule.core.eventhandler.DefaultEventHandler;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+package com.github.yizzuide.milkomeda.molecule.core.event;
 
 /**
- * Molecule module configuration.
+ * The DomainEventPublisher used to collect aggregate register events and publish them.
  *
  * @since 4.0.0
  * @author yizzuide
- * Create at 2025/06/09 16:47
+ * Create at 2025/06/09 14:30
  */
-@Configuration
-public class MoleculeConfig {
-
-    @Bean
-    public DomainEventPublisher domainEventPublisher() {
-        return new SpringApplicationDomainEventPublisher();
-    }
-
-    @Bean
-    public DomainEventBus domainEventBus(DomainEventPublisher domainEventPublisher) {
-        DomainEventBus domainEventBus = new DomainEventBus(domainEventPublisher);
-        MoleculeContext.setDomainEventBus(domainEventBus);
-        return domainEventBus;
-    }
-
-    @Bean
-    public DefaultEventHandler defaultEventHandler() {
-        return new DefaultEventHandler();
-    }
+@FunctionalInterface
+public interface DomainEventPublisher {
+    /**
+     * Public domain event
+     * @param event domain event
+     */
+    void publishEvent(Object event);
 }
