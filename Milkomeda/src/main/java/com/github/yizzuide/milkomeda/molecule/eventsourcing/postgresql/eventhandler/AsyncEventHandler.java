@@ -23,7 +23,6 @@ package com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.eventhan
 
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.event.Event;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.event.EventWithId;
-import jakarta.annotation.Nonnull;
 
 /**
  * The {@link AsyncEventHandler} means used to handle event after transaction commit.
@@ -32,12 +31,10 @@ import jakarta.annotation.Nonnull;
  * @author yizzuide
  * Create at 2025/06/11 15:56
  */
+@FunctionalInterface
 public interface AsyncEventHandler {
 
     void handleEvent(EventWithId<Event> event);
-
-    @Nonnull
-    String getAggregateType();
 
     default String getSubscriptionName() {
         return getClass().getName();

@@ -37,7 +37,7 @@ import java.lang.reflect.Method;
 import java.util.*;
 
 /**
- * The base {@link Aggregate} that any aggregate must extend.
+ * The base {@link Aggregate} can record and recreate from {@link Event}.
  *
  * @since 4.0.0
  * @author yizzuide

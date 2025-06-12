@@ -21,6 +21,7 @@
 
 package com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.processor;
 
+import com.github.yizzuide.milkomeda.molecule.MoleculeContext;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.EventSourcingProperties;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.eventhandler.AsyncEventHandler;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.service.EventSubscriptionProcessor;
@@ -105,9 +106,7 @@ public class PostgresChannelEventSubscriptionProcessor {
                                 if (notifications != null) {
                                     for (PGNotification notification : notifications) {
                                         String parameter = notification.getParameter();
-                                        eventHandlers.stream()
-                                                .filter(eventHandler -> eventHandler.getAggregateType().equals(parameter))
-                                                .forEach(this::processNewEvents);
+                                        MoleculeContext.getAsyncEventHandlers(parameter).forEach(this::processNewEvents);
                                     }
                                 }
                             }

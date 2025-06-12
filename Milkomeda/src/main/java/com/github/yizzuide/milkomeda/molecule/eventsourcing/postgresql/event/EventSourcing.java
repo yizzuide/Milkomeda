@@ -32,7 +32,7 @@ import java.lang.annotation.*;
  * @author yizzuide
  * Create at 2025/06/11 21:24
  */
-@Target({ElementType.TYPE})
+@Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface EventSourcing {

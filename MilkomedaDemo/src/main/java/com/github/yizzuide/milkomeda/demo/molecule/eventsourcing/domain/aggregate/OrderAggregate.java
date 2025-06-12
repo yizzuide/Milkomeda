@@ -1,6 +1,19 @@
 package com.github.yizzuide.milkomeda.demo.molecule.eventsourcing.domain.aggregate;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.github.yizzuide.milkomeda.demo.molecule.eventsourcing.domain.event.OrderPlacedEvent;
+import com.github.yizzuide.milkomeda.demo.molecule.eventsourcing.domain.value.OrderStatus;
+import com.github.yizzuide.milkomeda.demo.molecule.eventsourcing.domain.value.Waypoint;
+import com.github.yizzuide.milkomeda.demo.molecule.eventsourcing.uinterface.command.PlaceOrderCommand;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.AggregateType;
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.agg.Aggregate;
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.event.EventSourcing;
+import lombok.Getter;
+import lombok.ToString;
+
+import java.math.BigDecimal;
+import java.time.OffsetDateTime;
+import java.util.List;
 
 /**
  * OrderAggregate
@@ -9,5 +22,40 @@ import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.Aggregate
  * Create at 2025/06/11 16:00
  */
 @AggregateType("ORDER")
-public class OrderAggregate {
+@ToString(callSuper = true)
+@Getter
+public class OrderAggregate extends Aggregate {
+    private Long riderId;
+    private Long driverId;
+    private BigDecimal price;
+    private List<Waypoint> route;
+    private OrderStatus status;
+    private OffsetDateTime placedDate;
+    private OffsetDateTime acceptedDate;
+    private OffsetDateTime completedDate;
+    private OffsetDateTime cancelledDate;
+
+    @JsonCreator
+    public OrderAggregate(Long aggregateId, int version) {
+        super(aggregateId, version);
+    }
+
+    public void place(PlaceOrderCommand command) {
+        applyChange(OrderPlacedEvent.builder()
+                .aggregateId(aggregateId)
+                .version(getNextVersion())
+                .riderId(command.getRiderId())
+                .price(command.getPrice())
+                .route(command.getRoute())
+                .build());
+    }
+
+    @EventSourcing
+    public void apply(OrderPlacedEvent event) {
+        this.status = OrderStatus.PLACED;
+        this.riderId = event.getRiderId();
+        this.price = event.getPrice();
+        this.route = event.getRoute();
+        this.placedDate = event.getCreatedDate();
+    }
 }

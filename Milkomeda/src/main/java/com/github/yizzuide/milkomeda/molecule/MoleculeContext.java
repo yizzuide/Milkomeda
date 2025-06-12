@@ -22,20 +22,21 @@
 package com.github.yizzuide.milkomeda.molecule;
 
 import com.github.yizzuide.milkomeda.molecule.core.event.DomainEventBus;
-import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.EventSourcingProperties;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.AggregateType;
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.EventSourcingProperties;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.EventType;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.agg.Aggregate;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.event.Event;
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.eventhandler.AsyncEventHandler;
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.eventhandler.SyncEventHandler;
 import com.github.yizzuide.milkomeda.universe.context.SpringContext;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.bind.Binder;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.env.ConfigurableEnvironment;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * The context hold {@link DomainEventBus} which manage domain events.
@@ -59,6 +60,13 @@ public class MoleculeContext {
 
     private static final Map<Class<? extends Event>, String> eventTagMapper = new HashMap<>(64);
 
+    @Setter
+    private static Map<String, List<SyncEventHandler>> syncEventHandlerMapper = new HashMap<>(64);
+
+    @Setter
+    private static Map<String, List<AsyncEventHandler>> asyncEventHandlerMapper = new HashMap<>(64);
+
+    private static final Map<Class<? extends AsyncEventHandler>, String> asyncEventHandlerTagMapper = new HashMap<>(64);
 
     static void setDomainEventBus(DomainEventBus domainEventBus) {
         MoleculeContext.domainEventBus = domainEventBus;
@@ -96,6 +104,18 @@ public class MoleculeContext {
         return eventType;
     }
 
+    public static List<SyncEventHandler> getSyncEventHandlers(String aggregateType) {
+        return syncEventHandlerMapper.get(aggregateType);
+    }
+
+    public static List<AsyncEventHandler> getAsyncEventHandlers(String aggregateType) {
+        return asyncEventHandlerMapper.get(aggregateType);
+    }
+
+    public static String getAsyncEventHandlerTypeByClass(Class<? extends AsyncEventHandler> asyncEventHandlerClass) {
+        return asyncEventHandlerTagMapper.get(asyncEventHandlerClass);
+    }
+
     public static void loadAggregatesAndEvents(ConfigurableEnvironment environment) {
         EventSourcingProperties properties =  Binder.get(environment).bind(EventSourcingProperties.PREFIX, EventSourcingProperties.class).orElseGet(null);
         if (properties == null || !properties.getEnabled()) {
@@ -109,5 +129,36 @@ public class MoleculeContext {
         Map<String, Class<? extends Event>> eventClassMapper = SpringContext.bindClassTagMap(eventClasses, EventType.class, annotation -> ((EventType) annotation).value());
         MoleculeContext.setEventTypeMapper(eventClassMapper);
         eventClassMapper.forEach((key, value) -> eventTagMapper.put(value, key));
+    }
+
+    public static void loadAsyncEventHandlers(List<AsyncEventHandler> eventHandlers) {
+        eventHandlers.forEach(eventHandler -> {
+            AggregateType aggregateType = AnnotationUtils.findAnnotation(eventHandler.getClass(), AggregateType.class);
+            if (aggregateType != null) {
+                asyncEventHandlerTagMapper.put(eventHandler.getClass(), aggregateType.value());
+                if(asyncEventHandlerMapper.containsKey(aggregateType.value())) {
+                    asyncEventHandlerMapper.get(aggregateType.value()).add(eventHandler);
+                } else {
+                    List<AsyncEventHandler> eventHandlerList = new ArrayList<>();
+                    eventHandlerList.add(eventHandler);
+                    asyncEventHandlerMapper.put(aggregateType.value(), eventHandlerList);
+                }
+            }
+        });
+    }
+
+    public static void loadSyncEventHandlers(List<SyncEventHandler> eventHandlers) {
+        eventHandlers.forEach(eventHandler -> {
+            AggregateType aggregateType = AnnotationUtils.findAnnotation(eventHandler.getClass(), AggregateType.class);
+            if (aggregateType != null) {
+                if(syncEventHandlerMapper.containsKey(aggregateType.value())) {
+                    syncEventHandlerMapper.get(aggregateType.value()).add(eventHandler);
+                } else {
+                    List<SyncEventHandler> eventHandlerList = new ArrayList<>();
+                    eventHandlerList.add(eventHandler);
+                    syncEventHandlerMapper.put(aggregateType.value(), eventHandlerList);
+                }
+            }
+        });
     }
 }

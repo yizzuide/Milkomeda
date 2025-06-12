@@ -19,17 +19,26 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.demo.molecule.eventsourcing.uinterface.command;
+package com.github.yizzuide.milkomeda.demo.molecule.eventsourcing.application;
 
-import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.command.Command;
-import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.command.CreatedCommand;
+import com.github.yizzuide.milkomeda.demo.molecule.eventsourcing.domain.aggregate.OrderAggregate;
+import com.github.yizzuide.milkomeda.demo.molecule.eventsourcing.uinterface.command.PlaceOrderCommand;
+import com.github.yizzuide.milkomeda.molecule.core.event.DomainEventsDefer;
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.service.ApplicationService;
+import org.springframework.stereotype.Service;
 
 /**
- * 打车下单命令
+ * OrderAppService
  *
  * @author yizzuide
- * Create at 2025/06/12 14:27
+ * Create at 2025/06/12 17:44
  */
-@CreatedCommand
-public class OrderPlaceCommand extends Command {
+@Service
+public class OrderAppService extends ApplicationService {
+    @DomainEventsDefer
+    public String place(PlaceOrderCommand command) {
+        OrderAggregate orderAggregate = loadAggregate(OrderAggregate.class, command);
+        orderAggregate.place(command);
+        return "OK";
+    }
 }

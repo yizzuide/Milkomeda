@@ -24,7 +24,6 @@ package com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.eventhan
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.agg.Aggregate;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.event.Event;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.event.EventWithId;
-import jakarta.annotation.Nonnull;
 
 import java.util.List;
 
@@ -35,11 +34,7 @@ import java.util.List;
  * @author yizzuide
  * Create at 2025/06/11 15:48
  */
+@FunctionalInterface
 public interface SyncEventHandler {
-
-    void handleEvents(List<EventWithId<Event>> events,
-                      Aggregate aggregate);
-
-    @Nonnull
-    String getAggregateType();
+    void handleEvents(List<EventWithId<Event>> events, Aggregate aggregate);
 }

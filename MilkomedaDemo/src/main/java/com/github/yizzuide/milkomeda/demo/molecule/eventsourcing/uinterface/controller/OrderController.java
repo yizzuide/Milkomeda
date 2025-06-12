@@ -19,30 +19,33 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.event;
+package com.github.yizzuide.milkomeda.demo.molecule.eventsourcing.uinterface.controller;
 
-import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.agg.Aggregate;
-import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.command.Command;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.ToString;
-
-import java.time.OffsetDateTime;
+import com.github.yizzuide.milkomeda.demo.molecule.eventsourcing.application.OrderAppService;
+import com.github.yizzuide.milkomeda.demo.molecule.eventsourcing.uinterface.command.PlaceOrderCommand;
+import com.github.yizzuide.milkomeda.hydrogen.uniform.ResultVO;
+import com.github.yizzuide.milkomeda.hydrogen.uniform.UniformResult;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
- * The {@link Event} was created to publish when {@link Aggregate} processed the {@link Command}.
+ * OrderController
  *
- * @since 4.0.0
  * @author yizzuide
- * Create at 2025/06/11 15:32
+ * Create at 2025/06/12 17:30
  */
-@RequiredArgsConstructor(access = AccessLevel.PROTECTED)
-@ToString
-@Getter
-public abstract class Event {
-    protected final Long aggregateId;
-    protected final int version;
-    protected final String aggregateType;
-    protected final OffsetDateTime createdDate = OffsetDateTime.now();
+@RequestMapping("es/order")
+@RestController
+public class OrderController {
+
+    @Autowired
+    private OrderAppService orderAppService;
+
+    @PostMapping
+    public ResultVO<String> placeOrder(@RequestBody PlaceOrderCommand command) {
+        return UniformResult.ok(orderAppService.place(command));
+    }
 }

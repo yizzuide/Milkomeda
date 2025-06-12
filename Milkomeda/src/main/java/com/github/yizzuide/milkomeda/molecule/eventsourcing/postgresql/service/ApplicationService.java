@@ -37,11 +37,10 @@ import org.springframework.core.annotation.AnnotationUtils;
  * @author yizzuide
  * Create at 2025/06/12 13:33
  */
-@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 public class ApplicationService {
 
     @Autowired
-    private AggregateStore aggregateStore;
+    protected AggregateStore aggregateStore;
 
     @SuppressWarnings("unchecked")
     protected <T extends Aggregate> T loadAggregate(Class<T> aggregateClass, Command command) {
@@ -52,6 +51,12 @@ public class ApplicationService {
             return (T) aggregateStore.createAggregateFromType(aggregateType);
         }
         Long aggregateId = ReflectUtil.getAnnotatedFieldValue(BindAggregateId.class, command, Long.class);
+        return (T)aggregateStore.readAggregate(aggregateType, aggregateId);
+    }
+
+    @SuppressWarnings("unchecked")
+    protected <T extends Aggregate> T loadAggregate(Class<T> aggregateClass, Long aggregateId) {
+        String aggregateType = MoleculeContext.getAggregateTypeByClass(aggregateClass);
         return (T)aggregateStore.readAggregate(aggregateType, aggregateId);
     }
 

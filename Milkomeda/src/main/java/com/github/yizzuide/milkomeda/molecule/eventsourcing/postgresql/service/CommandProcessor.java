@@ -92,8 +92,8 @@ public class CommandProcessor {
 
     public void saveAndSendEvents(Aggregate aggregate) {
         List<EventWithId<Event>> newEvents = aggregateStore.saveAggregate(aggregate);
-        aggregateChangesHandlers.stream()
-                .filter(handler -> handler.getAggregateType().equals(MoleculeContext.getAggregateTypeByClass(aggregate.getClass())))
+        String aggregateType = MoleculeContext.getAggregateTypeByClass(aggregate.getClass());
+        MoleculeContext.getSyncEventHandlers(aggregateType)
                 .forEach(handler -> handler.handleEvents(newEvents, aggregate));
     }
 }

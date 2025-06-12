@@ -22,13 +22,14 @@
 package com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.agg.AggregateFactory;
+import com.github.yizzuide.milkomeda.molecule.MoleculeContext;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.command.Command;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.commandhandler.CommandHandler;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.commandhandler.DefaultCommandHandler;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.eventhandler.AsyncEventHandler;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.eventhandler.SyncEventHandler;
-import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.processor.*;
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.processor.PostgresChannelEventSubscriptionProcessor;
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.processor.ScheduledEventSubscriptionProcessor;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.repository.AggregateRepository;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.repository.EventRepository;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.repository.EventSubscriptionRepository;
@@ -62,6 +63,7 @@ public class EventSourcingConfig {
             List<AsyncEventHandler> eventHandlers,
             EventSubscriptionProcessor eventSubscriptionProcessor
     ) {
+        MoleculeContext.loadAsyncEventHandlers(eventHandlers);
         return new ScheduledEventSubscriptionProcessor(eventHandlers, eventSubscriptionProcessor);
     }
 
@@ -72,6 +74,7 @@ public class EventSourcingConfig {
             EventSubscriptionProcessor eventSubscriptionProcessor,
             EventSourcingProperties properties
     ) {
+        MoleculeContext.loadAsyncEventHandlers(eventHandlers);
         return new PostgresChannelEventSubscriptionProcessor(eventHandlers, eventSubscriptionProcessor, properties);
     }
 
@@ -125,6 +128,7 @@ public class EventSourcingConfig {
             DefaultCommandHandler commandHandler,
             List<SyncEventHandler> aggregateChangesHandlers
     ) {
+        MoleculeContext.loadSyncEventHandlers(aggregateChangesHandlers);
         return new CommandProcessor(aggregateStore, commandHandlers, commandHandler, aggregateChangesHandlers);
     }
 }

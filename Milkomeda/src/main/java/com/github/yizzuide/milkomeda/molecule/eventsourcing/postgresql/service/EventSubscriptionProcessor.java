@@ -21,6 +21,7 @@
 
 package com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.service;
 
+import com.github.yizzuide.milkomeda.molecule.MoleculeContext;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.event.Event;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.event.EventWithId;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.eventhandler.AsyncEventHandler;
@@ -59,7 +60,7 @@ public class EventSubscriptionProcessor {
                 checkpoint -> {
                     log.debug("Acquired lock on subscription {}, checkpoint = {}", subscriptionName, checkpoint);
                     List<EventWithId<Event>> events = eventRepository.readEventsAfterCheckpoint(
-                            eventHandler.getAggregateType(),
+                            MoleculeContext.getAsyncEventHandlerTypeByClass(eventHandler.getClass()),
                             checkpoint.lastProcessedTransactionId(),
                             checkpoint.lastProcessedEventId()
                     );

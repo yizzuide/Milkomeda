@@ -19,30 +19,28 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.event;
+package com.github.yizzuide.milkomeda.demo.molecule.eventsourcing.uinterface.command;
 
-import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.agg.Aggregate;
+import com.github.yizzuide.milkomeda.demo.molecule.eventsourcing.domain.value.Waypoint;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.command.Command;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.ToString;
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.command.CreatedCommand;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
-import java.time.OffsetDateTime;
+import java.math.BigDecimal;
+import java.util.List;
 
 /**
- * The {@link Event} was created to publish when {@link Aggregate} processed the {@link Command}.
+ * 打车下单命令
  *
- * @since 4.0.0
  * @author yizzuide
- * Create at 2025/06/11 15:32
+ * Create at 2025/06/12 14:27
  */
-@RequiredArgsConstructor(access = AccessLevel.PROTECTED)
-@ToString
-@Getter
-public abstract class Event {
-    protected final Long aggregateId;
-    protected final int version;
-    protected final String aggregateType;
-    protected final OffsetDateTime createdDate = OffsetDateTime.now();
+@CreatedCommand
+@EqualsAndHashCode(callSuper = true)
+@Data
+public class PlaceOrderCommand extends Command {
+    private Long riderId;
+    private BigDecimal price;
+    private List<Waypoint> route;
 }
