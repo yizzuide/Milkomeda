@@ -28,7 +28,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
-import java.time.OffsetDateTime;
+import java.sql.Timestamp;
 
 /**
  * The {@link Event} was created to publish when {@link Aggregate} processed the {@link Command}.
@@ -44,5 +44,5 @@ public abstract class Event {
     protected final Long aggregateId;
     protected final int version;
     protected final String aggregateType;
-    protected final OffsetDateTime createdDate = OffsetDateTime.now();
+    protected final Timestamp createdDate = new Timestamp(System.currentTimeMillis());
 }

@@ -21,7 +21,7 @@
 
 package com.github.yizzuide.milkomeda.demo.molecule.eventsourcing.uinterface.controller;
 
-import com.github.yizzuide.milkomeda.demo.molecule.eventsourcing.application.OrderAppService;
+import com.github.yizzuide.milkomeda.demo.molecule.eventsourcing.application.service.OrderAppService;
 import com.github.yizzuide.milkomeda.demo.molecule.eventsourcing.uinterface.command.PlaceOrderCommand;
 import com.github.yizzuide.milkomeda.hydrogen.uniform.ResultVO;
 import com.github.yizzuide.milkomeda.hydrogen.uniform.UniformResult;

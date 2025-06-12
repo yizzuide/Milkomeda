@@ -12,7 +12,7 @@ import lombok.Getter;
 import lombok.ToString;
 
 import java.math.BigDecimal;
-import java.time.OffsetDateTime;
+import java.sql.Timestamp;
 import java.util.List;
 
 /**
@@ -30,10 +30,10 @@ public class OrderAggregate extends Aggregate {
     private BigDecimal price;
     private List<Waypoint> route;
     private OrderStatus status;
-    private OffsetDateTime placedDate;
-    private OffsetDateTime acceptedDate;
-    private OffsetDateTime completedDate;
-    private OffsetDateTime cancelledDate;
+    private Timestamp placedDate;
+    private Timestamp acceptedDate;
+    private Timestamp completedDate;
+    private Timestamp cancelledDate;
 
     @JsonCreator
     public OrderAggregate(Long aggregateId, int version) {
