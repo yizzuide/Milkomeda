@@ -21,6 +21,8 @@
 
 package com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.command;
 
+import java.lang.annotation.*;
+
 /**
  * An identifier annotation indicates that the current {@link Command} is a creation type for internal optimization.
  *
@@ -28,5 +30,8 @@ package com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.command;
  * @author yizzuide
  * Create at 2025/06/12 14:23
  */
+@Target({ElementType.TYPE})
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
 public @interface CreatedCommand {
 }

@@ -22,11 +22,17 @@
 package com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.agg;
 
 import com.github.yizzuide.milkomeda.molecule.MoleculeContext;
-import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.AggregateType;
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.command.BindAggregateId;
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.command.Command;
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.command.CreatedCommand;
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.service.AggregateStore;
+import com.github.yizzuide.milkomeda.util.ReflectUtil;
 import lombok.SneakyThrows;
+import org.jetbrains.annotations.Nullable;
+import org.springframework.core.annotation.AnnotationUtils;
 
 /**
- * This Factory used to create {@link Aggregate} which annotated {@link AggregateType}.
+ * This factory create {@link Aggregate} which annotated {@link AggregateType}.
  *
  * @since 4.0.0
  * @author yizzuide
@@ -40,5 +46,18 @@ public class AggregateFactory {
         Class<? extends Aggregate> aggregateClass = MoleculeContext.getClassByAggregateType(aggregateType);
         var constructor = aggregateClass.getDeclaredConstructor(Long.class, Integer.TYPE);
         return (T) constructor.newInstance(aggregateId, 0);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T extends Aggregate> T create(AggregateStore aggregateStore, @Nullable String aggregateType, Command command) {
+        if (aggregateType == null) {
+            aggregateType = command.getAggregateType();
+        }
+        CreatedCommand createdCommand = AnnotationUtils.findAnnotation(command.getClass(), CreatedCommand.class);
+        if (createdCommand != null) {
+            return (T) aggregateStore.createAggregateFromType(aggregateType);
+        }
+        Long aggregateId = ReflectUtil.getAnnotatedFieldValue(BindAggregateId.class, command, Long.class);
+        return (T)aggregateStore.readAggregate(aggregateType, aggregateId);
     }
 }

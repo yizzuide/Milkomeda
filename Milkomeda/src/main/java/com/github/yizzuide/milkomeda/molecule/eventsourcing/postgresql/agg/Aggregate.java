@@ -34,7 +34,10 @@ import org.springframework.lang.NonNull;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * The base {@link Aggregate} can record and recreate from {@link Event}.

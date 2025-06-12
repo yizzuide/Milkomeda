@@ -21,21 +21,18 @@
 
 package com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.agg;
 
-import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.command.Command;
-
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
 /**
- * An identification annotation is used to identify what can be bound to the {@link Aggregate} id using in {@link Command}.
+ * Bind an aggregate type.
  *
  * @since 4.0.0
  * @author yizzuide
- * Create at 2025/06/12 14:09
+ * Create at 2025/06/11 15:26
  */
-@Target({ElementType.FIELD})
+@Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface BindAggregateId {
+@Documented
+public @interface AggregateType {
+    String value();
 }

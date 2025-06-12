@@ -22,9 +22,9 @@
 package com.github.yizzuide.milkomeda.molecule;
 
 import com.github.yizzuide.milkomeda.molecule.core.event.DomainEventBus;
-import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.AggregateType;
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.agg.AggregateType;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.EventSourcingProperties;
-import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.EventType;
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.event.EventType;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.agg.Aggregate;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.event.Event;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.eventhandler.AsyncEventHandler;

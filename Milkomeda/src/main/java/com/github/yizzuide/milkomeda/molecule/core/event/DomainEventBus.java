@@ -82,7 +82,7 @@ public class DomainEventBus {
     }
 
     /**
-     * Collect aggregate for publish events.
+     * Collect aggregate.
      * @param aggregate AggregateRoot
      */
     public void collect(AggregateRoot aggregate) {
@@ -93,14 +93,14 @@ public class DomainEventBus {
     }
 
     /**
-     * Publish aggregate events.
+     * Publish aggregate domain events.
      */
     public void publish() {
         clear(aggregateRoot -> aggregateRoot.domainEvents().forEach(domainEventPublisher::publishEvent));
     }
 
     /**
-     * Publish event object.
+     * Publish an event object.
      * @param event any event
      */
     public void publishEvent(Object event) {

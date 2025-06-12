@@ -23,12 +23,9 @@ package com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.service;
 
 import com.github.yizzuide.milkomeda.molecule.MoleculeContext;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.agg.Aggregate;
-import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.agg.BindAggregateId;
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.agg.AggregateFactory;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.command.Command;
-import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.command.CreatedCommand;
-import com.github.yizzuide.milkomeda.util.ReflectUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.annotation.AnnotationUtils;
 
 /**
  * The base application service which provides aggregate methods.
@@ -42,16 +39,10 @@ public class ApplicationService {
     @Autowired
     protected AggregateStore aggregateStore;
 
-    @SuppressWarnings("unchecked")
+
     protected <T extends Aggregate> T loadAggregate(Class<T> aggregateClass, Command command) {
         String aggregateType = MoleculeContext.getAggregateTypeByClass(aggregateClass);
-        command.setAggregateType(aggregateType);
-        CreatedCommand createdCommand = AnnotationUtils.findAnnotation(command.getClass(), CreatedCommand.class);
-        if (createdCommand != null) {
-            return (T) aggregateStore.createAggregateFromType(aggregateType);
-        }
-        Long aggregateId = ReflectUtil.getAnnotatedFieldValue(BindAggregateId.class, command, Long.class);
-        return (T)aggregateStore.readAggregate(aggregateType, aggregateId);
+        return AggregateFactory.create(aggregateStore, aggregateType, command);
     }
 
     @SuppressWarnings("unchecked")

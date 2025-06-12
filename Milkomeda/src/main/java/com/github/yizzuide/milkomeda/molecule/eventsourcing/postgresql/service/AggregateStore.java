@@ -35,7 +35,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.lang.NonNull;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,7 +47,6 @@ import java.util.Optional;
  * @author yizzuide
  * Create at 2025/06/11 19:38
  */
-@Transactional
 @RequiredArgsConstructor
 @Slf4j
 public class AggregateStore {

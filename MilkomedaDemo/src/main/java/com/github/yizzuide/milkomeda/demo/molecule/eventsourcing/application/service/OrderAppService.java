@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 public class OrderAppService extends ApplicationService {
     @DomainEventsDefer
     public String place(PlaceOrderCommand command) {
-        // Read other aggregates using AggregateStore.
+        // Read other aggregates...
         //loadAggregate(aggregateClass, aggregateId);
 
         OrderAggregate orderAggregate = loadAggregate(OrderAggregate.class, command);

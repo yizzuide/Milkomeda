@@ -2,7 +2,7 @@ package com.github.yizzuide.milkomeda.demo.molecule.eventsourcing.domain.event;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.github.yizzuide.milkomeda.demo.molecule.eventsourcing.domain.value.Waypoint;
-import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.EventType;
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.event.EventType;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.event.Event;
 import lombok.Builder;
 import lombok.Getter;
@@ -12,7 +12,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 /**
- * OrderCreatedEvent
+ * OrderPlacedEvent
  *
  * @author yizzuide
  * Create at 2025/06/11 16:02

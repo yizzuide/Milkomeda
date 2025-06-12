@@ -19,14 +19,21 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.molecule.core.event;
+package com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.command;
+
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.agg.Aggregate;
+
+import java.lang.annotation.*;
 
 /**
- * This event is auto published at end of transaction method which annotated {@link DomainEventsDefer} from application service layer.
+ * An identification annotation is used to identify what can be bound to the {@link Aggregate} id that using in impl of {@link Command}.
  *
  * @since 4.0.0
  * @author yizzuide
- * Create at 2025/06/11 18:10
+ * Create at 2025/06/12 14:09
  */
-public class ApplicationPostCommitEvent {
+@Target({ElementType.FIELD})
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+public @interface BindAggregateId {
 }

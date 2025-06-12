@@ -21,10 +21,7 @@
 
 package com.github.yizzuide.milkomeda.molecule.core.event;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-import java.lang.annotation.Retention;
+import java.lang.annotation.*;
 
 /**
  * The {@link DomainEventsDefer} annotation publish domain event which hanging with {@link DomainEventBus}
@@ -36,5 +33,6 @@ import java.lang.annotation.Retention;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
+@Documented
 public @interface DomainEventsDefer {
 }

@@ -19,22 +19,14 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql;
-
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+package com.github.yizzuide.milkomeda.molecule.core.event;
 
 /**
- * Register an event type.
+ * This event is auto published at the end of transaction method which annotated {@link DomainEventsDefer}.
  *
  * @since 4.0.0
  * @author yizzuide
- * Create at 2025/06/11 15:42
+ * Create at 2025/06/11 18:10
  */
-@Target({ElementType.TYPE})
-@Retention(RetentionPolicy.RUNTIME)
-public @interface EventType {
-    String value();
+public class RecordAggregateEvent {
 }

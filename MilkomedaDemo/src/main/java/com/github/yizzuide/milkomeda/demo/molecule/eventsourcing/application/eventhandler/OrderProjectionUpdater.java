@@ -1,6 +1,6 @@
 package com.github.yizzuide.milkomeda.demo.molecule.eventsourcing.application.eventhandler;
 
-import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.AggregateType;
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.agg.AggregateType;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.agg.Aggregate;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.event.Event;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.event.EventWithId;

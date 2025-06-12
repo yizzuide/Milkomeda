@@ -5,7 +5,7 @@ import com.github.yizzuide.milkomeda.demo.molecule.eventsourcing.domain.event.Or
 import com.github.yizzuide.milkomeda.demo.molecule.eventsourcing.domain.value.OrderStatus;
 import com.github.yizzuide.milkomeda.demo.molecule.eventsourcing.domain.value.Waypoint;
 import com.github.yizzuide.milkomeda.demo.molecule.eventsourcing.uinterface.command.PlaceOrderCommand;
-import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.AggregateType;
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.agg.AggregateType;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.agg.Aggregate;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.event.EventSourcing;
 import lombok.Getter;

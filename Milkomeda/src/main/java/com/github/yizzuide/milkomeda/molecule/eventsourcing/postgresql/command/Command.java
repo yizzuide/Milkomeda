@@ -21,21 +21,22 @@
 
 package com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.command;
 
-import io.swagger.v3.oas.annotations.Hidden;
-import lombok.Data;
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.agg.AggregateType;
+import org.springframework.core.annotation.AnnotationUtils;
 
 /**
- * The base {@link Command} used when aggregate need update.
+ * The {@link Command} used for aggregate update.
  *
  * @since 4.0.0
  * @author yizzuide
  * Create at 2025/06/11 16:12
  */
-@Data
-public class Command {
-    @Hidden
-    protected String aggregateType;
-
-    @Hidden
-    protected Long aggregateId;
+public interface Command {
+    default String getAggregateType() {
+        AggregateType annotation = AnnotationUtils.findAnnotation(this.getClass(), AggregateType.class);
+        if (annotation == null) {
+            return null;
+        }
+        return annotation.value();
+    }
 }

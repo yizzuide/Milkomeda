@@ -22,11 +22,11 @@
 package com.github.yizzuide.milkomeda.molecule.core.eventhandler;
 
 import com.github.yizzuide.milkomeda.molecule.MoleculeContext;
-import com.github.yizzuide.milkomeda.molecule.core.event.ApplicationPostCommitEvent;
+import com.github.yizzuide.milkomeda.molecule.core.event.RecordAggregateEvent;
 import org.springframework.context.event.EventListener;
 
 /**
- * The default event handler for handle {@link ApplicationPostCommitEvent}.
+ * The default event handler for handle {@link RecordAggregateEvent}.
  *
  * @since 4.0.0
  * @author yizzuide
@@ -34,7 +34,7 @@ import org.springframework.context.event.EventListener;
  */
 public class DefaultEventHandler {
     @EventListener
-    public void handle(ApplicationPostCommitEvent ignore) {
+    public void handle(RecordAggregateEvent ignore) {
         MoleculeContext.getDomainEventBus().publish();
     }
 }

@@ -22,7 +22,7 @@
 package com.github.yizzuide.milkomeda.molecule.orbit;
 
 import com.github.yizzuide.milkomeda.molecule.MoleculeContext;
-import com.github.yizzuide.milkomeda.molecule.core.event.ApplicationPostCommitEvent;
+import com.github.yizzuide.milkomeda.molecule.core.event.RecordAggregateEvent;
 import com.github.yizzuide.milkomeda.orbit.OrbitAdvice;
 import com.github.yizzuide.milkomeda.orbit.OrbitAdvisor;
 import com.github.yizzuide.milkomeda.orbit.OrbitInvocation;
@@ -39,7 +39,7 @@ public class MoleculeAdvice implements OrbitAdvice {
     @Override
     public Object invoke(OrbitInvocation invocation) throws Throwable {
         Object result = invocation.proceed();
-        MoleculeContext.getDomainEventBus().publishEvent(new ApplicationPostCommitEvent());
+        MoleculeContext.getDomainEventBus().publishEvent(new RecordAggregateEvent());
         return result;
     }
 }

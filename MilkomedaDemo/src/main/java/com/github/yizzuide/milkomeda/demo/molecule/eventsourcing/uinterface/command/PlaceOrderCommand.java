@@ -22,10 +22,10 @@
 package com.github.yizzuide.milkomeda.demo.molecule.eventsourcing.uinterface.command;
 
 import com.github.yizzuide.milkomeda.demo.molecule.eventsourcing.domain.value.Waypoint;
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.agg.AggregateType;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.command.Command;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.command.CreatedCommand;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -37,9 +37,9 @@ import java.util.List;
  * Create at 2025/06/12 14:27
  */
 @CreatedCommand
-@EqualsAndHashCode(callSuper = true)
+@AggregateType("ORDER")
 @Data
-public class PlaceOrderCommand extends Command {
+public class PlaceOrderCommand implements Command {
     private Long riderId;
     private BigDecimal price;
     private List<Waypoint> route;

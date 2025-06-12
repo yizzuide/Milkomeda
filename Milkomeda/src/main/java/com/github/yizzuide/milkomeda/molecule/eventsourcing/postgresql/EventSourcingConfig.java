@@ -129,6 +129,6 @@ public class EventSourcingConfig {
             List<SyncEventHandler> aggregateChangesHandlers
     ) {
         MoleculeContext.loadSyncEventHandlers(aggregateChangesHandlers);
-        return new CommandProcessor(aggregateStore, commandHandlers, commandHandler, aggregateChangesHandlers);
+        return new CommandProcessor(aggregateStore, commandHandlers, commandHandler);
     }
 }

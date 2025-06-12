@@ -22,19 +22,18 @@
 package com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.service;
 
 import com.github.yizzuide.milkomeda.molecule.MoleculeContext;
-import com.github.yizzuide.milkomeda.molecule.core.event.ApplicationPostCommitEvent;
+import com.github.yizzuide.milkomeda.molecule.core.event.RecordAggregateEvent;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.agg.Aggregate;
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.agg.AggregateFactory;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.command.Command;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.commandhandler.CommandHandler;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.commandhandler.DefaultCommandHandler;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.event.Event;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.event.EventWithId;
-import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.eventhandler.SyncEventHandler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.lang.NonNull;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -45,7 +44,6 @@ import java.util.List;
  * @author yizzuide
  * Create at 2025/06/11 19:36
  */
-@Transactional
 @RequiredArgsConstructor
 @Slf4j
 public class CommandProcessor {
@@ -53,15 +51,10 @@ public class CommandProcessor {
     private final AggregateStore aggregateStore;
     private final List<CommandHandler<? extends Command>> commandHandlers;
     private final DefaultCommandHandler defaultCommandHandler;
-    private final List<SyncEventHandler> aggregateChangesHandlers;
 
     public Aggregate process(@NonNull Command command) {
         log.debug("Processing command {}", command);
-
-        String aggregateType = command.getAggregateType();
-        Long aggregateId = command.getAggregateId();
-
-        Aggregate aggregate = aggregateStore.readAggregate(aggregateType, aggregateId);
+        Aggregate aggregate = AggregateFactory.create(aggregateStore, null, command);
 
         commandHandlers.stream()
                 .filter(commandHandler -> commandHandler.getCommandType() == command.getClass())
@@ -75,13 +68,11 @@ public class CommandProcessor {
                             command.getClass().getSimpleName(), defaultCommandHandler.getClass().getSimpleName());
                     defaultCommandHandler.handle(aggregate, command);
                 });
-
-        saveAndSendEvents(aggregate);
         return aggregate;
     }
 
     @EventListener
-    public void handle(ApplicationPostCommitEvent ignore) {
+    public void handle(RecordAggregateEvent ignore) {
         List<Aggregate> aggregates = MoleculeContext.getDomainEventBus().getHangingAggregates(Aggregate.class);
         if (aggregates.isEmpty()) {
             return;
@@ -90,7 +81,7 @@ public class CommandProcessor {
         MoleculeContext.getDomainEventBus().clear(null);
     }
 
-    public void saveAndSendEvents(Aggregate aggregate) {
+    private void saveAndSendEvents(Aggregate aggregate) {
         List<EventWithId<Event>> newEvents = aggregateStore.saveAggregate(aggregate);
         String aggregateType = MoleculeContext.getAggregateTypeByClass(aggregate.getClass());
         MoleculeContext.getSyncEventHandlers(aggregateType)
