@@ -33,6 +33,13 @@ import java.sql.SQLException;
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * This repository for event subscription and communicate {@link EventSubscriptionCheckpoint}.
+ *
+ * @since 4.0.0
+ * @author yizzuide
+ * Create at 2025/06/11 19:17
+ */
 @Transactional(propagation = Propagation.MANDATORY)
 @RequiredArgsConstructor
 public class EventSubscriptionRepository {

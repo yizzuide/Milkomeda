@@ -21,18 +21,21 @@
 
 package com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.command;
 
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.ToString;
+import io.swagger.v3.oas.annotations.Hidden;
+import lombok.Data;
 
-import java.util.UUID;
-
-@RequiredArgsConstructor(access = AccessLevel.PROTECTED)
-@Getter
-@ToString
+/**
+ * The base {@link Command} used when aggregate need update.
+ *
+ * @since 4.0.0
+ * @author yizzuide
+ * Create at 2025/06/11 16:12
+ */
+@Data
 public class Command {
+    @Hidden
+    protected String aggregateType;
 
-    protected final String aggregateType;
-    protected final UUID aggregateId;
+    @Hidden
+    protected Long aggregateId;
 }

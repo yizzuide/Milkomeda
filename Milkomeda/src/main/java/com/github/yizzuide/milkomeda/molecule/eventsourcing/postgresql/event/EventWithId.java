@@ -23,6 +23,13 @@ package com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.event;
 
 import java.math.BigInteger;
 
+/**
+ * A wrapper for {@link Event} with transaction id which used by subscription processor to find the latest event.
+ *
+ * @since 4.0.0
+ * @author yizzuide
+ * Create at 2025/06/11 15:45
+ */
 public record EventWithId<T extends Event>(
         long id,
         BigInteger transactionId,

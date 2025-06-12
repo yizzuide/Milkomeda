@@ -29,7 +29,13 @@ import org.springframework.scheduling.annotation.Scheduled;
 
 import java.util.List;
 
-
+/**
+ * This processor is scheduled at fixed-frequency that use {@link EventSubscriptionProcessor} find new events and notify {@link AsyncEventHandler}.
+ *
+ * @since 4.0.0
+ * @author yizzuide
+ * Create at 2025/06/11 17:09
+ */
 @RequiredArgsConstructor
 @Slf4j
 public class ScheduledEventSubscriptionProcessor {

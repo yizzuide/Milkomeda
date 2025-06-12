@@ -37,8 +37,14 @@ import org.springframework.lang.NonNull;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.UUID;
 
+/**
+ * This processor handles commands and saves the {@link Aggregate} events with {@link AggregateStore} synchronously.
+ *
+ * @since 4.0.0
+ * @author yizzuide
+ * Create at 2025/06/11 19:36
+ */
 @Transactional
 @RequiredArgsConstructor
 @Slf4j
@@ -53,7 +59,7 @@ public class CommandProcessor {
         log.debug("Processing command {}", command);
 
         String aggregateType = command.getAggregateType();
-        UUID aggregateId = command.getAggregateId();
+        Long aggregateId = command.getAggregateId();
 
         Aggregate aggregate = aggregateStore.readAggregate(aggregateType, aggregateId);
 

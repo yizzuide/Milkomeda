@@ -21,21 +21,28 @@
 
 package com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.event;
 
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.agg.Aggregate;
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.command.Command;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
 import java.time.OffsetDateTime;
-import java.util.UUID;
 
+/**
+ * The {@link Event} was created to publish when {@link Aggregate} processed the {@link Command}.
+ *
+ * @since 4.0.0
+ * @author yizzuide
+ * Create at 2025/06/11 15:32
+ */
 @ToString
 @Getter
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public abstract class Event {
-
-    protected final UUID aggregateId;
+    protected final Long aggregateId;
     protected final int version;
+    protected final String aggregateType;
     protected final OffsetDateTime createdDate = OffsetDateTime.now();
-
 }

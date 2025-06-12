@@ -275,6 +275,40 @@ public class ReflectUtil {
     }
 
     /**
+     * 根据指定的注解获取字段值
+     * @param annotationClazz   注解Class
+     * @param target            目标对象
+     * @param resultType        返回类型
+     * @return  字段值
+     * @param <T>   返回泛型
+     * @since 4.0.0
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> T getAnnotatedFieldValue(Class<? extends Annotation> annotationClazz, Object target, Class<T> resultType) {
+        Class<?> clazz = target.getClass();
+        Field[] fields = clazz.getDeclaredFields();
+        for (Field field : fields) {
+            if (field.isAnnotationPresent(annotationClazz)) {
+                // 尝试调用 Getter 方法获取字段值
+                String getterMethodName = "get" + Character.toUpperCase(field.getName().charAt(0)) + field.getName().substring(1);
+                try {
+                    try {
+                        Method getterMethod = clazz.getMethod(getterMethodName);
+                        return (T) getterMethod.invoke(target);
+                    } catch (NoSuchMethodException e) {
+                        // 如果没有 Getter 方法，直接访问字段
+                        field.setAccessible(true);
+                        return (T) field.get(target);
+                    }
+                } catch (IllegalAccessException | InvocationTargetException e) {
+                    log.error("Get field value error: {}", e.getMessage(), e);
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
      * 获取Field和值
      * @param target    目标对象
      * @param fieldPath 属性路径

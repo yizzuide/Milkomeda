@@ -28,6 +28,13 @@ import jakarta.annotation.Nonnull;
 
 import java.util.List;
 
+/**
+ * The {@link SyncEventHandler} means used to handle event at same transaction.
+ *
+ * @since 4.0.0
+ * @author yizzuide
+ * Create at 2025/06/11 15:48
+ */
 public interface SyncEventHandler {
 
     void handleEvents(List<EventWithId<Event>> events,

@@ -19,21 +19,14 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql;
-
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+package com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.command;
 
 /**
- * RegisterEvent
+ * An identifier annotation indicates that the current {@link Command} is a creation type for internal optimization.
  *
+ * @since 4.0.0
  * @author yizzuide
- * Create at 2025/06/11 15:42
+ * Create at 2025/06/12 14:23
  */
-@Target({ElementType.TYPE})
-@Retention(RetentionPolicy.RUNTIME)
-public @interface RegisterEvent {
-    String value();
+public @interface CreatedCommand {
 }

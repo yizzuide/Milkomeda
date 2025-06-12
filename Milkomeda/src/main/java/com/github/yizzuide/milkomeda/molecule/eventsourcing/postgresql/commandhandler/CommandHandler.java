@@ -25,6 +25,13 @@ import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.agg.Aggre
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.command.Command;
 import jakarta.annotation.Nonnull;
 
+/**
+ * The {@link CommandHandler} interface is needs any command handler to impl which handle {@link Command} from the Controller.
+ *
+ * @since 4.0.0
+ * @author yizzuide
+ * Create at 2025/06/11 17:32
+ */
 public interface CommandHandler<T extends Command> {
 
     void handle(Aggregate aggregate, Command command);

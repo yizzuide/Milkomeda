@@ -23,8 +23,8 @@ package com.github.yizzuide.milkomeda.molecule;
 
 import com.github.yizzuide.milkomeda.molecule.core.event.DomainEventBus;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.EventSourcingProperties;
-import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.RegisterAggregate;
-import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.RegisterEvent;
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.AggregateType;
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.EventType;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.agg.Aggregate;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.event.Event;
 import com.github.yizzuide.milkomeda.universe.context.SpringContext;
@@ -102,11 +102,11 @@ public class MoleculeContext {
             return;
         }
         Set<Class<Aggregate>> aggClasses = SpringContext.loadClassFromBasePackage(properties.getAggregatePackage(), Aggregate.class);
-        Map<String, Class<? extends Aggregate>> aggregateClassMapper = SpringContext.bindClassTagMap(aggClasses, RegisterAggregate.class, annotation -> ((RegisterAggregate) annotation).value());
+        Map<String, Class<? extends Aggregate>> aggregateClassMapper = SpringContext.bindClassTagMap(aggClasses, AggregateType.class, annotation -> ((AggregateType) annotation).value());
         MoleculeContext.setAggregateTypeMapper(aggregateClassMapper);
         aggregateClassMapper.forEach((key, value) -> aggregateTagMapper.put(value, key));
         Set<Class<Event>> eventClasses = SpringContext.loadClassFromBasePackage(properties.getEventPackage(), Event.class);
-        Map<String, Class<? extends Event>> eventClassMapper = SpringContext.bindClassTagMap(eventClasses, RegisterEvent.class, annotation -> ((RegisterEvent) annotation).value());
+        Map<String, Class<? extends Event>> eventClassMapper = SpringContext.bindClassTagMap(eventClasses, EventType.class, annotation -> ((EventType) annotation).value());
         MoleculeContext.setEventTypeMapper(eventClassMapper);
         eventClassMapper.forEach((key, value) -> eventTagMapper.put(value, key));
     }

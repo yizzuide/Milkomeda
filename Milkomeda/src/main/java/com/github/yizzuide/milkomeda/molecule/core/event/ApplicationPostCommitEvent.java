@@ -22,7 +22,7 @@
 package com.github.yizzuide.milkomeda.molecule.core.event;
 
 /**
- * ApplicationPostCommitEvent
+ * This event is auto published at end of transaction method which annotated {@link DomainEventsDefer} from application service layer.
  *
  * @since 4.0.0
  * @author yizzuide

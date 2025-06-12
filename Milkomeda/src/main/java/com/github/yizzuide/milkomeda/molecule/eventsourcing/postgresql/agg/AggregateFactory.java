@@ -22,18 +22,23 @@
 package com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.agg;
 
 import com.github.yizzuide.milkomeda.molecule.MoleculeContext;
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.AggregateType;
 import lombok.SneakyThrows;
 
-import java.util.UUID;
-
-
+/**
+ * This Factory used to create {@link Aggregate} which annotated {@link AggregateType}.
+ *
+ * @since 4.0.0
+ * @author yizzuide
+ * Create at 2025/06/11 16:32
+ */
 public class AggregateFactory {
 
     @SuppressWarnings("unchecked")
     @SneakyThrows(ReflectiveOperationException.class)
-    public <T extends Aggregate> T newInstance(String aggregateType, UUID aggregateId) {
+    public static <T extends Aggregate> T newInstance(String aggregateType, Long aggregateId) {
         Class<? extends Aggregate> aggregateClass = MoleculeContext.getClassByAggregateType(aggregateType);
-        var constructor = aggregateClass.getDeclaredConstructor(UUID.class, Integer.TYPE);
+        var constructor = aggregateClass.getDeclaredConstructor(Long.class, Integer.TYPE);
         return (T) constructor.newInstance(aggregateId, 0);
     }
 }

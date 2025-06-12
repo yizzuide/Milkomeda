@@ -36,12 +36,19 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
 
+/**
+ * The base {@link Aggregate} that any aggregate must extend.
+ *
+ * @since 4.0.0
+ * @author yizzuide
+ * Create at 2025/06/11 17:09
+ */
 @ToString
 @Getter
 @Slf4j
 public abstract class Aggregate implements AggregateRoot {
 
-    protected final UUID aggregateId;
+    protected final Long aggregateId;
 
     protected int version;
 
@@ -51,7 +58,7 @@ public abstract class Aggregate implements AggregateRoot {
     @JsonIgnore
     protected final List<Event> changes = new ArrayList<>();
 
-    protected Aggregate(@NonNull UUID aggregateId, int version) {
+    protected Aggregate(@NonNull Long aggregateId, int version) {
         this.aggregateId = aggregateId;
         this.baseVersion = this.version = version;
     }

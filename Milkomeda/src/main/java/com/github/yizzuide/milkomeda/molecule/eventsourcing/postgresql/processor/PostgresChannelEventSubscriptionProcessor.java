@@ -42,7 +42,13 @@ import java.sql.Statement;
 import java.util.List;
 import java.util.concurrent.*;
 
-
+/**
+ * This processor is used to subscribe to Postgres channel events.
+ *
+ * @since 4.0.0
+ * @author yizzuide
+ * Create at 2025/06/11 17:09
+ */
 @RequiredArgsConstructor
 @Slf4j
 public class PostgresChannelEventSubscriptionProcessor {

@@ -40,8 +40,14 @@ import java.sql.ResultSet;
 import java.sql.Types;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
+/**
+ * This repository is used to store the {@link Event} with version.
+ *
+ * @since 4.0.0
+ * @author yizzuide
+ * Create at 2025/06/11 18:46
+ */
 @Transactional(propagation = Propagation.MANDATORY)
 @RequiredArgsConstructor
 public class EventRepository {
@@ -52,13 +58,14 @@ public class EventRepository {
     @SneakyThrows
     public <T extends Event> EventWithId<T> appendEvent(@NonNull Event event) {
         List<EventWithId<T>> result = jdbcTemplate.query("""
-                        INSERT INTO ES_EVENT (TRANSACTION_ID, AGGREGATE_ID, VERSION, EVENT_TYPE, JSON_DATA)
-                        VALUES(pg_current_xact_id(), :aggregateId, :version, :eventType, :jsonObj::json)
+                        INSERT INTO ES_EVENT (TRANSACTION_ID, AGGREGATE_ID, VERSION, AGGREGATE_TYPE, EVENT_TYPE, JSON_DATA)
+                        VALUES(pg_current_xact_id(), :aggregateId, :version, :aggregateType, :eventType, :jsonObj::json)
                         RETURNING ID, TRANSACTION_ID::text, EVENT_TYPE, JSON_DATA
                         """,
                 Map.of(
                         "aggregateId", event.getAggregateId(),
                         "version", event.getVersion(),
+                        "aggregateType", event.getAggregateType(),
                         "eventType", MoleculeContext.getEventTypeByClass(event.getClass()),
                         "jsonObj", objectMapper.writeValueAsString(event)
                 ),
@@ -66,7 +73,7 @@ public class EventRepository {
         return result.getFirst();
     }
 
-    public List<EventWithId<Event>> readEvents(@NonNull UUID aggregateId,
+    public List<EventWithId<Event>> readEvents(@NonNull Long aggregateId,
                                                @Nullable Integer fromVersion,
                                                @Nullable Integer toVersion) {
         MapSqlParameterSource parameters = new MapSqlParameterSource();
@@ -93,16 +100,15 @@ public class EventRepository {
                                                               @NonNull BigInteger lastProcessedTransactionId,
                                                               long lastProcessedEventId) {
         return jdbcTemplate.query("""
-                        SELECT e.ID,
-                               e.TRANSACTION_ID::text,
-                               e.EVENT_TYPE,
-                               e.JSON_DATA
-                          FROM ES_EVENT e
-                          JOIN ES_AGGREGATE a on a.ID = e.AGGREGATE_ID
-                         WHERE a.AGGREGATE_TYPE = :aggregateType
-                           AND (e.TRANSACTION_ID, e.ID) > (:lastProcessedTransactionId::xid8, :lastProcessedEventId)
-                           AND e.TRANSACTION_ID < pg_snapshot_xmin(pg_current_snapshot())
-                         ORDER BY e.TRANSACTION_ID ASC, e.ID ASC
+                        SELECT ID,
+                               TRANSACTION_ID::text,
+                               EVENT_TYPE,
+                               JSON_DATA
+                          FROM ES_EVENT
+                         WHERE AGGREGATE_TYPE = :aggregateType
+                           AND (TRANSACTION_ID, ID) > (:lastProcessedTransactionId::xid8, :lastProcessedEventId)
+                           AND TRANSACTION_ID < pg_snapshot_xmin(pg_current_snapshot())
+                         ORDER BY TRANSACTION_ID ASC, ID ASC
                         """,
                 Map.of(
                         "aggregateType", aggregateType,

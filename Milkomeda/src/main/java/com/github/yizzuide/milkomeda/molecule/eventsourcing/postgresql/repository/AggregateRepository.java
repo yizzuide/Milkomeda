@@ -24,22 +24,32 @@ package com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.reposito
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.yizzuide.milkomeda.molecule.MoleculeContext;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.agg.Aggregate;
+import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.jetbrains.annotations.Nullable;
 import org.postgresql.util.PGobject;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.lang.NonNull;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.Serializable;
 import java.sql.ResultSet;
 import java.sql.Types;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 
+/**
+ * This repository is used to store the {@link Aggregate} and snapshot with version.
+ *
+ * @since 4.0.0
+ * @author yizzuide
+ * Create at 2025/06/11 18:25
+ */
 @Transactional(propagation = Propagation.MANDATORY)
 @RequiredArgsConstructor
 public class AggregateRepository {
@@ -47,8 +57,17 @@ public class AggregateRepository {
     private final NamedParameterJdbcTemplate jdbcTemplate;
     private final ObjectMapper objectMapper;
 
-    public void createAggregateIfAbsent(@NonNull String aggregateType,
-                                        @NonNull UUID aggregateId) {
+    public Long createAggregateIfAbsent(@NonNull String aggregateType,
+                                        @Nullable Long aggregateId) {
+        if (aggregateId == null) {
+            SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(ApplicationContextHolder.get().getBean(JdbcTemplate.class))
+                    .withTableName("ES_AGGREGATE")
+                    .usingGeneratedKeyColumns("ID");
+            Map<String, ? extends Serializable> params = Map.of("VERSION", 0, "AGGREGATE_TYPE", aggregateType);
+            Number key = simpleJdbcInsert.executeAndReturnKey(params);
+            return key.longValue();
+        }
+
         jdbcTemplate.update("""
                         INSERT INTO ES_AGGREGATE (ID, VERSION, AGGREGATE_TYPE)
                         VALUES (:aggregateId, 0, :aggregateType)
@@ -58,9 +77,10 @@ public class AggregateRepository {
                         "aggregateId", aggregateId,
                         "aggregateType", aggregateType
                 ));
+        return null;
     }
 
-    public boolean checkAndUpdateAggregateVersion(@NonNull UUID aggregateId,
+    public boolean checkAndUpdateAggregateVersion(@NonNull Long aggregateId,
                                                   int expectedVersion,
                                                   int newVersion) {
         int updatedRows = jdbcTemplate.update("""
@@ -80,30 +100,29 @@ public class AggregateRepository {
     @SneakyThrows
     public void createAggregateSnapshot(@NonNull Aggregate aggregate) {
         jdbcTemplate.update("""
-                        INSERT INTO ES_AGGREGATE_SNAPSHOT (AGGREGATE_ID, VERSION, JSON_DATA)
-                        VALUES (:aggregateId, :version, :jsonObj::json)
+                        INSERT INTO ES_AGGREGATE_SNAPSHOT (AGGREGATE_ID, VERSION, AGGREGATE_TYPE, JSON_DATA)
+                        VALUES (:aggregateId, :version, :aggregateType, :jsonObj::json)
                         """,
                 Map.of(
                         "aggregateId", aggregate.getAggregateId(),
                         "version", aggregate.getVersion(),
+                        "aggregateType", MoleculeContext.getAggregateTypeByClass(aggregate.getClass()),
                         "jsonObj", objectMapper.writeValueAsString(aggregate)
                 ));
     }
 
-    public Optional<Aggregate> readAggregateSnapshot(@NonNull UUID aggregateId,
+    public Optional<Aggregate> readAggregateSnapshot(@NonNull Long aggregateId,
                                                      @Nullable Integer version) {
         MapSqlParameterSource parameters = new MapSqlParameterSource();
         parameters.addValue("aggregateId", aggregateId);
         parameters.addValue("version", version, Types.INTEGER);
 
         return jdbcTemplate.query("""
-                        SELECT a.AGGREGATE_TYPE,
-                               s.JSON_DATA
-                          FROM ES_AGGREGATE_SNAPSHOT s
-                          JOIN ES_AGGREGATE a ON a.ID = s.AGGREGATE_ID
-                         WHERE s.AGGREGATE_ID = :aggregateId
-                           AND (:version IS NULL OR s.VERSION <= :version)
-                         ORDER BY s.VERSION DESC
+                        SELECT AGGREGATE_TYPE,
+                               JSON_DATA
+                          FROM ES_AGGREGATE_SNAPSHOT
+                         WHERE (:version IS NULL OR VERSION <= :version)
+                         ORDER BY VERSION DESC
                          LIMIT 1
                         """,
                 parameters,

@@ -25,6 +25,13 @@ import org.springframework.lang.NonNull;
 
 import java.io.Serial;
 
+/**
+ * Thrown to indicate that the state of an aggregate is invalid.
+ *
+ * @since 4.0.0
+ * @author yizzuide
+ * Create at 2025/06/11 18:05
+ */
 public class AggregateStateException extends RuntimeException {
 
     @Serial

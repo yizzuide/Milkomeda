@@ -19,21 +19,22 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.event;
+package com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql;
 
-import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.repository.EventSubscriptionRepository;
-
-import java.math.BigInteger;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * The {@link EventSubscriptionCheckpoint} is used by {@link EventSubscriptionRepository} for querying the last processed event.
+ * Register an event type.
  *
  * @since 4.0.0
  * @author yizzuide
- * Create at 2025/06/11 18:21
+ * Create at 2025/06/11 15:42
  */
-public record EventSubscriptionCheckpoint(
-        BigInteger lastProcessedTransactionId,
-        long lastProcessedEventId
-) {
+@Target({ElementType.TYPE})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface EventType {
+    String value();
 }

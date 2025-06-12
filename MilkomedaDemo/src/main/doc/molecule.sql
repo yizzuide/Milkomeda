@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS ES_AGGREGATE (
-                                            ID              UUID     PRIMARY KEY,
+                                            ID              BIGSERIAL  PRIMARY KEY,
                                             VERSION         INTEGER  NOT NULL,
                                             AGGREGATE_TYPE  TEXT     NOT NULL
 );
@@ -9,20 +9,23 @@ CREATE INDEX IF NOT EXISTS IDX_ES_AGGREGATE_AGGREGATE_TYPE ON ES_AGGREGATE (AGGR
 CREATE TABLE IF NOT EXISTS ES_EVENT (
                                         ID              BIGSERIAL  PRIMARY KEY,
                                         TRANSACTION_ID  XID8       NOT NULL,
-                                        AGGREGATE_ID    UUID       NOT NULL REFERENCES ES_AGGREGATE (ID),
+                                        AGGREGATE_ID    BIGINT     NOT NULL,
                                         VERSION         INTEGER    NOT NULL,
+                                        AGGREGATE_TYPE  TEXT       NOT NULL,
                                         EVENT_TYPE      TEXT       NOT NULL,
                                         JSON_DATA       JSON       NOT NULL,
                                         UNIQUE (AGGREGATE_ID, VERSION)
 );
 
-CREATE INDEX IF NOT EXISTS IDX_ES_EVENT_TRANSACTION_ID_ID ON ES_EVENT (TRANSACTION_ID, ID);
+CREATE INDEX IF NOT EXISTS IDX_ES_EVENT_AGGREGATE_TYPE_TRANSACTION_ID_ID ON ES_EVENT (AGGREGATE_TYPE, TRANSACTION_ID, ID);
 CREATE INDEX IF NOT EXISTS IDX_ES_EVENT_AGGREGATE_ID ON ES_EVENT (AGGREGATE_ID);
 CREATE INDEX IF NOT EXISTS IDX_ES_EVENT_VERSION ON ES_EVENT (VERSION);
+CREATE INDEX IF NOT EXISTS IDX_ES_EVENT_AGGREGATE_TYPE ON ES_EVENT (AGGREGATE_TYPE);
 
 CREATE TABLE IF NOT EXISTS ES_AGGREGATE_SNAPSHOT (
-                                                     AGGREGATE_ID  UUID     NOT NULL REFERENCES ES_AGGREGATE (ID),
+                                                     AGGREGATE_ID  BIGINT,
                                                      VERSION       INTEGER  NOT NULL,
+                                                     AGGREGATE_TYPE  TEXT   NOT NULL,
                                                      JSON_DATA     JSON     NOT NULL,
                                                      PRIMARY KEY (AGGREGATE_ID, VERSION)
 );

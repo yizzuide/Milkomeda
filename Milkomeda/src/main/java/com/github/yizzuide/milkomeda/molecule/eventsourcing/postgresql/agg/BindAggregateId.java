@@ -19,21 +19,23 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.event;
+package com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.agg;
 
-import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.repository.EventSubscriptionRepository;
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.command.Command;
 
-import java.math.BigInteger;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * The {@link EventSubscriptionCheckpoint} is used by {@link EventSubscriptionRepository} for querying the last processed event.
+ * An identification annotation is used to identify what can be bound to the {@link Aggregate} id using in {@link Command}.
  *
  * @since 4.0.0
  * @author yizzuide
- * Create at 2025/06/11 18:21
+ * Create at 2025/06/12 14:09
  */
-public record EventSubscriptionCheckpoint(
-        BigInteger lastProcessedTransactionId,
-        long lastProcessedEventId
-) {
+@Target({ElementType.FIELD})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface BindAggregateId {
 }

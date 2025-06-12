@@ -22,11 +22,12 @@
 package com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.service;
 
 import com.github.yizzuide.milkomeda.molecule.MoleculeContext;
-import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.agg.AggregateFactory;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.EventSourcingProperties;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.agg.Aggregate;
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.agg.AggregateFactory;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.event.Event;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.event.EventWithId;
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.exception.AggregateStateException;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.exception.OptimisticConcurrencyControlException;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.repository.AggregateRepository;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.repository.EventRepository;
@@ -39,8 +40,14 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
+/**
+ * The {@link AggregateStore} is entry storage of {@link Aggregate} and {@link Event}.
+ *
+ * @since 4.0.0
+ * @author yizzuide
+ * Create at 2025/06/11 19:38
+ */
 @Transactional
 @RequiredArgsConstructor
 @Slf4j
@@ -48,14 +55,21 @@ public class AggregateStore {
 
     private final AggregateRepository aggregateRepository;
     private final EventRepository eventRepository;
-    private final AggregateFactory aggregateFactory;
     private final EventSourcingProperties properties;
+
+    public Aggregate createAggregateFromType(String aggregateType) {
+        Long aggregateId =  aggregateRepository.createAggregateIfAbsent(aggregateType, null);
+        return AggregateFactory.newInstance(aggregateType, aggregateId);
+    }
 
     public List<EventWithId<Event>> saveAggregate(Aggregate aggregate) {
         log.debug("Saving aggregate {}", aggregate);
 
         String aggregateType = MoleculeContext.getAggregateTypeByClass(aggregate.getClass());
-        UUID aggregateId = aggregate.getAggregateId();
+        Long aggregateId = aggregate.getAggregateId();
+        if (aggregateId == null) {
+            throw new AggregateStateException("Aggregate id can't be null");
+        }
         aggregateRepository.createAggregateIfAbsent(aggregateType, aggregateId);
 
         int expectedVersion = aggregate.getBaseVersion();
@@ -89,12 +103,12 @@ public class AggregateStore {
     }
 
     public Aggregate readAggregate(String aggregateType,
-                                   UUID aggregateId) {
+                                   Long aggregateId) {
         return readAggregate(aggregateType, aggregateId, null);
     }
 
     public Aggregate readAggregate(@NonNull String aggregateType,
-                                   @NonNull UUID aggregateId,
+                                   @NonNull Long aggregateId,
                                    @Nullable Integer version) {
         log.debug("Reading {} aggregate {}", aggregateType, aggregateId);
         EventSourcingProperties.Snapshotting snapshotting = properties.getSnapshotting(aggregateType);
@@ -113,7 +127,7 @@ public class AggregateStore {
         return aggregate;
     }
 
-    private Optional<Aggregate> readAggregateFromSnapshot(UUID aggregateId,
+    private Optional<Aggregate> readAggregateFromSnapshot(Long aggregateId,
                                                           @Nullable Integer aggregateVersion) {
         return aggregateRepository.readAggregateSnapshot(aggregateId, aggregateVersion)
                 .map(aggregate -> {
@@ -133,14 +147,14 @@ public class AggregateStore {
     }
 
     private Aggregate readAggregateFromEvents(String aggregateType,
-                                              UUID aggregateId,
+                                              Long aggregateId,
                                               @Nullable Integer aggregateVersion) {
         var events = eventRepository.readEvents(aggregateId, null, aggregateVersion)
                 .stream()
                 .map(EventWithId::event)
                 .toList();
         log.debug("Read {} events for aggregate {}", events.size(), aggregateId);
-        Aggregate aggregate = aggregateFactory.newInstance(aggregateType, aggregateId);
+        Aggregate aggregate = AggregateFactory.newInstance(aggregateType, aggregateId);
         aggregate.loadFromHistory(events);
         return aggregate;
     }

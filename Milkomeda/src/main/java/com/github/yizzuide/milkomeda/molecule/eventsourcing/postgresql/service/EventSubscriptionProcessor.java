@@ -34,6 +34,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+/**
+ * This processor use {@link AsyncEventHandler} to handle new events which find from {@link EventSubscriptionRepository}.
+ *
+ * @since 4.0.0
+ * @author yizzuide
+ * Create at 2025/06/11 19:28
+ */
 @Transactional(propagation = Propagation.REQUIRES_NEW)
 @RequiredArgsConstructor
 @Slf4j

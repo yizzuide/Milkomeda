@@ -26,6 +26,13 @@ import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.command.C
 import jakarta.annotation.Nonnull;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * This is default impl of {@link CommandHandler} which simplify transfer the processing to {@link Aggregate}.
+ *
+ * @since 4.0.0
+ * @author yizzuide
+ * Create at 2025/06/11 17:45
+ */
 @Slf4j
 public class DefaultCommandHandler implements CommandHandler<Command> {
 

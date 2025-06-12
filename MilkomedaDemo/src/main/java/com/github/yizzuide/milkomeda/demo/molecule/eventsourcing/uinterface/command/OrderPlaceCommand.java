@@ -19,22 +19,17 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql;
+package com.github.yizzuide.milkomeda.demo.molecule.eventsourcing.uinterface.command;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.command.Command;
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.command.CreatedCommand;
 
 /**
- * RegisterAggregate
+ * 打车下单命令
  *
- * @since 4.0.0
  * @author yizzuide
- * Create at 2025/06/11 15:26
+ * Create at 2025/06/12 14:27
  */
-@Target({ElementType.TYPE})
-@Retention(RetentionPolicy.RUNTIME)
-public @interface RegisterAggregate {
-    String value();
+@CreatedCommand
+public class OrderPlaceCommand extends Command {
 }

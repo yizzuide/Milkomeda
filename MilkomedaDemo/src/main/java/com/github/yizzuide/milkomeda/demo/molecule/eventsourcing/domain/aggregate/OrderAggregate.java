@@ -1,6 +1,6 @@
 package com.github.yizzuide.milkomeda.demo.molecule.eventsourcing.domain.aggregate;
 
-import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.RegisterAggregate;
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.AggregateType;
 
 /**
  * OrderAggregate
@@ -8,6 +8,6 @@ import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.RegisterA
  * @author yizzuide
  * Create at 2025/06/11 16:00
  */
-@RegisterAggregate("ORDER")
+@AggregateType("ORDER")
 public class OrderAggregate {
 }

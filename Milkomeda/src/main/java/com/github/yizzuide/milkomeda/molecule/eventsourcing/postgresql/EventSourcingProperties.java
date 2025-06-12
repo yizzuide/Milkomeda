@@ -32,7 +32,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Event Sourcing Properties.
+ * Event-sourcing properties.
  *
  * @since 4.0.0
  * @author yizzuide

@@ -110,18 +110,12 @@ public class EventSourcingConfig {
     }
 
     @Bean
-    public AggregateFactory aggregateFactory() {
-        return new AggregateFactory();
-    }
-
-    @Bean
     public AggregateStore aggregateStore(
             AggregateRepository aggregateRepository,
             EventRepository eventRepository,
-            AggregateFactory aggregateFactory,
             EventSourcingProperties properties
     ) {
-        return new AggregateStore(aggregateRepository, eventRepository, aggregateFactory, properties);
+        return new AggregateStore(aggregateRepository, eventRepository, properties);
     }
 
     @Bean

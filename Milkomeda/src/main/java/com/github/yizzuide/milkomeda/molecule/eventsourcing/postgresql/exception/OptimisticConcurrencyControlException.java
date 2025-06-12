@@ -23,6 +23,13 @@ package com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.exceptio
 
 import java.io.Serial;
 
+/**
+ * Thrown to indicate that the expected version of an aggregate doesn't match the actual version.
+ *
+ * @since 4.0.0
+ * @author yizzuide
+ * Create at 2025/06/11 18:15
+ */
 public class OptimisticConcurrencyControlException extends AggregateStateException {
 
     @Serial

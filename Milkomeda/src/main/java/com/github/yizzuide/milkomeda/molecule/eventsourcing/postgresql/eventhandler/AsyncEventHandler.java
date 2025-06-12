@@ -25,6 +25,13 @@ import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.event.Eve
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.event.EventWithId;
 import jakarta.annotation.Nonnull;
 
+/**
+ * The {@link AsyncEventHandler} means used to handle event after transaction commit.
+ *
+ * @since 4.0.0
+ * @author yizzuide
+ * Create at 2025/06/11 15:56
+ */
 public interface AsyncEventHandler {
 
     void handleEvent(EventWithId<Event> event);
