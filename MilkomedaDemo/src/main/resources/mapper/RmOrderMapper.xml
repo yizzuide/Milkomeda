@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.github.yizzuide.milkomeda.demo.molecule.eventsourcing.infrastructure.orm.mapper.RmOrderMapper">
+
+    <resultMap id="BaseResultMap" type="com.github.yizzuide.milkomeda.demo.molecule.eventsourcing.infrastructure.orm.model.RmOrder">
+            <id property="id" column="id" jdbcType="BIGINT"/>
+            <result property="version" column="version" jdbcType="INTEGER"/>
+            <result property="status" column="status" jdbcType="VARCHAR"/>
+            <result property="riderId" column="rider_id" jdbcType="BIGINT"/>
+            <result property="price" column="price" jdbcType="NUMERIC"/>
+            <result property="driverId" column="driver_id" jdbcType="BIGINT"/>
+            <result property="placedDate" column="placed_date" jdbcType="TIMESTAMP"/>
+            <result property="acceptedDate" column="accepted_date" jdbcType="TIMESTAMP"/>
+            <result property="cancelledDate" column="cancelled_date" jdbcType="TIMESTAMP"/>
+            <result property="completedDate" column="completed_date" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,version,status,
+        rider_id,price,driver_id,
+        placed_date,accepted_date,cancelled_date,
+        completed_date
+    </sql>
+</mapper>

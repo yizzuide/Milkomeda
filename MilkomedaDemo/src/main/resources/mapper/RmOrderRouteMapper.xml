@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.github.yizzuide.milkomeda.demo.molecule.eventsourcing.infrastructure.orm.mapper.RmOrderRouteMapper">
+
+    <resultMap id="BaseResultMap" type="com.github.yizzuide.milkomeda.demo.molecule.eventsourcing.infrastructure.orm.model.RmOrderRoute">
+            <id property="orderId" column="order_id" jdbcType="BIGINT"/>
+            <id property="address" column="address" jdbcType="VARCHAR"/>
+            <result property="latitude" column="latitude" jdbcType="DOUBLE"/>
+            <result property="longitude" column="longitude" jdbcType="DOUBLE"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        order_id,address,latitude,
+        longitude
+    </sql>
+</mapper>
