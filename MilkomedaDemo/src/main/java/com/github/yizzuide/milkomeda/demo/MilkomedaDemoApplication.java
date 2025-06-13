@@ -17,7 +17,8 @@ import org.springframework.context.annotation.PropertySource;
 // 导入配置类
 @PropertySource(value = "classpath:conf.properties", encoding = "UTF-8")
 @PropertySource(value = "classpath:api.yml", name = "api", encoding = "UTF-8", factory = YmlPropertySourceFactory.class)
-@MapperScan(basePackages = "com.github.yizzuide.milkomeda.demo.*.mapper")
+@MapperScan(basePackages = {"com.github.yizzuide.milkomeda.demo.*.mapper",
+        "com.github.yizzuide.milkomeda.demo.molecule.eventsourcing.infrastructure.orm.mapper"})
 // 开启Servlet组件扫描，如：WebFilter、WebServlet
 //@ServletComponentScan
 @SpringBootApplication

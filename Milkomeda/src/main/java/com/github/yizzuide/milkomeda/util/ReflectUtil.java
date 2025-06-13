@@ -27,6 +27,7 @@ import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -272,6 +273,14 @@ public class ReflectUtil {
      */
     public static Class<?> getMethodReturnType(Method method) {
         return ResolvableType.forMethodReturnType(method).resolve();
+    }
+
+    public static <T> T getClazzAnnotatedValue(Class<? extends Annotation> annotationClazz, Class<?> targetClazz, Function<Annotation, T> provider, Class<T> resultType) {
+        Annotation annotation = AnnotationUtils.findAnnotation(targetClazz, annotationClazz);
+        if (annotation == null) {
+            return null;
+        }
+        return provider.apply(annotation);
     }
 
     /**

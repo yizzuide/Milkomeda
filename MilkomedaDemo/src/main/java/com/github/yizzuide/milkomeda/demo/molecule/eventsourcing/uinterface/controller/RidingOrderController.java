@@ -37,15 +37,15 @@ import org.springframework.web.bind.annotation.RestController;
  * @author yizzuide
  * Create at 2025/06/12 17:30
  */
-@RequestMapping("es/order")
+@RequestMapping("riding/order")
 @RestController
-public class OrderController {
+public class RidingOrderController {
 
     @Autowired
     private OrderAppService orderAppService;
 
-    @PostMapping
+    @PostMapping("place")
     public ResultVO<String> placeOrder(@RequestBody PlaceOrderCommand command) {
-        return UniformResult.ok(orderAppService.place(command));
+        return UniformResult.ok(orderAppService.place(command).getAggregateId().toString());
     }
 }

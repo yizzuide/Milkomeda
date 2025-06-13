@@ -15,12 +15,12 @@ import org.springframework.stereotype.Service;
 @Service
 public class OrderAppService extends ApplicationService {
     @DomainEventsDefer
-    public String place(PlaceOrderCommand command) {
+    public OrderAggregate place(PlaceOrderCommand command) {
         // Read other aggregates...
         //loadAggregate(aggregateClass, aggregateId);
 
         OrderAggregate orderAggregate = loadAggregate(OrderAggregate.class, command);
         orderAggregate.place(command);
-        return "OK";
+        return orderAggregate;
     }
 }

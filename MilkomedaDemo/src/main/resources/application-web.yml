@@ -91,3 +91,16 @@ spring:
   threads:
     virtual:
       enabled: true
+
+mybatis-plus:
+  mapper-locations:
+    - classpath*:mapper/*.xml
+  config-location: classpath:config/mybatis-config.xml
+  type-aliases-package: com.github.yizzuide.milkomeda.demo.*.domain,com.github.yizzuide.milkomeda.demo.molecule.eventsourcing.infrastructure.orm.model
+  # mybatis-plus全局配置
+  global-config:
+    db-config:
+      # id自增长
+      id-type: auto
+      # 逻辑删除字段名
+      logic-delete-field: isDelete

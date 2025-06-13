@@ -22,7 +22,7 @@
 package com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.command;
 
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.agg.AggregateType;
-import org.springframework.core.annotation.AnnotationUtils;
+import com.github.yizzuide.milkomeda.util.ReflectUtil;
 
 /**
  * The {@link Command} used for aggregate update.
@@ -33,10 +33,6 @@ import org.springframework.core.annotation.AnnotationUtils;
  */
 public interface Command {
     default String getAggregateType() {
-        AggregateType annotation = AnnotationUtils.findAnnotation(this.getClass(), AggregateType.class);
-        if (annotation == null) {
-            return null;
-        }
-        return annotation.value();
+        return ReflectUtil.getClazzAnnotatedValue(AggregateType.class, this.getClass(), annotation -> ((AggregateType)annotation).value(),  String.class);
     }
 }

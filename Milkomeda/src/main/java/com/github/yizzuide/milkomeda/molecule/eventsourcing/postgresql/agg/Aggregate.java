@@ -133,4 +133,8 @@ public abstract class Aggregate implements AggregateRoot {
                     e);
         }
     }
+
+    public String getAggregateType() {
+        return MoleculeContext.getAggregateTypeByClass(this.getClass());
+    }
 }

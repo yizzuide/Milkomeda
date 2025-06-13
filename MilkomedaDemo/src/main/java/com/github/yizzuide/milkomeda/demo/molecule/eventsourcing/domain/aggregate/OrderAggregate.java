@@ -41,13 +41,7 @@ public class OrderAggregate extends Aggregate {
     }
 
     public void place(PlaceOrderCommand command) {
-        applyChange(OrderPlacedEvent.builder()
-                .aggregateId(aggregateId)
-                .version(getNextVersion())
-                .riderId(command.getRiderId())
-                .price(command.getPrice())
-                .route(command.getRoute())
-                .build());
+        applyChange(new OrderPlacedEvent(aggregateId, getNextVersion(), this.getAggregateType(),  command.getRiderId(), command.getPrice(), command.getRoute()));
     }
 
     @EventSourcing

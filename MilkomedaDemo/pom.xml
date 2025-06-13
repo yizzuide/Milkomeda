@@ -27,12 +27,13 @@
         <!--<jakarta-servlet.version>5.0</jakarta-servlet.version>-->
         <spring-cloud.version>2023.0.0</spring-cloud.version>
         <milkomeda.version>4.0.0-SNAPSHOT</milkomeda.version>
-        <mybatis.starter>3.0.3</mybatis.starter>
+        <mybatis.starter.version>3.0.3</mybatis.starter.version>
+        <mybatis-plus.version>3.5.5</mybatis-plus.version>
+        <pagehelper.version>1.4.7</pagehelper.version>
         <redission.version>3.20.0</redission.version>
         <zookeeper.version>3.9.1</zookeeper.version>
         <jetcd.version>0.7.5</jetcd.version>
         <contiperf.version>2.3.4</contiperf.version>
-        <pagehelper.version>5.3.2</pagehelper.version>
     </properties>
 
     <profiles>
@@ -113,11 +114,23 @@
         <dependency>
             <groupId>org.mybatis.spring.boot</groupId>
             <artifactId>mybatis-spring-boot-starter</artifactId>
-            <version>${mybatis.starter}</version>
+            <version>${mybatis.starter.version}</version>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-boot-starter</artifactId>
+            <version>${mybatis-plus.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.mybatis</groupId>
+                    <artifactId>mybatis-spring</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.github.pagehelper</groupId>
-            <artifactId>pagehelper</artifactId>
+            <artifactId>pagehelper-spring-boot-starter</artifactId>
             <version>${pagehelper.version}</version>
         </dependency>
         <dependency>
