@@ -21,8 +21,11 @@
 
 package com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.eventhandler;
 
+import com.github.yizzuide.milkomeda.molecule.MoleculeContext;
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.agg.Aggregate;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.event.Event;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.event.EventWithId;
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.service.AggregateStore;
 
 /**
  * The {@link AsyncEventHandler} means used to handle event after transaction commit.
@@ -34,9 +37,23 @@ import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.event.Eve
 @FunctionalInterface
 public interface AsyncEventHandler {
 
-    void handleEvent(EventWithId<Event> event);
+    void handleEvent(EventWithId<Event> eventWithId);
 
     default String getSubscriptionName() {
         return getClass().getName();
+    }
+
+    /**
+     * load aggregate from lasted domain event.
+     * @param event             domain event
+     * @param aggregateStore    aggregate repository
+     * @param aggregateClazz    aggregate class
+     * @return  aggregate
+     * @param <T>   aggregate type
+     */
+    @SuppressWarnings("unchecked")
+    default <T extends Aggregate> T loadAggregate(Event event, AggregateStore aggregateStore, Class<T> aggregateClazz) {
+        return (T)aggregateStore.readAggregate(
+                MoleculeContext.getAggregateTypeByClass(aggregateClazz), event.getAggregateId(), event.getVersion());
     }
 }

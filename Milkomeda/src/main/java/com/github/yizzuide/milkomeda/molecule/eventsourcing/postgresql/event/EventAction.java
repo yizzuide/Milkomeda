@@ -21,19 +21,14 @@
 
 package com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.event;
 
-import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.agg.Aggregate;
-
-import java.lang.annotation.*;
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.eventhandler.SyncEventHandler;
 
 /**
- * An identifier annotation is used for domain event restoration which annotated on <code>apply(event)</code> method of {@link Aggregate}.
+ * An identifier annotation is used for handle domain event which annotated on <code>handleEvent(event)</code> method of {@link SyncEventHandler}.
  *
  * @since 4.0.0
  * @author yizzuide
- * Create at 2025/06/11 21:24
+ * Create at 2025/06/14 19:08
  */
-@Target({ElementType.METHOD})
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
-public @interface EventSourcing {
+public @interface EventAction {
 }

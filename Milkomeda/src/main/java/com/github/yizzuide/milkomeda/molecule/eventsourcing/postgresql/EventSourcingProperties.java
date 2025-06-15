@@ -57,6 +57,11 @@ public class EventSourcingProperties {
     private Boolean enabled = false;
 
     /**
+     * Set service name when used {@link SubscriptionType#POSTGRES_CHANNEL}.
+     */
+    private String serviceName;
+
+    /**
      * DataSource prefix.
      */
     private String datasourcePrefix = DEFAULT_DATASOURCE_PREFIX;

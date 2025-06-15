@@ -515,6 +515,7 @@ milkomeda:
 
   molecule:
     event-sourcing:
+      service-name: ${spring.application.name}
       enabled: true
       datasource-prefix: milkomeda.sundial.instances.pg
       aggregate-package: com.github.yizzuide.milkomeda.demo.molecule.eventsourcing.domain.aggregate

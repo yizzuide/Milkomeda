@@ -26,14 +26,12 @@ import com.github.yizzuide.milkomeda.molecule.MoleculeContext;
 import com.github.yizzuide.milkomeda.molecule.core.agg.AggregateRoot;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.command.Command;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.event.Event;
+import com.github.yizzuide.milkomeda.util.ReflectUtil;
 import lombok.Getter;
-import lombok.SneakyThrows;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -113,25 +111,12 @@ public abstract class Aggregate implements AggregateRoot {
 
     private void apply(Event event) {
         log.debug("Applying event {}", event);
-        invoke(event, "apply");
+        ReflectUtil.invokeDynamically(this, event, "apply");
     }
 
     public void process(Command command) {
         log.debug("Processing command {}", command);
-        invoke(command, "process");
-    }
-
-    @SneakyThrows(InvocationTargetException.class)
-    private void invoke(Object o, String methodName) {
-        try {
-            Method method = this.getClass().getMethod(methodName, o.getClass());
-            method.invoke(this, o);
-        } catch (NoSuchMethodException | IllegalAccessException e) {
-            throw new UnsupportedOperationException(
-                    "Aggregate %s doesn't support %s(%s)".formatted(
-                            this.getClass(), methodName, o.getClass().getSimpleName()),
-                    e);
-        }
+        ReflectUtil.invokeDynamically(this, command, "process");
     }
 
     public String getAggregateType() {

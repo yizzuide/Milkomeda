@@ -21,6 +21,7 @@
 
 package com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.event;
 
+import com.github.yizzuide.milkomeda.molecule.MoleculeContext;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.agg.Aggregate;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.command.Command;
 import lombok.AccessLevel;
@@ -29,6 +30,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
 import java.sql.Timestamp;
+import java.time.Instant;
 
 /**
  * The {@link Event} was created to publish when {@link Aggregate} processed the {@link Command}.
@@ -44,5 +46,9 @@ public abstract class Event {
     protected final Long aggregateId;
     protected final int version;
     protected final String aggregateType;
-    protected final Timestamp createdDate = new Timestamp(System.currentTimeMillis());
+    protected final Timestamp createdDate = Timestamp.from(Instant.now());
+
+    public String getEventType() {
+        return MoleculeContext.getEventTypeByClass(this.getClass());
+    }
 }

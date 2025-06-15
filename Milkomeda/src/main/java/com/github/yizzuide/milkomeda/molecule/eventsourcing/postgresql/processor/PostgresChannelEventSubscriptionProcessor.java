@@ -35,6 +35,7 @@ import org.postgresql.jdbc.PgConnection;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.context.properties.bind.BindResult;
 import org.springframework.boot.context.properties.bind.Binder;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 
 import java.sql.DriverManager;
@@ -53,12 +54,13 @@ import java.util.concurrent.*;
 @RequiredArgsConstructor
 @Slf4j
 public class PostgresChannelEventSubscriptionProcessor {
+    private static final String REDIS_POSTGRES_CHANNEL_EVENT_LOCK_KEY = "milkomeda:molecule:%s:lock-pg-chanel-event-sub";
 
     private final List<AsyncEventHandler> eventHandlers;
     private final EventSubscriptionProcessor eventSubscriptionProcessor;
     private final EventSourcingProperties properties;
-    private volatile PgConnection connection;
 
+    private volatile PgConnection connection;
     private final ExecutorService executor = newExecutor();
     private CountDownLatch latch = new CountDownLatch(0);
     private Future<?> future = CompletableFuture.completedFuture(null);
@@ -77,6 +79,10 @@ public class PostgresChannelEventSubscriptionProcessor {
         }
         this.latch = new CountDownLatch(1);
         this.future = executor.submit(() -> {
+            // 同一服务多实例，使用分布式锁（防止异步事件重复处理）
+            String lockKey = String.format(REDIS_POSTGRES_CHANNEL_EVENT_LOCK_KEY, properties.getServiceName());
+            StringRedisTemplate redisTemplate = ApplicationContextHolder.get().getBean(StringRedisTemplate.class);
+            redisTemplate.opsForValue().setIfAbsent(lockKey, "1");
             try {
                 while (isActive()) {
                     try {
@@ -123,6 +129,8 @@ public class PostgresChannelEventSubscriptionProcessor {
                 }
             } finally {
                 this.latch.countDown();
+                // 分布式锁释放
+                redisTemplate.delete(lockKey);
             }
         });
     }
@@ -156,6 +164,9 @@ public class PostgresChannelEventSubscriptionProcessor {
 
     @PreDestroy
     public synchronized void stop() {
+        String lockKey = String.format(REDIS_POSTGRES_CHANNEL_EVENT_LOCK_KEY, properties.getServiceName());
+        StringRedisTemplate redisTemplate = ApplicationContextHolder.get().getBean(StringRedisTemplate.class);
+        redisTemplate.delete(lockKey);
         if (this.future.isDone()) {
             return;
         }

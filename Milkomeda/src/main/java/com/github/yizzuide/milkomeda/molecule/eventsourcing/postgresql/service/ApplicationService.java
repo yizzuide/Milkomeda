@@ -40,14 +40,28 @@ public class ApplicationService {
     protected AggregateStore aggregateStore;
 
 
-    protected <T extends Aggregate> T loadAggregate(Class<T> aggregateClass, Command command) {
-        String aggregateType = MoleculeContext.getAggregateTypeByClass(aggregateClass);
+    /**
+     * load aggregate from command
+     * @param aggregateClazz    aggregate class
+     * @param command           created command or update command
+     * @return  aggregate
+     * @param <T>   aggregate type
+     */
+    protected <T extends Aggregate> T loadAggregate(Class<T> aggregateClazz, Command command) {
+        String aggregateType = MoleculeContext.getAggregateTypeByClass(aggregateClazz);
         return AggregateFactory.create(aggregateStore, aggregateType, command);
     }
 
+    /**
+     * load aggregate from aggregate id
+     * @param aggregateClazz    aggregate class
+     * @param aggregateId       aggregate id
+     * @return  aggregate
+     * @param <T>   aggregate type
+     */
     @SuppressWarnings("unchecked")
-    protected <T extends Aggregate> T loadAggregate(Class<T> aggregateClass, Long aggregateId) {
-        String aggregateType = MoleculeContext.getAggregateTypeByClass(aggregateClass);
+    protected <T extends Aggregate> T loadAggregate(Class<T> aggregateClazz, Long aggregateId) {
+        String aggregateType = MoleculeContext.getAggregateTypeByClass(aggregateClazz);
         return (T)aggregateStore.readAggregate(aggregateType, aggregateId);
     }
 

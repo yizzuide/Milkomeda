@@ -21,6 +21,7 @@
 
 package com.github.yizzuide.milkomeda.util;
 
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.aspectj.lang.JoinPoint;
@@ -421,6 +422,26 @@ public class ReflectUtil {
         }
         ReflectionUtils.makeAccessible(method);
         return (T) ReflectionUtils.invokeMethod(method, target, args);
+    }
+
+    /**
+     * 根据参数类型动态调用目标对象方法
+     * @param target        目标对象
+     * @param paramObj      方法参数
+     * @param methodName    方法名
+     * @since 4.0.0
+     */
+    @SneakyThrows(InvocationTargetException.class)
+    public static void invokeDynamically(Object target, Object paramObj, String methodName) {
+        try {
+            Method method = target.getClass().getMethod(methodName, paramObj.getClass());
+            method.invoke(target, paramObj);
+        } catch (NoSuchMethodException | IllegalAccessException e) {
+            throw new UnsupportedOperationException(
+                    "Aggregate %s doesn't support %s(%s)".formatted(
+                            target.getClass(), methodName, paramObj.getClass().getSimpleName()),
+                    e);
+        }
     }
 
     /**
