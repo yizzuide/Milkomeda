@@ -34,6 +34,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
+import org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.util.CollectionUtils;
 
 import javax.sql.DataSource;
@@ -46,7 +48,7 @@ import java.util.Set;
  * 自定义数据源配置
  * @author jsq 786063250@qq.com
  * @since 3.4.0
- * @version 3.13.10
+ * @version 4.0.0
  * <br>
  * Create at 2020/5/8
  */
@@ -84,7 +86,7 @@ public class SundialConfig {
 
     @Primary
     @Bean
-    public DataSource dynamicRouteDataSource(DataSourceFactory dataSourceFactory) {
+    public AbstractRoutingDataSource dynamicRouteDataSource(DataSourceFactory dataSourceFactory) {
         DataSource defaultDataSource = null;
         Map<Object, Object> targetDataSources = new HashMap<>();
         try {
@@ -104,5 +106,10 @@ public class SundialConfig {
             log.error("Sundial load datasource instances error with msg: {}", e.getMessage(), e);
         }
         return new DynamicRouteDataSource(defaultDataSource, targetDataSources);
+    }
+
+    @Bean
+    public PlatformTransactionManager transactionManager(AbstractRoutingDataSource dynamicRouteDataSource) {
+        return new DynamicDataSourceTransactionManager(dynamicRouteDataSource);
     }
 }

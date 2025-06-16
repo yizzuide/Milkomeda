@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 yizzuide All rights Reserved.
+ * Copyright (c) 2025 yizzuide All rights Reserved.
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -19,32 +19,32 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.sundial.orbit;
+package com.github.yizzuide.milkomeda.demo.molecule.eventsourcing.uinterface.config;
 
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.processor.DataSourceRouting;
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.service.EventSubscriptionProcessor;
 import com.github.yizzuide.milkomeda.orbit.OrbitAdvice;
 import com.github.yizzuide.milkomeda.orbit.OrbitInvocation;
 import com.github.yizzuide.milkomeda.sundial.DynamicRouteDataSource;
-import com.github.yizzuide.milkomeda.sundial.Sundial;
+import com.github.yizzuide.milkomeda.sundial.SundialHolder;
 import org.springframework.core.annotation.AnnotationUtils;
 
 /**
- * Dynamic route advice impl of {@link OrbitAdvice} with Annotation.
+ * {@link EventSubscriptionProcessor} 切面通知，用于与当前多数据源环境集成
  *
- * @since 3.15.0
  * @author yizzuide
- * <br>
- * Create at 2023/04/15 03:07
+ * Create at 2025/06/16 16:40
  */
-public class AnnotationDataSourceOrbitAdvice extends AbstractDataSourceOrbitAdvice {
+public class DataSourceSelectAdvice implements OrbitAdvice {
     @Override
-    protected String getRouteKey(OrbitInvocation invocation) {
-        Sundial sundial = AnnotationUtils.findAnnotation(invocation.getMethod(), Sundial.class);
-        if (sundial == null) {
-            sundial = AnnotationUtils.findAnnotation(invocation.getTargetClass(), Sundial.class);
-            if (sundial == null) {
-                return DynamicRouteDataSource.MASTER_KEY;
-            }
+    public Object invoke(OrbitInvocation invocation) {
+        DataSourceRouting annotation = AnnotationUtils.findAnnotation(invocation.getTargetClass(), DataSourceRouting.class);
+        String routingKey = annotation == null ? DynamicRouteDataSource.MASTER_KEY : annotation.value();
+        try {
+            SundialHolder.setDataSourceType(routingKey);
+            return invocation.proceed();
+        } finally {
+            SundialHolder.clearDataSourceType();
         }
-        return sundial.key();
     }
 }

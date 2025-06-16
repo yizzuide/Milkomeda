@@ -507,6 +507,11 @@ milkomeda:
         advisor-clazz: com.github.yizzuide.milkomeda.orbit.AnnotationOrbitAdvisor
         advisor-props:
           methodAnnotationType: com.github.yizzuide.milkomeda.demo.orbit.RecordLog
+      - key-name: molecule-sub-datasource
+        advice-clazz: com.github.yizzuide.milkomeda.demo.molecule.eventsourcing.uinterface.config.DataSourceSelectAdvice
+        advisor-clazz: com.github.yizzuide.milkomeda.orbit.AnnotationOrbitAdvisor
+        advisor-props:
+          classAnnotationType: com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.processor.DataSourceRouting
 
   # 高并发任务队列
   quark:

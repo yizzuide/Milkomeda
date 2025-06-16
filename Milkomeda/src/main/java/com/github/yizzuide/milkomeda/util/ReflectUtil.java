@@ -276,12 +276,22 @@ public class ReflectUtil {
         return ResolvableType.forMethodReturnType(method).resolve();
     }
 
-    public static <T> T getClazzAnnotatedValue(Class<? extends Annotation> annotationClazz, Class<?> targetClazz, Function<Annotation, T> provider, Class<T> resultType) {
+    /**
+     * 获取类注解字段值
+     * @param annotationClazz   注解 Class
+     * @param targetClazz       目标 Class
+     * @param recognizer        注解值获取
+     * @param resultType        注解值类
+     * @return  注解值
+     * @param <T>   注解类型
+     * @since 4.0.0
+     */
+    public static <T> T getClazzAnnotatedValue(Class<? extends Annotation> annotationClazz, Class<?> targetClazz, Function<Annotation, T> recognizer, Class<T> resultType) {
         Annotation annotation = AnnotationUtils.findAnnotation(targetClazz, annotationClazz);
         if (annotation == null) {
             return null;
         }
-        return provider.apply(annotation);
+        return recognizer.apply(annotation);
     }
 
     /**

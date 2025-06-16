@@ -25,6 +25,7 @@ import com.github.yizzuide.milkomeda.molecule.MoleculeContext;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.event.Event;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.event.EventWithId;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.eventhandler.AsyncEventHandler;
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.processor.DataSourceRouting;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.repository.EventRepository;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.repository.EventSubscriptionRepository;
 import lombok.RequiredArgsConstructor;
@@ -42,6 +43,7 @@ import java.util.List;
  * @author yizzuide
  * Create at 2025/06/11 19:28
  */
+@DataSourceRouting("pg")
 @Transactional(propagation = Propagation.REQUIRES_NEW)
 @RequiredArgsConstructor
 @Slf4j

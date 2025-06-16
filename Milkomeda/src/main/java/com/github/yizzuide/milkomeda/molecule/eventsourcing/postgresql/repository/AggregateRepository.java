@@ -39,7 +39,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.Serializable;
 import java.sql.ResultSet;
+import java.sql.Timestamp;
 import java.sql.Types;
+import java.time.Instant;
 import java.util.Map;
 import java.util.Optional;
 
@@ -61,9 +63,9 @@ public class AggregateRepository {
                                         @Nullable Long aggregateId) {
         if (aggregateId == null) {
             SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(ApplicationContextHolder.get().getBean(JdbcTemplate.class))
-                    .withTableName("ES_AGGREGATE")
-                    .usingGeneratedKeyColumns("ID");
-            Map<String, ? extends Serializable> params = Map.of("VERSION", 0, "AGGREGATE_TYPE", aggregateType);
+                    .withTableName("es_aggregate")
+                    .usingGeneratedKeyColumns("id");
+            Map<String, ? extends Serializable> params = Map.of("version", 0, "aggregate_type", aggregateType, "create_at", Timestamp.from(Instant.now()));
             Number key = simpleJdbcInsert.executeAndReturnKey(params);
             return key.longValue();
         }

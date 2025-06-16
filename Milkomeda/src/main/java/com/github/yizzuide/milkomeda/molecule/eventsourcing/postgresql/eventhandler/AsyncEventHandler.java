@@ -40,7 +40,7 @@ public interface AsyncEventHandler {
     void handleEvent(EventWithId<Event> eventWithId);
 
     default String getSubscriptionName() {
-        return getClass().getName();
+        return getClass().getSimpleName();
     }
 
     /**

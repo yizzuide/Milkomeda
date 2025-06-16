@@ -19,21 +19,22 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.molecule.core.eventhandler;
+package com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.processor;
 
-import com.github.yizzuide.milkomeda.molecule.core.event.RecordAggregateEvent;
-import org.springframework.context.event.EventListener;
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.service.EventSubscriptionProcessor;
+
+import java.lang.annotation.*;
 
 /**
- * The default event handler for handle {@link RecordAggregateEvent}.
+ * The data source select annotation used for {@link EventSubscriptionProcessor}.
  *
  * @since 4.0.0
  * @author yizzuide
- * Create at 2025/06/11 18:14
+ * Create at 2025/06/16 16:32
  */
-public class DefaultEventHandler {
-    @EventListener
-    public void handle(RecordAggregateEvent ignore) {
-       //MoleculeContext.getDomainEventBus().publish();
-    }
+@Target({ElementType.TYPE})
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+public @interface DataSourceRouting {
+    String value();
 }

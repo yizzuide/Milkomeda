@@ -6,6 +6,7 @@ import com.github.yizzuide.milkomeda.molecule.core.event.DomainEventsDefer;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.service.ApplicationService;
 import com.github.yizzuide.milkomeda.sundial.Sundial;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * OrderAppService
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
  * Create at 2025/06/12 17:44
  */
 @Sundial(key = "pg")
+@Transactional
 @Service
 public class OrderAppService extends ApplicationService {
     @DomainEventsDefer
