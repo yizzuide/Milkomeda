@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 import java.sql.Timestamp;
 
 /**
- * OrderAsyncEventHandler
+ * 订单异步事件通知（调用三方API、发送MQ消息等）
  *
  * @author yizzuide
  * Create at 2025/06/14 19:39
@@ -29,7 +29,7 @@ public class OrderIntegrationEventSender implements AsyncEventHandler {
     @Override
     public void handleEvent(EventWithId<Event> eventWithId) {
         Event event = eventWithId.event();
-        // 重建聚合到当前事件版本（需要聚合里的数据才调用）
+        // 重建聚合到当前事件版本（只有在需要聚合里的数据时才调用）
         OrderAggregate orderAggregate = loadAggregate(event, aggregateStore, OrderAggregate.class);
         // 转为IntegrationEvent，发送到ACL层
         Timestamp createdDate = event.getCreatedDate();

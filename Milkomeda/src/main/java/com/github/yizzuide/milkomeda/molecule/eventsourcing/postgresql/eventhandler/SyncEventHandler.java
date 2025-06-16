@@ -21,10 +21,12 @@
 
 package com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.eventhandler;
 
+import com.github.yizzuide.milkomeda.molecule.MoleculeContext;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.agg.Aggregate;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.event.Event;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.event.EventWithId;
 import com.github.yizzuide.milkomeda.util.ReflectUtil;
+import org.springframework.lang.NonNull;
 
 import java.util.List;
 
@@ -36,7 +38,37 @@ import java.util.List;
  * Create at 2025/06/11 15:48
  */
 public interface SyncEventHandler {
+    /**
+     * Event type of handler dispatcher method and don't override this method.
+     * @param events        aggregate events
+     * @param aggregate     aggregate
+     */
     default void handleEvents(List<EventWithId<Event>> events, Aggregate aggregate) {
-        ReflectUtil.invokeDynamically(this, events.getFirst().event(), "handleEvent");
+        events.forEach(eventID -> {
+            try {
+                ReflectUtil.invokeDynamically(this, eventID.event(), "handleEvent");
+            } catch (UnsupportedOperationException e) {
+                handleEvent(eventID.event());
+            }
+        });
+    }
+
+    /**
+     * The default handler for any impl of {@link Event}.
+     * @param event Event
+     */
+    default void handleEvent(Event event) {}
+
+    /**
+     * load aggregate from event bus hanging.
+     * @param aggregateId       aggregate id
+     * @param aggregateClazz    aggregate class
+     * @return  Aggregate
+     * @param <T>   aggregate type
+     */
+    @SuppressWarnings("unchecked")
+    default <T extends Aggregate> T loadAggregate(@NonNull Long aggregateId, Class<T> aggregateClazz) {
+        List<Aggregate> aggregates = MoleculeContext.getDomainEventBus().getHangingAggregates(Aggregate.class);
+        return (T) aggregates.stream().filter(agg -> agg.getAggregateId().equals(aggregateId)).findFirst().orElseThrow();
     }
 }

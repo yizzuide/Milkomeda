@@ -44,8 +44,8 @@ public interface AsyncEventHandler {
     }
 
     /**
-     * load aggregate from lasted domain event.
-     * @param event             domain event
+     * load aggregate with lasted domain event from the repository.
+     * @param event             aggregate event
      * @param aggregateStore    aggregate repository
      * @param aggregateClazz    aggregate class
      * @return  aggregate
