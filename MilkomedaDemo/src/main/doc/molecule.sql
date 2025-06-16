@@ -2,7 +2,6 @@ CREATE SEQUENCE ES_AGGREGATE_ID_SEQ
     INCREMENT 1
     MINVALUE 1
     START 1
-    CACHE 100
     NO CYCLE;
 
 CREATE TABLE IF NOT EXISTS ES_AGGREGATE (
@@ -31,7 +30,6 @@ CREATE SEQUENCE ES_EVENT_ID_SEQ
     INCREMENT 1
     MINVALUE 1
     START 1
-    CACHE 100
     NO CYCLE;
 
 CREATE TABLE IF NOT EXISTS ES_EVENT (
@@ -148,7 +146,7 @@ CREATE TABLE IF NOT EXISTS RM_ORDER (
                                         ACCEPTED_DATE   TIMESTAMP WITH TIME ZONE,
                                         CANCELLED_DATE  TIMESTAMP WITH TIME ZONE,
                                         COMPLETED_DATE  TIMESTAMP WITH TIME ZONE,
-                                        IS_DELETE       INTEGER                   NOT NULL
+                                        IS_DELETE       INTEGER                   NOT NULL DEFAULT 0
 );
 
 CREATE INDEX IF NOT EXISTS IDX_RM_ORDER_RIDER_ID ON RM_ORDER (RIDER_ID, DRIVER_ID);
@@ -160,7 +158,7 @@ CREATE TABLE IF NOT EXISTS RM_ORDER_ROUTE (
                                               ADDRESS    TEXT,
                                               LATITUDE   DOUBLE PRECISION  NOT NULL,
                                               LONGITUDE  DOUBLE PRECISION  NOT NULL,
-                                              IS_DELETE  INTEGER           NOT NULL,
+                                              IS_DELETE  INTEGER           NOT NULL  DEFAULT 0,
                                               PRIMARY KEY (ORDER_ID, ADDRESS)
 );
 

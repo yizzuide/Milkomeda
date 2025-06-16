@@ -18,14 +18,14 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @Service
 public class OrderAppService extends ApplicationService {
-    @DomainEventsDefer
+    @DomainEventsDefer // 自动发送领域事件
     public OrderAggregate place(PlaceOrderCommand command) {
         // 加载其它聚合
         //loadAggregate(aggregateClass, aggregateId);
 
         // 领域服务校验...
 
-        // 创建订单
+        // 创建订单（在这里不要调用存储层的保存操作，读模型（视图表）都交给SyncEventHandler）
         OrderAggregate orderAggregate = loadAggregate(OrderAggregate.class, command);
         orderAggregate.place(command);
         return orderAggregate;

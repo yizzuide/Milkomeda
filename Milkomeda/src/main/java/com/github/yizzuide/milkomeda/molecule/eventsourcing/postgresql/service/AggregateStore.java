@@ -55,9 +55,13 @@ public class AggregateStore {
     private final EventRepository eventRepository;
     private final EventSourcingProperties properties;
 
-    public Aggregate createAggregateFromType(String aggregateType) {
-        Long aggregateId =  aggregateRepository.createAggregateIfAbsent(aggregateType, null);
+    public Aggregate createAggregateFromType(@NonNull String aggregateType) {
+        Long aggregateId = aggregateRepository.createAggregateIfAbsent(aggregateType, null);
         return AggregateFactory.newInstance(aggregateType, aggregateId);
+    }
+
+    public void deleteTempAggregate(@NonNull Long aggregateId) {
+        aggregateRepository.deleteById(aggregateId);
     }
 
     public List<EventWithId<Event>> saveAggregate(Aggregate aggregate) {
@@ -100,8 +104,8 @@ public class AggregateStore {
         }
     }
 
-    public Aggregate readAggregate(String aggregateType,
-                                   Long aggregateId) {
+    public Aggregate readAggregate(@NonNull String aggregateType,
+                                   @NonNull Long aggregateId) {
         return readAggregate(aggregateType, aggregateId, null);
     }
 

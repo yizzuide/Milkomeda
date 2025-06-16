@@ -30,10 +30,12 @@ import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.commandha
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.commandhandler.DefaultCommandHandler;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.event.Event;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.event.EventWithId;
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.processor.DataSourceRouting;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.lang.NonNull;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -44,6 +46,7 @@ import java.util.List;
  * @author yizzuide
  * Create at 2025/06/11 19:36
  */
+@DataSourceRouting("pg")
 @RequiredArgsConstructor
 @Slf4j
 public class CommandProcessor {
@@ -71,14 +74,21 @@ public class CommandProcessor {
         return aggregate;
     }
 
+    @Transactional(rollbackFor = Throwable.class)
     @EventListener
     public void handle(RecordAggregateEvent ignore) {
         List<Aggregate> aggregates = MoleculeContext.getDomainEventBus().getHangingAggregates(Aggregate.class);
-        if (aggregates.isEmpty()) {
-            return;
+        try {
+            if (aggregates.isEmpty()) {
+                return;
+            }
+            aggregates.forEach(this::saveAndSendEvents);
+        } catch (Exception ex) {
+            aggregates.forEach(agg -> aggregateStore.deleteTempAggregate(agg.getAggregateId()));
+            throw ex;
+        } finally {
+            MoleculeContext.getDomainEventBus().clear(null);
         }
-        aggregates.forEach(this::saveAndSendEvents);
-        MoleculeContext.getDomainEventBus().clear(null);
     }
 
     private void saveAndSendEvents(Aggregate aggregate) {

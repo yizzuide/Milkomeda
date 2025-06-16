@@ -25,6 +25,7 @@ import com.github.yizzuide.milkomeda.molecule.MoleculeContext;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.command.BindAggregateId;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.command.Command;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.command.CreatedCommand;
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.exception.AggregateStateException;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.service.AggregateStore;
 import com.github.yizzuide.milkomeda.util.ReflectUtil;
 import lombok.SneakyThrows;
@@ -58,6 +59,9 @@ public class AggregateFactory {
             return (T) aggregateStore.createAggregateFromType(aggregateType);
         }
         Long aggregateId = ReflectUtil.getAnnotatedFieldValue(BindAggregateId.class, command, Long.class);
+        if (aggregateId == null) {
+            throw new AggregateStateException("aggregate id must be not null");
+        }
         return (T)aggregateStore.readAggregate(aggregateType, aggregateId);
     }
 }

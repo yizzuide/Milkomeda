@@ -53,7 +53,6 @@ import java.util.regex.Pattern;
  * <br>
  * Create at 2020/06/16 11:18
  */
-@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 @Slf4j
 @Intercepts({
         @Signature(type = Executor.class, method = "update", args = {MappedStatement.class, Object.class}),
@@ -186,15 +185,15 @@ public class SundialInterceptor implements Interceptor {
             return foundMethod;
         }
         Class<?> clazz = Class.forName(className);
-        Method method = null;
-        for (Method declaredMethod : clazz.getDeclaredMethods()) {
-            if (declaredMethod.getName().equals(methodName)) {
-                method = declaredMethod;
+        Method targetMethod = null;
+        for (Method method : clazz.getMethods()) {
+            if (method.getName().equals(methodName)) {
+                targetMethod = method;
             }
         }
-        assert method != null;
-        methodMap.put(methodName, method);
-        return method;
+        assert targetMethod != null;
+        methodMap.put(methodName, targetMethod);
+        return targetMethod;
     }
 
     private void updateSql(String sql, Invocation invocation, MappedStatement ms, Object[] args, BoundSql boundSql) {

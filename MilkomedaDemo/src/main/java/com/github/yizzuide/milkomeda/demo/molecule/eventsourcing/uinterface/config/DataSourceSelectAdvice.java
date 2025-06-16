@@ -44,7 +44,8 @@ public class DataSourceSelectAdvice implements OrbitAdvice {
             SundialHolder.setDataSourceType(routingKey);
             return invocation.proceed();
         } finally {
-            SundialHolder.clearDataSourceType();
+            // 交给了事务完成回调
+            //SundialHolder.clearDataSourceType();
         }
     }
 }

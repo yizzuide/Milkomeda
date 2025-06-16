@@ -47,6 +47,9 @@ import java.util.*;
  */
 public class MoleculeContext {
 
+    @Setter @Getter
+    private static EventSourcingProperties eventSourcingProperties;
+
     @Getter
     private static DomainEventBus domainEventBus;
 

@@ -65,7 +65,7 @@ public class AggregateRepository {
             SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(ApplicationContextHolder.get().getBean(JdbcTemplate.class))
                     .withTableName("es_aggregate")
                     .usingGeneratedKeyColumns("id");
-            Map<String, ? extends Serializable> params = Map.of("version", 0, "aggregate_type", aggregateType, "create_at", Timestamp.from(Instant.now()));
+            Map<String, ? extends Serializable> params = Map.of("version", 0, "aggregate_type", aggregateType, "created_at", Timestamp.from(Instant.now()));
             Number key = simpleJdbcInsert.executeAndReturnKey(params);
             return key.longValue();
         }
@@ -80,6 +80,15 @@ public class AggregateRepository {
                         "aggregateType", aggregateType
                 ));
         return null;
+    }
+
+    public void deleteById(@NonNull Long aggregateId) {
+        jdbcTemplate.update("""
+                        DELETE FROM ES_AGGREGATE WHERE ID = :aggregateId
+                        """,
+                Map.of(
+                        "aggregateId", aggregateId
+                ));
     }
 
     public boolean checkAndUpdateAggregateVersion(@NonNull Long aggregateId,

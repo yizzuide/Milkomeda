@@ -74,6 +74,7 @@ public class EventSourcingConfig {
             EventSubscriptionProcessor eventSubscriptionProcessor,
             EventSourcingProperties properties
     ) {
+        MoleculeContext.setEventSourcingProperties(properties);
         MoleculeContext.loadAsyncEventHandlers(eventHandlers);
         return new PostgresChannelEventSubscriptionProcessor(eventHandlers, eventSubscriptionProcessor, properties);
     }

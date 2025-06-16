@@ -21,12 +21,13 @@
 
 package com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.processor;
 
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.service.CommandProcessor;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.service.EventSubscriptionProcessor;
 
 import java.lang.annotation.*;
 
 /**
- * The data source select annotation used for {@link EventSubscriptionProcessor}.
+ * The data source annotation used for {@link EventSubscriptionProcessor} and {@link CommandProcessor}.
  *
  * @since 4.0.0
  * @author yizzuide
