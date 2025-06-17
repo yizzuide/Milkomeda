@@ -27,8 +27,10 @@ import com.github.yizzuide.milkomeda.orbit.OrbitSource;
 import com.github.yizzuide.milkomeda.orbit.OrbitSourceProvider;
 import com.github.yizzuide.milkomeda.sundial.Sundial;
 import com.github.yizzuide.milkomeda.sundial.SundialProperties;
+import com.google.common.collect.Lists;
 import org.springframework.boot.context.properties.bind.BindResult;
 import org.springframework.boot.context.properties.bind.Binder;
+import org.springframework.core.Ordered;
 import org.springframework.core.env.Environment;
 
 import java.util.Collections;
@@ -52,7 +54,10 @@ public class AnnotationOrbitSource implements OrbitSource {
         if (!bindResult.isBound()) {
             return Collections.emptyList();
         }
-        AnnotationOrbitAdvisor annotationOrbitAdvisor = new AnnotationOrbitAdvisor(Sundial.class, Sundial.class, "sundial", AnnotationDataSourceOrbitAdvice.class, null);
-        return Collections.singletonList(annotationOrbitAdvisor);
+        AnnotationOrbitAdvisor annotationClazzOrbitAdvisor = AnnotationOrbitAdvisor.forClass(Sundial.class, "sundial_clazz", AnnotationDataSourceOrbitAdvice.class, null);
+        AnnotationOrbitAdvisor annotationMethodOrbitAdvisor = AnnotationOrbitAdvisor.forMethod(Sundial.class, "sundial_method", AnnotationDataSourceOrbitAdvice.class, null);
+        annotationClazzOrbitAdvisor.setOrder(Ordered.HIGHEST_PRECEDENCE);
+        annotationMethodOrbitAdvisor.setOrder(Ordered.HIGHEST_PRECEDENCE);
+        return Lists.newArrayList(annotationClazzOrbitAdvisor, annotationMethodOrbitAdvisor);
     }
 }

@@ -40,7 +40,10 @@ public class AnnotationDataSourceOrbitAdvice extends AbstractDataSourceOrbitAdvi
     protected String getRouteKey(OrbitInvocation invocation) {
         Sundial sundial = AnnotationUtils.findAnnotation(invocation.getMethod(), Sundial.class);
         if (sundial == null) {
-            return DynamicRouteDataSource.MASTER_KEY;
+            sundial = AnnotationUtils.findAnnotation(invocation.getTargetClass(), Sundial.class);
+            if (sundial == null) {
+                return DynamicRouteDataSource.MASTER_KEY;
+            }
         }
         return sundial.key();
     }

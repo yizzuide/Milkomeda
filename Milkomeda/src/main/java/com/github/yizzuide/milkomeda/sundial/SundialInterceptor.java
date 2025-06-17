@@ -186,15 +186,15 @@ public class SundialInterceptor implements Interceptor {
             return foundMethod;
         }
         Class<?> clazz = Class.forName(className);
-        Method method = null;
-        for (Method declaredMethod : clazz.getDeclaredMethods()) {
-            if (declaredMethod.getName().equals(methodName)) {
-                method = declaredMethod;
+        Method targetMethod = null;
+        for (Method method : clazz.getMethods()) {
+            if (method.getName().equals(methodName)) {
+                targetMethod = method;
             }
         }
-        assert method != null;
-        methodMap.put(methodName, method);
-        return method;
+        assert targetMethod != null;
+        methodMap.put(methodName, targetMethod);
+        return targetMethod;
     }
 
     private void updateSql(String sql, Invocation invocation, MappedStatement ms, Object[] args, BoundSql boundSql) {

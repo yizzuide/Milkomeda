@@ -21,12 +21,14 @@
 
 package com.github.yizzuide.milkomeda.util;
 
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -276,6 +278,58 @@ public class ReflectUtil {
     }
 
     /**
+     * 获取类注解字段值
+     * @param annotationClazz   注解 Class
+     * @param targetClazz       目标 Class
+     * @param recognizer        注解值获取
+     * @param resultType        注解值类
+     * @return  注解值
+     * @param <T>   注解类型
+     * @since 3.21.0
+     */
+    public static <T> T getClazzAnnotatedValue(Class<? extends Annotation> annotationClazz, Class<?> targetClazz, Function<Annotation, T> recognizer, Class<T> resultType) {
+        Annotation annotation = AnnotationUtils.findAnnotation(targetClazz, annotationClazz);
+        if (annotation == null) {
+            return null;
+        }
+        return recognizer.apply(annotation);
+    }
+
+    /**
+     * 根据指定的注解获取字段值
+     * @param annotationClazz   注解Class
+     * @param target            目标对象
+     * @param resultType        返回类型
+     * @return  字段值
+     * @param <T>   返回泛型
+     * @since 3.21.0
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> T getAnnotatedFieldValue(Class<? extends Annotation> annotationClazz, Object target, Class<T> resultType) {
+        Class<?> clazz = target.getClass();
+        Field[] fields = clazz.getDeclaredFields();
+        for (Field field : fields) {
+            if (field.isAnnotationPresent(annotationClazz)) {
+                // 尝试调用 Getter 方法获取字段值
+                String getterMethodName = "get" + Character.toUpperCase(field.getName().charAt(0)) + field.getName().substring(1);
+                try {
+                    try {
+                        Method getterMethod = clazz.getMethod(getterMethodName);
+                        return (T) getterMethod.invoke(target);
+                    } catch (NoSuchMethodException e) {
+                        // 如果没有 Getter 方法，直接访问字段
+                        field.setAccessible(true);
+                        return (T) field.get(target);
+                    }
+                } catch (IllegalAccessException | InvocationTargetException e) {
+                    log.error("Get field value error: {}", e.getMessage(), e);
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
      * 获取Field和值
      * @param target    目标对象
      * @param fieldPath 属性路径
@@ -379,6 +433,25 @@ public class ReflectUtil {
         }
         ReflectionUtils.makeAccessible(method);
         return (T) ReflectionUtils.invokeMethod(method, target, args);
+    }
+
+    /**
+     * 根据参数类型动态调用目标对象方法
+     * @param target        目标对象
+     * @param paramObj      方法参数
+     * @param methodName    方法名
+     * @since 3.21.0
+     */
+    @SneakyThrows(InvocationTargetException.class)
+    public static void invokeDynamically(Object target, Object paramObj, String methodName) {
+        try {
+            Method method = target.getClass().getMethod(methodName, paramObj.getClass());
+            method.invoke(target, paramObj);
+        } catch (NoSuchMethodException | IllegalAccessException e) {
+            throw new UnsupportedOperationException(
+                    String.format("Aggregate %s doesn't support %s(%s)",
+                            target.getClass(), methodName, paramObj.getClass().getSimpleName()), e);
+        }
     }
 
     /**

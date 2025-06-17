@@ -25,6 +25,7 @@ import com.github.yizzuide.milkomeda.universe.engine.el.ELContext;
 import com.github.yizzuide.milkomeda.universe.engine.el.EvaluateSource;
 import com.github.yizzuide.milkomeda.universe.function.TripleFunction;
 import com.github.yizzuide.milkomeda.universe.metadata.HandlerMetaData;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.aop.framework.autoproxy.AutoProxyUtils;
 import org.springframework.aop.scope.ScopedProxyUtils;
 import org.springframework.aop.support.AopUtils;
@@ -37,14 +38,20 @@ import org.springframework.context.annotation.ClassPathBeanDefinitionScanner;
 import org.springframework.core.MethodIntrospector;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.lang.Nullable;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ReflectionUtils;
 
+import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -52,10 +59,14 @@ import java.util.stream.Collectors;
  *
  * @author yizzuide
  * @since 3.13.0
+ * @version 3.21.0
  * <br>
  * Create at 2022/09/04 18:17
  */
+@Slf4j
 public final class SpringContext {
+
+    private static final String RESOURCE_PATTERN = "**/*.class";
 
     /**
      * 构建BeanDefinition
@@ -269,5 +280,61 @@ public final class SpringContext {
      */
     public static boolean hasAnnotationContains(Class<Annotation> annotationClass, final Class<?> targetType) {
         return AnnotationUtils.isCandidateClass(targetType, annotationClass);
+    }
+
+    /**
+     * 从指定包中加载指定类型的类
+     * @param basePackage   需要扫描的包
+     * @param clazz         类的Type
+     * @return  所有类
+     * @param <T> 类泛型
+     * @since 3.21.0
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> Set<Class<T>> loadClassFromBasePackage(String basePackage, Class<T> clazz) {
+        Set<Class<T>> clazzSet = new HashSet<>();
+        ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+        String packagePath = "classpath*:" + ClassUtils.convertClassNameToResourcePath(basePackage) +
+                "/" + RESOURCE_PATTERN;
+        try {
+            Resource[] resources = resolver.getResources(packagePath);
+            for (Resource resource : resources) {
+                if (resource.isReadable()) {
+                    String filename = resource.getURL().toString();
+                    if (filename.endsWith(".class")) {
+                        // 从路径中提取完整类名
+                        String className = filename
+                                .substring(filename.indexOf(basePackage.replace(".", "/")))
+                                .replace(".class", "")
+                                .replace("/", ".");
+                        clazzSet.add((Class<T>) Class.forName(className));
+                    }
+                }
+            }
+        } catch (IOException e) {
+            log.error("Load resource error: {}", e.getMessage(), e);
+        } catch (ClassNotFoundException e) {
+            log.error("Load class error: {}", e.getMessage(), e);
+        }
+        return clazzSet;
+    }
+
+    /**
+     * 绑定类和类注解标签
+     * @param clazzSet          类集合
+     * @param annotationClass   注解类
+     * @param tagProvider       注解标签提供者
+     * @return  Map
+     * @param <T>   类泛型
+     * @since 3.21.0
+     */
+    public static <T> Map<String, Class<? extends T>> bindClassTagMap(Collection<Class<T>> clazzSet, Class<? extends Annotation> annotationClass, Function<Annotation, String> tagProvider) {
+        Map<String, Class<? extends T>> tagClassMap = new HashMap<>();
+        for (Class<T> clazz : clazzSet) {
+            Annotation tagAnnotation = AnnotationUtils.findAnnotation(clazz, annotationClass);
+            String tag = tagProvider.apply(tagAnnotation);
+            tagClassMap.put(tag, clazz);
+        }
+        return tagClassMap;
     }
 }
