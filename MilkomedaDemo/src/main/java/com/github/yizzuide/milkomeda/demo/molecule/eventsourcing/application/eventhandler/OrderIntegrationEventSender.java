@@ -18,7 +18,7 @@ import java.sql.Timestamp;
  * @author yizzuide
  * Create at 2025/06/14 19:39
  */
-@AggregateType("ORDER")
+@AggregateType(OrderAggregate.TYPE)
 @Component
 @Slf4j
 public class OrderIntegrationEventSender implements AsyncEventHandler {

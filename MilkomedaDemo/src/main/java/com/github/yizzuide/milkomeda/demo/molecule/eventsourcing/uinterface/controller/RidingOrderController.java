@@ -22,6 +22,7 @@
 package com.github.yizzuide.milkomeda.demo.molecule.eventsourcing.uinterface.controller;
 
 import com.github.yizzuide.milkomeda.demo.molecule.eventsourcing.application.service.OrderAppService;
+import com.github.yizzuide.milkomeda.demo.molecule.eventsourcing.uinterface.command.AcceptOrderCommand;
 import com.github.yizzuide.milkomeda.demo.molecule.eventsourcing.uinterface.command.PlaceOrderCommand;
 import com.github.yizzuide.milkomeda.hydrogen.uniform.ResultVO;
 import com.github.yizzuide.milkomeda.hydrogen.uniform.UniformResult;
@@ -47,5 +48,11 @@ public class RidingOrderController {
     @PostMapping("place")
     public ResultVO<String> placeOrder(@RequestBody PlaceOrderCommand command) {
         return UniformResult.ok(orderAppService.place(command).getAggregateId().toString());
+    }
+
+    @PostMapping("accept")
+    public ResultVO<Object> acceptOrder(@RequestBody AcceptOrderCommand command) {
+        orderAppService.accept(command);
+        return UniformResult.ok(null);
     }
 }

@@ -33,6 +33,7 @@ import java.io.Serial;
 /**
  * A custom transaction manager, it fixed {@link Sundial} and {@link Transactional} don't work together.
  *
+ * @since 4.0.0
  * @author yizzuide
  * Create at 2025/06/16 15:44
  */

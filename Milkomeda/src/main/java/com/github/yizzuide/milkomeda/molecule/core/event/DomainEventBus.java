@@ -23,9 +23,7 @@ package com.github.yizzuide.milkomeda.molecule.core.event;
 
 import com.github.yizzuide.milkomeda.molecule.core.agg.AggregateRoot;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.*;
 import java.util.function.Consumer;
 
 /**
@@ -39,7 +37,7 @@ public class DomainEventBus {
 
     private final DomainEventPublisher domainEventPublisher;
 
-    private final ThreadLocal<List<AggregateRoot>> HANGING_AGGREGATES = ThreadLocal.withInitial(CopyOnWriteArrayList::new);
+    private final ThreadLocal<Set<AggregateRoot>> HANGING_AGGREGATES = ThreadLocal.withInitial(HashSet::new);
 
     public DomainEventBus(DomainEventPublisher domainEventPublisher) {
         this.domainEventPublisher = domainEventPublisher;
@@ -47,17 +45,17 @@ public class DomainEventBus {
 
     /**
      * Get hanging aggregates
-     * @param aggClass  aggregate class
+     * @param aggregateClazz  aggregate class
      * @return  aggregate events list
      * @param <T>   aggregate type
      */
     @SuppressWarnings("unchecked")
-    public <T extends AggregateRoot> List<T> getHangingAggregates(Class<T> aggClass) {
+    public <T extends AggregateRoot> List<T> getHangingAggregates(Class<T> aggregateClazz) {
         if(HANGING_AGGREGATES.get().isEmpty() ||
-                !aggClass.isAssignableFrom(HANGING_AGGREGATES.get().getFirst().getClass())) {
+                !aggregateClazz.isAssignableFrom(HANGING_AGGREGATES.get().stream().findFirst().orElseThrow().getClass())) {
             return Collections.emptyList();
         }
-        return (List<T>) HANGING_AGGREGATES.get();
+        return (List<T>) HANGING_AGGREGATES.get().stream().toList();
     }
 
     /**
@@ -65,7 +63,7 @@ public class DomainEventBus {
      * @param consumer consumer aggregate
      */
     public void clear(Consumer<AggregateRoot> consumer) {
-        List<AggregateRoot> aggregateRoots = HANGING_AGGREGATES.get();
+        Set<AggregateRoot> aggregateRoots = HANGING_AGGREGATES.get();
         if (aggregateRoots.isEmpty()) {
             return;
         }
@@ -86,10 +84,8 @@ public class DomainEventBus {
      * @param aggregate AggregateRoot
      */
     public void collect(AggregateRoot aggregate) {
-        List<AggregateRoot> aggregateRoots = HANGING_AGGREGATES.get();
-        if (aggregateRoots.isEmpty() || !aggregateRoots.contains(aggregate)) {
-            aggregateRoots.add(aggregate);
-        }
+        Set<AggregateRoot> aggregateRoots = HANGING_AGGREGATES.get();
+        aggregateRoots.add(aggregate);
     }
 
     /**

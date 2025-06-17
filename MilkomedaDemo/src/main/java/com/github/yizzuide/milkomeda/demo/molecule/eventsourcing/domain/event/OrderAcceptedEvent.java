@@ -19,32 +19,30 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.molecule.orbit;
+package com.github.yizzuide.milkomeda.demo.molecule.eventsourcing.domain.event;
 
-import com.github.yizzuide.milkomeda.molecule.core.event.DomainEventsDefer;
-import com.github.yizzuide.milkomeda.orbit.AnnotationOrbitAdvisor;
-import com.github.yizzuide.milkomeda.orbit.OrbitAdvisor;
-import com.github.yizzuide.milkomeda.orbit.OrbitSource;
-import com.github.yizzuide.milkomeda.orbit.OrbitSourceProvider;
-import org.springframework.core.Ordered;
-import org.springframework.core.env.Environment;
-
-import java.util.Collections;
-import java.util.List;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.event.Event;
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.event.EventType;
+import lombok.Getter;
+import lombok.ToString;
 
 /**
- * This advice listen on method which annotated {@link DomainEventsDefer} has invoked.
+ * 订单接受事件
  *
- * @since 4.0.0
  * @author yizzuide
- * Create at 2025/06/09 14:56
+ * Create at 2025/06/17 15:26
  */
-@OrbitSourceProvider
-public class MoleculeOrbitSource implements OrbitSource {
-    @Override
-    public List<OrbitAdvisor> createAdvisors(Environment environment) {
-        AnnotationOrbitAdvisor advisor = AnnotationOrbitAdvisor.forMethod(DomainEventsDefer.class, "molecule", MoleculeAdvice.class, null);
-        advisor.setOrder(Ordered.HIGHEST_PRECEDENCE + 6);
-        return Collections.singletonList(advisor);
+@EventType("ORDER_ACCEPTED")
+@ToString(callSuper = true)
+@Getter
+public final class OrderAcceptedEvent extends Event {
+
+    private final Long driverId;
+
+    @JsonCreator
+    public OrderAcceptedEvent(Long aggregateId, int version, String aggregateType, Long driverId) {
+        super(aggregateId, version, aggregateType);
+        this.driverId = driverId;
     }
 }

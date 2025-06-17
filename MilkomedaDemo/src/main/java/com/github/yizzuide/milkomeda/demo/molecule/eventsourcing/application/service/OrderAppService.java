@@ -1,6 +1,7 @@
 package com.github.yizzuide.milkomeda.demo.molecule.eventsourcing.application.service;
 
 import com.github.yizzuide.milkomeda.demo.molecule.eventsourcing.domain.aggregate.OrderAggregate;
+import com.github.yizzuide.milkomeda.demo.molecule.eventsourcing.uinterface.command.AcceptOrderCommand;
 import com.github.yizzuide.milkomeda.demo.molecule.eventsourcing.uinterface.command.PlaceOrderCommand;
 import com.github.yizzuide.milkomeda.molecule.core.event.DomainEventsDefer;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.service.ApplicationService;
@@ -18,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @Service
 public class OrderAppService extends ApplicationService {
+
     @DomainEventsDefer // 自动发送领域事件
     public OrderAggregate place(PlaceOrderCommand command) {
         // 加载其它聚合
@@ -29,5 +31,11 @@ public class OrderAppService extends ApplicationService {
         OrderAggregate orderAggregate = loadAggregate(OrderAggregate.class, command);
         orderAggregate.place(command);
         return orderAggregate;
+    }
+
+    @DomainEventsDefer
+    public void accept(AcceptOrderCommand command) {
+        OrderAggregate orderAggregate = loadAggregate(OrderAggregate.class, command);
+        orderAggregate.accept(command);
     }
 }

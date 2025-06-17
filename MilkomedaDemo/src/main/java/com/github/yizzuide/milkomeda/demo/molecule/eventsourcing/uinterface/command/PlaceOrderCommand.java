@@ -21,6 +21,7 @@
 
 package com.github.yizzuide.milkomeda.demo.molecule.eventsourcing.uinterface.command;
 
+import com.github.yizzuide.milkomeda.demo.molecule.eventsourcing.domain.aggregate.OrderAggregate;
 import com.github.yizzuide.milkomeda.demo.molecule.eventsourcing.domain.value.Waypoint;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.agg.AggregateType;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.command.Command;
@@ -36,8 +37,8 @@ import java.util.List;
  * @author yizzuide
  * Create at 2025/06/12 14:27
  */
-@CreatedCommand
-@AggregateType("ORDER")
+@CreatedCommand // 创建类型命令标识（用于创建聚合ID）
+@AggregateType(OrderAggregate.TYPE)
 @Data
 public class PlaceOrderCommand implements Command {
     private Long riderId;
