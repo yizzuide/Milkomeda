@@ -528,6 +528,6 @@ milkomeda:
       snapshotting:
         ORDER:
           enabled: true
-          nth-event: 5
+          nth-event: 3
       subscription-type: postgres_channel
 

@@ -7,7 +7,6 @@ import com.github.yizzuide.milkomeda.molecule.core.event.DomainEventsDefer;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.service.ApplicationService;
 import com.github.yizzuide.milkomeda.sundial.Sundial;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * OrderAppService
@@ -16,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
  * Create at 2025/06/12 17:44
  */
 @Sundial(key = "pg")
-@Transactional
 @Service
 public class OrderAppService extends ApplicationService {
 
@@ -25,7 +23,8 @@ public class OrderAppService extends ApplicationService {
         // 加载其它聚合
         //loadAggregate(aggregateClass, aggregateId);
 
-        // 领域服务校验...
+        // 领域服务(跨聚合可利用逻辑)校验...
+        //orderAuditDomainService.audit(command);
 
         // 创建订单（在这里不要调用存储层的保存操作，读模型（视图表）都交给SyncEventHandler）
         OrderAggregate orderAggregate = loadAggregate(OrderAggregate.class, command);

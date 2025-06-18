@@ -24,7 +24,9 @@ package com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
 
@@ -85,6 +87,11 @@ public class EventSourcingProperties {
     private Map<String, Snapshotting> snapshotting = new HashMap<>();
 
     /**
+     * Enable sync read model before transaction commit.
+     */
+    private Boolean syncReadModelBeforeTransactionCommit = true;
+
+    /**
      * Async event subscription type.
      */
     private SubscriptionType subscriptionType = SubscriptionType.POSTGRES_CHANNEL;
@@ -98,15 +105,24 @@ public class EventSourcingProperties {
         return snapshotting.getOrDefault(aggregateType, NO_SNAPSHOTTING);
     }
 
-    public record Snapshotting(
-            boolean enabled,
-            @Min(DEFAULT_NTH_EVENT)
-            int nthEvent
-    ) {
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Data
+    public static class Snapshotting {
+        /**
+         * Enable snapshotting.
+         */
+        private boolean enabled;
+
+        /**
+         * Save a snapshot after nth events
+         */
+        @Min(DEFAULT_NTH_EVENT)
+        private int nthEvent = DEFAULT_NTH_EVENT;
     }
 
     @Data
-    static class PollingSubscription {
+    public static class PollingSubscription {
         private String initialDelay = "PT1S";
         private String interval = "PT1S";
     }

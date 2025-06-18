@@ -22,10 +22,13 @@
 package com.github.yizzuide.milkomeda.molecule.orbit;
 
 import com.github.yizzuide.milkomeda.molecule.core.event.DomainEventsDefer;
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.EventSourcingProperties;
 import com.github.yizzuide.milkomeda.orbit.AnnotationOrbitAdvisor;
 import com.github.yizzuide.milkomeda.orbit.OrbitAdvisor;
 import com.github.yizzuide.milkomeda.orbit.OrbitSource;
 import com.github.yizzuide.milkomeda.orbit.OrbitSourceProvider;
+import org.springframework.boot.context.properties.bind.BindResult;
+import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.core.Ordered;
 import org.springframework.core.env.Environment;
 
@@ -43,8 +46,13 @@ import java.util.List;
 public class MoleculeOrbitSource implements OrbitSource {
     @Override
     public List<OrbitAdvisor> createAdvisors(Environment environment) {
+        BindResult<EventSourcingProperties> bindResult = Binder.get(environment).bind(EventSourcingProperties.PREFIX, EventSourcingProperties.class);
+        int ordered = Ordered.HIGHEST_PRECEDENCE + 6;
+        if (bindResult.isBound() && !bindResult.get().getSyncReadModelBeforeTransactionCommit()) {
+            ordered = Ordered.LOWEST_PRECEDENCE;
+        }
         AnnotationOrbitAdvisor advisor = AnnotationOrbitAdvisor.forMethod(DomainEventsDefer.class, "molecule", MoleculeAdvice.class, null);
-        advisor.setOrder(Ordered.HIGHEST_PRECEDENCE + 6);
+        advisor.setOrder(ordered);
         return Collections.singletonList(advisor);
     }
 }
