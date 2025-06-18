@@ -5,6 +5,7 @@ import io.micrometer.common.KeyValues;
 import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationFilter;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.server.observation.ServerHttpObservationDocumentation;
@@ -17,6 +18,8 @@ import org.springframework.http.server.observation.ServerRequestObservationConve
  * @author yizzuide
  * Create at 2025/06/08 23:24
  */
+// Spring Boot 3.0: @AutoConfigureMetrics has been deprecated in favor of @AutoConfigureObservability
+@AutoConfigureObservability
 @Configuration
 public class MvcObservationConfiguration {
     @Bean
@@ -95,6 +98,7 @@ public class MvcObservationConfiguration {
         }
     }
 
+    // SpanCustomizer beans for Brave and OpenTelemetry are now Auto-configured.
     // Micrometer’s JvmInfoMetrics is now autoconfigured.
 
     // The new ObservationRegistry interface can be used to create observations which provide a single API for both metrics and traces.
@@ -112,9 +116,12 @@ public class MvcObservationConfiguration {
     //  Tracing can be controlled with properties under management.tracing. Zipkin can be configured with management.zipkin.tracing, while Wavefront uses management.wavefront.
 
     // An OtlpMeterRegistry is now autoconfigured when io.micrometer:micrometer-registry-otlp is on the classpath. The meter registry can be configured using management.otlp.metrics.export.* properties.
+    // When io.opentelemetry:opentelemetry-exporter-otlp is on the classpath, an OtlpHttpSpanExporter will be Auto-configured. The configuration of the exporter can be customized using the management.otlp.tracing.* configuration properties.
 
     // When there is a Micrometer Tracing `Tracer` bean and Prometheus is on the classpath, a SpanContextSupplier is now autoconfigured. This supplier links metrics to traces by making the current trace ID and span ID available to Prometheus.
     // The Push Gateway can be configured to perform a `PUT` on shutdown. To do so, set `management.prometheus.metrics.export.pushgateway.shutdown-operation` to `put`. Additionally, the existing `push` setting has been deprecated and `post` should now be used instead.
+    // A management.otlp.metrics.export.headers property has been added to support sending headers to an OTLP registry.
+    // Aggregation temporality configuration support for Micrometer’s OtlpMeterRegistry
 
     // The HealthIndicator for MongoDB now supports MongoDB’s Stable API. The buildInfo query has been replaced with
     //  `isMaster` and the response now contains `maxWireVersion` instead of `version`.

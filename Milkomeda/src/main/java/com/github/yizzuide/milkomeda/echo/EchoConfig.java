@@ -134,6 +134,7 @@ public class EchoConfig {
                 .build();
     }
 
+    // Spring Boot 3.0: ClientHttpRequestFactorySupplier should be replaced with ClientHttpRequestFactories
     @Bean
     public ClientHttpRequestFactory clientHttpRequestFactory() {
         HttpComponentsClientHttpRequestFactory clientHttpRequestFactory = new HttpComponentsClientHttpRequestFactory();

@@ -18,8 +18,9 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <!-- Spring Boot 3.1：The spring-boot-starter-parent now uses maven.compiler.release
-            to configure the Java version instead of maven.compiler.source and maven.compiler.target. -->
+        <!-- Spring Boot 3.1：The spring-boot-starter-parent now uses `maven.compiler.release` to configure the Java version instead of maven.compiler.source and maven.compiler.target.
+            and the build-info goal can now be skipped by setting -Dspring-boot.build-info.skip
+        -->
         <maven.compiler.release>21</maven.compiler.release>
         <java.version>21</java.version>
         <!-- Spring Boot 3.0: Jetty does not yet support Servlet 6.0. To use Jetty with Spring Boot 3.0,
@@ -208,7 +209,7 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <!-- Spring Boot 3.1.x: Testcontainers深度集成 -->
+        <!-- Spring Boot 3.1: Testcontainers support Testcontainers at Development Time -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-testcontainers</artifactId>

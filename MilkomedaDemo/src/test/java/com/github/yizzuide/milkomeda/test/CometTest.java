@@ -23,7 +23,10 @@ import org.springframework.web.context.WebApplicationContext;
  * Create at 2019/04/11 23:02
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = MilkomedaDemoApplication.class)
+// Spring Boot 3.0: The @SpringBootTest annotation can now use the main of any discovered @SpringBootConfiguration class if it’s available.
+//  This means that any custom SpringApplication configuration performed by your main method can now be picked up by tests.
+// To use the main method for a test set the useMainMethod attribute of @SpringBootTest to UseMainMethod.ALWAYS or UseMainMethod.WHEN_AVAILABLE
+@SpringBootTest(classes = MilkomedaDemoApplication.class, useMainMethod = SpringBootTest.UseMainMethod.WHEN_AVAILABLE)
 public class CometTest {
     @Autowired
     private WebApplicationContext wac;

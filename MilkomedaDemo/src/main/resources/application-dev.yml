@@ -8,6 +8,9 @@ server:
     keep-alive-timeout: 30s
     # Spring Boot 2.4: Control the maximum number of requests that can be made on a keep-alive connection before it is closed
     max-keep-alive-requests: 120
+    # Spring Boot 3.0: Trusted proxies of Tomcat’s remote IP valve can be configured.
+    #remoteip:
+      #trusted-proxies:
 
 spring:
   config:
@@ -51,6 +54,8 @@ spring:
       database: milkomeda
       host: localhost
       port: 27017
+      # Multiple hosts can now be configured for MongoDB using the spring.data.mongodb.additional-hosts property.
+      #additional-hosts:
 
     # Spring Boot 3.0：Configuration Properties for Redis have moved from `spring.redis.` to `spring.data.redis.`
     #   as redis autoconfiguration requires Spring Data to be present on the classpath.
@@ -59,6 +64,62 @@ spring:
       # Spring Boot 2.7: Support for specifying a username for authenticating to Sentinel(s)
       #sentinel:
         #username:
+
+  # Spring Boot 3.0: Elasticsearch’s socketKeepAlive property can be configured.
+  #elasticsearch:
+    #socket-keep-alive: true
+
+  # Spring Boot 3.0: A new configuration property, spring.kafka.listener.async-acks, for enabling async acks with Kafka has been added.
+  #   To enable async acks, set the property to true. The property only applies when spring.kafka.listener.async-mode is set to manual or manual-immediate in provider.
+  #kafka:
+    #listener:
+      #async-acks: true
+    # Existing Kafka topics can be modified using spring.kafka.admin.modify-topic-configs
+    #admin:
+      #modify-topic-configs: true
+      # Spring Boot 3.1: Additional close-timeout, operation-timeout, auto-startup and auto-create properties have been added to spring.kafka.admin
+      #close-timeout: 10s
+
+    # Spring Boot 3.1: When using Apache Kafka with Auto-configured retryable topic configuration (spring.kafka.retry.topic.enabled: true),
+    #   with an exponential back off with a maxDelay, all retries at the maxDelay level are now sent to the same topic.
+    #retry:
+      #topic:
+        #max-delay: 30s
+
+  # Spring Boot 3.0: When using spring-rabbit-stream, a RabbitStreamTemplate and Environment will now be Auto-configured whether or not spring.rabbitmq.listener.type is stream.
+  #rabbitmq:
+    #listener:
+      #type: stream
+
+  # Spring Boot 3.1: Spring Boot provides the ability to configure SSL trust material that can be applied to several types of connections in order to support secure communications.
+  #   Spring Boot Auto-configures a bean of type `SslBundles` that provides access to each of the named bundles configured using the spring.ssl.bundle properties.
+  #   The createSslContext() provides a convenient way to obtain a new java.net.ssl.SSLContext instance.
+  ssl:
+    bundle:
+      # configure bundles of trust material created with the Java keytool utility and stored in Java KeyStore files in the JKS or PKCS12 format.
+      jks:
+        # a keystore is typically configured with a Java KeyStore containing a certificate and private key
+        pulsar:
+          key:
+            alias: pulsar
+          keystore:
+            location: classpath:cert/pulsar.jks
+            type: JKS
+        # configured with a Java KeyStore containing the server certificate
+        api-platform:
+          truststore:
+            location: classpath:server.p12
+            type: PKCS12
+
+      # configure bundles of trust material in the form of PEM-encoded text
+      pem:
+        pay:
+          keystore:
+            certificate: classpath:cert/pay.crt
+            private-key: classpath:cert/pay.key
+        api-server:
+          truststore:
+            certificate: classpath:cert/api-server.crt
 
 
   # Pulsar模块异步线程池（Async异步任务线程池，Spring Boot 2.1.0+在这里配置）
@@ -85,6 +146,13 @@ spring:
     overwrite-existing-jobs: true
     wait-for-jobs-to-complete-on-shutdown: true
 
+  # Spring Boot 3.0: The @EnableBatchProcessing no longer required and should be removed from applications that want to use Boot’s Auto-configuration.
+  #   Running multiple batch jobs is no longer supported. If the Auto-configuration detects a single job is, it will be executed on startup.
+  #   If multiple jobs are found in the context, a job name to execute on startup must be supplied.
+  #batch:
+    #job:
+      #name:
+
 mybatis:
   type-aliases-package: com.github.yizzuide.milkomeda.demo.halo.domain
   mapper-locations:
@@ -99,6 +167,10 @@ logging:
   charset:
     console: UTF-8
     file: UTF-8
+  # Spring Boot 3.1: If you’re using Logback or Log4j2, there’s now the option to have different log levels for console logs and file logs.
+  threshold:
+    console: TRACE
+    file: TRACE
 
 management:
   server:

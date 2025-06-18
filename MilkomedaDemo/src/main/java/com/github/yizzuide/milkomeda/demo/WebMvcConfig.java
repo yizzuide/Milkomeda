@@ -18,8 +18,6 @@ import org.springframework.core.env.PropertySource;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import static org.springframework.boot.actuate.endpoint.SanitizableData.SANITIZED_VALUE;
-
 /**
  * WebMvcConfig
  *
@@ -55,7 +53,8 @@ public class WebMvcConfig implements WebMvcConfigurer, SmartLifecycle {
             PropertySource<?> propertySource = data.getPropertySource();
             if (propertySource.getName().contains("develop.properties")) {
                 if (data.getKey().equals("mysql.user")) {
-                    return data.withValue(SANITIZED_VALUE);
+                    // Spring Boot 3.1: A withSanitizedValue utility method has been added to SanitizableData
+                    return data.withSanitizedValue();
                 }
             }
             return data;
@@ -81,6 +80,15 @@ public class WebMvcConfig implements WebMvcConfigurer, SmartLifecycle {
         });
     }
 
+    // Spring Boot 3.0: In the absence of Reactor Netty, Jetty’s reactive client, and the Apache HTTP client a JdkClientHttpConnector
+    //  will now be Auto-configured. This allows WebClient to be used with the JDK’s HttpClient.
+
+    // Spring Boot 3.1: Spring Kafka ContainerCustomizer beans are now applied to the Auto-configured KafkaListenerContainerFactory.
+    //  BatchInterceptor beans are now applied to the Auto-configured ConcurrentKafkaListenerContainerFactory.
+
+    // Spring Boot 3.1: RabbitTemplateCustomizer has been introduced. Beans of this type will customize the Auto-configured RabbitTemplate.
+
+
     // Spring Boot 3.0: FlywayConfigurationCustomizer beans are now called to customize the FluentConfiguration after
     //  any Callback and JavaMigration beans have been added to the configuration. An application that defines
     //  Callback and JavaMigration beans and adds callbacks and Java migrations using a customizer may have
@@ -88,6 +96,16 @@ public class WebMvcConfig implements WebMvcConfigurer, SmartLifecycle {
     /*@Bean
     public FlywayConfigurationCustomizer flywayConfigurationCustomizer() {
         return configuration -> {};
+    }*/
+
+    // Spring Boot 3.0: Auto-configuration for the new Elasticsearch Java Client has been introduced.
+    //  It can be configured using the existing spring.elasticsearch.* configuration properties.
+    // The Auto-configuration for the new client does not use the Auto-configuration ObjectMapper for JSON mapping.
+    //  This is to prevent clashes between the needs of the application and the needs of Elasticsearch.
+    //  To control the ObjectMapper that is used, define a JacksonJsonpMapper bean.
+    /*@Bean
+    public JacksonJsonpMapper jacksonJsonpMapper(ObjectMapper objectMapper) { // using the context’s ObjectMapper
+        return new JacksonJsonpMapper(objectMapper);
     }*/
 
     // Spring Boot 3.1: One notable change in Jackson 2.15 is the introduction of processing limits.
