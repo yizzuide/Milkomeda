@@ -121,7 +121,9 @@ public class MvcObservationConfiguration {
     // When there is a Micrometer Tracing `Tracer` bean and Prometheus is on the classpath, a SpanContextSupplier is now autoconfigured. This supplier links metrics to traces by making the current trace ID and span ID available to Prometheus.
     // The Push Gateway can be configured to perform a `PUT` on shutdown. To do so, set `management.prometheus.metrics.export.pushgateway.shutdown-operation` to `put`. Additionally, the existing `push` setting has been deprecated and `post` should now be used instead.
     // A management.otlp.metrics.export.headers property has been added to support sending headers to an OTLP registry.
-    // Aggregation temporality configuration support for Micrometer’s OtlpMeterRegistry
+    // Aggregation temporality configuration support for Micrometer’s OtlpMeterRegistry.
+    // When using OpenTelemetry, the SdkTracerProviderBuilder that is used to create the Auto-configured SdkTracerProvider can be customised by defining an SdkTracerProviderBuilderCustomizer bean.
+    // The default value of management.otlp.tracing.endpoint has been removed. The OtlpHttpSpanExporter bean is now only Auto-configured if management.otlp.tracing.endpoint has a value. To restore the old behavior, set management.otlp.tracing.endpoint=http://localhost:4318/v1/traces
 
     // The HealthIndicator for MongoDB now supports MongoDB’s Stable API. The buildInfo query has been replaced with
     //  `isMaster` and the response now contains `maxWireVersion` instead of `version`.

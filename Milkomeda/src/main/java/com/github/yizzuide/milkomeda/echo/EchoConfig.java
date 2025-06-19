@@ -64,6 +64,9 @@ import java.util.concurrent.TimeUnit;
  * <br>
  * Create at 2019/09/21 16:24
  */
+// Spring Boot 3.2: Spring Boot 3.2 includes support for the new RestClient interface which has been introduced in Spring Framework 6.1.
+//  This interface provides a functional style blocking HTTP API with a similar to design to WebClient.
+//  Existing and new application might want to consider using RestClient as an alternative to RestTemplate.
 @Slf4j
 @Configuration
 @EnableConfigurationProperties(EchoProperties.class)
@@ -75,9 +78,11 @@ public class EchoConfig {
     // Spring Boot 3.0: RestTemplate, or rather the HttpComponentsClientHttpRequestFactory, now requires Apache HttpClient 5.
     //  If you are noticing issues with HTTP client behavior, it could be that RestTemplate is falling back to the JDK client.
     //  `org.apache.httpcomponents:httpclient` can be brought transitively by other dependencies, so your application might rely on this dependency without declaring it.
+    // Since RestTemplate instances often need to be customized before being used, Spring Boot does not provide any single Auto-configured RestTemplate bean.
+    //  The Auto-configured RestTemplateBuilder ensures that sensible HttpMessageConverters and an appropriate ClientHttpRequestFactory are applied to RestTemplate instances.
     @Bean("echoRestTemplate")
     public RestTemplate simpleRestTemplate(RestTemplateBuilder builder) {
-        RestTemplate restTemplate = builder.build();
+        RestTemplate restTemplate = builder/*.setSslBundle()*/.build();
         // Spring Boot 3.1：Support for Apache HttpClient 4 with RestTemplate was removed in Spring Framework 6,in favor of Apache HttpClient 5.
         restTemplate.setRequestFactory(clientHttpRequestFactory());
         // 自定义错误处理
@@ -134,9 +139,13 @@ public class EchoConfig {
                 .build();
     }
 
-    // Spring Boot 3.0: ClientHttpRequestFactorySupplier should be replaced with ClientHttpRequestFactories
     @Bean
     public ClientHttpRequestFactory clientHttpRequestFactory() {
+        // Spring Boot 3.0: ClientHttpRequestFactorySupplier should be replaced with ClientHttpRequestFactories
+        /*ClientHttpRequestFactory defaultClientHttpRequestFactory = ClientHttpRequestFactories.get(
+                HttpComponentsClientHttpRequestFactory.class,
+                ClientHttpRequestFactorySettings.DEFAULTS.withConnectTimeout(echoProperties.getConnectTimeout())
+        );*/
         HttpComponentsClientHttpRequestFactory clientHttpRequestFactory = new HttpComponentsClientHttpRequestFactory();
         clientHttpRequestFactory.setHttpClient(closeableHttpClient());
         // 设置客户端和服务端建立连接的超时时间

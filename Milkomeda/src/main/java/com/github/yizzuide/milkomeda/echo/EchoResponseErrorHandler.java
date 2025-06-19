@@ -23,6 +23,7 @@ package com.github.yizzuide.milkomeda.echo;
 
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.web.client.DefaultResponseErrorHandler;
 import org.springframework.web.client.HttpStatusCodeException;
@@ -32,7 +33,7 @@ import org.springframework.web.client.RestClientException;
 import java.io.IOException;
 
 /**
- * EchoResponseErrorHandler
+ * Custom response error handler.
  *
  * @author yizzuide
  * @since 1.13.4
@@ -50,8 +51,7 @@ public class EchoResponseErrorHandler implements ResponseErrorHandler {
         try {
             errorHandler.handleError(response);
         } catch (RestClientException e) {
-            if (e instanceof HttpStatusCodeException) {
-                HttpStatusCodeException ce = (HttpStatusCodeException) e;
+            if (e instanceof HttpStatusCodeException ce) {
                 log.error("Echo request with error code: {}, msg:{}, body:{}", ce.getStatusCode().value(), ce.getMessage(), ce.getResponseBodyAsString());
                 throw new EchoException(ce.getStatusCode().value(), ce.getMessage(), ce.getResponseBodyAsString());
             }
@@ -60,7 +60,7 @@ public class EchoResponseErrorHandler implements ResponseErrorHandler {
     }
 
     @Override
-    public boolean hasError(ClientHttpResponse response) throws IOException {
+    public boolean hasError(@NotNull ClientHttpResponse response) throws IOException {
         return errorHandler.hasError(response);
     }
 }

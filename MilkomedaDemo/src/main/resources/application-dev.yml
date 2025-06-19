@@ -79,6 +79,9 @@ spring:
       #modify-topic-configs: true
       # Spring Boot 3.1: Additional close-timeout, operation-timeout, auto-startup and auto-create properties have been added to spring.kafka.admin
       #close-timeout: 10s
+    # Spring Boot 3.1: The spring.kafka.streams.cache-max-size-buffering has been deprecated.
+    #streams:
+      #state-store-cache-max-size: 1MB
 
     # Spring Boot 3.1: When using Apache Kafka with Auto-configured retryable topic configuration (spring.kafka.retry.topic.enabled: true),
     #   with an exponential back off with a maxDelay, all retries at the maxDelay level are now sent to the same topic.
@@ -149,6 +152,7 @@ spring:
   # Spring Boot 3.0: The @EnableBatchProcessing no longer required and should be removed from applications that want to use Boot’s Auto-configuration.
   #   Running multiple batch jobs is no longer supported. If the Auto-configuration detects a single job is, it will be executed on startup.
   #   If multiple jobs are found in the context, a job name to execute on startup must be supplied.
+  # The conversion service using by Spring Batch when it is Auto-configured can now be customised by defining a BatchConversionServiceCustomizer bean.
   #batch:
     #job:
       #name:
@@ -168,9 +172,17 @@ logging:
     console: UTF-8
     file: UTF-8
   # Spring Boot 3.1: If you’re using Logback or Log4j2, there’s now the option to have different log levels for console logs and file logs.
+  # Logback’s root log level is now defaulted to INFO as early as possible.
   threshold:
     console: TRACE
     file: TRACE
+
+  # Spring Boot 3.2: The default log output now includes your application name whenever you have a spring.application.name property set.
+  #   If you prefer the previous format, you can set logging.include-application-name to false.
+  include-application-name: false
+  # The application name, trace id and span id are now included by default.
+  pattern:
+    correlation: "[${spring.application.name:},%X{traceId:-},%X{spanId:-}]"
 
 management:
   server:
@@ -213,6 +225,11 @@ management:
     jmx:
       exposure:
         include: '*'
+
+  # Spring Boot 3.2: Spring Boot will now automatically log correlation ID whenever you are using Micrometer tracing.
+  #   as long as management.tracing.enabled has not been set to false.
+  tracing:
+    enabled: true
 
   # Spring Boot 3.0: 'trace.http' Endpoint Renamed to 'httpexchanges'. Related infrastructure classes have also been renamed.
   #   For example, HttpTraceRepository is now named HttpExchangeRepository.

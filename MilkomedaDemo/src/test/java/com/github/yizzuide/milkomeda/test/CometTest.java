@@ -33,6 +33,7 @@ public class CometTest {
 
     private MockMvc mockMvc;
 
+    // Spring Boot 3.1: MockServerRestTemplateCustomizer now supports enable content buffering through a new setBufferContent method.
     @Before
     public void setup() {
         mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();

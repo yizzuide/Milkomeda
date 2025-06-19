@@ -39,6 +39,8 @@ public abstract class AbstractArgumentMatcher implements ArgumentMatcher {
 
     // Spring Boot 3.0：Compile your Java sources with the common Java 8+ `-parameters` flag for parameter name retention.
     //  With the Kotlin compiler, we recommend the `-java-parameters` flag for completeness.
+    // Spring Boot 3.2: The version of Spring Framework used by Spring Boot 3.2 no longer attempts to deduce parameter names by parsing bytecode.
+    //  If you experience issues with dependency injection or property binding, you should add compiling with the -parameters option.
     public static final ParameterNameDiscoverer NAME_DISCOVERER = new DefaultParameterNameDiscoverer();
 
     @Override

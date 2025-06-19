@@ -23,9 +23,6 @@
         -->
         <maven.compiler.release>21</maven.compiler.release>
         <java.version>21</java.version>
-        <!-- Spring Boot 3.0: Jetty does not yet support Servlet 6.0. To use Jetty with Spring Boot 3.0,
-            you will have to downgrade the Servlet API to 5.0. You can use the jakarta-servlet.version property to do so. -->
-        <!--<jakarta-servlet.version>5.0</jakarta-servlet.version>-->
         <spring-cloud.version>2023.0.0</spring-cloud.version>
         <milkomeda.version>4.0.0-SNAPSHOT</milkomeda.version>
         <mybatis.starter.version>3.0.3</mybatis.starter.version>
@@ -69,14 +66,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-actuator</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
         </dependency>
         <dependency>
             <groupId>com.github.yizzuide</groupId>
@@ -197,6 +186,19 @@
             <version>${contiperf.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-tracing-bridge-otel</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+        </dependency>
+
         <!-- Spring Boot 2.4.x: JUnit 5’s vintage engine has been removed from spring-boot-starter-test -->
         <dependency>
             <groupId>org.junit.vintage</groupId>
