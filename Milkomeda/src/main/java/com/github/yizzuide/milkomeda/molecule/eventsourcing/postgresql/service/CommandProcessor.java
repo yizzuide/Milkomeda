@@ -36,6 +36,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.lang.NonNull;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.List;
 
@@ -83,6 +85,12 @@ public class CommandProcessor {
                 return;
             }
             aggregates.forEach(this::saveAndSendEvents);
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    log.debug("aggregates and events commit, clear hanging aggregates");
+                }
+            });
         } catch (Exception ex) {
             aggregates.forEach(agg -> aggregateStore.deleteTempAggregate(agg.getAggregateId()));
             throw ex;

@@ -90,7 +90,7 @@ spring:
   # Spring Boot 3.2：开启虚拟线程
   threads:
     virtual:
-      enabled: true
+      enabled: false
 
 mybatis-plus:
   mapper-locations:

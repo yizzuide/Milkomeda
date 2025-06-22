@@ -440,7 +440,7 @@ milkomeda:
         driver-class-name: org.postgresql.Driver
         username: postgres
         password: ${MYSQL_PWD}
-        url: jdbc:postgresql://localhost:5432/postgres?currentSchema=milkomeda&useUnicode=true&characterEncoding=UTF-8&TimeZone=Asia/Shanghai
+        url: jdbc:postgresql://localhost:5432/postgres?currentSchema=milkomeda&asyncNotify=true&useUnicode=true&characterEncoding=UTF-8&TimeZone=Asia/Shanghai
     # 主从切面策略（内部通过桥接Orbit模块功能实现）
     strategy:
       - key-name: read-only # 这里用上面instances里配置的key
