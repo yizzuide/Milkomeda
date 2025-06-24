@@ -29,7 +29,6 @@ import com.github.yizzuide.milkomeda.universe.extend.web.handler.HotHttpHandlerP
 import com.github.yizzuide.milkomeda.universe.extend.web.handler.NamedHandler;
 import com.github.yizzuide.milkomeda.universe.metadata.BeanIds;
 import com.github.yizzuide.milkomeda.universe.polyfill.SpringMvcPolyfill;
-import com.google.common.collect.Maps;
 import jakarta.servlet.DispatcherType;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -144,7 +143,7 @@ public class CometConfig implements ApplicationListener<ApplicationStartedEvent>
             return;
         }
         Map<String, HotHttpHandlerProperty> responseInterceptors = Optional.ofNullable(cometProperties.getResponseInterceptors()).orElseGet(() -> {
-            cometProperties.setResponseInterceptors(Maps.newHashMap());
+            cometProperties.setResponseInterceptors(new HashMap<>());
             return cometProperties.getResponseInterceptors();
         });
         // 添加自动装载处理器

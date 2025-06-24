@@ -197,6 +197,7 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
         </dependency>
 
         <!-- Spring Boot 2.4.x: JUnit 5’s vintage engine has been removed from spring-boot-starter-test -->

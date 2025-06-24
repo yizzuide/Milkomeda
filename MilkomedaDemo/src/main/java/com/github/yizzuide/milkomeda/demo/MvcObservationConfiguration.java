@@ -5,7 +5,6 @@ import io.micrometer.common.KeyValues;
 import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationFilter;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.server.observation.ServerHttpObservationDocumentation;
@@ -18,8 +17,6 @@ import org.springframework.http.server.observation.ServerRequestObservationConve
  * @author yizzuide
  * Create at 2025/06/08 23:24
  */
-// Spring Boot 3.0: @AutoConfigureMetrics has been deprecated in favor of @AutoConfigureObservability
-@AutoConfigureObservability
 @Configuration
 public class MvcObservationConfiguration {
     @Bean

@@ -10,8 +10,7 @@
     <packaging>jar</packaging>
 
     <properties>
-        <maven.compiler.source>21</maven.compiler.source>
-        <maven.compiler.target>21</maven.compiler.target>
+        <maven.compiler.release>21</maven.compiler.release>
         <java.version>21</java.version>
         <kotlin.version>1.9.21</kotlin.version>
         <project.release.version>4.0.0-SNAPSHOT</project.release.version>

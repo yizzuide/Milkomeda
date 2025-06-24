@@ -13,9 +13,9 @@ import org.springframework.boot.web.server.WebServerFactoryCustomizer;
 import org.springframework.context.SmartLifecycle;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.env.PropertySource;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
@@ -34,9 +34,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 //    这个会把ContentNegotiation配置上，包括忽略请求后缀数据匹配，并导入
 //    EnableWebMvcConfiguration（等同于@EnableWebMvc，继承自DelegatingWebMvcConfiguration -> WebMvcConfigurationSupport
 // 总结：在Spring Boot 2.0不添加@EnableWebMvc，会配置的更多更全面，拥有添加@EnableWebMvc的所有配置
-
-// Spring Boot 2.3: 不支持@ActiveProfiles({"dev,test"})，它将识别为单个字符串：dev,test
-@ActiveProfiles({"dev","test"})
+// Spring Boot 2.3: 不支持@Profile("dev,test")，它将识别为单个字符串：dev,test
+@Profile({"dev", "test"})
 @Configuration
 @Slf4j
 public class WebMvcConfig implements WebMvcConfigurer, SmartLifecycle {

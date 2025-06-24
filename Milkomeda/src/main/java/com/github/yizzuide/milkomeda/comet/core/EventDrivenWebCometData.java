@@ -24,6 +24,8 @@ package com.github.yizzuide.milkomeda.comet.core;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import java.io.Serial;
+
 /**
  * An identification class which used indicate for event driven.
  *
@@ -34,5 +36,6 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class EventDrivenWebCometData extends WebCometData {
+    @Serial
     private static final long serialVersionUID = 9122488246826621150L;
 }

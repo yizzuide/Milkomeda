@@ -6,8 +6,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -23,10 +25,14 @@ import org.springframework.web.context.WebApplicationContext;
  * Create at 2019/04/11 23:02
  */
 @RunWith(SpringRunner.class)
+// Spring Boot 3.0: @AutoConfigureMetrics has been deprecated in favor of @AutoConfigureObservability
+@AutoConfigureObservability
 // Spring Boot 3.0: The @SpringBootTest annotation can now use the main of any discovered @SpringBootConfiguration class if it’s available.
 //  This means that any custom SpringApplication configuration performed by your main method can now be picked up by tests.
 // To use the main method for a test set the useMainMethod attribute of @SpringBootTest to UseMainMethod.ALWAYS or UseMainMethod.WHEN_AVAILABLE
 @SpringBootTest(classes = MilkomedaDemoApplication.class, useMainMethod = SpringBootTest.UseMainMethod.WHEN_AVAILABLE)
+// Spring Boot 2.3: 不支持@Profile("dev,test")，它将识别为单个字符串：dev,test
+@ActiveProfiles({"dev","test"})
 public class CometTest {
     @Autowired
     private WebApplicationContext wac;
