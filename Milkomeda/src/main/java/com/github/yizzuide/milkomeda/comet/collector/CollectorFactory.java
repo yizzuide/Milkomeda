@@ -21,11 +21,6 @@
 
 package com.github.yizzuide.milkomeda.comet.collector;
 
-import com.github.yizzuide.milkomeda.comet.core.CometData;
-import com.github.yizzuide.milkomeda.pillar.PillarExecutor;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-
 /**
  * CollectorFactory
  * 收集器工厂
@@ -36,20 +31,12 @@ import lombok.Data;
  * <br>
  * Create at 2019/11/13 19:11
  */
-@Data
-@AllArgsConstructor
-public class CollectorFactory {
-    /**
-     * 分流执行器
-     */
-    private PillarExecutor<CometData, Object> pillarExecutor;
+public interface CollectorFactory {
 
     /**
      * 根据标识符获取一个收集器
      * @param  tag  收集器的tag
      * @return  收集器
      */
-    public Collector get(String tag) {
-        return (Collector) pillarExecutor.getPillar(tag);
-    }
+    Collector get(String tag);
 }

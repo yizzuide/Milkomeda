@@ -15,7 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 // @CometCollectorHandler可以指定日志收集器的tag，不指定的情况下为默认的bean名，如：ProductTagCollector -> productTagCollector
 @CometCollectorHandler(tag = "product-tag")
-public class ProductTagCollector extends TagCollector {
+public class ProductTagCollector implements TagCollector {
     @Override
     public void prepare(CometData params) {
       log.info("prepare - {}", params);

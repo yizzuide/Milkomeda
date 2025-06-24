@@ -21,6 +21,7 @@
 
 package com.github.yizzuide.milkomeda.comet.core;
 
+import com.github.yizzuide.milkomeda.comet.collector.CollectorFactory;
 import com.github.yizzuide.milkomeda.comet.collector.CometCollectorProperties;
 import com.github.yizzuide.milkomeda.comet.collector.TagCollector;
 import com.github.yizzuide.milkomeda.comet.logger.CometLoggerProperties;
@@ -35,6 +36,7 @@ import com.github.yizzuide.milkomeda.universe.parser.yml.YmlResponseOutput;
 import com.github.yizzuide.milkomeda.util.DataTypeConvertUtil;
 import com.github.yizzuide.milkomeda.util.JSONUtil;
 import com.github.yizzuide.milkomeda.util.NetworkUtil;
+import io.netty.util.concurrent.FastThreadLocal;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeansException;
@@ -60,9 +62,9 @@ import java.util.stream.Collectors;
  * CometInterceptor
  * 处理TagCollector和Logger
  *
- * @author yizzuide
  * @since 3.0.0
- * @version 3.13.0
+ * @version 4.0.0
+ * @author yizzuide
  * <br>
  * Create at 2020/03/28 01:08
  */
@@ -81,6 +83,9 @@ public class CometInterceptor implements AsyncHandlerInterceptor, ApplicationCon
     @Autowired(required = false) @Qualifier(BeanIds.COMET_LOGGER_RESOLVER)
     private URLPlaceholderResolver cometLoggerURLPlaceholderResolver;
 
+    @Autowired(required = false)
+    private CollectorFactory collectorFactory;
+
     // 占位解析器
     private URLPlaceholderParser urlPlaceholderParser;
 
@@ -88,10 +93,7 @@ public class CometInterceptor implements AsyncHandlerInterceptor, ApplicationCon
     private List<CometLoggerProperties.Strategy> strategyList;
 
     // 线程日志记录
-    private static ThreadLocal<CometData> threadLocal;
-
-    // tag收集器
-    private Map<String, TagCollector> tagCollectorMap;
+    private static FastThreadLocal<CometData> threadLocal;
 
     // 异常body识别节点：(key, (alias_key, value))
     private Map<String, Map<String, YmlAliasNode>> aliasNodesMap;
@@ -135,8 +137,6 @@ public class CometInterceptor implements AsyncHandlerInterceptor, ApplicationCon
         }
 
         Map<String, CometCollectorProperties.Tag> tagMap = cometCollectorProperties.getTags();
-        this.tagCollectorMap = tagMap.keySet().stream()
-                .collect(Collectors.toMap(Object::toString, tagName -> applicationContext.getBean(tagName, TagCollector.class)));
         // 别名绑定
         aliasNodesMap = new HashMap<>();
         for (Map.Entry<String, CometCollectorProperties.Tag> tagCollectorEntry : cometCollectorProperties.getTags().entrySet()) {
@@ -147,7 +147,7 @@ public class CometInterceptor implements AsyncHandlerInterceptor, ApplicationCon
             String tag = tagCollectorEntry.getKey();
             aliasNodesMap.put(tag, YmlParser.parseAliasMap(exceptionMonitor));
         }
-        threadLocal = new ThreadLocal<>();
+        threadLocal = new FastThreadLocal<>();
     }
 
     @Override
@@ -156,7 +156,7 @@ public class CometInterceptor implements AsyncHandlerInterceptor, ApplicationCon
             printRequestLog(request);
         }
 
-        if (cometCollectorProperties != null && cometCollectorProperties.isEnableTag() && !CollectionUtils.isEmpty(this.tagCollectorMap)) {
+        if (cometCollectorProperties != null && cometCollectorProperties.isEnableTag() && collectorFactory != null) {
             collectPreLog(request);
         }
         return AsyncHandlerInterceptor.super.preHandle(request, response, handler);
@@ -192,7 +192,7 @@ public class CometInterceptor implements AsyncHandlerInterceptor, ApplicationCon
         }
 
         if (cometCollectorProperties != null && cometCollectorProperties.isEnableTag() &&
-                !CollectionUtils.isEmpty(this.tagCollectorMap) && threadLocal.get() != null) {
+                collectorFactory != null && threadLocal.get() != null) {
             this.collectPostLog(response.getStatus(), body, ex);
         }
 
@@ -206,7 +206,7 @@ public class CometInterceptor implements AsyncHandlerInterceptor, ApplicationCon
         cometData.setDuration(duration);
         cometData.setResponseTime(now);
         String tag = cometData.getTag();
-        TagCollector tagCollector = tagCollectorMap.get(tag);
+        TagCollector tagCollector = (TagCollector) collectorFactory.get(tag);
 
         // 如果有异常（说明这是没有经过统一异常拦截响应处理的异常）
         if (ex != null) {
@@ -321,7 +321,7 @@ public class CometInterceptor implements AsyncHandlerInterceptor, ApplicationCon
         String host = NetworkUtil.getHost();
         cometData.setHost(host);
         cometData.setTag(selectTag);
-        this.tagCollectorMap.get(selectTag).prepare(cometData);
+        collectorFactory.get(selectTag).prepare(cometData);
         threadLocal.set(cometData);
     }
 

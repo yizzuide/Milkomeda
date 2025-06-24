@@ -25,14 +25,11 @@ package com.github.yizzuide.milkomeda.comet.collector;
  * TagCollector
  * 声明式标签收集器，去掉侵入式注解，与yml配置联合使用
  *
- * @author yizzuide
  * @since 3.0.0
+ * @version 4.0.0
+ * @author yizzuide
  * <br>
  * Create at 2020/03/29 17:12
  */
-public abstract class TagCollector implements Collector {
-    @Override
-    public String supportType() {
-        return null;
-    }
+public interface TagCollector extends Collector {
 }

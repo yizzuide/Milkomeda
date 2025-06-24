@@ -27,9 +27,9 @@ import jakarta.servlet.http.HttpServletRequest;
  * CometRecorder
  * 采集记录器策略接口
  *
- * @author yizzuide
  * @since 0.2.0
  * @version 1.13.3
+ * @author yizzuide
  * <br>
  * Create at 2019/04/11 19:45
  */

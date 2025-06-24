@@ -22,22 +22,18 @@
 package com.github.yizzuide.milkomeda.comet.collector;
 
 import com.github.yizzuide.milkomeda.comet.core.CometData;
-import com.github.yizzuide.milkomeda.pillar.Pillar;
 
 /**
  * Collector
  * 日志收集器接口
  *
- * @author yizzuide
  * @since 1.15.0
- * @version 1.16.0
+ * @version 4.0.0
+ * @author yizzuide
  * <br>
  * Create at 2019/11/13 18:12
  */
-public interface Collector extends Pillar<CometData, Object> {
-
-    @Override
-    default void process(CometData params, Object result) {}
+public interface Collector {
 
     /**
      * 数据准备

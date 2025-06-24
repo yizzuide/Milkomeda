@@ -24,6 +24,7 @@ package com.github.yizzuide.milkomeda.comet.collector;
 import com.github.yizzuide.milkomeda.comet.core.CometData;
 import com.github.yizzuide.milkomeda.comet.core.CometRecorder;
 import com.github.yizzuide.milkomeda.comet.core.EventDrivenWebCometData;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -33,10 +34,11 @@ import jakarta.servlet.http.HttpServletRequest;
  *
  * @author yizzuide
  * @since 1.15.0
- * @version 3.15.0
+ * @version 4.0.0
  * <br>
  * Create at 2019/11/13 19:18
  */
+@AllArgsConstructor
 @Slf4j
 public class CollectorRecorder implements CometRecorder {
     /**
@@ -44,15 +46,11 @@ public class CollectorRecorder implements CometRecorder {
      */
     private final CollectorFactory collectorFactory;
 
-    public CollectorRecorder(CollectorFactory collectorFactory) {
-        this.collectorFactory = collectorFactory;
-    }
-
     @Override
     public void onRequest(CometData prototype, String tag, HttpServletRequest request, Object[] args) {
         try {
             // ignore event driven comet data
-            if (prototype instanceof EventDrivenWebCometData) {
+            if (collectorFactory== null || prototype instanceof EventDrivenWebCometData) {
                 return;
             }
             collectorFactory.get(tag).prepare(prototype);
@@ -65,7 +63,7 @@ public class CollectorRecorder implements CometRecorder {
     public Object onReturn(CometData cometData, Object returnData) {
         try {
             // ignore event driven comet data
-            if (cometData instanceof EventDrivenWebCometData) {
+            if (collectorFactory== null || cometData instanceof EventDrivenWebCometData) {
                 return returnData;
             }
             collectorFactory.get(cometData.getTag()).onSuccess(cometData);
@@ -79,7 +77,7 @@ public class CollectorRecorder implements CometRecorder {
     public void onThrowing(CometData cometData, Exception e) {
         try {
             // ignore event driven comet data
-            if (cometData instanceof EventDrivenWebCometData) {
+            if (collectorFactory== null || cometData instanceof EventDrivenWebCometData) {
                 return;
             }
             collectorFactory.get(cometData.getTag()).onFailure(cometData);

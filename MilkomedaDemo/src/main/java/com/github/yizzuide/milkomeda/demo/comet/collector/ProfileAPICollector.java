@@ -18,7 +18,7 @@ import java.util.Map;
  * Create at 2019/11/14 16:02
  */
 @Slf4j
-@Component
+@Component("PROFILE")
 public class ProfileAPICollector implements Collector {
 
     @Override
@@ -50,10 +50,5 @@ public class ProfileAPICollector implements Collector {
         if (apiLog == null) return;
         // 异步将日志存储到MySQL数据库或ES
         log.info("正在处理失败的日志数据：{}", apiLog);
-    }
-
-    @Override
-    public String supportType() {
-        return "PROFILE";
     }
 }

@@ -40,7 +40,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * @author yizzuide
  * Create at 2025/05/30 14:23
  */
-public abstract class AbstractCounterTagCollector extends TagCollector {
+public abstract class AbstractCounterTagCollector implements TagCollector {
 
     private final LoadingCache<String, AtomicLong> localCounter;
 

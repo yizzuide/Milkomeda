@@ -26,6 +26,7 @@ import com.github.yizzuide.milkomeda.universe.context.WebContext;
 import com.github.yizzuide.milkomeda.util.JSONUtil;
 import com.github.yizzuide.milkomeda.util.NetworkUtil;
 import com.github.yizzuide.milkomeda.util.ReflectUtil;
+import io.netty.util.concurrent.FastThreadLocal;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
@@ -58,13 +59,12 @@ import java.util.function.Function;
  * CometAspect
  * 采集切面
  *
- * @author yizzuide
  * @since 0.2.0
- * @version 3.15.0
+ * @version 4.0.0
+ * @author yizzuide
  * <br>
  * Create at 2019/04/11 19:48
  */
-@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 @Slf4j
 @Aspect
 @Order(-99)
@@ -79,12 +79,12 @@ public class CometAspect {
     /**
      * 存储请求参数解析
      */
-    static final ThreadLocal<String> resolveThreadLocal = new ThreadLocal<>();
+    static final FastThreadLocal<String> resolveThreadLocal = new FastThreadLocal<>();
     /**
      * 控制器层本地线程存储
      */
     // 官方推荐使用private static能减少弱引用对GC的影响
-    private static final ThreadLocal<CometData> threadLocal = new ThreadLocal<>();
+    private static final FastThreadLocal<CometData> threadLocal = new FastThreadLocal<>();
 
     /**
      * 忽略序列化的参数

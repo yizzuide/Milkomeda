@@ -23,34 +23,25 @@ package com.github.yizzuide.milkomeda.comet.collector;
 
 import com.github.yizzuide.milkomeda.comet.core.CometAspect;
 import com.github.yizzuide.milkomeda.comet.core.CometConfig;
-import com.github.yizzuide.milkomeda.comet.core.CometData;
 import com.github.yizzuide.milkomeda.comet.core.CometHolder;
-import com.github.yizzuide.milkomeda.pillar.PillarExecutor;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactoryUtils;
+import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ServiceLocatorFactoryBean;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.lang.NonNull;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * CometCollectorConfig
  *
- * @author yizzuide
- * @since 3.0.0
- * @version 3.14.0
  * @see BeanFactoryUtils#beansOfTypeIncludingAncestors(org.springframework.beans.factory.ListableBeanFactory, java.lang.Class)
+ * @since 3.0.0
+ * @version 4.0.0
+ * @author yizzuide
  * <br>
  * Create at 2020/03/28 18:54
  */
@@ -58,10 +49,7 @@ import java.util.stream.Collectors;
 @AutoConfigureAfter(CometConfig.class)
 @EnableConfigurationProperties(CometCollectorProperties.class)
 @ConditionalOnProperty(prefix = "milkomeda.comet.collector", name = "enable", havingValue = "true")
-public class CometCollectorConfig implements ApplicationContextAware {
-
-    @Autowired(required = false)
-    private List<Collector> collectors;
+public class CometCollectorConfig implements InitializingBean {
 
     @Autowired
     private CometAspect cometAspect;
@@ -69,36 +57,23 @@ public class CometCollectorConfig implements ApplicationContextAware {
     @Autowired
     private CometCollectorProperties cometCollectorProperties;
 
-    @Bean
-    public CollectorFactory collectorFactory() {
-        PillarExecutor<CometData, Object> pillarExecutor = new PillarExecutor<>();
-        // 排除tag-collector
-        if (!CollectionUtils.isEmpty(collectors)) {
-            pillarExecutor.addPillarList(collectors.stream()
-                    .filter(c -> StringUtils.hasLength(c.supportType()))
-                    .collect(Collectors.toList()));
-        }
-        return new CollectorFactory(pillarExecutor);
+    @SuppressWarnings("rawtypes")
+    @Bean(name = "collectorFactory")
+    public FactoryBean collectorFactory() {
+        ServiceLocatorFactoryBean factoryBean = new ServiceLocatorFactoryBean();
+        factoryBean.setServiceLocatorInterface(CollectorFactory.class);
+        return factoryBean;
     }
 
     @Bean
-    public CollectorRecorder collectorRecorder() {
-        CollectorRecorder collectorRecorder = new CollectorRecorder(collectorFactory());
+    public CollectorRecorder collectorRecorder(@Autowired(required = false) CollectorFactory collectorFactory) {
+        CollectorRecorder collectorRecorder = new CollectorRecorder(collectorFactory);
         cometAspect.setRecorder(collectorRecorder);
         return collectorRecorder;
     }
 
     @Override
-    public void setApplicationContext(@NonNull ApplicationContext applicationContext) throws BeansException {
+    public void afterPropertiesSet() throws Exception {
         CometHolder.setCollectorProps(cometCollectorProperties);
-        // 如果为空，到BeanFactory里查找
-        if (CollectionUtils.isEmpty(collectors)) {
-            collectors = new ArrayList<>(BeanFactoryUtils.beansOfTypeIncludingAncestors(applicationContext, Collector.class).values());
-            if (CollectionUtils.isEmpty(collectors)) {
-                return;
-            }
-            // 排除tag-collector
-            applicationContext.getBean(CollectorFactory.class).getPillarExecutor().addPillarList(collectors.stream().filter(c -> StringUtils.hasLength(c.supportType())).collect(Collectors.toList()));
-        }
     }
 }
