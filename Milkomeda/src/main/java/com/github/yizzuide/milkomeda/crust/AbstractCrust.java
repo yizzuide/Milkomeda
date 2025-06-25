@@ -41,7 +41,6 @@ import java.io.Serializable;
  * @author yizzuide
  * Create at 2024/01/12 18:43
  */
-@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 public abstract class AbstractCrust {
 
     /**

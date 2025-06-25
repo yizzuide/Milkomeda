@@ -39,6 +39,7 @@ import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.BlockAttackInnerInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.TenantLineInnerInterceptor;
 import com.baomidou.mybatisplus.extension.spring.MybatisSqlSessionFactoryBean;
+import com.github.yizzuide.milkomeda.orbit.OrbitConfig;
 import com.github.yizzuide.milkomeda.sirius.wormhole.SiriusInspector;
 import com.github.yizzuide.milkomeda.sirius.wormhole.SiriusTransactionWorkBus;
 import com.github.yizzuide.milkomeda.universe.extend.env.CollectionsPropertySource;
@@ -53,6 +54,7 @@ import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.GenericConverter;
 import org.springframework.core.io.Resource;
@@ -81,6 +83,7 @@ import java.util.Optional;
  */
 @AutoConfigureBefore(MybatisPlusAutoConfiguration.class)
 @EnableConfigurationProperties({SiriusProperties.class, TenantProperties.class})
+@Import(OrbitConfig.class)
 @Configuration
 public class SiriusConfig {
 

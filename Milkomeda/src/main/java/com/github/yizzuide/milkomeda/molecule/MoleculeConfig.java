@@ -25,8 +25,10 @@ import com.github.yizzuide.milkomeda.molecule.core.event.DomainEventBus;
 import com.github.yizzuide.milkomeda.molecule.core.event.DomainEventPublisher;
 import com.github.yizzuide.milkomeda.molecule.core.event.SpringApplicationDomainEventPublisher;
 import com.github.yizzuide.milkomeda.molecule.core.eventhandler.DefaultEventHandler;
+import com.github.yizzuide.milkomeda.orbit.OrbitConfig;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
 /**
  * Molecule module configuration.
@@ -35,6 +37,7 @@ import org.springframework.context.annotation.Configuration;
  * @author yizzuide
  * Create at 2025/06/09 16:47
  */
+@Import(OrbitConfig.class)
 @Configuration
 public class MoleculeConfig {
 

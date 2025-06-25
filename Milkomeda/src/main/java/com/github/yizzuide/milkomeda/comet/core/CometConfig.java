@@ -64,10 +64,10 @@ import java.util.*;
  * <br>
  * Create at 2019/12/12 18:10
  */
-@Configuration
 @Import(OrbitConfig.class)
-@AutoConfigureAfter({WebMvcAutoConfiguration.class, PulsarConfig.class})
 @EnableConfigurationProperties({MilkomedaProperties.class, CometProperties.class})
+@AutoConfigureAfter({WebMvcAutoConfiguration.class, PulsarConfig.class})
+@Configuration
 public class CometConfig implements ApplicationListener<ApplicationStartedEvent> {
 
     @Autowired CometProperties cometProperties;

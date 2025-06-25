@@ -53,10 +53,10 @@ import java.util.Set;
  * Create at 2020/5/8
  */
 @Slf4j
-@Configuration(proxyBeanMethods = false)
 @Import(OrbitConfig.class)
 @EnableConfigurationProperties(SundialProperties.class)
 @AutoConfigureBefore({DataSourceAutoConfiguration.class, TransactionAutoConfiguration.class})
+@Configuration(proxyBeanMethods = false)
 public class SundialConfig {
 
     @Autowired
