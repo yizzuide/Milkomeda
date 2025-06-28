@@ -36,11 +36,13 @@ import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.repositor
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.service.AggregateStore;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.service.CommandProcessor;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.service.EventSubscriptionProcessor;
+import com.github.yizzuide.milkomeda.pulsar.PulsarConfig;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 import java.util.List;
@@ -54,6 +56,7 @@ import java.util.List;
  */
 @ConditionalOnProperty(prefix = EventSourcingProperties.PREFIX, name = "enabled", havingValue = "true")
 @EnableConfigurationProperties(EventSourcingProperties.class)
+@Import(PulsarConfig.class)
 @Configuration(proxyBeanMethods = false)
 public class EventSourcingConfig {
 

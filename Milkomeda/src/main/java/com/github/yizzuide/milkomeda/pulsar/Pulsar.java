@@ -170,7 +170,7 @@ public class Pulsar implements ApplicationListener<ApplicationStartedEvent> {
      * @return  Timeout
      * @since 4.0.0
      */
-    public Timeout delay(Runnable runnable, int milliseconds) {
+    public Timeout delay(Runnable runnable, long milliseconds) {
         return PulsarHolder.hashedWheelTimer.newTimeout(timeout -> post(runnable), milliseconds, TimeUnit.MILLISECONDS);
     }
 

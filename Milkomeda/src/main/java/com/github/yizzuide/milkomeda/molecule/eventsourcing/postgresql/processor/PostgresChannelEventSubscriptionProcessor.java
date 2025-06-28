@@ -25,6 +25,7 @@ import com.github.yizzuide.milkomeda.molecule.MoleculeContext;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.EventSourcingProperties;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.eventhandler.AsyncEventHandler;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.service.EventSubscriptionProcessor;
+import com.github.yizzuide.milkomeda.pulsar.PulsarHolder;
 import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
@@ -98,6 +99,7 @@ public class PostgresChannelEventSubscriptionProcessor {
                             throw ex;
                         }
 
+                        // handle old events on startup
                         this.eventHandlers.forEach(this::processNewEvents);
 
                         try {
@@ -114,6 +116,12 @@ public class PostgresChannelEventSubscriptionProcessor {
                                         String parameter = notification.getParameter();
                                         MoleculeContext.getAsyncEventHandlers(parameter).forEach(this::processNewEvents);
                                     }
+                                }
+                                // delay handle changed events
+                                try {
+                                    PulsarHolder.getPulsar().delay(() -> this.eventHandlers.forEach(this::processNewEvents),  properties.getHandleChangedEventsDelayTime().toMillis());
+                                } catch (Exception e) {
+                                    log.error("Error while processing changed events asynchronously", e);
                                 }
                             }
                         } finally {

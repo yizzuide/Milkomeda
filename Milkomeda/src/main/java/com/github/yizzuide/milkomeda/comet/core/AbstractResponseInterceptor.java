@@ -44,7 +44,6 @@ import java.nio.charset.StandardCharsets;
  */
 @Getter
 @Slf4j
-@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 public abstract class AbstractResponseInterceptor implements CometResponseInterceptor {
 
     @Setter
