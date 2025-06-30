@@ -22,6 +22,7 @@
 package com.github.yizzuide.milkomeda.molecule.core.eventhandler;
 
 import com.github.yizzuide.milkomeda.molecule.MoleculeContext;
+import com.github.yizzuide.milkomeda.molecule.core.agg.AbstractAggregateRoot;
 import com.github.yizzuide.milkomeda.molecule.core.event.RecordAggregateEvent;
 import org.springframework.context.event.EventListener;
 
@@ -35,9 +36,8 @@ import org.springframework.context.event.EventListener;
 public class DefaultEventHandler {
     @EventListener
     public void handle(RecordAggregateEvent ignore) {
-       if (MoleculeContext.getEventSourcingProperties().getEnabled()) {
-           return;
-       }
-       MoleculeContext.getDomainEventBus().publish();
+        if(MoleculeContext.getDomainEventBus().hasHangingType(AbstractAggregateRoot.class)) {
+            MoleculeContext.getDomainEventBus().publish();
+        }
     }
 }

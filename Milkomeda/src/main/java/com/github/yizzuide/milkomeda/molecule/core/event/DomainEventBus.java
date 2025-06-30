@@ -23,7 +23,10 @@ package com.github.yizzuide.milkomeda.molecule.core.event;
 
 import com.github.yizzuide.milkomeda.molecule.core.agg.AggregateRoot;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 
 /**
@@ -51,11 +54,20 @@ public class DomainEventBus {
      */
     @SuppressWarnings("unchecked")
     public <T extends AggregateRoot> List<T> getHangingAggregates(Class<T> aggregateClazz) {
-        if(HANGING_AGGREGATES.get().isEmpty() ||
-                !aggregateClazz.isAssignableFrom(HANGING_AGGREGATES.get().stream().findFirst().orElseThrow().getClass())) {
-            return Collections.emptyList();
+        if (hasHangingType(aggregateClazz)) {
+            return (List<T>) HANGING_AGGREGATES.get().stream().toList();
         }
-        return (List<T>) HANGING_AGGREGATES.get().stream().toList();
+        return Collections.emptyList();
+    }
+
+    /**
+     * Has hanging aggregate type.
+     * @param aggregateClazz  aggregate class
+     * @return  true if it has hanging type
+     */
+    public boolean hasHangingType(Class<? extends AggregateRoot> aggregateClazz) {
+        return !HANGING_AGGREGATES.get().isEmpty() &&
+                aggregateClazz.isAssignableFrom(HANGING_AGGREGATES.get().stream().findFirst().orElseThrow().getClass());
     }
 
     /**
