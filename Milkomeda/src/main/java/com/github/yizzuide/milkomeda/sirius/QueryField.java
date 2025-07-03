@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 yizzuide All rights Reserved.
+ * Copyright (c) 2025 yizzuide All rights Reserved.
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -21,59 +21,17 @@
 
 package com.github.yizzuide.milkomeda.sirius;
 
-import org.springframework.core.Ordered;
-
 import java.lang.annotation.*;
 
 /**
- * Auto generate multi {@link QueryLinker}.
+ * Query match field for used in `queryFields` of {@link QueryMatcher}.
  *
- * @since 3.15.0
- * @version 4.0.0
  * @author yizzuide
- * Create at 2023/09/21 10:33
+ * @since 4.0.0
+ * Create at 2025/07/03 23:21
  */
 @Documented
+@Target({ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.FIELD, ElementType.ANNOTATION_TYPE})
-@Inherited
-@Repeatable(QueryAutoLinkers.class)
-public @interface QueryAutoLinker {
-
-    /**
-     * Link expression.
-     * @return link expression
-     */
-    String links();
-
-    /**
-     * Reference id field name.
-     * @return field name
-     */
-    String linkIdField() default "id";
-
-    /**
-     * Mapping fields from target to linker.
-     * @return mapping expression
-     */
-    String mappings() default "";
-
-    /**
-     * Link entity class.
-     * @return mapper class
-     */
-    Class<?> type();
-
-    /**
-     * Query linker order.
-     * @return query order
-     * @since 4.0.0
-     */
-    int order() default Ordered.LOWEST_PRECEDENCE;
-
-    /**
-     * Bind link expression in query group.
-     * @return  group name
-     */
-    String[] group() default { IPageableService.DEFAULT_GROUP };
+public @interface QueryField {
 }

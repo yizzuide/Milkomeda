@@ -48,22 +48,28 @@ public enum PrefectType {
     EMPTY,
 
     /**
-     * Match fuzzy with {@link QueryLinker} or not used linker using sql `in`.
+     * Match using sql `in($1%)` or
+     * Match and query target field value of {@link QueryLinker} by `like`, and return linker entity ids for sql `in($1)`.
      */
     IN,
 
     /**
-     * Match full words with {@link QueryLinker} and using sql `in`.
+     * Match and query target field value of {@link QueryLinker} by `eq`, and return linker entity ids for sql `in($1)`.
      */
     LINK_EQ_IN,
 
     /**
-     * Match using sql `like`.
+     * Match using sql `like $1%`.
      */
     LIKE,
 
     /**
-     * Match using sql `order by`.
+     * Match using sql `between $1 and $2`.
+     */
+    BETWEEN,
+
+    /**
+     * Match using sql `order by $1`.
      */
     OrderBy,
 

@@ -328,6 +328,41 @@ public class ReflectUtil {
         return null;
     }
 
+
+    /**
+     * 获取目标对象上所有注解字段名和值
+     * @param annotationClazz   注解
+     * @param target            目标对象
+     * @return map
+     * @since 4.0.0
+     */
+    public static Map<String, Object> getAnnotatedFieldValues(Class<? extends Annotation> annotationClazz, Object target) {
+        Class<?> clazz = target.getClass();
+        Field[] fields = clazz.getDeclaredFields();
+        Map<String, Object> mapValues = new HashMap<>();
+        for (Field field : fields) {
+            if (field.isAnnotationPresent(annotationClazz)) {
+                Object value = null;
+                // 尝试调用 Getter 方法获取字段值
+                String getterMethodName = "get" + Character.toUpperCase(field.getName().charAt(0)) + field.getName().substring(1);
+                try {
+                    try {
+                        Method getterMethod = clazz.getMethod(getterMethodName);
+                        value = getterMethod.invoke(target);
+                    } catch (NoSuchMethodException e) {
+                        // 如果没有 Getter 方法，直接访问字段
+                        field.setAccessible(true);
+                        value = field.get(target);
+                    }
+                } catch (IllegalAccessException | InvocationTargetException e) {
+                    log.error("Get field value error: {}", e.getMessage(), e);
+                }
+                mapValues.put(field.getName(), value);
+            }
+        }
+        return mapValues;
+    }
+
     /**
      * 获取Field和值
      * @param target    目标对象

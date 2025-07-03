@@ -4,8 +4,10 @@ import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.github.yizzuide.milkomeda.hydrogen.uniform.UniformPage;
 import com.github.yizzuide.milkomeda.hydrogen.uniform.UniformQueryPageData;
+import com.github.yizzuide.milkomeda.util.ReflectUtil;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -86,7 +88,7 @@ public interface IPageableService<T> extends IService<T> {
                                                  Function<Q, T> query2EntityConverter,
                                                  Function<T, V> entity2VoConverter,
                                                  boolean linkFieldsToVO) {
-        return selectByPage(pageableService, queryPageData, null, group, query2EntityConverter, entity2VoConverter, linkFieldsToVO);
+        return selectByPage(pageableService, queryPageData, null, group, null, query2EntityConverter, entity2VoConverter, linkFieldsToVO);
     }
 
     /**
@@ -95,6 +97,7 @@ public interface IPageableService<T> extends IService<T> {
      * @param queryPageData     page query data
      * @param queryMatchData    match data
      * @param group             match group name
+     * @param query             query object
      * @param query2EntityConverter   query to entity converter
      * @param entity2VoConverter      entity to vo converter
      * @param linkFieldsToVO    whether link fields to VO
@@ -107,9 +110,16 @@ public interface IPageableService<T> extends IService<T> {
     static <T, Q, V> UniformPage<V> selectByPage(IPageableService<T> pageableService,
                                                  UniformQueryPageData<Q> queryPageData,
                                                  Map<String, Object> queryMatchData,
-                                                 String group, Function<Q, T> query2EntityConverter,
+                                                 String group, Q query,
+                                                 Function<Q, T> query2EntityConverter,
                                                  Function<T, V> entity2VoConverter,
                                                  boolean linkFieldsToVO) {
+        if (query != null) {
+            if (queryMatchData == null) {
+                queryMatchData = new HashMap<>();
+            }
+            queryMatchData.putAll(ReflectUtil.getAnnotatedFieldValues(QueryField.class, query));
+        }
         if (linkFieldsToVO) {
             return pageableService.selectByPage(
                     UniformQueryPageData.convert(queryPageData, query2EntityConverter),

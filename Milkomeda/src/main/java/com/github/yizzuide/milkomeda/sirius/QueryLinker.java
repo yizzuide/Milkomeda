@@ -21,6 +21,8 @@
 
 package com.github.yizzuide.milkomeda.sirius;
 
+import org.springframework.core.Ordered;
+
 import java.lang.annotation.*;
 
 /**
@@ -72,6 +74,13 @@ public @interface QueryLinker {
      * @return mapper class
      */
     Class<?> type();
+
+    /**
+     * Query linker order.
+     * @return query order
+     * @since 4.0.0
+     */
+    int order() default Ordered.LOWEST_PRECEDENCE;
 
     /**
      * Bind conditions in query group.

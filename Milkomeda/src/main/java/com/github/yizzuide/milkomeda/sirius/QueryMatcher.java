@@ -1,5 +1,6 @@
 package com.github.yizzuide.milkomeda.sirius;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.core.annotation.AliasFor;
 
 import java.lang.annotation.*;
@@ -35,7 +36,7 @@ public @interface QueryMatcher {
     PrefectType prefect() default PrefectType.EQ;
 
     /**
-     * Custom type of query match with {@link PageableService#additionParseQueryMatcher(com.baomidou.mybatisplus.core.conditions.query.QueryWrapper, java.lang.String, java.lang.String, boolean, java.lang.Object)}.
+     * Custom type of query match with {@link PageableService#additionParseQueryMatcher(QueryWrapper, String, String, boolean, Object)}.
      * @return string of a prefect type
      */
     String prefectString() default "";
@@ -58,6 +59,13 @@ public @interface QueryMatcher {
      * @return match data field name
      */
     String matchDataField() default "";
+
+    /**
+     * Query match data fields for `queryMatchData` params of {@link IPageableService}.
+     * @return query field names
+     * @since 4.0.0
+     */
+    String[] queryFields() default {};
 
     /**
      * Bundle conditions in a group.

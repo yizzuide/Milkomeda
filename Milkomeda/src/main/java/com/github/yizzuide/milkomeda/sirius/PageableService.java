@@ -22,6 +22,8 @@ import lombok.EqualsAndHashCode;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.core.OrderComparator;
+import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.CollectionUtils;
@@ -189,6 +191,14 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
                         condition = !CollectionUtils.isEmpty(valueObjects);
                     }
                     queryWrapper.in(condition, columnName, valueObjects);
+                } else if(queryMatcher.prefect() == PrefectType.BETWEEN) {
+                    String[] queryFields = queryMatcher.queryFields();
+                    if(queryFields.length == 2) {
+                        Object beginData = queryMatchData.get(queryFields[0]);
+                        Object endData = queryMatchData.get(queryFields[1]);
+                        boolean condition = beginData != null && endData != null;
+                        queryWrapper.between(condition, columnName, beginData, endData);
+                    }
                 } else if (queryMatcher.prefect() == PrefectType.PageDate) {
                     queryWrapper.ge(Objects.nonNull(queryPageData.getStartDate()), columnName, queryPageData.getStartDate());
                     queryWrapper.le(Objects.nonNull(queryPageData.getEndDate()), columnName, queryPageData.getEndDate());
@@ -274,7 +284,9 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
                 // cache link entity list with the field
                 Map<String, List<?>> linkEntityListCacheMap = new HashMap<>();
                 List<QueryLinkerNode> queryLinkerNodes = linkerNodes.get(linkerField.getName()).stream()
-                        .sorted(Comparator.comparingInt(QueryLinkerNode::getLinkSelectTop)).toList();
+                        //.sorted(Comparator.comparingInt(QueryLinkerNode::getLinkSelectTop))
+                        .sorted(OrderComparator.INSTANCE.withSourceProvider(n -> n))
+                        .toList();
                 for (QueryLinkerNode linkerNode : queryLinkerNodes) {
                     BaseMapper linkMapper = SiriusInspector.getMapper(linkerNode.getLinkEntityType());
                     List<?> linkEntityList;
@@ -316,7 +328,7 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
                                 }  else if (mappingNode.getPrefectType() == PrefectType.IN) {
                                     linkQueryWrapper.in(colName, mappingFieldValue);
                                 } else if (mappingNode.getPrefectType() == PrefectType.LIKE) {
-                                    linkQueryWrapper.like(colName, mappingFieldValue);
+                                    linkQueryWrapper.likeRight(colName, mappingFieldValue);
                                 }
                             });
                         }
@@ -327,7 +339,7 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
                                 PrefectLinkNode prefectLinkNode = filterMap.get(key);
                                 String linkNameColumn = findColumnName(linkTableInfo, prefectLinkNode.getLinkFieldName());
                                 if (prefectLinkNode.getPrefectType() == PrefectType.IN) {
-                                    linkQueryWrapper.like(linkNameColumn, prefectLinkNode.getTargetFieldValue());
+                                    linkQueryWrapper.likeRight(linkNameColumn, prefectLinkNode.getTargetFieldValue());
                                 } else {
                                     linkQueryWrapper.eq(linkNameColumn, prefectLinkNode.getTargetFieldValue());
                                 }
@@ -516,7 +528,7 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
             QueryWrapper<T> queryExample = new QueryWrapper<>();
             if (queryMatcher.prefect() == PrefectType.IN || queryMatcher.prefect() == PrefectType.LINK_EQ_IN) {
                 if (queryMatcher.prefect() == PrefectType.IN) {
-                    queryExample.like(linkNameColumn, searchValue);
+                    queryExample.likeRight(linkNameColumn, searchValue);
                 } else {
                     queryExample.eq(linkNameColumn, searchValue);
                 }
@@ -580,7 +592,7 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
 
     @EqualsAndHashCode
     @Data
-    static class QueryLinkerNode {
+    static class QueryLinkerNode implements Ordered {
 
         /**
          * match target field name
@@ -627,6 +639,11 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
          */
         private String[] group;
 
+        /**
+         * query order
+         */
+        private int order;
+
         static Set<QueryLinkerNode> build(Set<QueryLinker> queryLinkers) {
             return queryLinkers.stream().map(ql -> {
                 QueryLinkerNode node = new QueryLinkerNode();
@@ -651,6 +668,7 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
                 node.setMappings(ql.mappings());
                 node.setLinkEntityType(ql.type());
                 node.setGroup(ql.group());
+                node.setOrder(ql.order());
                 return node;
             }).collect(Collectors.toSet());
         }
@@ -691,6 +709,7 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
                 queryLinkerNode.setMappings(queryAutoLinker.mappings());
                 queryLinkerNode.setLinkEntityType(queryAutoLinker.type());
                 queryLinkerNode.setGroup(queryAutoLinker.group());
+                queryLinkerNode.setOrder(queryAutoLinker.order());
                 nodes.add(queryLinkerNode);
             }
             return nodes;
