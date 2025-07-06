@@ -88,7 +88,7 @@ public interface IPageableService<T> extends IService<T> {
                                                  Function<Q, T> query2EntityConverter,
                                                  Function<T, V> entity2VoConverter,
                                                  boolean linkFieldsToVO) {
-        return selectByPage(pageableService, queryPageData, null, group, null, query2EntityConverter, entity2VoConverter, linkFieldsToVO);
+        return selectByPage(pageableService, queryPageData, null, group, query2EntityConverter, entity2VoConverter, linkFieldsToVO);
     }
 
     /**
@@ -97,7 +97,6 @@ public interface IPageableService<T> extends IService<T> {
      * @param queryPageData     page query data
      * @param queryMatchData    match data
      * @param group             match group name
-     * @param query             query object
      * @param query2EntityConverter   query to entity converter
      * @param entity2VoConverter      entity to vo converter
      * @param linkFieldsToVO    whether link fields to VO
@@ -110,16 +109,18 @@ public interface IPageableService<T> extends IService<T> {
     static <T, Q, V> UniformPage<V> selectByPage(IPageableService<T> pageableService,
                                                  UniformQueryPageData<Q> queryPageData,
                                                  Map<String, Object> queryMatchData,
-                                                 String group, Q query,
+                                                 String group,
                                                  Function<Q, T> query2EntityConverter,
                                                  Function<T, V> entity2VoConverter,
                                                  boolean linkFieldsToVO) {
-        if (query != null) {
+        Map<String, Object> fieldNamedValues = ReflectUtil.getAnnotatedFieldValues(QueryField.class, QueryField::matched, QueryField::value, queryPageData.getEntity());
+        if (!fieldNamedValues.isEmpty()) {
             if (queryMatchData == null) {
                 queryMatchData = new HashMap<>();
             }
-            queryMatchData.putAll(ReflectUtil.getAnnotatedFieldValues(QueryField.class, QueryField::matched, QueryField::value, query));
+            queryMatchData.putAll(fieldNamedValues);
         }
+
         if (linkFieldsToVO) {
             return pageableService.selectByPage(
                     UniformQueryPageData.convert(queryPageData, query2EntityConverter),
@@ -134,6 +135,49 @@ public interface IPageableService<T> extends IService<T> {
                 group
         ), entity2VoConverter);
     }
+
+    /**
+     * Query page data with the query.
+     * @param pageableService   pageable service
+     * @param queryPageData     page query data
+     * @param queryMatchData    match data
+     * @param entity2VoConverter    entity to vo converter
+     * @return UniformPage
+     * @param <T>   entity type
+     * @param <Q>   query type
+     * @param <V>   vo type
+     * @since 4.0.0
+     */
+    static <T, Q, V> UniformPage<V> queryByPage(IPageableService<T> pageableService,
+                                                 UniformQueryPageData<Q> queryPageData,
+                                                 Map<String, Object> queryMatchData,
+                                                 Function<T, V> entity2VoConverter) {
+        Map<String, Object> fieldNamedValues = ReflectUtil.getAnnotatedFieldValues(QueryField.class, QueryField::matched, QueryField::value, queryPageData.getEntity());
+        if (!fieldNamedValues.isEmpty()) {
+            if (queryMatchData == null) {
+                queryMatchData = new HashMap<>();
+            }
+            queryMatchData.putAll(fieldNamedValues);
+        }
+
+        return pageableService.queryByPage(
+                queryPageData,
+                queryMatchData,
+                entity2VoConverter
+        );
+    }
+
+    /**
+     * Query by page data, match data and group name which support entity to vo converter.
+     * @param queryPageData page data
+     * @param queryMatchData match data
+     * @param entity2VoConverter entity to vo converter
+     * @return  UniformPage
+     * @since 4.0.0
+     * @param <Q> query class type
+     * @param <V> VO class type
+     */
+    <Q, V> UniformPage<V> queryByPage(UniformQueryPageData<Q> queryPageData, Map<String, Object> queryMatchData, Function<T,V> entity2VoConverter);
 
     /**
      * Query by page data.

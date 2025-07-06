@@ -89,21 +89,38 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
         return selectByPage(queryPageData, null, entity2VoConverter, group);
     }
 
-    @SuppressWarnings({"ConstantConditions", "rawtypes", "unchecked"})
+
     public <V> UniformPage<V> selectByPage(UniformQueryPageData<T> queryPageData,
                                        Map<String, Object> queryMatchData,
                                        Function<T, V> entity2VoConverter,
                                        String group) {
+        Field[] fields = TypeReflector.getFields(currentModelClass());
+        return selectByPageInternal(queryPageData, queryMatchData, entity2VoConverter, group, fields);
+    }
+
+    @Override
+    public <Q, V> UniformPage<V> queryByPage(UniformQueryPageData<Q> queryPageData,
+                                             Map<String, Object> queryMatchData,
+                                             Function<T, V> entity2VoConverter) {
+        Field[] fields = TypeReflector.getFields(queryPageData.currentEntityClass());
+        return selectByPageInternal(queryPageData, queryMatchData, entity2VoConverter, IPageableService.DEFAULT_GROUP, fields);
+    }
+
+    @SuppressWarnings({"ConstantConditions", "rawtypes", "unchecked"})
+    private <O,V> UniformPage<V> selectByPageInternal(UniformQueryPageData<O> queryPageData,
+                                                    Map<String, Object> queryMatchData,
+                                                    Function<T, V> entity2VoConverter,
+                                                    String group,
+                                                    Field[] fields) {
         QueryWrapper<T> queryWrapper = new QueryWrapper<>();
-        Class<T> tClass = currentModelClass();
-        T target = queryPageData.getEntity();
+        O target = queryPageData.getEntity();
         TableInfo tableInfo = TableInfoHelper.getTableInfo(entityClass);
-        Field[] fields = TypeReflector.getFields(tClass);
         List<Field> linkerFields = new ArrayList<>();
         Map<String, Set<QueryLinkerNode>> linkerNodes = new HashMap<>();
         // 需要在linker关联结果过滤条件
         Map<String, PrefectLinkNode> filterMap = new HashMap<>();
         for (Field field : fields) {
+            String fieldName = getEntityFieldName(field);
             // convert QueryAutoLinker to QueryLinkerNode
             Set<QueryAutoLinker> queryAutoLinkers = AnnotatedElementUtils.getMergedRepeatableAnnotations(field, QueryAutoLinker.class, QueryAutoLinkers.class);
             if (!CollectionUtils.isEmpty(queryAutoLinkers)) {
@@ -112,7 +129,7 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
                         .toList();
                 for (QueryAutoLinker queryAutoLinker : filteredQueryAutoLinkers) {
                     Set<QueryLinkerNode> nodes = QueryLinkerNode.build(queryAutoLinker);
-                    linkerNodes.put(field.getName(), nodes);
+                    linkerNodes.put(fieldName, nodes);
                     linkerFields.add(field);
                 }
             }
@@ -124,7 +141,7 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
                         .filter(ql -> Arrays.asList(ql.group()).contains(group))
                         .collect(Collectors.toSet());
                 Set<QueryLinkerNode> nodes = QueryLinkerNode.build(filteredQueryLinkers);
-                linkerNodes.put(field.getName(), nodes);
+                linkerNodes.put(fieldName, nodes);
                 linkerFields.add(field);
             }
 
@@ -139,7 +156,7 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
                 if (queryMatcher.prefect() == PrefectType.OrderBy) {
                     continue;
                 }
-                String columnName = findColumnName(tableInfo, field);
+                String columnName = findColumnName(tableInfo, field, fieldName);
                 Object fieldValue = null;
                 if (target != null) {
                     // can get field value from getter method？
@@ -212,7 +229,7 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
             filteredQueryMatchers.stream()
                     .filter(qm -> qm.prefect() == PrefectType.OrderBy)
                     .sorted(Comparator.comparingInt(QueryMatcher::order))
-                    .forEach(queryMatcher -> queryWrapper.orderBy(true, queryMatcher.forward(), findColumnName(tableInfo, field)));
+                    .forEach(queryMatcher -> queryWrapper.orderBy(true, queryMatcher.forward(), findColumnName(tableInfo, field, fieldName)));
         }
 
         // 设置查询字段
@@ -238,7 +255,7 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
             // 添加主键字段
             includeColumns.add(tableInfo.getKeyColumn());
             // 添加linker字段
-            includeColumns.addAll(linkerFields.stream().map(field -> findColumnName(tableInfo, field.getName())).collect(Collectors.toSet()));
+            includeColumns.addAll(linkerFields.stream().map(field -> findColumnName(tableInfo, field, getEntityFieldName(field))).collect(Collectors.toSet()));
         }
 
         Predicate<TableFieldInfo> selectFieldPredicate = fi -> {
@@ -279,15 +296,16 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
         // query link name
         if (!CollectionUtils.isEmpty(linkerFields) && !CollectionUtils.isEmpty(records)) {
             for (Field linkerField : linkerFields) {
+                String linkerFieldName = getEntityFieldName(linkerField);
                 // collect mappings
                 Map<String, MappingNode> mappingFields = new HashMap<>();
-                if (!linkerNodes.isEmpty() && linkerNodes.containsKey(linkerField.getName())) {
-                    MappingNode.construct(linkerNodes.get(linkerField.getName()), mappingFields, tableInfo, target);
+                if (!linkerNodes.isEmpty() && linkerNodes.containsKey(linkerFieldName)) {
+                    MappingNode.construct(linkerNodes.get(linkerFieldName), mappingFields, tableInfo, target);
                 }
 
                 // cache link entity list with the field
                 Map<String, List<?>> linkEntityListCacheMap = new HashMap<>();
-                List<QueryLinkerNode> queryLinkerNodes = linkerNodes.get(linkerField.getName()).stream()
+                List<QueryLinkerNode> queryLinkerNodes = linkerNodes.get(linkerFieldName).stream()
                         //.sorted(Comparator.comparingInt(QueryLinkerNode::getLinkSelectTop))
                         .sorted(OrderComparator.INSTANCE.withSourceProvider(n -> n))
                         .toList();
@@ -301,7 +319,7 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
                         linkEntityList = linkEntityListCacheMap.get(linkMapperClassName);
                     } else {
                         Set<Serializable> idValues = records.stream()
-                                .map(e -> (Serializable) tableInfo.getPropertyValue(e, linkerField.getName()))
+                                .map(e -> (Serializable) tableInfo.getPropertyValue(e, linkerFieldName))
                                 .filter(val -> val != null && !linkerNode.getLinkIdIgnore().equals(val.toString()))
                                 .collect(Collectors.toSet());
                         if (CollectionUtils.isEmpty(idValues)) {
@@ -309,7 +327,7 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
                         }
                         QueryWrapper<T> linkQueryWrapper = new QueryWrapper<>();
                         boolean isSameIdNamed = linkerNode.getLinkIdFieldName().equals(linkTableInfo.getKeyColumn());
-                        String linkIdColumn = isSameIdNamed ? linkerNode.getLinkIdFieldName() : findColumnName(linkTableInfo, linkerNode.getLinkIdFieldName());
+                        String linkIdColumn = isSameIdNamed ? linkerNode.getLinkIdFieldName() : findColumnName(linkTableInfo, null, linkerNode.getLinkIdFieldName());
                         linkQueryWrapper.in(linkIdColumn, idValues);
 
                         // add condition of mappings
@@ -318,7 +336,7 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
                                 if (mappingNode.getLinkEntityType() != linkerNode.getLinkEntityType()) {
                                     return;
                                 }
-                                String colName = findColumnName(linkTableInfo, mappingFieldName);
+                                String colName = findColumnName(linkTableInfo, null, mappingFieldName);
                                 if (colName == null) {
                                     return;
                                 }
@@ -341,7 +359,7 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
                         if (!filterMap.isEmpty()) {
                             for (String key : filterMap.keySet()) {
                                 PrefectLinkNode prefectLinkNode = filterMap.get(key);
-                                String linkNameColumn = findColumnName(linkTableInfo, prefectLinkNode.getLinkFieldName());
+                                String linkNameColumn = findColumnName(linkTableInfo, null, prefectLinkNode.getLinkFieldName());
                                 if (prefectLinkNode.getPrefectType() == PrefectType.IN) {
                                     linkQueryWrapper.likeRight(linkNameColumn, prefectLinkNode.getTargetFieldValue());
                                 } else {
@@ -360,7 +378,7 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
                                 .flatMap(Arrays::stream)
                                 .distinct()
                                 .filter(f -> !queryColumns.contains(f))
-                                .map(f -> findColumnName(linkTableInfo, f))
+                                .map(f -> findColumnName(linkTableInfo, null, f))
                                 .toList();
                         queryColumns.addAll(linkColumns);
                         linkQueryWrapper.select(queryColumns.toArray(new String[]{}));
@@ -368,7 +386,7 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
                         if (selectTopFieldName != null) {
                             // 只获取顶部的一条记录
                             Integer linkSelectTop = linkerNode.getLinkSelectTop();
-                            String selectTopColumnName = findColumnName(linkTableInfo, selectTopFieldName);
+                            String selectTopColumnName = findColumnName(linkTableInfo, null, selectTopFieldName);
                             // 如果设置为-1，则为倒序
                             if (linkSelectTop == -1) {
                                 linkQueryWrapper.orderBy(true, false, selectTopColumnName);
@@ -390,23 +408,30 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
                     int recordSize = records.size();
                     for (int i = 0; i < recordSize; i++) {
                         T record = records.get(i);
-                        Object matchIdValue = tableInfo.getPropertyValue(record, linkerField.getName());
+                        Object matchIdValue = tableInfo.getPropertyValue(record, linkerFieldName);
                         List<?> matchEntityList = linkEntityList.stream()
                                 .filter(linkEntity -> String.valueOf(linkTableInfo.getPropertyValue(linkEntity, linkerNode.getLinkIdFieldName())).equals(String.valueOf(matchIdValue)))
                                 .toList();
                         if (CollectionUtils.isEmpty(matchEntityList)){
                             continue;
                         }
-                        Field[] declaredFields = entity2VoConverter == null ? TypeReflector.getFields(tableInfo.getEntityType()) :
+                        Field[] declaredFields = entity2VoConverter == null ? fields :
                                 TypeReflector.getFields(voList.getFirst().getClass());
+                        Field orgTargetField = Stream.of(fields)
+                                .filter(field -> getEntityFieldName(field).equals(linkerNode.getTargetFieldName()))
+                                .findFirst()
+                                .orElse(null);
                         Field targetField = Stream.of(declaredFields)
-                                .filter(field -> field.getName().equals(linkerNode.getTargetFieldName()))
+                                .filter(field -> getEntityFieldName(field).equals(linkerNode.getTargetFieldName()))
                                 .findFirst()
                                 .orElse(null);
                         if (List.class.isAssignableFrom(targetField.getType())) {
                             List<Object> targetValues = matchEntityList.stream()
                                     .map(linkEntity -> linkTableInfo.getPropertyValue(linkEntity, linkerNode.getLinkFieldName()))
                                     .toList();
+                            if (orgTargetField != null) {
+                                tableInfo.setPropertyValue(target, linkerNode.getTargetFieldName(), targetValues);
+                            }
                             if (entity2VoConverter == null) {
                                 tableInfo.setPropertyValue(record, linkerNode.getTargetFieldName(), targetValues);
                             } else {
@@ -417,6 +442,9 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
                         }
                         Object linkEntity = matchEntityList.getFirst();
                         Object targetValue = linkTableInfo.getPropertyValue(linkEntity, linkerNode.getLinkFieldName());
+                        if (orgTargetField != null) {
+                            tableInfo.setPropertyValue(target, linkerNode.getTargetFieldName(), targetValue);
+                        }
                         if (entity2VoConverter == null) {
                             tableInfo.setPropertyValue(record, linkerNode.getTargetFieldName(), targetValue);
                             continue;
@@ -458,7 +486,7 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
                 continue;
             }
             if (refMatcher.type() == RefMatcher.RefType.SELF) {
-                String columnName = findColumnName(tableInfo, field.getName());
+                String columnName = findColumnName(tableInfo, field, field.getName());
                 QueryWrapper<T> queryWrapper = new QueryWrapper<>();
                 queryWrapper.eq(columnName, id);
                 Long count = this.baseMapper.selectCount(queryWrapper);
@@ -469,7 +497,7 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
             if (refMatcher.type() == RefMatcher.RefType.FOREIGN) {
                 QueryWrapper foreignQueryWrapper = new QueryWrapper();
                 TableInfo foreignTableInfo = TableInfoHelper.getTableInfo(refMatcher.foreignType());
-                String columnName = findColumnName(foreignTableInfo, refMatcher.foreignField());
+                String columnName = findColumnName(foreignTableInfo, null, refMatcher.foreignField());
                 foreignQueryWrapper.eq(columnName, id);
                 BaseMapper referenceMapper = SiriusInspector.getMapper(refMatcher.foreignType());
                 if (referenceMapper.selectCount(foreignQueryWrapper) > 0) {
@@ -504,7 +532,7 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
         }
         for (Field linkerField : linkerFields) {
             // find linker field which matches `matchDataField` from QueryMatcher
-            Set<QueryLinkerNode> queryLinkerNodes = linkerNodes.get(linkerField.getName());
+            Set<QueryLinkerNode> queryLinkerNodes = linkerNodes.get(getEntityFieldName(linkerField));
             if (queryLinkerNodes == null) {
                 continue;
             }
@@ -528,7 +556,7 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
             filterMap.put(linkerNode.getLinkFieldName(), prefectLinkNode);
             // find link entity with linker mapper
             BaseMapper<T> linkMapper = (BaseMapper<T>) SiriusInspector.getMapper(linkClass);
-            String linkNameColumn = findColumnName(linkTableInfo, linkerNode.getLinkFieldName());
+            String linkNameColumn = findColumnName(linkTableInfo, null, linkerNode.getLinkFieldName());
             QueryWrapper<T> queryExample = new QueryWrapper<>();
             if (queryMatcher.prefect() == PrefectType.IN || queryMatcher.prefect() == PrefectType.LINK_EQ_IN) {
                 if (queryMatcher.prefect() == PrefectType.IN) {
@@ -536,7 +564,7 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
                 } else {
                     queryExample.eq(linkNameColumn, searchValue);
                 }
-                String linkIdColumn = findColumnName(linkTableInfo, linkerNode.getLinkIdFieldName());
+                String linkIdColumn = findColumnName(linkTableInfo, null, linkerNode.getLinkIdFieldName());
                 queryExample.select(linkTableInfo.getKeyColumn(), linkNameColumn, linkIdColumn);
                 List<?> linkRecordlist = linkMapper.selectList(queryExample);
                 if (CollectionUtils.isEmpty(linkRecordlist)) {
@@ -570,19 +598,18 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
         return null;
     }
 
-    private String findColumnName(TableInfo tableInfo, String fieldName) {
+    private String findColumnName(TableInfo tableInfo, Field field, String fieldName) {
+        String columnName = null;
         for (TableFieldInfo tableFieldInfo : tableInfo.getFieldList()) {
             if (fieldName.equals(tableFieldInfo.getProperty())) {
-                return tableFieldInfo.getColumn();
+                columnName = tableFieldInfo.getColumn();
+                if (columnName != null) {
+                    return columnName;
+                }
             }
         }
-        return null;
-    }
-
-    private String findColumnName(TableInfo tableInfo, Field field) {
-        String columnName = findColumnName(tableInfo, field.getName());
         // get from @TableField or convert it
-        if (columnName == null) {
+        if (field != null) {
             TableField tableField = field.getDeclaredAnnotation(TableField.class);
             if (tableField != null) {
                 columnName = tableField.value();
@@ -592,6 +619,17 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
             }
         }
         return columnName;
+    }
+
+    private String getEntityFieldName(Field field) {
+        if (field.isAnnotationPresent(QueryField.class)) {
+            QueryField queryField = field.getAnnotation(QueryField.class);
+            if (StringUtils.isEmpty(queryField.value())) {
+                return field.getName();
+            }
+            return queryField.value();
+        }
+        return field.getName();
     }
 
     @EqualsAndHashCode
