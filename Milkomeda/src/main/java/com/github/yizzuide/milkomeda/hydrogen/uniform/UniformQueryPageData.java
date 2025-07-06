@@ -53,9 +53,9 @@ public class UniformQueryPageData<T> extends UniformQueryData<T> {
     private Integer pageSize = 10;
 
     /**
-     * 排序，用于redis分页排序（1:asc, -1:desc)
+     * 排序（1:asc, -1:desc)
      */
-    @Schema(hidden = true, accessMode = Schema.AccessMode.WRITE_ONLY)
+    @Schema(description = "redis分页排序", defaultValue = "1", hidden = true, accessMode = Schema.AccessMode.WRITE_ONLY)
     private Integer order = 1;
 
     /**

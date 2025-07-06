@@ -332,17 +332,25 @@ public class ReflectUtil {
     /**
      * 获取目标对象上所有注解字段名和值
      * @param annotationClazz   注解
+     * @param filter            注解过滤
      * @param target            目标对象
-     * @return map
+     * @return  map
+     * @param <A>   注解类型
      * @since 4.0.0
      */
-    public static Map<String, Object> getAnnotatedFieldValues(Class<? extends Annotation> annotationClazz, Object target) {
+    public static <A extends Annotation> Map<String, Object> getAnnotatedFieldValues(Class<A> annotationClazz, Function<A, Boolean> filter, Function<A, String> nameProvider, Object target) {
         Class<?> clazz = target.getClass();
         Field[] fields = clazz.getDeclaredFields();
         Map<String, Object> mapValues = new HashMap<>();
         for (Field field : fields) {
             if (field.isAnnotationPresent(annotationClazz)) {
+                A annotation = field.getAnnotation(annotationClazz);
+                if (!filter.apply(annotation)) {
+                    continue;
+                }
                 Object value = null;
+                String fieldName = nameProvider.apply(annotation);
+                fieldName = StringUtils.hasLength(fieldName) ? fieldName : field.getName();
                 // 尝试调用 Getter 方法获取字段值
                 String getterMethodName = "get" + Character.toUpperCase(field.getName().charAt(0)) + field.getName().substring(1);
                 try {
@@ -357,7 +365,7 @@ public class ReflectUtil {
                 } catch (IllegalAccessException | InvocationTargetException e) {
                     log.error("Get field value error: {}", e.getMessage(), e);
                 }
-                mapValues.put(field.getName(), value);
+                mapValues.put(fieldName, value);
             }
         }
         return mapValues;

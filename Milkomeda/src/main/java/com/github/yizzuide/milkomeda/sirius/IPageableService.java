@@ -118,7 +118,7 @@ public interface IPageableService<T> extends IService<T> {
             if (queryMatchData == null) {
                 queryMatchData = new HashMap<>();
             }
-            queryMatchData.putAll(ReflectUtil.getAnnotatedFieldValues(QueryField.class, query));
+            queryMatchData.putAll(ReflectUtil.getAnnotatedFieldValues(QueryField.class, QueryField::matched, QueryField::value, query));
         }
         if (linkFieldsToVO) {
             return pageableService.selectByPage(

@@ -24,7 +24,7 @@ package com.github.yizzuide.milkomeda.sirius;
 import java.lang.annotation.*;
 
 /**
- * Query match field for used in `queryFields` of {@link QueryMatcher}.
+ * Custom query match with entity.
  *
  * @author yizzuide
  * @since 4.0.0
@@ -34,4 +34,34 @@ import java.lang.annotation.*;
 @Target({ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface QueryField {
+
+    /**
+     * mapping query entity field name or used to match data (only support with `Query` object).
+     * @return default is the same name
+     */
+    String value() default "";
+
+    /**
+     * match field for used in `queryFields` of {@link QueryMatcher} (only support with `Query` object).
+     * @return true if for used
+     */
+    boolean matched() default false;
+
+    /**
+     * The field is included in query result.
+     * @return true if included
+     */
+    boolean include() default false;
+
+    /**
+     * The field is excluded in query result.
+     * @return true if excluded
+     */
+    boolean exclude() default false;
+
+    /**
+     * select in a group.
+     * @return  group name
+     */
+    String[] group() default {"default"};
 }

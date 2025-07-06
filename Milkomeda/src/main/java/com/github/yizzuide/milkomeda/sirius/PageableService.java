@@ -193,7 +193,7 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
                     queryWrapper.in(condition, columnName, valueObjects);
                 } else if(queryMatcher.prefect() == PrefectType.BETWEEN) {
                     String[] queryFields = queryMatcher.queryFields();
-                    if(queryFields.length == 2) {
+                    if(queryFields.length == 2 && queryMatchData != null) {
                         Object beginData = queryMatchData.get(queryFields[0]);
                         Object endData = queryMatchData.get(queryFields[1]);
                         boolean condition = beginData != null && endData != null;
@@ -219,13 +219,17 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
         Set<String> includeColumns = new HashSet<>();
         Set<String> excludeColumns = new HashSet<>();
         for (TableFieldInfo tableFieldInfo : tableInfo.getFieldList()) {
-            QueryFieldInclude fieldInclude = AnnotationUtils.findAnnotation(tableFieldInfo.getField(), QueryFieldInclude.class);
-            if (fieldInclude != null && ArrayUtils.contains(fieldInclude.group(), group)) {
+            QueryField fieldInclude = AnnotationUtils.findAnnotation(tableFieldInfo.getField(), QueryField.class);
+            if (fieldInclude != null &&
+                    fieldInclude.include() &&
+                    (Arrays.asList(fieldInclude.group()).contains("*") || ArrayUtils.contains(fieldInclude.group(), group))) {
                 includeColumns.add(tableFieldInfo.getColumn());
                 continue;
             }
-            QueryFieldExclude fieldExclude = AnnotationUtils.findAnnotation(tableFieldInfo.getField(), QueryFieldExclude.class);
-            if (fieldExclude != null && (Arrays.asList(fieldExclude.group()).contains("*") || ArrayUtils.contains(fieldExclude.group(), group))) {
+            QueryField fieldExclude = AnnotationUtils.findAnnotation(tableFieldInfo.getField(), QueryField.class);
+            if (fieldExclude != null &&
+                    fieldExclude.exclude() &&
+                    (Arrays.asList(fieldExclude.group()).contains("*") || ArrayUtils.contains(fieldExclude.group(), group))) {
                 excludeColumns.add(tableFieldInfo.getColumn());
             }
         }
