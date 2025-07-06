@@ -87,7 +87,7 @@ public class CometParamResolver implements HandlerMethodArgumentResolver {
                 return map;
             }
             CometParamDecrypt cometParamDecrypt = ApplicationContextHolder.get().getBean(cometParam.decrypt());
-            return cometParamDecrypt.decrypt(map);
+            return cometParamDecrypt.decrypt(WebContext.getRequest(), map);
         }
 
         // List

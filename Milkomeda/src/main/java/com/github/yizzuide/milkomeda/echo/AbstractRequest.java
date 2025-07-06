@@ -24,6 +24,7 @@ package com.github.yizzuide.milkomeda.echo;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.github.yizzuide.milkomeda.universe.config.MilkomedaProperties;
 import com.github.yizzuide.milkomeda.util.JSONUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
@@ -41,12 +42,11 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * AbstractRequest
  * 抽象请求类
  *
- * @author yizzuide
  * @since 1.13.0
- * @version 3.12.3
+ * @version 4.0.0
+ * @author yizzuide
  * <br>
  * Create at 2019/09/21 16:48
  */
@@ -297,7 +297,7 @@ public abstract class AbstractRequest {
             params = new HashMap<>();
         }
         // 追加签名等参数
-        signParam(params, reqParams);
+        signParam(headers, params, reqParams);
         if (showLog) {
             log.info("abstractRequest:- send request with url: {}, params: {}, reqParams:{}", url, params, reqParams);
         }
@@ -348,11 +348,12 @@ public abstract class AbstractRequest {
     /**
      * 子类需要实现的参数签名（默认不应用签名）
      *
+     * @param headers   请求头
      * @param inParams  需要签名的业务参数
      * @param outParams 加上签名后的参数，如果Content-Type是APPLICATION_FORM_URLENCODED, 则类型为LinkedMultiValueMap，添加参数需要调用add方法
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
-    protected void signParam(Map<String, Object> inParams, Map<String, Object> outParams) {
+    protected void signParam(HttpHeaders headers, Map<String, Object> inParams, Map<String, Object> outParams) {
         if (outParams instanceof LinkedMultiValueMap multiValueMap) {
             for (Map.Entry<String, Object> inEntry : inParams.entrySet()) {
                 multiValueMap.add(inEntry.getKey(), inEntry.getValue());
@@ -386,14 +387,14 @@ public abstract class AbstractRequest {
      * @param responseData 统一响应数据类
      * @throws EchoException 请求异常
      */
-    @SuppressWarnings("rawtypes")
-    protected void checkResponse(EchoResponseData responseData) throws EchoException {}
+    protected void checkResponse(EchoResponseData<?> responseData) throws EchoException {}
 
     /**
      * 对第三方平台的请求参数验签
      *
+     * @param request   HttpServletRequest
      * @param inParams  请求参数
-     * @return  解签后的业务数据，解签失败返回null
+     * @return 解签后的业务数据，解签失败返回null
      */
-    public Map<String, Object> verifyParam(Map<String, Object> inParams) { return null; }
+    public Map<String, Object> verifyParam(HttpServletRequest request, Map<String, Object> inParams) { return null; }
 }

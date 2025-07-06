@@ -21,22 +21,27 @@
 
 package com.github.yizzuide.milkomeda.comet.core;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 import java.util.Map;
 
 /**
  * CometParamDecrypt
  * 用于Echo验签功能
  *
- * @author yizzuide
  * @since 3.13.0
+ * @version 4.0.0
+ * @author yizzuide
  * <br>
  * Create at 2022/07/03 17:12
  */
 public interface CometParamDecrypt {
     /**
      * 请求参数解密方法
+     *
+     * @param request   HttpServletRequest
      * @param params    请求参数
-     * @return  解密后的参数
+     * @return 解密后的参数
      */
-    Map<String, Object> decrypt(Map<String, Object> params);
+    Map<String, Object> decrypt(HttpServletRequest request, Map<String, Object> params);
 }

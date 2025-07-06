@@ -8,6 +8,7 @@ import com.github.yizzuide.milkomeda.echo.ErrorCode;
 import com.github.yizzuide.milkomeda.util.DataTypeConvertUtil;
 import com.github.yizzuide.milkomeda.util.EncryptUtil;
 import com.github.yizzuide.milkomeda.util.JSONUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -36,7 +37,7 @@ public class SimpleEchoRequest extends EchoRequest {
     }
 
     @Override
-    protected void checkResponse(EchoResponseData responseData) throws EchoException {
+    protected void checkResponse(EchoResponseData<?> responseData) throws EchoException {
         // 检测第三方返回的code是否ok
         if (!("200".equals(responseData.getCode()))) {
             log.error("SimpleEchoRequest:- response error with msg: {}, code:{}", responseData.getMsg(), responseData.getCode());
@@ -61,7 +62,7 @@ public class SimpleEchoRequest extends EchoRequest {
     // 添加统一传递参数，如appId、签名等，如是不需要可不用覆盖这个类
     @Override
 //    @SuppressWarnings("unchecked")
-    protected void signParam(Map<String, Object> inParams, Map<String, Object> outParams) {
+    protected void signParam(HttpHeaders headers, Map<String, Object> inParams, Map<String, Object> outParams) {
         // 父类实现直接将 inParams 数据给到 outParams
 //        super.signParam(inParams, outParams);
 
@@ -89,7 +90,7 @@ public class SimpleEchoRequest extends EchoRequest {
     }
 
     @Override
-    public Map<String, Object> verifyParam(Map<String, Object> inParams) {
+    public Map<String, Object> verifyParam(HttpServletRequest request, Map<String, Object> inParams) {
         String sign = (String) inParams.remove("sign");
         String signStr = DataTypeConvertUtil.map2FormData(inParams, false);
         log.info("SimpleEchoRequest:- 原验签串：{}", signStr);
