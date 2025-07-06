@@ -25,6 +25,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.github.yizzuide.milkomeda.comet.core.CometParamDecrypt;
 import com.github.yizzuide.milkomeda.util.JSONUtil;
 import com.github.yizzuide.milkomeda.util.TypeUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.beanutils.BeanUtils;
 import org.springframework.http.HttpMethod;
@@ -186,8 +187,8 @@ public abstract class EchoRequest extends AbstractRequest implements CometParamD
     }
 
     @Override
-    public Map<String, Object> decrypt(Map<String, Object> params) {
-        return verifyParam(params);
+    public Map<String, Object> decrypt(HttpServletRequest request, Map<String, Object> params) {
+        return verifyParam(request, params);
     }
 
     /**

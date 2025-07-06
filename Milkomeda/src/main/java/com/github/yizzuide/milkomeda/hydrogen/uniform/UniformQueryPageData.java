@@ -21,6 +21,7 @@
 
 package com.github.yizzuide.milkomeda.hydrogen.uniform;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -35,23 +36,27 @@ import java.util.function.Function;
  * <br>
  * Create at 2022/10/29 19:10
  */
+@Schema(name = "queryPageData", description = "查询分页数据")
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class UniformQueryPageData<T> extends UniformQueryData<T> {
     /**
      * 查询当前页
      */
-    private Integer pageStart;
+    @Schema(description = "查询当前页（从1开始）", defaultValue = "1")
+    private Integer pageStart = 1;
 
     /**
      * 每页记录数
      */
-    private Integer pageSize;
+    @Schema(description = "每页大小", defaultValue = "10")
+    private Integer pageSize = 10;
 
     /**
      * 排序，用于redis分页排序（1:asc, -1:desc)
      */
-    private Integer order;
+    @Schema(hidden = true, accessMode = Schema.AccessMode.WRITE_ONLY)
+    private Integer order = 1;
 
     /**
      * Convert query to the entity of page query.

@@ -22,6 +22,7 @@
 package com.github.yizzuide.milkomeda.hydrogen.uniform;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 import java.util.Date;
@@ -39,16 +40,19 @@ public class UniformQueryData<T> {
     /**
      * 模型实体
      */
+    @Schema(description = "查询过滤条件")
     private T entity;
 
     /**
      * 开始时间
      */
+    @Schema(description = "页开始时间")
     private Date startDate;
 
     /**
      * 结束时间
      */
+    @Schema(description = "页结束时间")
     private Date endDate;
 
     @JsonIgnore
