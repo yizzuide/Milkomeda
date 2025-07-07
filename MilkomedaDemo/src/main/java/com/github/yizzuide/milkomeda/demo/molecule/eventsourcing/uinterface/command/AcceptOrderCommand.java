@@ -22,9 +22,9 @@
 package com.github.yizzuide.milkomeda.demo.molecule.eventsourcing.uinterface.command;
 
 import com.github.yizzuide.milkomeda.demo.molecule.eventsourcing.domain.aggregate.OrderAggregate;
-import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.agg.AggregateType;
-import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.command.BindAggregateId;
-import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.command.Command;
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.agg.AggregateType;
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.command.BindAggregateId;
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.command.Command;
 import lombok.Data;
 
 /**

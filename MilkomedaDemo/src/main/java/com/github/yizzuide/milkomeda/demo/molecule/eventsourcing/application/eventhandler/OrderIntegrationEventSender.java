@@ -1,11 +1,11 @@
 package com.github.yizzuide.milkomeda.demo.molecule.eventsourcing.application.eventhandler;
 
 import com.github.yizzuide.milkomeda.demo.molecule.eventsourcing.domain.aggregate.OrderAggregate;
-import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.agg.AggregateType;
-import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.event.Event;
-import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.event.EventWithId;
-import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.eventhandler.AsyncEventHandler;
-import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.service.AggregateStore;
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.agg.AggregateType;
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.event.Event;
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.event.EventWithId;
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.eventhandler.AsyncEventHandler;
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.service.IAggregateStore;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -24,7 +24,7 @@ import java.sql.Timestamp;
 public class OrderIntegrationEventSender implements AsyncEventHandler {
 
     @Autowired
-    private AggregateStore aggregateStore;
+    private IAggregateStore aggregateStore;
 
     @Override
     public void handleEvent(EventWithId<Event> eventWithId) {

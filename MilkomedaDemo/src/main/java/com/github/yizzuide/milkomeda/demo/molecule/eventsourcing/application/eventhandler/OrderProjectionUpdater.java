@@ -8,9 +8,9 @@ import com.github.yizzuide.milkomeda.demo.molecule.eventsourcing.infrastructure.
 import com.github.yizzuide.milkomeda.demo.molecule.eventsourcing.infrastructure.orm.model.RmOrderRoute;
 import com.github.yizzuide.milkomeda.demo.molecule.eventsourcing.infrastructure.orm.service.RmOrderRouteService;
 import com.github.yizzuide.milkomeda.demo.molecule.eventsourcing.infrastructure.orm.service.RmOrderService;
-import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.agg.AggregateType;
-import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.event.EventAction;
-import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.eventhandler.SyncEventHandler;
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.agg.AggregateType;
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.event.EventAction;
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.eventhandler.SyncEventHandler;
 import org.mapstruct.factory.Mappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

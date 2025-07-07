@@ -19,30 +19,23 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.demo.molecule.eventsourcing.domain.event;
+package com.github.yizzuide.milkomeda.molecule.eventsourcing.exception;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.github.yizzuide.milkomeda.molecule.eventsourcing.event.Event;
-import com.github.yizzuide.milkomeda.molecule.eventsourcing.event.EventType;
-import lombok.Getter;
-import lombok.ToString;
+import java.io.Serial;
 
 /**
- * 订单接受事件
+ * Thrown to indicate that the expected version of an aggregate doesn't match the actual version.
  *
+ * @since 4.0.0
  * @author yizzuide
- * Create at 2025/06/17 15:26
+ * Create at 2025/06/11 18:15
  */
-@EventType("ORDER_ACCEPTED")
-@ToString(callSuper = true)
-@Getter
-public final class OrderAcceptedEvent extends Event {
+public class OptimisticConcurrencyControlException extends AggregateStateException {
 
-    private final Long driverId;
+    @Serial
+    private static final long serialVersionUID = 1403265134536979889L;
 
-    @JsonCreator
-    public OrderAcceptedEvent(Long aggregateId, int version, String aggregateType, Long driverId) {
-        super(aggregateId, version, aggregateType);
-        this.driverId = driverId;
+    public OptimisticConcurrencyControlException(long expectedVersion) {
+        super("Actual version doesn't match expected version %s", expectedVersion);
     }
 }

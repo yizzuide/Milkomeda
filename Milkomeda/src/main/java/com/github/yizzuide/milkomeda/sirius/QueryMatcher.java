@@ -21,25 +21,25 @@ import java.lang.annotation.*;
 public @interface QueryMatcher {
     /**
      * Type to match and query.
-     * @return PrefectType
+     * @return PerfectType
      * @since 3.15.0
      */
-    @AliasFor("prefect")
-    PrefectType value() default PrefectType.EQ;
+    @AliasFor("perfect")
+    PerfectType value() default PerfectType.EQ;
 
     /**
      * Type to match and query.
-     * @return PrefectType
+     * @return PerfectType
      *
      */
     @AliasFor("value")
-    PrefectType prefect() default PrefectType.EQ;
+    PerfectType perfect() default PerfectType.EQ;
 
     /**
      * Custom type of query match with {@link PageableService#additionParseQueryMatcher(QueryWrapper, String, String, boolean, Object)}.
-     * @return string of a prefect type
+     * @return string of a perfect type
      */
-    String prefectString() default "";
+    String perfectString() default "";
 
     /**
      * Query result list order type.

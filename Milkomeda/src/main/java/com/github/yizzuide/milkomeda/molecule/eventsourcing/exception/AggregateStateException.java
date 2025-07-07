@@ -19,30 +19,25 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.demo.molecule.eventsourcing.domain.event;
+package com.github.yizzuide.milkomeda.molecule.eventsourcing.exception;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.github.yizzuide.milkomeda.molecule.eventsourcing.event.Event;
-import com.github.yizzuide.milkomeda.molecule.eventsourcing.event.EventType;
-import lombok.Getter;
-import lombok.ToString;
+import org.springframework.lang.NonNull;
+
+import java.io.Serial;
 
 /**
- * 订单接受事件
+ * Thrown to indicate that the state of an aggregate is invalid.
  *
+ * @since 4.0.0
  * @author yizzuide
- * Create at 2025/06/17 15:26
+ * Create at 2025/06/11 18:05
  */
-@EventType("ORDER_ACCEPTED")
-@ToString(callSuper = true)
-@Getter
-public final class OrderAcceptedEvent extends Event {
+public class AggregateStateException extends RuntimeException {
 
-    private final Long driverId;
+    @Serial
+    private static final long serialVersionUID = -6993164076101018460L;
 
-    @JsonCreator
-    public OrderAcceptedEvent(Long aggregateId, int version, String aggregateType, Long driverId) {
-        super(aggregateId, version, aggregateType);
-        this.driverId = driverId;
+    public AggregateStateException(@NonNull String message, Object... args) {
+        super(message.formatted(args));
     }
 }

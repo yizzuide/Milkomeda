@@ -21,8 +21,8 @@
 
 package com.github.yizzuide.milkomeda.demo.molecule.eventsourcing.uinterface.config;
 
-import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.processor.DataSourceRouting;
-import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.service.EventSubscriptionProcessor;
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.datasource.DataSourceRouting;
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.impl.postgresql.subscription.EventSubscriptionProcessor;
 import com.github.yizzuide.milkomeda.orbit.OrbitAdvice;
 import com.github.yizzuide.milkomeda.orbit.OrbitInvocation;
 import com.github.yizzuide.milkomeda.sundial.DynamicRouteDataSource;

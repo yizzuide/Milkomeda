@@ -19,30 +19,23 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.demo.molecule.eventsourcing.domain.event;
-
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.github.yizzuide.milkomeda.molecule.eventsourcing.event.Event;
-import com.github.yizzuide.milkomeda.molecule.eventsourcing.event.EventType;
-import lombok.Getter;
-import lombok.ToString;
+package com.github.yizzuide.milkomeda.molecule.eventsourcing;
 
 /**
- * 订单接受事件
+ * The event subscription type for asynchronous processing.
  *
+ * @since 4.0.0
  * @author yizzuide
- * Create at 2025/06/17 15:26
+ * Create at 2025/06/10 15:51
  */
-@EventType("ORDER_ACCEPTED")
-@ToString(callSuper = true)
-@Getter
-public final class OrderAcceptedEvent extends Event {
+public enum SubscriptionType {
+    /**
+     * Fixed delay polling for query event.
+     */
+    POLLING,
 
-    private final Long driverId;
-
-    @JsonCreator
-    public OrderAcceptedEvent(Long aggregateId, int version, String aggregateType, Long driverId) {
-        super(aggregateId, version, aggregateType);
-        this.driverId = driverId;
-    }
+    /**
+     * Use Postgresql channel to receive event.
+     */
+    POSTGRES_CHANNEL
 }

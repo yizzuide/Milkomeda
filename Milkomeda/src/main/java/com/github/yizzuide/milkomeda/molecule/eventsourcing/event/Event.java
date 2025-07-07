@@ -19,30 +19,36 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.demo.molecule.eventsourcing.domain.event;
+package com.github.yizzuide.milkomeda.molecule.eventsourcing.event;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.github.yizzuide.milkomeda.molecule.eventsourcing.event.Event;
-import com.github.yizzuide.milkomeda.molecule.eventsourcing.event.EventType;
+import com.github.yizzuide.milkomeda.molecule.MoleculeContext;
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.agg.Aggregate;
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.command.Command;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
+import java.sql.Timestamp;
+import java.time.Instant;
+
 /**
- * 订单接受事件
+ * The {@link Event} was created to publish when {@link Aggregate} processed the {@link Command}.
  *
+ * @since 4.0.0
  * @author yizzuide
- * Create at 2025/06/17 15:26
+ * Create at 2025/06/11 15:32
  */
-@EventType("ORDER_ACCEPTED")
-@ToString(callSuper = true)
+@RequiredArgsConstructor(access = AccessLevel.PROTECTED)
+@ToString
 @Getter
-public final class OrderAcceptedEvent extends Event {
+public abstract class Event {
+    protected final Long aggregateId;
+    protected final int version;
+    protected final String aggregateType;
+    protected final Timestamp createdDate = Timestamp.from(Instant.now());
 
-    private final Long driverId;
-
-    @JsonCreator
-    public OrderAcceptedEvent(Long aggregateId, int version, String aggregateType, Long driverId) {
-        super(aggregateId, version, aggregateType);
-        this.driverId = driverId;
+    public String getEventType() {
+        return MoleculeContext.getEventTypeByClass(this.getClass());
     }
 }

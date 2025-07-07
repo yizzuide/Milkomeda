@@ -19,30 +19,23 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.demo.molecule.eventsourcing.domain.event;
+package com.github.yizzuide.milkomeda.molecule.eventsourcing.commandhandler;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.github.yizzuide.milkomeda.molecule.eventsourcing.event.Event;
-import com.github.yizzuide.milkomeda.molecule.eventsourcing.event.EventType;
-import lombok.Getter;
-import lombok.ToString;
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.agg.Aggregate;
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.command.Command;
+import jakarta.annotation.Nonnull;
 
 /**
- * 订单接受事件
+ * The {@link CommandHandler} interface is needs any command handler to impl which handle {@link Command} from the Controller.
  *
+ * @since 4.0.0
  * @author yizzuide
- * Create at 2025/06/17 15:26
+ * Create at 2025/06/11 17:32
  */
-@EventType("ORDER_ACCEPTED")
-@ToString(callSuper = true)
-@Getter
-public final class OrderAcceptedEvent extends Event {
+public interface CommandHandler<T extends Command> {
 
-    private final Long driverId;
+    void handle(Aggregate aggregate, Command command);
 
-    @JsonCreator
-    public OrderAcceptedEvent(Long aggregateId, int version, String aggregateType, Long driverId) {
-        super(aggregateId, version, aggregateType);
-        this.driverId = driverId;
-    }
+    @Nonnull
+    Class<T> getCommandType();
 }

@@ -22,7 +22,7 @@
 package com.github.yizzuide.milkomeda.molecule.orbit;
 
 import com.github.yizzuide.milkomeda.molecule.core.event.DomainEventsDefer;
-import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.EventSourcingProperties;
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.EventSourcingProperties;
 import com.github.yizzuide.milkomeda.orbit.AnnotationOrbitAdvisor;
 import com.github.yizzuide.milkomeda.orbit.OrbitAdvisor;
 import com.github.yizzuide.milkomeda.orbit.OrbitSource;

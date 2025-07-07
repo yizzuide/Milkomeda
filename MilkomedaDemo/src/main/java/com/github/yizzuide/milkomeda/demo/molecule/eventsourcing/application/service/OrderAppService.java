@@ -4,7 +4,7 @@ import com.github.yizzuide.milkomeda.demo.molecule.eventsourcing.domain.aggregat
 import com.github.yizzuide.milkomeda.demo.molecule.eventsourcing.uinterface.command.AcceptOrderCommand;
 import com.github.yizzuide.milkomeda.demo.molecule.eventsourcing.uinterface.command.PlaceOrderCommand;
 import com.github.yizzuide.milkomeda.molecule.core.event.DomainEventsDefer;
-import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.service.ApplicationService;
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.service.ApplicationService;
 import com.github.yizzuide.milkomeda.sundial.Sundial;
 import org.springframework.stereotype.Service;
 

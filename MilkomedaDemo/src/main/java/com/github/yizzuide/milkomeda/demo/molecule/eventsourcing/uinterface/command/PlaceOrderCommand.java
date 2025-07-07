@@ -23,9 +23,9 @@ package com.github.yizzuide.milkomeda.demo.molecule.eventsourcing.uinterface.com
 
 import com.github.yizzuide.milkomeda.demo.molecule.eventsourcing.domain.aggregate.OrderAggregate;
 import com.github.yizzuide.milkomeda.demo.molecule.eventsourcing.domain.value.Waypoint;
-import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.agg.AggregateType;
-import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.command.Command;
-import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.command.CreatedCommand;
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.agg.AggregateType;
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.command.Command;
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.command.CreatedCommand;
 import lombok.Data;
 
 import java.math.BigDecimal;

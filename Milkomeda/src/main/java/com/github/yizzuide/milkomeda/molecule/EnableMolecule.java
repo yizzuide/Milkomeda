@@ -21,7 +21,7 @@
 
 package com.github.yizzuide.milkomeda.molecule;
 
-import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.EventSourcingConfig;
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.EventSourcingConfig;
 import org.springframework.context.annotation.Import;
 
 import java.lang.annotation.*;

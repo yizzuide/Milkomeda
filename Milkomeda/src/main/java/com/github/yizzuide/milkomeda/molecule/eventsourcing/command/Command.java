@@ -19,30 +19,20 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.demo.molecule.eventsourcing.domain.event;
+package com.github.yizzuide.milkomeda.molecule.eventsourcing.command;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.github.yizzuide.milkomeda.molecule.eventsourcing.event.Event;
-import com.github.yizzuide.milkomeda.molecule.eventsourcing.event.EventType;
-import lombok.Getter;
-import lombok.ToString;
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.agg.AggregateType;
+import com.github.yizzuide.milkomeda.util.ReflectUtil;
 
 /**
- * 订单接受事件
+ * The {@link Command} used for aggregate update.
  *
+ * @since 4.0.0
  * @author yizzuide
- * Create at 2025/06/17 15:26
+ * Create at 2025/06/11 16:12
  */
-@EventType("ORDER_ACCEPTED")
-@ToString(callSuper = true)
-@Getter
-public final class OrderAcceptedEvent extends Event {
-
-    private final Long driverId;
-
-    @JsonCreator
-    public OrderAcceptedEvent(Long aggregateId, int version, String aggregateType, Long driverId) {
-        super(aggregateId, version, aggregateType);
-        this.driverId = driverId;
+public interface Command {
+    default String getAggregateType() {
+        return ReflectUtil.getClazzAnnotatedValue(AggregateType.class, this.getClass(), annotation -> ((AggregateType)annotation).value(),  String.class);
     }
 }

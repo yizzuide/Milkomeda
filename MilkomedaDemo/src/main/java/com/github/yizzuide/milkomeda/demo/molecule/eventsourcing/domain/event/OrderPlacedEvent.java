@@ -2,8 +2,8 @@ package com.github.yizzuide.milkomeda.demo.molecule.eventsourcing.domain.event;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.github.yizzuide.milkomeda.demo.molecule.eventsourcing.domain.value.Waypoint;
-import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.event.Event;
-import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.event.EventType;
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.event.Event;
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.event.EventType;
 import lombok.Getter;
 import lombok.ToString;
 

@@ -22,13 +22,13 @@
 package com.github.yizzuide.milkomeda.molecule;
 
 import com.github.yizzuide.milkomeda.molecule.core.event.DomainEventBus;
-import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.agg.AggregateType;
-import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.EventSourcingProperties;
-import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.event.EventType;
-import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.agg.Aggregate;
-import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.event.Event;
-import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.eventhandler.AsyncEventHandler;
-import com.github.yizzuide.milkomeda.molecule.eventsourcing.postgresql.eventhandler.SyncEventHandler;
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.agg.AggregateType;
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.EventSourcingProperties;
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.event.EventType;
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.agg.Aggregate;
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.event.Event;
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.eventhandler.AsyncEventHandler;
+import com.github.yizzuide.milkomeda.molecule.eventsourcing.eventhandler.SyncEventHandler;
 import com.github.yizzuide.milkomeda.universe.context.SpringContext;
 import lombok.Getter;
 import lombok.Setter;
