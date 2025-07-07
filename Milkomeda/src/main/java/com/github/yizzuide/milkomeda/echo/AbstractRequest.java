@@ -392,9 +392,10 @@ public abstract class AbstractRequest {
     /**
      * 对第三方平台的请求参数验签
      *
-     * @param request   HttpServletRequest
-     * @param inParams  请求参数
+     * @param request  HttpServletRequest
+     * @param body     请求原数据
+     * @param inParams 请求Map参数
      * @return 解签后的业务数据，解签失败返回null
      */
-    public Map<String, Object> verifyParam(HttpServletRequest request, Map<String, Object> inParams) { return null; }
+    public Map<String, Object> verifyParam(HttpServletRequest request, String body, Map<String, Object> inParams) { return null; }
 }

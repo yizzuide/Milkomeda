@@ -39,9 +39,10 @@ public interface CometParamDecrypt {
     /**
      * 请求参数解密方法
      *
-     * @param request   HttpServletRequest
-     * @param params    请求参数
+     * @param request HttpServletRequest
+     * @param body    请求体
+     * @param params  请求Map参数
      * @return 解密后的参数
      */
-    Map<String, Object> decrypt(HttpServletRequest request, Map<String, Object> params);
+    Map<String, Object> decrypt(HttpServletRequest request, String body, Map<String, Object> params);
 }

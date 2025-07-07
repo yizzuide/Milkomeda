@@ -187,8 +187,8 @@ public abstract class EchoRequest extends AbstractRequest implements CometParamD
     }
 
     @Override
-    public Map<String, Object> decrypt(HttpServletRequest request, Map<String, Object> params) {
-        return verifyParam(request, params);
+    public Map<String, Object> decrypt(HttpServletRequest request, String body, Map<String, Object> params) {
+        return verifyParam(request, body, params);
     }
 
     /**
