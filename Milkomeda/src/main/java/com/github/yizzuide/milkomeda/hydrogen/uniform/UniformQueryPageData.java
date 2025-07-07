@@ -36,7 +36,7 @@ import java.util.function.Function;
  * <br>
  * Create at 2022/10/29 19:10
  */
-@Schema(name = "queryPageData", description = "查询分页数据")
+@Schema(description = "查询分页")
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class UniformQueryPageData<T> extends UniformQueryData<T> {
