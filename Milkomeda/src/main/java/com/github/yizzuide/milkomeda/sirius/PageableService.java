@@ -160,7 +160,9 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
                 Object fieldValue = null;
                 if (target != null) {
                     // can get field value from getter method？
-                    fieldValue = tableInfo.getPropertyValue(target, field.getName());
+                    if (tableInfo.getEntityType() == target.getClass()) {
+                        fieldValue = tableInfo.getPropertyValue(target, field.getName());
+                    }
                     // reflect it!
                     if (fieldValue == null) {
                         ReflectionUtils.makeAccessible(field);

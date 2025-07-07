@@ -21,7 +21,6 @@
 
 package com.github.yizzuide.milkomeda.hydrogen.uniform;
 
-import com.baomidou.mybatisplus.core.toolkit.ReflectionKit;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
@@ -75,6 +74,6 @@ public class UniformQueryData<T> {
     @JsonIgnore
     @SuppressWarnings("unchecked")
     public Class<T> currentEntityClass() {
-        return (Class<T>) ReflectionKit.getSuperClassGenericType(this.getClass(), UniformQueryData.class, 0);
+        return (Class<T>) this.getEntity().getClass();
     }
 }

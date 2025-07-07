@@ -161,9 +161,8 @@ public class EncryptUtil {
     }
 
     public static void genKeyPair() {
-        KeyPairGenerator keyPairGen;
         try {
-            keyPairGen = KeyPairGenerator.getInstance("RSA");
+            KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance("RSA");
             keyPairGen.initialize(1024, new SecureRandom());
             KeyPair keyPair = keyPairGen.generateKeyPair();
             String priKey = encode(keyPair.getPrivate().getEncoded());
