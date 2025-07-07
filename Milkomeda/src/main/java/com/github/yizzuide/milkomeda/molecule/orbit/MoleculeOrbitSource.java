@@ -21,8 +21,8 @@
 
 package com.github.yizzuide.milkomeda.molecule.orbit;
 
+import com.github.yizzuide.milkomeda.molecule.MoleculeProperties;
 import com.github.yizzuide.milkomeda.molecule.core.event.DomainEventsDefer;
-import com.github.yizzuide.milkomeda.molecule.eventsourcing.EventSourcingProperties;
 import com.github.yizzuide.milkomeda.orbit.AnnotationOrbitAdvisor;
 import com.github.yizzuide.milkomeda.orbit.OrbitAdvisor;
 import com.github.yizzuide.milkomeda.orbit.OrbitSource;
@@ -46,9 +46,11 @@ import java.util.List;
 public class MoleculeOrbitSource implements OrbitSource {
     @Override
     public List<OrbitAdvisor> createAdvisors(Environment environment) {
-        BindResult<EventSourcingProperties> bindResult = Binder.get(environment).bind(EventSourcingProperties.PREFIX, EventSourcingProperties.class);
+        // 在事务切面内执行
         int ordered = Ordered.HIGHEST_PRECEDENCE + 6;
+        BindResult<MoleculeProperties> bindResult = Binder.get(environment).bind(MoleculeProperties.PREFIX, MoleculeProperties.class);
         if (bindResult.isBound() && !bindResult.get().getSyncReadModelBeforeTransactionCommit()) {
+            // 在事务切面外执行
             ordered = Ordered.LOWEST_PRECEDENCE;
         }
         AnnotationOrbitAdvisor advisor = AnnotationOrbitAdvisor.forMethod(DomainEventsDefer.class, "molecule", MoleculeAdvice.class, null);

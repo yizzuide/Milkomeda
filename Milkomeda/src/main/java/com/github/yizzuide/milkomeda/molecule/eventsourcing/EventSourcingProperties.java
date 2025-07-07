@@ -90,11 +90,6 @@ public class EventSourcingProperties {
     private Map<String, Snapshotting> snapshotting = new HashMap<>();
 
     /**
-     * Enable sync read model before transaction commit (must set true if application service invoke in transactional).
-     */
-    private Boolean syncReadModelBeforeTransactionCommit = true;
-
-    /**
      * Set delay time is a compensation mechanism for handle changed events when handle new events had broken with throws exception.
      */
     @DurationUnit(ChronoUnit.MILLIS)

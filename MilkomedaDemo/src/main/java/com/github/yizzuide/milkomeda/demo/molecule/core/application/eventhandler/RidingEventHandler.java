@@ -16,8 +16,7 @@ public class RidingEventHandler {
     @EventListener
     public void handle(RidingOrderCreatedEvent event) {
         System.out.println("订单创建成功，订单号：" + event.getOrderNo());
-        // 保存聚合...
-        // 保存读模型（视图表）...
+        // 保存聚合相关读模型（视图表）...
     }
 
 }
