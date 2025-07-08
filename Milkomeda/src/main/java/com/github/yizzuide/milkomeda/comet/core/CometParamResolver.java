@@ -78,10 +78,10 @@ public class CometParamResolver implements HandlerMethodArgumentResolver {
         }
 
         // Map
+        CometParam cometParam = methodParameter.getParameterAnnotation(CometParam.class);
         if (Map.class.isAssignableFrom(parameterType)) {
             Map<String, Object> map = JSONUtil.parseMap(params, String.class, Object.class);
             // 检测是否需要验签
-            CometParam cometParam = methodParameter.getParameterAnnotation(CometParam.class);
             if (cometParam == null || cometParam.decrypt() == CometParamDecrypt.class
                     || !CometParamDecrypt.class.isAssignableFrom(cometParam.decrypt())) {
                 return map;
@@ -103,6 +103,12 @@ public class CometParamResolver implements HandlerMethodArgumentResolver {
             return queryData;
         }
 
+        // 检测是否需要验签
+        if (cometParam != null && cometParam.decrypt() != CometParamDecrypt.class &&
+                CometParamDecrypt.class.isAssignableFrom(cometParam.decrypt())) {
+            CometParamDecrypt cometParamDecrypt = ApplicationContextHolder.get().getBean(cometParam.decrypt());
+            cometParamDecrypt.decrypt(WebContext.getRequest(), params, null);
+        }
         // custom object
         Object commandParam = JSONUtil.parse(params, parameterType);
         validate(methodParameter, commandParam);

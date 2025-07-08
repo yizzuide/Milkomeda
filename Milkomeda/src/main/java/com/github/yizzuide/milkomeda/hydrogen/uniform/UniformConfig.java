@@ -77,7 +77,6 @@ public class UniformConfig {
         return new UniformResponseInterceptor();
     }
 
-    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Bean
     public UniformErrorController uniformErrorController(ErrorAttributes errorAttributes,
                                                          ObjectProvider<ErrorViewResolver> errorViewResolvers) {

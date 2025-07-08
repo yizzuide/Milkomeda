@@ -24,6 +24,7 @@ package com.github.yizzuide.milkomeda.echo;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.github.yizzuide.milkomeda.universe.config.MilkomedaProperties;
 import com.github.yizzuide.milkomeda.util.JSONUtil;
+import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +33,6 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import jakarta.annotation.Resource;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -395,7 +395,7 @@ public abstract class AbstractRequest {
      * @param request  HttpServletRequest
      * @param body     请求原数据
      * @param inParams 请求Map参数
-     * @return 解签后的业务数据，解签失败返回null
+     * @return 业务数据
      */
     public Map<String, Object> verifyParam(HttpServletRequest request, String body, Map<String, Object> inParams) { return null; }
 }
