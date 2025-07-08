@@ -71,10 +71,10 @@ public class DomainEventBus {
     }
 
     /**
-     * Clear aggregate events.
+     * Perform before clear aggregate events.
      * @param consumer consumer aggregate
      */
-    public void clear(Consumer<AggregateRoot> consumer) {
+    public void performBeforeClear(Consumer<AggregateRoot> consumer) {
         Set<AggregateRoot> aggregateRoots = HANGING_AGGREGATES.get();
         if (aggregateRoots.isEmpty()) {
             return;
@@ -104,7 +104,7 @@ public class DomainEventBus {
      * Publish aggregate domain events.
      */
     public void publish() {
-        clear(aggregateRoot -> aggregateRoot.domainEvents().forEach(domainEventPublisher::publishEvent));
+        performBeforeClear(aggregateRoot -> aggregateRoot.domainEvents().forEach(domainEventPublisher::publishEvent));
     }
 
     /**

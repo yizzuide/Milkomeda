@@ -19,14 +19,31 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.molecule.core.event;
+package com.github.yizzuide.milkomeda.molecule;
+
+import lombok.Data;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
- * This event is auto published at the end of transaction method which annotated {@link DomainEventsDefer}.
+ * Molecule config properties.
  *
  * @since 4.0.0
  * @author yizzuide
- * Create at 2025/06/11 18:10
+ * Create at 2025/07/07 23:49
  */
-public class RecordAggregateEvent {
+@Data
+@ConfigurationProperties(prefix = MoleculeProperties.PREFIX)
+public class MoleculeProperties {
+
+    public static final String PREFIX = "milkomeda.molecule";
+
+    /**
+     * Enable molecule module.
+     */
+    private Boolean enabled = true;
+
+    /**
+     * Enable sync read model before transaction commit (must set true if application service invoke in transactional).
+     */
+    private Boolean syncReadModelBeforeTransactionCommit = true;
 }

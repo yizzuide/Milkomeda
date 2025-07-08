@@ -19,27 +19,14 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.molecule.orbit;
-
-import com.github.yizzuide.milkomeda.molecule.MoleculeContext;
-import com.github.yizzuide.milkomeda.molecule.core.event.AwakePerformAggregateEvent;
-import com.github.yizzuide.milkomeda.orbit.OrbitAdvice;
-import com.github.yizzuide.milkomeda.orbit.OrbitAdvisor;
-import com.github.yizzuide.milkomeda.orbit.OrbitInvocation;
+package com.github.yizzuide.milkomeda.molecule.core.event;
 
 /**
- * Provide {@link OrbitAdvisor} for Molecule module to register advisor.
+ * This event is auto published at the end of method which annotated {@link DomainEventsDefer}.
  *
  * @since 4.0.0
  * @author yizzuide
- * Create at 2025/06/09 14:59
+ * Create at 2025/06/11 18:10
  */
-public class MoleculeAdvice implements OrbitAdvice {
-
-    @Override
-    public Object invoke(OrbitInvocation invocation) throws Throwable {
-        Object result = invocation.proceed();
-        MoleculeContext.getDomainEventBus().publishEvent(new AwakePerformAggregateEvent());
-        return result;
-    }
+public class AwakePerformAggregateEvent {
 }

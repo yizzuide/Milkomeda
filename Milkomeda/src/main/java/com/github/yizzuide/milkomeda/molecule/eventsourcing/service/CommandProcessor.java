@@ -22,7 +22,7 @@
 package com.github.yizzuide.milkomeda.molecule.eventsourcing.service;
 
 import com.github.yizzuide.milkomeda.molecule.MoleculeContext;
-import com.github.yizzuide.milkomeda.molecule.core.event.RecordAggregateEvent;
+import com.github.yizzuide.milkomeda.molecule.core.event.AwakePerformAggregateEvent;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.agg.Aggregate;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.agg.AggregateFactory;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.command.Command;
@@ -31,7 +31,6 @@ import com.github.yizzuide.milkomeda.molecule.eventsourcing.commandhandler.Defau
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.datasource.DataSourceRouting;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.event.Event;
 import com.github.yizzuide.milkomeda.molecule.eventsourcing.event.EventWithId;
-import com.github.yizzuide.milkomeda.molecule.eventsourcing.service.IAggregateStore;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
@@ -78,7 +77,7 @@ public class CommandProcessor {
 
     @Transactional(rollbackFor = Throwable.class)
     @EventListener
-    public void handle(RecordAggregateEvent ignore) {
+    public void handle(AwakePerformAggregateEvent ignore) {
         List<Aggregate> aggregates = MoleculeContext.getDomainEventBus().getHangingAggregates(Aggregate.class);
         try {
             if (aggregates.isEmpty()) {
@@ -95,7 +94,7 @@ public class CommandProcessor {
             aggregates.forEach(agg -> aggregateStore.deleteTempAggregate(agg.getAggregateId()));
             throw ex;
         } finally {
-            MoleculeContext.getDomainEventBus().clear(null);
+            MoleculeContext.getDomainEventBus().performBeforeClear(null);
         }
     }
 

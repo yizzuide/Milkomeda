@@ -23,11 +23,11 @@ package com.github.yizzuide.milkomeda.molecule.core.eventhandler;
 
 import com.github.yizzuide.milkomeda.molecule.MoleculeContext;
 import com.github.yizzuide.milkomeda.molecule.core.agg.AbstractAggregateRoot;
-import com.github.yizzuide.milkomeda.molecule.core.event.RecordAggregateEvent;
+import com.github.yizzuide.milkomeda.molecule.core.event.AwakePerformAggregateEvent;
 import org.springframework.context.event.EventListener;
 
 /**
- * The default event handler for handle {@link RecordAggregateEvent}.
+ * The default event handler for handle {@link AwakePerformAggregateEvent}.
  *
  * @since 4.0.0
  * @author yizzuide
@@ -35,7 +35,7 @@ import org.springframework.context.event.EventListener;
  */
 public class DefaultEventHandler {
     @EventListener
-    public void handle(RecordAggregateEvent ignore) {
+    public void handle(AwakePerformAggregateEvent ignore) {
         if(MoleculeContext.getDomainEventBus().hasHangingType(AbstractAggregateRoot.class)) {
             MoleculeContext.getDomainEventBus().publish();
         }
