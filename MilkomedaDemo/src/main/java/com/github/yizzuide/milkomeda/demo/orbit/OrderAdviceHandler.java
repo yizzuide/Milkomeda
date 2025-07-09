@@ -24,7 +24,6 @@ package com.github.yizzuide.milkomeda.demo.orbit;
 import com.github.yizzuide.milkomeda.orbit.OrbitInvocation;
 import com.github.yizzuide.milkomeda.orbit.orbit.OrbitAround;
 import com.github.yizzuide.milkomeda.orbit.orbit.OrbitHandler;
-import com.github.yizzuide.milkomeda.orbit.orbit.OrbitHandlerContext;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -37,12 +36,18 @@ import lombok.extern.slf4j.Slf4j;
 @OrbitHandler
 public class OrderAdviceHandler {
     @OrbitAround
-    public Object pushOrder(String orderNo/*, OrbitInvocation invocation*/) { // 获取OrbitInvocation方式一：在方法参数上注入
+    public Object pushOrder(String orderNo, OrbitInvocation invocation) { // 获取OrbitInvocation方式一：在方法参数上注入
         log.info("订单推送前置处理：{}", orderNo);
         // 获取OrbitInvocation方式二：通过上下文获取（推荐，可以保持方法参数与被代理方法参数一致）
-        OrbitInvocation invocation = OrbitHandlerContext.getInvocation();
+        //OrbitInvocation invocation = OrbitHandlerContext.getInvocation();
         // 获取原目标对象，用于直接调用（防止循环切面处理）
         //OrderAPI orderAPI = invocation.getTarget(OrderAPI.class);
         return invocation.proceed();
     }
+
+    // 必须在调用OrderAPI.pushOrder前加事务注解才有效！
+    /*@OrbitAround(afterTransactionCommit = true)
+    public void pushOrder(String orderNo) {
+        log.info("订单推送后处理：{}", orderNo);
+    }*/
 }

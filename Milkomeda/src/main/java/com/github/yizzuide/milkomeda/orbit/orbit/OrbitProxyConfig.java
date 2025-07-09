@@ -46,11 +46,16 @@ public class OrbitProxyConfig implements ApplicationListener<ContextRefreshedEve
     @Getter
     private static Map<String, List<HandlerMetaData>> aroundMap = new HashMap<>();
 
+    static final String COMMIT_TAG = "commit_tag";
+
     @Override
     public void onApplicationEvent(@NonNull ContextRefreshedEvent contextRefreshedEvent) {
         aroundMap = SpringContext.getHandlerMetaData(OrbitHandler.class, OrbitAround.class, (annotation, handlerAnnotation, metaData) -> {
             OrbitAround orbitAround = (OrbitAround) annotation;
             String tag = orbitAround.value();
+            Map<String, Object> attrs = new HashMap<>();
+            attrs.put(COMMIT_TAG, orbitAround.afterTransactionCommit());
+            metaData.setAttributes(attrs);
             return tag.isEmpty() ? metaData.getMethod().getName() : tag;
         }, false);
     }

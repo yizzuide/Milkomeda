@@ -28,6 +28,8 @@ import com.github.yizzuide.milkomeda.universe.metadata.HandlerMetaData;
 import org.apache.commons.lang3.StringUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.List;
 
@@ -68,6 +70,26 @@ public class OrbitProxyAdvice implements OrbitAdvice {
         argumentSources.add(new ArgumentDefinition(ArgumentMatchType.BY_TYPE,null, OrbitInvocation.class, invocation));
         Object[] args = MethodArgumentBinder.bind(argumentSources, metaData.getMethod());
         try {
+            if (metaData.getAttributes() != null) {
+                Boolean isNeedCommit = (Boolean) metaData.getAttributes().get(OrbitProxyConfig.COMMIT_TAG);
+                if (isNeedCommit) {
+                    if (TransactionSynchronizationManager.isSynchronizationActive()) {
+                        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                            @Override
+                            public void afterCommit() {
+                                try {
+                                    metaData.getMethod().invoke(metaData.getTarget(), args);
+                                } catch (Exception e) {
+                                    throw new RuntimeException(e.getMessage(), e);
+                                } finally {
+                                    OrbitHandlerContext.clear();
+                                }
+                            }
+                        });
+                    }
+                    return invocation.proceed();
+                }
+            }
             return metaData.getMethod().invoke(metaData.getTarget(), args);
         } finally {
             OrbitHandlerContext.clear();

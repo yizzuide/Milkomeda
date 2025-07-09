@@ -51,4 +51,10 @@ public @interface OrbitAround {
      */
     @AliasFor("value")
     String tag() default "";
+
+    /**
+     * Invoke after transactional commit
+     * @return true if used for invoke after transactional commit
+     */
+    boolean afterTransactionCommit() default false;
 }
