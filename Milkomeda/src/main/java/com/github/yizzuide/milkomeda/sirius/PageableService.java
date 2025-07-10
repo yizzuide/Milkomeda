@@ -176,6 +176,12 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
                         fieldValue = findLinkerValue(linkerNodes, queryMatcher, linkerFields, queryPageData.getEntity(), field, tableInfo, filterMap);
                         fieldNonNull = fieldValue != null;
                     }
+                    if (fieldNonNull) {
+                        if (String.class.isAssignableFrom(field.getType()) && queryMatcher.filterEmpty() &&
+                                StringUtils.isEmpty(fieldValue.toString())) {
+                            fieldNonNull = false;
+                        }
+                    }
                     queryWrapper.eq(fieldNonNull, columnName, fieldValue);
                 } else if (queryMatcher.perfect() == PerfectType.NEQ) {
                     queryWrapper.ne(fieldNonNull, columnName, fieldValue);
