@@ -25,6 +25,7 @@ import com.github.yizzuide.milkomeda.molecule.MoleculeContext;
 import com.github.yizzuide.milkomeda.molecule.core.agg.AbstractAggregateRoot;
 import com.github.yizzuide.milkomeda.molecule.core.event.AwakePerformAggregateEvent;
 import org.springframework.context.event.EventListener;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * The default event handler for handle {@link AwakePerformAggregateEvent}.
@@ -34,6 +35,7 @@ import org.springframework.context.event.EventListener;
  * Create at 2025/06/11 18:14
  */
 public class DefaultEventHandler {
+    @Transactional(rollbackFor = Throwable.class)
     @EventListener
     public void handle(AwakePerformAggregateEvent ignore) {
         if(MoleculeContext.getDomainEventBus().hasHangingType(AbstractAggregateRoot.class)) {

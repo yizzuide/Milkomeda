@@ -19,31 +19,27 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.orbit.orbit;
+package com.github.yizzuide.milkomeda.demo.molecule.core.application.eventhandler;
 
-import com.github.yizzuide.milkomeda.orbit.AnnotationOrbitAdvisor;
-import com.github.yizzuide.milkomeda.orbit.OrbitAdvisor;
-import com.github.yizzuide.milkomeda.orbit.OrbitSource;
-import com.github.yizzuide.milkomeda.orbit.OrbitSourceProvider;
-import org.springframework.core.Ordered;
-import org.springframework.core.env.Environment;
-
-import java.util.Collections;
-import java.util.List;
+import com.github.yizzuide.milkomeda.demo.molecule.core.domain.event.RidingOrderCreatedEvent;
+import com.github.yizzuide.milkomeda.orbit.orbit.OrbitAround;
+import com.github.yizzuide.milkomeda.orbit.orbit.OrbitHandler;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
 
 /**
- * Register the advisor with {@link OrbitSourceProvider}, It links the {@link OrbitProxy} and {@link OrbitProxyAdvice}.
+ * 打车事件异步通知处理器
  *
- * @since 4.0.0
  * @author yizzuide
- * Create at 2025/05/18 15:02
+ * Create at 2025/07/11 02:24
  */
-@OrbitSourceProvider
-public class OrbitProxySource implements OrbitSource {
-    @Override
-    public List<OrbitAdvisor> createAdvisors(Environment environment) {
-        AnnotationOrbitAdvisor advisor = AnnotationOrbitAdvisor.forMethod(OrbitProxy.class, "orbitProxy", OrbitProxyAdvice.class, null);
-        advisor.setOrder(Ordered.LOWEST_PRECEDENCE);
-        return Collections.singletonList(advisor);
+@Slf4j
+@OrbitHandler
+public class RidingAsyncNotifyEventHandler {
+
+    @Async
+    @OrbitAround(afterTransactionCommit = true)
+    public void handle(RidingOrderCreatedEvent event) {
+        log.info("订单异步通知，订单号：{}", event.getOrderNo());
     }
 }
