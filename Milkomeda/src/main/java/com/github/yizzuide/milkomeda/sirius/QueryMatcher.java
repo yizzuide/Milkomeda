@@ -42,6 +42,12 @@ public @interface QueryMatcher {
     String perfectString() default "";
 
     /**
+     * Filter empty value.
+     * @return true if you need filter empty value
+     */
+    boolean filterEmpty() default true;
+
+    /**
      * Query result list order type.
      * @return  true if you need order with asc
      */

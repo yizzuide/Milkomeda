@@ -90,7 +90,7 @@ public class SimpleEchoRequest extends EchoRequest {
     }
 
     @Override
-    public Map<String, Object> verifyParam(HttpServletRequest request, Map<String, Object> inParams) {
+    public Map<String, Object> verifyParam(HttpServletRequest request, String body, Map<String, Object> inParams) {
         String sign = (String) inParams.remove("sign");
         String signStr = DataTypeConvertUtil.map2FormData(inParams, false);
         log.info("SimpleEchoRequest:- 原验签串：{}", signStr);

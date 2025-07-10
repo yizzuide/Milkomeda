@@ -176,6 +176,12 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
                         fieldValue = findLinkerValue(linkerNodes, queryMatcher, linkerFields, queryPageData.getEntity(), field, tableInfo, filterMap);
                         fieldNonNull = fieldValue != null;
                     }
+                    if (fieldNonNull) {
+                        if (String.class.isAssignableFrom(field.getType()) && queryMatcher.filterEmpty() &&
+                                StringUtils.isEmpty(fieldValue.toString())) {
+                            fieldNonNull = false;
+                        }
+                    }
                     queryWrapper.eq(fieldNonNull, columnName, fieldValue);
                 } else if (queryMatcher.perfect() == PerfectType.NEQ) {
                     queryWrapper.ne(fieldNonNull, columnName, fieldValue);
@@ -295,169 +301,175 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
             }
         }
 
-        // query link name
-        if (!CollectionUtils.isEmpty(linkerFields) && !CollectionUtils.isEmpty(records)) {
-            for (Field linkerField : linkerFields) {
-                String linkerFieldName = getEntityFieldName(linkerField);
-                // collect mappings
-                Map<String, MappingNode> mappingFields = new HashMap<>();
-                if (!linkerNodes.isEmpty() && linkerNodes.containsKey(linkerFieldName)) {
-                    MappingNode.construct(linkerNodes.get(linkerFieldName), mappingFields, tableInfo, target);
-                }
+        if (!CollectionUtils.isEmpty(records)) {
+            if (entity2VoConverter != null && voList == null) {
+                voList = records.stream().map(entity2VoConverter).collect(Collectors.toCollection(ArrayList::new));
+            }
+            // query link name
+            if (!CollectionUtils.isEmpty(linkerFields)) {
+                for (Field linkerField : linkerFields) {
+                    String linkerFieldName = getEntityFieldName(linkerField);
+                    // collect mappings
+                    Map<String, MappingNode> mappingFields = new HashMap<>();
+                    if (!linkerNodes.isEmpty() && linkerNodes.containsKey(linkerFieldName)) {
+                        MappingNode.construct(linkerNodes.get(linkerFieldName), mappingFields, tableInfo, target);
+                    }
 
-                // cache link entity list with the field
-                Map<String, List<?>> linkEntityListCacheMap = new HashMap<>();
-                List<QueryLinkerNode> queryLinkerNodes = linkerNodes.get(linkerFieldName).stream()
-                        //.sorted(Comparator.comparingInt(QueryLinkerNode::getLinkSelectTop))
-                        .sorted(OrderComparator.INSTANCE.withSourceProvider(n -> n))
-                        .toList();
-                for (QueryLinkerNode linkerNode : queryLinkerNodes) {
-                    BaseMapper linkMapper = SiriusInspector.getMapper(linkerNode.getLinkEntityType());
-                    List<?> linkEntityList;
-                    // get link entity table info
-                    TableInfo linkTableInfo = TableInfoHelper.getTableInfo(linkerNode.getLinkEntityType());
-                    String linkMapperClassName = linkTableInfo.getCurrentNamespace();
-                    if (linkEntityListCacheMap.containsKey(linkMapperClassName)) {
-                        linkEntityList = linkEntityListCacheMap.get(linkMapperClassName);
-                    } else {
-                        Set<Serializable> idValues = records.stream()
-                                .map(e -> (Serializable) tableInfo.getPropertyValue(e, linkerFieldName))
-                                .filter(val -> val != null && !linkerNode.getLinkIdIgnore().equals(val.toString()))
-                                .collect(Collectors.toSet());
-                        if (CollectionUtils.isEmpty(idValues)) {
-                            continue;
-                        }
-                        QueryWrapper<T> linkQueryWrapper = new QueryWrapper<>();
-                        boolean isSameIdNamed = linkerNode.getLinkIdFieldName().equals(linkTableInfo.getKeyColumn());
-                        String linkIdColumn = isSameIdNamed ? linkerNode.getLinkIdFieldName() : findColumnName(linkTableInfo, null, linkerNode.getLinkIdFieldName());
-                        linkQueryWrapper.in(linkIdColumn, idValues);
+                    // cache link entity list with the field
+                    Map<String, List<?>> linkEntityListCacheMap = new HashMap<>();
+                    List<QueryLinkerNode> queryLinkerNodes = linkerNodes.get(linkerFieldName).stream()
+                            //.sorted(Comparator.comparingInt(QueryLinkerNode::getLinkSelectTop))
+                            .sorted(OrderComparator.INSTANCE.withSourceProvider(n -> n))
+                            .toList();
+                    for (QueryLinkerNode linkerNode : queryLinkerNodes) {
+                        BaseMapper linkMapper = SiriusInspector.getMapper(linkerNode.getLinkEntityType());
+                        List<?> linkEntityList;
+                        // get link entity table info
+                        TableInfo linkTableInfo = TableInfoHelper.getTableInfo(linkerNode.getLinkEntityType());
+                        String linkMapperClassName = linkTableInfo.getCurrentNamespace();
+                        if (linkEntityListCacheMap.containsKey(linkMapperClassName)) {
+                            linkEntityList = linkEntityListCacheMap.get(linkMapperClassName);
+                        } else {
+                            Set<Serializable> idValues = records.stream()
+                                    .map(e -> (Serializable) tableInfo.getPropertyValue(e, linkerFieldName))
+                                    .filter(val -> val != null && !linkerNode.getLinkIdIgnore().equals(val.toString()))
+                                    .collect(Collectors.toSet());
+                            if (CollectionUtils.isEmpty(idValues)) {
+                                continue;
+                            }
+                            QueryWrapper<T> linkQueryWrapper = new QueryWrapper<>();
+                            boolean isSameIdNamed = linkerNode.getLinkIdFieldName().equals(linkTableInfo.getKeyColumn());
+                            String linkIdColumn = isSameIdNamed ? linkerNode.getLinkIdFieldName() : findColumnName(linkTableInfo, null, linkerNode.getLinkIdFieldName());
+                            linkQueryWrapper.in(linkIdColumn, idValues);
 
-                        // add condition of mappings
-                        if (!CollectionUtils.isEmpty(mappingFields)) {
-                            mappingFields.forEach((mappingFieldName, mappingNode) -> {
-                                if (mappingNode.getLinkEntityType() != linkerNode.getLinkEntityType()) {
-                                    return;
-                                }
-                                String colName = findColumnName(linkTableInfo, null, mappingFieldName);
-                                if (colName == null) {
-                                    return;
-                                }
-                                Object mappingFieldValue = mappingNode.getFieldValue();
-                                if (mappingNode.getPerfectType() == PerfectType.EQ) {
-                                    linkQueryWrapper.eq(colName, mappingFieldValue);
-                                } else if (mappingNode.getPerfectType() == PerfectType.NEQ) {
-                                    linkQueryWrapper.ne(colName, mappingFieldValue);
-                                } else if (mappingNode.getPerfectType() == PerfectType.EMPTY) {
-                                    linkQueryWrapper.eq(ObjectUtils.isEmpty(mappingFieldValue), colName, mappingFieldValue);
-                                }  else if (mappingNode.getPerfectType() == PerfectType.IN) {
-                                    linkQueryWrapper.in(colName, mappingFieldValue);
-                                } else if (mappingNode.getPerfectType() == PerfectType.LIKE) {
-                                    linkQueryWrapper.likeRight(colName, mappingFieldValue);
-                                }
-                            });
-                        }
+                            // add condition of mappings
+                            if (!CollectionUtils.isEmpty(mappingFields)) {
+                                mappingFields.forEach((mappingFieldName, mappingNode) -> {
+                                    if (mappingNode.getLinkEntityType() != linkerNode.getLinkEntityType()) {
+                                        return;
+                                    }
+                                    String colName = findColumnName(linkTableInfo, null, mappingFieldName);
+                                    if (colName == null) {
+                                        return;
+                                    }
+                                    Object mappingFieldValue = mappingNode.getFieldValue();
+                                    if (mappingNode.getPerfectType() == PerfectType.EQ) {
+                                        linkQueryWrapper.eq(colName, mappingFieldValue);
+                                    } else if (mappingNode.getPerfectType() == PerfectType.NEQ) {
+                                        linkQueryWrapper.ne(colName, mappingFieldValue);
+                                    } else if (mappingNode.getPerfectType() == PerfectType.EMPTY) {
+                                        linkQueryWrapper.eq(ObjectUtils.isEmpty(mappingFieldValue), colName, mappingFieldValue);
+                                    }  else if (mappingNode.getPerfectType() == PerfectType.IN) {
+                                        linkQueryWrapper.in(colName, mappingFieldValue);
+                                    } else if (mappingNode.getPerfectType() == PerfectType.LIKE) {
+                                        linkQueryWrapper.likeRight(colName, mappingFieldValue);
+                                    }
+                                });
+                            }
 
-                        // 如果有需要过滤的link字段
-                        if (!filterMap.isEmpty()) {
-                            for (String key : filterMap.keySet()) {
-                                PerfectLinkNode perfectLinkNode = filterMap.get(key);
-                                String linkNameColumn = findColumnName(linkTableInfo, null, perfectLinkNode.getLinkFieldName());
-                                if (perfectLinkNode.getPerfectType() == PerfectType.IN) {
-                                    linkQueryWrapper.likeRight(linkNameColumn, perfectLinkNode.getTargetFieldValue());
-                                } else {
-                                    linkQueryWrapper.eq(linkNameColumn, perfectLinkNode.getTargetFieldValue());
+                            // 如果有需要过滤的link字段
+                            if (!filterMap.isEmpty()) {
+                                for (String key : filterMap.keySet()) {
+                                    PerfectLinkNode perfectLinkNode = filterMap.get(key);
+                                    String linkNameColumn = findColumnName(linkTableInfo, null, perfectLinkNode.getLinkFieldName());
+                                    if (perfectLinkNode.getPerfectType() == PerfectType.IN) {
+                                        linkQueryWrapper.likeRight(linkNameColumn, perfectLinkNode.getTargetFieldValue());
+                                    } else {
+                                        linkQueryWrapper.eq(linkNameColumn, perfectLinkNode.getTargetFieldValue());
+                                    }
                                 }
                             }
-                        }
 
-                        // 设置查询的字段
-                        List<String> queryColumns = new ArrayList<>();
-                        queryColumns.add(linkTableInfo.getKeyColumn());
-                        // 所有当前类型的 linkId 和 linkName 作为查询的字段
-                        List<String> linkColumns = queryLinkerNodes.stream()
-                                .filter(ql -> ql.getLinkEntityType() == linkerNode.getLinkEntityType())
-                                .map(ql -> new String[] { ql.getLinkIdFieldName(), ql.getLinkFieldName() })
-                                .flatMap(Arrays::stream)
-                                .distinct()
-                                .filter(f -> !queryColumns.contains(f))
-                                .map(f -> findColumnName(linkTableInfo, null, f))
-                                .toList();
-                        queryColumns.addAll(linkColumns);
-                        linkQueryWrapper.select(queryColumns.toArray(new String[]{}));
-                        String selectTopFieldName = linkerNode.getLinkSelectTopFieldName();
-                        if (selectTopFieldName != null) {
-                            // 只获取顶部的一条记录
-                            Integer linkSelectTop = linkerNode.getLinkSelectTop();
-                            String selectTopColumnName = findColumnName(linkTableInfo, null, selectTopFieldName);
-                            // 如果设置为-1，则为倒序
-                            if (linkSelectTop == -1) {
-                                linkQueryWrapper.orderBy(true, false, selectTopColumnName);
-                            }
-                            // one to many, find the first row
-                            if (idValues.size() == 1) {
-                                linkQueryWrapper.last("limit 1");
-                            }
-                        }
-                        linkEntityList = linkMapper.selectList(linkQueryWrapper);
-                        linkEntityListCacheMap.put(linkMapperClassName, linkEntityList);
-                    }
-                    if (CollectionUtils.isEmpty(linkEntityList)) {
-                        continue;
-                    }
-                    if (entity2VoConverter != null && voList == null) {
-                        voList = records.stream().map(entity2VoConverter).collect(Collectors.toCollection(ArrayList::new));
-                    }
-                    int recordSize = records.size();
-                    for (int i = 0; i < recordSize; i++) {
-                        T record = records.get(i);
-                        Object matchIdValue = tableInfo.getPropertyValue(record, linkerFieldName);
-                        List<?> matchEntityList = linkEntityList.stream()
-                                .filter(linkEntity -> String.valueOf(linkTableInfo.getPropertyValue(linkEntity, linkerNode.getLinkIdFieldName())).equals(String.valueOf(matchIdValue)))
-                                .toList();
-                        if (CollectionUtils.isEmpty(matchEntityList)){
-                            continue;
-                        }
-                        Field[] declaredFields = entity2VoConverter == null ? fields :
-                                TypeReflector.getFields(voList.getFirst().getClass());
-                        Field orgTargetField = Stream.of(fields)
-                                .filter(field -> getEntityFieldName(field).equals(linkerNode.getTargetFieldName()))
-                                .findFirst()
-                                .orElse(null);
-                        Field targetField = Stream.of(declaredFields)
-                                .filter(field -> getEntityFieldName(field).equals(linkerNode.getTargetFieldName()))
-                                .findFirst()
-                                .orElse(null);
-                        if (List.class.isAssignableFrom(targetField.getType())) {
-                            List<Object> targetValues = matchEntityList.stream()
-                                    .map(linkEntity -> linkTableInfo.getPropertyValue(linkEntity, linkerNode.getLinkFieldName()))
+                            // 设置查询的字段
+                            List<String> queryColumns = new ArrayList<>();
+                            queryColumns.add(linkTableInfo.getKeyColumn());
+                            // 所有当前类型的 linkId 和 linkName 作为查询的字段
+                            List<String> linkColumns = queryLinkerNodes.stream()
+                                    .filter(ql -> ql.getLinkEntityType() == linkerNode.getLinkEntityType())
+                                    .map(ql -> new String[] { ql.getLinkIdFieldName(), ql.getLinkFieldName() })
+                                    .flatMap(Arrays::stream)
+                                    .distinct()
+                                    .filter(f -> !queryColumns.contains(f))
+                                    .map(f -> findColumnName(linkTableInfo, null, f))
                                     .toList();
+                            queryColumns.addAll(linkColumns);
+                            linkQueryWrapper.select(queryColumns.toArray(new String[]{}));
+                            String selectTopFieldName = linkerNode.getLinkSelectTopFieldName();
+                            if (selectTopFieldName != null) {
+                                // 只获取顶部的一条记录
+                                Integer linkSelectTop = linkerNode.getLinkSelectTop();
+                                String selectTopColumnName = findColumnName(linkTableInfo, null, selectTopFieldName);
+                                // 如果设置为-1，则为倒序
+                                if (linkSelectTop == -1) {
+                                    linkQueryWrapper.orderBy(true, false, selectTopColumnName);
+                                }
+                                // one to many, find the first row
+                                if (idValues.size() == 1) {
+                                    linkQueryWrapper.last("limit 1");
+                                }
+                            }
+                            linkEntityList = linkMapper.selectList(linkQueryWrapper);
+                            linkEntityListCacheMap.put(linkMapperClassName, linkEntityList);
+                        }
+                        if (CollectionUtils.isEmpty(linkEntityList)) {
+                            continue;
+                        }
+                        if (entity2VoConverter != null && voList == null) {
+                            voList = records.stream().map(entity2VoConverter).collect(Collectors.toCollection(ArrayList::new));
+                        }
+                        int recordSize = records.size();
+                        for (int i = 0; i < recordSize; i++) {
+                            T record = records.get(i);
+                            Object matchIdValue = tableInfo.getPropertyValue(record, linkerFieldName);
+                            List<?> matchEntityList = linkEntityList.stream()
+                                    .filter(linkEntity -> String.valueOf(linkTableInfo.getPropertyValue(linkEntity, linkerNode.getLinkIdFieldName())).equals(String.valueOf(matchIdValue)))
+                                    .toList();
+                            if (CollectionUtils.isEmpty(matchEntityList)){
+                                continue;
+                            }
+                            Field[] declaredFields = entity2VoConverter == null ? fields :
+                                    TypeReflector.getFields(voList.getFirst().getClass());
+                            Field orgTargetField = Stream.of(fields)
+                                    .filter(field -> getEntityFieldName(field).equals(linkerNode.getTargetFieldName()))
+                                    .findFirst()
+                                    .orElse(null);
+                            Field targetField = Stream.of(declaredFields)
+                                    .filter(field -> getEntityFieldName(field).equals(linkerNode.getTargetFieldName()))
+                                    .findFirst()
+                                    .orElse(null);
+                            if (List.class.isAssignableFrom(targetField.getType())) {
+                                List<Object> targetValues = matchEntityList.stream()
+                                        .map(linkEntity -> linkTableInfo.getPropertyValue(linkEntity, linkerNode.getLinkFieldName()))
+                                        .toList();
+                                if (orgTargetField != null) {
+                                    tableInfo.setPropertyValue(target, linkerNode.getTargetFieldName(), targetValues);
+                                }
+                                if (entity2VoConverter == null) {
+                                    tableInfo.setPropertyValue(record, linkerNode.getTargetFieldName(), targetValues);
+                                } else {
+                                    V vo = voList.get(i);
+                                    TypeReflector.setProps(vo, linkerNode.getTargetFieldName(), targetValues);
+                                }
+                                continue;
+                            }
+                            Object linkEntity = matchEntityList.getFirst();
+                            Object targetValue = linkTableInfo.getPropertyValue(linkEntity, linkerNode.getLinkFieldName());
                             if (orgTargetField != null) {
-                                tableInfo.setPropertyValue(target, linkerNode.getTargetFieldName(), targetValues);
+                                tableInfo.setPropertyValue(target, linkerNode.getTargetFieldName(), targetValue);
                             }
                             if (entity2VoConverter == null) {
-                                tableInfo.setPropertyValue(record, linkerNode.getTargetFieldName(), targetValues);
-                            } else {
-                                V vo = voList.get(i);
-                                TypeReflector.setProps(vo, linkerNode.getTargetFieldName(), targetValues);
+                                tableInfo.setPropertyValue(record, linkerNode.getTargetFieldName(), targetValue);
+                                continue;
                             }
-                            continue;
+                            V vo = voList.get(i);
+                            TypeReflector.setProps(vo, linkerNode.getTargetFieldName(), targetValue);
                         }
-                        Object linkEntity = matchEntityList.getFirst();
-                        Object targetValue = linkTableInfo.getPropertyValue(linkEntity, linkerNode.getLinkFieldName());
-                        if (orgTargetField != null) {
-                            tableInfo.setPropertyValue(target, linkerNode.getTargetFieldName(), targetValue);
-                        }
-                        if (entity2VoConverter == null) {
-                            tableInfo.setPropertyValue(record, linkerNode.getTargetFieldName(), targetValue);
-                            continue;
-                        }
-                        V vo = voList.get(i);
-                        TypeReflector.setProps(vo, linkerNode.getTargetFieldName(), targetValue);
                     }
                 }
             }
         }
-        if (entity2VoConverter == null || voList == null) {
+
+        if (voList == null) {
             uniformPage.setList((List<V>) records);
         } else {
             uniformPage.setList(voList);
