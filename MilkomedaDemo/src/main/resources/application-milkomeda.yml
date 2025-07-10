@@ -214,7 +214,7 @@ milkomeda:
     # -- 设置session方式 --
     #stateless: false
     #login-url: ${url.login}
-    #root-redirect: ${url.index}
+    root-redirect: ${url.index}
 
     # 不使用BCrypt（如果用户表有salt字段的情况）
     #use-bcrypt: false
@@ -222,6 +222,7 @@ milkomeda:
     addition-permit-urls:
       - /actuator
       - /actuator/**
+      - /
       - /s_login
       - /verifyCode/render
       - /collect/**

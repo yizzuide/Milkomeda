@@ -43,7 +43,7 @@ public class OrbitProxySource implements OrbitSource {
     @Override
     public List<OrbitAdvisor> createAdvisors(Environment environment) {
         AnnotationOrbitAdvisor advisor = AnnotationOrbitAdvisor.forMethod(OrbitProxy.class, "orbitProxy", OrbitProxyAdvice.class, null);
-        advisor.setOrder(Ordered.LOWEST_PRECEDENCE);
+        advisor.setOrder(Ordered.HIGHEST_PRECEDENCE + 5);
         return Collections.singletonList(advisor);
     }
 }
