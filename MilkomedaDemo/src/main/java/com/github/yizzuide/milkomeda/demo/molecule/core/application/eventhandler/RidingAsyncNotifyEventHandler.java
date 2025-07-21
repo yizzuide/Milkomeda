@@ -1,31 +1,18 @@
-/*
- * Copyright (c) 2025 yizzuide All rights Reserved.
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- */
-
 package com.github.yizzuide.milkomeda.demo.molecule.core.application.eventhandler;
 
 import com.github.yizzuide.milkomeda.demo.molecule.core.domain.event.RidingOrderCreatedEvent;
+import com.github.yizzuide.milkomeda.demo.molecule.core.uinterface.retry.RetryFailedException;
 import com.github.yizzuide.milkomeda.orbit.orbit.OrbitAround;
 import com.github.yizzuide.milkomeda.orbit.orbit.OrbitHandler;
+import com.github.yizzuide.milkomeda.universe.context.AopContextHolder;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.retry.RetryContext;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Recover;
+import org.springframework.retry.annotation.Retryable;
+import org.springframework.retry.support.RetrySynchronizationManager;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Component;
 
 /**
  * 打车事件异步通知处理器
@@ -35,11 +22,36 @@ import org.springframework.scheduling.annotation.Async;
  */
 @Slf4j
 @OrbitHandler
+@Component
 public class RidingAsyncNotifyEventHandler {
 
-    @Async
     @OrbitAround(afterTransactionCommit = true)
     public void handle(RidingOrderCreatedEvent event) {
         log.info("订单异步通知，订单号：{}", event.getOrderNo());
+        AopContextHolder.self(this.getClass()).notifyOrderPayToSource(event.getOrderNo());
+    }
+
+    @Async
+    @Retryable(
+            label = "同步支付通知给来源方",
+            recover = "recoverPush",
+            retryFor = RetryFailedException.class,
+            listeners = "pushRetryListener",
+            maxAttempts = 2,
+            backoff = @Backoff(delay = 2000, multiplier = 1.0)
+    )
+    public void notifyOrderPayToSource(String orderNo) {
+        log.info("同步支付通知给来源方，订单号：{}", orderNo);
+        RetryContext context = RetrySynchronizationManager.getContext();
+        if (context != null) {
+            int retryCount = context.getRetryCount();
+            log.info("重试[{}]次同步支付通知给来源方，订单号：{}", retryCount, orderNo);
+        }
+        throw new RetryFailedException("测试失败", 0, orderNo);
+    }
+
+    @Recover
+    public void recoverPush(RetryFailedException e, String orderNo) {
+        log.info("推送订单[orderNo={}]异常", orderNo);
     }
 }

@@ -45,6 +45,11 @@ public class CrustPermDetails {
     private BiConsumer<CrustUserInfo<CrustEntity, CrustPermission>, List<Long>> rolesCollector;
 
     /**
+     * Fill the parts with the user.
+     */
+    private BiConsumer<CrustUserInfo<CrustEntity, CrustPermission>, List<Long>> partsCollector;
+
+    /**
      * Filter out roles which used to query permissions.
      */
     private Function<List<Long>, List<Long>> rolesFilter;

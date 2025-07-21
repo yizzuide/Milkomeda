@@ -21,6 +21,7 @@
 
 package com.github.yizzuide.milkomeda.crust;
 
+import com.github.yizzuide.milkomeda.util.ReflectUtil;
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.OrderComparator;
 import org.springframework.core.Ordered;
@@ -28,7 +29,11 @@ import org.springframework.lang.NonNull;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
+import java.io.Serializable;
+import java.util.Collection;
 import java.util.List;
+import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -181,7 +186,7 @@ public interface CrustPermission extends Ordered {
                 .map(perm -> {
                     CrustPermission newPerm = null;
                     try {
-                        newPerm = (CrustPermission) permClass.newInstance();
+                        newPerm = (CrustPermission) ReflectUtil.newInstance(permClass);
                     } catch (Exception ignore) {}
                     Assert.notNull(newPerm, "Create instance error with class: " + permClass.getTypeName());
                     BeanUtils.copyProperties(perm, newPerm);
@@ -190,6 +195,23 @@ public interface CrustPermission extends Ordered {
                 .peek(perm -> perm.setChildren(buildPermTree(permissionList, permClass, perm.getId())))
                 .sorted(OrderComparator.INSTANCE.withSourceProvider(p -> p))
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Fill the hanging menu with parent.
+     * @param permissionList    permission list
+     * @param provider          permission source provider
+     * @since 4.0.0
+     */
+    static void fillHangingMenuWithParent(List<CrustPermission> permissionList, Function<Collection<? extends Serializable>, List<? extends CrustPermission>> provider) {
+        List<CrustPermission> menus =  permissionList.stream()
+                .filter(perm -> perm.getParentId() != 0 && perm.getType() == 1 &&
+                        permissionList.stream().noneMatch(p -> p.getId().equals(perm.getParentId()))).toList();
+        if (!menus.isEmpty()) {
+            Set<Long> parentIds = menus.stream().map(CrustPermission::getParentId).collect(Collectors.toSet());
+            List<? extends CrustPermission> parentPerms = provider.apply(parentIds);
+            permissionList.addAll(parentPerms);
+        }
     }
 
     /**

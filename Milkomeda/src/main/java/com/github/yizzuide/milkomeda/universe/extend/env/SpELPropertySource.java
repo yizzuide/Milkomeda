@@ -31,6 +31,7 @@ import org.springframework.util.StringUtils;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 /**
  * Supported SpEL to YML value parse with PropertySource.
@@ -52,6 +53,8 @@ public class SpELPropertySource extends PropertySource<Object> {
     public static final Map<String, Class<?>> TYPE_MAP = new HashMap<>();
 
     private static Object ROOT;
+
+    private static final Pattern TYPE_PATTERN = Pattern.compile(".*,\\s*\\b(INT|LONG|BOOL|STRING|DATE|OBJECT)\\s*$");
 
     public SpELPropertySource(Object root) {
         super(EL_PROPERTY_SOURCE_NAME);
@@ -87,8 +90,9 @@ public class SpELPropertySource extends PropertySource<Object> {
             if (condition == null) {
                 return null;
             }
-            if (condition.contains(",")) {
-                String[] parts = condition.split(",");
+
+            if (TYPE_PATTERN.matcher(condition).matches()) {
+                String[] parts = condition.split(",(?=[^,]*$)", 2);
                 String typeKey = parts[1].trim().toUpperCase();
                 if (StringUtils.hasText(typeKey)) {
                     type = TYPE_MAP.get(typeKey);

@@ -16,6 +16,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.env.PropertySource;
+import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
@@ -36,6 +37,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 // 总结：在Spring Boot 2.0不添加@EnableWebMvc，会配置的更多更全面，拥有添加@EnableWebMvc的所有配置
 // Spring Boot 2.3: 不支持@Profile("dev,test")，它将识别为单个字符串：dev,test
 @Profile({"dev", "test"})
+@EnableRetry
 @Configuration
 @Slf4j
 public class WebMvcConfig implements WebMvcConfigurer, SmartLifecycle {

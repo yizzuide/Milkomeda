@@ -220,6 +220,7 @@ public final class SpringContext {
                 }
                 HandlerMetaData metaData = new HandlerMetaData();
                 metaData.setTarget(target);
+                metaData.setAnnotation(executeAnnotation);
                 if (wrapMethods == null) {
                     metaData.setMethod(method);
                 } else {

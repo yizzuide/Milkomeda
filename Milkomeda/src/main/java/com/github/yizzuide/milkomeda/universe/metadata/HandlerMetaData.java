@@ -25,6 +25,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Map;
 
@@ -50,6 +51,10 @@ public class HandlerMetaData {
      * 其它属性方法值
      */
     private Map<String, Object> attributes;
+    /**
+     * 注解实例
+     */
+    private Annotation annotation;
     /**
      * 处理目标对象
      */

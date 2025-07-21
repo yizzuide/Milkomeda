@@ -58,7 +58,6 @@ import static com.github.yizzuide.milkomeda.particle.ParticleProperties.Limiter.
  * <br>
  * Create at 2020/04/08 11:41
  */
-@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 public class ParticleFilter implements Filter {
 
     @Autowired
@@ -75,6 +74,10 @@ public class ParticleFilter implements Filter {
 
     @PostConstruct
     public void init() {
+        if (!particleProperties.isEnableFilter()) {
+            skip = true;
+            return;
+        }
         List<ParticleProperties.Limiter> limiters = particleProperties.getLimiters();
         if (CollectionUtils.isEmpty(limiters)) {
             skip = true;

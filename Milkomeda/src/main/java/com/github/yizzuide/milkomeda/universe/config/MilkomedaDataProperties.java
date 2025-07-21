@@ -63,10 +63,16 @@ public class MilkomedaDataProperties {
         private Duration scanInterval = Duration.ofMillis(2000);
 
         /**
-         * 空闲连接超时时间（默认为10s）
+         * 空闲连接超时时间（默认为30s）
          * @since 4.0.0
          */
         @DurationUnit(ChronoUnit.MILLIS)
-        private Duration idleConnectionTimeout = Duration.ofMillis(10000);
+        private Duration idleConnectionTimeout = Duration.ofMillis(30000);
+
+        /**
+         * 命令测试时间（默认为10s）
+         * @since 4.0.0
+         */
+        private Duration pingConnectionInterval = Duration.ofMillis(10000);
     }
 }

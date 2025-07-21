@@ -61,6 +61,9 @@ public abstract class CrustUserDetailsService implements UserDetailsService {
             if (!CollectionUtils.isEmpty(crustPerm.getRoleIds())) {
                 userInfo.setRoleIds(crustPerm.getRoleIds());
             }
+            if (!CollectionUtils.isEmpty(crustPerm.getPartIds())) {
+                userInfo.setPartIds(crustPerm.getPartIds());
+            }
             List<CrustPermission> permissionList = crustPerm.getPermissionList();
             userInfo.setPermissionList(permissionList);
             grantedAuthorities = CrustPerm.buildAuthorities(permissionList);
@@ -92,11 +95,16 @@ public abstract class CrustUserDetailsService implements UserDetailsService {
             roleIds = new ArrayList<>();
             crustPermDetails.getRolesCollector().accept(userInfo, roleIds);
         }
+        List<Long> partIds = userInfo.getPartIds();
+        if (CollectionUtils.isEmpty(partIds)) {
+            partIds = new ArrayList<>();
+            crustPermDetails.getPartsCollector().accept(userInfo, partIds);
+        }
         List<Long> sysRoleIds = crustPermDetails.getRolesFilter() != null ?
                 crustPermDetails.getRolesFilter().apply(roleIds) : roleIds;
         boolean isAdmin = crustPermDetails.getAdminRecognizer().apply(sysRoleIds);
         List<? extends CrustPermission> permissions = crustPermDetails.getPermsCollector().apply(sysRoleIds, isAdmin);
-        return CrustPerm.builder().roleIds(roleIds).admin(isAdmin).permissionList(permissions).build();
+        return CrustPerm.builder().admin(isAdmin).roleIds(roleIds).partIds(partIds).permissionList(permissions).build();
     }
 
     /**

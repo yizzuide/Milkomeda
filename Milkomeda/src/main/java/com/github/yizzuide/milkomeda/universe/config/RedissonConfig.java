@@ -30,6 +30,8 @@ import org.redisson.config.Config;
 import org.redisson.config.SingleServerConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
 import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
@@ -57,6 +59,8 @@ public class RedissonConfig {
     private MilkomedaDataProperties dataProperties;
 
     @Bean(destroyMethod = "shutdown")
+    @ConditionalOnClass(RedissonClient.class)
+    @ConditionalOnMissingClass("org.redisson.spring.starter.RedissonAutoConfiguration")
     @ConditionalOnProperty(prefix = "milkomeda.data.redisson", name = "use-cluster", havingValue = "false", matchIfMissing = true)
     public RedissonClient redissonClient() {
         Config config = new Config();
@@ -66,13 +70,21 @@ public class RedissonConfig {
                 .setAddress(redisUrl)
                 .setPassword(redisProperties.getPassword())
                 .setDatabase(redisProperties.getDatabase());
+        if (redisProperties.getConnectTimeout() != null) {
+            singleServerConfig.setConnectTimeout((int) redisProperties.getConnectTimeout().toMillis());
+        }
         if (redisProperties.getTimeout() != null) {
             singleServerConfig.setTimeout((int) redisProperties.getTimeout().toMillis());
+        }
+        if (dataProperties.getRedisson().getPingConnectionInterval() != null) {
+            singleServerConfig.setPingConnectionInterval((int) dataProperties.getRedisson().getPingConnectionInterval().toMillis());
         }
         return Redisson.create(config);
     }
 
     @Bean(destroyMethod = "shutdown")
+    @ConditionalOnClass(RedissonClient.class)
+    @ConditionalOnMissingClass("org.redisson.spring.starter.RedissonAutoConfiguration")
     @ConditionalOnProperty(prefix = "milkomeda.data.redisson", name = "use-cluster", havingValue = "true")
     @Conditional(RedisClusterConditional.class)
     public RedissonClient clusterRedissonClient() {
@@ -95,6 +107,7 @@ public class RedissonConfig {
         clusterServersConfig.setScanInterval((int) dataProperties.getRedisson().getScanInterval().toMillis());
         // 空闲连接超时时间
         clusterServersConfig.setIdleConnectionTimeout((int) dataProperties.getRedisson().getIdleConnectionTimeout().toMillis());
+        clusterServersConfig.setPingConnectionInterval((int) dataProperties.getRedisson().getPingConnectionInterval().toMillis());
         return Redisson.create(config);
     }
 }

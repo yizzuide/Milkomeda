@@ -124,6 +124,19 @@ public class IdGenerator {
     }
 
     /**
+     * Generate 20-bit ID
+     * @return  ID
+     */
+    public static String genNext20ID() {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+        String dateStr = sdf.format(new Date());
+        String unixTime = String.valueOf(System.currentTimeMillis() / 1000);
+        String second = unixTime.substring(unixTime.length() - 6);
+        String randNum = RandomStringUtils.randomNumeric(6);
+        return String.format("%s%s%s", dateStr, second, randNum);
+    }
+
+    /**
      * Generate sequence ID
      * @param seq  sequence
      * @return  ID

@@ -86,6 +86,11 @@ public class CrustUserInfo<T, P> implements Serializable {
     private List<Long> roleIds;
 
     /**
+     * 数据分区id列表
+     */
+    private List<Long> partIds;
+
+    /**
      * 权限列表
      * @since 3.14.0
      */

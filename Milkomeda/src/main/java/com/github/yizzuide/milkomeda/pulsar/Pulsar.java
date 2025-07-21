@@ -166,12 +166,25 @@ public class Pulsar implements ApplicationListener<ApplicationStartedEvent> {
      * 提交一个延迟任务
      *
      * @param runnable      可运行任务
-     * @param milliseconds  延迟 ms
+     * @param milliseconds  延迟毫秒数
      * @return  Timeout
      * @since 4.0.0
      */
     public Timeout delay(Runnable runnable, long milliseconds) {
-        return PulsarHolder.hashedWheelTimer.newTimeout(timeout -> post(runnable), milliseconds, TimeUnit.MILLISECONDS);
+        return delay(runnable, milliseconds, TimeUnit.MILLISECONDS);
+    }
+
+    /**
+     * 提交一个延迟任务
+     *
+     * @param runnable      可运行任务
+     * @param delay         延迟时间
+     * @param timeUnit      时间单位
+     * @return  Timeout
+     * @since 4.0.0
+     */
+    public Timeout delay(Runnable runnable, long delay, TimeUnit timeUnit) {
+        return PulsarHolder.hashedWheelTimer.newTimeout(timeout -> post(runnable), delay, timeUnit);
     }
 
     /**

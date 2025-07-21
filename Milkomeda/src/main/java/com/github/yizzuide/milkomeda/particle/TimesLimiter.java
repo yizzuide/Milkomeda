@@ -59,6 +59,11 @@ public class TimesLimiter extends LimitHandler implements LuaLoader {
     private TimesType timesType;
 
     /**
+     * 限制时间系数
+     */
+    private Long timesFactor = 1L;
+
+    /**
      * 限制次数
      */
     @Getter
@@ -89,16 +94,16 @@ public class TimesLimiter extends LimitHandler implements LuaLoader {
         long expireSeconds;
         switch (timesType) {
             case SEC:
-                expireSeconds = 1;
+                expireSeconds = timesFactor;
                 break;
             case MIN:
-                expireSeconds = Duration.ofMinutes(1).getSeconds();
+                expireSeconds = Duration.ofMinutes(timesFactor).getSeconds();
                 break;
             case HOUR:
-                expireSeconds = Duration.ofHours(1).getSeconds();
+                expireSeconds = Duration.ofHours(timesFactor).getSeconds();
                 break;
             case DAY:
-                expireSeconds = Duration.ofDays(1).getSeconds();
+                expireSeconds = Duration.ofDays(timesFactor).getSeconds();
                 break;
             default:
                 throw new IllegalStateException("Unexpected value: " + timesType);

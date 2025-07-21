@@ -61,6 +61,11 @@ public class CrustPerm implements Serializable {
     private List<Long> roleIds;
 
     /**
+     * 数据分区id列表
+     */
+    private List<Long> partIds;
+
+    /**
      * 权限列表
      * @since 3.14.0
      */
@@ -85,6 +90,11 @@ public class CrustPerm implements Serializable {
 
         public Builder roleIds(List<Long> roleIds) {
             this.crustPerm.setRoleIds(roleIds);
+            return this;
+        }
+
+        public Builder partIds(List<Long> partIds) {
+            this.crustPerm.setPartIds(partIds);
             return this;
         }
 

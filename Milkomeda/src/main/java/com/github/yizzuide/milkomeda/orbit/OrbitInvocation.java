@@ -24,6 +24,7 @@ package com.github.yizzuide.milkomeda.orbit;
 import com.github.yizzuide.milkomeda.universe.context.AopContextHolder;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
 import org.aspectj.lang.ProceedingJoinPoint;
 
 import java.lang.reflect.Method;
@@ -65,6 +66,12 @@ public class OrbitInvocation {
      * 调用参数
      */
     private Object[] args;
+
+    /**
+     * 附件信息
+     */
+    @Setter
+    private Object attachment;
 
     /**
      * 获取被代理的目标对象（支持非当前代理目标类）

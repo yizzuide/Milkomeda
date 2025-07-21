@@ -106,8 +106,9 @@ public class CometParamResolver implements HandlerMethodArgumentResolver {
         // 检测是否需要验签
         if (cometParam != null && cometParam.decrypt() != CometParamDecrypt.class &&
                 CometParamDecrypt.class.isAssignableFrom(cometParam.decrypt())) {
+            Map<String, Object> map = JSONUtil.parseMap(params, String.class, Object.class);
             CometParamDecrypt cometParamDecrypt = ApplicationContextHolder.get().getBean(cometParam.decrypt());
-            cometParamDecrypt.decrypt(WebContext.getRequest(), params, null);
+            cometParamDecrypt.decrypt(WebContext.getRequest(), params, map);
         }
         // custom object
         Object commandParam = JSONUtil.parse(params, parameterType);
