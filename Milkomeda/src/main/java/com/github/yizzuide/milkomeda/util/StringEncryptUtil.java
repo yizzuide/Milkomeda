@@ -19,31 +19,33 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.molecule;
+package com.github.yizzuide.milkomeda.util;
 
-import lombok.Data;
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.util.StringUtils;
 
 /**
- * Molecule config properties.
+ * 字符串编码工具类
  *
  * @since 4.0.0
  * @author yizzuide
- * Create at 2025/07/07 23:49
+ * Create at 2025/07/24 17:21
  */
-@Data
-@ConfigurationProperties(prefix = MoleculeProperties.PREFIX)
-public class MoleculeProperties {
-
-    public static final String PREFIX = "milkomeda.molecule";
-
+public class StringEncryptUtil {
     /**
-     * Enable molecule module.
+     * 字符串脱敏
+     * @param str       原字符串
+     * @param maskChar  脱敏符号
+     * @return  脱敏后的字符串
      */
-    private boolean enable = true;
-
-    /**
-     * Enable sync read model before transaction commit (must set true if application service invoke in transactional).
-     */
-    private boolean syncReadModelBeforeTransactionCommit = true;
+    public static String masking(String str, String maskChar) {
+        if (StringUtils.hasLength(str)) {
+            if (str.length() <= 3) {
+                return maskChar.repeat(str.length());
+            }
+            // 大于3时，对中间部分进行隐藏
+            return str.charAt(0) + maskChar.repeat(str.length() - 2) + str.substring(str.length() - 1);
+        } else {
+            return str;
+        }
+    }
 }

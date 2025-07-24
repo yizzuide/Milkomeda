@@ -521,14 +521,14 @@ milkomeda:
 
   molecule:
     event-sourcing:
-      enabled: true
+      enable: true
       service-name: ${spring.application.name}
       datasource-prefix: milkomeda.sundial.instances.pg
       aggregate-package: com.github.yizzuide.milkomeda.demo.molecule.eventsourcing.domain.aggregate
       event-package: com.github.yizzuide.milkomeda.demo.molecule.eventsourcing.domain.event
       snapshotting:
         ORDER:
-          enabled: true
+          enable: true
           nth-event: 3
       subscription-type: postgres_channel
 

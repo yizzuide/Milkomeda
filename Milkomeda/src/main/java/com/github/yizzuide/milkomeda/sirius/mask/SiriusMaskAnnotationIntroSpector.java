@@ -19,31 +19,38 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.molecule;
+package com.github.yizzuide.milkomeda.sirius.mask;
 
-import lombok.Data;
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.introspect.Annotated;
+import com.fasterxml.jackson.databind.introspect.NopAnnotationIntrospector;
+
+import java.io.Serial;
 
 /**
- * Molecule config properties.
+ * Sensitive field masking annotation introspect with {@link ObjectMapper}.
  *
  * @since 4.0.0
  * @author yizzuide
- * Create at 2025/07/07 23:49
+ * Create at 2025/07/24 17:17
  */
-@Data
-@ConfigurationProperties(prefix = MoleculeProperties.PREFIX)
-public class MoleculeProperties {
+public class SiriusMaskAnnotationIntroSpector extends NopAnnotationIntrospector {
 
-    public static final String PREFIX = "milkomeda.molecule";
+    @Serial
+    private static final long serialVersionUID = 7753413878742607521L;
 
-    /**
-     * Enable molecule module.
-     */
-    private boolean enable = true;
+    private final String maskChar;
 
-    /**
-     * Enable sync read model before transaction commit (must set true if application service invoke in transactional).
-     */
-    private boolean syncReadModelBeforeTransactionCommit = true;
+    public SiriusMaskAnnotationIntroSpector(String maskChar) {
+        this.maskChar = maskChar;
+    }
+
+    @Override
+    public Object findSerializer(Annotated am) {
+        MaskField annotation = am.getAnnotation(MaskField.class);
+        if (annotation != null) {
+            return new SiriusMaskingSerializer(this.maskChar);
+        }
+        return null;
+    }
 }

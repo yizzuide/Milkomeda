@@ -13,13 +13,13 @@
         <maven.compiler.release>21</maven.compiler.release>
         <java.version>21</java.version>
         <kotlin.version>1.9.21</kotlin.version>
-        <project.release.version>4.0.11</project.release.version>
+        <project.release.version>4.0.12</project.release.version>
         <spring-boot.version>3.2.12</spring-boot.version>
         <spring-cloud.version>2023.0.0</spring-cloud.version>
         <mybatis.starter.version>3.0.3</mybatis.starter.version>
         <mybatis-plus.version>3.5.5</mybatis-plus.version>
         <pagehelper.version>1.4.7</pagehelper.version>
-        <knife4j.version>4.4.0</knife4j.version>
+        <knife4j.version>4.5.0</knife4j.version>
         <redission.version>3.25.2</redission.version>
         <jetcd.version>0.7.7</jetcd.version>
         <disruptor.version>3.4.4</disruptor.version>

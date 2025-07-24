@@ -19,31 +19,39 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.molecule;
+package com.github.yizzuide.milkomeda.sirius.mask;
 
-import lombok.Data;
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.ser.std.StdScalarSerializer;
+import com.github.yizzuide.milkomeda.util.StringEncryptUtil;
+
+import java.io.IOException;
+import java.io.Serial;
 
 /**
- * Molecule config properties.
+ * Sensitive field masking serializer with {@link ObjectMapper}.
  *
  * @since 4.0.0
  * @author yizzuide
- * Create at 2025/07/07 23:49
+ * Create at 2025/07/24 17:17
  */
-@Data
-@ConfigurationProperties(prefix = MoleculeProperties.PREFIX)
-public class MoleculeProperties {
+public class SiriusMaskingSerializer extends StdScalarSerializer<String> {
 
-    public static final String PREFIX = "milkomeda.molecule";
+    @Serial
+    private static final long serialVersionUID = -608448089382850986L;
 
-    /**
-     * Enable molecule module.
-     */
-    private boolean enable = true;
+    private final String maskChar;
 
-    /**
-     * Enable sync read model before transaction commit (must set true if application service invoke in transactional).
-     */
-    private boolean syncReadModelBeforeTransactionCommit = true;
+    public SiriusMaskingSerializer(String maskChar) {
+        super(String.class, false);
+        this.maskChar = maskChar;
+    }
+
+    @Override
+    public void serialize(String value, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
+        String content = StringEncryptUtil.masking(value, this.maskChar);
+        jsonGenerator.writeString(content);
+    }
 }

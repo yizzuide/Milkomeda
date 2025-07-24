@@ -59,7 +59,7 @@ public class EventSourcingProperties {
     /**
      * Enable event sourcing.
      */
-    private Boolean enabled = false;
+    private boolean enable = false;
 
     /**
      * Set service name when used {@link SubscriptionType#POSTGRES_CHANNEL}.
@@ -116,7 +116,7 @@ public class EventSourcingProperties {
         /**
          * Enable snapshotting.
          */
-        private boolean enabled;
+        private boolean enable;
 
         /**
          * Save a snapshot after nth events

@@ -19,31 +19,21 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.molecule;
+package com.github.yizzuide.milkomeda.sirius.mask;
 
-import lombok.Data;
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * Molecule config properties.
+ * Sensitive field masking annotation.
  *
- * @since 4.0.0
+ * @version 4.0.0
  * @author yizzuide
- * Create at 2025/07/07 23:49
+ * Create at 2025/07/24 13:48
  */
-@Data
-@ConfigurationProperties(prefix = MoleculeProperties.PREFIX)
-public class MoleculeProperties {
-
-    public static final String PREFIX = "milkomeda.molecule";
-
-    /**
-     * Enable molecule module.
-     */
-    private boolean enable = true;
-
-    /**
-     * Enable sync read model before transaction commit (must set true if application service invoke in transactional).
-     */
-    private boolean syncReadModelBeforeTransactionCommit = true;
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.FIELD, ElementType.METHOD})
+public @interface MaskField {
 }

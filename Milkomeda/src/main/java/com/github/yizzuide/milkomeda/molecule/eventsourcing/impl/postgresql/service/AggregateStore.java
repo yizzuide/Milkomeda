@@ -98,7 +98,7 @@ public class AggregateStore implements IAggregateStore {
 
     private void createAggregateSnapshot(EventSourcingProperties.Snapshotting snapshotting,
                                          Aggregate aggregate) {
-        if (snapshotting.isEnabled() && aggregate.getVersion() % snapshotting.getNthEvent() == 0) {
+        if (snapshotting.isEnable() && aggregate.getVersion() % snapshotting.getNthEvent() == 0) {
             log.info("Creating {} aggregate {} version {} snapshot",
                     MoleculeContext.getAggregateTypeByClass(aggregate.getClass()), aggregate.getAggregateId(), aggregate.getVersion());
             aggregateRepository.createAggregateSnapshot(aggregate);
@@ -116,7 +116,7 @@ public class AggregateStore implements IAggregateStore {
         log.debug("Reading {} aggregate {}", aggregateType, aggregateId);
         EventSourcingProperties.Snapshotting snapshotting = properties.getSnapshotting(aggregateType);
         Aggregate aggregate;
-        if (snapshotting.isEnabled()) {
+        if (snapshotting.isEnable()) {
             aggregate = readAggregateFromSnapshot(aggregateId, version)
                     .orElseGet(() -> {
                         log.debug("Aggregate {} snapshot not found", aggregateId);

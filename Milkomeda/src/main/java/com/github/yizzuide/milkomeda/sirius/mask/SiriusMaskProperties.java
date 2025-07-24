@@ -19,31 +19,27 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.molecule;
+package com.github.yizzuide.milkomeda.sirius.mask;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
- * Molecule config properties.
+ * Sensitive field masking properties.
  *
  * @since 4.0.0
  * @author yizzuide
- * Create at 2025/07/07 23:49
+ * Create at 2025/07/24 13:40
  */
 @Data
-@ConfigurationProperties(prefix = MoleculeProperties.PREFIX)
-public class MoleculeProperties {
+@ConfigurationProperties(prefix = SiriusMaskProperties.PREFIX)
+public class SiriusMaskProperties {
 
-    public static final String PREFIX = "milkomeda.molecule";
+    public static final String PREFIX = "milkomeda.sirius.mask";
 
-    /**
-     * Enable molecule module.
-     */
-    private boolean enable = true;
+    static final String DEFAULT_MASK_CHAR = "*";
 
-    /**
-     * Enable sync read model before transaction commit (must set true if application service invoke in transactional).
-     */
-    private boolean syncReadModelBeforeTransactionCommit = true;
+    private boolean enable = false;
+
+    private String maskChar = DEFAULT_MASK_CHAR;
 }

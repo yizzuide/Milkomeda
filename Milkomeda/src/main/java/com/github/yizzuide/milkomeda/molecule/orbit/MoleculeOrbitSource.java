@@ -48,7 +48,7 @@ public class MoleculeOrbitSource implements OrbitSource {
     public List<OrbitAdvisor> createAdvisors(Environment environment) {
         int ordered = Ordered.HIGHEST_PRECEDENCE + 6;
         BindResult<MoleculeProperties> bindResult = Binder.get(environment).bind(MoleculeProperties.PREFIX, MoleculeProperties.class);
-        if (bindResult.isBound() && !bindResult.get().getSyncReadModelBeforeTransactionCommit()) {
+        if (bindResult.isBound() && !bindResult.get().isSyncReadModelBeforeTransactionCommit()) {
             ordered = Ordered.LOWEST_PRECEDENCE;
         }
         AnnotationOrbitAdvisor advisor = AnnotationOrbitAdvisor.forMethod(DomainEventsDefer.class, "molecule", MoleculeAdvice.class, null);

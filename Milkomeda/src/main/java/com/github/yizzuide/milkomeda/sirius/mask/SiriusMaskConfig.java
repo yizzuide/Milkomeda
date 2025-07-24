@@ -19,46 +19,45 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.molecule;
+package com.github.yizzuide.milkomeda.sirius.mask;
 
-import com.github.yizzuide.milkomeda.molecule.core.event.DomainEventBus;
-import com.github.yizzuide.milkomeda.molecule.core.event.DomainEventPublisher;
-import com.github.yizzuide.milkomeda.molecule.core.event.SpringApplicationDomainEventPublisher;
-import com.github.yizzuide.milkomeda.molecule.core.eventhandler.DefaultEventHandler;
-import com.github.yizzuide.milkomeda.orbit.OrbitConfig;
+import com.fasterxml.jackson.databind.AnnotationIntrospector;
+import com.fasterxml.jackson.databind.introspect.AnnotationIntrospectorPair;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
+
+import java.util.List;
 
 /**
- * Molecule module configuration.
+ * Sensitive field masking config.
  *
- * @since 4.0.0
+ * @version 4.0.0
  * @author yizzuide
- * Create at 2025/06/09 16:47
+ * Create at 2025/07/24 13:42
  */
-@Import(OrbitConfig.class)
-@EnableConfigurationProperties(MoleculeProperties.class)
-@ConditionalOnProperty(prefix = MoleculeProperties.PREFIX, name = "enable", havingValue = "true", matchIfMissing = true)
-@Configuration
-public class MoleculeConfig {
+@ConditionalOnProperty(prefix = SiriusMaskProperties.PREFIX, name = "enable", havingValue = "true")
+@EnableConfigurationProperties(SiriusMaskProperties.class)
+@Configuration(proxyBeanMethods = false)
+public class SiriusMaskConfig {
+
+    @Autowired(required = false)
+    private List<MaskFilter> maskFilters;
 
     @Bean
-    public DomainEventPublisher domainEventPublisher() {
-        return new SpringApplicationDomainEventPublisher();
+    public SiriusMaskInterceptor siriusMaskInterceptor(SiriusMaskProperties maskProperties) {
+        return new SiriusMaskInterceptor(maskProperties, maskFilters);
     }
 
     @Bean
-    public DomainEventBus domainEventBus(DomainEventPublisher domainEventPublisher) {
-        DomainEventBus domainEventBus = new DomainEventBus(domainEventPublisher);
-        MoleculeContext.setDomainEventBus(domainEventBus);
-        return domainEventBus;
-    }
-
-    @Bean
-    public DefaultEventHandler defaultEventHandler() {
-        return new DefaultEventHandler();
+    public Jackson2ObjectMapperBuilderCustomizer maskingObjectMapperCustomizer(SiriusMaskProperties maskProperties) {
+        return (builder) -> builder.postConfigurer((objectMapper) -> {
+            AnnotationIntrospector annoIntro = objectMapper.getSerializationConfig().getAnnotationIntrospector();
+            AnnotationIntrospector maskAnnoIntro = AnnotationIntrospectorPair.pair(annoIntro, new SiriusMaskAnnotationIntroSpector(maskProperties.getMaskChar()));
+            objectMapper.setAnnotationIntrospector(maskAnnoIntro);
+        });
     }
 }

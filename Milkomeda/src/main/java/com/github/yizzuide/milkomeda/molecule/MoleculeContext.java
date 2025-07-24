@@ -118,7 +118,7 @@ public class MoleculeContext {
 
     public static void loadAggregatesAndEvents(ConfigurableEnvironment environment) {
         EventSourcingProperties properties =  Binder.get(environment).bind(EventSourcingProperties.PREFIX, EventSourcingProperties.class).orElseGet(EventSourcingProperties::new);
-        if (properties == null || !properties.getEnabled()) {
+        if (properties == null || !properties.isEnable()) {
             return;
         }
         Set<Class<Aggregate>> aggClasses = SpringContext.loadClassFromBasePackage(properties.getAggregatePackage(), Aggregate.class);

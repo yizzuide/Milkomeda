@@ -21,17 +21,18 @@
 
 package com.github.yizzuide.milkomeda.comet.core;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.yizzuide.milkomeda.universe.context.WebContext;
 import com.github.yizzuide.milkomeda.universe.extend.web.handler.HotHttpHandlerProperty;
 import com.github.yizzuide.milkomeda.universe.extend.web.handler.NamedHandler;
-import com.github.yizzuide.milkomeda.util.JSONUtil;
+import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.FastByteArrayOutputStream;
 
-import jakarta.servlet.http.HttpServletResponse;
 import java.nio.charset.StandardCharsets;
 
 /**
@@ -52,6 +53,9 @@ public abstract class AbstractResponseInterceptor implements CometResponseInterc
     @Autowired
     private CometProperties cometProperties;
 
+    @Resource
+    private ObjectMapper jacksonObjectMapper;
+
     @Override
     public boolean writeToResponse(FastByteArrayOutputStream outputStream, HttpServletResponse wrapperResponse, HttpServletResponse rawResponse, Object body) {
         HotHttpHandlerProperty responseInterceptor = cometProperties.getResponseInterceptors().get(handlerName());
@@ -63,7 +67,7 @@ public abstract class AbstractResponseInterceptor implements CometResponseInterc
             if (result == null) {
                 return false;
             }
-            String content = JSONUtil.serialize(result);
+            String content = jacksonObjectMapper.writeValueAsString(result);
             // reset content and length
             byte[] bytes = content.getBytes(StandardCharsets.UTF_8);
             wrapperResponse.resetBuffer();

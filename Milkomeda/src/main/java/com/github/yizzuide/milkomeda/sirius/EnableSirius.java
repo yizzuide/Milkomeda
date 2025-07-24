@@ -21,6 +21,7 @@
 
 package com.github.yizzuide.milkomeda.sirius;
 
+import com.github.yizzuide.milkomeda.sirius.mask.SiriusMaskConfig;
 import org.springframework.context.annotation.Import;
 
 import java.lang.annotation.*;
@@ -33,7 +34,7 @@ import java.lang.annotation.*;
  * <br>
  * Create at 2022/10/30 17:45
  */
-@Import(SiriusConfig.class)
+@Import({SiriusConfig.class, SiriusMaskConfig.class})
 @Inherited
 @Documented
 @Retention(RetentionPolicy.RUNTIME)

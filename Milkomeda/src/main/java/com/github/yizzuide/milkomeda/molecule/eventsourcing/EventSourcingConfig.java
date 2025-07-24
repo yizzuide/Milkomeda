@@ -54,7 +54,7 @@ import java.util.List;
  * @author yizzuide
  * Create at 2025/06/10 16:16
  */
-@ConditionalOnProperty(prefix = EventSourcingProperties.PREFIX, name = "enabled", havingValue = "true")
+@ConditionalOnProperty(prefix = EventSourcingProperties.PREFIX, name = "enable", havingValue = "true")
 @EnableConfigurationProperties(EventSourcingProperties.class)
 @Import(PulsarConfig.class)
 @Configuration(proxyBeanMethods = false)
