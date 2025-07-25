@@ -56,7 +56,7 @@ public class SiriusMaskConfig {
     public Jackson2ObjectMapperBuilderCustomizer maskingObjectMapperCustomizer(SiriusMaskProperties maskProperties) {
         return (builder) -> builder.postConfigurer((objectMapper) -> {
             AnnotationIntrospector annoIntro = objectMapper.getSerializationConfig().getAnnotationIntrospector();
-            AnnotationIntrospector maskAnnoIntro = AnnotationIntrospectorPair.pair(annoIntro, new SiriusMaskAnnotationIntroSpector(maskProperties.getMaskChar()));
+            AnnotationIntrospector maskAnnoIntro = AnnotationIntrospectorPair.pair(annoIntro, new SiriusMaskAnnotationIntrospector(maskProperties.getMaskChar(), maskFilters));
             objectMapper.setAnnotationIntrospector(maskAnnoIntro);
         });
     }

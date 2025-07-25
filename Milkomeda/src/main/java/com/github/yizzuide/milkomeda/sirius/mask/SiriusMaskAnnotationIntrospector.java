@@ -26,6 +26,7 @@ import com.fasterxml.jackson.databind.introspect.Annotated;
 import com.fasterxml.jackson.databind.introspect.NopAnnotationIntrospector;
 
 import java.io.Serial;
+import java.util.List;
 
 /**
  * Sensitive field masking annotation introspect with {@link ObjectMapper}.
@@ -34,21 +35,36 @@ import java.io.Serial;
  * @author yizzuide
  * Create at 2025/07/24 17:17
  */
-public class SiriusMaskAnnotationIntroSpector extends NopAnnotationIntrospector {
+public class SiriusMaskAnnotationIntrospector extends NopAnnotationIntrospector {
 
     @Serial
     private static final long serialVersionUID = 7753413878742607521L;
 
     private final String maskChar;
 
-    public SiriusMaskAnnotationIntroSpector(String maskChar) {
+    private final List<MaskFilter> maskFilters;
+
+    public SiriusMaskAnnotationIntrospector(String maskChar, List<MaskFilter> maskFilters) {
         this.maskChar = maskChar;
+        this.maskFilters = maskFilters;
     }
 
     @Override
     public Object findSerializer(Annotated am) {
         MaskField annotation = am.getAnnotation(MaskField.class);
         if (annotation != null) {
+            if (maskFilters != null) {
+                boolean useMask = false;
+                for (MaskFilter maskFilter : maskFilters) {
+                    if (!maskFilter.filter(am)) {
+                        useMask = true;
+                        break;
+                    }
+                }
+                if (!useMask) {
+                    return null;
+                }
+            }
             return new SiriusMaskingSerializer(this.maskChar);
         }
         return null;

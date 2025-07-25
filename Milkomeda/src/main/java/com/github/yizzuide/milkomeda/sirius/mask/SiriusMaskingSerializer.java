@@ -51,6 +51,12 @@ public class SiriusMaskingSerializer extends StdScalarSerializer<String> {
 
     @Override
     public void serialize(String value, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
+        if (value == null) {
+            return;
+        }
+        if (value.contains(this.maskChar.repeat(2))) {
+            jsonGenerator.writeString(value);
+        }
         String content = StringEncryptUtil.masking(value, this.maskChar);
         jsonGenerator.writeString(content);
     }
