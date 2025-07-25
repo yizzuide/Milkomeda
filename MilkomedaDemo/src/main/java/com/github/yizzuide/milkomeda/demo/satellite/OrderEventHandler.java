@@ -19,31 +19,24 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.sirius.mask;
+package com.github.yizzuide.milkomeda.demo.satellite;
 
-import lombok.Data;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-
-import java.util.List;
+import com.github.yizzuide.milkomeda.satellite.RedisMessageHandler;
+import com.github.yizzuide.milkomeda.satellite.RedisMessageListener;
+import lombok.extern.slf4j.Slf4j;
 
 /**
- * Sensitive field masking properties.
+ * OrderEventHandler
  *
- * @since 4.0.0
  * @author yizzuide
- * Create at 2025/07/24 13:40
+ * Create at 2025/07/25 16:35
  */
-@Data
-@ConfigurationProperties(prefix = SiriusMaskProperties.PREFIX)
-public class SiriusMaskProperties {
+@Slf4j
+@RedisMessageHandler
+public class OrderEventHandler {
 
-    public static final String PREFIX = "milkomeda.sirius.mask";
-
-    static final String DEFAULT_MASK_CHAR = "*";
-
-    private boolean enable = false;
-
-    private String maskChar = DEFAULT_MASK_CHAR;
-
-    private List<String> maskFields;
+    @RedisMessageListener(topic = "order—event", batchSize = 10)
+    public void onMessage(String data) {
+       log.info("Redis消费端接收到消息: {}" , data);
+    }
 }

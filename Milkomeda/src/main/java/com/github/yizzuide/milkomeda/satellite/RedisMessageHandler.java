@@ -19,31 +19,22 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.sirius.mask;
+package com.github.yizzuide.milkomeda.satellite;
 
-import lombok.Data;
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
 
-import java.util.List;
+import java.lang.annotation.*;
 
 /**
- * Sensitive field masking properties.
+ * Redis message handler annotation which extends {@link Component}.
  *
  * @since 4.0.0
  * @author yizzuide
- * Create at 2025/07/24 13:40
+ * Create at 2025/07/16 13:43
  */
-@Data
-@ConfigurationProperties(prefix = SiriusMaskProperties.PREFIX)
-public class SiriusMaskProperties {
-
-    public static final String PREFIX = "milkomeda.sirius.mask";
-
-    static final String DEFAULT_MASK_CHAR = "*";
-
-    private boolean enable = false;
-
-    private String maskChar = DEFAULT_MASK_CHAR;
-
-    private List<String> maskFields;
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+@Component
+public @interface RedisMessageHandler {
 }

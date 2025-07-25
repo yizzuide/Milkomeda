@@ -249,6 +249,7 @@ milkomeda:
       - /chat/**
       - /payPlatform/**
       - /riding/**
+      - /satellite/**
 
     # 放开static资源访问
     allow-static-urls:

@@ -19,31 +19,35 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.sirius.mask;
+package com.github.yizzuide.milkomeda.demo.satellite;
 
-import lombok.Data;
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import com.github.yizzuide.milkomeda.satellite.RedisBatchPublisher;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
 /**
- * Sensitive field masking properties.
+ * SatelliteController
  *
- * @since 4.0.0
  * @author yizzuide
- * Create at 2025/07/24 13:40
+ * Create at 2025/07/25 16:32
  */
-@Data
-@ConfigurationProperties(prefix = SiriusMaskProperties.PREFIX)
-public class SiriusMaskProperties {
+@RequestMapping("satellite")
+@RestController
+public class SatelliteController {
 
-    public static final String PREFIX = "milkomeda.sirius.mask";
+    @Autowired
+    private RedisBatchPublisher redisBatchPublisher;
 
-    static final String DEFAULT_MASK_CHAR = "*";
-
-    private boolean enable = false;
-
-    private String maskChar = DEFAULT_MASK_CHAR;
-
-    private List<String> maskFields;
+    @GetMapping("orderEvent")
+    public String orderEvent() {
+        OrderEvent orderEvent = new OrderEvent();
+        orderEvent.setOrderNo(1435436546556098L);
+        orderEvent.setStatus(1);
+        redisBatchPublisher.publishBatch("order—event", List.of(orderEvent));
+        return "OK";
+    }
 }

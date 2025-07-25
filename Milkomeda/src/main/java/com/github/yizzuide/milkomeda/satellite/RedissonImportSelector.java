@@ -19,31 +19,27 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.sirius.mask;
+package com.github.yizzuide.milkomeda.satellite;
 
-import lombok.Data;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-
-import java.util.List;
+import org.springframework.context.annotation.ImportSelector;
+import org.springframework.core.type.AnnotationMetadata;
+import org.springframework.lang.NonNull;
+import org.springframework.util.ClassUtils;
 
 /**
- * Sensitive field masking properties.
+ * Select import redisson auto config.
  *
  * @since 4.0.0
  * @author yizzuide
- * Create at 2025/07/24 13:40
+ * Create at 2025/07/25 13:52
  */
-@Data
-@ConfigurationProperties(prefix = SiriusMaskProperties.PREFIX)
-public class SiriusMaskProperties {
-
-    public static final String PREFIX = "milkomeda.sirius.mask";
-
-    static final String DEFAULT_MASK_CHAR = "*";
-
-    private boolean enable = false;
-
-    private String maskChar = DEFAULT_MASK_CHAR;
-
-    private List<String> maskFields;
+public class RedissonImportSelector implements ImportSelector {
+    @Override
+    @NonNull
+    public String[] selectImports(@NonNull AnnotationMetadata importingClassMetadata) {
+        String autoConfigClassName = "org.redisson.spring.starter.RedissonAutoConfiguration";
+        boolean isPresent = ClassUtils.isPresent(autoConfigClassName, getClass().getClassLoader());
+        return isPresent ? new String[]{ autoConfigClassName }
+                : new String[]{ "com.github.yizzuide.milkomeda.universe.config.RedissonConfig" };
+    }
 }

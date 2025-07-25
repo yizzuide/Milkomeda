@@ -28,7 +28,7 @@
         <mybatis.starter.version>3.0.3</mybatis.starter.version>
         <mybatis-plus.version>3.5.5</mybatis-plus.version>
         <pagehelper.version>1.4.7</pagehelper.version>
-        <redission.version>3.20.0</redission.version>
+        <redission.version>3.25.2</redission.version>
         <zookeeper.version>3.9.1</zookeeper.version>
         <jetcd.version>0.7.5</jetcd.version>
         <contiperf.version>2.3.4</contiperf.version>

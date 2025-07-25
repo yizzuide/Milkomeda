@@ -19,31 +19,54 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.sirius.mask;
+package com.github.yizzuide.milkomeda.satellite;
 
-import lombok.Data;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-
-import java.util.List;
+import java.lang.annotation.*;
 
 /**
- * Sensitive field masking properties.
+ * Redis message listener that support type of list and stream.
  *
  * @since 4.0.0
  * @author yizzuide
- * Create at 2025/07/24 13:40
+ * Create at 2025/07/16 13:45
  */
-@Data
-@ConfigurationProperties(prefix = SiriusMaskProperties.PREFIX)
-public class SiriusMaskProperties {
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+public @interface RedisMessageListener {
+    /**
+     * Topic name
+     * @return  message topic
+     */
+    String topic();
 
-    public static final String PREFIX = "milkomeda.sirius.mask";
+    /**
+     * Batch size per fetch
+     * @return batch size
+     */
+    int batchSize() default 10;
 
-    static final String DEFAULT_MASK_CHAR = "*";
+    /**
+     * Use stream (as support at redis 5.0)
+     * @return true is stream
+     */
+    boolean stream() default false;
 
-    private boolean enable = false;
+    /**
+     * Consumer group（only support type of stream）
+     * @return group name
+     */
+    String group() default "";
 
-    private String maskChar = DEFAULT_MASK_CHAR;
+    /**
+     * Wait for the timeout when the queue is empty (ms)
+     * @return 0 if not supported
+     */
+    int timeout() default 0;
 
-    private List<String> maskFields;
+    /**
+     * Message data type
+     * @return class
+     */
+    Class<?> messageType() default String.class;
 }

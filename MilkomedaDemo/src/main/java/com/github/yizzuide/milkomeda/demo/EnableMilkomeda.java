@@ -20,6 +20,7 @@ import com.github.yizzuide.milkomeda.particle.EnableParticle;
 import com.github.yizzuide.milkomeda.pillar.EnablePillar;
 import com.github.yizzuide.milkomeda.pulsar.EnablePulsar;
 import com.github.yizzuide.milkomeda.quark.EnableQuark;
+import com.github.yizzuide.milkomeda.satellite.EnableSatellite;
 import com.github.yizzuide.milkomeda.sundial.EnableSundial;
 import com.github.yizzuide.milkomeda.wormhole.EnableWormhole;
 
@@ -36,6 +37,7 @@ import java.lang.annotation.Target;
  * <br>
  * Create at 2019/12/13 01:03
  */
+@EnableSatellite
 @EnableMolecule
 @EnableEuropa
 @EnableQuark

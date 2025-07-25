@@ -23,12 +23,15 @@ package com.github.yizzuide.milkomeda.sirius.mask;
 
 import com.fasterxml.jackson.databind.AnnotationIntrospector;
 import com.fasterxml.jackson.databind.introspect.AnnotationIntrospectorPair;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.event.ContextRefreshedEvent;
 
 import java.util.List;
 
@@ -42,22 +45,32 @@ import java.util.List;
 @ConditionalOnProperty(prefix = SiriusMaskProperties.PREFIX, name = "enable", havingValue = "true")
 @EnableConfigurationProperties(SiriusMaskProperties.class)
 @Configuration(proxyBeanMethods = false)
-public class SiriusMaskConfig {
+public class SiriusMaskConfig implements ApplicationListener<ContextRefreshedEvent> {
+
+    @Autowired
+    private SiriusMaskProperties maskProperties;
 
     @Autowired(required = false)
     private List<MaskFilter> maskFilters;
 
     @Bean
-    public SiriusMaskInterceptor siriusMaskInterceptor(SiriusMaskProperties maskProperties) {
+    public SiriusMaskInterceptor siriusMaskInterceptor() {
         return new SiriusMaskInterceptor(maskProperties, maskFilters);
     }
 
     @Bean
-    public Jackson2ObjectMapperBuilderCustomizer maskingObjectMapperCustomizer(SiriusMaskProperties maskProperties) {
+    public Jackson2ObjectMapperBuilderCustomizer maskingObjectMapperCustomizer() {
         return (builder) -> builder.postConfigurer((objectMapper) -> {
             AnnotationIntrospector annoIntro = objectMapper.getSerializationConfig().getAnnotationIntrospector();
-            AnnotationIntrospector maskAnnoIntro = AnnotationIntrospectorPair.pair(annoIntro, new SiriusMaskAnnotationIntrospector(maskProperties.getMaskChar(), maskFilters));
+            AnnotationIntrospector maskAnnoIntro = AnnotationIntrospectorPair.pair(annoIntro, new SiriusMaskAnnotationIntrospector(maskProperties, maskFilters));
             objectMapper.setAnnotationIntrospector(maskAnnoIntro);
         });
+    }
+
+    @Override
+    public void onApplicationEvent(@NotNull ContextRefreshedEvent event) {
+        List<String> getterMethods = maskProperties.getMaskFields().stream().map(field ->
+                "get" + Character.toUpperCase(field.charAt(0)) + field.substring(1)).toList();
+        maskProperties.setMaskFields(getterMethods);
     }
 }

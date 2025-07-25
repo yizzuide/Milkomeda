@@ -24,6 +24,7 @@ package com.github.yizzuide.milkomeda.sirius.mask;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.introspect.Annotated;
 import com.fasterxml.jackson.databind.introspect.NopAnnotationIntrospector;
+import com.github.yizzuide.milkomeda.util.TypeUtil;
 
 import java.io.Serial;
 import java.util.List;
@@ -40,32 +41,46 @@ public class SiriusMaskAnnotationIntrospector extends NopAnnotationIntrospector 
     @Serial
     private static final long serialVersionUID = 7753413878742607521L;
 
-    private final String maskChar;
+    private final SiriusMaskProperties maskProperties;
 
     private final List<MaskFilter> maskFilters;
 
-    public SiriusMaskAnnotationIntrospector(String maskChar, List<MaskFilter> maskFilters) {
-        this.maskChar = maskChar;
+    public SiriusMaskAnnotationIntrospector(SiriusMaskProperties maskProperties, List<MaskFilter> maskFilters) {
+        this.maskProperties = maskProperties;
         this.maskFilters = maskFilters;
     }
 
     @Override
     public Object findSerializer(Annotated am) {
-        MaskField annotation = am.getAnnotation(MaskField.class);
-        if (annotation != null) {
-            if (maskFilters != null) {
-                boolean useMask = false;
-                for (MaskFilter maskFilter : maskFilters) {
-                    if (!maskFilter.filter(am)) {
-                        useMask = true;
-                        break;
+        boolean useMask = false;
+        if (TypeUtil.type2JavaType(String.class).equals(am.getType()) && maskProperties.getMaskFields() != null) {
+            if (maskProperties.getMaskFields().stream().anyMatch(name -> name.equals(am.getName()))) {
+                if (maskFilters != null) {
+                    for (MaskFilter maskFilter : maskFilters) {
+                        if (!maskFilter.filter(am)) {
+                            useMask = true;
+                            break;
+                        }
                     }
                 }
-                if (!useMask) {
-                    return null;
+            }
+        }
+        if (!useMask) {
+            MaskField annotation = am.getAnnotation(MaskField.class);
+            if (annotation != null) {
+                if (maskFilters != null) {
+                    for (MaskFilter maskFilter : maskFilters) {
+                        if (!maskFilter.filter(am)) {
+                            useMask = true;
+                            break;
+                        }
+                    }
                 }
             }
-            return new SiriusMaskingSerializer(this.maskChar);
+        }
+
+        if (useMask) {
+            return new SiriusMaskingSerializer(this.maskProperties.getMaskChar());
         }
         return null;
     }

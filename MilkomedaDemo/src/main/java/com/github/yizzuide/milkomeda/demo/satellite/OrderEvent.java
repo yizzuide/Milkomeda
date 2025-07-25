@@ -19,31 +19,18 @@
  * SOFTWARE.
  */
 
-package com.github.yizzuide.milkomeda.sirius.mask;
+package com.github.yizzuide.milkomeda.demo.satellite;
 
 import lombok.Data;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-
-import java.util.List;
 
 /**
- * Sensitive field masking properties.
+ * 订单事件
  *
- * @since 4.0.0
  * @author yizzuide
- * Create at 2025/07/24 13:40
+ * Create at 2025/07/25 16:34
  */
 @Data
-@ConfigurationProperties(prefix = SiriusMaskProperties.PREFIX)
-public class SiriusMaskProperties {
-
-    public static final String PREFIX = "milkomeda.sirius.mask";
-
-    static final String DEFAULT_MASK_CHAR = "*";
-
-    private boolean enable = false;
-
-    private String maskChar = DEFAULT_MASK_CHAR;
-
-    private List<String> maskFields;
+public class OrderEvent {
+    Long orderNo;
+    int status;
 }
