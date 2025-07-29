@@ -21,6 +21,7 @@
 
 package com.github.yizzuide.milkomeda.comet.core;
 
+import com.fasterxml.jackson.databind.JavaType;
 import com.github.yizzuide.milkomeda.hydrogen.uniform.UniformQueryData;
 import com.github.yizzuide.milkomeda.hydrogen.validator.ValidatorExaminer;
 import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
@@ -35,6 +36,7 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
+import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
 
@@ -111,7 +113,16 @@ public class CometParamResolver implements HandlerMethodArgumentResolver {
             cometParamDecrypt.decrypt(WebContext.getRequest(), params, map);
         }
         // custom object
-        Object commandParam = JSONUtil.parse(params, parameterType);
+        Object commandParam;
+        // 处理泛型参数
+        if (parameterType.getTypeParameters().length > 0) {
+            // 获取方法参数的完整泛型信息
+            Type genericParameterType = methodParameter.getGenericParameterType();
+            JavaType javaType = JSONUtil.mapper.getTypeFactory().constructType(genericParameterType);
+            commandParam = JSONUtil.nativeRead(params, javaType);
+        } else {
+            commandParam = JSONUtil.parse(params, parameterType);
+        }
         validate(methodParameter, commandParam);
         return commandParam;
     }
