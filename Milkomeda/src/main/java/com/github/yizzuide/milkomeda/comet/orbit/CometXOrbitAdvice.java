@@ -63,6 +63,7 @@ public class CometXOrbitAdvice implements OrbitAdvice {
         cometData.setTag(cometX.tag());
         cometData.setClazzName(invocation.getTargetClass().getName());
         cometData.setExecMethod(invocation.getMethod().getName());
+        cometData.setRequestData(invocation.getArgs());
         if (CrustContext.get() != null && CrustContext.get().hasAuthenticated()) {
             try {
                 cometData.setRequestType(CrustContext.usedAPI() ? CometData.REQ_TYPE_FRONT : CometData.REQ_TYPE_BACK);
@@ -96,6 +97,7 @@ public class CometXOrbitAdvice implements OrbitAdvice {
         long duration = endDate.getTime() - startDate.getTime();
         cometData.setDuration(duration);
         cometData.setResponseTime(endDate);
+        cometData.setResponseData(result);
         cometData.setResult(result);
         if (cometData.getFailure() != null) {
             cometData.setStatus(props.getStatusFailCode());

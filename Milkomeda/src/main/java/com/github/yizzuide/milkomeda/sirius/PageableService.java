@@ -231,7 +231,7 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
                     queryWrapper.ge(Objects.nonNull(queryPageData.getStartDate()), columnName, queryPageData.getStartUnixTime());
                     queryWrapper.le(Objects.nonNull(queryPageData.getEndDate()), columnName, queryPageData.getEndUnixTime());
                 } else {
-                    additionParseQueryMatcher(queryWrapper, queryMatcher.perfectString(), columnName, fieldNonNull, fieldValue);
+                    additionParseQueryMatcher(queryWrapper, queryMatcher, columnName, fieldNonNull, fieldValue);
                 }
             }
             filteredQueryMatchers.stream()
@@ -480,12 +480,19 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
     /**
      * Addition parse query matcher with {@link QueryMatcher#perfectString()}
      * @param queryWrapper      QueryWrapper
-     * @param perfectString     type for match query
+     * @param queryMatcher     query matcher
      * @param columnName        table column name
      * @param isFieldNonNull    false if field value
      * @param fieldValue         entity field value
      */
-    protected void additionParseQueryMatcher(QueryWrapper<T> queryWrapper, String perfectString, String columnName, boolean isFieldNonNull, Object fieldValue) {
+    protected void additionParseQueryMatcher(QueryWrapper<T> queryWrapper, QueryMatcher queryMatcher, String columnName, boolean isFieldNonNull, Object fieldValue) {
+        if (isFieldNonNull) {
+            if (String.class.isAssignableFrom(fieldValue.getClass()) && queryMatcher.filterEmpty() &&
+                    StringUtils.isEmpty(fieldValue.toString())) {
+                return;
+            }
+            queryWrapper.apply(queryMatcher.perfectString(), fieldValue);
+        }
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})

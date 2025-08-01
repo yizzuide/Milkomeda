@@ -36,7 +36,7 @@ public @interface QueryMatcher {
     PerfectType perfect() default PerfectType.EQ;
 
     /**
-     * Custom type of query match with {@link PageableService#additionParseQueryMatcher(QueryWrapper, String, String, boolean, Object)}.
+     * Custom type of query match with {@link PageableService#additionParseQueryMatcher(QueryWrapper, QueryMatcher, String, boolean, Object)}.
      * @return string of a perfect type
      */
     String perfectString() default "";

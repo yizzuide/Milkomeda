@@ -21,11 +21,9 @@
 
 package com.github.yizzuide.milkomeda.hydrogen.filter;
 
+import jakarta.servlet.ServletContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.servlet.ServletContextInitializer;
-
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletException;
 
 /**
  * ServletContextListener
@@ -36,15 +34,16 @@ import jakarta.servlet.ServletException;
  * <br>
  * Create at 2020/04/01 18:18
  */
-@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 public class ServletContextListener implements ServletContextInitializer {
 
-    @Autowired
+    @Autowired(required = false)
     private FilterLoader filterLoader;
 
     @Override
-    public void onStartup(ServletContext servletContext) throws ServletException {
-        filterLoader.setServletContext(servletContext);
-        filterLoader.refresh();
+    public void onStartup(ServletContext servletContext) {
+        if (filterLoader != null) {
+            filterLoader.setServletContext(servletContext);
+            filterLoader.refresh();
+        }
     }
 }

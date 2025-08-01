@@ -21,10 +21,11 @@
 
 package com.github.yizzuide.milkomeda.universe.extend.web.handler;
 
-import org.springframework.web.context.request.WebRequestInterceptor;
-
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
+import org.springframework.web.context.request.WebRequestInterceptor;
+
+import java.io.IOException;
 
 /**
  * Request aspect handler that impl used filter which compare with {@link WebRequestInterceptor} impl used interceptor.
@@ -41,11 +42,16 @@ public interface AstrolabeHandler extends NamedHandler {
      * Just throw {@link com.github.yizzuide.milkomeda.hydrogen.uniform.UniformException} if you need intercept request.
      *
      * @param request  ServletRequest
+     * @param response ServletResponse
+     * @return  true if continue
+     * @throws IOException unhandled network exception
      */
-    default void preHandle(ServletRequest request) {}
+    default boolean preHandle(ServletRequest request, ServletResponse response) throws IOException {
+        return true;
+    }
 
     /**
-     * 请求后置
+     * Handle response after mapping into controller
      * @param request   ServletRequest
      * @param response  ServletResponse
      */

@@ -88,6 +88,7 @@ public abstract class CrustConfigurerAdapter {
     @Autowired(required = false)
     private BCryptPasswordEncoder passwordEncoder;
 
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
     private ApplicationContextHolder applicationContextHolder;
 

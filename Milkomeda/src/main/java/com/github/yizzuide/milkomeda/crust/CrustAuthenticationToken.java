@@ -26,6 +26,7 @@ import lombok.Setter;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 
+import java.io.Serial;
 import java.util.Collection;
 
 /**
@@ -38,6 +39,7 @@ import java.util.Collection;
  * Create at 2019/11/11 17:12
  */
 public class CrustAuthenticationToken extends UsernamePasswordAuthenticationToken {
+    @Serial
     private static final long serialVersionUID = -4832533804982166177L;
     /**
      * 访问令牌

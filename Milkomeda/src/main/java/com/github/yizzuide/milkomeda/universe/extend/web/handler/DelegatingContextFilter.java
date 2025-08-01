@@ -73,7 +73,9 @@ public class DelegatingContextFilter implements Filter {
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         for (AstrolabeHandler astrolabeHandler : astrolabeHandlers) {
             try {
-                astrolabeHandler.preHandle(request);
+                if (!astrolabeHandler.preHandle(request, response)) {
+                    return;
+                }
             } catch (UniformException e) {
                 UniformHandler.matchStatusToWrite((HttpServletResponse) response, e.getCode(), e);
                 return;

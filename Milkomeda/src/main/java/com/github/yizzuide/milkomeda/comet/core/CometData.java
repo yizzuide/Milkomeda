@@ -148,4 +148,16 @@ public class CometData implements Serializable {
      */
     @JsonIgnore
     private transient Object intentData;
+
+    /**
+     * 参数转换
+     * @param params 方法参数
+     * @param type  目标类
+     * @return  目标对象
+     * @param <T> 目标类型
+     * @since 4.0.0
+     */
+    public <T> T convert(Object params, Class<T> type) {
+        return null;
+    }
 }

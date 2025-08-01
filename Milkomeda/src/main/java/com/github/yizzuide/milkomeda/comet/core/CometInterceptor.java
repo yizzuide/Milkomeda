@@ -136,7 +136,6 @@ public class CometInterceptor implements AsyncHandlerInterceptor, ApplicationCon
             return;
         }
 
-        Map<String, CometCollectorProperties.Tag> tagMap = cometCollectorProperties.getTags();
         // 别名绑定
         aliasNodesMap = new HashMap<>();
         for (Map.Entry<String, CometCollectorProperties.Tag> tagCollectorEntry : cometCollectorProperties.getTags().entrySet()) {
@@ -355,6 +354,10 @@ public class CometInterceptor implements AsyncHandlerInterceptor, ApplicationCon
         for (CometLoggerProperties.Strategy strategy : strategyList) {
             if (CollectionUtils.isEmpty(strategy.getPaths()) ||
                     !URLPathMatcher.match(strategy.getPaths(), requestURI)) {
+                continue;
+            }
+            if (!CollectionUtils.isEmpty(strategy.getExcludePaths()) &&
+                    URLPathMatcher.match(strategy.getExcludePaths(), requestURI)) {
                 continue;
             }
             String resp;

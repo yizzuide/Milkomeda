@@ -69,6 +69,11 @@ public enum PerfectType {
     BETWEEN,
 
     /**
+     * Match using raw sql.
+     */
+    RAW,
+
+    /**
      * Match using sql `order by $1`.
      */
     OrderBy,

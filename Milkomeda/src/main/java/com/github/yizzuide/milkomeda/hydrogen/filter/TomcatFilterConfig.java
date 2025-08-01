@@ -34,7 +34,7 @@ import org.springframework.context.annotation.Configuration;
  * <br>
  * Create at 2020/04/03 00:51
  */
-@ConditionalOnClass(name = {"org.apache.catalina.core.StandardContext"})
+@ConditionalOnClass(name = "org.apache.catalina.startup.Tomcat")
 @Configuration
 public class TomcatFilterConfig {
     @Bean

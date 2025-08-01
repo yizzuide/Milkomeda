@@ -28,7 +28,6 @@ import jakarta.servlet.ServletRequest;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletRequestWrapper;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.catalina.connector.ClientAbortException;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartResolver;
@@ -65,6 +64,8 @@ public class CometRequestWrapper extends HttpServletRequestWrapper {
 
     private final HttpServletRequest originalRequest;
 
+    private Map<String, String> replacedHeaders = new HashMap<>();
+
     /**
      * Create Request wrapper for intercept or cache body.
      * @param request   HttpServletRequest
@@ -91,6 +92,24 @@ public class CometRequestWrapper extends HttpServletRequestWrapper {
                 body = bodyStr.getBytes(StandardCharsets.UTF_8);
             }
         }
+    }
+
+    /**
+     * Replace header
+     * @param name  header name
+     * @param value header value
+     * @since 4.0.0
+     */
+    public void replaceHeader(String name, String value) {
+        replacedHeaders.put(name, value);
+    }
+
+    @Override
+    public String getHeader(String name) {
+        if (replacedHeaders.containsKey(name)) {
+            return replacedHeaders.get(name);
+        }
+        return super.getHeader(name);
     }
 
     @Override
@@ -238,7 +257,7 @@ public class CometRequestWrapper extends HttpServletRequestWrapper {
             while ((line = reader.readLine()) != null) {
                 sb.append(line);
             }
-        } catch (ClientAbortException | SocketTimeoutException ignore) {
+        } catch (SocketTimeoutException ignore) {
             return null;
         } catch (IOException e) {
             log.error("Comet read input stream error with msg: {}", e.getMessage(), e);

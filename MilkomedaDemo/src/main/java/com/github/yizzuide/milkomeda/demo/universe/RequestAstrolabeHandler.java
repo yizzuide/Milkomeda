@@ -2,6 +2,7 @@ package com.github.yizzuide.milkomeda.demo.universe;
 
 import com.github.yizzuide.milkomeda.universe.context.WebContext;
 import com.github.yizzuide.milkomeda.universe.extend.web.handler.AstrolabeHandler;
+import jakarta.servlet.ServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -19,8 +20,9 @@ import java.util.Objects;
 @Component
 public class RequestAstrolabeHandler implements AstrolabeHandler {
     @Override
-    public void preHandle(ServletRequest request) {
+    public boolean preHandle(ServletRequest request, ServletResponse response) {
         // ((HttpServletRequest)request).getRequestURI()
         log.info("AstrolabeHandler请求前：{}", Objects.requireNonNull(WebContext.getRequest()).getRequestURI());
+        return true;
     }
 }
