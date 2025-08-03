@@ -46,7 +46,7 @@ public class EuropaProperties {
     public static final String PREFIX = "milkomeda.europa";
 
     /**
-     * Only enabled L2 cache.
+     * Only enabled L2 cache in global.
      */
     private boolean onlyCacheL2 = false;
 
@@ -57,6 +57,16 @@ public class EuropaProperties {
 
     @Data
     static class CacheProps {
+
+        /**
+         * Only enabled L1 cache.
+         */
+        private boolean onlyCacheL1 = false;
+
+        /**
+         * Only enabled L2 cache.
+         */
+        private boolean onlyCacheL2 = false;
 
         /**
          * Expiration time for L1 cache.

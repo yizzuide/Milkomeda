@@ -55,7 +55,7 @@ public class CaffeineNamedCacheManager extends CaffeineCacheManager {
                 .filter(key -> key.equals(name))
                 .map(key -> europaProperties.getInstances().get(key))
                 .findFirst();
-        if (cachePropsOpt.isPresent()) {
+        if (cachePropsOpt.isPresent() && !cachePropsOpt.get().isOnlyCacheL2()) {
             EuropaProperties.CacheProps cacheProps = cachePropsOpt.get();
             if (cacheProps.getL1MaxSize() > 0) {
                 caffeine = Caffeine.newBuilder().maximumSize(cacheProps.getL1MaxSize());

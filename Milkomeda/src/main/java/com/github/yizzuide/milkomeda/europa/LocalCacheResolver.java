@@ -21,11 +21,13 @@
 
 package com.github.yizzuide.milkomeda.europa;
 
+import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import org.redisson.api.RedissonClient;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.interceptor.CacheOperationInvocationContext;
 import org.springframework.cache.interceptor.CacheResolver;
+import org.springframework.cache.support.NoOpCache;
 import org.springframework.lang.NonNull;
 
 import java.util.Collection;
@@ -60,22 +62,34 @@ public class LocalCacheResolver implements CacheResolver {
 
     @Override
     @NonNull
-    public Collection<? extends Cache> resolveCaches(
-            @NonNull CacheOperationInvocationContext<?> context) {
+    public Collection<? extends Cache> resolveCaches(@NonNull CacheOperationInvocationContext<?> context) {
         Collection<Cache> caches = getCaches(cacheManager, context);
         return caches.stream().map(this::getOrCreateLocalCache).collect(Collectors.toList());
     }
 
     private Collection<Cache> getCaches(CacheManager cacheManager, CacheOperationInvocationContext<?> context) {
         return context.getOperation().getCacheNames().stream()
-                .map(cacheManager::getCache)
+                .map(cacheName -> {
+                    EuropaProperties europaProperties = ApplicationContextHolder.get()
+                            .getBean(EuropaProperties.class);
+                    EuropaProperties.CacheProps cacheProps = europaProperties.getInstances().get(cacheName);
+                    if (cacheProps.isOnlyCacheL2()) {
+                        return new NoOpCache(cacheName);
+                    }
+                    return cacheManager.getCache(cacheName);
+                })
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }
 
     private LocalCache getOrCreateLocalCache(Cache cache) {
-        return cacheMap.computeIfAbsent(
-                cache.getName(),
-                cacheName -> new LocalCache(cache, redisson, cacheEntryModifiedListener));
+        return cacheMap.computeIfAbsent(cache.getName(), cacheName -> {
+            // 获取该缓存实例的配置
+            EuropaProperties europaProperties = ApplicationContextHolder.get()
+                    .getBean(EuropaProperties.class);
+            EuropaProperties.CacheProps cacheProps = europaProperties.getInstances().get(cacheName);
+            return new LocalCache(cache, redisson, cacheEntryModifiedListener,
+                    cacheProps.isOnlyCacheL1(), cacheProps.isOnlyCacheL2());
+        });
     }
 }

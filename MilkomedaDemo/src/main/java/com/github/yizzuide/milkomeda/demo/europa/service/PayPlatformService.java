@@ -36,7 +36,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class PayPlatformService {
 
-    @Cacheable(value = "payPlatform", key = "'pay_platform_cache_' + #id")
+    @Cacheable(value = "payPlatform", key = "'pay_platform_cache_' + #id", sync = true)
     public PayPlatform findById(Long id) {
         log.info("正在从数据库查询支付平台id: {}", id);
         return new PayPlatform(1L, "连连支付", 100);

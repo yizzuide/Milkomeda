@@ -171,10 +171,14 @@ milkomeda:
 
   # L1(memory) + L2(Redis)（使用 Spring Cache）
   europa:
-    only-cache-l2: true
+    # 全局只使用redis缓存
+    #only-cache-l2: true
     instances:
       payPlatform:
-        l2-ttl: 2h
+        #l2-ttl: 2h
+        # 只使用内存缓存
+        only-cache-l1: true
+        l1-ttl: 1h
 
   # 三级缓存（不使用Spring Cache）
   light:

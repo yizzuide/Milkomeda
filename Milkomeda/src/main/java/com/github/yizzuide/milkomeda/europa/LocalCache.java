@@ -41,11 +41,21 @@ public class LocalCache implements Cache {
 
     private final Cache cache;
     private final RMapCache<Object, Object> distributedCache;
+    private final boolean onlyCacheL1;
+    private final boolean onlyCacheL2;
 
-    public LocalCache(Cache cache, RedissonClient redisson, CacheEntryModifiedListener cacheEntryModifiedListener) {
+    public LocalCache(Cache cache, RedissonClient redisson, CacheEntryModifiedListener cacheEntryModifiedListener, boolean onlyCacheL1, boolean onlyCacheL2) {
         this.cache = cache;
-        this.distributedCache = redisson.getMapCache(getName());
-        this.distributedCache.addListener(cacheEntryModifiedListener);
+        this.onlyCacheL1 = onlyCacheL1;
+        this.onlyCacheL2 = onlyCacheL2;
+
+        // 只有在不只使用L1缓存时才初始化分布式缓存
+        if (!onlyCacheL1) {
+            this.distributedCache = redisson.getMapCache(getName());
+            this.distributedCache.addListener(cacheEntryModifiedListener);
+        } else {
+            this.distributedCache = null;
+        }
     }
 
     @Override
@@ -57,6 +67,7 @@ public class LocalCache implements Cache {
     @Override
     @NonNull
     public Object getNativeCache() {
+        // Spring cache默认使用ConcurrentMapCache
         return cache.getNativeCache();
     }
 
@@ -64,6 +75,17 @@ public class LocalCache implements Cache {
     //  If the value exists in the distributed cache, it is also added to the local cache for faster subsequent access.
     @Override
     public ValueWrapper get(@NonNull Object key) {
+        // 如果只使用L2缓存，直接从Redis获取
+        if (onlyCacheL2) {
+            return toValueWrapper(distributedCache.get(key));
+        }
+
+        // 如果只使用L1缓存，只从Caffeine获取
+        if (onlyCacheL1) {
+            return cache.get(key);
+        }
+
+        // 同时使用L1和L2缓存
         Object value = cache.get(key);
         if (value == null && (value = distributedCache.get(key)) != null) {
             cache.put(key, value);
@@ -89,18 +111,45 @@ public class LocalCache implements Cache {
     // When a method annotated with @Cacheable is executed, the put method is invoked.
     @Override
     public void put(@NonNull Object key, Object value) {
-        distributedCache.put(key, value, EuropaProperties.getL2ExpirationTime(getName()).toMinutes(), TimeUnit.MINUTES);
+        // 如果只使用L1缓存，只写入Caffeine
+        if (onlyCacheL1) {
+            cache.put(key, value);
+            return;
+        }
+
+        // 如果只使用L2缓存，只写入Redis
+        if (onlyCacheL2) {
+            distributedCache.put(key, value,
+                    EuropaProperties.getL2ExpirationTime(getName()).toMinutes(), TimeUnit.MINUTES);
+            return;
+        }
+
+        // 同时写入L1和L2缓存
+        distributedCache.put(key, value,
+                EuropaProperties.getL2ExpirationTime(getName()).toMinutes(), TimeUnit.MINUTES);
         cache.put(key, value);
     }
 
     // When a cache eviction occurs (e.g., through a @CacheEvict annotation), the key is removed from the distributed cache.
     @Override
     public void evict(@NonNull Object key) {
+        if (onlyCacheL1) {
+            cache.evict(key);
+            return;
+        }
         distributedCache.remove(key);
     }
 
     @Override
     public void clear() {
+        if (onlyCacheL1) {
+            cache.clear();
+            return;
+        }
+        if (onlyCacheL2) {
+            distributedCache.clear();
+            return;
+        }
         cache.clear();
         distributedCache.clear();
         // 通知其它分布式服务清空缓存（目前不支持）

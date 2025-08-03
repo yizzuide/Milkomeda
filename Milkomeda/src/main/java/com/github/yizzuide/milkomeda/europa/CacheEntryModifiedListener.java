@@ -41,9 +41,17 @@ public class CacheEntryModifiedListener implements EntryRemovedListener<Object, 
 
     private final CacheManager cacheManager;
 
+    private final EuropaProperties europaProperties;
+
     @Override
     public void onRemoved(EntryEvent event) {
-        Cache cache = cacheManager.getCache(event.getSource().getName());
+        String cacheName = event.getSource().getName();
+        EuropaProperties.CacheProps cacheProps = europaProperties.getInstances().get(cacheName);
+        if (cacheProps.isOnlyCacheL2()) {
+            return;
+        }
+        // 收到Redis缓存删除key后，把本地key删除
+        Cache cache = cacheManager.getCache(cacheName);
         if (cache != null) {
             cache.evict(event.getKey());
         }
@@ -51,7 +59,13 @@ public class CacheEntryModifiedListener implements EntryRemovedListener<Object, 
 
     @Override
     public void onUpdated(EntryEvent event) {
-        Cache cache = cacheManager.getCache(event.getSource().getName());
+        String cacheName = event.getSource().getName();
+        EuropaProperties.CacheProps cacheProps = europaProperties.getInstances().get(cacheName);
+        if (cacheProps.isOnlyCacheL2()) {
+            return;
+        }
+        // 收到Redis缓存更新key后，把本地key更新
+        Cache cache = cacheManager.getCache(cacheName);
         if (cache != null) {
             cache.put(event.getKey(), event.getValue());
         }

@@ -64,8 +64,8 @@ public class CacheConfig implements CachingConfigurer {
     }
 
     @Bean
-    public CacheEntryModifiedListener cacheEntryRemovedListener() {
-        return new CacheEntryModifiedListener(cacheManager());
+    public CacheEntryModifiedListener cacheEntryModifiedListener() {
+        return new CacheEntryModifiedListener(cacheManager(), europaProperties);
     }
 
     @Bean
@@ -74,6 +74,6 @@ public class CacheConfig implements CachingConfigurer {
         return new LocalCacheResolver(
                 cacheManager(),
                 redissonClient,
-                cacheEntryRemovedListener());
+                cacheEntryModifiedListener());
     }
 }
