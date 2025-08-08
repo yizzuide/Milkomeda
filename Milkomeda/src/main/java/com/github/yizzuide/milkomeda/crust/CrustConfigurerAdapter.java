@@ -58,16 +58,9 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.method.HandlerMethod;
-import org.springframework.web.servlet.mvc.condition.PathPatternsRequestCondition;
-import org.springframework.web.servlet.mvc.condition.PatternsRequestCondition;
-import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
-import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
-import org.springframework.web.util.pattern.PathPattern;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Spring Security config adapter, need impl with {@link org.springframework.context.annotation.Configuration}.
@@ -124,33 +117,7 @@ public abstract class CrustConfigurerAdapter {
         if (!CollectionUtils.isEmpty(props.getAdditionPermitUrls())) {
             allowURLs.addAll(props.getAdditionPermitUrls());
         }
-        // 标记匿名访问
-        // Find URL method map
-        Map<RequestMappingInfo, HandlerMethod> handlerMethodMap = applicationContextHolder.getApplicationContext()
-                .getBean(com.github.yizzuide.milkomeda.universe.metadata.BeanIds.REQUEST_MAPPING_HANDLER_MAPPING,
-                        RequestMappingHandlerMapping.class).getHandlerMethods();
-        Set<String> anonUrls = new HashSet<>();
-        for (Map.Entry<RequestMappingInfo, HandlerMethod> infoEntry : handlerMethodMap.entrySet()) {
-            HandlerMethod handlerMethod = infoEntry.getValue();
-            // Has `CrustAnon` annotation on Method？
-            CrustAnon crustAnon = handlerMethod.getMethodAnnotation(CrustAnon.class);
-            if (null != crustAnon) {
-                Collection<String> requestPatterns = null;
-                PatternsRequestCondition patternsCondition = infoEntry.getKey().getPatternsCondition();
-                if (patternsCondition != null) {
-                    requestPatterns = patternsCondition.getPatterns();
-                }
-                if (requestPatterns == null) {
-                    PathPatternsRequestCondition pathPatternsCondition = infoEntry.getKey().getPathPatternsCondition();
-                    if (pathPatternsCondition != null) {
-                        requestPatterns = pathPatternsCondition.getPatterns().stream().map(PathPattern::getPatternString).collect(Collectors.toSet());
-                    }
-                }
-                if (requestPatterns != null) {
-                    anonUrls.addAll(requestPatterns);
-                }
-            }
-        }
+        Set<String> anonUrls = CrustAnnoResolver.resolve(applicationContextHolder);
         if (!CollectionUtils.isEmpty(anonUrls)) {
             allowURLs.addAll(anonUrls);
         }

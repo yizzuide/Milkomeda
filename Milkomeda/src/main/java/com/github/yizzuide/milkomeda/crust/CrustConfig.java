@@ -22,7 +22,9 @@
 package com.github.yizzuide.milkomeda.crust;
 
 import com.github.yizzuide.milkomeda.light.*;
+import io.jsonwebtoken.Jwts;
 import org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
@@ -52,10 +54,18 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 @AutoConfigureAfter(LightConfig.class)
 @ConditionalOnClass({AuthenticationManager.class})
 @Configuration
-public class CrustConfig {
+public class CrustConfig implements InitializingBean {
 
     @Autowired
     private CrustProperties crustProps;
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        // Reset an AES key with 256 bit
+        if (!crustProps.isUseRsa()) {
+            crustProps.setSecureKey(new String(Jwts.SIG.HS256.key().build().getEncoded()));
+        }
+    }
 
     @Bean(AbstractCrust.BEAN_NAME)
     public AbstractCrust crust() {

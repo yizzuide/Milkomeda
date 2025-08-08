@@ -21,7 +21,6 @@
 
 package com.github.yizzuide.milkomeda.crust;
 
-import io.jsonwebtoken.Jwts;
 import jakarta.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.InitializingBean;
@@ -81,10 +80,6 @@ public class CrustURLMappingConfigurer implements WebMvcConfigurer, Initializing
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        // Reset an AES key with 256 bit
-        if (!crustProps.isUseRsa()) {
-            crustProps.setSecureKey(new String(Jwts.SIG.HS256.key().build().getEncoded()));
-        }
         CrustContext.set(crust);
     }
 }

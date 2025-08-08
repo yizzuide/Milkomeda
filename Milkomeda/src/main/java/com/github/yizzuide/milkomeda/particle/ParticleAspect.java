@@ -65,7 +65,13 @@ public class ParticleAspect {
         Limiter limiter = !StringExtensionsKt.isEmpty(beanName) ? ApplicationContextHolder.get().getBean(beanName, Limiter.class)
                 : ApplicationContextHolder.get().getBean(limit.limiterBeanClass());
         String decorateKey = StringExtensionsKt.isEmpty(prefix) ? key : prefix + ":" + key;
-        return limiter.limit(decorateKey, (particle ->
-                joinPoint.proceed(ReflectUtil.injectParam(joinPoint, particle, limit, true))));
+        try {
+            return limiter.limit(decorateKey, (particle -> {
+                Particle.setContext(particle);
+                return joinPoint.proceed(ReflectUtil.injectParam(joinPoint, particle, limit, false));
+            }));
+        } finally {
+            Particle.clearContext();
+        }
     }
 }

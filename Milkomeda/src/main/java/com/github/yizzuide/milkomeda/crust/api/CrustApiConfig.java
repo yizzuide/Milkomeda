@@ -22,10 +22,12 @@
 package com.github.yizzuide.milkomeda.crust.api;
 
 import com.github.yizzuide.milkomeda.crust.AbstractCrust;
+import com.github.yizzuide.milkomeda.crust.CrustAnnoResolver;
 import com.github.yizzuide.milkomeda.crust.CrustProperties;
 import com.github.yizzuide.milkomeda.crust.CrustURLMappingConfigurer;
 import com.github.yizzuide.milkomeda.light.Cache;
 import com.github.yizzuide.milkomeda.light.LightCache;
+import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import com.github.yizzuide.milkomeda.universe.metadata.BeanIds;
 import com.github.yizzuide.milkomeda.universe.polyfill.SpringMvcPolyfill;
 import org.springframework.beans.factory.InitializingBean;
@@ -43,6 +45,7 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Crust config used for api service.
@@ -95,12 +98,19 @@ public class CrustApiConfig {
         @Autowired
         private RequestMappingHandlerMapping requestMappingHandlerMapping;
 
+        @Autowired
+        private ApplicationContextHolder applicationContextHolder;
+
         @Override
         public void afterPropertiesSet() throws Exception {
             List<String> allowURLs = new ArrayList<>(crustProperties.getPermitUrls());
                 List<String> additionPermitUrls = crustProperties.getAdditionPermitUrls();
             if (!CollectionUtils.isEmpty(additionPermitUrls)) {
                 allowURLs.addAll(additionPermitUrls);
+            }
+            Set<String> anonUrls = CrustAnnoResolver.resolve(applicationContextHolder);
+            if (!CollectionUtils.isEmpty(anonUrls)) {
+                allowURLs.addAll(anonUrls);
             }
             SpringMvcPolyfill.addDynamicInterceptor(crustInterceptor,  Ordered.HIGHEST_PRECEDENCE, Collections.singletonList("/**"),
                     allowURLs, requestMappingHandlerMapping);

@@ -21,6 +21,8 @@
 
 package com.github.yizzuide.milkomeda.sirius;
 
+import com.baomidou.mybatisplus.core.metadata.TableInfo;
+import com.baomidou.mybatisplus.core.metadata.TableInfoHelper;
 import com.baomidou.mybatisplus.extension.plugins.handler.TenantLineHandler;
 import com.github.yizzuide.milkomeda.universe.extend.env.SpELPropertySource;
 import net.sf.jsqlparser.expression.Expression;
@@ -30,6 +32,7 @@ import org.springframework.util.StringUtils;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
@@ -44,6 +47,10 @@ public class TenantInterceptHandler implements TenantLineHandler {
     private final TenantProperties tenantProperties;
 
     private final Set<String> ignoreTables;
+
+    private final Set<String> tablesWithoutTenantIds = ConcurrentHashMap.newKeySet();
+
+    private final Set<String> tablesWithTenantIds = ConcurrentHashMap.newKeySet();
 
     public TenantInterceptHandler(TenantProperties tenantProperties) {
         this.tenantProperties = tenantProperties;
@@ -76,7 +83,38 @@ public class TenantInterceptHandler implements TenantLineHandler {
         if (SiriusHolder.getTenantData() != null && SiriusHolder.getTenantData().isIgnored()) {
             return true;
         }
-        return ignoreTables.stream().anyMatch(table -> table.equals(tableName.toLowerCase()) || table.equals(tableName.toUpperCase()));
+        if (ignoreTables.contains(tableName)) {
+            return true;
+        }
+        // 缓存中存在，忽略不带租户ID的表
+        if (tablesWithoutTenantIds.contains(tableName)) {
+            return true;
+        }
+        // 缓存中存在，过滤带租户ID的表
+        if (tablesWithTenantIds.contains(tableName)) {
+            return false;
+        }
+        boolean hasTenantId = hasTenantIdColumnInTable(tableName);
+        if (hasTenantId) {
+            tablesWithTenantIds.add(tableName);
+            return false;
+        } else {
+            tablesWithoutTenantIds.add(tableName);
+            return true;
+        }
+    }
+
+    private boolean hasTenantIdColumnInTable(String tableName) {
+        try {
+            TableInfo tableInfo = TableInfoHelper.getTableInfo(tableName);
+            if (tableInfo != null) {
+                return tableInfo.getFieldList().stream()
+                        .anyMatch(field -> getTenantIdColumn().equalsIgnoreCase(field.getColumn()));
+            }
+        } catch (Exception e) {
+            // MyBatis-Plus实体未找到时降级到数据库查询
+        }
+        return false;
     }
 
     /**

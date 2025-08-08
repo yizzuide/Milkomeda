@@ -29,6 +29,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.lang.NonNull;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.io.Serializable;
 import java.util.Objects;
@@ -46,6 +47,7 @@ public class CrustApi extends AbstractCrust {
 
     public static final String LIGHT_CONTEXT_ID = "CrustApiLightContext";
 
+    private final BCryptPasswordEncoder passwordEncoder;
 
     @Getter
     @Autowired
@@ -55,23 +57,36 @@ public class CrustApi extends AbstractCrust {
     @Autowired
     private CrustApiUserDetailsService crustApiUserDetailsService;
 
+    public CrustApi() {
+        passwordEncoder = new BCryptPasswordEncoder();
+    }
 
     @SuppressWarnings("unchecked")
     @NonNull
     @Override
     public <T extends CrustEntity> CrustUserInfo<T, CrustPermission> login(@NotNull String account, @NotNull String credentials, @NotNull Class<T> entityClazz) {
-        if (props.getLoginType() != CrustLoginType.CODE) {
+        if (props.getLoginType() == CrustLoginType.CUSTOM) {
             throw new IllegalArgumentException("current login type[" + props.getLoginType().name() + "] not supported");
         }
-        // 验证码否正确
-        String code = getCode(account);
-        if (code == null) {
-            throw new CrustBadCredentialsException("Verify code is null");
+
+        UserDetails userDetails;
+        if (props.getLoginType() == CrustLoginType.CODE) {
+            // 验证码否正确
+            String code = getCode(account);
+            if (code == null) {
+                throw new CrustBadCredentialsException("Verify code is null");
+            }
+            if (!code.equals(credentials)) {
+                throw new CrustBadCredentialsException("Verify code not match");
+            }
+            userDetails = crustApiUserDetailsService.loadUserByUsername(account);
+        } else {
+            userDetails = crustApiUserDetailsService.loadUserByUsername(account);
+            if (!passwordEncoder.matches(credentials, userDetails.getPassword())) {
+                throw new CrustBadCredentialsException("Credentials is invalid");
+            }
         }
-        if (!code.equals(credentials)) {
-            throw new CrustBadCredentialsException("Verify code not match");
-        }
-        UserDetails userDetails = crustApiUserDetailsService.loadUserByUsername(account);
+
         if (!userDetails.enabled() || userDetails.accountExpired() || userDetails.accountLocked()) {
             throw new CrustUserAccessForbidden("Restricted user access");
         }

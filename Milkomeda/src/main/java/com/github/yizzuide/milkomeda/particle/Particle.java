@@ -21,16 +21,17 @@
 
 package com.github.yizzuide.milkomeda.particle;
 
+import com.github.yizzuide.milkomeda.light.LightContext;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * Particle
- * 粒子状态数据
+ * 限制器状态数据
  *
  * @author yizzuide
  * @since 1.5.0
+ * @version 4.0.0
  * <br>
  * Create at 2019/05/30 13:44
  */
@@ -38,6 +39,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Particle {
+
+    public static final String LIGHT_CONTEXT_ID = "ParticleLightContext";
+
     /**
      * 状态类型
      */
@@ -52,4 +56,21 @@ public class Particle {
      * 结果值
      */
     private Object value;
+
+    /**
+     * 获取当前状态
+     * @return Particle
+     * @since 4.0.0
+     */
+    public static Particle getContext() {
+        return LightContext.getValue(LIGHT_CONTEXT_ID);
+    }
+
+    static void setContext(Particle particle) {
+        LightContext.setValue(particle, LIGHT_CONTEXT_ID);
+    }
+
+    static void clearContext() {
+        LightContext.clearValue(LIGHT_CONTEXT_ID);
+    }
 }
