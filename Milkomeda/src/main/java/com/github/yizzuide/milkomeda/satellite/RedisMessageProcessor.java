@@ -222,8 +222,10 @@ public class RedisMessageProcessor implements ApplicationListener<ContextRefresh
     }
 
     private void invokeMethod(HandlerMetaData handlerMetaData, List<String> messages) {
-        Class<?> messageType = ((RedisMessageListener) handlerMetaData.getAnnotation()).messageType();
-        if(messages.size() == 1) {
+        RedisMessageListener redisMessageListener = (RedisMessageListener) handlerMetaData.getAnnotation();
+        Class<?> messageType = redisMessageListener.messageType();
+        Class<?> parameterType = handlerMetaData.getMethod().getParameterTypes()[0];
+        if (redisMessageListener.batchSize() == 1 && parameterType != List.class) {
             if (messageType == String.class) {
                 performInvoke(handlerMetaData, messages.getFirst());
                 return;
