@@ -243,19 +243,19 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
         // 设置查询字段
         Set<String> includeColumns = new HashSet<>();
         Set<String> excludeColumns = new HashSet<>();
-        for (TableFieldInfo tableFieldInfo : tableInfo.getFieldList()) {
-            QueryField fieldInclude = AnnotationUtils.findAnnotation(tableFieldInfo.getField(), QueryField.class);
+        for (Field field : fields) {
+            QueryField fieldInclude = AnnotationUtils.findAnnotation(field, QueryField.class);
             if (fieldInclude != null &&
                     fieldInclude.include() &&
                     (Arrays.asList(fieldInclude.group()).contains("*") || ArrayUtils.contains(fieldInclude.group(), group))) {
-                includeColumns.add(tableFieldInfo.getColumn());
+                includeColumns.add(findColumnName(tableInfo, field, getEntityFieldName(field)));
                 continue;
             }
-            QueryField fieldExclude = AnnotationUtils.findAnnotation(tableFieldInfo.getField(), QueryField.class);
+            QueryField fieldExclude = AnnotationUtils.findAnnotation(field, QueryField.class);
             if (fieldExclude != null &&
                     fieldExclude.exclude() &&
                     (Arrays.asList(fieldExclude.group()).contains("*") || ArrayUtils.contains(fieldExclude.group(), group))) {
-                excludeColumns.add(tableFieldInfo.getColumn());
+                excludeColumns.add(findColumnName(tableInfo, field, getEntityFieldName(field)));
             }
         }
         boolean hasSelectColumn = !includeColumns.isEmpty();

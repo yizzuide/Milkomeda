@@ -41,8 +41,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * CometParamResolver
- * 支持CometParam自定义参数处理器
+ * CometParam自定义参数处理器
  *
  * @see org.springframework.web.method.support.HandlerMethodArgumentResolver
  * @see org.springframework.web.method.annotation.ModelAttributeMethodProcessor
@@ -74,11 +73,6 @@ public class CometParamResolver implements HandlerMethodArgumentResolver {
         CometAspect.resolveThreadLocal.set(params);
         Class<?> parameterType = methodParameter.getParameterType();
 
-        // is matched String?
-        if (String.class.isAssignableFrom(parameterType)) {
-            return params;
-        }
-
         // Map
         CometParam cometParam = methodParameter.getParameterAnnotation(CometParam.class);
         if (Map.class.isAssignableFrom(parameterType)) {
@@ -108,10 +102,16 @@ public class CometParamResolver implements HandlerMethodArgumentResolver {
         // 检测是否需要验签
         if (cometParam != null && cometParam.decrypt() != CometParamDecrypt.class &&
                 CometParamDecrypt.class.isAssignableFrom(cometParam.decrypt())) {
-            Map<String, Object> map = JSONUtil.parseMap(params, String.class, Object.class);
             CometParamDecrypt cometParamDecrypt = ApplicationContextHolder.get().getBean(cometParam.decrypt());
+            Map<String, Object> map = String.class.isAssignableFrom(parameterType) ? null : JSONUtil.parseMap(params, String.class, Object.class);
             cometParamDecrypt.decrypt(WebContext.getRequest(), params, map);
         }
+
+        // is matched String?
+        if (String.class.isAssignableFrom(parameterType)) {
+            return params;
+        }
+
         // custom object
         Object commandParam;
         // 处理泛型参数
