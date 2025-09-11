@@ -26,7 +26,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.util.Map;
 
 /**
- * CometParamDecrypt
  * 用于Echo验签功能
  *
  * @since 3.13.0
@@ -40,8 +39,8 @@ public interface CometParamDecrypt {
      * 请求参数解密方法
      *
      * @param request HttpServletRequest
-     * @param body    请求体
-     * @param params  请求Map参数
+     * @param body    请求体字符串
+     * @param params  请求Map参数，请求方法参数是String接收类型时为null
      * @return 解密后的参数
      */
     Map<String, Object> decrypt(HttpServletRequest request, String body, Map<String, Object> params);
