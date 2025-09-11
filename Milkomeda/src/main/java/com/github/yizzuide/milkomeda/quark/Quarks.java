@@ -102,6 +102,10 @@ public final class Quarks {
      * @param identifier such as user id.
      */
     public static void unbindProducer(Serializable identifier) {
+        if (identifier == null) {
+            producerMap.values().forEach(QuarkProducer::shutdown);
+            return;
+        }
         if (!producerMap.containsKey(identifier)) {
             return;
         }

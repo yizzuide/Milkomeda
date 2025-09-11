@@ -21,6 +21,7 @@
 
 package com.github.yizzuide.milkomeda.demo.europa.entity;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -35,7 +36,13 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Data
 public class PayPlatform {
+    @JsonView(BasicView.class)
     private Long id;
+
+    @JsonView(BasicView.class)
     private String name;
+
     private Integer appId;
+
+    public interface BasicView {}
 }

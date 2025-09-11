@@ -24,6 +24,7 @@ package com.github.yizzuide.milkomeda.demo.europa.controller;
 import com.github.yizzuide.milkomeda.demo.europa.entity.PayPlatform;
 import com.github.yizzuide.milkomeda.demo.europa.service.PayPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -40,8 +41,13 @@ public class PayPlatformController {
     @Autowired
     private PayPlatformService payPlatformService;
 
+    //@JsonView(PayPlatform.BasicView.class)
     @RequestMapping("find/{id}")
-    public PayPlatform getPayPlatformById(@PathVariable Long id) {
-        return payPlatformService.findById(id);
+    public MappingJacksonValue getPayPlatformById(@PathVariable Long id) {
+        PayPlatform payPlatform = payPlatformService.findById(id);
+        MappingJacksonValue wrapper = new MappingJacksonValue(payPlatform);
+        // 动态指定视图
+        wrapper.setSerializationView(PayPlatform.BasicView.class);
+        return wrapper;
     }
 }

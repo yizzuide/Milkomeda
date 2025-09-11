@@ -22,6 +22,7 @@
 package com.github.yizzuide.milkomeda.quark;
 
 import org.springframework.context.annotation.Import;
+import org.springframework.scheduling.annotation.EnableAsync;
 
 import java.lang.annotation.*;
 
@@ -32,10 +33,11 @@ import java.lang.annotation.*;
  * @author yizzuide
  * Create at 2023/08/19 10:49
  */
+@EnableAsync
+@Import(QuarkConfig.class)
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE})
 @Inherited
-@Import(QuarkConfig.class)
 public @interface EnableQuark {
 }

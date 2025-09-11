@@ -23,10 +23,7 @@ package com.github.yizzuide.milkomeda.quark;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.convert.DurationUnit;
 
-import java.time.Duration;
-import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -54,26 +51,7 @@ public class QuarkProperties {
     private Float warningPercent = .05f;
 
     /**
-     * Executor pool.
-     */
-    private Pool pool = new Pool();
-
-    /**
      * Config topic handler chain.
      */
     private Map<String, String> topicChains = new HashMap<>();
-
-
-    @Data
-    static class Pool {
-
-        private Integer core = 4;
-
-        private Integer maximum = 8;
-
-        @DurationUnit(ChronoUnit.MILLIS)
-        private Duration keepAliveTime = Duration.ofSeconds(20);
-
-        private Integer queueSize = 1 << 15;
-    }
 }

@@ -519,8 +519,9 @@ milkomeda:
         advisor-props:
           classAnnotationType: com.github.yizzuide.milkomeda.molecule.eventsourcing.datasource.DataSourceRouting
 
-  # 高并发任务队列
+  # 高并发内存无锁任务队列
   quark:
+    buffer-size: 8192
     topic-chains:
       test: h1 -> h2
 

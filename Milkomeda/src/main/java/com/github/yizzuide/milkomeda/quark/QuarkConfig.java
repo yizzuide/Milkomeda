@@ -21,13 +21,18 @@
 
 package com.github.yizzuide.milkomeda.quark;
 
+import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import com.lmax.disruptor.ExceptionHandler;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
+import org.springframework.boot.autoconfigure.task.TaskExecutionAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.lang.NonNull;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.util.CollectionUtils;
@@ -37,9 +42,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Quark config.
@@ -52,7 +54,8 @@ import java.util.concurrent.TimeUnit;
 @EnableScheduling
 @Configuration
 @EnableConfigurationProperties(QuarkProperties.class)
-public class QuarkConfig implements ApplicationListener<ContextRefreshedEvent> {
+@AutoConfigureAfter(TaskExecutionAutoConfiguration.class)
+public class QuarkConfig implements ApplicationListener<ContextRefreshedEvent>, DisposableBean {
 
     @Autowired
     private QuarkProperties props;
@@ -63,17 +66,24 @@ public class QuarkConfig implements ApplicationListener<ContextRefreshedEvent> {
     @Autowired(required = false)
     private List<ExceptionHandler<?>> exceptionHandlerList;
 
+    public void destroy() {
+        Quarks.unbindProducer(null);
+    }
+
     @Override
     public void onApplicationEvent(@NonNull ContextRefreshedEvent event) {
         if (Quarks.getBufferSize() != null) {
             return;
         }
         Quarks.setWarningPercent(props.getWarningPercent());
-        QuarkProperties.Pool pool = props.getPool();
-        ThreadPoolExecutor executor = new ThreadPoolExecutor(pool.getCore(), pool.getMaximum(),
-                pool.getKeepAliveTime().toMillis(), TimeUnit.MILLISECONDS,
-                new ArrayBlockingQueue<>(pool.getQueueSize()),
-                new ThreadPoolExecutor.DiscardPolicy());
+        // 使用SpringBoot配置的异步线程（支持虚拟线程）
+        AsyncTaskExecutor executor;
+        Map<String, AsyncTaskExecutor> taskExecutorMap = ApplicationContextHolder.get().getBeansOfType(AsyncTaskExecutor.class);
+        if (taskExecutorMap.containsKey(TaskExecutionAutoConfiguration.APPLICATION_TASK_EXECUTOR_BEAN_NAME)) {
+            executor = taskExecutorMap.get(TaskExecutionAutoConfiguration.APPLICATION_TASK_EXECUTOR_BEAN_NAME);
+        } else {
+            executor = taskExecutorMap.values().stream().findFirst().orElseThrow();
+        }
         Quarks.setExecutor(executor);
         Quarks.setBufferSize(props.getBufferSize());
         if (!CollectionUtils.isEmpty(eventHandlerList)) {

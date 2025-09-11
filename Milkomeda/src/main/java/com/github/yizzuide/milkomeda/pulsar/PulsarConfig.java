@@ -27,10 +27,13 @@ import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.autoconfigure.task.TaskExecutionAutoConfiguration;
+import org.springframework.boot.task.ThreadPoolTaskExecutorCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.servlet.DispatcherServlet;
+
+import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * PulsarConfig
@@ -50,6 +53,11 @@ public class PulsarConfig {
     @Bean
     public Pulsar pulsar() {
         return new Pulsar();
+    }
+
+    @Bean
+    public ThreadPoolTaskExecutorCustomizer pulsarTaskExecutorCustomizer() {
+        return (executor) -> executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
     }
 
     @Bean
