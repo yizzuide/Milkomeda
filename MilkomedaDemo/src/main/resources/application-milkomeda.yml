@@ -523,7 +523,7 @@ milkomeda:
   quark:
     buffer-size: 8192
     topic-chains:
-      test: h1 -> h2
+      test: h1 -> (h2 -> h4,h5),h3
 
   molecule:
     event-sourcing:

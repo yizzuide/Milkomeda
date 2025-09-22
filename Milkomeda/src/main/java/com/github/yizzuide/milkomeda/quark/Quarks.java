@@ -75,7 +75,7 @@ public final class Quarks {
     static void setEventHandlerList(Map<String, List<QuarkEventHandler<?>>> topicEventHandlerMap,
                                     Map<String, QuarkEventHandler<?>> namedEventHandlerMap,
                                     Map<String, String> chainMap) {
-        QuarkChainHelper.setTopicEventHandlers(topicEventHandlerMap, namedEventHandlerMap, chainMap);
+        QuarkChainASTHelper.setTopicEventHandlers(topicEventHandlerMap, namedEventHandlerMap, chainMap);
     }
 
     static void setExceptionHandlerList(Map<String, ExceptionHandler<?>> topicExceptionHandlerMap) {
@@ -118,7 +118,7 @@ public final class Quarks {
         QuarkEventFactory<Object> eventFactory = new QuarkEventFactory<>();
         Disruptor<QuarkEvent<Object>> disruptor = new Disruptor<>(eventFactory, bufferSize, executor,
                 ProducerType.SINGLE, new YieldingWaitStrategy());
-        List<QuarkEventHandler<?>> quarkEventHandlers = QuarkChainHelper.invoke(disruptor, topic);
+        List<QuarkEventHandler<?>> quarkEventHandlers = QuarkChainASTHelper.invoke(disruptor, topic);
         if (!CollectionUtils.isEmpty(topicExceptionHandlerMap) && topicExceptionHandlerMap.get(topic) != null) {
             quarkEventHandlers.forEach(eventHandler -> disruptor.handleExceptionsFor((EventHandler) eventHandler)
                     .with(topicExceptionHandlerMap.get(topic)));
@@ -134,7 +134,7 @@ public final class Quarks {
                 new QuarkEventFactory<>(),
                 bufferSize,
                 new YieldingWaitStrategy());
-        List<QuarkEventHandler<?>> quarkEventHandlers = QuarkChainHelper.invoke(null, topic);
+        List<QuarkEventHandler<?>> quarkEventHandlers = QuarkChainASTHelper.invoke(null, topic);
         ExceptionHandler<Object> exceptionHandler;
         if (!CollectionUtils.isEmpty(topicExceptionHandlerMap)) {
             exceptionHandler = (ExceptionHandler<Object>) topicExceptionHandlerMap.get(topic);
