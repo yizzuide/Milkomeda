@@ -21,6 +21,7 @@
 
 package com.github.yizzuide.milkomeda.quark;
 
+import com.github.yizzuide.milkomeda.universe.context.AopContextHolder;
 import com.lmax.disruptor.EventHandler;
 import com.lmax.disruptor.WorkHandler;
 
@@ -33,9 +34,10 @@ import com.lmax.disruptor.WorkHandler;
  */
 public class QuarkEventHandler<T> implements EventHandler<QuarkEvent<T>>, WorkHandler<QuarkEvent<T>> {
 
+    @SuppressWarnings("unchecked")
     @Override
     public void onEvent(QuarkEvent<T> event, long sequence, boolean endOfBatch) throws Exception {
-        onEvent(event);
+        AopContextHolder.self(this.getClass()).onEvent(event);
     }
 
     @Override

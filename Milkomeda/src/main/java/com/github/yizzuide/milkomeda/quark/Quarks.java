@@ -122,6 +122,9 @@ public final class Quarks {
         if (!CollectionUtils.isEmpty(topicExceptionHandlerMap) && topicExceptionHandlerMap.get(topic) != null) {
             quarkEventHandlers.forEach(eventHandler -> disruptor.handleExceptionsFor((EventHandler) eventHandler)
                     .with(topicExceptionHandlerMap.get(topic)));
+        } else {
+            quarkEventHandlers.forEach(eventHandler -> disruptor.handleExceptionsFor((EventHandler) eventHandler)
+                    .with(new IgnoreExceptionHandler()));
         }
         disruptor.start();
         return disruptor;
@@ -139,7 +142,7 @@ public final class Quarks {
         if (!CollectionUtils.isEmpty(topicExceptionHandlerMap)) {
             exceptionHandler = (ExceptionHandler<Object>) topicExceptionHandlerMap.get(topic);
         } else {
-            exceptionHandler = new FatalExceptionHandler();
+            exceptionHandler = new IgnoreExceptionHandler();
         }
         // Coordination barrier for tracking the cursor for publishers and sequence of dependent EventProcessors
         // for processing a data structure
