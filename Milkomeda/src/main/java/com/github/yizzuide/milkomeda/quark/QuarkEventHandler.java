@@ -24,11 +24,13 @@ package com.github.yizzuide.milkomeda.quark;
 import com.github.yizzuide.milkomeda.universe.context.AopContextHolder;
 import com.lmax.disruptor.EventHandler;
 import com.lmax.disruptor.WorkHandler;
+import org.springframework.aop.support.AopUtils;
 
 /**
  * This event handler is empty, just let subclass keeps the event type.
  *
  * @since 3.15.0
+ * @version 4.0.0
  * @author yizzuide
  * Create at 2023/08/19 14:05
  */
@@ -37,7 +39,11 @@ public class QuarkEventHandler<T> implements EventHandler<QuarkEvent<T>>, WorkHa
     @SuppressWarnings("unchecked")
     @Override
     public void onEvent(QuarkEvent<T> event, long sequence, boolean endOfBatch) throws Exception {
-        AopContextHolder.self(this.getClass()).onEvent(event);
+        if (AopUtils.isAopProxy(this)) {
+            AopContextHolder.self(this.getClass()).onEvent(event);
+            return;
+        }
+        onEvent(event);
     }
 
     @Override

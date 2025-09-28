@@ -21,11 +21,13 @@
 
 package com.github.yizzuide.milkomeda.quark;
 
+import com.github.yizzuide.milkomeda.universe.context.WebContext;
 import com.lmax.disruptor.RingBuffer;
 import com.lmax.disruptor.dsl.Disruptor;
 import lombok.Data;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -63,6 +65,15 @@ public final class QuarkProducer {
     }
 
     public <T> void publishEventData(T data) {
+        // 调用方渗透事件ID
+        UUID quarkEventId = null;
+        if (WebContext.getRequest() != null) {
+            Object quarkEventIdObject = WebContext.getRequest().getAttribute(QuarkEvent.EVENT_ID);
+            if (quarkEventIdObject != null) {
+                quarkEventId = (UUID) quarkEventIdObject;
+            }
+        }
+
         checkAndResize();
         RingBuffer<QuarkEvent<Object>> ringBuffer = getCurrentRingBuffer();
         // first, get and occupy the next sequence
@@ -71,6 +82,9 @@ public final class QuarkProducer {
         try {
             // second, fill event into ring
             QuarkEvent<Object> event = ringBuffer.get(sequence);
+            if (quarkEventId != null) {
+                event.setEventId(quarkEventId);
+            }
             event.setData(data);
         } finally {
             // last, publish the sequence slot

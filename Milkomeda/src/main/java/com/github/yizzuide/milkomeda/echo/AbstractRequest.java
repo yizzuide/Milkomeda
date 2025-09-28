@@ -201,7 +201,16 @@ public abstract class AbstractRequest {
             } else if (isList) {
                 responseEntity = JSONUtil.parseList(body, Map.class);
             } else {
-                throw new EchoException(ErrorCode.VENDOR_SERVER_RESPONSE_DATA_ANALYSIS_FAIL, "不支持的响应数据：" + body);
+                // 简单成功响应转标准响应
+                if (useSimpleResponsePossible()) {
+                    EchoResponseData<T> returnData = createReturnData(null, null, false, false);
+                    returnData.setCode("0");
+                    returnData.setMsg(body);
+                    checkResponse(returnData);
+                    return returnData;
+                } else {
+                    throw new EchoException(ErrorCode.VENDOR_SERVER_RESPONSE_DATA_ANALYSIS_FAIL, "不支持的响应数据：" + body);
+                }
             }
             checkRawResponse(responseEntity);
 
@@ -329,6 +338,14 @@ public abstract class AbstractRequest {
      * @return 默认为false
      */
     protected boolean useStandardHTTP() {
+        return false;
+    }
+
+    /**
+     * 是否优先使用简单的响应数据结构（返回的data字段字符串"success"）
+     * @return 默认false
+     */
+    protected boolean useSimpleResponsePossible() {
         return false;
     }
 

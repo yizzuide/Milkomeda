@@ -23,15 +23,26 @@ package com.github.yizzuide.milkomeda.quark;
 
 import lombok.Data;
 
+import java.util.UUID;
+
 /**
  * Quark event used for {@link com.lmax.disruptor.dsl.Disruptor}.
  *
  * @since 3.15.0
+ * @version 4.0.0
  * @author yizzuide
  * Create at 2023/08/19 10:58
  */
 @Data
 public class QuarkEvent<T> {
+
+    public static final String EVENT_ID = "QUARK_EVENT_ID";
+
+    /**
+     * Event id.
+     */
+    private UUID eventId;
+
     /**
      * Event data.
      */
