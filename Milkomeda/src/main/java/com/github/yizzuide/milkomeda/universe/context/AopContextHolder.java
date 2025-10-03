@@ -73,7 +73,10 @@ public final class AopContextHolder {
                 throw new RuntimeException(e);
             }
         }
-        return (T)target;
+        if (target == null) {
+            target = proxy;
+        }
+        return (T) target;
     }
 
     /**
@@ -84,8 +87,19 @@ public final class AopContextHolder {
      * @since 4.0.0
      */
     public static <T> T getRealTarget(Class<T> clazz) {
-        T proxy = ApplicationContextHolder.get().getBean(clazz);
+        T proxy = getBeanProxy(clazz);
         return getRealTarget(proxy, clazz);
+    }
+
+    /**
+     * 获取Bean代理对象
+     * @param clazz Bean class
+     * @return  Bean代理对象
+     * @param <T>   Bean类型
+     * @since 4.0.0
+     */
+    public static <T> T getBeanProxy(Class<T> clazz) {
+        return ApplicationContextHolder.get().getBean(clazz);
     }
 
     /**

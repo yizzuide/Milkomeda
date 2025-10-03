@@ -24,6 +24,7 @@ package com.github.yizzuide.milkomeda.quark;
 import lombok.Data;
 
 import java.util.UUID;
+import java.util.function.Supplier;
 
 /**
  * Quark event used for {@link com.lmax.disruptor.dsl.Disruptor}.
@@ -34,7 +35,7 @@ import java.util.UUID;
  * Create at 2023/08/19 10:58
  */
 @Data
-public class QuarkEvent<T> {
+public class QuarkEvent<T> implements Supplier<T> {
 
     public static final String EVENT_ID = "QUARK_EVENT_ID";
 
@@ -47,4 +48,9 @@ public class QuarkEvent<T> {
      * Event data.
      */
     private T data;
+
+    @Override
+    public T get() {
+        return data;
+    }
 }
