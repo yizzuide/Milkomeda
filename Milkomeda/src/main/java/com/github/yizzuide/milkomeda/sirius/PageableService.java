@@ -195,6 +195,8 @@ public class PageableService<M extends BaseMapper<T>, T> extends ServiceImpl<M, 
                     queryWrapper.le(fieldNonNull, columnName, fieldValue);
                 } else if (queryMatcher.perfect() == PerfectType.EMPTY) {
                     queryWrapper.eq(ObjectUtils.isEmpty(fieldValue), columnName, fieldValue);
+                } else if (queryMatcher.perfect() == PerfectType.NOT_EMPTY) {
+                    queryWrapper.ne(ObjectUtils.isEmpty(fieldValue), columnName, fieldValue);
                 } else if (queryMatcher.perfect() == PerfectType.LIKE) {
                     queryWrapper.likeRight(fieldNonNull && StringUtils.isNotBlank(fieldValue.toString()), columnName, fieldValue);
                 } else if (queryMatcher.perfect() == PerfectType.IN || queryMatcher.perfect() == PerfectType.LINK_EQ_IN) {

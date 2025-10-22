@@ -26,18 +26,15 @@ import com.lmax.disruptor.ExceptionHandler;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnThreading;
 import org.springframework.boot.autoconfigure.task.TaskExecutionAutoConfiguration;
-import org.springframework.boot.autoconfigure.thread.Threading;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationListener;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.lang.NonNull;
 import org.springframework.scheduling.TaskScheduler;
-import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -45,10 +42,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
 
 /**
  * Quark config.
@@ -58,7 +51,6 @@ import java.util.concurrent.ThreadFactory;
  * @author yizzuide
  * Create at 2023/08/19 10:52
  */
-@EnableScheduling
 @Configuration
 @EnableConfigurationProperties(QuarkProperties.class)
 @AutoConfigureAfter(TaskExecutionAutoConfiguration.class)
@@ -77,36 +69,20 @@ public class QuarkConfig implements ApplicationListener<ContextRefreshedEvent>, 
         Quarks.unbindProducer(null);
     }
 
-    @Bean("quarkExecutor")
-    @ConditionalOnThreading(Threading.VIRTUAL)
-    public Executor quarkVirtualThreadExecutor() {
-        Thread.Builder.OfVirtual ofVirtual = Thread.ofVirtual().name("quark-virtualThread#", 1);
-        ThreadFactory threadFactory = ofVirtual.factory();
-        ExecutorService executor = Executors.newThreadPerTaskExecutor(threadFactory);
-        Quarks.setExecutor(executor);
-        return executor;
-    }
-
-    @Bean("quarkExecutor")
-    @ConditionalOnThreading(Threading.PLATFORM)
-    public Executor quarkThreadPoolTaskExecutor() {
-        // 使用SpringBoot配置的调度线程（支持虚拟线程，但这个虚拟线程不支持ScopedValue<最少在JDK21上>）
-        Executor executor;
-        Map<String, TaskScheduler> taskSchedulerMap = ApplicationContextHolder.get().getBeansOfType(TaskScheduler.class);
-        if (taskSchedulerMap.containsKey("taskScheduler")) {
-            executor = (Executor) taskSchedulerMap.get("taskScheduler");
-        } else {
-            executor = (Executor) taskSchedulerMap.values().stream().findFirst().orElseThrow();
-        }
-        Quarks.setExecutor(executor);
-        return executor;
-    }
-
     @Override
     public void onApplicationEvent(@NonNull ContextRefreshedEvent event) {
         if (Quarks.getBufferSize() != null) {
             return;
         }
+        // 使用SpringBoot配置的调度线程（支持虚拟线程，但这个虚拟线程不支持ScopedValue<最少在JDK21上>）
+        TaskExecutor executor;
+        Map<String, TaskScheduler> taskSchedulerMap = ApplicationContextHolder.get().getBeansOfType(TaskScheduler.class);
+        if (taskSchedulerMap.containsKey("taskScheduler")) {
+            executor = (TaskExecutor) taskSchedulerMap.get("taskScheduler");
+        } else {
+            executor = (TaskExecutor) taskSchedulerMap.values().stream().findFirst().orElseThrow();
+        }
+        Quarks.setExecutor(executor);
         Quarks.setWarningPercent(props.getWarningPercent());
         Quarks.setBufferSize(props.getBufferSize());
         if (!CollectionUtils.isEmpty(eventHandlerList)) {

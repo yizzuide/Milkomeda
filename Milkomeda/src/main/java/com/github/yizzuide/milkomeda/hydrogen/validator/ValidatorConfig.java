@@ -32,12 +32,12 @@ import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.validation.ValidationAutoConfiguration;
 import org.springframework.boot.autoconfigure.validation.ValidationConfigurationCustomizer;
-import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.context.event.ContextRefreshedEvent;
 
 import java.util.List;
 
@@ -55,7 +55,7 @@ import java.util.List;
 @EnableConfigurationProperties(ValidatorProperties.class)
 @AutoConfigureAfter(ValidationAutoConfiguration.class)
 @ConditionalOnProperty(prefix = "milkomeda.hydrogen.validator", name = "enable", havingValue = "true")
-public class ValidatorConfig implements InitializingBean, ApplicationListener<ApplicationStartedEvent> {
+public class ValidatorConfig implements InitializingBean, ApplicationListener<ContextRefreshedEvent> {
 
     @Lazy
     @Autowired
@@ -112,7 +112,7 @@ public class ValidatorConfig implements InitializingBean, ApplicationListener<Ap
     }
 
     @Override
-    public void onApplicationEvent(@Nonnull ApplicationStartedEvent event) {
+    public void onApplicationEvent(@Nonnull ContextRefreshedEvent event) {
         HydrogenHolder.setValidator(ApplicationContextHolder.get().getBean(Validator.class));
     }
 }

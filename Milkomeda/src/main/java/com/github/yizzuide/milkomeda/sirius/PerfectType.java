@@ -3,7 +3,7 @@ package com.github.yizzuide.milkomeda.sirius;
 import com.github.yizzuide.milkomeda.hydrogen.uniform.UniformQueryPageData;
 
 /**
- * Perfect type using for {@link QueryMatcher}
+ * Perfect type using for {@link QueryMatcher}.
  *
  * @since 3.14.0
  * @version 4.0.0
@@ -46,6 +46,11 @@ public enum PerfectType {
      * Match empty field (null or '').
      */
     EMPTY,
+
+    /**
+     * Match not empty field (not null and not '').
+     */
+    NOT_EMPTY,
 
     /**
      * Match using sql `in($1%)` or

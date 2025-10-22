@@ -53,6 +53,8 @@ import java.util.Map;
 @Slf4j
 public abstract class AbstractRequest {
 
+    public static final String BODY_STRING = "BODY_STRING";
+
     @Resource(name = "echoRestTemplate")
     private RestTemplate restTemplate;
 
@@ -310,8 +312,12 @@ public abstract class AbstractRequest {
         if (showLog) {
             log.info("abstractRequest:- send request with url: {}, params: {}, reqParams:{}", url, params, reqParams);
         }
+        Object body = reqParams;
+        if (reqParams.get(BODY_STRING) != null) {
+            body = reqParams.get(BODY_STRING);
+        }
         // 组装实体
-        HttpEntity<Map> httpEntity = new HttpEntity<>(hasBody ? reqParams : null, headers);
+        HttpEntity<Object> httpEntity = new HttpEntity<>(hasBody ? body : null, headers);
         // 执行请求
         ResponseEntity<T> request;
         if (hasBody) {

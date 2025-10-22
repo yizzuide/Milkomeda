@@ -35,11 +35,11 @@ import java.lang.annotation.*;
  * <br>
  * Create at 2019/11/23 00:18
  */
+@EnableAsync
+@Import(PulsarConfig.class)
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Inherited
-@EnableAsync
-@Import(PulsarConfig.class)
 public @interface EnablePulsar {
 }

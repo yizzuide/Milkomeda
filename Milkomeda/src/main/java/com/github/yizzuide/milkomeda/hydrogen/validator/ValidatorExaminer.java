@@ -24,6 +24,8 @@ package com.github.yizzuide.milkomeda.hydrogen.validator;
 import com.github.yizzuide.milkomeda.hydrogen.core.HydrogenHolder;
 
 import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validator;
+
 import java.util.Set;
 
 /**
@@ -43,7 +45,11 @@ public class ValidatorExaminer {
      * @return 错误信息，如果返回null，则验证成功
      */
     public static <T> String valid(T obj, Class<?>... groups) {
-        Set<ConstraintViolation<T>> violationSet = HydrogenHolder.getValidator().validate(obj, groups);
+        Validator validator = HydrogenHolder.getValidator();
+        if (validator == null) {
+            return null;
+        }
+        Set<ConstraintViolation<T>> violationSet = validator.validate(obj, groups);
         if (!violationSet.isEmpty()) {
             ConstraintViolation<T> model = violationSet.iterator().next();
             return model.getMessage();

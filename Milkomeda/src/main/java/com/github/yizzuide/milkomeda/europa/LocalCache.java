@@ -103,12 +103,27 @@ public class LocalCache implements Cache {
         return cache.get(key, type);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public <T> T get(@NonNull Object key, @NonNull Callable<T> valueLoader) {
-        return cache.get(key, valueLoader);
+        T data = null;
+        ValueWrapper valueWrapper = get(key);
+        if (valueWrapper != null) {
+            data = (T) valueWrapper.get();
+        }
+
+        if (data == null) {
+            try {
+                data = valueLoader.call();
+                put(key, data);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return data;
     }
 
-    // When a method annotated with @Cacheable is executed, the put method is invoked.
+
     @Override
     public void put(@NonNull Object key, Object value) {
         // 如果只使用L1缓存，只写入Caffeine

@@ -31,7 +31,6 @@ import org.springframework.boot.task.ThreadPoolTaskExecutorCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.context.request.async.DeferredResult;
-import org.springframework.web.servlet.DispatcherServlet;
 
 import java.util.concurrent.ThreadPoolExecutor;
 
@@ -46,7 +45,7 @@ import java.util.concurrent.ThreadPoolExecutor;
  */
 @Configuration
 @ConditionalOnWebApplication
-@ConditionalOnClass({DispatcherServlet.class, DeferredResult.class})
+@ConditionalOnClass(DeferredResult.class)
 @AutoConfigureAfter(TaskExecutionAutoConfiguration.class)
 public class PulsarConfig {
 
