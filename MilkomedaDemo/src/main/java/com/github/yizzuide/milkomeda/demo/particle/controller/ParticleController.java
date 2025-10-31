@@ -1,15 +1,17 @@
 package com.github.yizzuide.milkomeda.demo.particle.controller;
 
+import com.github.yizzuide.milkomeda.demo.particle.service.OrderNotifyService;
 import com.github.yizzuide.milkomeda.particle.*;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import jakarta.annotation.PostConstruct;
-import jakarta.annotation.Resource;
-import jakarta.servlet.http.HttpServletResponse;
 import java.util.Collections;
 import java.util.Map;
 
@@ -178,6 +180,18 @@ public class ParticleController {
             resp.sendError(406, "请求勿重复调用");
             return;
         }
+
+        resp.setStatus(200);
+        resp.getWriter().println("OK");
+        resp.getWriter().flush();
+    }
+
+    @Autowired
+    private OrderNotifyService orderNotifyService;
+
+    @RequestMapping("notify2")
+    public void notify2(@RequestBody Map<String, Object> params, HttpServletResponse resp) throws Exception {
+        orderNotifyService.notify((String) params.get("orderId"));
 
         resp.setStatus(200);
         resp.getWriter().println("OK");

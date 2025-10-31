@@ -29,8 +29,9 @@
         <mybatis-plus.version>3.5.5</mybatis-plus.version>
         <pagehelper.version>1.4.7</pagehelper.version>
         <redission.version>3.25.2</redission.version>
-        <zookeeper.version>3.9.1</zookeeper.version>
+        <zookeeper.version>3.9.4</zookeeper.version>
         <jetcd.version>0.7.5</jetcd.version>
+        <disruptor.version>3.4.4</disruptor.version>
         <contiperf.version>2.3.4</contiperf.version>
         <mapstruct.version>1.5.5.Final</mapstruct.version>
         <lombok-mapstruct-binding>0.2.0</lombok-mapstruct-binding>
@@ -169,6 +170,11 @@
             <groupId>io.etcd</groupId>
             <artifactId>jetcd-core</artifactId>
             <version>${jetcd.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.lmax</groupId>
+            <artifactId>disruptor</artifactId>
+            <version>${disruptor.version}</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
