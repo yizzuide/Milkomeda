@@ -184,8 +184,10 @@ public class ReflectUtil {
             T entity = wrapperList.getFirst();
             ResolvableType[] wrapperGenerics = resolvableType.getGenerics();
             Class<?> elementGenericType = wrapperGenerics[0].resolve();
-            // Entity or Entity<Map>
-            if (elementGenericType == null || elementGenericType == Map.class) {
+            // Entity or Entity<D> or Entity<Map>
+            if (elementGenericType == null ||
+                    elementGenericType == wrapperBody.apply(wrapperList.getFirst()).getClass() ||
+                    elementGenericType == Map.class) {
                 return method.invoke(target, entity);
             }
 
@@ -199,23 +201,24 @@ public class ReflectUtil {
         if (parameterClazz == List.class) {
             ResolvableType[] wrapperGenerics = resolvableType.getGenerics();
             Class<?> elementGenericType = wrapperGenerics[0].resolve();
-            if (elementGenericType == null) {
+            if (elementGenericType == null || elementGenericType == Map.class) {
                 // 去掉实体的包装
                 return method.invoke(target, wrapperList.stream().map(wrapperBody).collect(Collectors.toList()));
             }
 
-            if (elementGenericType == Map.class) {
-                // 去掉实体的包装
-                return method.invoke(target, wrapperList.stream().map(wrapperBody).collect(Collectors.toList()));
+            // 列表元素为同类型
+            if (elementGenericType == wrapperBody.apply(wrapperList.getFirst()).getClass()) {
+                return method.invoke(target, wrapperList);
             }
+
             if (elementGenericType == wrapperClazz) {
                 Class<?> entityGenericType = wrapperGenerics[0].getGeneric(0).resolve();
-                if (entityGenericType == null) {
+                if (entityGenericType == null ||
+                        entityGenericType == wrapperBody.apply(wrapperList.getFirst()).getClass() ||
+                        entityGenericType == Map.class) {
                     return method.invoke(target, wrapperList);
                 }
-                if (entityGenericType == Map.class) {
-                    return method.invoke(target, wrapperList);
-                }
+
                 for (T wrapper : wrapperList) {
                     Object body = JSONUtil.parse(JSONUtil.serialize(wrapperBody.apply(wrapper)), entityGenericType);
                     wipeWrapperBody.accept(wrapper, body);
