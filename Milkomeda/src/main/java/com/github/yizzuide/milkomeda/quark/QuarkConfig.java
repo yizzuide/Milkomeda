@@ -34,7 +34,6 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.lang.NonNull;
-import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -76,11 +75,11 @@ public class QuarkConfig implements ApplicationListener<ContextRefreshedEvent>, 
         }
         // 使用SpringBoot配置的调度线程（支持虚拟线程，但这个虚拟线程不支持ScopedValue<最少在JDK21上>）
         TaskExecutor executor;
-        Map<String, TaskScheduler> taskSchedulerMap = ApplicationContextHolder.get().getBeansOfType(TaskScheduler.class);
-        if (taskSchedulerMap.containsKey("taskScheduler")) {
-            executor = (TaskExecutor) taskSchedulerMap.get("taskScheduler");
+        Map<String, TaskExecutor> taskExecutorMap = ApplicationContextHolder.get().getBeansOfType(TaskExecutor.class);
+        if (taskExecutorMap.containsKey("taskScheduler")) {
+            executor = taskExecutorMap.get("taskScheduler");
         } else {
-            executor = (TaskExecutor) taskSchedulerMap.values().stream().findFirst().orElseThrow();
+            executor = taskExecutorMap.values().stream().findFirst().orElseThrow();
         }
         Quarks.setExecutor(executor);
         Quarks.setWarningPercent(props.getWarningPercent());
