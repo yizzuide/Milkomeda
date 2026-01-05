@@ -24,6 +24,7 @@ package com.github.yizzuide.milkomeda.pillar;
 import com.github.yizzuide.milkomeda.universe.metadata.HandlerMetaData;
 import lombok.extern.slf4j.Slf4j;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 /**
@@ -55,7 +56,11 @@ public class PillarEntryDispatcher {
                     return (T) handlerMetaData.getMethod().invoke(handlerMetaData.getTarget(), args);
                 } catch (Exception e) {
                     log.error("Pillar entry dispatch error with msg: {}", e.getMessage(), e);
-                    return null;
+                    if (e instanceof InvocationTargetException te) {
+                        if (te.getTargetException() instanceof RuntimeException ex) {
+                            throw ex;
+                        }
+                    }
                 }
             }
         }

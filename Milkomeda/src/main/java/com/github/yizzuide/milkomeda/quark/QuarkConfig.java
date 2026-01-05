@@ -21,8 +21,8 @@
 
 package com.github.yizzuide.milkomeda.quark;
 
-import com.github.yizzuide.milkomeda.universe.context.ApplicationContextHolder;
 import com.lmax.disruptor.ExceptionHandler;
+import io.micrometer.core.instrument.util.NamedThreadFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
@@ -32,7 +32,6 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.core.task.TaskExecutor;
 import org.springframework.lang.NonNull;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -41,6 +40,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.*;
 
 /**
  * Quark config.
@@ -73,17 +73,15 @@ public class QuarkConfig implements ApplicationListener<ContextRefreshedEvent>, 
         if (Quarks.getBufferSize() != null) {
             return;
         }
-        // 使用SpringBoot配置的调度线程（支持虚拟线程，但这个虚拟线程不支持ScopedValue<最少在JDK21上>）
-        TaskExecutor executor;
-        Map<String, TaskExecutor> taskExecutorMap = ApplicationContextHolder.get().getBeansOfType(TaskExecutor.class);
-        if (taskExecutorMap.containsKey("taskScheduler")) {
-            executor = taskExecutorMap.get("taskScheduler");
-        } else {
-            executor = taskExecutorMap.values().stream().findFirst().orElseThrow();
-        }
+
+        ExecutorService executor = new ThreadPoolExecutor(8, 16,
+                2500L, TimeUnit.MILLISECONDS,
+                new LinkedBlockingQueue<>(1024),
+                new NamedThreadFactory("quark"));
         Quarks.setExecutor(executor);
         Quarks.setWarningPercent(props.getWarningPercent());
         Quarks.setBufferSize(props.getBufferSize());
+        Quarks.setWaitStrategyClazz(props.getWaitStrategyClazz());
         if (!CollectionUtils.isEmpty(eventHandlerList)) {
             Map<String, List<QuarkEventHandler<?>>> topicEventHandlerMap = new HashMap<>();
             Map<String, QuarkEventHandler<?>> namedEventHandlerMap = new HashMap<>();

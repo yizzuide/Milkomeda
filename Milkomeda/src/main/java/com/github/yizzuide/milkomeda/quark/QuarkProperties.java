@@ -21,6 +21,8 @@
 
 package com.github.yizzuide.milkomeda.quark;
 
+import com.lmax.disruptor.BlockingWaitStrategy;
+import com.lmax.disruptor.WaitStrategy;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
@@ -49,6 +51,11 @@ public class QuarkProperties {
      * @since 4.0.0
      */
     private Float warningPercent = .05f;
+
+    /**
+     * Wait strategy class.
+     */
+    private Class<? extends WaitStrategy> waitStrategyClazz = BlockingWaitStrategy.class;
 
     /**
      * Config topic handler chain.

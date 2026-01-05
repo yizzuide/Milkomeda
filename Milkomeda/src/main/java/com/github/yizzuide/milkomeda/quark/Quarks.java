@@ -21,6 +21,7 @@
 
 package com.github.yizzuide.milkomeda.quark;
 
+import com.github.yizzuide.milkomeda.util.ReflectUtil;
 import com.lmax.disruptor.*;
 import com.lmax.disruptor.dsl.Disruptor;
 import com.lmax.disruptor.dsl.ProducerType;
@@ -48,6 +49,8 @@ public final class Quarks {
 
     private static Executor executor;
 
+    private static WaitStrategy waitStrategy;
+
     private static Map<String, ExceptionHandler<?>> topicExceptionHandlerMap;
 
     private static final Map<Serializable, QuarkProducer> producerMap = new ConcurrentHashMap<>();
@@ -70,6 +73,10 @@ public final class Quarks {
 
     static void setExecutor(Executor executor) {
         Quarks.executor = executor;
+    }
+
+    public static void setWaitStrategyClazz(Class<? extends WaitStrategy> waitStrategyClazz) {
+        waitStrategy = ReflectUtil.newInstance(waitStrategyClazz);
     }
 
     static void setEventHandlerList(Map<String, List<QuarkEventHandler<?>>> topicEventHandlerMap,
@@ -117,7 +124,7 @@ public final class Quarks {
     static Disruptor<QuarkEvent<Object>> createDisruptor(String topic) {
         QuarkEventFactory<Object> eventFactory = new QuarkEventFactory<>();
         Disruptor<QuarkEvent<Object>> disruptor = new Disruptor<>(eventFactory, bufferSize, executor,
-                ProducerType.SINGLE, new YieldingWaitStrategy());
+                ProducerType.SINGLE, waitStrategy);
         List<QuarkEventHandler<?>> quarkEventHandlers = QuarkChainASTHelper.invoke(disruptor, topic);
         if (!CollectionUtils.isEmpty(topicExceptionHandlerMap) && topicExceptionHandlerMap.get(topic) != null) {
             quarkEventHandlers.forEach(eventHandler -> disruptor.handleExceptionsFor((EventHandler) eventHandler)
@@ -136,7 +143,7 @@ public final class Quarks {
                 ProducerType.SINGLE,
                 new QuarkEventFactory<>(),
                 bufferSize,
-                new YieldingWaitStrategy());
+                waitStrategy);
         List<QuarkEventHandler<?>> quarkEventHandlers = QuarkChainASTHelper.invoke(null, topic);
         ExceptionHandler<Object> exceptionHandler;
         if (!CollectionUtils.isEmpty(topicExceptionHandlerMap)) {
