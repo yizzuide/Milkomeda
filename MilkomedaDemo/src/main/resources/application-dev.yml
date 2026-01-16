@@ -97,12 +97,15 @@ spring:
   # Spring Boot 3.1: Spring Boot provides the ability to configure SSL trust material that can be applied to several types of connections in order to support secure communications.
   #   Spring Boot Auto-configures a bean of type `SslBundles` that provides access to each of the named bundles configured using the spring.ssl.bundle properties.
   #   The createSslContext() provides a convenient way to obtain a new java.net.ssl.SSLContext instance.
+
+  # Spring Boot 3.2: SSL bundles can now be automatically reloaded when the trust material changes. A bundle must opt in to this functionality by settings its reload-on-update property to true.
   ssl:
     bundle:
       # configure bundles of trust material created with the Java keytool utility and stored in Java KeyStore files in the JKS or PKCS12 format.
       jks:
         # a keystore is typically configured with a Java KeyStore containing a certificate and private key
         pulsar:
+          reload-on-update: true
           key:
             alias: pulsar
           keystore:
@@ -128,6 +131,7 @@ spring:
   # Pulsar模块异步线程池（Async异步任务线程池，Spring Boot 2.1.0+在这里配置）
   task:
     execution:
+      # Spring Boot 3.2: 线程前缀在虚拟线程开启是依然有效，而 pool配置将被忽略
       thread-name-prefix: pulsar-
       pool:
         queue-capacity: 150

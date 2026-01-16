@@ -4,7 +4,6 @@ import io.micrometer.common.KeyValue;
 import io.micrometer.common.KeyValues;
 import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationFilter;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.server.observation.ServerHttpObservationDocumentation;
@@ -12,7 +11,7 @@ import org.springframework.http.server.observation.ServerRequestObservationConte
 import org.springframework.http.server.observation.ServerRequestObservationConvention;
 
 /**
- * MvcObservationConfiguration
+ * 监控配置
  *
  * @author yizzuide
  * Create at 2025/06/08 23:24
@@ -50,15 +49,13 @@ public class MvcObservationConfiguration {
             return "http " + context.getCarrier().getMethod().toLowerCase();
         }
 
-        @NotNull
         @Override
-        public KeyValues getLowCardinalityKeyValues(@NotNull ServerRequestObservationContext context) {
+        public KeyValues getLowCardinalityKeyValues(ServerRequestObservationContext context) {
             return KeyValues.of(method(context), status(context), exception(context));
         }
 
-        @NotNull
         @Override
-        public KeyValues getHighCardinalityKeyValues(@NotNull ServerRequestObservationContext context) {
+        public KeyValues getHighCardinalityKeyValues(ServerRequestObservationContext context) {
             return KeyValues.of(httpUrl(context));
         }
 
@@ -83,9 +80,8 @@ public class MvcObservationConfiguration {
     // You can be also similar goals using a custom ObservationFilter - adding or removing key values for an observation.
     //  Filters do not replace the default convention and are used as a post-processing component.
     public static class ServerRequestObservationFilter implements ObservationFilter {
-        @NotNull
         @Override
-        public Observation.Context map(@NotNull Observation.Context context) {
+        public Observation.Context map(Observation.Context context) {
             if (context instanceof ServerRequestObservationContext serverContext) {
                 context.addLowCardinalityKeyValue(KeyValue.of("project", "spring"));
                 String customAttribute = String.valueOf(serverContext.getCarrier().getAttribute("customAttribute"));
@@ -97,6 +93,9 @@ public class MvcObservationConfiguration {
 
     // SpanCustomizer beans for Brave and OpenTelemetry are now Auto-configured.
     // Micrometer’s JvmInfoMetrics is now autoconfigured.
+
+    // The HealthIndicator for MongoDB now supports MongoDB’s Stable API. The buildInfo query has been replaced with
+    //  `isMaster` and the response now contains `maxWireVersion` instead of `version`.
 
     // The new ObservationRegistry interface can be used to create observations which provide a single API for both metrics and traces.
     //  Spring Boot now autoconfigures an instance of ObservationRegistry for you.
@@ -120,8 +119,11 @@ public class MvcObservationConfiguration {
     // A management.otlp.metrics.export.headers property has been added to support sending headers to an OTLP registry.
     // Aggregation temporality configuration support for Micrometer’s OtlpMeterRegistry.
     // When using OpenTelemetry, the SdkTracerProviderBuilder that is used to create the Auto-configured SdkTracerProvider can be customised by defining an SdkTracerProviderBuilderCustomizer bean.
+
+    // Spring Boot 3.2
     // The default value of management.otlp.tracing.endpoint has been removed. The OtlpHttpSpanExporter bean is now only Auto-configured if management.otlp.tracing.endpoint has a value. To restore the old behavior, set management.otlp.tracing.endpoint=http://localhost:4318/v1/traces
 
-    // The HealthIndicator for MongoDB now supports MongoDB’s Stable API. The buildInfo query has been replaced with
-    //  `isMaster` and the response now contains `maxWireVersion` instead of `version`.
+    // You can now use Micrometer’s @Timed, @Counted, @NewSpan, @ContinueSpan and @Observed annotations. The aspects for them are now autoconfigured if you have AspectJ on the classpath.
+    // Micrometer Tracing’s ObservationHandler beans are automatically registered on the ObservationConfig.
+    // The @Scheduled methods are now instrumented for observability.
 }

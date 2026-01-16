@@ -55,6 +55,8 @@ spring:
     allow-bean-definition-overriding: false
     # Spring Boot 2.6: Circular references between beans are now prohibited by default.
     #allow-circular-references: true
+    # Spring Boot 3.2: When set to true, the JVM is kept alive, even if all other threads are virtual (or daemon) threads.
+    keep-alive: true
   web:
     # Spring Boot 2.4: 资源不生成mapping映射
     resources:
@@ -87,7 +89,9 @@ spring:
     filter:
       dispatcher-types: async, error, forward, include, request
 
-  # Spring Boot 3.2：开启虚拟线程
+  # Spring Boot 3.2：When virtual threads are enabled, the applicationTaskExecutor bean will be a SimpleAsyncTaskExecutor configured to use virtual threads.
+  # A SimpleAsyncTaskExecutorBuilder is now available in the application context and can be used to build a SimpleAsyncTaskExecutor. SimpleAsyncTaskExecutorCustomizer beans can be used to customize the built SimpleAsyncTaskExecutor.
+  # A SimpleAsyncTaskSchedulerBuilder is now available in the application context and can be used to build SimpleAsyncTaskScheduler. SimpleAsyncTaskSchedulerCustomizer beans can be used to customize the built SimpleAsyncTaskScheduler.
   threads:
     virtual:
       enabled: false

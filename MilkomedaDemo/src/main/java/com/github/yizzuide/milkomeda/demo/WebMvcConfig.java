@@ -138,4 +138,9 @@ public class WebMvcConfig implements WebMvcConfigurer, SmartLifecycle {
     public int getPhase() {
         return SmartLifecycle.DEFAULT_PHASE - 2000;
     }
+
+
+    // Spring Boot 3.2: The underlying code that supports Spring Boot’s "Uber Jar" loading has been rewritten now that we no longer need to support Java 8.
+    // The updated code makes use of a new URL format which is more compliant with JDK expectations. The previous URL format of
+    // jar:file:/dir/myjar.jar:BOOT-INF/lib/nested.jar!/com/example/MyClass.class has been replaced with jar:nested:/dir/myjar.jar/!BOOT-INF/lib/nested.jar!/com/example/MyClass.class.
 }
