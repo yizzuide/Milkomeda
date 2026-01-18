@@ -24,6 +24,7 @@ package com.github.yizzuide.milkomeda.quark;
 import com.github.yizzuide.milkomeda.universe.context.AopContextHolder;
 import com.lmax.disruptor.EventHandler;
 import com.lmax.disruptor.WorkHandler;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * This event handler is empty, just let subclass keeps the event type.
@@ -33,11 +34,13 @@ import com.lmax.disruptor.WorkHandler;
  * @author yizzuide
  * Create at 2023/08/19 14:05
  */
+@Slf4j
 public class QuarkEventHandler<T> implements EventHandler<QuarkEvent<T>>, WorkHandler<QuarkEvent<T>> {
 
     @SuppressWarnings("unchecked")
     @Override
     public void onEvent(QuarkEvent<T> event, long sequence, boolean endOfBatch) throws Exception {
+        log.debug("quark invoke event: {}, sequence: {}, endOfBatch:{}", event, sequence, endOfBatch);
         AopContextHolder.getBeanProxy(this.getClass()).onEvent(event);
     }
 

@@ -25,6 +25,7 @@ import com.github.yizzuide.milkomeda.util.ReflectUtil;
 import com.lmax.disruptor.*;
 import com.lmax.disruptor.dsl.Disruptor;
 import com.lmax.disruptor.dsl.ProducerType;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
 
 import java.io.Serializable;
@@ -41,6 +42,7 @@ import java.util.concurrent.Executor;
  * @author yizzuide
  * Create at 2023/08/20 10:23
  */
+@Slf4j
 public final class Quarks {
 
     private static Integer bufferSize;
@@ -126,6 +128,7 @@ public final class Quarks {
         Disruptor<QuarkEvent<Object>> disruptor = new Disruptor<>(eventFactory, bufferSize, executor,
                 ProducerType.SINGLE, waitStrategy);
         List<QuarkEventHandler<?>> quarkEventHandlers = QuarkChainASTHelper.invoke(disruptor, topic);
+        log.debug("quark bind topic[{}] with event handlers: {}", topic, quarkEventHandlers);
         if (!CollectionUtils.isEmpty(topicExceptionHandlerMap) && topicExceptionHandlerMap.get(topic) != null) {
             quarkEventHandlers.forEach(eventHandler -> disruptor.handleExceptionsFor((EventHandler) eventHandler)
                     .with(topicExceptionHandlerMap.get(topic)));

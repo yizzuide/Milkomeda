@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 yizzuide All rights Reserved.
+ * Copyright (c) 2026 yizzuide All rights Reserved.
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -21,49 +21,24 @@
 
 package com.github.yizzuide.milkomeda.quark;
 
-import com.lmax.disruptor.BlockingWaitStrategy;
-import com.lmax.disruptor.WaitStrategy;
-import lombok.Data;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-
-import java.util.HashMap;
-import java.util.Map;
-
 /**
- * Quark config properties.
+ * Disruptor thread type.
  *
- * @since 3.15.0
- * @version 4.0.0
+ * @since 4.0.0
  * @author yizzuide
- * Create at 2023/08/19 10:04
+ * Create at 2026/01/19 00:03
  */
-@Data
-@ConfigurationProperties(prefix = "milkomeda.quark")
-public class QuarkProperties {
-
+public enum QuarkThreadType {
     /**
-     * Cache buffer size.
+     * Spring config.
      */
-    private Integer bufferSize = 1 << 13;
-
+    AUTO,
     /**
-     * Buffer size warning percent for expansion.
-     * @since 4.0.0
+     * Platform thread type.
      */
-    private Float warningPercent = .05f;
-
+    PLATFORM,
     /**
-     * Wait strategy class.
+     * Virtual thread type.
      */
-    private Class<? extends WaitStrategy> waitStrategyClazz = BlockingWaitStrategy.class;
-
-    /**
-     * Execute thread type.
-     */
-    private QuarkThreadType threadType = QuarkThreadType.AUTO;
-
-    /**
-     * Config topic handler chain.
-     */
-    private Map<String, String> topicChains = new HashMap<>();
+    VIRTUAL
 }

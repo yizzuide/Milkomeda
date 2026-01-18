@@ -25,6 +25,7 @@ import com.github.yizzuide.milkomeda.universe.context.WebContext;
 import com.lmax.disruptor.RingBuffer;
 import com.lmax.disruptor.dsl.Disruptor;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 import java.util.UUID;
@@ -39,6 +40,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author yizzuide
  * Create at 2023/08/19 13:03
  */
+@Slf4j
 @Data
 public final class QuarkProducer {
 
@@ -79,6 +81,7 @@ public final class QuarkProducer {
         // first, get and occupy the next sequence
         // 通过自旋获取下一个位置，需要均衡当前线程的任务与环形缓存的大小
         long sequence = ringBuffer.next();
+        log.debug("quark prepare sequence {} to put data: {}", sequence, data);
         try {
             // second, fill event into ring
             QuarkEvent<Object> event = ringBuffer.get(sequence);
@@ -92,6 +95,7 @@ public final class QuarkProducer {
             // 如果某个请求的sequence未被提交将会堵塞后续的发布操作或者其他的Producer
             // 在事件发布后，这个sequence会传递给消费者（EventHandler）
             ringBuffer.publish(sequence);
+            log.debug("quark publish sequence {} success", sequence);
         }
     }
 
@@ -113,6 +117,7 @@ public final class QuarkProducer {
         if (getRemainingCapacity() > warningSize) {
             return;
         }
+        log.debug("quark current ringBuffer[{}] capacity not enough and begin resize", idx.get());
         // is all ringBuffers filled over?
         int count = ringBuffers.length;
         if (count > 1) {
@@ -121,6 +126,7 @@ public final class QuarkProducer {
                 if (ringBuffer.remainingCapacity() > warningSize) {
                     // reset uses the previous index
                     idx.getAndSet(i);
+                    log.debug("quark rechange ringBuffer[{}] to used", idx.get());
                     return;
                 }
             }
@@ -136,6 +142,7 @@ public final class QuarkProducer {
         }
         // reset uses the last index
         idx.getAndSet(count);
+        log.debug("quark add new ringBuffer[{}] to used", idx.get());
         this.ringBuffers = ringBuffers;
     }
 }
