@@ -18,7 +18,10 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.context.WebApplicationContext;
 
+import java.time.Duration;
 import java.util.Collections;
+
+import static org.testcontainers.shaded.org.awaitility.Awaitility.await;
 
 /**
  * EchoTest
@@ -27,6 +30,7 @@ import java.util.Collections;
  * <br>
  * Create at 2019/11/12 17:19
  */
+// Spring Boot 3.2: The autoconfigured JdbcClient bean is now available in tests using @JdbcTest and @DataJpaTest
 @Slf4j
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = MilkomedaDemoApplication.class)
@@ -34,6 +38,7 @@ public class EchoTest {
     @Autowired
     private WebApplicationContext wac;
 
+    // Spring Boot 3.2: When autoconfiguring MockMvc, filters are now registered using the dispatcher types and init parameters from their registration bean.
     private MockMvc mockMvc;
 
     @Before
@@ -53,6 +58,8 @@ public class EchoTest {
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andReturn().getResponse().getContentAsString();
+        // Spring Boot 3.2: Awaitility is now part of spring-boot-starter-test
+        await().atMost(Duration.ofSeconds(5)).until(() -> true);
         System.out.println(ret);
     }
 }

@@ -6,8 +6,12 @@ import org.apache.coyote.ProtocolHandler;
 import org.apache.coyote.http11.AbstractHttp11Protocol;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.endpoint.SanitizingFunction;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnThreading;
 import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
+import org.springframework.boot.autoconfigure.thread.Threading;
+import org.springframework.boot.autoconfigure.transaction.TransactionManagerCustomizer;
 import org.springframework.boot.autoconfigure.web.WebProperties;
+import org.springframework.boot.web.client.RestClientCustomizer;
 import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
 import org.springframework.boot.web.server.WebServerFactoryCustomizer;
 import org.springframework.context.SmartLifecycle;
@@ -17,6 +21,8 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.env.PropertySource;
 import org.springframework.retry.annotation.EnableRetry;
+import org.springframework.transaction.TransactionExecution;
+import org.springframework.transaction.TransactionExecutionListener;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
@@ -89,6 +95,13 @@ public class WebMvcConfig implements WebMvcConfigurer, SmartLifecycle {
 
     // Spring Boot 3.1: RabbitTemplateCustomizer has been introduced. Beans of this type will customize the Auto-configured RabbitTemplate.
 
+    // Spring Boot 3.2: Added support for RabbitMQ container forceStop property.
+
+    // Spring Boot 3.2: Support for an `spring.kafka.template.observation-enabled` property to support Micrometer observations
+    // Added support for Kafka MessageListenerContainer changeConsumerThreadName property.
+    // Autoconfigure Function<MessageListenerContainer, String> bean to Kafka MessageListenerContainer’s threadNameSupplier.
+
+
 
     // Spring Boot 3.0: FlywayConfigurationCustomizer beans are now called to customize the FluentConfiguration after
     //  any Callback and JavaMigration beans have been added to the configuration. An application that defines
@@ -139,6 +152,29 @@ public class WebMvcConfig implements WebMvcConfigurer, SmartLifecycle {
         return SmartLifecycle.DEFAULT_PHASE - 2000;
     }
 
+
+    // Spring Boot 3.2: Transaction manager customization now applies to any type of TransactionManager, not just PlatformTransactionManager.
+    public TransactionManagerCustomizer<?> transactionManagerCustomizer() {
+        return t -> {};
+    }
+
+    // Spring Boot 3.2: Any TransactionExecutionListener beans are now added to the autoconfigured transaction manager.
+    public TransactionExecutionListener transactionExecutionListener() {
+        return new TransactionExecutionListener() {
+            @Override
+            public void beforeBegin(TransactionExecution transaction) {
+                TransactionExecutionListener.super.beforeBegin(transaction);
+            }
+        };
+    }
+
+    // Spring Boot 3.2: customize a RestClient.Builder
+    // Spring Boot 3.2: A new @ConditionalOnThreading annotation has been introduced to help autoconfigure virtual thread concerns.
+    @ConditionalOnThreading(Threading.VIRTUAL)
+    @Bean
+    public RestClientCustomizer restClientCustomizer() {
+        return builder -> {};
+    }
 
     // Spring Boot 3.2: The underlying code that supports Spring Boot’s "Uber Jar" loading has been rewritten now that we no longer need to support Java 8.
     // The updated code makes use of a new URL format which is more compliant with JDK expectations. The previous URL format of

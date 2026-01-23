@@ -121,9 +121,20 @@ public class MvcObservationConfiguration {
     // When using OpenTelemetry, the SdkTracerProviderBuilder that is used to create the Auto-configured SdkTracerProvider can be customised by defining an SdkTracerProviderBuilderCustomizer bean.
 
     // Spring Boot 3.2
-    // The default value of management.otlp.tracing.endpoint has been removed. The OtlpHttpSpanExporter bean is now only Auto-configured if management.otlp.tracing.endpoint has a value. To restore the old behavior, set management.otlp.tracing.endpoint=http://localhost:4318/v1/traces
+    // The default value of management.otlp.tracing.endpoint has been removed. The OtlpHttpSpanExporter bean is now only Auto-configured if management.otlp.tracing.endpoint has a value. To restore the old behavior, set `management.otlp.tracing.endpoint=http://localhost:4318/v1/traces`
 
     // You can now use Micrometer’s @Timed, @Counted, @NewSpan, @ContinueSpan and @Observed annotations. The aspects for them are now autoconfigured if you have AspectJ on the classpath.
     // Micrometer Tracing’s ObservationHandler beans are automatically registered on the ObservationConfig.
     // The @Scheduled methods are now instrumented for observability.
+
+    // Observations starting with a prefix can now be disabled via properties. For example, to prevent Spring Security from reporting observations, set `management.observations.enable.spring.security=false`
+    // The property management.observations.key-values.* can be used to automatically apply low-cardinality key-values to all observations. For example setting `management.observations.key-values.region=us-west` will add the key region with the value us-west to all observations.
+
+    // OpenTelemetry’s Resource is now exposed as a bean, and there’s a new configuration property `management.opentelemetry.resource-attributes` which configures the resource attributes.
+    // If you’re using OpenTelemetry and you want more control over the applied SpanProcessor, you can now define a bean of type SpanProcessors. By default, all available SpanProcessor beans are applied.
+    // The same works with OpenTelemetry’s SpanExporter, use a SpanExporters bean to override the default. It applies all available SpanExporter beans by default.
+
+    // If you have custom Brave SpanHandler or OpenTelemetry SpanExporter beans, please make sure to annotate them with `@ConditionalOnEnabledTracing` so that they won’t be created when running integration tests with observability switched off.
+
+    // There’s now connection details support for OTLP metrics and traces. A connection details bean is automatically created if using Testcontainers or Docker Compose with the `otel/opentelemetry-collector-contrib` image.
 }

@@ -1,5 +1,6 @@
 spring:
   application:
+    # Spring Boot 3.2: spring.application.name is now used for OpenTelemetry’s service.name if no service.name has been set explicitly.
     name: @spring.application.name@
   # Spring Boot 2.4：不能用在指定配置环境，但仍然可以用于激活环境及命令行激活，如：--spring.profiles.active=prod
   profiles:

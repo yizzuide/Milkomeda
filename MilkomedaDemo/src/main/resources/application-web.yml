@@ -61,12 +61,16 @@ spring:
     # Spring Boot 2.4: 资源不生成mapping映射
     resources:
       add-mappings: false
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 10MB
   mvc:
     # 异步超时
     async:
       request-timeout: 20s
 
-    # Spring Boot 2.6: 默认的路径匹配器由AntPathMatcher改为PathPatternParser（包括Actuator，但matching-strategy不作用于Actuator），匹配根路径必须添加"/"
+    # Spring Boot 2.6: 默认的路径匹配器由AntPathMatcher改为PathPatternParser（包括Actuator，但matching-strategy不作用于Actuator），匹配根路径必须添加‘/’
     #pathmatch:
       #matching-strategy: ant_path_matcher
 
@@ -82,6 +86,12 @@ spring:
     date-format: yyyy-MM-dd HH:mm:ss
     locale: zh_CN
     time-zone: GMT+8
+    # Spring Boot 3.2: The features declared in Jackson’s EnumFeature and JsonNodeFeature can now be enabled and disabled using the configuration properties spring.jackson.datatype.enum. and spring.jackson.datatype.jsonnode.
+    datatype:
+      enum:
+        write-enums-to-lowercase: false
+      json-node:
+        write-null-properties: false
 
   # Spring Boot 3.0: In Servlet applications, Spring Security 6.0 applies authorization to every dispatch type.
   #   To align with this, Spring Boot now configures Spring Security’s filter to be called for every dispatch type.
@@ -95,6 +105,11 @@ spring:
   threads:
     virtual:
       enabled: false
+
+  # Spring Boot 3.2: Testcontainers can now be initialized in parallel. For this, set `spring.testcontainers.beans.startup` to parallel
+  testcontainers:
+    beans:
+      startup: parallel
 
 mybatis-plus:
   mapper-locations:
